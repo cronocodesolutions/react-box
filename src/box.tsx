@@ -1,3 +1,5 @@
+import classes from './box.module.css';
+
 export default function Box() {
-  return <div>This is a box component</div>;
+  return <div className={classes.box}>This is a box component</div>;
 }
