@@ -1,3 +1,10 @@
 .block {
   display: block;
+  height: fit-content;
+}
+
+@each $size in $sizes {
+  .margin-$(size) {
+    margin: $size;
+  }
 }
