@@ -1,10 +1,35 @@
-.block {
-  display: block;
+.box {
+  display: inline-block;
   height: fit-content;
+  border: 0 solid transparent;
+  font-family: inherit;
+  font-size: inherit;
 }
 
-@each $size in $sizes {
-  .margin-$(size) {
-    margin: $size;
+@each $dimmension, $dimmensionName in (m, p), (margin, padding) {
+  @each $size in $sizes {
+    .$(dimmension)$(size) {
+      $(dimmensionName): calc($size * $sizeMultiplier * 1rem);
+    }
+  }
+
+  @each $size in $sizes {
+    .$(dimmension)x$(size) {
+      $(dimmensionName)-left: calc($size * $sizeMultiplier * 1rem);
+      $(dimmensionName)-right: calc($size * $sizeMultiplier * 1rem);
+    }
+
+    .$(dimmension)y$(size) {
+      $(dimmensionName)-top: calc($size * $sizeMultiplier * 1rem);
+      $(dimmensionName)-bottom: calc($size * $sizeMultiplier * 1rem);
+    }
+  }
+
+  @each $size in $sizes {
+    @each $side, $sideName in (t, r, b, l), (top, right, bottom, left) {
+      .$(dimmension)$(side)$(size) {
+        $(dimmensionName)-$(sideName): calc($size * $sizeMultiplier * 1rem);
+      }
+    }
   }
 }
