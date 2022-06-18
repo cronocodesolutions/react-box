@@ -4,8 +4,27 @@
   border: 0 solid transparent;
   font-family: inherit;
   font-size: inherit;
+  margin: 0;
+  padding: 0;
 }
 
+/* display */
+@each $display in none, block, inline-block, flex, inline-flex, grid {
+  .display$(display) {
+    display: $display;
+  }
+}
+
+/* top, right, bottom, left */
+@each $side in (top, right, bottom, left) {
+  @each $size in $sizes {
+    .$(side)$(size) {
+      $(side): calc($size * $sizeMultiplier * 1rem);
+    }
+  }
+}
+
+/* margin, padding */
 @each $dimmension, $dimmensionName in (m, p), (margin, padding) {
   @each $size in $sizes {
     .$(dimmension)$(size) {
@@ -31,5 +50,106 @@
         $(dimmensionName)-$(sideName): calc($size * $sizeMultiplier * 1rem);
       }
     }
+  }
+}
+
+/* border-width */
+@each $size in $sizes {
+  .b$(size) {
+    border-width: calc($size * 1px);
+  }
+}
+
+@each $size in $sizes {
+  .bx$(size) {
+    border-left-width: calc($size * 1px);
+    border-right-width: calc($size * 1px);
+  }
+
+  .by$(size) {
+    border-top-width: calc($size * 1px);
+    border-bottom-width: calc($size * 1px);
+  }
+}
+
+@each $size in $sizes {
+  @each $side, $sideName in (t, r, b, l), (top, right, bottom, left) {
+    .b$(side)$(size) {
+      border-$(sideName)-width: calc($size * 1px);
+    }
+  }
+}
+
+/* border-style */
+@each $borderStyle in solid, dashed, dotted, double {
+  .bStyle$(borderStyle) {
+    border-style: $borderStyle;
+  }
+}
+
+/* border radius */
+@each $size in $sizes {
+  .bRadius$(size) {
+    border-radius: calc($size / 4 * 1rem);
+  }
+}
+@each $size in $sizes {
+  .bRadiusTop$(size) {
+    border-top-left-radius: calc($size / 4 * 1rem);
+    border-top-right-radius: calc($size / 4 * 1rem);
+  }
+}
+@each $size in $sizes {
+  .bRadiusRight$(size) {
+    border-top-right-radius: calc($size / 4 * 1rem);
+    border-bottom-right-radius: calc($size / 4 * 1rem);
+  }
+}
+@each $size in $sizes {
+  .bRadiusBottom$(size) {
+    border-bottom-left-radius: calc($size / 4 * 1rem);
+    border-bottom-right-radius: calc($size / 4 * 1rem);
+  }
+}
+@each $size in $sizes {
+  .bRadiusLeft$(size) {
+    border-top-left-radius: calc($size / 4 * 1rem);
+    border-bottom-left-radius: calc($size / 4 * 1rem);
+  }
+}
+@each $size in $sizes {
+  @each $sideY, $sideNameY in (top, bottom), (Top, Bottom) {
+    @each $sideX, $sideNameX in (right, left), (Right, Left) {
+      .bRadius$(sideNameY)$(sideNameX)$(size) {
+        border-$(sideY)-$(sideX)-radius: calc($size / 4 * 1rem);
+      }
+    }
+  }
+}
+
+/* colors (color, bgColor, borderColor)  */
+@each $color in $colors {
+  .color$(color) {
+    color: var(--$(color));
+  }
+
+  .colorHover$(color):hover {
+    color: var(--$(color));
+  }
+
+  .bgColor$(color) {
+    background-color: var(--$(color));
+  }
+
+  .bgColorHover$(color):hover {
+    background-color: var(--$(color));
+  }
+
+  .bColor$(color) {
+    border-color: var(--$(color));
+  }
+
+  .bColorHover$(color):hover {
+    border-color: var(--$(color));
   }
 }

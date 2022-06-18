@@ -1,6 +1,17 @@
 import React, { useState } from 'react';
 import classes from './box.module.css';
-import { SizeType } from './css.variables';
+import { SizeType, ColorType } from './css.variables';
+
+interface BoxDisplay {
+  display?: 'none' | 'block' | 'inline-block' | 'flex' | 'inline-flex' | 'grid';
+}
+
+interface BoxEdges {
+  top?: SizeType;
+  right?: SizeType;
+  bottom?: SizeType;
+  left?: SizeType;
+}
 
 interface BoxMargin {
   m?: SizeType;
@@ -10,6 +21,26 @@ interface BoxMargin {
   mr?: SizeType;
   mb?: SizeType;
   ml?: SizeType;
+}
+
+interface BoxBorder {
+  b?: SizeType;
+  bx?: SizeType;
+  by?: SizeType;
+  bt?: SizeType;
+  br?: SizeType;
+  bb?: SizeType;
+  bl?: SizeType;
+  bStyle?: 'solid' | 'dashed' | 'dotted' | 'double';
+  bRadius?: SizeType;
+  bRadiusTop?: SizeType;
+  bRadiusRight?: SizeType;
+  bRadiusBottom?: SizeType;
+  bRadiusLeft?: SizeType;
+  bRadiusTopLeft?: SizeType;
+  bRadiusTopRight?: SizeType;
+  bRadiusBottomLeft?: SizeType;
+  bRadiusBottomRight?: SizeType;
 }
 
 interface BoxPadding {
@@ -22,7 +53,16 @@ interface BoxPadding {
   pl?: SizeType;
 }
 
-interface Props<TTag extends keyof React.ReactHTML> extends BoxMargin, BoxPadding {
+interface BoxColors {
+  color?: ColorType;
+  colorHover?: ColorType;
+  bgColor?: ColorType;
+  bgColorHover?: ColorType;
+  bColor?: ColorType;
+  bColorHover?: ColorType;
+}
+
+interface Props<TTag extends keyof React.ReactHTML> extends BoxDisplay, BoxEdges, BoxMargin, BoxBorder, BoxPadding, BoxColors {
   children?: React.ReactNode | ((props: { isHover: boolean }) => React.ReactNode);
   tag?: TTag;
   props?: React.ComponentProps<TTag>;
