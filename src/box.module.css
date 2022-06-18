@@ -172,3 +172,10 @@ body {
     line-height: calc($size * 0.3);
   }
 }
+
+/* cursor */
+@each $cursor in $cursors {
+  .cursor$(cursor) {
+    cursor: $cursor;
+  }
+}

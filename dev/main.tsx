@@ -20,6 +20,7 @@ root.render(
       b={3}
       bStyle="dotted"
       bColor="brown"
+      cursor="not-allowed"
     >
       test
     </Box>

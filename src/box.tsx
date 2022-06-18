@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import classes from './box.module.css';
-import { SizeType, ColorType } from './css.variables';
+import { SizeType, ColorType, CursorType } from './css.variables';
 
 interface BoxDisplay {
   display?: 'none' | 'block' | 'inline-block' | 'flex' | 'inline-flex' | 'grid';
@@ -67,6 +67,10 @@ interface BoxLineHeightSize {
   lineHeight?: SizeType;
 }
 
+interface BoxCursor {
+  cursor?: CursorType;
+}
+
 interface BoxPosition {}
 
 interface Props<TTag extends keyof React.ReactHTML>
@@ -76,7 +80,8 @@ interface Props<TTag extends keyof React.ReactHTML>
     BoxBorder,
     BoxPadding,
     BoxColors,
-    BoxLineHeightSize {
+    BoxLineHeightSize,
+    BoxCursor {
   children?: React.ReactNode | ((props: { isHover: boolean }) => React.ReactNode);
   tag?: TTag;
   props?: React.ComponentProps<TTag>;
