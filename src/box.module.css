@@ -179,3 +179,59 @@ body {
     cursor: $cursor;
   }
 }
+
+/* z-index */
+@each $size in $sizes {
+  .zIndex$(size) {
+    z-index: $size;
+  }
+}
+
+/* overflow */
+@each $overflow in auto, hidden, scroll, visible {
+  .overflow$(overflow) {
+    overflow: $overflow;
+  }
+
+  .overflowX$(overflow) {
+    overflow-x: $overflow;
+  }
+
+  .overflowY$(overflow) {
+    overflow-y: $overflow;
+  }
+}
+
+/* opacity */
+@each $opacity in 10, 20, 30, 40, 50, 60, 70, 80, 90, 100 {
+  .opacity$(opacity) {
+    opacity: calc($(opacity) / 100);
+  }
+}
+
+/* font-size */
+@each $fontSize in $fontSizes {
+  .fontSize$(fontSize) {
+    font-size: calc($fontSize * 1px);
+  }
+}
+
+/* font-weight */
+@each $fontWeight in 100, 200, 300, 400, 500, 600, 700, 800, 900 {
+  .fontWeight$(fontWeight) {
+    font-weight: $fontWeight;
+  }
+}
+
+/* text-decoration */
+@each $textDecoration in none, underline {
+  .textDecoration$(textDecoration) {
+    text-decoration: $textDecoration;
+  }
+}
+
+@each $textAlign in left, right, center {
+  .textAlign$(textAlign) {
+    text-align: $textAlign;
+  }
+}

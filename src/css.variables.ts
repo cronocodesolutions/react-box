@@ -91,10 +91,12 @@ const variables = {
     'grab',
     'grabbing',
   ] as const,
+  fontSizes: [6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30, 32, 34, 36, 38, 40, 42, 44, 46, 48, 50] as const,
 };
 
 export type SizeType = typeof variables.sizes[number];
 export type ColorType = typeof variables.colors[number];
 export type CursorType = typeof variables.cursors[number];
+export type FontSizeType = typeof variables.fontSizes[number];
 
 export default variables;

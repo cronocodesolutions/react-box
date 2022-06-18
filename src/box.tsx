@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import classes from './box.module.css';
-import { SizeType, ColorType, CursorType } from './css.variables';
+import { SizeType, ColorType, CursorType, FontSizeType } from './css.variables';
 
 interface BoxDisplay {
   display?: 'none' | 'block' | 'inline-block' | 'flex' | 'inline-flex' | 'grid';
@@ -71,7 +71,29 @@ interface BoxCursor {
   cursor?: CursorType;
 }
 
-interface BoxPosition {}
+interface BoxZIndex {
+  zIndex?: SizeType;
+}
+
+interface BoxOverflow {
+  overflow?: 'auto' | 'hidden' | 'scroll' | 'visible';
+  overflowX?: 'auto' | 'hidden' | 'scroll' | 'visible';
+  overflowY?: 'auto' | 'hidden' | 'scroll' | 'visible';
+}
+
+interface BoxOpacity {
+  opacity?: 10 | 20 | 30 | 40 | 50 | 60 | 70 | 80 | 90 | 100;
+}
+
+interface BoxFont {
+  fontSize?: FontSizeType;
+  fontWeight?: 100 | 200 | 300 | 400 | 500 | 600 | 700 | 800 | 900;
+}
+
+interface BoxText {
+  textDecoration?: 'none' | 'underline';
+  textAlign?: 'left' | 'right' | 'center';
+}
 
 interface Props<TTag extends keyof React.ReactHTML>
   extends BoxDisplay,
@@ -81,7 +103,12 @@ interface Props<TTag extends keyof React.ReactHTML>
     BoxPadding,
     BoxColors,
     BoxLineHeightSize,
-    BoxCursor {
+    BoxCursor,
+    BoxZIndex,
+    BoxOverflow,
+    BoxOpacity,
+    BoxFont,
+    BoxText {
   children?: React.ReactNode | ((props: { isHover: boolean }) => React.ReactNode);
   tag?: TTag;
   props?: React.ComponentProps<TTag>;

@@ -16,11 +16,14 @@ root.render(
       m={3}
       pt={4}
       px={9}
-      display="flex"
+      display="block"
       b={3}
       bStyle="dotted"
       bColor="brown"
       cursor="not-allowed"
+      opacity={30}
+      fontWeight={900}
+      textAlign="right"
     >
       test
     </Box>
