@@ -10,12 +10,12 @@ root.render(
       bRadiusTop={3}
       bgColor="navy"
       bgColorHover="green"
+      color="white"
       mx={7}
       ml={5}
       m={3}
       pt={4}
       px={9}
-      top={5}
       display="flex"
       b={3}
       bStyle="dotted"

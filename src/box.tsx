@@ -6,7 +6,8 @@ interface BoxDisplay {
   display?: 'none' | 'block' | 'inline-block' | 'flex' | 'inline-flex' | 'grid';
 }
 
-interface BoxEdges {
+interface BoxPosition {
+  position?: 'static' | 'relative' | 'absolute' | 'fixed' | 'sticky';
   top?: SizeType;
   right?: SizeType;
   bottom?: SizeType;
@@ -62,7 +63,20 @@ interface BoxColors {
   bColorHover?: ColorType;
 }
 
-interface Props<TTag extends keyof React.ReactHTML> extends BoxDisplay, BoxEdges, BoxMargin, BoxBorder, BoxPadding, BoxColors {
+interface BoxLineHeightSize {
+  lineHeight?: SizeType;
+}
+
+interface BoxPosition {}
+
+interface Props<TTag extends keyof React.ReactHTML>
+  extends BoxDisplay,
+    BoxPosition,
+    BoxMargin,
+    BoxBorder,
+    BoxPadding,
+    BoxColors,
+    BoxLineHeightSize {
   children?: React.ReactNode | ((props: { isHover: boolean }) => React.ReactNode);
   tag?: TTag;
   props?: React.ComponentProps<TTag>;

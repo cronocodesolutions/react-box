@@ -1,17 +1,29 @@
+body {
+  font-size: 16px;
+}
+
 .box {
   display: inline-block;
   height: fit-content;
-  border: 0 solid transparent;
+  border: 0 solid inherit;
   font-family: inherit;
   font-size: inherit;
   margin: 0;
   padding: 0;
+  line-height: 1.2;
 }
 
 /* display */
 @each $display in none, block, inline-block, flex, inline-flex, grid {
   .display$(display) {
     display: $display;
+  }
+}
+
+/* position */
+@each $position in static, relative, absolute, fixed, sticky {
+  .position$(position) {
+    position: $position;
   }
 }
 
@@ -151,5 +163,12 @@
 
   .bColorHover$(color):hover {
     border-color: var(--$(color));
+  }
+}
+
+/* line-height */
+@each $size in $sizes {
+  .lineHeight$(size) {
+    line-height: calc($size * 0.3);
   }
 }
