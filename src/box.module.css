@@ -1,5 +1,6 @@
 body {
   font-size: 16px;
+  line-height: 1.2;
 }
 
 .box {
@@ -10,7 +11,6 @@ body {
   font-size: inherit;
   margin: 0;
   padding: 0;
-  line-height: 1.2;
 }
 
 /* display */
@@ -71,7 +71,6 @@ body {
     border-width: calc($size * 1px);
   }
 }
-
 @each $size in $sizes {
   .bx$(size) {
     border-left-width: calc($size * 1px);
@@ -83,7 +82,6 @@ body {
     border-bottom-width: calc($size * 1px);
   }
 }
-
 @each $size in $sizes {
   @each $side, $sideName in (t, r, b, l), (top, right, bottom, left) {
     .b$(side)$(size) {
@@ -205,7 +203,7 @@ body {
 /* opacity */
 @each $opacity in 10, 20, 30, 40, 50, 60, 70, 80, 90, 100 {
   .opacity$(opacity) {
-    opacity: calc($(opacity) / 100);
+    opacity: calc($opacity / 100);
   }
 }
 
@@ -230,8 +228,78 @@ body {
   }
 }
 
+/* text-align */
 @each $textAlign in left, right, center {
   .textAlign$(textAlign) {
     text-align: $textAlign;
+  }
+}
+
+/* flex-wrap */
+@each $flexWrap in nowrap, wrap, wrap-reverse {
+  .flexWrap$(flexWrap) {
+    flex-wrap: $flexWrap;
+  }
+}
+
+/* justify-content */
+@each $justifyContent in start, end, flex-start, flex-end, center, left, right, space-between, space-around, space-evenly, stretch {
+  .justifyContent$(justifyContent) {
+    justify-content: $justifyContent;
+  }
+}
+
+/* align-items */
+@each $alignItems in stretch, flex-start, flex-end, center, baseline, start, end, self-start, self-end {
+  .alignItems$(alignItems) {
+    align-items: $alignItems;
+  }
+}
+
+/* align-content */
+@each $alignContent in flex-start, flex-end, center, space-between, space-around, space-evenly, stretch, start, end, baseline {
+  .alignContent$(alignContent) {
+    align-content: $alignContent;
+  }
+}
+
+/* flex: 1 */
+.flex1true {
+  flex: 1;
+}
+
+/* direction */
+@each $direction in row, row-reverse, column, column-reverse {
+  .direction$(direction) {
+    direction: $direction;
+  }
+}
+
+/* gap, row-gap, column-gap, order, flex-grow, flex-shrink */
+@each $size in $sizes {
+  .gap$(size) {
+    gap: calc($size * $sizeMultiplier * 1rem);
+  }
+  .rowGap$(size) {
+    row-gap: calc($size * $sizeMultiplier * 1rem);
+  }
+  .columnGap$(size) {
+    column-gap: calc($size * $sizeMultiplier * 1rem);
+  }
+  .order$(size) {
+    order: $size;
+  }
+  .flexGrow$(size) {
+    flex-grow: $size;
+  }
+  .flexShrink$(size) {
+    flex-shrink: $size;
+  }
+}
+
+/* alignSelf */
+@each $alignSelf in auto, flex-start, flex-end, center, baseline, stretch {
+  .alignSelf$(alignSelf) {
+    align-self: $alignSelf;
   }
 }

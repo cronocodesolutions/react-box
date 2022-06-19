@@ -24,8 +24,9 @@ root.render(
       opacity={30}
       fontWeight={900}
       textAlign="right"
+      flex1
     >
-      test
+      <Box>test</Box>
     </Box>
   </React.StrictMode>,
 );

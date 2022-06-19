@@ -95,6 +95,43 @@ interface BoxText {
   textAlign?: 'left' | 'right' | 'center';
 }
 
+interface BoxFlex {
+  flexWrap?: 'nowrap' | 'wrap' | 'wrap-reverse';
+  justifyContent?:
+    | 'start'
+    | 'end'
+    | 'flex-start'
+    | 'flex-end'
+    | 'center'
+    | 'left'
+    | 'right'
+    | 'space-between'
+    | 'space-around'
+    | 'space-evenly'
+    | 'stretch';
+  alignItems?: 'stretch' | 'flex-start' | 'flex-end' | 'center' | 'baseline' | 'start' | 'end' | 'self-start' | 'self-end';
+  alignContent?:
+    | 'flex-start'
+    | 'flex-end'
+    | 'center'
+    | 'space-between'
+    | 'space-around'
+    | 'space-evenly'
+    | 'stretch'
+    | 'start'
+    | 'end'
+    | 'baseline';
+  flex1?: boolean;
+  direction?: 'row' | 'row-reverse' | 'column' | 'column-reverse';
+  gap?: SizeType;
+  rowGap?: SizeType;
+  columnGap?: SizeType;
+  order?: SizeType;
+  flexGrow?: SizeType;
+  flexShrink?: SizeType;
+  alignSelf?: 'auto' | 'flex-start' | 'flex-end' | 'center' | 'baseline' | 'stretch';
+}
+
 interface Props<TTag extends keyof React.ReactHTML>
   extends BoxDisplay,
     BoxPosition,
@@ -108,7 +145,8 @@ interface Props<TTag extends keyof React.ReactHTML>
     BoxOverflow,
     BoxOpacity,
     BoxFont,
-    BoxText {
+    BoxText,
+    BoxFlex {
   children?: React.ReactNode | ((props: { isHover: boolean }) => React.ReactNode);
   tag?: TTag;
   props?: React.ComponentProps<TTag>;
