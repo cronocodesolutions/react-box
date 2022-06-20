@@ -14,6 +14,16 @@ interface BoxPosition {
   left?: SizeType;
 }
 
+type BoxSizeValue = 'fit' | 'fit-screen' | 'auto' | 'fit-content' | 'max-content' | 'min-content';
+interface BoxSize {
+  width?: BoxSizeValue;
+  height?: BoxSizeValue;
+  minWidth?: BoxSizeValue;
+  minHeight?: BoxSizeValue;
+  maxWidth?: BoxSizeValue;
+  maxHeight?: BoxSizeValue;
+}
+
 interface BoxMargin {
   m?: SizeType;
   mx?: SizeType;
@@ -135,6 +145,7 @@ interface BoxFlex {
 interface Props<TTag extends keyof React.ReactHTML>
   extends BoxDisplay,
     BoxPosition,
+    BoxSize,
     BoxMargin,
     BoxBorder,
     BoxPadding,

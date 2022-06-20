@@ -27,6 +27,23 @@ body {
   }
 }
 
+/*  width, height */
+@each $side, $fitScreenValue in (width, height, min-width, min-height, max-width, max-height), (100vw, 100vh, 100vw, 100vh, 100vw, 100vh) {
+  .$(side)fit {
+    $(side): 100%;
+  }
+
+  .$(side)fit-screen {
+    $(side): $fitScreenValue;
+  }
+
+  @each $otherSize in auto, fit-content, max-content, min-content {
+    .$(side)$(otherSize) {
+      $(side): $otherSize;
+    }
+  }
+}
+
 /* top, right, bottom, left */
 @each $side in (top, right, bottom, left) {
   @each $size in $sizes {
