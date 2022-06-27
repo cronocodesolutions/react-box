@@ -102,6 +102,7 @@ interface BoxFont {
 
 interface BoxText {
   textDecoration?: 'none' | 'underline';
+  textTransform?: 'none' | 'capitalize' | 'lowercase' | 'uppercase';
   textAlign?: 'left' | 'right' | 'center';
 }
 

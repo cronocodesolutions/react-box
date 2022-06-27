@@ -252,6 +252,13 @@ body {
   }
 }
 
+/* text-transform */
+@each $textTransform in none, capitalize, lowercase, uppercase {
+  .textTransform$(textTransform) {
+    text-transform: $textTransform;
+  }
+}
+
 /* flex-wrap */
 @each $flexWrap in nowrap, wrap, wrap-reverse {
   .flexWrap$(flexWrap) {
