@@ -162,12 +162,13 @@ interface Props<TTag extends keyof React.ReactHTML>
   children?: React.ReactNode | ((props: { isHover: boolean }) => React.ReactNode);
   tag?: TTag;
   props?: React.ComponentProps<TTag>;
+  className?: string;
 }
 
 export default function Box<TTag extends keyof React.ReactHTML = 'div'>(boxProps: Props<TTag>) {
-  const { tag, children, props } = boxProps;
+  const { tag, children, props, className } = boxProps;
 
-  const classNames = [classes.box];
+  const classNames = className ? [className, classes.box] : [classes.box];
   Object.entries(boxProps).forEach(([key, value]) => {
     const classToAdd = classes[key + value];
     classToAdd && classNames.push(classToAdd);
