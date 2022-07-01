@@ -1,5 +1,7 @@
 import Box from '../../box';
 
-export default function Flex() {
-  return <Box display="flex">flex</Box>;
+type Props = React.ComponentProps<typeof Box>;
+
+export default function Flex(props: Props) {
+  return <Box display="flex" {...props} />;
 }
