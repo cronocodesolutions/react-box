@@ -1,6 +1,6 @@
 {
   "name": "@cronocode/react-box",
-  "version": "0.0.7",
+  "version": "0.0.8",
   "main": "./box.js",
   "module": "./box.js",
   "types": "./box.d.ts",
@@ -13,7 +13,7 @@
   "scripts": {
     "dev": "vite ./dev --config ./vite.config.ts",
     "build": "vite build",
-    "postbuild": "cp package.json dist/package.json",
+    "postbuild": "cp package.json dist & cp LICENSE dist",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
