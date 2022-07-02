@@ -24,7 +24,7 @@ root.render(
       flex1
       color="green"
     >
-      <Flex width="max-content" inlineMinHeight="50px">
+      <Flex width="max-content" inlineMinHeight="50px" className={{ ha: false, max: true }}>
         test flex
       </Flex>
       <Button p={2} bgColor="blueDark" color="black">

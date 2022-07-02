@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import classes from './box.module.css';
 import { SizeType, ColorType, CursorType, FontSizeType } from './css.variables';
+import ClassNameUtils from './utils/className/classNameUtils';
 
 interface BoxDisplay {
   display?: 'none' | 'block' | 'inline-block' | 'flex' | 'inline-flex' | 'grid';
@@ -203,14 +204,14 @@ interface Props<TTag extends keyof React.ReactHTML>
   children?: React.ReactNode | ((props: { isHover: boolean }) => React.ReactNode);
   tag?: TTag;
   props?: React.ComponentProps<TTag>;
-  className?: string;
+  className?: ClassNameUtils.ClassNameType;
 }
 
 export default function Box<TTag extends keyof React.ReactHTML = 'div'>(boxProps: Props<TTag>) {
   const { tag, children, props, className, inlineWidth, inlineHeight, inlineMinWidth, inlineMinHeight, inlineMaxWidth, inlineMaxHeight } =
     boxProps;
 
-  const classNames = className ? [className, classes.box] : [classes.box];
+  const classNames = className ? ClassNameUtils.classNames(className, classes.box) : [classes.box];
   Object.entries(boxProps).forEach(([key, value]) => {
     const classToAdd = classes[key + value];
     classToAdd && classNames.push(classToAdd);
