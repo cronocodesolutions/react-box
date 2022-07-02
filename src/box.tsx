@@ -22,6 +22,12 @@ interface BoxSize {
   minHeight?: BoxSizeValue;
   maxWidth?: BoxSizeValue;
   maxHeight?: BoxSizeValue;
+  inlineWidth?: string;
+  inlineHeight?: string;
+  inlineMinWidth?: string;
+  inlineMinHeight?: string;
+  inlineMaxWidth?: string;
+  inlineMaxHeight?: string;
 }
 
 interface BoxMargin {
@@ -201,7 +207,8 @@ interface Props<TTag extends keyof React.ReactHTML>
 }
 
 export default function Box<TTag extends keyof React.ReactHTML = 'div'>(boxProps: Props<TTag>) {
-  const { tag, children, props, className } = boxProps;
+  const { tag, children, props, className, inlineWidth, inlineHeight, inlineMinWidth, inlineMinHeight, inlineMaxWidth, inlineMaxHeight } =
+    boxProps;
 
   const classNames = className ? [className, classes.box] : [classes.box];
   Object.entries(boxProps).forEach(([key, value]) => {
@@ -210,7 +217,18 @@ export default function Box<TTag extends keyof React.ReactHTML = 'div'>(boxProps
   });
 
   const boxTag = tag || 'div';
-  const tagProps = { ...props, className: classNames.join(' ') };
+  const tagProps = {
+    ...props,
+    className: classNames.join(' '),
+    style: {
+      width: inlineWidth,
+      height: inlineHeight,
+      minWidth: inlineMinWidth,
+      minHeight: inlineMinHeight,
+      maxWidth: inlineMaxWidth,
+      maxHeight: inlineMaxHeight,
+    },
+  };
 
   const [isHover, setIsHover] = useState(false);
   const needsHoverState = typeof children === 'function';
