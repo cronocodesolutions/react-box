@@ -25,51 +25,86 @@ interface BoxSize {
 }
 
 interface BoxMargin {
+  margin?: SizeType;
   m?: SizeType;
+  marginHorizontal?: SizeType;
   mx?: SizeType;
+  marginVertical?: SizeType;
   my?: SizeType;
+  marginTop?: SizeType;
   mt?: SizeType;
+  marginRight?: SizeType;
   mr?: SizeType;
+  marginBottom?: SizeType;
   mb?: SizeType;
+  marginLeft?: SizeType;
   ml?: SizeType;
 }
 
 interface BoxBorder {
+  border?: SizeType;
   b?: SizeType;
+  borderHorizontal?: SizeType;
   bx?: SizeType;
+  borderVertical?: SizeType;
   by?: SizeType;
+  borderTop?: SizeType;
   bt?: SizeType;
+  borderRight?: SizeType;
   br?: SizeType;
+  borderBottom?: SizeType;
   bb?: SizeType;
+  borderLeft?: SizeType;
   bl?: SizeType;
+  borderStyle?: 'solid' | 'dashed' | 'dotted' | 'double';
   bStyle?: 'solid' | 'dashed' | 'dotted' | 'double';
+  borderRadius?: SizeType;
   bRadius?: SizeType;
+  borderRadiusTop?: SizeType;
   bRadiusTop?: SizeType;
+  borderRadiusRight?: SizeType;
   bRadiusRight?: SizeType;
+  borderRadiusBottom?: SizeType;
   bRadiusBottom?: SizeType;
+  borderRadiusLeft?: SizeType;
   bRadiusLeft?: SizeType;
+  borderRadiusTopLeft?: SizeType;
   bRadiusTopLeft?: SizeType;
+  borderRadiusTopRight?: SizeType;
   bRadiusTopRight?: SizeType;
+  borderRadiusBottomLeft?: SizeType;
   bRadiusBottomLeft?: SizeType;
+  borderRadiusBottomRight?: SizeType;
   bRadiusBottomRight?: SizeType;
 }
 
 interface BoxPadding {
+  padding?: SizeType;
   p?: SizeType;
+  paddingHorizontal?: SizeType;
   px?: SizeType;
+  paddingVertical?: SizeType;
   py?: SizeType;
+  paddingTop?: SizeType;
   pt?: SizeType;
+  paddingRight?: SizeType;
   pr?: SizeType;
+  paddingBottom?: SizeType;
   pb?: SizeType;
+  paddingLeft?: SizeType;
   pl?: SizeType;
 }
 
 interface BoxColors {
   color?: ColorType;
   colorHover?: ColorType;
+  backgroundColor?: ColorType;
   bgColor?: ColorType;
+  backgroundColorHover?: ColorType;
   bgColorHover?: ColorType;
+  borderColor?: ColorType;
   bColor?: ColorType;
+  borderColorHover?: ColorType;
   bColorHover?: ColorType;
 }
 

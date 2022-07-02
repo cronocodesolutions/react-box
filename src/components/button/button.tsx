@@ -10,5 +10,5 @@ export default function Button(props: Props) {
   const newTagProps: React.ComponentProps<'button'> = { ...{ type: 'button', onClick }, ...tagProps };
   const newProps = { ...{ props: newTagProps }, ...props };
 
-  return <Box tag="button" cursor="pointer" {...newProps} />;
+  return <Box tag="button" cursor="pointer" display="inline-block" {...newProps} />;
 }

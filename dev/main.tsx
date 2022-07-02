@@ -24,6 +24,9 @@ root.render(
       flex1
       color="green"
     >
+      <Flex my={4} marginTop={8} ml={2}>
+        test flex
+      </Flex>
       <Button p={2} bgColor="blueDark" color="black">
         Button
       </Button>

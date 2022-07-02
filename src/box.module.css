@@ -1,6 +1,8 @@
 body {
   font-size: 16px;
   line-height: 1.2;
+  margin: 0;
+  padding: 0;
 }
 
 .box {
@@ -55,17 +57,20 @@ body {
 /* margin, padding */
 @each $dimmension, $dimmensionName in (m, p), (margin, padding) {
   @each $size in $sizes {
+    .$(dimmensionName)$(size),
     .$(dimmension)$(size) {
       $(dimmensionName): calc($size * $sizeMultiplier * 1rem);
     }
   }
 
   @each $size in $sizes {
+    .$(dimmensionName)Horizontal$(size),
     .$(dimmension)x$(size) {
       $(dimmensionName)-left: calc($size * $sizeMultiplier * 1rem);
       $(dimmensionName)-right: calc($size * $sizeMultiplier * 1rem);
     }
 
+    .$(dimmensionName)Vertical$(size),
     .$(dimmension)y$(size) {
       $(dimmensionName)-top: calc($size * $sizeMultiplier * 1rem);
       $(dimmensionName)-bottom: calc($size * $sizeMultiplier * 1rem);
@@ -73,7 +78,8 @@ body {
   }
 
   @each $size in $sizes {
-    @each $side, $sideName in (t, r, b, l), (top, right, bottom, left) {
+    @each $side, $sideName, $sideCapitalizedName in (t, r, b, l), (top, right, bottom, left), (Top, Right, Bottom, Left) {
+      .$(dimmensionName)$(sideCapitalizedName)$(size),
       .$(dimmension)$(side)$(size) {
         $(dimmensionName)-$(sideName): calc($size * $sizeMultiplier * 1rem);
       }
@@ -83,23 +89,27 @@ body {
 
 /* border-width */
 @each $size in $sizes {
+  .border$(size),
   .b$(size) {
     border-width: calc($size * 1px);
   }
 }
 @each $size in $sizes {
+  .borderHorizontal$(size),
   .bx$(size) {
     border-left-width: calc($size * 1px);
     border-right-width: calc($size * 1px);
   }
 
+  .borderVertical$(size),
   .by$(size) {
     border-top-width: calc($size * 1px);
     border-bottom-width: calc($size * 1px);
   }
 }
 @each $size in $sizes {
-  @each $side, $sideName in (t, r, b, l), (top, right, bottom, left) {
+  @each $side, $sideName, $sideCapitalizedName in (t, r, b, l), (top, right, bottom, left), (Top, Right, Bottom, Left) {
+    .border$(sideCapitalizedName)$(size),
     .b$(side)$(size) {
       border-$(sideName)-width: calc($size * 1px);
     }
@@ -108,6 +118,7 @@ body {
 
 /* border-style */
 @each $borderStyle in solid, dashed, dotted, double {
+  .borderStyle$(borderStyle),
   .bStyle$(borderStyle) {
     border-style: $borderStyle;
   }
@@ -115,29 +126,34 @@ body {
 
 /* border radius */
 @each $size in $sizes {
+  .borderRadius$(size),
   .bRadius$(size) {
     border-radius: calc($size / 4 * 1rem);
   }
 }
 @each $size in $sizes {
+  .borderRadiusTop$(size),
   .bRadiusTop$(size) {
     border-top-left-radius: calc($size / 4 * 1rem);
     border-top-right-radius: calc($size / 4 * 1rem);
   }
 }
 @each $size in $sizes {
+  .borderRadiusRight$(size),
   .bRadiusRight$(size) {
     border-top-right-radius: calc($size / 4 * 1rem);
     border-bottom-right-radius: calc($size / 4 * 1rem);
   }
 }
 @each $size in $sizes {
+  .borderRadiusBottom$(size),
   .bRadiusBottom$(size) {
     border-bottom-left-radius: calc($size / 4 * 1rem);
     border-bottom-right-radius: calc($size / 4 * 1rem);
   }
 }
 @each $size in $sizes {
+  .borderRadiusLeft$(size),
   .bRadiusLeft$(size) {
     border-top-left-radius: calc($size / 4 * 1rem);
     border-bottom-left-radius: calc($size / 4 * 1rem);
@@ -146,6 +162,7 @@ body {
 @each $size in $sizes {
   @each $sideY, $sideNameY in (top, bottom), (Top, Bottom) {
     @each $sideX, $sideNameX in (right, left), (Right, Left) {
+      .borderRadius$(sideNameY)$(sideNameX)$(size),
       .bRadius$(sideNameY)$(sideNameX)$(size) {
         border-$(sideY)-$(sideX)-radius: calc($size / 4 * 1rem);
       }
@@ -163,18 +180,22 @@ body {
     color: var(--$(color));
   }
 
+  .backgroundColor$(color),
   .bgColor$(color) {
     background-color: var(--$(color));
   }
 
+  .backgroundColorHover$(color):hover,
   .bgColorHover$(color):hover {
     background-color: var(--$(color));
   }
 
+  .borderColor$(color),
   .bColor$(color) {
     border-color: var(--$(color));
   }
 
+  .borderColorHover$(color):hover,
   .bColorHover$(color):hover {
     border-color: var(--$(color));
   }
