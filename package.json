@@ -7,7 +7,18 @@
   "exports": {
     ".": {
       "import": "./box.js",
-      "require": "./box.js"
+      "require": "./box.js",
+      "types": "./box.d.ts"
+    },
+    "./components/flex": {
+      "import": "./components/flex.js",
+      "require": "./components/flex.js",
+      "types": "./components/flex/index.d.ts"
+    },
+    "./components/button": {
+      "import": "./components/button.js",
+      "require": "./components/button.js",
+      "types": "./components/button/index.d.ts"
     }
   },
   "scripts": {

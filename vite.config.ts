@@ -58,7 +58,7 @@ export default defineConfig({
             return '[name].js';
           }
 
-          return 'components/[name]/index.js';
+          return 'components/[name].js';
         },
         chunkFileNames: 'chunk/[name]-[hash].js',
         assetFileNames: (assetInfo) => {
