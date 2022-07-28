@@ -8,16 +8,7 @@ import path from 'path';
 const identity = new IdentityFactory();
 
 export default defineConfig({
-  plugins: [
-    dts({
-      beforeWriteFile(filePath, content) {
-        const { dir } = path.parse(filePath);
-
-        return { filePath: dir.includes('components') ? `${dir}/index.d.ts` : filePath, content };
-      },
-    }),
-    reactPlugin(),
-  ],
+  plugins: [dts(), reactPlugin()],
   css: {
     postcss: {
       plugins: [
@@ -58,7 +49,7 @@ export default defineConfig({
             return '[name].js';
           }
 
-          return 'components/[name].js';
+          return 'components/[name]/[name].js';
         },
         chunkFileNames: 'chunk/[name]-[hash].js',
         assetFileNames: (assetInfo) => {
