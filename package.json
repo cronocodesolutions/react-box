@@ -1,20 +1,20 @@
 {
   "name": "@cronocode/react-box",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "main": "./box.js",
   "module": "./box.js",
   "types": "./box.d.ts",
   "exports": {
-    "./styles.css": "./styles.css",
-    "./components/flex": {
-      "import": "./components/flex.js",
-      "require": "./components/flex.js",
-      "types": "./components/flex/index.d.ts"
+    ".": {
+      "import": "./box.js",
+      "require": "./box.js",
+      "types": "./box.d.ts"
     },
-    "./components/button": {
-      "import": "./components/button.js",
-      "require": "./components/button.js",
-      "types": "./components/button/index.d.ts"
+    "./styles.css": "./styles.css",
+    "./components/*": {
+      "import": "./components/*.js",
+      "require": "./components/*.js",
+      "types": "./components/*/index.d.ts"
     }
   },
   "scripts": {
