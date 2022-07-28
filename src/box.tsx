@@ -222,6 +222,7 @@ export default function Box<TTag extends keyof React.ReactHTML = 'div'>(boxProps
     ...props,
     className: classNames.join(' '),
     style: {
+      ...props?.style,
       width: inlineWidth,
       height: inlineHeight,
       minWidth: inlineMinWidth,
