@@ -27,10 +27,10 @@ root.render(
       flex1
       color="green"
     >
-      <Flex width="max-content" inlineMinHeight="50px" className={{ ha: false, max: true }}>
+      <Flex width="max-content" tag="span" inlineMinHeight="50px" className={{ ha: false, max: true }}>
         test flex
       </Flex>
-      <Button p={2} bgColor="blueDark" color="black">
+      <Button p={2} bgColor="blueDark" color="black" tag="span" onClick={() => alert(1)}>
         Button
       </Button>
       <Flex>
