@@ -1,15 +1,17 @@
 import Box from '../../box';
 
-interface Props<TTag extends keyof React.ReactHTML> extends React.ComponentProps<typeof Box<TTag>> {
+type BoxProps = React.ComponentProps<typeof Box>;
+
+interface Props extends BoxProps {
   onClick?: (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void;
   type?: React.ComponentProps<'button'>['type'];
 }
 
-export default function Button<TTag extends keyof React.ReactHTML = 'button'>(props: Props<TTag>) {
+export default function Button(props: Props) {
   const { props: tagProps, onClick, type } = props;
 
-  const newTagProps = { ...tagProps, ...{ onClick, type: type || 'button' } } as React.ComponentProps<TTag>;
-  const newProps: Props<TTag> = { ...{ props: newTagProps }, ...props };
+  const newTagProps: React.ComponentProps<keyof React.ReactHTML> = { ...{ type: type || 'button', onClick }, ...tagProps };
+  const newProps = { ...{ props: newTagProps }, ...props };
 
   return <Box tag="button" cursor="pointer" display="inline-block" {...newProps} />;
 }
