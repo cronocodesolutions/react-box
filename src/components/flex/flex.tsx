@@ -2,7 +2,7 @@ import Box from '../../box';
 
 type BoxProps = React.ComponentProps<typeof Box>;
 
-interface BoxFlex {
+interface Props extends BoxProps {
   wrap?: BoxProps['flexWrap'];
   jc?: BoxProps['justifyContent'];
   ai?: BoxProps['alignItems'];
@@ -12,8 +12,6 @@ interface BoxFlex {
   shrink?: BoxProps['flexShrink'];
   as?: BoxProps['alignSelf'];
 }
-
-type Props = React.ComponentProps<typeof Box> & BoxFlex;
 
 export default function Flex(props: Props) {
   const { wrap, jc, ai, ac, d, grow, shrink, as } = props;
