@@ -35,38 +35,48 @@ export default defineConfig({
   },
   build: {
     lib: {
-      entry: './src/box.tsx',
+      entry: path.resolve(__dirname, './src/index.ts'),
       name: 'react-box',
-      fileName: (format) => `index.${format}.js`,
-      formats: ['es'],
+      fileName: 'index',
+      formats: ['cjs'],
     },
     rollupOptions: {
-      input: {
-        box: path.resolve(__dirname, 'src/box.tsx'),
-        button: path.resolve(__dirname, 'src/components/button/button.tsx'),
-        flex: path.resolve(__dirname, 'src/components/flex/flex.tsx'),
-      },
-      external: ['react', 'react-dom'],
+      external: ['react', 'react/jsx-runtime'],
       output: {
-        globals: {
-          react: 'React',
-          'react-dom': 'ReactDOM',
-        },
         exports: 'named',
-        entryFileNames: (chunkInfo) => {
+        manualChunks(id: string) {
+          if (id.endsWith('src/index.ts')) {
+            return 'index';
+          }
+
+          if (id.includes('box.tsx') || id.includes('box.module.css')) {
+            return 'box';
+          }
+
+          if (id.includes('/src/components/')) {
+            const re = new RegExp('(.*)src/components/(.*)');
+            const result = re.exec(id)[2].split('/')[0];
+
+            return result;
+          }
+
+          return 'utils';
+        },
+
+        chunkFileNames(chunkInfo) {
+          if (chunkInfo.name === 'index') {
+            return '[name].js';
+          }
+
           if (chunkInfo.name === 'box') {
             return '[name].js';
           }
 
-          return 'components/[name].js';
-        },
-        chunkFileNames: 'chunk/[name]-[hash].js',
-        assetFileNames: (assetInfo) => {
-          if (/\.css$/.test(assetInfo.name)) {
-            return 'styles.css';
+          if (chunkInfo.name === 'utils') {
+            return 'utils/[name].js';
           }
 
-          return 'components/asset-[name]-[hash].[ext]';
+          return 'components/[name].js';
         },
       },
     },
