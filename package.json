@@ -1,6 +1,6 @@
 {
   "name": "@cronocode/react-box",
-  "version": "0.2.3",
+  "version": "0.2.4",
   "main": "./box.js",
   "module": "./box.js",
   "types": "./box.d.ts",
@@ -10,7 +10,7 @@
       "require": "./box.js",
       "types": "./box.d.ts"
     },
-    "./styles.css": "./styles.css",
+    "./style.css": "./style.css",
     "./components/*": {
       "import": "./components/*.js",
       "require": "./components/*.js",
