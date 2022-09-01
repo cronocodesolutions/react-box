@@ -43,7 +43,6 @@ export default defineConfig({
     rollupOptions: {
       external: ['react', 'react/jsx-runtime'],
       output: {
-        exports: 'named',
         manualChunks(id: string) {
           if (id.endsWith('src/index.ts')) {
             return 'index';
