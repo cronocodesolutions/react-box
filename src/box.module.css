@@ -317,10 +317,10 @@ body {
   flex: 1;
 }
 
-/* direction */
+/* flex-direction */
 @each $direction in row, row-reverse, column, column-reverse {
   .direction$(direction) {
-    direction: $direction;
+    flex-direction: $direction;
   }
 }
 
