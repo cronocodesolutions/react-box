@@ -36,13 +36,13 @@ export default defineConfig({
   build: {
     lib: {
       entry: path.resolve(__dirname, './src/index.ts'),
-      name: 'react-box',
-      fileName: 'index',
-      formats: ['cjs'],
+      fileName: (format) => 'index.js',
+      formats: ['es'],
     },
     rollupOptions: {
       external: ['react', 'react/jsx-runtime'],
       output: {
+        inlineDynamicImports: false,
         manualChunks(id: string) {
           if (id.endsWith('src/index.ts')) {
             return 'index';
