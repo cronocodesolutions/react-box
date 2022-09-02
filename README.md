@@ -52,7 +52,7 @@ import Flex from "@cronocode/react-box/components/flex";
 import Button from "@cronocode/react-box/components/button";
 ```
 
-## Themes variables
+## Theme variables
 
 ```
 --lineHeight
