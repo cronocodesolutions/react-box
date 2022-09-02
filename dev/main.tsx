@@ -30,6 +30,8 @@ root.render(
         fontWeight={900}
         flex1
         color="green"
+        minHeight="fit-screen"
+        marginHorizontal={20}
       >
         <Flex width="max-content" inlineMinHeight="50px" className={{ ha: false, max: true }}>
           <Box>

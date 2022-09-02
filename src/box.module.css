@@ -32,18 +32,20 @@ body {
 }
 
 /*  width, height */
-@each $side, $fitScreenValue in (width, height, min-width, min-height, max-width, max-height), (100vw, 100vh, 100vw, 100vh, 100vw, 100vh) {
-  .$(side)fit {
-    $(side): 100%;
+@each $styleProp, $style, $fitScreenValue in (width, height, minWidth, minHeight, maxWidth, maxHeight),
+  (width, height, min-width, min-height, max-width, max-height), (100vw, 100vh, 100vw, 100vh, 100vw, 100vh)
+{
+  .$(styleProp)fit {
+    $(style): 100%;
   }
 
-  .$(side)fit-screen {
-    $(side): $fitScreenValue;
+  .$(styleProp)fit-screen {
+    $(style): $fitScreenValue;
   }
 
   @each $otherSize in auto, fit-content, max-content, min-content {
-    .$(side)$(otherSize) {
-      $(side): $otherSize;
+    .$(styleProp)$(otherSize) {
+      $(style): $otherSize;
     }
   }
 }
