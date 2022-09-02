@@ -8,35 +8,45 @@ const root = ReactDOM.createRoot(document.getElementById('root')!);
 
 root.render(
   <React.StrictMode>
-    <Box props={{ style: { background: '#ccc' } }} inlineHeight="100px">
-      hello
-    </Box>
-    <Box
-      bRadiusTop={3}
-      mx={7}
-      ml={5}
-      m={3}
-      pt={4}
-      px={9}
-      display="block"
-      b={3}
-      bStyle="dotted"
-      bColor="brown"
-      cursor="not-allowed"
-      fontWeight={900}
-      flex1
-      color="green"
-    >
-      <Flex width="max-content" tag="span" inlineMinHeight="50px" className={{ ha: false, max: true }}>
-        test flex
-      </Flex>
-      <Button p={2} bgColor="blueDark" color="black" tag="span" onClick={() => alert(1)} props={{ style: { paddingTop: '30px' } }}>
-        Button
-      </Button>
-      <Flex>
-        <Box flex1>test1</Box>
-        <Box>test2</Box>
-      </Flex>
+    <Box>
+      <Box props={{ style: { background: '#ccc' } }} inlineHeight="100px">
+        hello
+        <div>
+          <Box b={2}>new test </Box>
+        </div>
+      </Box>
+      <Box
+        bRadiusTop={3}
+        mx={7}
+        ml={5}
+        m={3}
+        pt={4}
+        px={9}
+        display="block"
+        b={3}
+        bStyle="dotted"
+        bColor="brown"
+        cursor="not-allowed"
+        fontWeight={900}
+        flex1
+        color="green"
+      >
+        <Flex width="max-content" inlineMinHeight="50px" className={{ ha: false, max: true }}>
+          <Box>
+            <Box b={1} bColor="teal">
+              test border
+              <Box b={2}>inner text</Box>
+            </Box>
+          </Box>
+        </Flex>
+        <Button p={2} bgColor="blueDark" color="black" tag="span" onClick={() => alert(1)} props={{ style: { paddingTop: '30px' } }}>
+          Button
+        </Button>
+        <Flex>
+          <Box flex1>test1</Box>
+          <Box>test2</Box>
+        </Flex>
+      </Box>
     </Box>
   </React.StrictMode>,
 );
