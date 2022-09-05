@@ -30,7 +30,6 @@ root.render(
         fontWeight={900}
         flex1
         color="green"
-        minHeight="fit-screen"
         marginHorizontal={20}
       >
         <Flex width="max-content" inlineMinHeight="50px" className={{ ha: false, max: true }}>
@@ -49,6 +48,26 @@ root.render(
           <Box>test2</Box>
         </Flex>
       </Box>
+      <Box p={2} bx={5} m={2} position="relative">
+        <Box b={1} bColor="gray" inset={1} position="absolute">
+          absolute
+        </Box>
+
+        <Box mt={8}>Buttons</Box>
+        <MyButton>Click me</MyButton>
+        <Button bgColor="green" color="white" ml={2}>
+          Click me 2
+        </Button>
+      </Box>
+      <Box mx="auto" inlineMaxWidth="1000px" b={2}>
+        test margin auto
+      </Box>
     </Box>
   </React.StrictMode>,
 );
+
+type Props = React.ComponentProps<typeof Button>;
+
+function MyButton(props: Props) {
+  return <Button className="button" px={5} py={2} bgColor="blue" color="white" bRadius={2} {...props} />;
+}

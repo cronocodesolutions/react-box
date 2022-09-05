@@ -14,11 +14,11 @@ interface Props extends BoxProps {
 }
 
 export default function Flex(props: Props) {
-  const { wrap, jc, ai, ac, d, grow, shrink, as } = props;
+  const { wrap, jc, ai, ac, d, grow, shrink, as, inline } = props;
 
   return (
     <Box
-      display="flex"
+      display={inline ? 'inline-flex' : 'flex'}
       flexWrap={wrap}
       justifyContent={jc}
       alignItems={ai}

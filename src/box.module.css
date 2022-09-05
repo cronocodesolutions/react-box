@@ -18,6 +18,10 @@ body {
 }
 
 /* display */
+.inlinetrue {
+  display: inline-block;
+}
+
 @each $display in none, block, inline-block, flex, inline-flex, grid {
   .display$(display) {
     display: $display;
@@ -50,6 +54,13 @@ body {
   }
 }
 
+/* inset */
+@each $size in $sizes {
+  .inset$(size) {
+    inset: calc($size * $sizeMultiplier * 1rem);
+  }
+}
+
 /* top, right, bottom, left */
 @each $side in (top, right, bottom, left) {
   @each $size in $sizes {
@@ -67,27 +78,42 @@ body {
       $(dimmensionName): calc($size * $sizeMultiplier * 1rem);
     }
   }
+  .$(dimmensionName)auto,
+  .$(dimmension)auto {
+    $(dimmensionName): auto;
+  }
 
   @each $size in $sizes {
     .$(dimmensionName)Horizontal$(size),
     .$(dimmension)x$(size) {
-      $(dimmensionName)-left: calc($size * $sizeMultiplier * 1rem);
-      $(dimmensionName)-right: calc($size * $sizeMultiplier * 1rem);
+      $(dimmensionName)-inline: calc($size * $sizeMultiplier * 1rem);
     }
 
     .$(dimmensionName)Vertical$(size),
     .$(dimmension)y$(size) {
-      $(dimmensionName)-top: calc($size * $sizeMultiplier * 1rem);
-      $(dimmensionName)-bottom: calc($size * $sizeMultiplier * 1rem);
+      $(dimmensionName)-block: calc($size * $sizeMultiplier * 1rem);
     }
   }
+  .$(dimmensionName)Horizontalauto,
+  .$(dimmension)xauto {
+    $(dimmensionName)-inline: auto;
+  }
 
-  @each $size in $sizes {
-    @each $side, $sideName, $sideCapitalizedName in (t, r, b, l), (top, right, bottom, left), (Top, Right, Bottom, Left) {
+  .$(dimmensionName)Verticalauto,
+  .$(dimmension)yauto {
+    $(dimmensionName)-block: auto;
+  }
+
+  @each $side, $sideName, $sideCapitalizedName in (t, r, b, l), (top, right, bottom, left), (Top, Right, Bottom, Left) {
+    @each $size in $sizes {
       .$(dimmensionName)$(sideCapitalizedName)$(size),
       .$(dimmension)$(side)$(size) {
         $(dimmensionName)-$(sideName): calc($size * $sizeMultiplier * 1rem);
       }
+    }
+    .$(dimmensionName)$(sideCapitalizedName)auto,
+    .$(dimmension)$(side)auto {
+      $(dimmensionName)-$(sideName): auto;
     }
   }
 }
@@ -102,14 +128,12 @@ body {
 @each $size in $sizes {
   .borderHorizontal$(size),
   .bx$(size) {
-    border-left-width: calc($size * 1px);
-    border-right-width: calc($size * 1px);
+    border-inline-width: calc($size * 1px);
   }
 
   .borderVertical$(size),
   .by$(size) {
-    border-top-width: calc($size * 1px);
-    border-bottom-width: calc($size * 1px);
+    border-block-width: calc($size * 1px);
   }
 }
 @each $size in $sizes {
@@ -133,35 +157,35 @@ body {
 @each $size in $sizes {
   .borderRadius$(size),
   .bRadius$(size) {
-    border-radius: calc($size / 4 * 1rem);
+    border-radius: calc($size * $sizeMultiplier * 1rem);
   }
 }
 @each $size in $sizes {
   .borderRadiusTop$(size),
   .bRadiusTop$(size) {
-    border-top-left-radius: calc($size / 4 * 1rem);
-    border-top-right-radius: calc($size / 4 * 1rem);
+    border-top-left-radius: calc($size * $sizeMultiplier * 1rem);
+    border-top-right-radius: calc($size * $sizeMultiplier * 1rem);
   }
 }
 @each $size in $sizes {
   .borderRadiusRight$(size),
   .bRadiusRight$(size) {
-    border-top-right-radius: calc($size / 4 * 1rem);
-    border-bottom-right-radius: calc($size / 4 * 1rem);
+    border-top-right-radius: calc($size * $sizeMultiplier * 1rem);
+    border-bottom-right-radius: calc($size * $sizeMultiplier * 1rem);
   }
 }
 @each $size in $sizes {
   .borderRadiusBottom$(size),
   .bRadiusBottom$(size) {
-    border-bottom-left-radius: calc($size / 4 * 1rem);
-    border-bottom-right-radius: calc($size / 4 * 1rem);
+    border-bottom-left-radius: calc($size * $sizeMultiplier * 1rem);
+    border-bottom-right-radius: calc($size * $sizeMultiplier * 1rem);
   }
 }
 @each $size in $sizes {
   .borderRadiusLeft$(size),
   .bRadiusLeft$(size) {
-    border-top-left-radius: calc($size / 4 * 1rem);
-    border-bottom-left-radius: calc($size / 4 * 1rem);
+    border-top-left-radius: calc($size * $sizeMultiplier * 1rem);
+    border-bottom-left-radius: calc($size * $sizeMultiplier * 1rem);
   }
 }
 @each $size in $sizes {
@@ -169,7 +193,7 @@ body {
     @each $sideX, $sideNameX in (right, left), (Right, Left) {
       .borderRadius$(sideNameY)$(sideNameX)$(size),
       .bRadius$(sideNameY)$(sideNameX)$(size) {
-        border-$(sideY)-$(sideX)-radius: calc($size / 4 * 1rem);
+        border-$(sideY)-$(sideX)-radius: calc($size * $sizeMultiplier * 1rem);
       }
     }
   }

@@ -14,5 +14,5 @@ export default function Button(props: Props) {
   const newTagProps = { ...{ onClick, type: type || 'button', disabled }, ...tagProps };
   const newProps = { ...props, ...{ props: newTagProps } };
 
-  return <Box tag="button" cursor="pointer" display="inline-block" {...newProps} />;
+  return <Box tag="button" cursor="pointer" inline {...newProps} />;
 }

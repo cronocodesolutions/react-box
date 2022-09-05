@@ -5,10 +5,12 @@ import ClassNameUtils from './utils/className/classNameUtils';
 
 interface BoxDisplay {
   display?: 'none' | 'block' | 'inline-block' | 'flex' | 'inline-flex' | 'grid';
+  inline?: boolean;
 }
 
 interface BoxPosition {
   position?: 'static' | 'relative' | 'absolute' | 'fixed' | 'sticky';
+  inset?: SizeType;
   top?: SizeType;
   right?: SizeType;
   bottom?: SizeType;
@@ -32,20 +34,20 @@ interface BoxSize {
 }
 
 interface BoxMargin {
-  margin?: SizeType;
-  m?: SizeType;
-  marginHorizontal?: SizeType;
-  mx?: SizeType;
-  marginVertical?: SizeType;
-  my?: SizeType;
-  marginTop?: SizeType;
-  mt?: SizeType;
-  marginRight?: SizeType;
-  mr?: SizeType;
-  marginBottom?: SizeType;
-  mb?: SizeType;
-  marginLeft?: SizeType;
-  ml?: SizeType;
+  margin?: SizeType | 'auto';
+  m?: SizeType | 'auto';
+  marginHorizontal?: SizeType | 'auto';
+  mx?: SizeType | 'auto';
+  marginVertical?: SizeType | 'auto';
+  my?: SizeType | 'auto';
+  marginTop?: SizeType | 'auto';
+  mt?: SizeType | 'auto';
+  marginRight?: SizeType | 'auto';
+  mr?: SizeType | 'auto';
+  marginBottom?: SizeType | 'auto';
+  mb?: SizeType | 'auto';
+  marginLeft?: SizeType | 'auto';
+  ml?: SizeType | 'auto';
 }
 
 interface BoxBorder {
