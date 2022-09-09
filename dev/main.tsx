@@ -34,7 +34,7 @@ root.render(
       >
         <Flex width="max-content" inlineMinHeight="50px" className={{ ha: false, max: true }}>
           <Box>
-            <Box b={1} bColor="teal">
+            <Box b={1} bColor="teal" letterSpacing={10}>
               test border
               <Box b={2}>inner text</Box>
             </Box>

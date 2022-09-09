@@ -287,6 +287,13 @@ body {
   }
 }
 
+/* letter-spacing */
+@each $size in $sizes {
+  .letterSpacing$(size) {
+    letter-spacing: calc($size * 1px);
+  }
+}
+
 /* text-decoration */
 @each $textDecoration in none, underline {
   .textDecoration$(textDecoration) {
