@@ -1,7 +1,8 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import Box from './../src/box';
-import Button from './../src/components/button/button';
+import ButtonCore from './../src/components/buttonCore/buttonCore';
+import UncontrolledTextboxCore from './../src/components/uncontrolledTextboxCore/uncontrolledTextboxCore';
 import Flex from './../src/components/flex/flex';
 
 const root = ReactDOM.createRoot(document.getElementById('root')!);
@@ -40,9 +41,9 @@ root.render(
             </Box>
           </Box>
         </Flex>
-        <Button p={2} bgColor="blueDark" color="black" tag="span" onClick={() => alert(1)} props={{ style: { paddingTop: '30px' } }}>
+        <ButtonCore p={2} bgColor="blueDark" color="black" tag="span" onClick={() => alert(1)} props={{ style: { paddingTop: '30px' } }}>
           Button
-        </Button>
+        </ButtonCore>
         <Flex>
           <Box flex1>test1</Box>
           <Box>test2</Box>
@@ -55,19 +56,24 @@ root.render(
 
         <Box mt={8}>Buttons</Box>
         <MyButton>Click me</MyButton>
-        <Button bgColor="green" color="white" ml={2}>
+        <ButtonCore bgColor="green" color="white" ml={2}>
           Click me 2
-        </Button>
+        </ButtonCore>
       </Box>
       <Box mx="auto" inlineMaxWidth="1000px" b={2}>
         test margin auto
+      </Box>
+
+      <Box b={1} bColor="brown">
+        Textbox
+        <UncontrolledTextboxCore type="email" p={2} b={1} />
       </Box>
     </Box>
   </React.StrictMode>,
 );
 
-type Props = React.ComponentProps<typeof Button>;
+type Props = React.ComponentProps<typeof ButtonCore>;
 
 function MyButton(props: Props) {
-  return <Button className="button" px={5} py={2} bgColor="blue" color="white" bRadius={2} {...props} />;
+  return <ButtonCore className="button" px={5} py={2} bgColor="blue" color="white" bRadius={2} {...props} />;
 }
