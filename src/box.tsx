@@ -193,7 +193,6 @@ interface Props<TTag extends keyof React.ReactHTML>
     BoxBorder,
     BoxPadding,
     BoxColors,
-    BoxLineHeightSize,
     BoxCursor,
     BoxZIndex,
     BoxOverflow,

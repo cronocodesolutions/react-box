@@ -2,8 +2,10 @@ import { defineConfig } from 'vite';
 import reactPlugin from '@vitejs/plugin-react';
 import IdentityFactory from '@cronocode/identity-factory';
 import dts from 'vite-plugin-dts';
-import variables from './src/css.variables';
 import path from 'path';
+
+// @ts-ignore
+import variables from './src/css.variables';
 
 const identity = new IdentityFactory();
 

@@ -1,6 +1,6 @@
 {
   "name": "@cronocode/react-box",
-  "version": "0.3.3",
+  "version": "0.3.4",
   "main": "./box.js",
   "module": "./box.js",
   "types": "./box.d.ts",
