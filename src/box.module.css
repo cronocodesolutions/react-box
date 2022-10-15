@@ -230,13 +230,6 @@ body {
   }
 }
 
-/* line-height */
-@each $size in $sizes {
-  .lineHeight$(size) {
-    line-height: calc($size * 0.3);
-  }
-}
-
 /* cursor */
 @each $cursor in $cursors {
   .cursor$(cursor) {
@@ -277,6 +270,10 @@ body {
 @each $fontSize in $fontSizes {
   .fontSize$(fontSize) {
     font-size: calc($fontSize * 1px);
+  }
+
+  .lineHeight$(fontSize) {
+    line-height: calc($fontSize * 1px);
   }
 }
 

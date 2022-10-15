@@ -117,10 +117,6 @@ interface BoxColors {
   bColorHover?: ColorType;
 }
 
-interface BoxLineHeightSize {
-  lineHeight?: SizeType;
-}
-
 interface BoxCursor {
   cursor?: CursorType;
 }
@@ -141,6 +137,7 @@ interface BoxOpacity {
 
 interface BoxFont {
   fontSize?: FontSizeType;
+  lineHeight?: FontSizeType;
   fontWeight?: 100 | 200 | 300 | 400 | 500 | 600 | 700 | 800 | 900;
   letterSpacing?: SizeType;
 }

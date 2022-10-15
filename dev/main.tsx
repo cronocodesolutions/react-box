@@ -11,7 +11,9 @@ root.render(
   <React.StrictMode>
     <Box>
       <Box props={{ style: { background: '#ccc' } }} inlineHeight="100px">
-        hello
+        <Box fontSize={30}> hello</Box>
+        <Box fontSize={30}> hello</Box>
+        <Box fontSize={30}> hello</Box>
         <div>
           <Box b={2}>new test </Box>
         </div>
