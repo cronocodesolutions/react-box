@@ -2,7 +2,7 @@ import Box from '../../box';
 
 type BoxProps = React.ComponentProps<typeof Box>;
 
-interface Props extends BoxProps {
+interface FlexStylesShortCuts {
   wrap?: BoxProps['flexWrap'];
   jc?: BoxProps['justifyContent'];
   ai?: BoxProps['alignItems'];
@@ -11,23 +11,13 @@ interface Props extends BoxProps {
   grow?: BoxProps['flexGrow'];
   shrink?: BoxProps['flexShrink'];
   as?: BoxProps['alignSelf'];
+  js?: BoxProps['justifySelf'];
 }
 
-export default function Flex(props: Props) {
-  const { wrap, jc, ai, ac, d, grow, shrink, as, inline } = props;
+type Props = BoxProps & FlexStylesShortCuts & Hovered<FlexStylesShortCuts>;
 
-  return (
-    <Box
-      display={inline ? 'inline-flex' : 'flex'}
-      flexWrap={wrap}
-      justifyContent={jc}
-      alignItems={ai}
-      alignContent={ac}
-      direction={d}
-      flexGrow={grow}
-      flexShrink={shrink}
-      alignSelf={as}
-      {...props}
-    />
-  );
+export default function Flex(props: Props) {
+  const { inline } = props;
+
+  return <Box display={inline ? 'inline-flex' : 'flex'} {...props} />;
 }

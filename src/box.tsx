@@ -177,6 +177,7 @@ interface BoxFlex {
   flexGrow?: SizeType;
   flexShrink?: SizeType;
   alignSelf?: 'auto' | 'flex-start' | 'flex-end' | 'center' | 'baseline' | 'stretch';
+  justifySelf?: 'auto' | 'flex-start' | 'flex-end' | 'center' | 'baseline' | 'stretch';
 }
 
 interface BoxHover {
@@ -198,10 +199,6 @@ type BoxStyles = BoxDisplay &
   BoxText &
   BoxFlex &
   BoxHover;
-
-type Hovered<T> = {
-  [K in keyof T as K extends string ? `${K}h` : never]: T[K];
-};
 
 type TagPropsType<TTag extends keyof React.ReactHTML> = Omit<React.ComponentProps<TTag>, 'className' | 'style'>;
 

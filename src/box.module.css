@@ -15,6 +15,7 @@ body {
   margin: 0;
   padding: 0;
   border-color: var(--borderColor);
+  transition: all 0.2s;
 }
 
 /* display */
@@ -25,6 +26,7 @@ body {
 
 @each $display in none, block, inline-block, flex, inline-flex, grid {
   .display$(display),
+  .hovertrue:hover.displayh$(display),
   .hovertrue:hover .displayh$(display) {
     display: $display;
   }
@@ -33,6 +35,7 @@ body {
 /* position */
 @each $position in static, relative, absolute, fixed, sticky {
   .position$(position),
+  .hovertrue:hover.positionh$(position),
   .hovertrue:hover .positionh$(position) {
     position: $position;
   }
@@ -43,17 +46,20 @@ body {
   (width, height, min-width, min-height, max-width, max-height), (100vw, 100vh, 100vw, 100vh, 100vw, 100vh)
 {
   .$(styleProp)fit,
+  .hovertrue:hover.$(styleProp)hfit,
   .hovertrue:hover .$(styleProp)hfit {
     $(style): 100%;
   }
 
   .$(styleProp)fit-screen,
+  .hovertrue:hover.$(styleProp)hfit-screen,
   .hovertrue:hover .$(styleProp)hfit-screen {
     $(style): $fitScreenValue;
   }
 
   @each $otherSize in auto, fit-content, max-content, min-content {
     .$(styleProp)$(otherSize),
+    .hovertrue:hover.$(styleProp)h$(otherSize),
     .hovertrue:hover .$(styleProp)h$(otherSize) {
       $(style): $otherSize;
     }
@@ -63,6 +69,7 @@ body {
 /* inset */
 @each $size in $sizes {
   .inset$(size),
+  .hovertrue:hover.inseth$(size),
   .hovertrue:hover .inseth$(size) {
     inset: calc($size * $sizeMultiplier * 1rem);
   }
@@ -72,6 +79,7 @@ body {
 @each $side in (top, right, bottom, left) {
   @each $size in $sizes {
     .$(side)$(size),
+    .hovertrue:hover.$(side)h$(size),
     .hovertrue:hover .$(side)h$(size) {
       $(side): calc($size * $sizeMultiplier * 1rem);
     }
@@ -83,14 +91,18 @@ body {
   @each $size in $sizes {
     .$(dimmensionName)$(size),
     .$(dimmension)$(size),
+    .hovertrue:hover.$(dimmensionName)h$(size),
     .hovertrue:hover .$(dimmensionName)h$(size),
+    .hovertrue:hover.$(dimmension)h$(size),
     .hovertrue:hover .$(dimmension)h$(size) {
       $(dimmensionName): calc($size * $sizeMultiplier * 1rem);
     }
   }
   .$(dimmensionName)auto,
   .$(dimmension)auto,
+  .hovertrue:hover.$(dimmensionName)hauto,
   .hovertrue:hover .$(dimmensionName)hauto,
+  .hovertrue:hover.$(dimmension)hauto,
   .hovertrue:hover .$(dimmension)hauto {
     $(dimmensionName): auto;
   }
@@ -98,28 +110,36 @@ body {
   @each $size in $sizes {
     .$(dimmensionName)Horizontal$(size),
     .$(dimmension)x$(size),
+    .hovertrue:hover.$(dimmensionName)Horizontalh$(size),
     .hovertrue:hover .$(dimmensionName)Horizontalh$(size),
+    .hovertrue:hover.$(dimmension)xh$(size),
     .hovertrue:hover .$(dimmension)xh$(size) {
       $(dimmensionName)-inline: calc($size * $sizeMultiplier * 1rem);
     }
 
     .$(dimmensionName)Vertical$(size),
     .$(dimmension)y$(size),
+    .hovertrue:hover.$(dimmensionName)Verticalh$(size),
     .hovertrue:hover .$(dimmensionName)Verticalh$(size),
+    .hovertrue:hover.$(dimmension)yh$(size),
     .hovertrue:hover .$(dimmension)yh$(size) {
       $(dimmensionName)-block: calc($size * $sizeMultiplier * 1rem);
     }
   }
   .$(dimmensionName)Horizontalauto,
   .$(dimmension)xauto,
+  .hovertrue:hover.$(dimmensionName)Horizontalhauto,
   .hovertrue:hover .$(dimmensionName)Horizontalhauto,
+  .hovertrue:hover.$(dimmension)xhauto,
   .hovertrue:hover .$(dimmension)xhauto {
     $(dimmensionName)-inline: auto;
   }
 
   .$(dimmensionName)Verticalauto,
   .$(dimmension)yauto,
+  .hovertrue:hover.$(dimmensionName)Verticalhauto,
   .hovertrue:hover .$(dimmensionName)Verticalhauto,
+  .hovertrue:hover.$(dimmension)yhauto,
   .hovertrue:hover .$(dimmension)yhauto {
     $(dimmensionName)-block: auto;
   }
@@ -128,14 +148,18 @@ body {
     @each $size in $sizes {
       .$(dimmensionName)$(sideCapitalizedName)$(size),
       .$(dimmension)$(side)$(size),
+      .hovertrue:hover.$(dimmensionName)$(sideCapitalizedName)h$(size),
       .hovertrue:hover .$(dimmensionName)$(sideCapitalizedName)h$(size),
+      .hovertrue:hover.$(dimmension)$(side)h$(size),
       .hovertrue:hover .$(dimmension)$(side)h$(size) {
         $(dimmensionName)-$(sideName): calc($size * $sizeMultiplier * 1rem);
       }
     }
     .$(dimmensionName)$(sideCapitalizedName)auto,
     .$(dimmension)$(side)auto,
+    .hovertrue:hover.$(dimmensionName)$(sideCapitalizedName)hauto,
     .hovertrue:hover .$(dimmensionName)$(sideCapitalizedName)hauto,
+    .hovertrue:hover.$(dimmension)$(side)hauto,
     .hovertrue:hover .$(dimmension)$(side)hauto {
       $(dimmensionName)-$(sideName): auto;
     }
@@ -146,7 +170,9 @@ body {
 @each $size in $sizes {
   .border$(size),
   .b$(size),
+  .hovertrue:hover.borderh$(size),
   .hovertrue:hover .borderh$(size),
+  .hovertrue:hover.bh$(size),
   .hovertrue:hover .bh$(size) {
     border-width: calc($size * 1px);
   }
@@ -154,14 +180,18 @@ body {
 @each $size in $sizes {
   .borderHorizontal$(size),
   .bx$(size),
+  .hovertrue:hover.borderHorizontalh$(size),
   .hovertrue:hover .borderHorizontalh$(size),
+  .hovertrue:hover.bxh$(size),
   .hovertrue:hover .bxh$(size) {
     border-inline-width: calc($size * 1px);
   }
 
   .borderVertical$(size),
   .by$(size),
+  .hovertrue:hover.borderVerticalh$(size),
   .hovertrue:hover .borderVerticalh$(size),
+  .hovertrue:hover.byh$(size),
   .hovertrue:hover .byh$(size) {
     border-block-width: calc($size * 1px);
   }
@@ -170,7 +200,9 @@ body {
   @each $side, $sideName, $sideCapitalizedName in (t, r, b, l), (top, right, bottom, left), (Top, Right, Bottom, Left) {
     .border$(sideCapitalizedName)$(size),
     .b$(side)$(size),
+    .hovertrue:hover.border$(sideCapitalizedName)h$(size),
     .hovertrue:hover .border$(sideCapitalizedName)h$(size),
+    .hovertrue:hover.b$(side)h$(size),
     .hovertrue:hover .b$(side)h$(size) {
       border-$(sideName)-width: calc($size * 1px);
     }
@@ -181,7 +213,9 @@ body {
 @each $borderStyle in solid, dashed, dotted, double {
   .borderStyle$(borderStyle),
   .bStyle$(borderStyle),
+  .hovertrue:hover.borderStyleh$(borderStyle),
   .hovertrue:hover .borderStyleh$(borderStyle),
+  .hovertrue:hover.bStyleh$(borderStyle),
   .hovertrue:hover .bStyleh$(borderStyle) {
     border-style: $borderStyle;
   }
@@ -191,7 +225,9 @@ body {
 @each $size in $sizes {
   .borderRadius$(size),
   .bRadius$(size),
+  .hovertrue:hover.borderRadiush$(size),
   .hovertrue:hover .borderRadiush$(size),
+  .hovertrue:hover.bRadiush$(size),
   .hovertrue:hover .bRadiush$(size) {
     border-radius: calc($size * $sizeMultiplier * 1rem);
   }
@@ -199,7 +235,9 @@ body {
 @each $size in $sizes {
   .borderRadiusTop$(size),
   .bRadiusTop$(size),
+  .hovertrue:hover.borderRadiusToph$(size),
   .hovertrue:hover .borderRadiusToph$(size),
+  .hovertrue:hover.bRadiusToph$(size),
   .hovertrue:hover .bRadiusToph$(size) {
     border-top-left-radius: calc($size * $sizeMultiplier * 1rem);
     border-top-right-radius: calc($size * $sizeMultiplier * 1rem);
@@ -208,7 +246,9 @@ body {
 @each $size in $sizes {
   .borderRadiusRight$(size),
   .bRadiusRight$(size),
+  .hovertrue:hover.borderRadiusRighth$(size),
   .hovertrue:hover .borderRadiusRighth$(size),
+  .hovertrue:hover.bRadiusRighth$(size),
   .hovertrue:hover .bRadiusRighth$(size) {
     border-top-right-radius: calc($size * $sizeMultiplier * 1rem);
     border-bottom-right-radius: calc($size * $sizeMultiplier * 1rem);
@@ -217,7 +257,9 @@ body {
 @each $size in $sizes {
   .borderRadiusBottom$(size),
   .bRadiusBottom$(size),
+  .hovertrue:hover.borderRadiusBottomh$(size),
   .hovertrue:hover .borderRadiusBottomh$(size),
+  .hovertrue:hover.bRadiusBottomh$(size),
   .hovertrue:hover .bRadiusBottomh$(size) {
     border-bottom-left-radius: calc($size * $sizeMultiplier * 1rem);
     border-bottom-right-radius: calc($size * $sizeMultiplier * 1rem);
@@ -226,7 +268,9 @@ body {
 @each $size in $sizes {
   .borderRadiusLeft$(size),
   .bRadiusLeft$(size),
+  .hovertrue:hover.borderRadiusLefth$(size),
   .hovertrue:hover .borderRadiusLefth$(size),
+  .hovertrue:hover.bRadiusLefth$(size),
   .hovertrue:hover .bRadiusLefth$(size) {
     border-top-left-radius: calc($size * $sizeMultiplier * 1rem);
     border-bottom-left-radius: calc($size * $sizeMultiplier * 1rem);
@@ -237,7 +281,9 @@ body {
     @each $sideX, $sideNameX in (right, left), (Right, Left) {
       .borderRadius$(sideNameY)$(sideNameX)$(size),
       .bRadius$(sideNameY)$(sideNameX)$(size),
+      .hovertrue:hover.borderRadius$(sideNameY)$(sideNameX)h$(size),
       .hovertrue:hover .borderRadius$(sideNameY)$(sideNameX)h$(size),
+      .hovertrue:hover.bRadius$(sideNameY)$(sideNameX)h$(size),
       .hovertrue:hover .bRadius$(sideNameY)$(sideNameX)h$(size) {
         border-$(sideY)-$(sideX)-radius: calc($size * $sizeMultiplier * 1rem);
       }
@@ -248,37 +294,47 @@ body {
 /* colors (color, bgColor, borderColor)  */
 @each $color in $colors {
   .color$(color),
+  .hovertrue:hover.colorh$(color),
   .hovertrue:hover .colorh$(color) {
     color: var(--$(color));
   }
 
   .colorHover$(color):hover,
+  .hovertrue:hover.colorHoverh$(color):hover,
   .hovertrue:hover .colorHoverh$(color):hover {
     color: var(--$(color));
   }
 
   .backgroundColor$(color),
   .bgColor$(color),
+  .hovertrue:hover.backgroundColorh$(color),
   .hovertrue:hover .backgroundColorh$(color),
+  .hovertrue:hover.bgColorh$(color),
   .hovertrue:hover .bgColorh$(color) {
     background-color: var(--$(color));
   }
 
   .backgroundColorHover$(color):hover,
   .bgColorHover$(color):hover,
+  .hovertrue:hover.backgroundColorHoverh$(color):hover,
   .hovertrue:hover .backgroundColorHoverh$(color):hover,
+  .hovertrue:hover.bgColorHoverh$(color):hover,
   .hovertrue:hover .bgColorHoverh$(color):hover {
     background-color: var(--$(color));
   }
 
   .borderColor$(color),
   .bColor$(color),
+  .hovertrue:hover.borderColorh$(color),
   .hovertrue:hover .borderColorh$(color),
+  .hovertrue:hover.bColorh$(color),
   .hovertrue:hover .bColorh$(color) {
     border-color: var(--$(color));
   }
 
+  .hovertrue:hover.borderColorHoverh$(color):hover,
   .hovertrue:hover .borderColorHoverh$(color):hover,
+  .hovertrue:hover.bColorHoverh$(color):hover,
   .hovertrue:hover .bColorHoverh$(color):hover {
     border-color: var(--$(color));
   }
@@ -287,6 +343,7 @@ body {
 /* cursor */
 @each $cursor in $cursors {
   .cursor$(cursor),
+  .hovertrue:hover.cursorh$(cursor),
   .hovertrue:hover .cursorh$(cursor) {
     cursor: $cursor;
   }
@@ -295,6 +352,7 @@ body {
 /* z-index */
 @each $size in $sizes {
   .zIndex$(size),
+  .hovertrue:hover.zIndexh$(size),
   .hovertrue:hover .zIndexh$(size) {
     z-index: $size;
   }
@@ -303,16 +361,19 @@ body {
 /* overflow */
 @each $overflow in auto, hidden, scroll, visible {
   .overflow$(overflow),
+  .hovertrue:hover.overflowh$(overflow),
   .hovertrue:hover .overflowh$(overflow) {
     overflow: $overflow;
   }
 
   .overflowX$(overflow),
+  .hovertrue:hover.overflowXh$(overflow),
   .hovertrue:hover .overflowXh$(overflow) {
     overflow-x: $overflow;
   }
 
   .overflowY$(overflow),
+  .hovertrue:hover.overflowYh$(overflow),
   .hovertrue:hover .overflowYh$(overflow) {
     overflow-y: $overflow;
   }
@@ -321,6 +382,7 @@ body {
 /* opacity */
 @each $opacity in 10, 20, 30, 40, 50, 60, 70, 80, 90, 100 {
   .opacity$(opacity),
+  .hovertrue:hover.opacityh$(opacity),
   .hovertrue:hover .opacityh$(opacity) {
     opacity: calc($opacity / 100);
   }
@@ -329,11 +391,13 @@ body {
 /* font-size */
 @each $fontSize in $fontSizes {
   .fontSize$(fontSize),
+  .hovertrue:hover.fontSizeh$(fontSize),
   .hovertrue:hover .fontSizeh$(fontSize) {
     font-size: calc($fontSize * 1px);
   }
 
   .lineHeight$(fontSize),
+  .hovertrue:hover.lineHeighth$(fontSize),
   .hovertrue:hover .lineHeighth$(fontSize) {
     line-height: calc($fontSize * 1px);
   }
@@ -342,6 +406,7 @@ body {
 /* font-weight */
 @each $fontWeight in 100, 200, 300, 400, 500, 600, 700, 800, 900 {
   .fontWeight$(fontWeight),
+  .hovertrue:hover.fontWeighth$(fontWeight),
   .hovertrue:hover .fontWeighth$(fontWeight) {
     font-weight: $fontWeight;
   }
@@ -350,6 +415,7 @@ body {
 /* letter-spacing */
 @each $size in $sizes {
   .letterSpacing$(size),
+  .hovertrue:hover.letterSpacingh$(size),
   .hovertrue:hover .letterSpacingh$(size) {
     letter-spacing: calc($size * 1px);
   }
@@ -358,6 +424,7 @@ body {
 /* text-decoration */
 @each $textDecoration in none, underline {
   .textDecoration$(textDecoration),
+  .hovertrue:hover.textDecorationh$(textDecoration),
   .hovertrue:hover .textDecorationh$(textDecoration) {
     text-decoration: $textDecoration;
   }
@@ -366,6 +433,7 @@ body {
 /* text-align */
 @each $textAlign in left, right, center {
   .textAlign$(textAlign),
+  .hovertrue:hover.textAlignh$(textAlign),
   .hovertrue:hover .textAlignh$(textAlign) {
     text-align: $textAlign;
   }
@@ -374,6 +442,7 @@ body {
 /* text-transform */
 @each $textTransform in none, capitalize, lowercase, uppercase {
   .textTransform$(textTransform),
+  .hovertrue:hover.textTransformh$(textTransform),
   .hovertrue:hover .textTransformh$(textTransform) {
     text-transform: $textTransform;
   }
@@ -382,7 +451,11 @@ body {
 /* flex-wrap */
 @each $flexWrap in nowrap, wrap, wrap-reverse {
   .flexWrap$(flexWrap),
-  .hovertrue:hover .flexWraph$(flexWrap) {
+  .wrap$(flexWrap),
+  .hovertrue:hover.flexWraph$(flexWrap),
+  .hovertrue:hover .flexWraph$(flexWrap),
+  .hovertrue:hover.wraph$(flexWrap),
+  .hovertrue:hover .wraph$(flexWrap) {
     flex-wrap: $flexWrap;
   }
 }
@@ -390,7 +463,11 @@ body {
 /* justify-content */
 @each $justifyContent in start, end, flex-start, flex-end, center, left, right, space-between, space-around, space-evenly, stretch {
   .justifyContent$(justifyContent),
-  .hovertrue:hover .justifyContenth$(justifyContent) {
+  .jc$(justifyContent),
+  .hovertrue:hover.justifyContenth$(justifyContent),
+  .hovertrue:hover .justifyContenth$(justifyContent),
+  .hovertrue:hover.jch$(justifyContent),
+  .hovertrue:hover .jch$(justifyContent) {
     justify-content: $justifyContent;
   }
 }
@@ -398,7 +475,11 @@ body {
 /* align-items */
 @each $alignItems in stretch, flex-start, flex-end, center, baseline, start, end, self-start, self-end {
   .alignItems$(alignItems),
-  .hovertrue:hover .alignItemsh$(alignItems) {
+  .ai$(alignItems),
+  .hovertrue:hover.alignItemsh$(alignItems),
+  .hovertrue:hover .alignItemsh$(alignItems),
+  .hovertrue:hover.aih$(alignItems),
+  .hovertrue:hover .aih$(alignItems) {
     align-items: $alignItems;
   }
 }
@@ -406,13 +487,18 @@ body {
 /* align-content */
 @each $alignContent in flex-start, flex-end, center, space-between, space-around, space-evenly, stretch, start, end, baseline {
   .alignContent$(alignContent),
-  .hovertrue:hover .alignContenth$(alignContent) {
+  .ac$(alignContent),
+  .hovertrue:hover.alignContenth$(alignContent),
+  .hovertrue:hover .alignContenth$(alignContent),
+  .hovertrue:hover.ach$(alignContent),
+  .hovertrue:hover .ach$(alignContent) {
     align-content: $alignContent;
   }
 }
 
 /* flex: 1 */
 .flex1true,
+.hovertrue:hover.flex1htrue,
 .hovertrue:hover .flex1htrue {
   flex: 1;
 }
@@ -420,7 +506,11 @@ body {
 /* flex-direction */
 @each $direction in row, row-reverse, column, column-reverse {
   .direction$(direction),
-  .hovertrue:hover .directionh$(direction) {
+  .d$(direction),
+  .hovertrue:hover.directionh$(direction),
+  .hovertrue:hover .directionh$(direction),
+  .hovertrue:hover.dh$(direction),
+  .hovertrue:hover .dh$(direction) {
     flex-direction: $direction;
   }
 }
@@ -428,27 +518,39 @@ body {
 /* gap, row-gap, column-gap, order, flex-grow, flex-shrink */
 @each $size in $sizes {
   .gap$(size),
+  .hovertrue:hover.gaph$(size),
   .hovertrue:hover .gaph$(size) {
     gap: calc($size * $sizeMultiplier * 1rem);
   }
   .rowGap$(size),
+  .hovertrue:hover.rowGaph$(size),
   .hovertrue:hover .rowGaph$(size) {
     row-gap: calc($size * $sizeMultiplier * 1rem);
   }
   .columnGap$(size),
+  .hovertrue:hover.columnGaph$(size),
   .hovertrue:hover .columnGaph$(size) {
     column-gap: calc($size * $sizeMultiplier * 1rem);
   }
   .order$(size),
+  .hovertrue:hover.orderh$(size),
   .hovertrue:hover .orderh$(size) {
     order: $size;
   }
   .flexGrow$(size),
-  .hovertrue:hover .flexGrowh$(size) {
+  .grow$(size),
+  .hovertrue:hover.flexGrowh$(size),
+  .hovertrue:hover .flexGrowh$(size),
+  .hovertrue:hover.growh$(size),
+  .hovertrue:hover .growh$(size) {
     flex-grow: $size;
   }
   .flexShrink$(size),
-  .hovertrue:hover .flexShrinkh$(size) {
+  .shrink$(size),
+  .hovertrue:hover.flexShrinkh$(size),
+  .hovertrue:hover .flexShrinkh$(size),
+  .hovertrue:hover.shrinkh$(size),
+  .hovertrue:hover .shrinkh$(size) {
     flex-shrink: $size;
   }
 }
@@ -456,7 +558,23 @@ body {
 /* alignSelf */
 @each $alignSelf in auto, flex-start, flex-end, center, baseline, stretch {
   .alignSelf$(alignSelf),
-  .hovertrue:hover .alignSelfh$(alignSelf) {
+  .as$(alignSelf),
+  .hovertrue:hover.alignSelfh$(alignSelf),
+  .hovertrue:hover .alignSelfh$(alignSelf),
+  .hovertrue:hover.ash$(alignSelf),
+  .hovertrue:hover .ash$(alignSelf) {
     align-self: $alignSelf;
+  }
+}
+
+/* justifySelf */
+@each $justifySelf in auto, flex-start, flex-end, center, baseline, stretch {
+  .justifySelf$(justifySelf),
+  .js$(justifySelf),
+  .hovertrue:hover.justifySelfh$(justifySelf),
+  .hovertrue:hover .justifySelfh$(justifySelf),
+  .hovertrue:hover.jsh$(justifySelf),
+  .hovertrue:hover .jsh$(justifySelf) {
+    justify-self: $justifySelf;
   }
 }

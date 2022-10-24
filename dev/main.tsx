@@ -9,6 +9,9 @@ const root = ReactDOM.createRoot(document.getElementById('root')!);
 
 root.render(
   <React.StrictMode>
+    <Flex hover jc="center" b={1} inline p={2} ph={4}>
+      test
+    </Flex>
     <Box>
       <Box styles={{ background: '#ccc', height: '100px' }}>
         <Box fontSize={30}> hello</Box>
