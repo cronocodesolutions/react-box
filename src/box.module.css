@@ -18,19 +18,22 @@ body {
 }
 
 /* display */
-.inlinetrue {
+.inlinetrue,
+.hovertrue:hover .inlinehtrue {
   display: inline-block;
 }
 
 @each $display in none, block, inline-block, flex, inline-flex, grid {
-  .display$(display) {
+  .display$(display),
+  .hovertrue:hover .displayh$(display) {
     display: $display;
   }
 }
 
 /* position */
 @each $position in static, relative, absolute, fixed, sticky {
-  .position$(position) {
+  .position$(position),
+  .hovertrue:hover .positionh$(position) {
     position: $position;
   }
 }
@@ -39,16 +42,19 @@ body {
 @each $styleProp, $style, $fitScreenValue in (width, height, minWidth, minHeight, maxWidth, maxHeight),
   (width, height, min-width, min-height, max-width, max-height), (100vw, 100vh, 100vw, 100vh, 100vw, 100vh)
 {
-  .$(styleProp)fit {
+  .$(styleProp)fit,
+  .hovertrue:hover .$(styleProp)hfit {
     $(style): 100%;
   }
 
-  .$(styleProp)fit-screen {
+  .$(styleProp)fit-screen,
+  .hovertrue:hover .$(styleProp)hfit-screen {
     $(style): $fitScreenValue;
   }
 
   @each $otherSize in auto, fit-content, max-content, min-content {
-    .$(styleProp)$(otherSize) {
+    .$(styleProp)$(otherSize),
+    .hovertrue:hover .$(styleProp)h$(otherSize) {
       $(style): $otherSize;
     }
   }
@@ -56,7 +62,8 @@ body {
 
 /* inset */
 @each $size in $sizes {
-  .inset$(size) {
+  .inset$(size),
+  .hovertrue:hover .inseth$(size) {
     inset: calc($size * $sizeMultiplier * 1rem);
   }
 }
@@ -64,7 +71,8 @@ body {
 /* top, right, bottom, left */
 @each $side in (top, right, bottom, left) {
   @each $size in $sizes {
-    .$(side)$(size) {
+    .$(side)$(size),
+    .hovertrue:hover .$(side)h$(size) {
       $(side): calc($size * $sizeMultiplier * 1rem);
     }
   }
@@ -74,45 +82,61 @@ body {
 @each $dimmension, $dimmensionName in (m, p), (margin, padding) {
   @each $size in $sizes {
     .$(dimmensionName)$(size),
-    .$(dimmension)$(size) {
+    .$(dimmension)$(size),
+    .hovertrue:hover .$(dimmensionName)h$(size),
+    .hovertrue:hover .$(dimmension)h$(size) {
       $(dimmensionName): calc($size * $sizeMultiplier * 1rem);
     }
   }
   .$(dimmensionName)auto,
-  .$(dimmension)auto {
+  .$(dimmension)auto,
+  .hovertrue:hover .$(dimmensionName)hauto,
+  .hovertrue:hover .$(dimmension)hauto {
     $(dimmensionName): auto;
   }
 
   @each $size in $sizes {
     .$(dimmensionName)Horizontal$(size),
-    .$(dimmension)x$(size) {
+    .$(dimmension)x$(size),
+    .hovertrue:hover .$(dimmensionName)Horizontalh$(size),
+    .hovertrue:hover .$(dimmension)xh$(size) {
       $(dimmensionName)-inline: calc($size * $sizeMultiplier * 1rem);
     }
 
     .$(dimmensionName)Vertical$(size),
-    .$(dimmension)y$(size) {
+    .$(dimmension)y$(size),
+    .hovertrue:hover .$(dimmensionName)Verticalh$(size),
+    .hovertrue:hover .$(dimmension)yh$(size) {
       $(dimmensionName)-block: calc($size * $sizeMultiplier * 1rem);
     }
   }
   .$(dimmensionName)Horizontalauto,
-  .$(dimmension)xauto {
+  .$(dimmension)xauto,
+  .hovertrue:hover .$(dimmensionName)Horizontalhauto,
+  .hovertrue:hover .$(dimmension)xhauto {
     $(dimmensionName)-inline: auto;
   }
 
   .$(dimmensionName)Verticalauto,
-  .$(dimmension)yauto {
+  .$(dimmension)yauto,
+  .hovertrue:hover .$(dimmensionName)Verticalhauto,
+  .hovertrue:hover .$(dimmension)yhauto {
     $(dimmensionName)-block: auto;
   }
 
   @each $side, $sideName, $sideCapitalizedName in (t, r, b, l), (top, right, bottom, left), (Top, Right, Bottom, Left) {
     @each $size in $sizes {
       .$(dimmensionName)$(sideCapitalizedName)$(size),
-      .$(dimmension)$(side)$(size) {
+      .$(dimmension)$(side)$(size),
+      .hovertrue:hover .$(dimmensionName)$(sideCapitalizedName)h$(size),
+      .hovertrue:hover .$(dimmension)$(side)h$(size) {
         $(dimmensionName)-$(sideName): calc($size * $sizeMultiplier * 1rem);
       }
     }
     .$(dimmensionName)$(sideCapitalizedName)auto,
-    .$(dimmension)$(side)auto {
+    .$(dimmension)$(side)auto,
+    .hovertrue:hover .$(dimmensionName)$(sideCapitalizedName)hauto,
+    .hovertrue:hover .$(dimmension)$(side)hauto {
       $(dimmensionName)-$(sideName): auto;
     }
   }
@@ -121,25 +145,33 @@ body {
 /* border-width */
 @each $size in $sizes {
   .border$(size),
-  .b$(size) {
+  .b$(size),
+  .hovertrue:hover .borderh$(size),
+  .hovertrue:hover .bh$(size) {
     border-width: calc($size * 1px);
   }
 }
 @each $size in $sizes {
   .borderHorizontal$(size),
-  .bx$(size) {
+  .bx$(size),
+  .hovertrue:hover .borderHorizontalh$(size),
+  .hovertrue:hover .bxh$(size) {
     border-inline-width: calc($size * 1px);
   }
 
   .borderVertical$(size),
-  .by$(size) {
+  .by$(size),
+  .hovertrue:hover .borderVerticalh$(size),
+  .hovertrue:hover .byh$(size) {
     border-block-width: calc($size * 1px);
   }
 }
 @each $size in $sizes {
   @each $side, $sideName, $sideCapitalizedName in (t, r, b, l), (top, right, bottom, left), (Top, Right, Bottom, Left) {
     .border$(sideCapitalizedName)$(size),
-    .b$(side)$(size) {
+    .b$(side)$(size),
+    .hovertrue:hover .border$(sideCapitalizedName)h$(size),
+    .hovertrue:hover .b$(side)h$(size) {
       border-$(sideName)-width: calc($size * 1px);
     }
   }
@@ -148,7 +180,9 @@ body {
 /* border-style */
 @each $borderStyle in solid, dashed, dotted, double {
   .borderStyle$(borderStyle),
-  .bStyle$(borderStyle) {
+  .bStyle$(borderStyle),
+  .hovertrue:hover .borderStyleh$(borderStyle),
+  .hovertrue:hover .bStyleh$(borderStyle) {
     border-style: $borderStyle;
   }
 }
@@ -156,34 +190,44 @@ body {
 /* border radius */
 @each $size in $sizes {
   .borderRadius$(size),
-  .bRadius$(size) {
+  .bRadius$(size),
+  .hovertrue:hover .borderRadiush$(size),
+  .hovertrue:hover .bRadiush$(size) {
     border-radius: calc($size * $sizeMultiplier * 1rem);
   }
 }
 @each $size in $sizes {
   .borderRadiusTop$(size),
-  .bRadiusTop$(size) {
+  .bRadiusTop$(size),
+  .hovertrue:hover .borderRadiusToph$(size),
+  .hovertrue:hover .bRadiusToph$(size) {
     border-top-left-radius: calc($size * $sizeMultiplier * 1rem);
     border-top-right-radius: calc($size * $sizeMultiplier * 1rem);
   }
 }
 @each $size in $sizes {
   .borderRadiusRight$(size),
-  .bRadiusRight$(size) {
+  .bRadiusRight$(size),
+  .hovertrue:hover .borderRadiusRighth$(size),
+  .hovertrue:hover .bRadiusRighth$(size) {
     border-top-right-radius: calc($size * $sizeMultiplier * 1rem);
     border-bottom-right-radius: calc($size * $sizeMultiplier * 1rem);
   }
 }
 @each $size in $sizes {
   .borderRadiusBottom$(size),
-  .bRadiusBottom$(size) {
+  .bRadiusBottom$(size),
+  .hovertrue:hover .borderRadiusBottomh$(size),
+  .hovertrue:hover .bRadiusBottomh$(size) {
     border-bottom-left-radius: calc($size * $sizeMultiplier * 1rem);
     border-bottom-right-radius: calc($size * $sizeMultiplier * 1rem);
   }
 }
 @each $size in $sizes {
   .borderRadiusLeft$(size),
-  .bRadiusLeft$(size) {
+  .bRadiusLeft$(size),
+  .hovertrue:hover .borderRadiusLefth$(size),
+  .hovertrue:hover .bRadiusLefth$(size) {
     border-top-left-radius: calc($size * $sizeMultiplier * 1rem);
     border-bottom-left-radius: calc($size * $sizeMultiplier * 1rem);
   }
@@ -192,7 +236,9 @@ body {
   @each $sideY, $sideNameY in (top, bottom), (Top, Bottom) {
     @each $sideX, $sideNameX in (right, left), (Right, Left) {
       .borderRadius$(sideNameY)$(sideNameX)$(size),
-      .bRadius$(sideNameY)$(sideNameX)$(size) {
+      .bRadius$(sideNameY)$(sideNameX)$(size),
+      .hovertrue:hover .borderRadius$(sideNameY)$(sideNameX)h$(size),
+      .hovertrue:hover .bRadius$(sideNameY)$(sideNameX)h$(size) {
         border-$(sideY)-$(sideX)-radius: calc($size * $sizeMultiplier * 1rem);
       }
     }
@@ -201,182 +247,216 @@ body {
 
 /* colors (color, bgColor, borderColor)  */
 @each $color in $colors {
-  .color$(color) {
+  .color$(color),
+  .hovertrue:hover .colorh$(color) {
     color: var(--$(color));
   }
 
-  .colorHover$(color):hover {
+  .colorHover$(color):hover,
+  .hovertrue:hover .colorHoverh$(color):hover {
     color: var(--$(color));
   }
 
   .backgroundColor$(color),
-  .bgColor$(color) {
+  .bgColor$(color),
+  .hovertrue:hover .backgroundColorh$(color),
+  .hovertrue:hover .bgColorh$(color) {
     background-color: var(--$(color));
   }
 
   .backgroundColorHover$(color):hover,
-  .bgColorHover$(color):hover {
+  .bgColorHover$(color):hover,
+  .hovertrue:hover .backgroundColorHoverh$(color):hover,
+  .hovertrue:hover .bgColorHoverh$(color):hover {
     background-color: var(--$(color));
   }
 
   .borderColor$(color),
-  .bColor$(color) {
+  .bColor$(color),
+  .hovertrue:hover .borderColorh$(color),
+  .hovertrue:hover .bColorh$(color) {
     border-color: var(--$(color));
   }
 
-  .borderColorHover$(color):hover,
-  .bColorHover$(color):hover {
+  .hovertrue:hover .borderColorHoverh$(color):hover,
+  .hovertrue:hover .bColorHoverh$(color):hover {
     border-color: var(--$(color));
   }
 }
 
 /* cursor */
 @each $cursor in $cursors {
-  .cursor$(cursor) {
+  .cursor$(cursor),
+  .hovertrue:hover .cursorh$(cursor) {
     cursor: $cursor;
   }
 }
 
 /* z-index */
 @each $size in $sizes {
-  .zIndex$(size) {
+  .zIndex$(size),
+  .hovertrue:hover .zIndexh$(size) {
     z-index: $size;
   }
 }
 
 /* overflow */
 @each $overflow in auto, hidden, scroll, visible {
-  .overflow$(overflow) {
+  .overflow$(overflow),
+  .hovertrue:hover .overflowh$(overflow) {
     overflow: $overflow;
   }
 
-  .overflowX$(overflow) {
+  .overflowX$(overflow),
+  .hovertrue:hover .overflowXh$(overflow) {
     overflow-x: $overflow;
   }
 
-  .overflowY$(overflow) {
+  .overflowY$(overflow),
+  .hovertrue:hover .overflowYh$(overflow) {
     overflow-y: $overflow;
   }
 }
 
 /* opacity */
 @each $opacity in 10, 20, 30, 40, 50, 60, 70, 80, 90, 100 {
-  .opacity$(opacity) {
+  .opacity$(opacity),
+  .hovertrue:hover .opacityh$(opacity) {
     opacity: calc($opacity / 100);
   }
 }
 
 /* font-size */
 @each $fontSize in $fontSizes {
-  .fontSize$(fontSize) {
+  .fontSize$(fontSize),
+  .hovertrue:hover .fontSizeh$(fontSize) {
     font-size: calc($fontSize * 1px);
   }
 
-  .lineHeight$(fontSize) {
+  .lineHeight$(fontSize),
+  .hovertrue:hover .lineHeighth$(fontSize) {
     line-height: calc($fontSize * 1px);
   }
 }
 
 /* font-weight */
 @each $fontWeight in 100, 200, 300, 400, 500, 600, 700, 800, 900 {
-  .fontWeight$(fontWeight) {
+  .fontWeight$(fontWeight),
+  .hovertrue:hover .fontWeighth$(fontWeight) {
     font-weight: $fontWeight;
   }
 }
 
 /* letter-spacing */
 @each $size in $sizes {
-  .letterSpacing$(size) {
+  .letterSpacing$(size),
+  .hovertrue:hover .letterSpacingh$(size) {
     letter-spacing: calc($size * 1px);
   }
 }
 
 /* text-decoration */
 @each $textDecoration in none, underline {
-  .textDecoration$(textDecoration) {
+  .textDecoration$(textDecoration),
+  .hovertrue:hover .textDecorationh$(textDecoration) {
     text-decoration: $textDecoration;
   }
 }
 
 /* text-align */
 @each $textAlign in left, right, center {
-  .textAlign$(textAlign) {
+  .textAlign$(textAlign),
+  .hovertrue:hover .textAlignh$(textAlign) {
     text-align: $textAlign;
   }
 }
 
 /* text-transform */
 @each $textTransform in none, capitalize, lowercase, uppercase {
-  .textTransform$(textTransform) {
+  .textTransform$(textTransform),
+  .hovertrue:hover .textTransformh$(textTransform) {
     text-transform: $textTransform;
   }
 }
 
 /* flex-wrap */
 @each $flexWrap in nowrap, wrap, wrap-reverse {
-  .flexWrap$(flexWrap) {
+  .flexWrap$(flexWrap),
+  .hovertrue:hover .flexWraph$(flexWrap) {
     flex-wrap: $flexWrap;
   }
 }
 
 /* justify-content */
 @each $justifyContent in start, end, flex-start, flex-end, center, left, right, space-between, space-around, space-evenly, stretch {
-  .justifyContent$(justifyContent) {
+  .justifyContent$(justifyContent),
+  .hovertrue:hover .justifyContenth$(justifyContent) {
     justify-content: $justifyContent;
   }
 }
 
 /* align-items */
 @each $alignItems in stretch, flex-start, flex-end, center, baseline, start, end, self-start, self-end {
-  .alignItems$(alignItems) {
+  .alignItems$(alignItems),
+  .hovertrue:hover .alignItemsh$(alignItems) {
     align-items: $alignItems;
   }
 }
 
 /* align-content */
 @each $alignContent in flex-start, flex-end, center, space-between, space-around, space-evenly, stretch, start, end, baseline {
-  .alignContent$(alignContent) {
+  .alignContent$(alignContent),
+  .hovertrue:hover .alignContenth$(alignContent) {
     align-content: $alignContent;
   }
 }
 
 /* flex: 1 */
-.flex1true {
+.flex1true,
+.hovertrue:hover .flex1htrue {
   flex: 1;
 }
 
 /* flex-direction */
 @each $direction in row, row-reverse, column, column-reverse {
-  .direction$(direction) {
+  .direction$(direction),
+  .hovertrue:hover .directionh$(direction) {
     flex-direction: $direction;
   }
 }
 
 /* gap, row-gap, column-gap, order, flex-grow, flex-shrink */
 @each $size in $sizes {
-  .gap$(size) {
+  .gap$(size),
+  .hovertrue:hover .gaph$(size) {
     gap: calc($size * $sizeMultiplier * 1rem);
   }
-  .rowGap$(size) {
+  .rowGap$(size),
+  .hovertrue:hover .rowGaph$(size) {
     row-gap: calc($size * $sizeMultiplier * 1rem);
   }
-  .columnGap$(size) {
+  .columnGap$(size),
+  .hovertrue:hover .columnGaph$(size) {
     column-gap: calc($size * $sizeMultiplier * 1rem);
   }
-  .order$(size) {
+  .order$(size),
+  .hovertrue:hover .orderh$(size) {
     order: $size;
   }
-  .flexGrow$(size) {
+  .flexGrow$(size),
+  .hovertrue:hover .flexGrowh$(size) {
     flex-grow: $size;
   }
-  .flexShrink$(size) {
+  .flexShrink$(size),
+  .hovertrue:hover .flexShrinkh$(size) {
     flex-shrink: $size;
   }
 }
 
 /* alignSelf */
 @each $alignSelf in auto, flex-start, flex-end, center, baseline, stretch {
-  .alignSelf$(alignSelf) {
+  .alignSelf$(alignSelf),
+  .hovertrue:hover .alignSelfh$(alignSelf) {
     align-self: $alignSelf;
   }
 }

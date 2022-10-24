@@ -10,7 +10,7 @@ const root = ReactDOM.createRoot(document.getElementById('root')!);
 root.render(
   <React.StrictMode>
     <Box>
-      <Box props={{ style: { background: '#ccc' } }} inlineHeight="100px">
+      <Box styles={{ background: '#ccc', height: '100px' }}>
         <Box fontSize={30}> hello</Box>
         <Box fontSize={30}> hello</Box>
         <Box fontSize={30}> hello</Box>
@@ -35,7 +35,7 @@ root.render(
         color="green"
         marginHorizontal={20}
       >
-        <Flex width="max-content" inlineMinHeight="50px" className={{ ha: false, max: true }}>
+        <Flex width="max-content" className={{ ha: false, max: true }}>
           <Box>
             <Box b={1} bColor="teal" letterSpacing={10}>
               test border
@@ -43,7 +43,7 @@ root.render(
             </Box>
           </Box>
         </Flex>
-        <ButtonCore p={2} bgColor="blueDark" color="black" tag="span" onClick={() => alert(1)} props={{ style: { paddingTop: '30px' } }}>
+        <ButtonCore p={2} bgColor="blueDark" color="black" tag="span" onClick={() => alert(1)} styles={{ paddingTop: '30px' }}>
           Button
         </ButtonCore>
         <Flex>
@@ -62,7 +62,7 @@ root.render(
           Click me 2
         </ButtonCore>
       </Box>
-      <Box mx="auto" inlineMaxWidth="1000px" b={2}>
+      <Box mx="auto" b={2}>
         test margin auto
       </Box>
 

@@ -25,12 +25,6 @@ interface BoxSize {
   minHeight?: BoxSizeValue;
   maxWidth?: BoxSizeValue;
   maxHeight?: BoxSizeValue;
-  inlineWidth?: string;
-  inlineHeight?: string;
-  inlineMinWidth?: string;
-  inlineMinHeight?: string;
-  inlineMaxWidth?: string;
-  inlineMaxHeight?: string;
 }
 
 interface BoxMargin {
@@ -185,58 +179,59 @@ interface BoxFlex {
   alignSelf?: 'auto' | 'flex-start' | 'flex-end' | 'center' | 'baseline' | 'stretch';
 }
 
-interface Props<TTag extends keyof React.ReactHTML>
-  extends BoxDisplay,
-    BoxPosition,
-    BoxSize,
-    BoxMargin,
-    BoxBorder,
-    BoxPadding,
-    BoxColors,
-    BoxCursor,
-    BoxZIndex,
-    BoxOverflow,
-    BoxOpacity,
-    BoxFont,
-    BoxText,
-    BoxFlex {
+interface BoxHover {
+  hover?: boolean;
+}
+
+type BoxStyles = BoxDisplay &
+  BoxPosition &
+  BoxSize &
+  BoxMargin &
+  BoxBorder &
+  BoxPadding &
+  BoxColors &
+  BoxCursor &
+  BoxZIndex &
+  BoxOverflow &
+  BoxOpacity &
+  BoxFont &
+  BoxText &
+  BoxFlex &
+  BoxHover;
+
+type Hovered<T> = {
+  [K in keyof T as K extends string ? `${K}h` : never]: T[K];
+};
+
+type TagPropsType<TTag extends keyof React.ReactHTML> = Omit<React.ComponentProps<TTag>, 'className' | 'style'>;
+
+interface Props<TTag extends keyof React.ReactHTML> extends BoxStyles, Hovered<BoxStyles> {
   children?: React.ReactNode | ((props: { isHover: boolean }) => React.ReactNode);
   tag?: TTag;
-  props?: React.ComponentProps<TTag>;
+  props?: TagPropsType<TTag>;
+  styles?: React.ComponentProps<TTag>['style'];
   className?: ClassNameUtils.ClassNameType;
 }
 
-export default function Box<TTag extends keyof React.ReactHTML = 'div'>(boxProps: Props<TTag>) {
-  const { tag, children, props, className, inlineWidth, inlineHeight, inlineMinWidth, inlineMinHeight, inlineMaxWidth, inlineMaxHeight } =
-    boxProps;
+export default function Box<TTag extends keyof React.ReactHTML = 'div'>(props: Props<TTag>) {
+  const { tag, children, props: tagProps, className, styles } = props;
 
   const classNames = className ? ClassNameUtils.classNames(className, classes.box) : [classes.box];
-  Object.entries(boxProps).forEach(([key, value]) => {
+  Object.entries(props).forEach(([key, value]) => {
     const classToAdd = classes[key + value];
     classToAdd && classNames.push(classToAdd);
   });
 
   const boxTag = tag || 'div';
-  const tagProps = {
-    ...props,
-    className: classNames.join(' '),
-    style: {
-      ...props?.style,
-      width: inlineWidth,
-      height: inlineHeight,
-      minWidth: inlineMinWidth,
-      minHeight: inlineMinHeight,
-      maxWidth: inlineMaxWidth,
-      maxHeight: inlineMaxHeight,
-    },
-  };
+
+  const finalTagProps = { ...tagProps, style: styles, className: classNames.join(' ') };
 
   const [isHover, setIsHover] = useState(false);
   const needsHoverState = typeof children === 'function';
   if (needsHoverState) {
-    tagProps.onMouseEnter = () => setIsHover(true);
-    tagProps.onMouseLeave = () => setIsHover(false);
+    finalTagProps.onMouseEnter = () => setIsHover(true);
+    finalTagProps.onMouseLeave = () => setIsHover(false);
   }
 
-  return React.createElement(boxTag, tagProps, needsHoverState ? children({ isHover }) : children);
+  return React.createElement(boxTag, finalTagProps, needsHoverState ? children({ isHover }) : children);
 }

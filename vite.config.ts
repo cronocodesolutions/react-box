@@ -50,8 +50,12 @@ export default defineConfig({
             return 'index';
           }
 
-          if (id.includes('box.tsx') || id.includes('box.module.css')) {
+          if (id.includes('box.tsx')) {
             return 'box';
+          }
+
+          if (id.includes('box.module.css')) {
+            return 'box.module.css';
           }
 
           if (id.includes('/src/components/')) {
@@ -70,6 +74,10 @@ export default defineConfig({
           }
 
           if (chunkInfo.name === 'box') {
+            return '[name].js';
+          }
+
+          if (chunkInfo.name === 'box.module.css') {
             return '[name].js';
           }
 

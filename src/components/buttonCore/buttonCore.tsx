@@ -1,18 +1,22 @@
 import Box from '../../box';
 
 type BoxProps = React.ComponentProps<typeof Box>;
+type BoxTagProps = Required<BoxProps>['props'];
 
-interface Props extends BoxProps {
+type ButtonTagProps = Omit<BoxTagProps, 'type' | 'onClick' | 'disabled'>;
+type ButtonType = Required<React.ComponentProps<'button'>>['type'];
+
+interface Props extends Omit<BoxProps, 'props'> {
+  props?: ButtonTagProps;
+  type?: ButtonType;
   onClick?: (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void;
-  type?: React.ComponentProps<'button'>['type'];
   disabled?: boolean;
 }
 
-export default function Button(props: Props) {
-  const { props: tagProps, onClick, type, disabled } = props;
+export default function ButtonCore(props: Props) {
+  const { tag, type, onClick, disabled, props: tagProps } = props;
 
-  const newTagProps = { ...{ onClick, type: type || 'button', disabled }, ...tagProps };
-  const newProps = { ...props, ...{ props: newTagProps } };
+  const newTagProps = { ...tagProps, type: type || 'button', onClick, disabled } as BoxTagProps;
 
-  return <Box tag="button" cursor="pointer" inline {...newProps} />;
+  return <Box tag={tag || 'button'} cursor="pointer" inline {...props} props={newTagProps} />;
 }
