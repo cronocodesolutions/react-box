@@ -1,8 +1,10 @@
 import Box from '../../box';
 
 type BoxProps = React.ComponentProps<typeof Box>;
+type BoxTagProps = Required<BoxProps>['props'];
 
-type UncontrolledTextboxCoreTypeAttribute =
+type UncontrolledTextboxCoreTagProps = Omit<BoxTagProps, 'onInput' | 'onChange' | 'type' | 'placeholder' | 'disabled' | 'defaultValue'>;
+type UncontrolledTextboxCoreType =
   | 'date'
   | 'datetime-local'
   | 'email'
@@ -17,10 +19,11 @@ type UncontrolledTextboxCoreTypeAttribute =
   | 'url'
   | 'week';
 
-interface Props extends BoxProps {
+interface Props extends Omit<BoxProps, 'props'> {
+  props?: UncontrolledTextboxCoreTagProps;
   onInput?: (e: React.FormEvent<HTMLInputElement>) => void;
   onChange?: (e: React.FormEvent<HTMLInputElement>) => void;
-  type?: UncontrolledTextboxCoreTypeAttribute;
+  type?: UncontrolledTextboxCoreType;
   placeholder?: string;
   disabled?: boolean;
   defaultValue?: string | number;
@@ -29,8 +32,15 @@ interface Props extends BoxProps {
 export default function UncontrolledTextboxCore(props: Props) {
   const { props: tagProps, type, disabled, placeholder, defaultValue, onInput, onChange } = props;
 
-  const newTagProps = { ...{ type: type || 'text', disabled, placeholder, onInput, onChange, defaultValue }, ...tagProps };
-  const newProps = { ...props, ...{ props: newTagProps } };
+  const newTagProps = {
+    ...tagProps,
+    type: type || 'text',
+    disabled,
+    placeholder,
+    onInput,
+    onChange,
+    defaultValue,
+  } as BoxTagProps;
 
-  return <Box tag="input" inline {...newProps} />;
+  return <Box tag="input" inline {...props} props={newTagProps} />;
 }
