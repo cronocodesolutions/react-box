@@ -1,4 +1,5 @@
 import Box from '../../box';
+import { Hovered } from '../../types';
 
 type BoxProps = React.ComponentProps<typeof Box>;
 
