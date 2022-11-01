@@ -1,6 +1,29 @@
+:root {
+  --black: black;
+  --white: white;
+  --transparent: transparent;
+  --blue: blue;
+  --red: red;
+  --purple: purple;
+  --yellow: yellow;
+  --pink: pink;
+  --green: green;
+  --orange: orange;
+  --navy: navy;
+  --teal: teal;
+  --violet: violet;
+  --gray: gray;
+  --brown: brown;
+  --orange: orange;
+
+  --borderColor: black;
+  --lineHeight: 1.2;
+  --fontSize: 14px;
+  --transitionTime: 0.3s;
+}
+
 html {
   font-size: 16px;
-  line-height: 1.2;
 }
 
 body {
@@ -15,7 +38,8 @@ body {
   margin: 0;
   padding: 0;
   border-color: var(--borderColor);
-  transition: all 0.2s;
+  background-color: initial;
+  transition: all var(--transitionTime);
 }
 
 /* display */
@@ -291,7 +315,83 @@ body {
   }
 }
 
-/* colors (color, bgColor, borderColor)  */
+/* shadow - variables */
+@each $shadow in $shadows {
+  .shadow$(shadow),
+  .hovertrue:hover.shadowh$(shadow),
+  .hovertrue:hover .shadowh$(shadow) {
+    box-shadow: var(--shadow$(shadow));
+  }
+}
+
+/* background - variables */
+@each $background in $backgrounds {
+  .background$(background),
+  .bg$(background),
+  .hovertrue:hover.backgroundh$(background),
+  .hovertrue:hover .backgroundh$(background),
+  .hovertrue:hover.bgh$(background),
+  .hovertrue:hover .bgh$(background) {
+    background: var(--background$(background));
+  }
+}
+
+/* base font colors */
+@each $color in $fontColors {
+  .color$(color),
+  .hovertrue:hover.colorh$(color),
+  .hovertrue:hover .colorh$(color) {
+    color: var(--color$(color));
+  }
+
+  .colorHover$(color):hover,
+  .hovertrue:hover.colorHoverh$(color):hover,
+  .hovertrue:hover .colorHoverh$(color):hover {
+    color: var(--color$(color));
+  }
+}
+
+/* base background colors */
+@each $color in $bgColors {
+  .backgroundColor$(color),
+  .bgColor$(color),
+  .hovertrue:hover.backgroundColorh$(color),
+  .hovertrue:hover .backgroundColorh$(color),
+  .hovertrue:hover.bgColorh$(color),
+  .hovertrue:hover .bgColorh$(color) {
+    background-color: var(--backgroundColor$(color));
+  }
+
+  .backgroundColorHover$(color):hover,
+  .bgColorHover$(color):hover,
+  .hovertrue:hover.backgroundColorHoverh$(color):hover,
+  .hovertrue:hover .backgroundColorHoverh$(color):hover,
+  .hovertrue:hover.bgColorHoverh$(color):hover,
+  .hovertrue:hover .bgColorHoverh$(color):hover {
+    background-color: var(--backgroundColor$(color));
+  }
+}
+
+/* base border colors */
+@each $color in $borderColors {
+  .borderColor$(color),
+  .bColor$(color),
+  .hovertrue:hover.borderColorh$(color),
+  .hovertrue:hover .borderColorh$(color),
+  .hovertrue:hover.bColorh$(color),
+  .hovertrue:hover .bColorh$(color) {
+    border-color: var(--borderColor$(color));
+  }
+
+  .hovertrue:hover.borderColorHoverh$(color):hover,
+  .hovertrue:hover .borderColorHoverh$(color):hover,
+  .hovertrue:hover.bColorHoverh$(color):hover,
+  .hovertrue:hover .bColorHoverh$(color):hover {
+    border-color: var(--borderColor$(color));
+  }
+}
+
+/* common - colors (color, bgColor, borderColor)  */
 @each $color in $colors {
   .color$(color),
   .hovertrue:hover.colorh$(color),

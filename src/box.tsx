@@ -1,6 +1,17 @@
 import React, { useState } from 'react';
 import classes from './box.module.css';
-import { SizeType, ColorType, CursorType, FontSizeType } from './css.variables';
+import {
+  SizeType,
+  ColorType,
+  CursorType,
+  FontSizeType,
+  BaseFontColorType,
+  BaseBgColorType,
+  BaseBorderColorType,
+  BackgroundType,
+  ShadowType,
+} from './css.variables';
+import { Hovered } from './types';
 import ClassNameUtils from './utils/className/classNameUtils';
 
 interface BoxDisplay {
@@ -98,17 +109,26 @@ interface BoxPadding {
   pl?: SizeType;
 }
 
+interface BoxShadow {
+  shadow?: ShadowType;
+}
+
+interface BoxBackground {
+  bg?: BackgroundType;
+  background?: BackgroundType;
+}
+
 interface BoxColors {
-  color?: ColorType;
-  colorHover?: ColorType;
-  backgroundColor?: ColorType;
-  bgColor?: ColorType;
-  backgroundColorHover?: ColorType;
-  bgColorHover?: ColorType;
-  borderColor?: ColorType;
-  bColor?: ColorType;
-  borderColorHover?: ColorType;
-  bColorHover?: ColorType;
+  color?: ColorType | BaseFontColorType;
+  colorHover?: ColorType | BaseFontColorType;
+  backgroundColor?: ColorType | BaseBgColorType;
+  bgColor?: ColorType | BaseBgColorType;
+  backgroundColorHover?: ColorType | BaseBgColorType;
+  bgColorHover?: ColorType | BaseBgColorType;
+  borderColor?: ColorType | BaseBorderColorType;
+  bColor?: ColorType | BaseBorderColorType;
+  borderColorHover?: ColorType | BaseBorderColorType;
+  bColorHover?: ColorType | BaseBorderColorType;
 }
 
 interface BoxCursor {
@@ -190,6 +210,8 @@ type BoxStyles = BoxDisplay &
   BoxMargin &
   BoxBorder &
   BoxPadding &
+  BoxShadow &
+  BoxBackground &
   BoxColors &
   BoxCursor &
   BoxZIndex &

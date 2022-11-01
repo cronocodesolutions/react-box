@@ -61,11 +61,9 @@ root.render(
 
         <Box mt={8}>Buttons</Box>
         <MyButton>Click me</MyButton>
-        <ButtonCore bgColor="green" color="white" ml={2}>
-          Click me 2
-        </ButtonCore>
+        <ButtonCore ml={2}>Click me 2</ButtonCore>
       </Box>
-      <Box mx="auto" b={2}>
+      <Box mx="auto" b={2} bg={1} color="navy" shadow={1} shadowh={2} hover>
         test margin auto
       </Box>
 

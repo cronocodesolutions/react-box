@@ -5,6 +5,9 @@ const variables = {
   ] as const,
   sizeMultiplier: 0.25,
   colors: [
+    'black',
+    'white',
+    'transparent',
     'primary',
     'primaryLight',
     'primaryDark',
@@ -44,8 +47,6 @@ const variables = {
     'violet',
     'violetLight',
     'violetDark',
-    'black',
-    'white',
     'gray',
     'grayLight',
     'grayDark',
@@ -56,6 +57,11 @@ const variables = {
     'orangeLight',
     'orangeDark',
   ] as const,
+  fontColors: ['color1', 'color2', 'color3', 'color4', 'color5', 'color6', 'color7', 'color8', 'color9', 'color10'] as const,
+  bgColors: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10] as const,
+  borderColors: [1, 2, 3, 4, 5] as const,
+  backgrounds: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10] as const,
+  shadows: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10] as const,
   cursors: [
     'auto',
     'default',
@@ -101,6 +107,11 @@ const variables = {
 
 export type SizeType = typeof variables.sizes[number];
 export type ColorType = typeof variables.colors[number];
+export type BaseFontColorType = typeof variables.fontColors[number];
+export type BaseBgColorType = typeof variables.bgColors[number];
+export type BaseBorderColorType = typeof variables.bgColors[number];
+export type BackgroundType = typeof variables.backgrounds[number];
+export type ShadowType = typeof variables.shadows[number];
 export type CursorType = typeof variables.cursors[number];
 export type FontSizeType = typeof variables.fontSizes[number];
 
