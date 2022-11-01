@@ -67,7 +67,7 @@ root.render(
         test margin auto
       </Box>
 
-      <Box b={1} bColor="brown">
+      <Box b={1} bColor="brown" boxSizing="content-box">
         Textbox
         <UncontrolledTextboxCore type="email" p={2} b={1} />
       </Box>

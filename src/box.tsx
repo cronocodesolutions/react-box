@@ -19,6 +19,10 @@ interface BoxDisplay {
   inline?: boolean;
 }
 
+interface BoxSizing {
+  boxSizing?: 'border-box' | 'content-box';
+}
+
 interface BoxPosition {
   position?: 'static' | 'relative' | 'absolute' | 'fixed' | 'sticky';
   inset?: SizeType;
@@ -205,6 +209,7 @@ interface BoxHover {
 }
 
 type BoxStyles = BoxDisplay &
+  BoxSizing &
   BoxPosition &
   BoxSize &
   BoxMargin &

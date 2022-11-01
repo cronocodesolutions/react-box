@@ -40,6 +40,7 @@ body {
   border-color: var(--borderColor);
   background-color: initial;
   transition: all var(--transitionTime);
+  box-sizing: border-box;
 }
 
 /* display */
@@ -48,11 +49,21 @@ body {
   display: inline-block;
 }
 
+/* display */
 @each $display in none, block, inline-block, flex, inline-flex, grid {
   .display$(display),
   .hovertrue:hover.displayh$(display),
   .hovertrue:hover .displayh$(display) {
     display: $display;
+  }
+}
+
+/* boxSizing */
+@each $boxSizing in border-box, content-box {
+  .boxSizing$(boxSizing),
+  .hovertrue:hover.boxSizingh$(boxSizing),
+  .hovertrue:hover .boxSizingh$(boxSizing) {
+    box-sizing: $boxSizing;
   }
 }
 
