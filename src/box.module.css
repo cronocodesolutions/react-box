@@ -1,7 +1,8 @@
 :root {
+  --none: none;
+  --transparent: transparent;
   --black: black;
   --white: white;
-  --transparent: transparent;
   --blue: blue;
   --red: red;
   --purple: purple;
@@ -17,9 +18,10 @@
   --orange: orange;
 
   --borderColor: black;
+  --outlineColor: black;
   --lineHeight: 1.2;
   --fontSize: 14px;
-  --transitionTime: 0.3s;
+  --transitionTime: 0.2s;
 }
 
 html {
@@ -34,13 +36,16 @@ body {
 
 .box {
   display: block;
-  border: 0 solid #000;
+  border: 0 solid var(--borderColor);
   margin: 0;
   padding: 0;
-  border-color: var(--borderColor);
   background-color: initial;
   transition: all var(--transitionTime);
   box-sizing: border-box;
+}
+
+.box:focus {
+  outline: 0px solid var(--outlineColor);
 }
 
 /* display */
@@ -201,6 +206,33 @@ body {
   }
 }
 
+/* outline-width */
+@each $size in $sizes {
+  .outline$(size):focus,
+  .hovertrue:hover.outlineh$(size):focus,
+  .hovertrue:hover .outlineh$(size):focus {
+    outline-width: calc($size * 1px);
+  }
+}
+
+/* outline-style */
+@each $outlineStyle in $borderAndOutlineStyles {
+  .outlineStyle$(outlineStyle):focus,
+  .hovertrue:hover.outlineStyleh$(outlineStyle):focus,
+  .hovertrue:hover .outlineStyleh$(outlineStyle):focus {
+    outline-style: $outlineStyle;
+  }
+}
+
+/* outline-offset */
+@each $size in $sizes {
+  .outlineOffset$(size):focus,
+  .hovertrue:hover.outlineOffseth$(size):focus,
+  .hovertrue:hover .outlineOffseth$(size):focus {
+    outline-offset: calc($size * 1px);
+  }
+}
+
 /* border-width */
 @each $size in $sizes {
   .border$(size),
@@ -245,7 +277,7 @@ body {
 }
 
 /* border-style */
-@each $borderStyle in solid, dashed, dotted, double {
+@each $borderStyle in $borderAndOutlineStyles {
   .borderStyle$(borderStyle),
   .bStyle$(borderStyle),
   .hovertrue:hover.borderStyleh$(borderStyle),
@@ -394,11 +426,28 @@ body {
     border-color: var(--borderColor$(color));
   }
 
+  .borderColorHover$(color):hover,
+  .bColorHover$(color):hover,
   .hovertrue:hover.borderColorHoverh$(color):hover,
   .hovertrue:hover .borderColorHoverh$(color):hover,
   .hovertrue:hover.bColorHoverh$(color):hover,
   .hovertrue:hover .bColorHoverh$(color):hover {
     border-color: var(--borderColor$(color));
+  }
+}
+
+/* base outline colors */
+@each $color in $outlineColors {
+  .outlineColor$(color):focus,
+  .hovertrue:hover.outlineColorh$(color):focus,
+  .hovertrue:hover .outlineColorh$(color):focus {
+    outline-color: var(--outlineColor$(color));
+  }
+
+  .outlineColorHover$(color):focus:hover,
+  .hovertrue:hover.outlineColorHoverh$(color):focus:hover,
+  .hovertrue:hover .outlineColorHoverh$(color):focus:hover {
+    outline-color: var(--outlineColor$(color));
   }
 }
 
@@ -443,11 +492,25 @@ body {
     border-color: var(--$(color));
   }
 
+  .borderColorHover$(color):hover,
+  .bColorHover$(color):hover,
   .hovertrue:hover.borderColorHoverh$(color):hover,
   .hovertrue:hover .borderColorHoverh$(color):hover,
   .hovertrue:hover.bColorHoverh$(color):hover,
   .hovertrue:hover .bColorHoverh$(color):hover {
     border-color: var(--$(color));
+  }
+
+  .outlineColor$(color):focus,
+  .hovertrue:hover.outlineColorh$(color):focus,
+  .hovertrue:hover .outlineColorh$(color):focus {
+    outline-color: var(--$(color));
+  }
+
+  .outlineColorHover$(color):focus:hover,
+  .hovertrue:hover.outlineColorHoverh$(color):focus:hover,
+  .hovertrue:hover .outlineColorHoverh$(color):focus:hover {
+    outline-color: var(--$(color));
   }
 }
 

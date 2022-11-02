@@ -10,6 +10,7 @@ import {
   BaseBorderColorType,
   BackgroundType,
   ShadowType,
+  BaseOutlineColorType,
 } from './css.variables';
 import { Hovered } from './types';
 import ClassNameUtils from './utils/className/classNameUtils';
@@ -59,6 +60,13 @@ interface BoxMargin {
   ml?: SizeType | 'auto';
 }
 
+type BoxBorderAndOutlineStyleType = 'solid' | 'dashed' | 'dotted' | 'double' | 'groove' | 'ridge' | 'inset' | 'outset' | 'none' | 'hidden';
+interface BoxOutline {
+  outline?: SizeType;
+  outlineStyle?: BoxBorderAndOutlineStyleType;
+  outlineOffset?: SizeType;
+}
+
 interface BoxBorder {
   border?: SizeType;
   b?: SizeType;
@@ -74,8 +82,8 @@ interface BoxBorder {
   bb?: SizeType;
   borderLeft?: SizeType;
   bl?: SizeType;
-  borderStyle?: 'solid' | 'dashed' | 'dotted' | 'double';
-  bStyle?: 'solid' | 'dashed' | 'dotted' | 'double';
+  borderStyle?: BoxBorderAndOutlineStyleType;
+  bStyle?: BoxBorderAndOutlineStyleType;
   borderRadius?: SizeType;
   bRadius?: SizeType;
   borderRadiusTop?: SizeType;
@@ -133,6 +141,8 @@ interface BoxColors {
   bColor?: ColorType | BaseBorderColorType;
   borderColorHover?: ColorType | BaseBorderColorType;
   bColorHover?: ColorType | BaseBorderColorType;
+  outlineColor?: ColorType | BaseOutlineColorType;
+  outlineColorHover?: ColorType | BaseOutlineColorType;
 }
 
 interface BoxCursor {
@@ -213,6 +223,7 @@ type BoxStyles = BoxDisplay &
   BoxPosition &
   BoxSize &
   BoxMargin &
+  BoxOutline &
   BoxBorder &
   BoxPadding &
   BoxShadow &

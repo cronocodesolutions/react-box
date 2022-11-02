@@ -3,7 +3,10 @@ import Box from '../../box';
 type BoxProps = React.ComponentProps<typeof Box>;
 type BoxTagProps = Required<BoxProps>['props'];
 
-type UncontrolledTextboxCoreTagProps = Omit<BoxTagProps, 'onInput' | 'onChange' | 'type' | 'placeholder' | 'disabled' | 'defaultValue'>;
+type UncontrolledTextboxCoreTagProps = Omit<
+  BoxTagProps,
+  'name' | 'onInput' | 'onChange' | 'type' | 'placeholder' | 'disabled' | 'defaultValue'
+>;
 type UncontrolledTextboxCoreType =
   | 'date'
   | 'datetime-local'
@@ -20,6 +23,7 @@ type UncontrolledTextboxCoreType =
   | 'week';
 
 interface Props extends Omit<BoxProps, 'props'> {
+  name: string;
   props?: UncontrolledTextboxCoreTagProps;
   onInput?: (e: React.FormEvent<HTMLInputElement>) => void;
   onChange?: (e: React.FormEvent<HTMLInputElement>) => void;
@@ -30,11 +34,12 @@ interface Props extends Omit<BoxProps, 'props'> {
 }
 
 export default function UncontrolledTextboxCore(props: Props) {
-  const { props: tagProps, type, disabled, placeholder, defaultValue, onInput, onChange } = props;
+  const { props: tagProps, name, type, disabled, placeholder, defaultValue, onInput, onChange } = props;
 
   const newTagProps = {
     ...tagProps,
     type: type || 'text',
+    name,
     disabled,
     placeholder,
     onInput,

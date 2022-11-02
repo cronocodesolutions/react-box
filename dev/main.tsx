@@ -4,13 +4,28 @@ import Box from './../src/box';
 import ButtonCore from './../src/components/buttonCore/buttonCore';
 import UncontrolledTextboxCore from './../src/components/uncontrolledTextboxCore/uncontrolledTextboxCore';
 import Flex from './../src/components/flex/flex';
+import FormAsync from '../src/components/formAsync/formAsync';
 
 const root = ReactDOM.createRoot(document.getElementById('root')!);
 
+function submitHandler(obj: any) {
+  console.log({ obj });
+}
+
 root.render(
   <React.StrictMode>
-    <Flex hover jc="center" b={1} inline p={2} ph={4}>
-      test
+    <Flex hover jc="center" b={1} inline p={2}>
+      <FormAsync onSubmit={submitHandler}>
+        <Box>
+          username: <UncontrolledTextboxCore name="userName" bb={1} p={1} outline={2} outlineStyle="dashed" outlineOffset={4} />
+        </Box>
+        <Box>
+          email: <UncontrolledTextboxCore name="email" />
+        </Box>
+        <Box>
+          password: <UncontrolledTextboxCore name="password" type="password" />
+        </Box>
+      </FormAsync>
     </Flex>
     <Box>
       <Box styles={{ background: '#ccc', height: '100px' }}>
@@ -69,7 +84,7 @@ root.render(
 
       <Box b={1} bColor="brown" boxSizing="content-box">
         Textbox
-        <UncontrolledTextboxCore type="email" p={2} b={1} />
+        <UncontrolledTextboxCore name="email" type="email" p={2} b={1} />
       </Box>
     </Box>
   </React.StrictMode>,
