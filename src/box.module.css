@@ -44,7 +44,9 @@ body {
   box-sizing: border-box;
 }
 
-.box:focus {
+.box:focus,
+.box:focus-visible,
+.box:focus-within {
   outline: 0px solid var(--outlineColor);
 }
 
@@ -209,8 +211,14 @@ body {
 /* outline-width */
 @each $size in $sizes {
   .outline$(size):focus,
+  .outline$(size):focus-visible,
+  .outline$(size):focus-within,
   .hovertrue:hover.outlineh$(size):focus,
-  .hovertrue:hover .outlineh$(size):focus {
+  .hovertrue:hover.outlineh$(size):focus-visible,
+  .hovertrue:hover.outlineh$(size):focus-within,
+  .hovertrue:hover .outlineh$(size):focus,
+  .hovertrue:hover .outlineh$(size):focus-visible,
+  .hovertrue:hover .outlineh$(size):focus-within {
     outline-width: calc($size * 1px);
   }
 }
@@ -218,8 +226,14 @@ body {
 /* outline-style */
 @each $outlineStyle in $borderAndOutlineStyles {
   .outlineStyle$(outlineStyle):focus,
+  .outlineStyle$(outlineStyle):focus-visible,
+  .outlineStyle$(outlineStyle):focus-within,
   .hovertrue:hover.outlineStyleh$(outlineStyle):focus,
-  .hovertrue:hover .outlineStyleh$(outlineStyle):focus {
+  .hovertrue:hover.outlineStyleh$(outlineStyle):focus-visible,
+  .hovertrue:hover.outlineStyleh$(outlineStyle):focus-within,
+  .hovertrue:hover .outlineStyleh$(outlineStyle):focus,
+  .hovertrue:hover .outlineStyleh$(outlineStyle):focus-visible,
+  .hovertrue:hover .outlineStyleh$(outlineStyle):focus-within {
     outline-style: $outlineStyle;
   }
 }
@@ -227,8 +241,14 @@ body {
 /* outline-offset */
 @each $size in $sizes {
   .outlineOffset$(size):focus,
+  .outlineOffset$(size):focus-visible,
+  .outlineOffset$(size):focus-within,
   .hovertrue:hover.outlineOffseth$(size):focus,
-  .hovertrue:hover .outlineOffseth$(size):focus {
+  .hovertrue:hover.outlineOffseth$(size):focus-visible,
+  .hovertrue:hover.outlineOffseth$(size):focus-within,
+  .hovertrue:hover .outlineOffseth$(size):focus,
+  .hovertrue:hover .outlineOffseth$(size):focus-visible,
+  .hovertrue:hover .outlineOffseth$(size):focus-within {
     outline-offset: calc($size * 1px);
   }
 }
@@ -439,14 +459,26 @@ body {
 /* base outline colors */
 @each $color in $outlineColors {
   .outlineColor$(color):focus,
+  .outlineColor$(color):focus-visible,
+  .outlineColor$(color):focus-within,
   .hovertrue:hover.outlineColorh$(color):focus,
-  .hovertrue:hover .outlineColorh$(color):focus {
+  .hovertrue:hover.outlineColorh$(color):focus-visible,
+  .hovertrue:hover.outlineColorh$(color):focus-within,
+  .hovertrue:hover .outlineColorh$(color):focus,
+  .hovertrue:hover .outlineColorh$(color):focus-visible,
+  .hovertrue:hover .outlineColorh$(color):focus-within {
     outline-color: var(--outlineColor$(color));
   }
 
   .outlineColorHover$(color):focus:hover,
+  .outlineColorHover$(color):focus-visible:hover,
+  .outlineColorHover$(color):focus-within:hover,
   .hovertrue:hover.outlineColorHoverh$(color):focus:hover,
-  .hovertrue:hover .outlineColorHoverh$(color):focus:hover {
+  .hovertrue:hover.outlineColorHoverh$(color):focus-visible:hover,
+  .hovertrue:hover.outlineColorHoverh$(color):focus-within:hover,
+  .hovertrue:hover .outlineColorHoverh$(color):focus:hover,
+  .hovertrue:hover .outlineColorHoverh$(color):focus-visible:hover,
+  .hovertrue:hover .outlineColorHoverh$(color):focus-within:hover {
     outline-color: var(--outlineColor$(color));
   }
 }
@@ -502,15 +534,27 @@ body {
   }
 
   .outlineColor$(color):focus,
+  .outlineColor$(color):focus-visible,
+  .outlineColor$(color):focus-within,
   .hovertrue:hover.outlineColorh$(color):focus,
-  .hovertrue:hover .outlineColorh$(color):focus {
+  .hovertrue:hover.outlineColorh$(color):focus-visible,
+  .hovertrue:hover.outlineColorh$(color):focus-within,
+  .hovertrue:hover .outlineColorh$(color):focus,
+  .hovertrue:hover .outlineColorh$(color):focus-visible,
+  .hovertrue:hover .outlineColorh$(color):focus-within {
     outline-color: var(--$(color));
   }
 
   .outlineColorHover$(color):focus:hover,
+  .outlineColorHover$(color):focus-visible:hover,
+  .outlineColorHover$(color):focus-within:hover,
   .hovertrue:hover.outlineColorHoverh$(color):focus:hover,
-  .hovertrue:hover .outlineColorHoverh$(color):focus:hover {
-    outline-color: var(--$(color));
+  .hovertrue:hover.outlineColorHoverh$(color):focus-visible:hover,
+  .hovertrue:hover.outlineColorHoverh$(color):focus-within:hover,
+  .hovertrue:hover .outlineColorHoverh$(color):focus:hover,
+  .hovertrue:hover .outlineColorHoverh$(color):focus-visible:hover,
+  .hovertrue:hover .outlineColorHoverh$(color):focus-within:hover {
+    outline-color: var(--outlineColor$(color));
   }
 }
 
