@@ -117,8 +117,8 @@ newStylesWithMapping(boxStyles, 'width', styleVariables.sizeSpecialValues, speci
 newStylesWithMapping(boxStyles, 'minWidth', styleVariables.sizeSpecialValues, specialSizeMap, ['min-width']);
 newStylesWithMapping(boxStyles, 'maxWidth', styleVariables.sizeSpecialValues, specialSizeMap, ['max-width']);
 newStylesWithMapping(boxStyles, 'height', styleVariables.sizeSpecialValues, specialSizeMap);
-newStylesWithMapping(boxStyles, 'height', styleVariables.sizeSpecialValues, specialSizeMap, ['min-height']);
-newStylesWithMapping(boxStyles, 'height', styleVariables.sizeSpecialValues, specialSizeMap, ['max-height']);
+newStylesWithMapping(boxStyles, 'minHeight', styleVariables.sizeSpecialValues, specialSizeMap, ['min-height']);
+newStylesWithMapping(boxStyles, 'maxHeight', styleVariables.sizeSpecialValues, specialSizeMap, ['max-height']);
 
 // margin
 newStylesWithSizes(boxStyles, 'margin', styleVariables.sizes, 'rem', undefined, ['m']);
