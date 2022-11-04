@@ -1,13 +1,16 @@
-import { defineConfig } from 'vite';
+import { defineConfig, PluginOption } from 'vite';
 import reactPlugin from '@vitejs/plugin-react';
 import IdentityFactory from '@cronocode/identity-factory';
 import dts from 'vite-plugin-dts';
 import path from 'path';
 
 // @ts-ignore
-import boxStylesMixins from './mixins/boxStyles';
+import boxStylesMixins from './buildHelpers/mixins/boxStyles';
+// @ts-ignore
+import moduleCssPlugin from './buildHelpers/plugins/moduleCssPlugin';
 
 const identity = new IdentityFactory();
+const jsonCache: Record<string, Record<string, string>> = {};
 
 export default defineConfig(({ mode }) => {
   console.log('NODE_ENV', process.env.NODE_ENV);
@@ -22,6 +25,7 @@ export default defineConfig(({ mode }) => {
         },
       }),
       reactPlugin(),
+      moduleCssPlugin(jsonCache),
     ],
     css: {
       devSourcemap: mode === 'dev',
@@ -31,6 +35,9 @@ export default defineConfig(({ mode }) => {
       modules: {
         generateScopedName: (name: string, filename: string, css: string) => {
           return mode === 'dev' ? name : identity.getIdentity(name);
+        },
+        getJSON: (cssFileName, json, outputFileName) => {
+          jsonCache[cssFileName] = json;
         },
       },
     },

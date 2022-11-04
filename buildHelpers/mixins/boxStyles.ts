@@ -1,5 +1,4 @@
-// @ts-ignore
-import { styleVariables } from '../src/types';
+import { styleVariables } from '../../src/types';
 
 type StylesType = Record<string, Record<string, string>>;
 

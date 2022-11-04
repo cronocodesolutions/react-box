@@ -1,6 +1,6 @@
 {
   "name": "@cronocode/react-box",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "main": "./box.js",
   "module": "./box.js",
   "types": "./box.d.ts",
@@ -42,6 +42,7 @@
   "description": "",
   "devDependencies": {
     "@cronocode/identity-factory": "^0.0.6",
+    "@rollup/pluginutils": "^5.0.2",
     "@types/node": "^18.7.14",
     "@types/postcss-mixins": "^9.0.0",
     "@types/react": "^18.0.18",

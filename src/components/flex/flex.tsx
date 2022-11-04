@@ -1,5 +1,5 @@
 import Box from '../../box';
-import { Hovered } from '../../types';
+import { Activated, Focused, Hovered } from '../../types';
 
 type BoxProps = React.ComponentProps<typeof Box>;
 
@@ -15,7 +15,7 @@ interface FlexStylesShortCuts {
   js?: BoxProps['justifySelf'];
 }
 
-type Props = BoxProps & FlexStylesShortCuts & Hovered<FlexStylesShortCuts>;
+type Props = BoxProps & FlexStylesShortCuts & Hovered<FlexStylesShortCuts> & Focused<FlexStylesShortCuts> & Activated<FlexStylesShortCuts>;
 
 export default function Flex(props: Props) {
   const { inline } = props;
