@@ -10,7 +10,75 @@ const root = ReactDOM.createRoot(document.getElementById('root')!);
 
 root.render(
   <React.StrictMode>
-    <Box display="grid" minHeight="fit-screen" styles={{ display: 'test', gridTemplateColumns: '200px 1fr' }}>
+    <Flex jc="center" ai="center" minHeight="fit-screen" bgColor={1} position="relative">
+      <Box styles={{ minWidth: '20rem' }} p={5} bgColor="white" borderRadius={1} color={1}>
+        <Box fontSize={18} fontWeight={900}>
+          Login
+        </Box>
+        <FormAsync onSubmit={() => {}}>
+          <Box mt={6}>Username</Box>
+          <Box mt={3} borderRadius={1}>
+            <UncontrolledTextboxCore
+              name="username"
+              placeholder="Email"
+              width="fit"
+              bb={2}
+              color={1}
+              borderColor={1}
+              py={3}
+              outlineF={2}
+              outlineOffset={4}
+              outlineColor={1}
+              bgColor="white"
+            />
+          </Box>
+          <Box mt={4}>Password</Box>
+          <Box mt={3} borderRadius={1} outlineOffset={0}>
+            <UncontrolledTextboxCore
+              name="password"
+              type="password"
+              placeholder="Password"
+              width="fit"
+              bb={2}
+              color={1}
+              borderColor={1}
+              py={3}
+              outlineF={2}
+              outlineOffset={4}
+              outlineColor={1}
+              bgColor="white"
+            />
+          </Box>
+          <Flex jc="flex-end" mt={4}>
+            <ButtonCore
+              type="submit"
+              py={2}
+              px={4}
+              bgColor="teal"
+              bgColorH={1}
+              color="white"
+              // borderRadius={1}
+              fontSize={14}
+              fontWeight={500}
+              outline={3}
+              outlineOffset={0}
+              outlineColor="teal"
+              outlineH={2}
+              outlineColorH={1}
+              outlineOffsetH={1}
+              outlineF={2}
+              outlineOffsetF={1}
+              outlineColorF={1}
+              outlineOffsetA={0}
+              outlineA={3}
+            >
+              Login
+            </ButtonCore>
+          </Flex>
+        </FormAsync>
+      </Box>
+    </Flex>
+    {/* <Box display="grid" minHeight="fit-screen" styles={{ display: 'test', gridTemplateColumns: '200px 1fr' }}>
       <Box inline hover>
         <Box inlineH>content</Box>
         <Box inlineH>content2</Box>
@@ -48,7 +116,7 @@ root.render(
           </Box>
         </Box>
       </Box>
-    </Box>
+    </Box> */}
     {/* <Flex hover jc="center" b={1} inline p={2}>
       <FormAsync onSubmit={submitHandler}>
         <Box>
