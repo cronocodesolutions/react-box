@@ -108,7 +108,7 @@ function specialSizeMap(value: string, className: string) {
     case 'fit':
       return '100%';
     case 'fit-screen':
-      return className.includes('height') ? '100vh' : '100vw';
+      return className.toLocaleLowerCase().includes('height') ? '100vh' : '100vw';
     default:
       return value;
   }
