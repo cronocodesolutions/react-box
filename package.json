@@ -18,8 +18,9 @@
     }
   },
   "scripts": {
-    "dev": "vite ./dev --config ./vite.config.ts",
+    "dev": "vite ./dev --config ./vite.config.ts --mode dev",
     "build": "vite build",
+    "build:dev": "vite build --mode dev",
     "postbuild": "cp package.json dist & cp LICENSE dist & rm ./dist/index.d.ts & rm ./dist/index.js",
     "compile": "tsc --noEmit --skipLibCheck",
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -42,14 +43,13 @@
   "devDependencies": {
     "@cronocode/identity-factory": "^0.0.6",
     "@types/node": "^18.7.14",
+    "@types/postcss-mixins": "^9.0.0",
     "@types/react": "^18.0.18",
     "@types/react-dom": "^18.0.6",
     "@vitejs/plugin-react": "^2.0.1",
     "autoprefixer": "^10.4.8",
     "postcss": "^8.4.16",
-    "postcss-calc": "^8.2.4",
-    "postcss-each": "^1.1.0",
-    "postcss-simple-vars": "^6.0.3",
+    "postcss-mixins": "^9.0.4",
     "prettier": "^2.7.1",
     "react": "^18.1.0",
     "react-dom": "^18.2.0",

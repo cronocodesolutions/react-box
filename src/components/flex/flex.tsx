@@ -8,7 +8,7 @@ interface FlexStylesShortCuts {
   jc?: BoxProps['justifyContent'];
   ai?: BoxProps['alignItems'];
   ac?: BoxProps['alignContent'];
-  d?: BoxProps['direction'];
+  d?: BoxProps['flexDirection'];
   grow?: BoxProps['flexGrow'];
   shrink?: BoxProps['flexShrink'];
   as?: BoxProps['alignSelf'];

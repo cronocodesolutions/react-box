@@ -8,13 +8,48 @@ import FormAsync from '../src/components/formAsync/formAsync';
 
 const root = ReactDOM.createRoot(document.getElementById('root')!);
 
-function submitHandler(obj: any) {
-  console.log({ obj });
-}
-
 root.render(
   <React.StrictMode>
-    <Flex hover jc="center" b={1} inline p={2}>
+    <Box display="grid" styles={{ display: 'test', gridTemplateColumns: '200px 1fr' }}>
+      <Box inline hover>
+        <Box inlineH>content</Box>
+        <Box inlineH>content2</Box>
+      </Box>
+      <Box cursor="pointer" b={1} p={2} hover>
+        right
+        <Box inline p={2} pH={4} b={2}>
+          inner
+        </Box>
+      </Box>
+    </Box>
+    <Box p={2}>
+      <Box p={2} b={1} borderColor="blue" inline>
+        <Box fontWeightF={900} focus>
+          <Box textTransformF="uppercase">Name:</Box>
+          <UncontrolledTextboxCore name="test1" b={1} p={2} borderRadius={1} outlineF={3} />
+        </Box>
+      </Box>
+      <Box p={2} b={1} borderColor="blue" inline>
+        <Box>Super Name:</Box>
+        <UncontrolledTextboxCore name="test2" b={1} p={2} borderRadius={1} />
+      </Box>
+      <Box p={2} b={1} borderColor="blue" inline>
+        <ButtonCore b={1} outline={1} p={2} borderRadius={1} outlineF={2} outlineA={3}>
+          <Box b={1} colorA="gray" p={2}>
+            Click
+          </Box>
+        </ButtonCore>
+      </Box>
+
+      <Box p={2} b={1} borderColor="blue" inline>
+        <Box tag="a" props={{ href: '#' }} b={2} p={2} color="red">
+          <Box b={1} colorA="gray" p={2}>
+            Link
+          </Box>
+        </Box>
+      </Box>
+    </Box>
+    {/* <Flex hover jc="center" b={1} inline p={2}>
       <FormAsync onSubmit={submitHandler}>
         <Box>
           username: <UncontrolledTextboxCore name="userName" bb={1} p={1} outline={2} outlineStyle="dashed" outlineOffset={4} />
@@ -86,12 +121,6 @@ root.render(
         Textbox
         <UncontrolledTextboxCore name="email" type="email" p={2} b={1} />
       </Box>
-    </Box>
+    </Box> */}
   </React.StrictMode>,
 );
-
-type Props = React.ComponentProps<typeof ButtonCore>;
-
-function MyButton(props: Props) {
-  return <ButtonCore className="button" px={5} py={2} bgColor="blue" color="white" bRadius={2} {...props} />;
-}
