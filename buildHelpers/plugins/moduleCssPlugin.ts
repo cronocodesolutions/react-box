@@ -4,6 +4,7 @@ import { PluginOption } from 'vite';
 export default function moduleCssPlugin(jsonCache: Record<string, Record<string, string>>): PluginOption {
   return {
     name: 'moduleCssPlugin',
+    apply: 'build',
     enforce: 'post',
     transform(_code: string, id: string, _options?: { ssr?: boolean }) {
       const json = jsonCache[id];

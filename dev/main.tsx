@@ -10,7 +10,7 @@ const root = ReactDOM.createRoot(document.getElementById('root')!);
 
 root.render(
   <React.StrictMode>
-    <Box display="grid" styles={{ display: 'test', gridTemplateColumns: '200px 1fr' }}>
+    <Box display="grid" minHeight="fit-screen" styles={{ display: 'test', gridTemplateColumns: '200px 1fr' }}>
       <Box inline hover>
         <Box inlineH>content</Box>
         <Box inlineH>content2</Box>
