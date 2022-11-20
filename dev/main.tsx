@@ -12,7 +12,7 @@ root.render(
   <React.StrictMode>
     <Flex jc="center" ai="center" minHeight="fit-screen" bgColor={1} position="relative">
       <Box styles={{ minWidth: '20rem' }} p={5} bgColor="white" borderRadius={1} color={1}>
-        <Box fontSize={18} fontWeight={900}>
+        <Box fontSize={18} fontWeight={900} letterSpacing={20}>
           Login
         </Box>
         <FormAsync onSubmit={() => {}}>

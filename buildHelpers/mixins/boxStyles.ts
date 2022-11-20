@@ -212,7 +212,7 @@ const boxStyles = {};
   newStylesWithSizes(boxStyles, 'fontSize', styleVariables.fontSizes, 'px', ['font-size']);
   newStylesWithSizes(boxStyles, 'lineHeight', styleVariables.fontSizes, 'px', ['line-height']);
   newStylesWithSizes(boxStyles, 'fontWeight', styleVariables.fontWeight, '', ['font-weight']);
-  newStylesWithSizes(boxStyles, 'letterSpacing', styleVariables.sizes, '', ['letter-spacing']);
+  newStylesWithSizes(boxStyles, 'letterSpacing', styleVariables.sizes, 'px', ['letter-spacing']);
 
   // text
   newStyles(boxStyles, 'textDecoration', styleVariables.textDecoration, ['text-decoration']);
