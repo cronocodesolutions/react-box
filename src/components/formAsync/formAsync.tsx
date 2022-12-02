@@ -10,15 +10,13 @@ type ValueType = string | string[] | number | number[] | boolean;
 
 function getFormEntries(form: HTMLFormElement) {
   const elementsGroupByName = Array.from(form.elements).reduce((state, element) => {
-    if (element.nodeName === 'INPUT') {
-      const name = (element as HTMLInputElement).name;
+    const name = (element as HTMLInputElement).name;
 
-      if (!state[name]) {
-        state[name] = [];
-      }
-
-      state[name].push(element as HTMLInputElement);
+    if (!state[name]) {
+      state[name] = [];
     }
+
+    state[name].push(element as HTMLInputElement);
 
     return state;
   }, {} as Record<string, HTMLInputElement[]>);
@@ -37,7 +35,7 @@ function getFormEntries(form: HTMLFormElement) {
             (obj[name] as string[]).push(el.value);
           }
         } else if (el.type === 'radio') {
-          (obj[name] as any) = elements.find((el) => el.checked)?.value;
+          (obj[name] as any) = elements.find((e) => e.checked)?.value;
         } else {
           (obj[name] as string[]).push(el.value);
         }
