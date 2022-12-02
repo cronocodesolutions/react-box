@@ -3,14 +3,14 @@ import Box from '../../box';
 type BoxProps = React.ComponentProps<typeof Box<'input'>>;
 type BoxTagProps = Required<BoxProps>['props'];
 
-type UncontrolledTextboxCoreTagProps = Omit<
+type UncontrolledRadioButtonCoreTagProps = Omit<
   BoxTagProps,
   'name' | 'onInput' | 'onChange' | 'type' | 'placeholder' | 'disabled' | 'value' | 'autoFocus' | 'readOnly' | 'required' | 'defaultChecked'
 >;
 
 interface Props extends Omit<BoxProps, 'props'> {
   name: string;
-  props?: UncontrolledTextboxCoreTagProps;
+  props?: UncontrolledRadioButtonCoreTagProps;
   onInput?: (e: React.FormEvent<HTMLInputElement>) => void;
   onChange?: (e: React.FormEvent<HTMLInputElement>) => void;
   placeholder?: string;

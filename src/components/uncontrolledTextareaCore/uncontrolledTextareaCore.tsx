@@ -37,7 +37,7 @@ interface Props extends Omit<BoxProps, 'props'> {
   required?: boolean;
 }
 
-export default function UncontrolledTextboxCore(props: Props) {
+export default function UncontrolledTextareaCore(props: Props) {
   const {
     props: tagProps,
     name,
