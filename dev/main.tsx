@@ -5,6 +5,8 @@ import ButtonCore from './../src/components/buttonCore/buttonCore';
 import UncontrolledTextboxCore from './../src/components/uncontrolledTextboxCore/uncontrolledTextboxCore';
 import Flex from './../src/components/flex/flex';
 import FormAsync from '../src/components/formAsync/formAsync';
+import UncontrolledCheckboxCore from '../src/components/uncontrolledCheckboxCore/uncontrolledCheckboxCore';
+import UncontrolledRadiobuttonCore from '../src/components/uncontrolledRadioButtonCore/uncontrolledRadioButtonCore';
 
 const root = ReactDOM.createRoot(document.getElementById('root')!);
 
@@ -15,10 +17,20 @@ root.render(
         <Box fontSize={18} fontWeight={900} letterSpacing={20}>
           Login
         </Box>
-        <FormAsync onSubmit={() => {}}>
+        <FormAsync
+          onSubmit={(obj) => {
+            console.log(obj);
+          }}
+        >
           <Box mt={6}>Username</Box>
           <Box mt={3} borderRadius={1}>
+            <UncontrolledCheckboxCore name="flagArray" value={3} defaultChecked />
+            <UncontrolledCheckboxCore name="flagArray" value="opt 2" />
+            <UncontrolledCheckboxCore name="flag" value="opt 3" />
+            <UncontrolledRadiobuttonCore name="radio" value="radio 1" />
+            <UncontrolledRadiobuttonCore name="radio" value="radio 2" />
             <UncontrolledTextboxCore
+              type="number"
               name="username"
               placeholder="Email"
               width="fit"

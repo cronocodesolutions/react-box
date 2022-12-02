@@ -6,6 +6,48 @@ interface Props<T> {
   onSubmit: (obj: T, e: React.FormEvent<HTMLFormElement>) => void;
 }
 
+type ValueType = string | string[] | number | number[] | boolean;
+
+function getFormEntries(form: HTMLFormElement) {
+  const elementsGroupByName = Array.from(form.elements).reduce((state, element) => {
+    if (element.nodeName === 'INPUT') {
+      const name = (element as HTMLInputElement).name;
+
+      if (!state[name]) {
+        state[name] = [];
+      }
+
+      state[name].push(element as HTMLInputElement);
+    }
+
+    return state;
+  }, {} as Record<string, HTMLInputElement[]>);
+
+  return Object.entries(elementsGroupByName).reduce((obj, [name, elements]) => {
+    if (elements.length === 1) {
+      const el = elements[0];
+
+      obj[name] = el.type === 'checkbox' || el.type === 'radio' ? el.checked : el.value;
+    } else {
+      obj[name] = [];
+
+      elements.forEach((el) => {
+        if (el.type === 'checkbox') {
+          if (el.checked) {
+            (obj[name] as string[]).push(el.value);
+          }
+        } else if (el.type === 'radio') {
+          (obj[name] as any) = elements.find((el) => el.checked)?.value;
+        } else {
+          (obj[name] as string[]).push(el.value);
+        }
+      });
+    }
+
+    return obj;
+  }, {} as Record<string, ValueType>);
+}
+
 export default function FormAsync<T>(props: Props<T>) {
   const { children, onSubmit } = props;
   const formRef = useRef(null);
@@ -13,10 +55,9 @@ export default function FormAsync<T>(props: Props<T>) {
   const formSubmitHandler = useCallback((e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    const data = new FormData(formRef.current!);
-    const obj = Object.fromEntries(data.entries()) as T;
+    const obj = getFormEntries(formRef.current!);
 
-    onSubmit(obj, e);
+    onSubmit(obj as T, e);
   }, []);
 
   return (

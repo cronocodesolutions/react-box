@@ -1,72 +1,76 @@
 import Box from '../../box';
 
-type BoxProps = React.ComponentProps<typeof Box<'input'>>;
+type BoxProps = React.ComponentProps<typeof Box<'textarea'>>;
 type BoxTagProps = Required<BoxProps>['props'];
 
-type UncontrolledTextboxCoreTagProps = Omit<
+type UncontrolledTextareaCoreTagProps = Omit<
   BoxTagProps,
-  'name' | 'onInput' | 'onChange' | 'type' | 'placeholder' | 'disabled' | 'defaultValue' | 'autoFocus' | 'readOnly' | 'required'
+  | 'name'
+  | 'onInput'
+  | 'onChange'
+  | 'placeholder'
+  | 'disabled'
+  | 'defaultValue'
+  | 'rows'
+  | 'cols'
+  | 'autoFocus'
+  | 'maxLength'
+  | 'minLength'
+  | 'readOnly'
+  | 'required'
 >;
-type UncontrolledTextboxCoreType =
-  | 'date'
-  | 'datetime-local'
-  | 'email'
-  | 'hidden'
-  | 'month'
-  | 'number'
-  | 'password'
-  | 'search'
-  | 'tel'
-  | 'text'
-  | 'time'
-  | 'url'
-  | 'week';
 
 interface Props extends Omit<BoxProps, 'props'> {
   name: string;
-  props?: UncontrolledTextboxCoreTagProps;
+  props?: UncontrolledTextareaCoreTagProps;
   onInput?: (e: React.FormEvent<HTMLInputElement>) => void;
   onChange?: (e: React.FormEvent<HTMLInputElement>) => void;
-  type?: UncontrolledTextboxCoreType;
   placeholder?: string;
   disabled?: boolean;
   defaultValue?: string | number;
+  rows?: number;
+  cols?: number;
   autoFocus?: boolean;
+  maxLength?: number;
+  minLength?: number;
   readOnly?: boolean;
   required?: boolean;
-  step?: number | string;
 }
 
 export default function UncontrolledTextboxCore(props: Props) {
   const {
     props: tagProps,
     name,
-    type,
     disabled,
     placeholder,
     defaultValue,
     onInput,
     onChange,
+    rows,
+    cols,
     autoFocus,
+    maxLength,
+    minLength,
     readOnly,
     required,
-    step,
   } = props;
 
   const newTagProps = {
     ...tagProps,
-    type: type || 'text',
     name,
     disabled,
     placeholder,
     onInput,
     onChange,
     defaultValue,
+    rows,
+    cols,
     autoFocus,
+    maxLength,
+    minLength,
     readOnly,
     required,
-    step,
   } as BoxTagProps;
 
-  return <Box tag="input" inline {...props} props={newTagProps} />;
+  return <Box tag="textarea" inline {...props} props={newTagProps} />;
 }

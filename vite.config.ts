@@ -84,10 +84,6 @@ export default defineConfig(({ mode }) => {
               return '[name].js';
             }
 
-            if (chunkInfo.name === 'box2.module.css') {
-              return '[name].js';
-            }
-
             if (chunkInfo.name === 'box.module.css') {
               return '[name].js';
             }
