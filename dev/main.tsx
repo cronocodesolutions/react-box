@@ -28,7 +28,7 @@ root.render(
             <UncontrolledCheckboxCore name="flagArray" value="opt 2" />
             <UncontrolledCheckboxCore name="flag" value="opt 3" />
             <UncontrolledRadiobuttonCore name="radio" value="radio 1" />
-            <UncontrolledRadiobuttonCore name="radio" value="radio 2" />
+            <UncontrolledRadiobuttonCore name="radio" value="radio 2" defaultChecked />
             <UncontrolledTextboxCore
               type="number"
               name="username"

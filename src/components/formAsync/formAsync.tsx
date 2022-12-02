@@ -11,6 +11,9 @@ type ValueType = string | string[] | number | number[] | boolean;
 function getFormEntries(form: HTMLFormElement) {
   const elementsGroupByName = Array.from(form.elements).reduce((state, element) => {
     const name = (element as HTMLInputElement).name;
+    if (!name) {
+      return state;
+    }
 
     if (!state[name]) {
       state[name] = [];
