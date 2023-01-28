@@ -1,6 +1,6 @@
 import Box from '../../box';
 
-type BoxProps = React.ComponentProps<typeof Box>;
+type BoxProps = React.ComponentProps<typeof Box<'button'>>;
 type BoxTagProps = Required<BoxProps>['props'];
 
 type ButtonTagProps = Omit<BoxTagProps, 'type' | 'onClick' | 'disabled'>;

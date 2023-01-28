@@ -11,7 +11,7 @@ export type Activated<T> = {
 };
 
 export const styleVariables = {
-  display: ['none', 'block', 'inline-block', 'flex', 'inline-flex', 'grid'] as const,
+  display: ['none', 'block', 'inline-block', 'flex', 'inline-flex', 'grid', 'contents'] as const,
   boxSizing: ['border-box', 'content-box'] as const,
   position: ['static', 'relative', 'absolute', 'fixed', 'sticky'] as const,
   sizeSpecialValues: ['fit', 'fit-screen', 'auto', 'fit-content', 'max-content', 'min-content'] as const,
@@ -166,27 +166,27 @@ export const styleVariables = {
   outlineOffset: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10] as const,
 };
 
-type GapType = typeof styleVariables.gap[number];
-type BoxSizeValue = typeof styleVariables.sizeSpecialValues[number];
-type BorderSizeType = typeof styleVariables.borderSizes[number];
-type SizeType = typeof styleVariables.sizes[number];
-type ColorType = typeof styleVariables.baseColors[number];
-type BaseFontColorType = typeof styleVariables.fontColors[number];
-type BaseBgColorType = typeof styleVariables.bgColors[number];
-type BaseBorderColorType = typeof styleVariables.borderColors[number];
-type BaseOutlineColorType = typeof styleVariables.outlineColors[number];
-type BackgroundType = typeof styleVariables.backgrounds[number];
-type ShadowType = typeof styleVariables.shadows[number];
-type CursorType = typeof styleVariables.cursors[number];
-type OverflowType = typeof styleVariables.overflows[number];
-type FontSizeType = typeof styleVariables.fontSizes[number];
-type FontWeightType = typeof styleVariables.fontWeight[number];
-type ZIndexSizeType = typeof styleVariables.zIndexSizes[number];
-type OpacitySizeType = typeof styleVariables.opacity[number];
-type TextDecorationType = typeof styleVariables.textDecoration[number];
-type TextTransformType = typeof styleVariables.textTransform[number];
-type TextAlignType = typeof styleVariables.textAlign[number];
-type BorderAndOutlineStyleType = typeof styleVariables.borderAndOutlineStyles[number];
+type GapType = (typeof styleVariables.gap)[number];
+type BoxSizeValue = (typeof styleVariables.sizeSpecialValues)[number];
+type BorderSizeType = (typeof styleVariables.borderSizes)[number];
+type SizeType = (typeof styleVariables.sizes)[number];
+type ColorType = (typeof styleVariables.baseColors)[number];
+type BaseFontColorType = (typeof styleVariables.fontColors)[number];
+type BaseBgColorType = (typeof styleVariables.bgColors)[number];
+type BaseBorderColorType = (typeof styleVariables.borderColors)[number];
+type BaseOutlineColorType = (typeof styleVariables.outlineColors)[number];
+type BackgroundType = (typeof styleVariables.backgrounds)[number];
+type ShadowType = (typeof styleVariables.shadows)[number];
+type CursorType = (typeof styleVariables.cursors)[number];
+type OverflowType = (typeof styleVariables.overflows)[number];
+type FontSizeType = (typeof styleVariables.fontSizes)[number];
+type FontWeightType = (typeof styleVariables.fontWeight)[number];
+type ZIndexSizeType = (typeof styleVariables.zIndexSizes)[number];
+type OpacitySizeType = (typeof styleVariables.opacity)[number];
+type TextDecorationType = (typeof styleVariables.textDecoration)[number];
+type TextTransformType = (typeof styleVariables.textTransform)[number];
+type TextAlignType = (typeof styleVariables.textAlign)[number];
+type BorderAndOutlineStyleType = (typeof styleVariables.borderAndOutlineStyles)[number];
 
 interface BoxPseudoClasses {
   hover?: boolean;
@@ -194,16 +194,16 @@ interface BoxPseudoClasses {
 }
 
 interface BoxDisplay {
-  display?: typeof styleVariables.display[number];
+  display?: (typeof styleVariables.display)[number];
   inline?: boolean;
 }
 
 interface BoxSizing {
-  boxSizing?: typeof styleVariables.boxSizing[number];
+  boxSizing?: (typeof styleVariables.boxSizing)[number];
 }
 
 interface BoxPosition {
-  position?: typeof styleVariables.position[number];
+  position?: (typeof styleVariables.position)[number];
   inset?: SizeType;
   top?: SizeType;
   right?: SizeType;
@@ -257,7 +257,7 @@ interface BoxPadding {
 interface BoxOutline {
   outline?: BorderSizeType;
   outlineStyle?: BorderAndOutlineStyleType;
-  outlineOffset?: typeof styleVariables.outlineOffset[number];
+  outlineOffset?: (typeof styleVariables.outlineOffset)[number];
 }
 
 interface BoxBorder {
@@ -336,20 +336,20 @@ interface BoxText {
 }
 
 interface BoxFlex {
-  flexWrap?: typeof styleVariables.flexWrap[number];
-  justifyContent?: typeof styleVariables.justifyContent[number];
-  alignItems?: typeof styleVariables.alignItems[number];
-  alignContent?: typeof styleVariables.alignContent[number];
+  flexWrap?: (typeof styleVariables.flexWrap)[number];
+  justifyContent?: (typeof styleVariables.justifyContent)[number];
+  alignItems?: (typeof styleVariables.alignItems)[number];
+  alignContent?: (typeof styleVariables.alignContent)[number];
   flex1?: boolean;
-  flexDirection?: typeof styleVariables.flexDirection[number];
+  flexDirection?: (typeof styleVariables.flexDirection)[number];
   gap?: GapType;
   rowGap?: GapType;
   columnGap?: GapType;
-  order?: typeof styleVariables.order[number];
-  flexGrow?: typeof styleVariables.flexGrow[number];
-  flexShrink?: typeof styleVariables.flexShrink[number];
-  alignSelf?: typeof styleVariables.flexSelf[number];
-  justifySelf?: typeof styleVariables.flexSelf[number];
+  order?: (typeof styleVariables.order)[number];
+  flexGrow?: (typeof styleVariables.flexGrow)[number];
+  flexShrink?: (typeof styleVariables.flexShrink)[number];
+  alignSelf?: (typeof styleVariables.flexSelf)[number];
+  justifySelf?: (typeof styleVariables.flexSelf)[number];
 }
 
 type BoxNormalStyles = BoxPseudoClasses &
