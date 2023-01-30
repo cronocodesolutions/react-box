@@ -1,3 +1,4 @@
+import React, { forwardRef, Ref } from 'react';
 import Box from '../../box';
 
 type BoxProps = React.ComponentProps<typeof Box<'input'>>;
@@ -22,7 +23,7 @@ interface Props extends Omit<BoxProps, 'props'> {
   defaultChecked?: boolean;
 }
 
-export default function UncontrolledCheckboxCore(props: Props) {
+function UncontrolledCheckboxCore(props: Props, ref: Ref<HTMLInputElement>) {
   const { props: tagProps, name, disabled, placeholder, value, onInput, onChange, autoFocus, readOnly, required, defaultChecked } = props;
 
   const newTagProps = {
@@ -38,7 +39,10 @@ export default function UncontrolledCheckboxCore(props: Props) {
     readOnly,
     required,
     defaultChecked,
+    ref,
   } as BoxTagProps;
 
   return <Box tag="input" inline {...props} props={newTagProps} />;
 }
+
+export default forwardRef(UncontrolledCheckboxCore);

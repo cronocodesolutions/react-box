@@ -1,3 +1,4 @@
+import React, { forwardRef, Ref } from 'react';
 import Box from '../../box';
 
 type BoxProps = React.ComponentProps<typeof Box<'textarea'>>;
@@ -23,8 +24,8 @@ type UncontrolledTextareaCoreTagProps = Omit<
 interface Props extends Omit<BoxProps, 'props'> {
   name: string;
   props?: UncontrolledTextareaCoreTagProps;
-  onInput?: (e: React.FormEvent<HTMLInputElement>) => void;
-  onChange?: (e: React.FormEvent<HTMLInputElement>) => void;
+  onInput?: (e: React.FormEvent<HTMLTextAreaElement>) => void;
+  onChange?: (e: React.FormEvent<HTMLTextAreaElement>) => void;
   placeholder?: string;
   disabled?: boolean;
   defaultValue?: string | number;
@@ -37,7 +38,7 @@ interface Props extends Omit<BoxProps, 'props'> {
   required?: boolean;
 }
 
-export default function UncontrolledTextareaCore(props: Props) {
+function UncontrolledTextareaCore(props: Props, ref: Ref<HTMLTextAreaElement>) {
   const {
     props: tagProps,
     name,
@@ -70,7 +71,10 @@ export default function UncontrolledTextareaCore(props: Props) {
     minLength,
     readOnly,
     required,
+    ref,
   } as BoxTagProps;
 
   return <Box tag="textarea" inline {...props} props={newTagProps} />;
 }
+
+export default forwardRef(UncontrolledTextareaCore);

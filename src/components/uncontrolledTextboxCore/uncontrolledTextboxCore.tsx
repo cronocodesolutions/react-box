@@ -1,3 +1,4 @@
+import React, { forwardRef, Ref } from 'react';
 import Box from '../../box';
 
 type BoxProps = React.ComponentProps<typeof Box<'input'>>;
@@ -37,7 +38,7 @@ interface Props extends Omit<BoxProps, 'props'> {
   step?: number | string;
 }
 
-export default function UncontrolledTextboxCore(props: Props) {
+function UncontrolledTextboxCore(props: Props, ref: Ref<HTMLInputElement>) {
   const {
     props: tagProps,
     name,
@@ -66,7 +67,10 @@ export default function UncontrolledTextboxCore(props: Props) {
     readOnly,
     required,
     step,
+    ref,
   } as BoxTagProps;
 
   return <Box tag="input" inline {...props} props={newTagProps} />;
 }
+
+export default forwardRef(UncontrolledTextboxCore);
