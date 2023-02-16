@@ -1,0 +1,107 @@
+:root {
+  --borderColor: green;
+  --background1: linear-gradient(0.25turn, #3f87a6, #ebf8e1, #f69d3c);
+  --shadow1: 10px 5px 5px red;
+  --shadow2: 10px 5px 5px blue;
+  --backgroundColor1: rgba(4, 40, 68, 0.85);
+  --outlineColor1: rgba(4, 40, 68, 0.85);
+  --borderColor1: rgba(4, 40, 68, 0.85);
+  --color1: rgba(4, 40, 68, 0.85);
+  --purple1: #8562a1;
+}
+.button {
+  --blue: red;
+}
+
+/* START - this is one color declaration */
+.colorpurple1,
+.colorHpurple1:hover,
+.hovertrue:hover > .colorHpurple1 {
+  color: var(--purple1);
+}
+.colorFpurple1:focus-within,
+.focustrue:focus-within > .colorFpurple1 {
+  color: var(--purple1);
+}
+.colorApurple1:active {
+  color: var(--purple1);
+}
+.backgroundColorpurple1,
+.backgroundColorHpurple1:hover,
+.hovertrue:hover > .backgroundColorHpurple1,
+.bgColorpurple1,
+.bgColorHpurple1:hover,
+.hovertrue:hover > .bgColorHpurple1 {
+  background-color: var(--purple1);
+}
+.backgroundColorFpurple1:focus-within,
+.focustrue:focus-within > .backgroundColorFpurple1,
+.bgColorFpurple1:focus-within,
+.focustrue:focus-within > .bgColorFpurple1 {
+  background-color: var(--purple1);
+}
+.backgroundColorApurple1:active,
+.bgColorApurple1:active {
+  background-color: var(--purple1);
+}
+.borderColorpurple1,
+.borderColorHpurple1:hover,
+.hovertrue:hover > .borderColorHpurple1 {
+  border-color: var(--purple1);
+}
+.borderColorFpurple1:focus-within,
+.focustrue:focus-within > .borderColorFpurple1 {
+  border-color: var(--purple1);
+}
+.borderColorApurple1:active {
+  border-color: var(--purple1);
+}
+.outlineColorpurple1,
+.outlineColorHpurple1:hover,
+.hovertrue:hover > .outlineColorHpurple1 {
+  outline-color: var(--purple1);
+}
+.outlineColorFpurple1:focus-within,
+.focustrue:focus-within > .outlineColorFpurple1 {
+  outline-color: var(--purple1);
+}
+.outlineColorApurple1:active {
+  outline-color: var(--purple1);
+}
+/* END - this is one color declaration */
+
+/* START - background definition */
+.background1,
+.backgroundH1:hover,
+.hovertrue:hover > .backgroundH1,
+.bg1,
+.bgH1:hover,
+.hovertrue:hover > .bgH1 {
+  background: var(--background1);
+}
+.backgroundF1:focus-within,
+.focustrue:focus-within > .backgroundF1,
+.bgF1:focus-within,
+.focustrue:focus-within > .bgF1 {
+  background: var(--background1);
+}
+.backgroundA1:active,
+.bgA1:active {
+  background: var(--background1);
+}
+/* END - background definition */
+
+/* START - shadow definition */
+.shadow1,
+.shadowH1:hover,
+.hovertrue:hover > .shadowH1 {
+  box-shadow: var(--shadow1);
+}
+.shadowF1:focus-within,
+.focustrue:focus-within > .shadowF1 {
+  box-shadow: var(--shadow1);
+}
+.shadowA1:active {
+  box-shadow: var(--shadow1);
+}
+/* END - shadow definition */

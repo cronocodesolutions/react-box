@@ -69,62 +69,21 @@ export const styleVariables = {
     'transparent',
     'black',
     'white',
-    'primary',
-    'primaryLight',
-    'primaryDark',
-    'secondary',
-    'secondaryLight',
-    'secondaryDark',
-    'tertiary',
-    'tertiaryLight',
-    'tertiaryDark',
     'blue',
-    'blueLight',
-    'blueDark',
     'red',
-    'redLight',
-    'redDark',
     'purple',
-    'purpleLight',
-    'purpleDark',
     'yellow',
-    'yellowLight',
-    'yellowDark',
     'pink',
-    'pinkLight',
-    'pinkDark',
     'green',
-    'greenLight',
-    'greenDark',
     'orange',
-    'orangeLight',
-    'orangeDark',
     'navy',
-    'navyLight',
-    'navyDark',
     'teal',
-    'tealLight',
-    'tealDark',
     'violet',
-    'violetLight',
-    'violetDark',
     'gray',
-    'grayLight',
-    'grayDark',
     'brown',
-    'brownLight',
-    'brownDark',
     'orange',
-    'orangeLight',
-    'orangeDark',
   ] as const,
   borderSizes: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10] as const,
-  fontColors: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10] as const,
-  bgColors: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10] as const,
-  borderColors: [1, 2, 3, 4, 5] as const,
-  outlineColors: [1, 2, 3, 4, 5] as const,
-  backgrounds: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10] as const,
-  shadows: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10] as const,
   fontSizes: [
     6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30, 32, 34, 36, 38, 40, 42, 44, 46, 48, 50, 54, 58, 64, 70, 78, 86, 96,
   ] as const,
@@ -171,12 +130,6 @@ type BoxSizeValue = (typeof styleVariables.sizeSpecialValues)[number];
 type BorderSizeType = (typeof styleVariables.borderSizes)[number];
 type SizeType = (typeof styleVariables.sizes)[number];
 type ColorType = (typeof styleVariables.baseColors)[number];
-type BaseFontColorType = (typeof styleVariables.fontColors)[number];
-type BaseBgColorType = (typeof styleVariables.bgColors)[number];
-type BaseBorderColorType = (typeof styleVariables.borderColors)[number];
-type BaseOutlineColorType = (typeof styleVariables.outlineColors)[number];
-type BackgroundType = (typeof styleVariables.backgrounds)[number];
-type ShadowType = (typeof styleVariables.shadows)[number];
 type CursorType = (typeof styleVariables.cursors)[number];
 type OverflowType = (typeof styleVariables.overflows)[number];
 type FontSizeType = (typeof styleVariables.fontSizes)[number];
@@ -288,20 +241,20 @@ interface BoxBorder {
 }
 
 interface BoxShadow {
-  shadow?: ShadowType;
+  shadow?: string;
 }
 
 interface BoxBackground {
-  background?: BackgroundType;
-  bg?: BackgroundType;
+  background?: string;
+  bg?: string;
 }
 
 interface BoxColors {
-  color?: ColorType | BaseFontColorType;
-  backgroundColor?: ColorType | BaseBgColorType;
-  bgColor?: ColorType | BaseBgColorType;
-  borderColor?: ColorType | BaseBorderColorType;
-  outlineColor?: ColorType | BaseOutlineColorType;
+  color?: ColorType | string;
+  backgroundColor?: ColorType | string;
+  bgColor?: ColorType | string;
+  borderColor?: ColorType | string;
+  outlineColor?: ColorType | string;
 }
 
 interface BoxCursor {
@@ -373,3 +326,30 @@ type BoxNormalStyles = BoxPseudoClasses &
   BoxOutline;
 
 export type BoxStyles = BoxNormalStyles & Hovered<BoxNormalStyles> & Focused<BoxNormalStyles> & Activated<BoxNormalStyles>;
+
+export const themeClasses: Array<keyof BoxStyles> = [
+  'shadow',
+  'shadowH',
+  'shadowA',
+  'background',
+  'backgroundH',
+  'backgroundA',
+  'bg',
+  'bgH',
+  'bgA',
+  'color',
+  'colorH',
+  'colorA',
+  'backgroundColor',
+  'backgroundColorH',
+  'backgroundColorA',
+  'bgColor',
+  'bgColorH',
+  'bgColorA',
+  'borderColor',
+  'borderColorH',
+  'borderColorA',
+  'outlineColor',
+  'outlineColorH',
+  'outlineColorA',
+];

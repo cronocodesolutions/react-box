@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import classes from './box.module.css';
-import { BoxStyles } from './types';
+import { BoxStyles, themeClasses } from './types';
 import ClassNameUtils from './utils/className/classNameUtils';
 
 type TagPropsType<TTag extends keyof React.ReactHTML> = Omit<React.ComponentProps<TTag>, 'className' | 'style'>;
@@ -19,7 +19,13 @@ export default function Box<TTag extends keyof React.ReactHTML = 'div'>(props: P
   const classNames = className ? ClassNameUtils.classNames(className, classes.box) : [classes.box];
   Object.entries(props).forEach(([key, value]) => {
     const classToAdd = classes[key + value];
-    classToAdd && classNames.push(classToAdd);
+    if (classToAdd) {
+      classNames.push(classToAdd);
+    } else {
+      if (themeClasses.includes(key as keyof BoxStyles)) {
+        classNames.push(`${key}${value}`);
+      }
+    }
   });
 
   const boxTag = tag || 'div';

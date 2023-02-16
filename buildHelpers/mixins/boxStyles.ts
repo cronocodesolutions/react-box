@@ -179,20 +179,20 @@ const boxStyles = {};
   newStylesWithSizes(boxStyles, 'borderRadiusBottomRight', styleVariables.sizes, 'rem', ['border-bottom-right-radius']);
 
   // shadow
-  newStylesCssVariables(boxStyles, 'shadow', styleVariables.shadows, ['box-shadow']);
+  // newStylesCssVariables(boxStyles, 'shadow', styleVariables.shadows, ['box-shadow']);
 
   // backgrounds
-  newStylesCssVariables(boxStyles, 'background', styleVariables.backgrounds, ['background'], ['bg']);
+  // newStylesCssVariables(boxStyles, 'background', styleVariables.backgrounds, ['background'], ['bg']);
 
   // colors
   newStylesCssVariables(boxStyles, 'color', styleVariables.baseColors, ['color'], [], true);
-  newStylesCssVariables(boxStyles, 'color', styleVariables.fontColors, ['color'], []);
+  // newStylesCssVariables(boxStyles, 'color', styleVariables.fontColors, ['color'], []);
   newStylesCssVariables(boxStyles, 'backgroundColor', styleVariables.baseColors, ['background-color'], ['bgColor'], true);
-  newStylesCssVariables(boxStyles, 'backgroundColor', styleVariables.bgColors, ['background-color'], ['bgColor']);
+  // newStylesCssVariables(boxStyles, 'backgroundColor', styleVariables.bgColors, ['background-color'], ['bgColor']);
   newStylesCssVariables(boxStyles, 'borderColor', styleVariables.baseColors, ['border-color'], [], true);
-  newStylesCssVariables(boxStyles, 'borderColor', styleVariables.borderColors, ['border-color'], []);
+  // newStylesCssVariables(boxStyles, 'borderColor', styleVariables.borderColors, ['border-color'], []);
   newStylesCssVariables(boxStyles, 'outlineColor', styleVariables.baseColors, ['outline-color'], [], true);
-  newStylesCssVariables(boxStyles, 'outlineColor', styleVariables.outlineColors, ['outline-color'], []);
+  // newStylesCssVariables(boxStyles, 'outlineColor', styleVariables.outlineColors, ['outline-color'], []);
 
   // cursor
   newStyles(boxStyles, 'cursor', styleVariables.cursors);
