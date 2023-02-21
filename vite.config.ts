@@ -7,6 +7,8 @@ import path from 'path';
 // @ts-ignore
 import boxStylesMixins from './buildHelpers/mixins/boxStyles';
 // @ts-ignore
+import svgStylesMixins from './buildHelpers/mixins/svgStyles';
+// @ts-ignore
 import moduleCssPlugin from './buildHelpers/plugins/moduleCssPlugin';
 
 const identity = new IdentityFactory();
@@ -30,7 +32,7 @@ export default defineConfig(({ mode }) => {
     css: {
       devSourcemap: mode === 'dev',
       postcss: {
-        plugins: [require('postcss-mixins')({ mixins: boxStylesMixins }), require('autoprefixer')],
+        plugins: [require('postcss-mixins')({ mixins: { ...boxStylesMixins, ...svgStylesMixins } }), require('autoprefixer')],
       },
       modules: {
         generateScopedName: (name: string, filename: string, css: string) => {

@@ -68,6 +68,16 @@
 .outlineColorApurple1:active {
   outline-color: var(--purple1);
 }
+.fillpurple1,
+.fillHpurple1:hover,
+.hovertrue:hover > .fillHpurple1 {
+  path,
+  circle,
+  rect,
+  line {
+    fill: var(--purple1);
+  }
+}
 /* END - this is one color declaration */
 
 /* START - background definition */

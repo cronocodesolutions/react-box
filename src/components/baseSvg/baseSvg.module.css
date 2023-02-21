@@ -1,0 +1,6 @@
+.base {
+  width: 1.5rem;
+  transition: all 0.2s;
+}
+
+@mixin svgStyles;

@@ -8,6 +8,7 @@ import FormAsync from '../src/components/formAsync/formAsync';
 import UncontrolledCheckboxCore from '../src/components/uncontrolledCheckboxCore/uncontrolledCheckboxCore';
 import UncontrolledRadiobuttonCore from '../src/components/uncontrolledRadioButtonCore/uncontrolledRadioButtonCore';
 import '/theme.css';
+import BaseSvg from '../src/components/baseSvg/baseSvg';
 
 const root = ReactDOM.createRoot(document.getElementById('root')!);
 
@@ -36,6 +37,25 @@ function TestUncontrolledTextboxCoreRef() {
       >
         Clear
       </ButtonCore>
+      <svg></svg>
+      <Test width="30px" fill="purple1" fillH="gray" rotate={0} flipH="yAxis" />
+      <Box style={{ color }} />
+      <div></div>
     </Box>
+  );
+}
+
+type TestProps = Omit<React.ComponentProps<typeof BaseSvg>, 'viewBox' | 'children'>;
+
+function Test(props: TestProps) {
+  return (
+    <BaseSvg {...props}>
+      <path
+        fillRule="evenodd"
+        clipRule="evenodd"
+        d="M4.293 8.293a1 1 0 0 1 1.414 0L12 14.586l6.293-6.293a1 1 0 1 1 1.414 1.414l-7 7a1 1 0 0 1-1.414 0l-7-7a1 1 0 0 1 0-1.414Z"
+        fill="#000"
+      />
+    </BaseSvg>
   );
 }
