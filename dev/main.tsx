@@ -39,7 +39,6 @@ function TestUncontrolledTextboxCoreRef() {
       </ButtonCore>
       <svg></svg>
       <Test width="30px" fill="purple1" fillH="gray" rotate={0} flipH="yAxis" />
-      <Box style={{ color }} />
       <div></div>
     </Box>
   );
