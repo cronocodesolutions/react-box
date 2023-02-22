@@ -43,6 +43,7 @@ body {
   background-color: initial;
   transition: all var(--transitionTime);
   box-sizing: border-box;
+  font-family: inherit;
 }
 
 @mixin boxStyles;
