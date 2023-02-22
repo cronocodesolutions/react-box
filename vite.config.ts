@@ -32,7 +32,11 @@ export default defineConfig(({ mode }) => {
     css: {
       devSourcemap: mode === 'dev',
       postcss: {
-        plugins: [require('postcss-mixins')({ mixins: { ...boxStylesMixins, ...svgStylesMixins } }), require('autoprefixer')],
+        plugins: [
+          require('postcss-mixins')({ mixins: { ...boxStylesMixins, ...svgStylesMixins } }),
+          require('postcss-nested'),
+          require('autoprefixer'),
+        ],
       },
       modules: {
         generateScopedName: (name: string, filename: string, css: string) => {

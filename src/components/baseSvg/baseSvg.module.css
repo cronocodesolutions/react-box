@@ -1,6 +1,17 @@
+:root {
+  --svgTransitionTime: 0.3s;
+}
+
 .base {
   width: 1.5rem;
-  transition: all 0.2s;
+  transition: all var(--svgTransitionTime);
+
+  path,
+  circle,
+  rect,
+  line {
+    transition: all var(--svgTransitionTime);
+  }
 }
 
 @mixin svgStyles;

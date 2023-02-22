@@ -78,6 +78,16 @@
     fill: var(--purple1);
   }
 }
+.strokepurple1,
+.strokeHpurple1:hover,
+.hovertrue:hover > .strokeHpurple1 {
+  path,
+  circle,
+  rect,
+  line {
+    stroke: var(--purple1);
+  }
+}
 /* END - this is one color declaration */
 
 /* START - background definition */

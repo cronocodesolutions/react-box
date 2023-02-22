@@ -1,6 +1,6 @@
 {
   "name": "@cronocode/react-box",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "main": "./box.js",
   "module": "./box.js",
   "types": "./box.d.ts",
@@ -51,6 +51,7 @@
     "autoprefixer": "^10.4.13",
     "postcss": "^8.4.21",
     "postcss-mixins": "^9.0.4",
+    "postcss-nested": "^6.0.1",
     "prettier": "^2.8.3",
     "react": "^18.1.0",
     "react-dom": "^18.2.0",
