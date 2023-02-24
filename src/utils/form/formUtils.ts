@@ -1,4 +1,7 @@
-type FormValueType = string | string[] | number | number[] | boolean;
+type FormValue = string | string[] | number | number[] | boolean;
+interface FormObject {
+  [index: string]: FormValue | FormObject;
+}
 
 namespace FormUtils {
   export function getFormEntries(form: HTMLFormElement) {
@@ -21,25 +24,53 @@ namespace FormUtils {
       if (elements.length === 1) {
         const el = elements[0];
 
-        obj[name] = el.type === 'checkbox' || el.type === 'radio' ? el.checked : el.value;
+        setValue(obj, name, el.type === 'checkbox' || el.type === 'radio' ? el.checked : el.value);
       } else {
-        obj[name] = [];
-
-        elements.forEach((el) => {
-          if (el.type === 'checkbox') {
+        const values = elements.reduce((values, el) => {
+          if (el.type === 'checkbox' || el.type === 'radio') {
             if (el.checked) {
-              (obj[name] as string[]).push(el.value);
+              values.push(el.value);
             }
-          } else if (el.type === 'radio') {
-            (obj[name] as any) = elements.find((e) => e.checked)?.value;
           } else {
-            (obj[name] as string[]).push(el.value);
+            values.push(el.value);
           }
-        });
+
+          return values;
+        }, [] as string[]);
+
+        setValue(obj, name, values);
       }
 
       return obj;
-    }, {} as Record<string, FormValueType>);
+    }, {} as FormObject);
+  }
+
+  function setValue(obj: FormObject, name: string, value: FormValue) {
+    if (name.includes('.')) {
+      const names = name.split('.');
+
+      let objPosition = obj;
+
+      names.forEach((n, index) => {
+        if (names.length > index + 1) {
+          const test = n.match(/^(.+)\[(\d)\]$/);
+
+          if (test) {
+            const [, arrName, arrIndex] = test;
+            objPosition[arrName] = (objPosition[arrName] || []) as FormObject;
+            (objPosition[arrName] as FormObject)[arrIndex] = (objPosition[arrName] as FormObject)[arrIndex] || {};
+            objPosition = (objPosition[arrName] as FormObject)[arrIndex] as FormObject;
+          } else {
+            objPosition[n] = objPosition[n] || {};
+            objPosition = objPosition[n] as FormObject;
+          }
+        } else {
+          objPosition[n] = value;
+        }
+      });
+    } else {
+      obj[name] = value;
+    }
   }
 }
 

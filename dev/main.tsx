@@ -15,8 +15,31 @@ const root = ReactDOM.createRoot(document.getElementById('root')!);
 root.render(
   <React.StrictMode>
     <TestSvgPathChangeAnimation />
+    <TestFormComplexObject />
   </React.StrictMode>,
 );
+
+function TestFormComplexObject() {
+  return (
+    <FormAsync onSubmit={(obj) => console.log(obj)}>
+      <UncontrolledTextboxCore name="prop" display="block" b={1} placeholder="prop" />
+      <UncontrolledTextboxCore name="prop" display="block" b={1} placeholder="prop" />
+      <Box>User</Box>
+      <UncontrolledTextboxCore name="user.firstname" display="block" b={1} placeholder="user.firstname" />
+      <UncontrolledTextboxCore name="user.lastname" display="block" b={1} placeholder="user.lastname" />
+      <Box>User array</Box>
+      {[0, 1].map((item, index) => (
+        <Box>
+          <UncontrolledTextboxCore name={`user2[${index}].firstname`} b={1} placeholder={`user2[${index}].firstname`} />
+          <UncontrolledTextboxCore name={`user2[${index}].lastname`} b={1} placeholder={`user2[${index}].lastname`} />
+          <UncontrolledTextboxCore name={`user2[${index}].lastname`} b={1} placeholder={`user2[${index}].lastname`} />
+        </Box>
+      ))}
+
+      <ButtonCore type="submit">Submit</ButtonCore>
+    </FormAsync>
+  );
+}
 
 function TestUncontrolledTextboxCoreRef() {
   const textBoxRef = useRef<HTMLInputElement>(null);
