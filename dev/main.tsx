@@ -14,6 +14,9 @@ const root = ReactDOM.createRoot(document.getElementById('root')!);
 
 root.render(
   <React.StrictMode>
+    <Box m={10} bgColor="red" inline p={3} pH={5} transition="none">
+      max
+    </Box>
     <TestSvgPathChangeAnimation />
     <TestFormComplexObject />
   </React.StrictMode>,

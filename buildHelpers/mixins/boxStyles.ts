@@ -239,6 +239,9 @@ const boxStyles = {};
   newStylesWithSizes(boxStyles, 'outline', styleVariables.borderSizes, 'px', ['outline-width']);
   newStyles(boxStyles, 'outlineStyle', styleVariables.borderAndOutlineStyles, ['outline-style']);
   newStylesWithSizes(boxStyles, 'outlineOffset', styleVariables.outlineOffset, 'px', ['outline-offset']);
+
+  // transition
+  newStyles(boxStyles, 'transition', styleVariables.transition);
 });
 
 export default {

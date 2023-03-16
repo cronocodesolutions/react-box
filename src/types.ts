@@ -123,6 +123,7 @@ export const styleVariables = {
   flexShrink: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10] as const,
   flexSelf: ['auto', 'flex-start', 'flex-end', 'center', 'baseline', 'stretch'] as const,
   outlineOffset: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10] as const,
+  transition: ['none'] as const,
 };
 
 type GapType = (typeof styleVariables.gap)[number];
@@ -140,6 +141,7 @@ type TextDecorationType = (typeof styleVariables.textDecoration)[number];
 type TextTransformType = (typeof styleVariables.textTransform)[number];
 type TextAlignType = (typeof styleVariables.textAlign)[number];
 type BorderAndOutlineStyleType = (typeof styleVariables.borderAndOutlineStyles)[number];
+type TransitionType = (typeof styleVariables.transition)[number];
 
 interface BoxPseudoClasses {
   hover?: boolean;
@@ -305,6 +307,10 @@ interface BoxFlex {
   justifySelf?: (typeof styleVariables.flexSelf)[number];
 }
 
+interface BoxTransition {
+  transition?: TransitionType;
+}
+
 type BoxNormalStyles = BoxPseudoClasses &
   BoxDisplay &
   BoxSizing &
@@ -323,7 +329,8 @@ type BoxNormalStyles = BoxPseudoClasses &
   BoxFont &
   BoxText &
   BoxFlex &
-  BoxOutline;
+  BoxOutline &
+  BoxTransition;
 
 export type BoxStyles = BoxNormalStyles & Hovered<BoxNormalStyles> & Focused<BoxNormalStyles> & Activated<BoxNormalStyles>;
 
