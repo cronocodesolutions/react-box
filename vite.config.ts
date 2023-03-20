@@ -55,7 +55,7 @@ export default defineConfig(({ mode }) => {
         formats: ['es'],
       },
       rollupOptions: {
-        external: ['react'],
+        external: ['react', 'react/jsx-runtime'],
         output: {
           inlineDynamicImports: false,
           manualChunks(id: string) {
