@@ -9,18 +9,31 @@ import UncontrolledCheckboxCore from '../src/components/uncontrolledCheckboxCore
 import UncontrolledRadiobuttonCore from '../src/components/uncontrolledRadioButtonCore/uncontrolledRadioButtonCore';
 import '/theme.css';
 import BaseSvg from '../src/components/baseSvg/baseSvg';
+import ClassNameUtils from '../src/utils/className/classNameUtils';
 
 const root = ReactDOM.createRoot(document.getElementById('root')!);
 
 root.render(
   <React.StrictMode>
     <Box m={10} bgColor="red" inline p={3} pH={5} transition="none">
-      max
+      max <TestClassName />
     </Box>
     <TestSvgPathChangeAnimation />
     <TestFormComplexObject />
   </React.StrictMode>,
 );
+
+interface TestClassNameProps {
+  className?: string;
+}
+
+function TestClassName(props: TestClassNameProps) {
+  const { className } = props;
+
+  const a: ClassNameUtils.ClassNameType = className;
+
+  return <Box className={a}>TestClassName</Box>;
+}
 
 function TestFormComplexObject() {
   return (
