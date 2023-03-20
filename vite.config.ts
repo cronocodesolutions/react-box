@@ -83,22 +83,22 @@ export default defineConfig(({ mode }) => {
 
           chunkFileNames(chunkInfo) {
             if (chunkInfo.name === 'index') {
-              return '[name].js';
+              return '[name].mjs';
             }
 
             if (chunkInfo.name === 'box') {
-              return '[name].js';
+              return '[name].mjs';
             }
 
             if (chunkInfo.name === 'box.module.css') {
-              return '[name].js';
+              return '[name].mjs';
             }
 
             if (chunkInfo.name === 'utils') {
-              return 'utils/[name].js';
+              return 'utils/[name].mjs';
             }
 
-            return 'components/[name].js';
+            return 'components/[name].mjs';
           },
         },
       },
