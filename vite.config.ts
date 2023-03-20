@@ -26,7 +26,7 @@ export default defineConfig(({ mode }) => {
           return { filePath: dir.includes('components') ? `${dir}.d.ts` : filePath, content: content.replace(/..\/..\//g, '../') };
         },
       }),
-      reactPlugin(),
+      reactPlugin({ jsxRuntime: 'classic' }),
       moduleCssPlugin(jsonCache),
     ],
     css: {
@@ -55,7 +55,7 @@ export default defineConfig(({ mode }) => {
         formats: ['es'],
       },
       rollupOptions: {
-        external: ['react'],
+        external: ['react', 'react/jsx-runtime'],
         output: {
           inlineDynamicImports: false,
           manualChunks(id: string) {
