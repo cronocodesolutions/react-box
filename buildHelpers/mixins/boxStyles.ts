@@ -182,6 +182,7 @@ const boxStyles = {};
   // newStylesCssVariables(boxStyles, 'shadow', styleVariables.shadows, ['box-shadow']);
 
   // backgrounds
+  newStyles(boxStyles, 'background', styleVariables.background, undefined, ['bg']);
   // newStylesCssVariables(boxStyles, 'background', styleVariables.backgrounds, ['background'], ['bg']);
 
   // colors

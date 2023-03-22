@@ -124,6 +124,7 @@ export const styleVariables = {
   flexSelf: ['auto', 'flex-start', 'flex-end', 'center', 'baseline', 'stretch'] as const,
   outlineOffset: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10] as const,
   transition: ['none'] as const,
+  background: ['none'] as const,
 };
 
 type GapType = (typeof styleVariables.gap)[number];
@@ -142,6 +143,7 @@ type TextTransformType = (typeof styleVariables.textTransform)[number];
 type TextAlignType = (typeof styleVariables.textAlign)[number];
 type BorderAndOutlineStyleType = (typeof styleVariables.borderAndOutlineStyles)[number];
 type TransitionType = (typeof styleVariables.transition)[number];
+type BackgroundType = (typeof styleVariables.background)[number];
 
 interface BoxPseudoClasses {
   hover?: boolean;
@@ -247,8 +249,8 @@ interface BoxShadow {
 }
 
 interface BoxBackground {
-  background?: string;
-  bg?: string;
+  background?: BackgroundType | string;
+  bg?: BackgroundType | string;
 }
 
 interface BoxColors {

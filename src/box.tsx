@@ -18,7 +18,7 @@ interface Props<TTag extends keyof React.ReactHTML> extends BoxStyles {
 function Box<TTag extends keyof React.ReactHTML = 'div'>(props: Props<TTag>, ref: Ref<HTMLElement>) {
   const { tag, children, props: tagProps, className, style } = props;
 
-  const classNames = className ? ClassNameUtils.classNames(className, classes.box) : [classes.box];
+  const classNames = className ? ClassNameUtils.classNames(classes.box, className) : [classes.box];
   Object.entries(props).forEach(([key, value]) => {
     const classToAdd = classes[key + value];
     if (classToAdd) {
