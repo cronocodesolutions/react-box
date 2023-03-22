@@ -5,7 +5,7 @@ import ObjectUtils from '../../utils/object/objectUtils';
 type BoxProps = Omit<React.ComponentProps<typeof Box<'input'>>, 'ref' | 'tag'>;
 type BoxTagProps = Required<BoxProps>['props'];
 
-type TextboxCoreTagProps = Omit<
+type RadioButtonCoreTagProps = Omit<
   BoxTagProps,
   | 'name'
   | 'onInput'
@@ -13,64 +13,44 @@ type TextboxCoreTagProps = Omit<
   | 'type'
   | 'placeholder'
   | 'disabled'
-  | 'defaultValue'
+  | 'value'
   | 'autoFocus'
   | 'readOnly'
   | 'required'
-  | 'value'
-  | 'pattern'
+  | 'checked'
+  | 'defaultChecked'
 >;
-type TextboxCoreType =
-  | 'date'
-  | 'datetime-local'
-  | 'email'
-  | 'hidden'
-  | 'month'
-  | 'number'
-  | 'password'
-  | 'search'
-  | 'tel'
-  | 'text'
-  | 'time'
-  | 'url'
-  | 'week';
 
 interface Props extends Omit<BoxProps, 'props'> {
   name?: string;
-  props?: TextboxCoreTagProps;
+  props?: RadioButtonCoreTagProps;
   onInput?: (e: React.FormEvent<HTMLInputElement>) => void;
   onChange?: (e: React.FormEvent<HTMLInputElement>) => void;
-  type?: TextboxCoreType;
-  placeholder?: string;
   disabled?: boolean;
   value?: string | number;
-  defaultValue?: string | number;
-  pattern?: string;
   autoFocus?: boolean;
   readOnly?: boolean;
   required?: boolean;
-  step?: number | string;
+  checked?: boolean;
+  defaultChecked?: boolean;
 }
 
-function TextboxCore(props: Props, ref: Ref<HTMLInputElement>) {
+function RadioButtonCore(props: Props, ref: Ref<HTMLInputElement>) {
   const [tagProps, newProps] = ObjectUtils.moveToTagProps(
     props,
     'name',
     'onInput',
     'onChange',
-    'type',
-    'placeholder',
     'disabled',
     'value',
-    'defaultValue',
-    'pattern',
     'autoFocus',
     'readOnly',
     'required',
-    'step',
+    'checked',
+    'defaultChecked',
   );
 
-  return <Box ref={ref} tag="input" inline {...newProps} props={{ ...props.props, ...(tagProps as BoxTagProps) }} />;
+  return <Box ref={ref} tag="input" inline {...newProps} props={{ ...props.props, ...(tagProps as BoxTagProps), type: 'radio' }} />;
 }
 
-export default forwardRef(TextboxCore);
+export default forwardRef(RadioButtonCore);

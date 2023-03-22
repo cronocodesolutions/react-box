@@ -21,7 +21,7 @@
   --outlineColor: black;
   --lineHeight: 1.2;
   --fontSize: 14px;
-  --transitionTime: 0.2s;
+  --transitionTime: 0.25s;
 }
 
 html {
@@ -44,6 +44,7 @@ body {
   transition: all var(--transitionTime);
   box-sizing: border-box;
   font-family: inherit;
+  font-size: inherit;
 }
 
 @mixin boxStyles;

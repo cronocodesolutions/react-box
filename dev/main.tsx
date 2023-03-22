@@ -35,6 +35,7 @@ function TestRef() {
     <Box ref={boxRef}>
       <Box>test</Box>
       <TextboxCore
+        name="test"
         ref={textboxRef}
         type="date"
         props={{
