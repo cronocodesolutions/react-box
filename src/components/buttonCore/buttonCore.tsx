@@ -1,6 +1,8 @@
+import { forwardRef, Ref } from 'react';
 import Box from '../../box';
+import ObjectUtils from '../../utils/object/objectUtils';
 
-type BoxProps = React.ComponentProps<typeof Box<'button'>>;
+type BoxProps = Omit<React.ComponentProps<typeof Box<'button'>>, 'ref' | 'tag'>;
 type BoxTagProps = Required<BoxProps>['props'];
 
 type ButtonTagProps = Omit<BoxTagProps, 'type' | 'onClick' | 'disabled'>;
@@ -13,10 +15,10 @@ interface Props extends Omit<BoxProps, 'props'> {
   disabled?: boolean;
 }
 
-export default function ButtonCore(props: Props) {
-  const { tag, type, onClick, disabled, props: tagProps } = props;
+function ButtonCore(props: Props, ref: Ref<HTMLButtonElement>) {
+  const [tagProps, newProps] = ObjectUtils.moveToTagProps(props, 'type', 'onClick', 'disabled');
 
-  const newTagProps = { ...tagProps, type: type || 'button', onClick, disabled } as BoxTagProps;
-
-  return <Box tag={tag || 'button'} cursor="pointer" inline {...props} props={newTagProps} />;
+  return <Box ref={ref} tag="button" cursor="pointer" inline {...newProps} props={{ ...props.props, ...(tagProps as BoxTagProps) }} />;
 }
+
+export default forwardRef(ButtonCore);

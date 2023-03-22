@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import React, { forwardRef, Ref, useState } from 'react';
 import classes from './box.module.css';
 import { BoxStyles, themeClasses } from './types';
 import ClassNameUtils from './utils/className/classNameUtils';
 
-type TagPropsType<TTag extends keyof React.ReactHTML> = Omit<React.ComponentProps<TTag>, 'className' | 'style'>;
+type AllProps<TTag extends keyof React.ReactHTML> = React.ComponentProps<TTag>;
+type TagPropsType<TTag extends keyof React.ReactHTML> = Omit<AllProps<TTag>, 'className' | 'style' | 'ref'>;
 
 interface Props<TTag extends keyof React.ReactHTML> extends BoxStyles {
   children?: React.ReactNode | ((props: { isHover: boolean }) => React.ReactNode);
@@ -11,9 +12,10 @@ interface Props<TTag extends keyof React.ReactHTML> extends BoxStyles {
   props?: TagPropsType<TTag>;
   style?: React.ComponentProps<TTag>['style'];
   className?: ClassNameUtils.ClassNameType;
+  ref?: Ref<HTMLElement>;
 }
 
-export default function Box<TTag extends keyof React.ReactHTML = 'div'>(props: Props<TTag>) {
+function Box<TTag extends keyof React.ReactHTML = 'div'>(props: Props<TTag>, ref: Ref<HTMLElement>) {
   const { tag, children, props: tagProps, className, style } = props;
 
   const classNames = className ? ClassNameUtils.classNames(className, classes.box) : [classes.box];
@@ -28,9 +30,9 @@ export default function Box<TTag extends keyof React.ReactHTML = 'div'>(props: P
     }
   });
 
-  const boxTag = tag || 'div';
-
-  const finalTagProps = { ...tagProps, style, className: classNames.join(' ') };
+  const finalTagProps = { ...tagProps, className: classNames.join(' ') } as AllProps<TTag>;
+  style && (finalTagProps.style = style);
+  ref && (finalTagProps.ref = ref);
 
   const [isHover, setIsHover] = useState(false);
   const needsHoverState = typeof children === 'function';
@@ -39,5 +41,7 @@ export default function Box<TTag extends keyof React.ReactHTML = 'div'>(props: P
     finalTagProps.onMouseLeave = () => setIsHover(false);
   }
 
-  return React.createElement(boxTag, finalTagProps, needsHoverState ? children({ isHover }) : children);
+  return React.createElement(tag || 'div', finalTagProps, needsHoverState ? children({ isHover }) : children);
 }
+
+export default forwardRef(Box) as <TTag extends keyof React.ReactHTML = 'div'>(props: Props<TTag>) => JSX.Element;
