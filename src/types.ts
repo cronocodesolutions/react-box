@@ -11,7 +11,7 @@ export type Activated<T> = {
 };
 
 export const styleVariables = {
-  display: ['none', 'block', 'inline-block', 'flex', 'inline-flex', 'grid', 'contents'] as const,
+  display: ['none', 'block', 'inline-block', 'flex', 'inline-flex', 'grid', 'inline-grid', 'contents'] as const,
   boxSizing: ['border-box', 'content-box'] as const,
   position: ['static', 'relative', 'absolute', 'fixed', 'sticky'] as const,
   sizeSpecialValues: ['fit', 'fit-screen', 'auto', 'fit-content', 'max-content', 'min-content'] as const,
@@ -125,6 +125,7 @@ export const styleVariables = {
   outlineOffset: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10] as const,
   transition: ['none'] as const,
   background: ['none'] as const,
+  userSelect: ['none'] as const,
 };
 
 type GapType = (typeof styleVariables.gap)[number];
@@ -144,6 +145,7 @@ type TextAlignType = (typeof styleVariables.textAlign)[number];
 type BorderAndOutlineStyleType = (typeof styleVariables.borderAndOutlineStyles)[number];
 type TransitionType = (typeof styleVariables.transition)[number];
 type BackgroundType = (typeof styleVariables.background)[number];
+type UserSelectType = (typeof styleVariables.userSelect)[number];
 
 interface BoxPseudoClasses {
   hover?: boolean;
@@ -313,6 +315,10 @@ interface BoxTransition {
   transition?: TransitionType;
 }
 
+interface BoxUserSelect {
+  userSelect?: UserSelectType;
+}
+
 type BoxNormalStyles = BoxPseudoClasses &
   BoxDisplay &
   BoxSizing &
@@ -332,7 +338,8 @@ type BoxNormalStyles = BoxPseudoClasses &
   BoxText &
   BoxFlex &
   BoxOutline &
-  BoxTransition;
+  BoxTransition &
+  BoxUserSelect;
 
 export type BoxStyles = BoxNormalStyles & Hovered<BoxNormalStyles> & Focused<BoxNormalStyles> & Activated<BoxNormalStyles>;
 

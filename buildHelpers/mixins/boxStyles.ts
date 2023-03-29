@@ -243,6 +243,9 @@ const boxStyles = {};
 
   // transition
   newStyles(boxStyles, 'transition', styleVariables.transition);
+
+  // user-select
+  newStyles(boxStyles, 'userSelect', styleVariables.userSelect, ['user-select']);
 });
 
 export default {
