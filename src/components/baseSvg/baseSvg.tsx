@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ColorType, Hovered } from '../../types';
+import { Activated, ColorType, Focused, Hovered, themeSvgClasses } from '../../types';
 import ClassNameUtils from '../../utils/className/classNameUtils';
 import classes from './baseSvg.module.css';
 
@@ -9,13 +9,11 @@ interface SvgNormalStyles {
   rotate?: 0 | 90 | 180 | 270;
   flip?: 'xAxis' | 'yAxis';
 }
-export type SvgStyles = SvgNormalStyles & Hovered<SvgNormalStyles>;
+export type SvgStyles = SvgNormalStyles & Hovered<SvgNormalStyles> & Focused<SvgNormalStyles> & Activated<SvgNormalStyles>;
 
 type AllSvgProps = React.SVGProps<SVGElement>;
 type SvgPropsType = Omit<AllSvgProps, 'className' | 'style' | 'width' | 'height'>;
 type SvgStyleType = Omit<React.CSSProperties, 'width' | 'height'>;
-
-const customThemeClasses: Array<keyof SvgStyles> = ['fill', 'fillH', 'stroke', 'strokeH'];
 
 interface Props extends SvgStyles {
   children?: React.ReactNode | ((props: { isHover: boolean }) => React.ReactNode);
@@ -36,8 +34,8 @@ export default function BaseSvg(props: Props) {
     if (classToAdd) {
       classNames.push(classToAdd);
     } else {
-      if (customThemeClasses.includes(key as keyof SvgStyles)) {
-        classNames.push(`${key}${value}`);
+      if (key in themeSvgClasses) {
+        classNames.push(`${themeSvgClasses[key as keyof SvgStyles]}${value}`);
       }
     }
   });

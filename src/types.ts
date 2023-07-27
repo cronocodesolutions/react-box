@@ -1,3 +1,5 @@
+import { SvgStyles } from './components/baseSvg/baseSvg';
+
 export type Hovered<T> = {
   [K in keyof T as K extends string ? `${K}H` : never]: T[K];
 };
@@ -378,4 +380,15 @@ export const themeClasses: Partial<Record<keyof BoxStyles, string>> = {
   outlineColorH: 'outlineColor_h_',
   outlineColorF: 'outlineColor_f_',
   outlineColorA: 'outlineColor_a_',
+};
+
+export const themeSvgClasses: Partial<Record<keyof SvgStyles, string>> = {
+  fill: 'fill_',
+  fillH: 'fill_h_',
+  fillF: 'fill_f_',
+  fillA: 'fill_a_',
+  stroke: 'stroke_',
+  strokeH: 'stroke_h_',
+  strokeF: 'stroke_f_',
+  strokeA: 'stroke_a_',
 };

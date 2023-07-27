@@ -90,9 +90,47 @@ $backgrounds: 1, 2, 3;
     }
   }
 
+  .fill_f_$(color):focus-within,
+  ._f:focus-within .fill_f_$(color) {
+    path,
+    circle,
+    rect,
+    line {
+      fill: var(--$(color));
+    }
+  }
+
+  .fill_a_$(color):active {
+    path,
+    circle,
+    rect,
+    line {
+      fill: var(--$(color));
+    }
+  }
+
   .stroke_$(color),
   .stroke_h_$(color):hover,
   ._h:hover .stroke_h_$(color) {
+    path,
+    circle,
+    rect,
+    line {
+      stroke: var(--$(color));
+    }
+  }
+
+  .stroke_f_$(color):focus-within,
+  ._f:focus-within .stroke_f_$(color) {
+    path,
+    circle,
+    rect,
+    line {
+      stroke: var(--$(color));
+    }
+  }
+
+  .stroke_a_$(color):active {
     path,
     circle,
     rect,
