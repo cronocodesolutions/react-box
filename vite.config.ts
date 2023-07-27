@@ -35,12 +35,18 @@ export default defineConfig(({ mode }) => {
         plugins: [
           require('postcss-mixins')({ mixins: { ...boxStylesMixins, ...svgStylesMixins } }),
           require('postcss-nested'),
+          require('postcss-simple-vars')({ silent: true }),
           require('autoprefixer'),
+          require('postcss-each'),
         ],
       },
       modules: {
         generateScopedName: (name: string, filename: string, css: string) => {
-          return mode === 'dev' ? name : identity.getIdentity(name);
+          // return mode === 'dev' ? name : identity.getIdentity(name);
+          if (name === 'hovertrue') return '_h';
+          if (name === 'focustrue') return '_f';
+
+          return identity.getIdentity(name);
         },
         getJSON: (cssFileName, json, outputFileName) => {
           jsonCache[cssFileName] = json;

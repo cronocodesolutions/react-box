@@ -24,8 +24,8 @@ function Box<TTag extends keyof React.ReactHTML = 'div'>(props: Props<TTag>, ref
     if (classToAdd) {
       classNames.push(classToAdd);
     } else {
-      if (themeClasses.includes(key as keyof BoxStyles)) {
-        classNames.push(`${key}${value}`);
+      if (key in themeClasses) {
+        classNames.push(`${themeClasses[key as keyof BoxStyles]}${value}`);
       }
     }
   });

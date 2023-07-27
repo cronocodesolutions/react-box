@@ -19,7 +19,11 @@ const root = ReactDOM.createRoot(document.getElementById('root')!);
 root.render(
   <React.StrictMode>
     <Flex>
-      <Flex flex1 height="fit-screen">
+      <Flex flex1 height="fit-screen" focus className="test" b={1} background="1" shadow="2">
+        <Flex color="blue6" colorF="purple1" fontSize={20}>
+          test
+        </Flex>
+        <input type="text" />
         {/* <SigninLeftSide /> */}
       </Flex>
       <Flex flex1 height="fit-screen" alignItems="center" flexDirection="column" p={6}>

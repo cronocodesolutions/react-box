@@ -10,13 +10,13 @@ const boxStyles = {};
 
     if (pseudoClass === 'hover') {
       classNames.push('.' + className + value);
-      classNames.push('.' + className + 'H' + value + ':hover');
-      classNames.push('.hovertrue:hover' + '>.' + className + 'H' + value);
+      classNames.push('.' + className + '_h_' + value + ':hover');
+      classNames.push('.hovertrue:hover' + ' .' + className + '_h_' + value);
     } else if (pseudoClass === 'focus') {
-      classNames.push('.' + className + 'F' + value + ':focus-within');
-      classNames.push('.focustrue:focus-within' + '>.' + className + 'F' + value);
+      classNames.push('.' + className + '_f_' + value + ':focus-within');
+      classNames.push('.focustrue:focus-within' + ' .' + className + '_f_' + value);
     } else if (pseudoClass === 'active') {
-      classNames.push('.' + className + 'A' + value + ':active');
+      classNames.push('.' + className + '_a_' + value + ':active');
     }
 
     return classNames;
@@ -186,13 +186,13 @@ const boxStyles = {};
   // newStylesCssVariables(boxStyles, 'background', styleVariables.backgrounds, ['background'], ['bg']);
 
   // colors
-  newStylesCssVariables(boxStyles, 'color', styleVariables.baseColors, ['color'], [], true);
+  // newStylesCssVariables(boxStyles, 'color', styleVariables.baseColors, ['color'], [], true);
   // newStylesCssVariables(boxStyles, 'color', styleVariables.fontColors, ['color'], []);
-  newStylesCssVariables(boxStyles, 'backgroundColor', styleVariables.baseColors, ['background-color'], ['bgColor'], true);
+  // newStylesCssVariables(boxStyles, 'backgroundColor', styleVariables.baseColors, ['background-color'], ['bgColor'], true);
   // newStylesCssVariables(boxStyles, 'backgroundColor', styleVariables.bgColors, ['background-color'], ['bgColor']);
-  newStylesCssVariables(boxStyles, 'borderColor', styleVariables.baseColors, ['border-color'], [], true);
+  // newStylesCssVariables(boxStyles, 'borderColor', styleVariables.baseColors, ['border-color'], [], true);
   // newStylesCssVariables(boxStyles, 'borderColor', styleVariables.borderColors, ['border-color'], []);
-  newStylesCssVariables(boxStyles, 'outlineColor', styleVariables.baseColors, ['outline-color'], [], true);
+  // newStylesCssVariables(boxStyles, 'outlineColor', styleVariables.baseColors, ['outline-color'], [], true);
   // newStylesCssVariables(boxStyles, 'outlineColor', styleVariables.outlineColors, ['outline-color'], []);
 
   // cursor
