@@ -21,12 +21,12 @@ $backgrounds: 1, 2, 3;
 @each $color in $colors {
   .color_$(color),
   .color_h_$(color):hover,
-  ._h:hover .color_h_$(color) {
+  ._h:hover > .color_h_$(color) {
     color: var(--$(color));
   }
 
   .color_f_$(color):focus-within,
-  ._f:focus-within .color_f_$(color) {
+  ._f:focus-within > .color_f_$(color) {
     color: var(--$(color));
   }
 
@@ -36,12 +36,12 @@ $backgrounds: 1, 2, 3;
 
   .bgColor_$(color),
   .bgColor_h_$(color):hover,
-  ._h:hover .bgColor_h_$(color) {
+  ._h:hover > .bgColor_h_$(color) {
     background-color: var(--$(color));
   }
 
   .bgColor_f_$(color):focus-within,
-  ._f:focus-within .bgColor_f_$(color) {
+  ._f:focus-within > .bgColor_f_$(color) {
     background-color: var(--$(color));
   }
 
@@ -51,12 +51,12 @@ $backgrounds: 1, 2, 3;
 
   .borderColor_$(color),
   .borderColor_h_$(color):hover,
-  ._h:hover .borderColor_h_$(color) {
+  ._h:hover > .borderColor_h_$(color) {
     border-color: var(--$(color));
   }
 
   .borderColor_f_$(color):focus-within,
-  ._f:focus-within .borderColor_f_$(color) {
+  ._f:focus-within > .borderColor_f_$(color) {
     border-color: var(--$(color));
   }
 
@@ -66,12 +66,12 @@ $backgrounds: 1, 2, 3;
 
   .outlineColor_$(color),
   .outlineColor_h_$(color):hover,
-  ._h:hover .outlineColor_h_$(color) {
+  ._h:hover > .outlineColor_h_$(color) {
     outline-color: var(--$(color));
   }
 
   .outlineColor_f_$(color):focus-within,
-  ._f:focus-within .outlineColor_f_$(color) {
+  ._f:focus-within > .outlineColor_f_$(color) {
     outline-color: var(--$(color));
   }
 
@@ -81,7 +81,7 @@ $backgrounds: 1, 2, 3;
 
   .fill_$(color),
   .fill_h_$(color):hover,
-  ._h:hover .fill_h_$(color) {
+  ._h:hover > .fill_h_$(color) {
     path,
     circle,
     rect,
@@ -91,7 +91,7 @@ $backgrounds: 1, 2, 3;
   }
 
   .fill_f_$(color):focus-within,
-  ._f:focus-within .fill_f_$(color) {
+  ._f:focus-within > .fill_f_$(color) {
     path,
     circle,
     rect,
@@ -111,7 +111,7 @@ $backgrounds: 1, 2, 3;
 
   .stroke_$(color),
   .stroke_h_$(color):hover,
-  ._h:hover .stroke_h_$(color) {
+  ._h:hover > .stroke_h_$(color) {
     path,
     circle,
     rect,
@@ -121,7 +121,7 @@ $backgrounds: 1, 2, 3;
   }
 
   .stroke_f_$(color):focus-within,
-  ._f:focus-within .stroke_f_$(color) {
+  ._f:focus-within > .stroke_f_$(color) {
     path,
     circle,
     rect,
@@ -143,12 +143,12 @@ $backgrounds: 1, 2, 3;
 @each $shadow in $shadows {
   .shadow_$(shadow),
   .shadow_h_$(shadow):hover,
-  ._h:hover .shadow_h_$(shadow) {
+  ._h:hover > .shadow_h_$(shadow) {
     box-shadow: var(--shadow$(shadow));
   }
 
   .shadow_f_$(shadow):focus-within,
-  ._f:focus-within .shadow_f_$(shadow) {
+  ._f:focus-within > .shadow_f_$(shadow) {
     box-shadow: var(--shadow$(shadow));
   }
 
@@ -160,12 +160,12 @@ $backgrounds: 1, 2, 3;
 @each $background in $backgrounds {
   .bg_$(background),
   .bg_h_$(background):hover,
-  ._h:hover .bg_h_$(background) {
+  ._h:hover > .bg_h_$(background) {
     background: var(--background$(background));
   }
 
   .bg_f_$(background):focus-within,
-  ._f:focus-within .bg_f_$(background) {
+  ._f:focus-within > .bg_f_$(background) {
     background: var(--background$(background));
   }
 
