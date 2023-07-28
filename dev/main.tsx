@@ -20,7 +20,7 @@ root.render(
   <React.StrictMode>
     <Flex>
       <Flex flex1 height="fit-screen" focus className="test" b={1} background="1" shadow="2">
-        <Flex color="blue6" colorF="purple1" fontSize={20}>
+        <Flex color="blue6" colorF="purple1" fontSize={20} b={3} bH={5} bF={8}>
           test
         </Flex>
         <input type="text" />

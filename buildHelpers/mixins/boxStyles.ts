@@ -10,13 +10,13 @@ const boxStyles = {};
 
     if (pseudoClass === 'hover') {
       classNames.push('.' + className + value);
-      classNames.push('.' + className + '_h_' + value + ':hover');
-      classNames.push('.hovertrue:hover' + '>.' + className + '_h_' + value);
+      classNames.push('.' + className + 'H' + value + ':hover');
+      classNames.push('.hovertrue:hover' + '>.' + className + 'H' + value);
     } else if (pseudoClass === 'focus') {
-      classNames.push('.' + className + '_f_' + value + ':focus-within');
-      classNames.push('.focustrue:focus-within' + '>.' + className + '_f_' + value);
+      classNames.push('.' + className + 'F' + value + ':focus-within');
+      classNames.push('.focustrue:focus-within' + '>.' + className + 'F' + value);
     } else if (pseudoClass === 'active') {
-      classNames.push('.' + className + '_a_' + value + ':active');
+      classNames.push('.' + className + 'A' + value + ':active');
     }
 
     return classNames;
