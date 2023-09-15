@@ -9,12 +9,20 @@
   --color1: rgba(4, 40, 68, 0.85);
   --purple1: #8562a1;
   --blue6: #1e39b3;
+  --gray1: #777;
+  --gray2: #ccc;
+  --red: red;
 }
 .button {
   --blue: red;
 }
 
-$colors: purple1, blue6;
+html {
+  font-family: Arial, Helvetica, sans-serif;
+  font-weight: 400;
+}
+
+$colors: purple1, blue6, gray1, gray2, red;
 $shadows: 1, 2, 3, 4, 5, 6, 7;
 $backgrounds: 1, 2, 3;
 
