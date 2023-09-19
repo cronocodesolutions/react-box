@@ -42,10 +42,11 @@ export default defineConfig(({ mode }) => {
       },
       modules: {
         generateScopedName: (name: string, filename: string, css: string) => {
+          // return mode === 'dev' ? name : identity.getIdentity(name);
           if (name === 'hovertrue') return '_h';
           if (name === 'focustrue') return '_f';
 
-          return mode === 'dev' ? name : identity.getIdentity(name);
+          return identity.getIdentity(name);
         },
         getJSON: (cssFileName, json, outputFileName) => {
           jsonCache[cssFileName] = json;
@@ -72,10 +73,6 @@ export default defineConfig(({ mode }) => {
               return 'box';
             }
 
-            if (id.includes('theme.ts')) {
-              return 'theme';
-            }
-
             if (id.includes('box.module.css')) {
               return 'box.module.css';
             }
@@ -96,10 +93,6 @@ export default defineConfig(({ mode }) => {
             }
 
             if (chunkInfo.name === 'box') {
-              return '[name].mjs';
-            }
-
-            if (chunkInfo.name === 'theme') {
               return '[name].mjs';
             }
 

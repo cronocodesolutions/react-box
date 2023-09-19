@@ -1,43 +1,71 @@
 import React, { useRef, useState } from 'react';
 import ReactDOM from 'react-dom/client';
+// import Box from './../src/box';
 import ButtonCore from './../src/components/buttonCore/buttonCore';
+// import UncontrolledTextboxCore from '../src/components/textboxCore/textboxCore';
+// import Flex from './../src/components/flex/flex';
+// import FormAsync from '../src/components/formAsync/formAsync';
+// import UncontrolledCheckboxCore from '../src/components/uncontrolledCheckboxCore/uncontrolledCheckboxCore';
+// import UncontrolledRadiobuttonCore from '../src/components/uncontrolledRadioButtonCore/uncontrolledRadioButtonCore';
 import '/theme.css';
+// import BaseSvg from '../src/components/baseSvg/baseSvg';
+// import ClassNameUtils from '../src/utils/className/classNameUtils';
 import TextboxCore from '../src/components/textboxCore/textboxCore';
 import Box from '../src/box';
 import Flex from '../src/components/flex/flex';
-import Textbox from '../src/components/textbox/textbox';
-import Theme from '../src/theme';
-
-Theme.setup({
-  textbox: {
-    styles: {
-      fontSize: 14,
-      b: 1,
-      p: 3,
-      outline: 0,
-      color: 'gray1',
-      borderColor: 'gray1',
-      borderRadius: 2,
-      background: 'none',
-    },
-    disabled: { color: 'gray2' },
-    themes: {
-      primary: {
-        styles: { borderColor: 'red' },
-        disabled: { color: 'red' },
-      },
-    },
-  },
-});
 
 const root = ReactDOM.createRoot(document.getElementById('root')!);
 
 root.render(
   <React.StrictMode>
-    <Box m={3}>
-      <TextboxCore placeholder="Old" b={2} borderColor="purple1" name="ff" />
-      <Textbox placeholder="New" defaultValue="test" />
-    </Box>
+    <Flex>
+      <Flex flex1 height="fit-screen" focus className="test" b={1} background="1" shadow="2">
+        <Flex color="blue6" colorF="purple1" fontSize={20} b={3} bH={5} bF={8}>
+          test
+        </Flex>
+        <input type="text" />
+        {/* <SigninLeftSide /> */}
+      </Flex>
+      <Flex flex1 height="fit-screen" alignItems="center" flexDirection="column" p={6}>
+        {/* <Flex justifyContent="flex-end" width="fit">
+          <Flex alignItems="center" position="relative" cursor="pointer" className={styles.language} pb={2} pl={2}>
+            <Box mr={1}>{t[`${selectedLanguage}Lang`]}</Box>
+            <Image className={styles.selectedLanguageIcon} src={AppUtils.getUrl('/arrow-down.svg')} />
+            <Flex
+              bgColor="white"
+              position="absolute"
+              right={0}
+              top={6}
+              borderRadius={2}
+              flexDirection="column"
+              className={styles.languagesBox}
+            >
+              <LanguageItem language="en" selectedLanguage={selectedLanguage} isTop />
+              <LanguageItem language="sv" selectedLanguage={selectedLanguage} />
+              <LanguageItem language="no" selectedLanguage={selectedLanguage} />
+              <LanguageItem language="es" selectedLanguage={selectedLanguage} isBottom />
+            </Flex>
+          </Flex>
+        </Flex>
+        <Flex className={styles.content} flexDirection="column" p={8} flex1 justifyContent="center">
+          <Box color="black1" fontSize={32} lineHeight={8}>
+            PIHR PAY EQUALITY
+          </Box>
+          <Box mt={16} fontSize={24}>
+            {t.signIn}
+          </Box>
+          <Box mt={1}>{t.signInMessage}</Box>
+          <Box mt={6} props={{ id: 'api' }}>
+            <Box props={{ style: { backgroundColor: '#ddd', height: '250px' } }}>
+              This is the b2c placeholder, for sign in form, provided by azure b2c
+            </Box>
+          </Box>
+        </Flex>
+        <Flex width="fit" justifyContent="flex-end">
+          <Image className={styles.logo} src={AppUtils.getUrl('/logo.svg')} />
+        </Flex> */}
+      </Flex>
+    </Flex>
   </React.StrictMode>,
 );
 

@@ -4,7 +4,7 @@ type StylesType = Record<string, Record<string, string>>;
 
 const svgStyles = {};
 
-['hover', 'focus', 'active'].forEach((pseudoClass) => {
+['hover', 'focus'].forEach((pseudoClass) => {
   function getClassNames(className: string, value: string | boolean | number) {
     const classNames: string[] = [];
 
