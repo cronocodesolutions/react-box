@@ -1,7 +1,7 @@
 import React, { forwardRef, Ref } from 'react';
 import Box from '../../box';
 import ObjectUtils from '../../utils/object/objectUtils';
-import Theme from '../../theme';
+import Theme, { useTheme } from '../../theme';
 
 type BoxProps = Omit<React.ComponentProps<typeof Box<'input'>>, 'ref' | 'tag'>;
 type BoxTagProps = Required<BoxProps>['props'];
@@ -55,7 +55,7 @@ interface Props extends Omit<BoxProps, 'props'>, Theme.ThemeComponentProps {
 }
 
 function Textbox(props: Props, ref: Ref<HTMLInputElement>) {
-  const themeStyles = Theme.useTheme('textbox', props);
+  const themeStyles = useTheme('textbox', props);
   const newProps = ObjectUtils.buildProps(props, tagProps, themeStyles);
 
   return <Box ref={ref} tag="input" inline {...newProps} />;

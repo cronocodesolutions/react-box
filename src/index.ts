@@ -7,6 +7,7 @@ import('./components/radioButtonCore/radioButtonCore');
 import('./components/textareaCore/textareaCore');
 import('./components/textboxCore/textboxCore');
 
+import('./theme');
 import('./components/textbox/textbox');
 
 import('./components/baseSvg/baseSvg');
