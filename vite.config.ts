@@ -64,29 +64,25 @@ export default defineConfig(({ mode }) => {
         output: {
           inlineDynamicImports: false,
           manualChunks(id: string) {
-            console.log(id);
-
             if (id.endsWith('src/index.ts')) {
               return 'index';
             }
 
-            if (id.includes('/box.tsx')) {
+            if (id.includes('box.tsx')) {
               return 'box';
             }
 
-            if (id.includes('/theme.ts')) {
+            if (id.includes('theme.ts')) {
               return 'theme';
             }
 
-            if (id.includes('/box.module.css')) {
+            if (id.includes('box.module.css')) {
               return 'box.module.css';
             }
 
             if (id.includes('/src/components/')) {
               const re = new RegExp('(.*)src/components/(.*)');
               const result = re.exec(id)[2].split('/')[0];
-
-              console.log(result);
 
               return result;
             }
