@@ -25,6 +25,7 @@
   "scripts": {
     "dev": "vite ./pages --config ./pages.vite.config.ts --mode dev",
     "build:pages": "vite build ./pages --config ./pages.vite.config.ts --outDir ../dist",
+    "preview": "vite preview",
     "build": "vite build",
     "build:dev": "vite build --mode dev",
     "postbuild": "cp package.json dist & cp LICENSE dist & rm ./dist/index.d.ts & rm ./dist/index.js",

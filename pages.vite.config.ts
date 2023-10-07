@@ -53,6 +53,7 @@ export default defineConfig(({ mode }) => {
       },
     },
     build: {
+      emptyOutDir: true,
       minify: mode !== 'dev',
       lib: {
         entry: path.resolve(__dirname, './src/index.ts'),
@@ -60,7 +61,6 @@ export default defineConfig(({ mode }) => {
         formats: ['es'],
       },
       rollupOptions: {
-        external: ['react', 'react/jsx-runtime'],
         input: 'pages/index.html',
       },
     },

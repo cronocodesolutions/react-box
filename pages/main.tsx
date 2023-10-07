@@ -1,6 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import './theme.css';
+import '/theme.css';
 import Box from './../src/box';
 
 const root = ReactDOM.createRoot(document.getElementById('root')!);
