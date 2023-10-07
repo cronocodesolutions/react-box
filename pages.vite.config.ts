@@ -52,6 +52,7 @@ export default defineConfig(({ mode }) => {
         },
       },
     },
+    base: 'https://cronocodesolutions.github.io/react-box',
     build: {
       emptyOutDir: true,
       minify: mode !== 'dev',
