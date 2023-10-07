@@ -15,22 +15,10 @@ const identity = new IdentityFactory();
 const jsonCache: Record<string, Record<string, string>> = {};
 
 export default defineConfig(({ mode }) => {
-  console.log('NODE_ENV', process.env.NODE_ENV);
-
   return {
-    plugins: [
-      // dts({
-      //   beforeWriteFile(filePath, content) {
-      //     const { dir } = path.parse(filePath);
-
-      //     return { filePath: dir.includes('components') ? `${dir}.d.ts` : filePath, content: content.replace(/..\/..\//g, '../') };
-      //   },
-      // }),
-      reactPlugin(),
-      moduleCssPlugin(jsonCache),
-    ],
+    plugins: [reactPlugin(), moduleCssPlugin(jsonCache)],
     define: {
-      'process.env.NODE_ENV': JSON.stringify('production'),
+      'process.env.NODE_ENV': JSON.stringify(mode),
     },
     css: {
       devSourcemap: mode === 'dev',
@@ -55,7 +43,7 @@ export default defineConfig(({ mode }) => {
         },
       },
     },
-    // base: 'https://cronocodesolutions.github.io/react-box',
+    base: mode === 'production' ? 'https://cronocodesolutions.github.io/react-box' : undefined,
     build: {
       emptyOutDir: true,
       minify: mode !== 'dev',

@@ -24,7 +24,7 @@
   },
   "scripts": {
     "dev": "vite ./pages --config ./pages.vite.config.ts --mode dev",
-    "build:pages": "vite build ./pages --config ./pages.vite.config.ts --outDir ../dist",
+    "build:pages": "vite build ./pages --config ./pages.vite.config.ts --outDir ../dist --mode production",
     "preview": "vite preview",
     "build": "vite build",
     "build:dev": "vite build --mode dev",
