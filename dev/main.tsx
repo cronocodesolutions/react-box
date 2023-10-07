@@ -13,21 +13,25 @@ import '/theme.css';
 import TextboxCore from '../src/components/textboxCore/textboxCore';
 import Box from '../src/box';
 import Flex from '../src/components/flex/flex';
+import AutoColumnsDataGrid from './components/dataGrid/autoColumnsDataGrid';
+import NoDataDataGrid from './components/dataGrid/noDataDataGrid';
 
 const root = ReactDOM.createRoot(document.getElementById('root')!);
 
 root.render(
   <React.StrictMode>
-    <Flex>
-      <Flex flex1 height="fit-screen" focus className="test" b={1} background="1" shadow="2">
+    <Flex p={3}>
+      {/* <NoDataDataGrid /> */}
+      <AutoColumnsDataGrid />
+      {/* <Flex flex1 height="fit-screen" focus className="test" b={1} background="1" shadow="2">
         <Flex color="blue6" colorF="purple1" fontSize={20} b={3} bH={5} bF={8}>
           test
         </Flex>
-        <input type="text" />
-        {/* <SigninLeftSide /> */}
-      </Flex>
-      <Flex flex1 height="fit-screen" alignItems="center" flexDirection="column" p={6}>
-        {/* <Flex justifyContent="flex-end" width="fit">
+        <input type="text" /> */}
+      {/* <SigninLeftSide /> */}
+      {/* </Flex> */}
+      {/* <Flex flex1 height="fit-screen" alignItems="center" flexDirection="column" p={6}> */}
+      {/* <Flex justifyContent="flex-end" width="fit">
           <Flex alignItems="center" position="relative" cursor="pointer" className={styles.language} pb={2} pl={2}>
             <Box mr={1}>{t[`${selectedLanguage}Lang`]}</Box>
             <Image className={styles.selectedLanguageIcon} src={AppUtils.getUrl('/arrow-down.svg')} />
@@ -64,7 +68,7 @@ root.render(
         <Flex width="fit" justifyContent="flex-end">
           <Image className={styles.logo} src={AppUtils.getUrl('/logo.svg')} />
         </Flex> */}
-      </Flex>
+      {/* </Flex> */}
     </Flex>
   </React.StrictMode>,
 );
