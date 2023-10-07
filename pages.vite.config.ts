@@ -29,6 +29,9 @@ export default defineConfig(({ mode }) => {
       reactPlugin(),
       moduleCssPlugin(jsonCache),
     ],
+    define: {
+      'process.env.NODE_ENV': JSON.stringify('production'),
+    },
     css: {
       devSourcemap: mode === 'dev',
       postcss: {
@@ -52,7 +55,7 @@ export default defineConfig(({ mode }) => {
         },
       },
     },
-    base: 'https://cronocodesolutions.github.io/react-box',
+    // base: 'https://cronocodesolutions.github.io/react-box',
     build: {
       emptyOutDir: true,
       minify: mode !== 'dev',
