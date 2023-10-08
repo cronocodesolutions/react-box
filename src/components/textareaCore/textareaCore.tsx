@@ -26,8 +26,8 @@ type TextareaCoreTagProps = Omit<
 interface Props extends Omit<BoxProps, 'props'> {
   name?: string;
   props?: TextareaCoreTagProps;
-  onInput?: (e: React.FormEvent<HTMLTextAreaElement>) => void;
-  onChange?: (e: React.FormEvent<HTMLTextAreaElement>) => void;
+  onInput?: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
+  onChange?: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
   placeholder?: string;
   disabled?: boolean;
   value?: string;

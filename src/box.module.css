@@ -26,6 +26,7 @@
 
 html {
   font-size: 16px;
+  font-family: Circular Std, Arial, sans-serif;
 }
 
 body {
@@ -34,9 +35,9 @@ body {
   font-size: var(--fontSize);
 }
 
-a {
-  color: inherit;
-  text-decoration: inherit;
+a,
+ul {
+  all: unset;
 }
 
 .box {

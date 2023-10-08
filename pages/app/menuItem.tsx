@@ -11,7 +11,7 @@ export default function MenuItem(props: Props) {
 
   return (
     <NavLink to={to}>
-      <Box p={2} bgColor="blue6">
+      <Box p={2} cursor="pointer">
         {children}
       </Box>
     </NavLink>

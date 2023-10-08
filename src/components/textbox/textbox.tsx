@@ -41,8 +41,8 @@ type TextboxType =
 interface Props extends Omit<BoxProps, 'props'>, Theme.ThemeComponentProps {
   name?: string;
   props?: TextboxTagProps;
-  onInput?: (e: React.FormEvent<HTMLInputElement>) => void;
-  onChange?: (e: React.FormEvent<HTMLInputElement>) => void;
+  onInput?: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
   type?: TextboxType;
   placeholder?: string;
   value?: string | number;

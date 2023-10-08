@@ -24,8 +24,8 @@ type RadioButtonCoreTagProps = Omit<
 interface Props extends Omit<BoxProps, 'props'> {
   name?: string;
   props?: RadioButtonCoreTagProps;
-  onInput?: (e: React.FormEvent<HTMLInputElement>) => void;
-  onChange?: (e: React.FormEvent<HTMLInputElement>) => void;
+  onInput?: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
   disabled?: boolean;
   value?: string | number;
   autoFocus?: boolean;

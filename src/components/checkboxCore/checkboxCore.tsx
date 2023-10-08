@@ -24,8 +24,8 @@ type CheckboxCoreTagProps = Omit<
 interface Props extends Omit<BoxProps, 'props'> {
   name?: string;
   props?: CheckboxCoreTagProps;
-  onInput?: (e: React.FormEvent<HTMLInputElement>) => void;
-  onChange?: (e: React.FormEvent<HTMLInputElement>) => void;
+  onInput?: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
   disabled?: boolean;
   value?: string | number;
   autoFocus?: boolean;

@@ -16,7 +16,7 @@ export default function App() {
         <MenuItem to="/flex">Flex</MenuItem>
         <MenuItem to="/textbox">Textbox</MenuItem>
       </Box>
-      <Box>
+      <Box p={3}>
         <Routes>
           <Route index element={<HomePage />} />
           <Route path="box" element={<BoxPage />} />
