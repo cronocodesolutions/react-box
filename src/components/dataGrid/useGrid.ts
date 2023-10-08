@@ -1,20 +1,5 @@
-interface GridCell {
-  value: string;
-}
-
-interface GridColumn<T extends {}> {
-  key: string | number;
-}
-
-interface GridRow<T extends {}> {
-  dataRow: T;
-  cells: GridCell[];
-}
-
-interface Grid<T extends {}> {
-  columns: GridColumn<T>[];
-  rows: GridRow<T>[];
-}
+import React from 'react';
+import { Grid } from './dataGridContract';
 
 export default function useGrid<T extends {}>(data?: T[]): Grid<T> {
   if (!data?.length) {
@@ -24,13 +9,14 @@ export default function useGrid<T extends {}>(data?: T[]): Grid<T> {
     };
   }
 
-  const keys = Object.keys(data[0]);
+  const keys = Object.keys(data[0]) as (keyof T)[];
 
   return {
     rows: data.map((dataRow) => ({
       dataRow,
       cells: keys.map((key) => ({
-        value: key,
+        key,
+        value: dataRow[key] as React.ReactNode,
       })),
     })),
     columns: keys.map((key) => ({
