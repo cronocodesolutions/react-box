@@ -1,12 +1,16 @@
 :root {
-  --white: #fff;
+  /* --white: #fff;
   --darkred: #4d181c;
   --darkblue: #144058;
   --orange: #e58d2e;
-  --red: #dd671e;
+  --red: #dd671e; */
+  --black: #07071b;
+  --violet: #988bee;
+  --violetLight: #e8edfd;
+  --violetLighter: #f6f8fe;
 }
 
-$colors: white, darkred, darkblue, orange, red;
+$colors: black, violet, violetLight, violetLighter;
 $shadows: 1, 2, 3, 4, 5, 6, 7;
 $backgrounds: 1, 2, 3;
 

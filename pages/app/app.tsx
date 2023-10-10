@@ -11,8 +11,12 @@ import { Routes, Route } from 'react-router-dom';
 export default function App() {
   return (
     <Flex height="fit-screen">
-      <Box height="fit-screen" br={1} style={{ width: '300px' }}>
-        <MenuItem to="/">LOGO</MenuItem>
+      <Box height="fit-screen" style={{ width: '200px' }} bgColor="violetLighter" px={2}>
+        <MenuItem to="/" bgColor={undefined} bgColorH={undefined} color={undefined}>
+          <Box fontWeight={700} py={5}>
+            React Box
+          </Box>
+        </MenuItem>
         <MenuItem to="/box">Box</MenuItem>
         <MenuItem to="/flex">Flex</MenuItem>
         <MenuItem to="/textbox">Textbox</MenuItem>
