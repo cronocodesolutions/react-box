@@ -18,6 +18,36 @@ Theme.setup({
       outlineColor: 'darkblue',
     },
   },
+  button: {
+    styles: {
+      b: 1,
+      borderRadius: 2,
+      p: 3,
+    },
+  },
+  checkbox: {
+    styles: {
+      b: 1,
+      borderColorH: 'violet',
+      p: 2,
+      borderRadius: 1,
+      bgColorH: 'violetLight',
+      cursor: 'pointer',
+      transition: 'none',
+    },
+  },
+  components: {
+    test: {
+      styles: {
+        alignContent: 'baseline',
+      },
+    },
+    textbox: {
+      styles: {
+        alignContent: 'baseline',
+      },
+    },
+  },
 });
 
 const root = ReactDOM.createRoot(document.getElementById('root')!);

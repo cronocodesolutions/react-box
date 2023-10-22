@@ -2,11 +2,12 @@ import React, { forwardRef, Ref, useState } from 'react';
 import classes from './box.module.css';
 import { BoxStyles, themeClasses } from './types';
 import ClassNameUtils from './utils/className/classNameUtils';
+import { ThemeComponentProps, useTheme } from './theme';
 
 type AllProps<TTag extends keyof React.ReactHTML> = React.ComponentProps<TTag>;
 type TagPropsType<TTag extends keyof React.ReactHTML> = Omit<AllProps<TTag>, 'className' | 'style' | 'ref'>;
 
-interface Props<TTag extends keyof React.ReactHTML> extends BoxStyles {
+interface Props<TTag extends keyof React.ReactHTML> extends BoxStyles, ThemeComponentProps {
   children?: React.ReactNode | ((props: { isHover: boolean }) => React.ReactNode);
   tag?: TTag;
   props?: TagPropsType<TTag>;
@@ -19,6 +20,19 @@ function Box<TTag extends keyof React.ReactHTML = 'div'>(props: Props<TTag>, ref
   const { tag, children, props: tagProps, className, style } = props;
 
   const classNames = className ? ClassNameUtils.classNames(classes.box, className) : [classes.box];
+
+  const themeStyles = useTheme(props);
+  Object.entries(themeStyles).forEach(([key, value]) => {
+    const classToAdd = classes[key + value];
+    if (classToAdd) {
+      classNames.push(classToAdd);
+    } else {
+      if (key in themeClasses) {
+        classNames.push(`${themeClasses[key as keyof BoxStyles]}${value}`);
+      }
+    }
+  });
+
   Object.entries(props).forEach(([key, value]) => {
     const classToAdd = classes[key + value];
     if (classToAdd) {

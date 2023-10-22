@@ -128,6 +128,8 @@ export const styleVariables = {
   transition: ['none'] as const,
   background: ['none'] as const,
   userSelect: ['none'] as const,
+  appearance: ['none'] as const,
+  pointerEvents: ['none'] as const,
 };
 
 type GapType = (typeof styleVariables.gap)[number];
@@ -148,6 +150,8 @@ type BorderAndOutlineStyleType = (typeof styleVariables.borderAndOutlineStyles)[
 type TransitionType = (typeof styleVariables.transition)[number];
 type BackgroundType = (typeof styleVariables.background)[number];
 type UserSelectType = (typeof styleVariables.userSelect)[number];
+type AppearanceType = (typeof styleVariables.appearance)[number];
+type PointerEventsType = (typeof styleVariables.pointerEvents)[number];
 
 interface BoxPseudoClasses {
   hover?: boolean;
@@ -321,6 +325,14 @@ interface BoxUserSelect {
   userSelect?: UserSelectType;
 }
 
+interface BoxAppearance {
+  appearance?: AppearanceType;
+}
+
+interface BoxPointerEvents {
+  pointerEvents?: PointerEventsType;
+}
+
 type BoxNormalStyles = BoxPseudoClasses &
   BoxDisplay &
   BoxSizing &
@@ -341,7 +353,9 @@ type BoxNormalStyles = BoxPseudoClasses &
   BoxFlex &
   BoxOutline &
   BoxTransition &
-  BoxUserSelect;
+  BoxUserSelect &
+  BoxAppearance &
+  BoxPointerEvents;
 
 export type BoxStyles = BoxNormalStyles & Hovered<BoxNormalStyles> & Focused<BoxNormalStyles> & Activated<BoxNormalStyles>;
 

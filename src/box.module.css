@@ -54,3 +54,7 @@ ul {
 }
 
 @mixin boxStyles;
+
+[type='checkbox']:not(:checked) + ._checkedIcon {
+  display: none;
+}

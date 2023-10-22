@@ -5,14 +5,14 @@ import FormUtils from '../../utils/form/formUtils';
 type BoxProps = React.ComponentProps<typeof Box<'form'>>;
 type BoxTagProps = Required<BoxProps>['props'];
 
-type FormAsyncTagProps = Omit<BoxTagProps, 'onSubmit' | 'ref'>;
+type FormTagProps = Omit<BoxTagProps, 'onSubmit' | 'ref'>;
 
 interface Props<T> extends Omit<BoxProps, 'props' | 'tag'> {
-  props?: FormAsyncTagProps;
+  props?: FormTagProps;
   onSubmit: (obj: T, e: React.ChangeEvent<HTMLFormElement>) => void;
 }
 
-export default function FormAsync<T>(props: Props<T>) {
+export default function Form<T>(props: Props<T>) {
   const { onSubmit, props: tagProps } = props;
   const formRef = useRef(null);
 

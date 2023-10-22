@@ -9,54 +9,37 @@ const tagProps = [
   'name',
   'onInput',
   'onChange',
-  'type',
-  'placeholder',
   'disabled',
-  'defaultValue',
+  'value',
   'autoFocus',
   'readOnly',
   'required',
-  'value',
-  'pattern',
+  'checked',
+  'defaultChecked',
 ] as const;
 type TagPropsType = (typeof tagProps)[number];
 
-type TextboxTagProps = Omit<BoxTagProps, TagPropsType>;
-type TextboxType =
-  | 'date'
-  | 'datetime-local'
-  | 'email'
-  | 'hidden'
-  | 'month'
-  | 'number'
-  | 'password'
-  | 'search'
-  | 'tel'
-  | 'text'
-  | 'time'
-  | 'url'
-  | 'week';
+type RadioButtonTagProps = Omit<BoxTagProps, TagPropsType | 'type'>;
 
 interface Props extends Omit<BoxProps, 'props'> {
   name?: string;
-  props?: TextboxTagProps;
+  props?: RadioButtonTagProps;
   onInput?: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  type?: TextboxType;
-  placeholder?: string;
   value?: string | number;
-  defaultValue?: string | number;
-  pattern?: string;
   autoFocus?: boolean;
   readOnly?: boolean;
   required?: boolean;
-  step?: number | string;
+  checked?: boolean;
+  defaultChecked?: boolean;
+  native?: boolean;
 }
 
-function Textbox(props: Props, ref: Ref<HTMLInputElement>) {
-  const newProps = ObjectUtils.buildProps(props, tagProps);
+function RadioButton(props: Props, ref: Ref<HTMLInputElement>) {
+  const { native } = props;
+  const newProps = ObjectUtils.buildProps(props, tagProps, { type: 'radio' });
 
-  return <Box ref={ref} tag="input" inline component="textbox" {...newProps} />;
+  return <Box ref={ref} tag="input" inline b={1} p={2} component="radioButton" {...newProps} appearance={native ? undefined : 'none'} />;
 }
 
-export default forwardRef(Textbox);
+export default forwardRef(RadioButton);

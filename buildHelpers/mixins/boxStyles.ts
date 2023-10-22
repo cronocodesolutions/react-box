@@ -246,6 +246,12 @@ const boxStyles = {};
 
   // user-select
   newStyles(boxStyles, 'userSelect', styleVariables.userSelect, ['user-select']);
+
+  // appearance
+  newStyles(boxStyles, 'appearance', styleVariables.appearance);
+
+  // pointer-events
+  newStyles(boxStyles, 'pointerEvents', styleVariables.pointerEvents, ['pointer-events']);
 });
 
 export default {
