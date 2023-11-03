@@ -20,7 +20,7 @@ interface Props extends Omit<BoxProps, 'props'> {
 function Button(props: Props, ref: Ref<HTMLButtonElement>) {
   const newProps = ObjectUtils.buildProps(props, tagProps);
 
-  return <Box ref={ref} tag="button" inline cursor="pointer" {...newProps} />;
+  return <Box ref={ref} tag="button" inline cursor="pointer" component="button" {...newProps} />;
 }
 
 export default forwardRef(Button);

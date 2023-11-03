@@ -167,7 +167,7 @@ interface BoxSizing {
   boxSizing?: (typeof styleVariables.boxSizing)[number];
 }
 
-interface BoxPosition {
+export interface BoxPosition {
   position?: (typeof styleVariables.position)[number];
   inset?: SizeType;
   top?: SizeType;

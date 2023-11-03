@@ -5,9 +5,7 @@ export default function ButtonPage() {
   return (
     <Box>
       <Box py={3}>
-        <Button component="button" type="button">
-          Click me!
-        </Button>
+        <Button>Click me!</Button>
       </Box>
     </Box>
   );
