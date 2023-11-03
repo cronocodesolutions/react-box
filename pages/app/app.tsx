@@ -36,6 +36,7 @@ export default function App() {
           <Route path="/textbox" element={<TextboxPage />} />
           <Route path="/datagrid" element={<DataGridPage />} />
           <Route path="/button" element={<ButtonPage />} />
+          <Route path="/checkbox" element={<CheckboxPage />} />
           <Route path="/tooltip" element={<TooltipPage />} />
         </Routes>
       </Box>
