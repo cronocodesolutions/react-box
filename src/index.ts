@@ -10,5 +10,6 @@ import('./components/form/form');
 import('./components/radioButton/radioButton');
 import('./components/textarea/textarea');
 import('./components/textbox/textbox');
+import('./components/tooltip/tooltip');
 
 import('./theme');

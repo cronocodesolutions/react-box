@@ -76,6 +76,12 @@ export default defineConfig(({ mode }) => {
               return 'box.module.css';
             }
 
+            if (id.includes('/baseSvg.module.css')) {
+              console.log('baseSvg.module.css');
+
+              return 'baseSvg.module.css';
+            }
+
             if (id.includes('/theme.ts')) {
               return 'theme';
             }
@@ -100,6 +106,10 @@ export default defineConfig(({ mode }) => {
             }
 
             if (chunkInfo.name === 'box.module.css') {
+              return '[name].mjs';
+            }
+
+            if (chunkInfo.name === 'baseSvg.module.css') {
               return '[name].mjs';
             }
 

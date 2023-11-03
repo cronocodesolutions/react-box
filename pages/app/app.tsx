@@ -5,6 +5,7 @@ import DataGridPage from '../pages/dataGridPage';
 import FlexPage from '../pages/flexPage';
 import HomePage from '../pages/homePage';
 import TextboxPage from '../pages/textboxPage';
+import TooltipPage from '../pages/tooltipPage';
 import Box from './../../src/box';
 import Flex from './../../src/components/flex/flex';
 import MenuItem from './menuItem';
@@ -25,6 +26,7 @@ export default function App() {
         <MenuItem to="/datagrid">Data Grid</MenuItem>
         <MenuItem to="/button">Button</MenuItem>
         <MenuItem to="/checkbox">Checkbox</MenuItem>
+        <MenuItem to="/tooltip">Tooltip</MenuItem>
       </Box>
       <Box p={3}>
         <Routes>
@@ -34,7 +36,7 @@ export default function App() {
           <Route path="/textbox" element={<TextboxPage />} />
           <Route path="/datagrid" element={<DataGridPage />} />
           <Route path="/button" element={<ButtonPage />} />
-          <Route path="/checkbox" element={<CheckboxPage />} />
+          <Route path="/tooltip" element={<TooltipPage />} />
         </Routes>
       </Box>
     </Flex>
