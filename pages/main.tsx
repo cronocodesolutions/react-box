@@ -23,6 +23,11 @@ Theme.setup({
       b: 1,
       borderRadius: 2,
       p: 3,
+      bgColor: 'violetLighter',
+    },
+    disabled: {
+      bgColor: 'violetLighter',
+      color: 'violet',
     },
   },
   checkbox: {

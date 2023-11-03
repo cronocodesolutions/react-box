@@ -5,7 +5,7 @@ export default function ButtonPage() {
   return (
     <Box>
       <Box py={3}>
-        <Button>Click me!</Button>
+        <Button disabled>Click me!</Button>
       </Box>
     </Box>
   );

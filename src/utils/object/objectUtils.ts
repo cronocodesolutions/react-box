@@ -22,6 +22,9 @@ namespace ObjectUtils {
     keys.forEach((key) => {
       if (key in newProps) {
         tagProps[key] = newProps[key];
+
+        if (key === 'disabled') return;
+
         delete newProps[key];
       }
     });
