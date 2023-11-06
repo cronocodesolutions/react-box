@@ -29,7 +29,7 @@ export default function Tooltip(props: Props) {
         document.removeEventListener('scroll', listener, { capture: true });
       };
     },
-    [position, ref],
+    [position],
   );
 
   const observeResize = useCallback(
@@ -43,38 +43,35 @@ export default function Tooltip(props: Props) {
         window.removeEventListener('resize', listener, { capture: true });
       };
     },
-    [position, ref],
+    [position],
   );
 
-  const positionHandler = useCallback(
-    (element: HTMLDivElement) => {
-      return () => {
-        const rect = element.getBoundingClientRect();
+  const positionHandler = useCallback(() => {
+    if (ref.current) {
+      const rect = ref.current.getBoundingClientRect();
 
-        const top = rect.top + window.scrollY;
-        const left = rect.left + window.scrollX;
+      const top = rect.top + window.scrollY;
+      const left = rect.left + window.scrollX;
 
-        if (position?.top !== top || position?.left !== left) {
-          onPositionChange?.({ top, left });
-          setPosition({ top: rect.top + window.scrollY, left: rect.left + window.scrollX });
-        }
-      };
-    },
-    [position, ref],
-  );
+      if (position?.top !== top || position?.left !== left) {
+        onPositionChange?.({ top, left });
+        setPosition({ top: rect.top + window.scrollY, left: rect.left + window.scrollX });
+      }
+    }
+  }, [position]);
 
   useLayoutEffect(() => {
     if (ref.current) {
-      positionHandler(ref.current)();
-      const scrollHandlerDispose = observeScroll(ref.current, positionHandler(ref.current));
-      const resizeHandlerDispose = observeResize(ref.current, positionHandler(ref.current));
+      positionHandler();
+      const scrollHandlerDispose = observeScroll(ref.current, positionHandler);
+      const resizeHandlerDispose = observeResize(ref.current, positionHandler);
 
       return () => {
         scrollHandlerDispose();
         resizeHandlerDispose();
       };
     }
-  }, [position, ref]);
+  }, [position]);
 
   return (
     <>
