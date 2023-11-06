@@ -7,10 +7,12 @@ import usePortalContainer from '../../hooks/usePortalContainer';
 interface Props extends BoxPosition {
   children: React.ReactNode;
   style?: React.ComponentProps<'div'>['style'];
+  onPositionChange?(position: { top: number; left: number }): void;
 }
 
 export default function Tooltip(props: Props) {
-  const { children } = props;
+  const { children, onPositionChange } = props;
+
   const ref = useRef<HTMLDivElement>(null);
   const [position, setPosition] = useState<{ top: number; left: number } | undefined>();
   const portalContainer = usePortalContainer();
@@ -43,6 +45,8 @@ export default function Tooltip(props: Props) {
     return () => {
       const rect = element.getBoundingClientRect();
       setPosition({ top: rect.top + window.scrollY, left: rect.left + window.scrollX });
+
+      onPositionChange?.({ top: rect.top + window.scrollY, left: rect.left + window.scrollX });
     };
   }, []);
 
