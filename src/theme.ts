@@ -25,11 +25,78 @@ export interface ThemeSetup {
   radioButton?: ThemeComponentStyles;
 }
 
-let Styles: ThemeSetup = {};
+const defaultTheme: ThemeSetup = {
+  button: {
+    styles: {
+      inline: true,
+      p: 3,
+      cursor: 'pointer',
+      b: 1,
+      borderRadius: 1,
+    },
+    disabled: {
+      cursor: 'default',
+    },
+  },
+  checkbox: {
+    styles: {
+      inline: true,
+      b: 1,
+      p: 2,
+    },
+  },
+  radioButton: {
+    styles: {
+      inline: true,
+      b: 1,
+      p: 2,
+    },
+  },
+  textbox: {
+    styles: {
+      inline: true,
+      b: 1,
+      borderRadius: 1,
+      p: 3,
+    },
+  },
+  textarea: {
+    styles: {
+      inline: true,
+      b: 1,
+      borderRadius: 1,
+    },
+  },
+};
+let Styles: ThemeSetup = defaultTheme;
 
 namespace Theme {
   export function setup(styles: ThemeSetup) {
     Styles = styles;
+
+    assignDefaultStyles();
+  }
+
+  function assignDefaultStyles() {
+    const components = Object.keys(defaultTheme) as (keyof ThemeSetup)[];
+
+    components.forEach((component) => {
+      console.log(component);
+
+      const componentStyles = Styles[component];
+      const componentDefaultStyles = defaultTheme[component]!;
+
+      if (componentStyles) {
+        componentStyles.styles = { ...componentDefaultStyles.styles, ...componentStyles.styles };
+        console.log(componentStyles.styles);
+
+        if (componentStyles.disabled && componentDefaultStyles.disabled) {
+          componentStyles.disabled = { ...componentDefaultStyles.disabled, ...componentStyles.disabled };
+        }
+      } else {
+        Styles[component] = defaultTheme[component] as any;
+      }
+    });
   }
 }
 

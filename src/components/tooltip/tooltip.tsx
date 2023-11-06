@@ -12,56 +12,66 @@ interface Props extends BoxPosition {
 
 export default function Tooltip(props: Props) {
   const { children, onPositionChange } = props;
-
   const ref = useRef<HTMLDivElement>(null);
   const [position, setPosition] = useState<{ top: number; left: number } | undefined>();
   const portalContainer = usePortalContainer();
 
-  const observeScroll = useCallback((element: HTMLElement, callback: () => void) => {
-    const listener = (e: Event) => {
-      if ((e.target as HTMLElement).contains(element)) {
+  const observeScroll = useCallback(
+    (element: HTMLElement, callback: () => void) => {
+      const listener = (e: Event) => {
+        if ((e.target as HTMLElement).contains(element)) {
+          callback();
+        }
+      };
+
+      document.addEventListener('scroll', listener, { capture: true });
+      return () => {
+        document.removeEventListener('scroll', listener, { capture: true });
+      };
+    },
+    [position],
+  );
+
+  const observeResize = useCallback(
+    (element: HTMLElement, callback: () => void) => {
+      const listener = (e: Event) => {
         callback();
+      };
+
+      window.addEventListener('resize', listener, { capture: true });
+      return () => {
+        window.removeEventListener('resize', listener, { capture: true });
+      };
+    },
+    [position],
+  );
+
+  const positionHandler = useCallback(() => {
+    if (ref.current) {
+      const rect = ref.current.getBoundingClientRect();
+
+      const top = rect.top + window.scrollY;
+      const left = rect.left + window.scrollX;
+
+      if (position?.top !== top || position?.left !== left) {
+        onPositionChange?.({ top, left });
+        setPosition({ top: rect.top + window.scrollY, left: rect.left + window.scrollX });
       }
-    };
-
-    document.addEventListener('scroll', listener, { capture: true });
-    return () => {
-      document.removeEventListener('scroll', listener, { capture: true });
-    };
-  }, []);
-
-  const observeResize = useCallback((element: HTMLElement, callback: () => void) => {
-    const listener = (e: Event) => {
-      callback();
-    };
-
-    window.addEventListener('resize', listener, { capture: true });
-    return () => {
-      window.removeEventListener('resize', listener, { capture: true });
-    };
-  }, []);
-
-  const positionHandler = useCallback((element: HTMLDivElement) => {
-    return () => {
-      const rect = element.getBoundingClientRect();
-      setPosition({ top: rect.top + window.scrollY, left: rect.left + window.scrollX });
-
-      onPositionChange?.({ top: rect.top + window.scrollY, left: rect.left + window.scrollX });
-    };
-  }, []);
+    }
+  }, [position]);
 
   useLayoutEffect(() => {
     if (ref.current) {
-      positionHandler(ref.current)();
-      const scrollHandlerDispose = observeScroll(ref.current, positionHandler(ref.current));
-      const resizeHandlerDispose = observeResize(ref.current, positionHandler(ref.current));
+      positionHandler();
+      const scrollHandlerDispose = observeScroll(ref.current, positionHandler);
+      const resizeHandlerDispose = observeResize(ref.current, positionHandler);
 
       return () => {
         scrollHandlerDispose();
         resizeHandlerDispose();
       };
     }
-  }, []);
+  }, [position]);
 
   return (
     <>

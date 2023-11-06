@@ -56,7 +56,7 @@ interface Props extends Omit<BoxProps, 'props'> {
 function Textbox(props: Props, ref: Ref<HTMLInputElement>) {
   const newProps = ObjectUtils.buildProps(props, tagProps);
 
-  return <Box ref={ref} tag="input" inline component="textbox" {...newProps} />;
+  return <Box ref={ref} tag="input" component="textbox" {...newProps} />;
 }
 
 export default forwardRef(Textbox);
