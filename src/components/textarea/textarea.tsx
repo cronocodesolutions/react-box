@@ -45,7 +45,7 @@ interface Props extends Omit<BoxProps, 'props'> {
 function Textarea(props: Props, ref: Ref<HTMLTextAreaElement>) {
   const newProps = ObjectUtils.buildProps(props, tagProps);
 
-  return <Box ref={ref} tag="textarea" component="textarea" inline {...newProps} />;
+  return <Box ref={ref} tag="textarea" component="textarea" {...newProps} />;
 }
 
 export default forwardRef(Textarea);

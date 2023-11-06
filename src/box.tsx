@@ -1,4 +1,4 @@
-import React, { forwardRef, Ref, useState } from 'react';
+import React, { forwardRef, Ref, useMemo, useState } from 'react';
 import classes from './box.module.css';
 import { BoxStyles, themeClasses } from './types';
 import ClassNameUtils from './utils/className/classNameUtils';
@@ -17,34 +17,29 @@ interface Props<TTag extends keyof React.ReactHTML> extends BoxStyles, ThemeComp
 }
 
 function Box<TTag extends keyof React.ReactHTML = 'div'>(props: Props<TTag>, ref: Ref<HTMLElement>) {
-  const { tag, children, props: tagProps, className, style } = props;
+  const { tag, children, props: tagProps, className: userClassName, style } = props;
 
-  const classNames = className ? ClassNameUtils.classNames(classes.box, className) : [classes.box];
+  const className = useMemo(() => {
+    const classNames = userClassName ? ClassNameUtils.classNames(classes.box, userClassName) : [classes.box];
 
-  const themeStyles = useTheme(props);
-  Object.entries(themeStyles).forEach(([key, value]) => {
-    const classToAdd = classes[key + value];
-    if (classToAdd) {
-      classNames.push(classToAdd);
-    } else {
-      if (key in themeClasses) {
-        classNames.push(`${themeClasses[key as keyof BoxStyles]}${value}`);
+    const themeStyles = useTheme(props);
+    const newProps = { ...themeStyles, ...props };
+
+    Object.entries(newProps).forEach(([key, value]) => {
+      const classToAdd = classes[key + value];
+      if (classToAdd) {
+        classNames.push(classToAdd);
+      } else {
+        if (key in themeClasses) {
+          classNames.push(`${themeClasses[key as keyof BoxStyles]}${value}`);
+        }
       }
-    }
-  });
+    });
 
-  Object.entries(props).forEach(([key, value]) => {
-    const classToAdd = classes[key + value];
-    if (classToAdd) {
-      classNames.push(classToAdd);
-    } else {
-      if (key in themeClasses) {
-        classNames.push(`${themeClasses[key as keyof BoxStyles]}${value}`);
-      }
-    }
-  });
+    return classNames.join(' ');
+  }, [props]);
 
-  const finalTagProps = { ...tagProps, className: classNames.join(' ') } as AllProps<TTag>;
+  const finalTagProps = { ...tagProps, className } as AllProps<TTag>;
   style && (finalTagProps.style = style);
   ref && (finalTagProps.ref = ref);
 

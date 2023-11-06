@@ -43,7 +43,7 @@ function Checkbox(props: Props, ref: Ref<HTMLInputElement>) {
 
   return (
     <Flex inline position="relative">
-      <Box ref={ref} tag="input" inline b={1} p={2} component="checkbox" {...newProps} appearance={native ? undefined : 'none'} />
+      <Box ref={ref} tag="input" component="checkbox" {...newProps} appearance={native ? undefined : 'none'} />
       {!native && (
         <Box position="absolute" pointerEvents="none" className={classes['_checkedIcon']}>
           <svg xmlns="http://www.w3.org/2000/svg" width="100%" viewBox="0 0 20 20">

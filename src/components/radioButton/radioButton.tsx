@@ -32,14 +32,12 @@ interface Props extends Omit<BoxProps, 'props'> {
   required?: boolean;
   checked?: boolean;
   defaultChecked?: boolean;
-  native?: boolean;
 }
 
 function RadioButton(props: Props, ref: Ref<HTMLInputElement>) {
-  const { native } = props;
   const newProps = ObjectUtils.buildProps(props, tagProps, { type: 'radio' });
 
-  return <Box ref={ref} tag="input" inline b={1} p={2} component="radioButton" {...newProps} appearance={native ? undefined : 'none'} />;
+  return <Box ref={ref} tag="input" component="radioButton" {...newProps} />;
 }
 
 export default forwardRef(RadioButton);
