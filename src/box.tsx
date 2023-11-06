@@ -19,10 +19,9 @@ interface Props<TTag extends keyof React.ReactHTML> extends BoxStyles, ThemeComp
 function Box<TTag extends keyof React.ReactHTML = 'div'>(props: Props<TTag>, ref: Ref<HTMLElement>) {
   const { tag, children, props: tagProps, className: userClassName, style } = props;
 
+  const themeStyles = useTheme(props);
   const className = useMemo(() => {
     const classNames = userClassName ? ClassNameUtils.classNames(classes.box, userClassName) : [classes.box];
-
-    const themeStyles = useTheme(props);
     const newProps = { ...themeStyles, ...props };
 
     Object.entries(newProps).forEach(([key, value]) => {
