@@ -81,14 +81,11 @@ namespace Theme {
     const components = Object.keys(defaultTheme) as (keyof ThemeSetup)[];
 
     components.forEach((component) => {
-      console.log(component);
-
       const componentStyles = Styles[component];
       const componentDefaultStyles = defaultTheme[component]!;
 
       if (componentStyles) {
         componentStyles.styles = { ...componentDefaultStyles.styles, ...componentStyles.styles };
-        console.log(componentStyles.styles);
 
         if (componentStyles.disabled && componentDefaultStyles.disabled) {
           componentStyles.disabled = { ...componentDefaultStyles.disabled, ...componentStyles.disabled };

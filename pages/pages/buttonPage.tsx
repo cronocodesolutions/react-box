@@ -5,7 +5,7 @@ export default function ButtonPage() {
   return (
     <Box>
       <Box py={3}>
-        <Button disabled onClick={() => alert('Click')}>
+        <Button p={4} disabled onClick={() => alert('Click')}>
           Click me!
         </Button>
       </Box>
