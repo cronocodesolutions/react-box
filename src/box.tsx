@@ -22,14 +22,14 @@ function Box<TTag extends keyof React.ReactHTML = 'div'>(props: Props<TTag>, ref
   const themeStyles = useTheme(props);
   const className = useMemo(() => {
     const classNames = userClassName ? ClassNameUtils.classNames(classes.box, userClassName) : [classes.box];
-    const newProps = { ...themeStyles, ...props };
+    const newProps = { ...replaceAliases(themeStyles), ...replaceAliases(props) };
 
     Object.entries(newProps).forEach(([key, value]) => {
-      const classToAdd = classes[key + value];
+      const classToAdd = classes[(key as string) + value];
       if (classToAdd) {
         classNames.push(classToAdd);
       } else {
-        if (key in themeClasses) {
+        if ((key as keyof BoxStyles) in themeClasses) {
           classNames.push(`${themeClasses[key as keyof BoxStyles]}${value}`);
         }
       }
@@ -53,3 +53,60 @@ function Box<TTag extends keyof React.ReactHTML = 'div'>(props: Props<TTag>, ref
 }
 
 export default forwardRef(Box) as <TTag extends keyof React.ReactHTML = 'div'>(props: Props<TTag>) => JSX.Element;
+
+const aliases: Partial<Record<keyof BoxStyles, keyof BoxStyles>> = {
+  m: 'margin',
+  mx: 'marginHorizontal',
+  my: 'marginVertical',
+  mt: 'marginTop',
+  mr: 'marginRight',
+  mb: 'marginBottom',
+  ml: 'marginLeft',
+  p: 'padding',
+  px: 'paddingHorizontal',
+  py: 'paddingVertical',
+  pt: 'paddingTop',
+  pr: 'paddingRight',
+  pb: 'paddingBottom',
+  pl: 'paddingLeft',
+  b: 'border',
+  bx: 'borderHorizontal',
+  by: 'borderVertical',
+  bt: 'borderTop',
+  br: 'borderRight',
+  bb: 'borderBottom',
+  bl: 'borderLeft',
+  bg: 'background',
+  jc: 'justifyContent',
+  ai: 'alignItems',
+  ac: 'alignContent',
+  d: 'flexDirection',
+};
+
+const aliasesToUse: Partial<Record<keyof BoxStyles, keyof BoxStyles>> = Object.entries(aliases).reduce((acc, [alias, property]) => {
+  acc[alias as keyof BoxStyles] = property;
+  acc[`${alias}H` as keyof BoxStyles] = `${property}H` as keyof BoxStyles;
+  acc[`${alias}F` as keyof BoxStyles] = `${property}F` as keyof BoxStyles;
+  acc[`${alias}A` as keyof BoxStyles] = `${property}A` as keyof BoxStyles;
+
+  return acc;
+}, {} as Partial<Record<keyof BoxStyles, keyof BoxStyles>>);
+
+function replaceAliases(props: BoxStyles) {
+  const newProps: BoxStyles = { ...props };
+  const keys = Object.keys(newProps) as (keyof BoxStyles)[];
+
+  keys.forEach((key) => {
+    const mainPropKey = aliasesToUse[key];
+    if (mainPropKey) {
+      //
+      if (mainPropKey in newProps === false) {
+        (newProps[mainPropKey] as any) = newProps[key];
+      }
+
+      delete newProps[key];
+    }
+  });
+
+  return newProps;
+}

@@ -1,23 +1,8 @@
 import Box from '../../box';
-import { Activated, Focused, Hovered } from '../../types';
 
 type BoxProps = React.ComponentProps<typeof Box>;
 
-interface FlexStylesShortCuts {
-  wrap?: BoxProps['flexWrap'];
-  jc?: BoxProps['justifyContent'];
-  ai?: BoxProps['alignItems'];
-  ac?: BoxProps['alignContent'];
-  d?: BoxProps['flexDirection'];
-  grow?: BoxProps['flexGrow'];
-  shrink?: BoxProps['flexShrink'];
-  as?: BoxProps['alignSelf'];
-  js?: BoxProps['justifySelf'];
-}
-
-type Props = BoxProps & FlexStylesShortCuts & Hovered<FlexStylesShortCuts> & Focused<FlexStylesShortCuts> & Activated<FlexStylesShortCuts>;
-
-export default function Flex(props: Props) {
+export default function Flex(props: BoxProps) {
   const { inline } = props;
 
   return <Box display={inline ? 'inline-flex' : 'flex'} {...props} />;

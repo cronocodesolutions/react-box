@@ -303,10 +303,14 @@ interface BoxText {
 interface BoxFlex {
   flexWrap?: (typeof styleVariables.flexWrap)[number];
   justifyContent?: (typeof styleVariables.justifyContent)[number];
+  jc?: (typeof styleVariables.justifyContent)[number];
   alignItems?: (typeof styleVariables.alignItems)[number];
+  ai?: (typeof styleVariables.alignItems)[number];
   alignContent?: (typeof styleVariables.alignContent)[number];
+  ac?: (typeof styleVariables.alignContent)[number];
   flex1?: boolean;
   flexDirection?: (typeof styleVariables.flexDirection)[number];
+  d?: (typeof styleVariables.flexDirection)[number];
   gap?: GapType;
   rowGap?: GapType;
   columnGap?: GapType;

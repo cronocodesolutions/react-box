@@ -28,12 +28,8 @@ const boxStyles = {};
     value: string | boolean | number,
     styleName: string[],
     styleValue: string | number,
-    alias: string[],
   ) {
     let classNames = getClassNames(className, value);
-    alias.forEach((a) => {
-      classNames = classNames.concat(getClassNames(a, value));
-    });
 
     const tmp: Record<string, string | number> = (styles[classNames.join(',')] = {});
     styleName.forEach((s) => {
@@ -41,9 +37,9 @@ const boxStyles = {};
     });
   }
 
-  function newStyles(styles: StylesType, className: string, values: readonly string[], styleName?: string[], alias?: string[]) {
+  function newStyles(styles: StylesType, className: string, values: readonly string[], styleName?: string[]) {
     values.forEach((value) => {
-      addStyle(styles, className, value, styleName || [className], value, alias || []);
+      addStyle(styles, className, value, styleName || [className], value);
     });
   }
 
@@ -52,12 +48,11 @@ const boxStyles = {};
     className: string,
     values: readonly number[] | readonly string[],
     styleName?: string[],
-    alias?: string[],
     justValue: boolean = false,
   ) {
     values.forEach((value) => {
       const variableName = justValue ? value : className + value;
-      addStyle(styles, className, value, styleName || [className], 'var(--' + variableName + ')', alias || []);
+      addStyle(styles, className, value, styleName || [className], 'var(--' + variableName + ')');
     });
   }
 
@@ -67,17 +62,9 @@ const boxStyles = {};
     values: readonly number[],
     unity: 'px' | 'rem' | '' = 'rem',
     styleName?: string[],
-    alias?: string[],
   ) {
     values.forEach((value) => {
-      addStyle(
-        styles,
-        className,
-        value,
-        styleName || [className],
-        value * (unity === 'rem' ? styleVariables.sizeMultiplier : 1) + unity,
-        alias || [],
-      );
+      addStyle(styles, className, value, styleName || [className], value * (unity === 'rem' ? styleVariables.sizeMultiplier : 1) + unity);
     });
   }
 
@@ -89,12 +76,12 @@ const boxStyles = {};
     styleName?: string[],
   ) {
     values.forEach((value) => {
-      addStyle(styles, className, value, styleName || [className], valueMap(value, className), []);
+      addStyle(styles, className, value, styleName || [className], valueMap(value, className));
     });
   }
 
   // inline
-  addStyle(boxStyles, 'inline', true, ['display'], 'inline-block', []);
+  addStyle(boxStyles, 'inline', true, ['display'], 'inline-block');
 
   // display
   newStyles(boxStyles, 'display', styleVariables.display);
@@ -129,38 +116,38 @@ const boxStyles = {};
   newStylesWithMapping(boxStyles, 'maxHeight', styleVariables.sizeSpecialValues, specialSizeMap, ['max-height']);
 
   // margin
-  newStylesWithSizes(boxStyles, 'margin', styleVariables.sizes, 'rem', undefined, ['m']);
-  addStyle(boxStyles, 'margin', 'auto', ['margin'], 'auto', ['m']);
-  newStylesWithSizes(boxStyles, 'marginHorizontal', styleVariables.sizes, 'rem', ['margin-inline'], ['mx']);
-  addStyle(boxStyles, 'marginHorizontal', 'auto', ['margin-inline'], 'auto', ['mx']);
-  newStylesWithSizes(boxStyles, 'marginVertical', styleVariables.sizes, 'rem', ['margin-block'], ['my']);
-  addStyle(boxStyles, 'marginVertical', 'auto', ['margin-block'], 'auto', ['my']);
-  newStylesWithSizes(boxStyles, 'marginTop', styleVariables.sizes, 'rem', ['margin-top'], ['mt']);
-  addStyle(boxStyles, 'marginTop', 'auto', ['margin-top'], 'auto', ['mt']);
-  newStylesWithSizes(boxStyles, 'marginRight', styleVariables.sizes, 'rem', ['margin-right'], ['mr']);
-  addStyle(boxStyles, 'marginRight', 'auto', ['margin-right'], 'auto', ['mr']);
-  newStylesWithSizes(boxStyles, 'marginBottom', styleVariables.sizes, 'rem', ['margin-bottom'], ['mb']);
-  addStyle(boxStyles, 'marginBottom', 'auto', ['margin-bottom'], 'auto', ['mb']);
-  newStylesWithSizes(boxStyles, 'marginLeft', styleVariables.sizes, 'rem', ['margin-left'], ['ml']);
-  addStyle(boxStyles, 'marginLeft', 'auto', ['margin-left'], 'auto', ['ml']);
+  newStylesWithSizes(boxStyles, 'margin', styleVariables.sizes, 'rem', undefined);
+  addStyle(boxStyles, 'margin', 'auto', ['margin'], 'auto');
+  newStylesWithSizes(boxStyles, 'marginHorizontal', styleVariables.sizes, 'rem', ['margin-inline']);
+  addStyle(boxStyles, 'marginHorizontal', 'auto', ['margin-inline'], 'auto');
+  newStylesWithSizes(boxStyles, 'marginVertical', styleVariables.sizes, 'rem', ['margin-block']);
+  addStyle(boxStyles, 'marginVertical', 'auto', ['margin-block'], 'auto');
+  newStylesWithSizes(boxStyles, 'marginTop', styleVariables.sizes, 'rem', ['margin-top']);
+  addStyle(boxStyles, 'marginTop', 'auto', ['margin-top'], 'auto');
+  newStylesWithSizes(boxStyles, 'marginRight', styleVariables.sizes, 'rem', ['margin-right']);
+  addStyle(boxStyles, 'marginRight', 'auto', ['margin-right'], 'auto');
+  newStylesWithSizes(boxStyles, 'marginBottom', styleVariables.sizes, 'rem', ['margin-bottom']);
+  addStyle(boxStyles, 'marginBottom', 'auto', ['margin-bottom'], 'auto');
+  newStylesWithSizes(boxStyles, 'marginLeft', styleVariables.sizes, 'rem', ['margin-left']);
+  addStyle(boxStyles, 'marginLeft', 'auto', ['margin-left'], 'auto');
 
   // padding
-  newStylesWithSizes(boxStyles, 'padding', styleVariables.sizes, 'rem', undefined, ['p']);
-  newStylesWithSizes(boxStyles, 'paddingHorizontal', styleVariables.sizes, 'rem', ['padding-inline'], ['px']);
-  newStylesWithSizes(boxStyles, 'paddingVertical', styleVariables.sizes, 'rem', ['padding-block'], ['py']);
-  newStylesWithSizes(boxStyles, 'paddingTop', styleVariables.sizes, 'rem', ['padding-top'], ['pt']);
-  newStylesWithSizes(boxStyles, 'paddingRight', styleVariables.sizes, 'rem', ['padding-right'], ['pr']);
-  newStylesWithSizes(boxStyles, 'paddingBottom', styleVariables.sizes, 'rem', ['padding-bottom'], ['pb']);
-  newStylesWithSizes(boxStyles, 'paddingLeft', styleVariables.sizes, 'rem', ['padding-left'], ['pl']);
+  newStylesWithSizes(boxStyles, 'padding', styleVariables.sizes, 'rem', undefined);
+  newStylesWithSizes(boxStyles, 'paddingHorizontal', styleVariables.sizes, 'rem', ['padding-inline']);
+  newStylesWithSizes(boxStyles, 'paddingVertical', styleVariables.sizes, 'rem', ['padding-block']);
+  newStylesWithSizes(boxStyles, 'paddingTop', styleVariables.sizes, 'rem', ['padding-top']);
+  newStylesWithSizes(boxStyles, 'paddingRight', styleVariables.sizes, 'rem', ['padding-right']);
+  newStylesWithSizes(boxStyles, 'paddingBottom', styleVariables.sizes, 'rem', ['padding-bottom']);
+  newStylesWithSizes(boxStyles, 'paddingLeft', styleVariables.sizes, 'rem', ['padding-left']);
 
   // border
-  newStylesWithSizes(boxStyles, 'border', styleVariables.borderSizes, 'px', ['border-width'], ['b']);
-  newStylesWithSizes(boxStyles, 'borderHorizontal', styleVariables.borderSizes, 'px', ['border-inline-width'], ['bx']);
-  newStylesWithSizes(boxStyles, 'borderVertical', styleVariables.borderSizes, 'px', ['border-block-width'], ['by']);
-  newStylesWithSizes(boxStyles, 'borderTop', styleVariables.borderSizes, 'px', ['border-top-width'], ['bt']);
-  newStylesWithSizes(boxStyles, 'borderRight', styleVariables.borderSizes, 'px', ['border-right-width'], ['br']);
-  newStylesWithSizes(boxStyles, 'borderBottom', styleVariables.borderSizes, 'px', ['border-bottom-width'], ['bb']);
-  newStylesWithSizes(boxStyles, 'borderLeft', styleVariables.borderSizes, 'px', ['border-left-width'], ['bl']);
+  newStylesWithSizes(boxStyles, 'border', styleVariables.borderSizes, 'px', ['border-width']);
+  newStylesWithSizes(boxStyles, 'borderHorizontal', styleVariables.borderSizes, 'px', ['border-inline-width']);
+  newStylesWithSizes(boxStyles, 'borderVertical', styleVariables.borderSizes, 'px', ['border-block-width']);
+  newStylesWithSizes(boxStyles, 'borderTop', styleVariables.borderSizes, 'px', ['border-top-width']);
+  newStylesWithSizes(boxStyles, 'borderRight', styleVariables.borderSizes, 'px', ['border-right-width']);
+  newStylesWithSizes(boxStyles, 'borderBottom', styleVariables.borderSizes, 'px', ['border-bottom-width']);
+  newStylesWithSizes(boxStyles, 'borderLeft', styleVariables.borderSizes, 'px', ['border-left-width']);
   newStyles(boxStyles, 'borderStyle', styleVariables.borderAndOutlineStyles, ['border-style']);
   newStylesWithSizes(boxStyles, 'borderRadius', styleVariables.sizes, 'rem', ['border-radius']);
   newStylesWithSizes(boxStyles, 'borderRadiusTop', styleVariables.sizes, 'rem', ['border-top-left-radius', 'border-top-right-radius']);
@@ -182,7 +169,7 @@ const boxStyles = {};
   // newStylesCssVariables(boxStyles, 'shadow', styleVariables.shadows, ['box-shadow']);
 
   // backgrounds
-  newStyles(boxStyles, 'background', styleVariables.background, undefined, ['bg']);
+  newStyles(boxStyles, 'background', styleVariables.background, undefined);
   // newStylesCssVariables(boxStyles, 'background', styleVariables.backgrounds, ['background'], ['bg']);
 
   // colors
@@ -221,20 +208,20 @@ const boxStyles = {};
   newStyles(boxStyles, 'textAlign', styleVariables.textAlign, ['text-align']);
 
   // flex
-  newStyles(boxStyles, 'flexWrap', styleVariables.flexWrap, ['flex-wrap'], ['wrap']);
-  newStyles(boxStyles, 'justifyContent', styleVariables.justifyContent, ['justify-content'], ['jc']);
-  newStyles(boxStyles, 'alignItems', styleVariables.alignItems, ['align-items'], ['ai']);
-  newStyles(boxStyles, 'alignContent', styleVariables.alignContent, ['align-content'], ['ac']);
-  addStyle(boxStyles, 'flex1', true, ['flex'], 1, []);
-  newStyles(boxStyles, 'flexDirection', styleVariables.flexDirection, ['flex-direction'], ['d']);
+  newStyles(boxStyles, 'flexWrap', styleVariables.flexWrap, ['flex-wrap']);
+  newStyles(boxStyles, 'justifyContent', styleVariables.justifyContent, ['justify-content']);
+  newStyles(boxStyles, 'alignItems', styleVariables.alignItems, ['align-items']);
+  newStyles(boxStyles, 'alignContent', styleVariables.alignContent, ['align-content']);
+  addStyle(boxStyles, 'flex1', true, ['flex'], 1);
+  newStyles(boxStyles, 'flexDirection', styleVariables.flexDirection, ['flex-direction']);
   newStylesWithSizes(boxStyles, 'gap', styleVariables.gap);
   newStylesWithSizes(boxStyles, 'rowGap', styleVariables.gap, 'rem', ['row-gap']);
   newStylesWithSizes(boxStyles, 'columnGap', styleVariables.gap, 'rem', ['column-gap']);
   newStylesWithSizes(boxStyles, 'order', styleVariables.order, '');
-  newStylesWithSizes(boxStyles, 'flexGrow', styleVariables.flexGrow, '', ['flex-grow'], ['grow']);
-  newStylesWithSizes(boxStyles, 'flexShrink', styleVariables.flexShrink, '', ['flex-shrink'], ['shrink']);
-  newStyles(boxStyles, 'alignSelf', styleVariables.flexSelf, ['align-self'], ['as']);
-  newStyles(boxStyles, 'justifySelf', styleVariables.flexSelf, ['justify-self'], ['js']);
+  newStylesWithSizes(boxStyles, 'flexGrow', styleVariables.flexGrow, '', ['flex-grow']);
+  newStylesWithSizes(boxStyles, 'flexShrink', styleVariables.flexShrink, '', ['flex-shrink']);
+  newStyles(boxStyles, 'alignSelf', styleVariables.flexSelf, ['align-self']);
+  newStyles(boxStyles, 'justifySelf', styleVariables.flexSelf, ['justify-self']);
 
   // outline
   newStylesWithSizes(boxStyles, 'outline', styleVariables.borderSizes, 'px', ['outline-width']);
