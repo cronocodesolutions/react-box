@@ -1,9 +1,12 @@
+import { Ref, forwardRef } from 'react';
 import Box from '../../box';
 
-type BoxProps = React.ComponentProps<typeof Box>;
+type BoxProps<TTag extends keyof React.ReactHTML> = React.ComponentProps<typeof Box<TTag>>;
 
-export default function Flex(props: BoxProps) {
+function Flex<TTag extends keyof React.ReactHTML = 'div'>(props: BoxProps<TTag>, ref: Ref<HTMLElement>) {
   const { inline } = props;
 
-  return <Box display={inline ? 'inline-flex' : 'flex'} {...props} />;
+  return <Box ref={ref} display={inline ? 'inline-flex' : 'flex'} {...props} />;
 }
+
+export default forwardRef(Flex) as <TTag extends keyof React.ReactHTML = 'div'>(props: BoxProps<TTag>) => JSX.Element;
