@@ -262,7 +262,7 @@ interface BoxBackground {
 }
 
 interface BoxColors {
-  color?: ColorType | string;
+  // color?: ColorType | string;
   backgroundColor?: ColorType | string;
   bgColor?: ColorType | string;
   borderColor?: ColorType | string;
@@ -363,7 +363,7 @@ type BoxNormalStyles = BoxPseudoClasses &
 
 export type BoxStyles = BoxNormalStyles & Hovered<BoxNormalStyles> & Focused<BoxNormalStyles> & Activated<BoxNormalStyles>;
 
-export const themeClasses: Partial<Record<keyof BoxStyles, string>> = {
+export const themeClasses: Partial<Record<string, string>> = {
   hover: '_h',
   focus: '_f',
   shadow: 'shadow_',
