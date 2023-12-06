@@ -136,7 +136,7 @@ type GapType = (typeof styleVariables.gap)[number];
 type BoxSizeValue = (typeof styleVariables.sizeSpecialValues)[number];
 type BorderSizeType = (typeof styleVariables.borderSizes)[number];
 type SizeType = (typeof styleVariables.sizes)[number];
-export type ColorType = string; // (typeof styleVariables.baseColors)[number];
+// export type ColorType = string; // (typeof styleVariables.baseColors)[number];
 type CursorType = (typeof styleVariables.cursors)[number];
 type OverflowType = (typeof styleVariables.overflows)[number];
 type FontSizeType = (typeof styleVariables.fontSizes)[number];
@@ -148,7 +148,7 @@ type TextTransformType = (typeof styleVariables.textTransform)[number];
 type TextAlignType = (typeof styleVariables.textAlign)[number];
 type BorderAndOutlineStyleType = (typeof styleVariables.borderAndOutlineStyles)[number];
 type TransitionType = (typeof styleVariables.transition)[number];
-type BackgroundType = (typeof styleVariables.background)[number];
+// type BackgroundType = (typeof styleVariables.background)[number];
 type UserSelectType = (typeof styleVariables.userSelect)[number];
 type AppearanceType = (typeof styleVariables.appearance)[number];
 type PointerEventsType = (typeof styleVariables.pointerEvents)[number];
@@ -253,20 +253,20 @@ interface BoxBorder {
 }
 
 interface BoxShadow {
-  shadow?: string;
+  // shadow?: string;
 }
 
 interface BoxBackground {
-  background?: BackgroundType | string;
-  bg?: BackgroundType | string;
+  // background?: BackgroundType | string;
+  // bg?: BackgroundType | string;
 }
 
 interface BoxColors {
   // color?: ColorType | string;
-  backgroundColor?: ColorType | string;
-  bgColor?: ColorType | string;
-  borderColor?: ColorType | string;
-  outlineColor?: ColorType | string;
+  // backgroundColor?: ColorType | string;
+  // bgColor?: ColorType | string;
+  // borderColor?: ColorType | string;
+  // outlineColor?: ColorType | string;
 }
 
 interface BoxCursor {

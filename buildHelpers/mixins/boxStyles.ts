@@ -169,7 +169,7 @@ const boxStyles = {};
   // newStylesCssVariables(boxStyles, 'shadow', styleVariables.shadows, ['box-shadow']);
 
   // backgrounds
-  newStyles(boxStyles, 'background', styleVariables.background, undefined);
+  // newStyles(boxStyles, 'background', styleVariables.background, undefined);
   // newStylesCssVariables(boxStyles, 'background', styleVariables.backgrounds, ['background'], ['bg']);
 
   // colors
