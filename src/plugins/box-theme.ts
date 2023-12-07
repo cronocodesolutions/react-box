@@ -1,37 +1,34 @@
-import * as fs from 'fs';
-import { PluginOption } from 'vite';
-
 interface BoxThemeOptions {
-  cssPath: string;
-  boxDtsPath: string;
-  baseSvgDtsPath: string;
   colors: Record<string, string>;
   shadows: Record<string, string>;
   backgrounds: Record<string, string>;
 }
 
-export function boxTheme(options: BoxThemeOptions): PluginOption {
-  return {
-    name: 'boxTheme',
-    configResolved(_config) {
-      const colorVariables = Object.entries(options.colors)
-        .map(([colorName, colorValue]) => `--color${colorName}: ${colorValue};`)
-        .join('\n');
-      const shadowVariables = Object.entries(options.shadows)
-        .map(([shadowName, shadowValue]) => `--shadow${shadowName}: ${shadowValue};`)
-        .join('\n');
-      const bgVariables = Object.entries(options.backgrounds)
-        .map(([backgroundName, backgroundValue]) => `--background${backgroundName}: ${backgroundValue};`)
-        .join('\n');
+interface BoxThemeResources {
+  themeCss: string;
+  boxDts: string;
+  baseSvgDts: string;
+}
 
-      const variables = `:root {
+export function boxTheme(options: BoxThemeOptions): BoxThemeResources {
+  const colorVariables = Object.entries(options.colors)
+    .map(([colorName, colorValue]) => `--color${colorName}: ${colorValue};`)
+    .join('\n');
+  const shadowVariables = Object.entries(options.shadows)
+    .map(([shadowName, shadowValue]) => `--shadow${shadowName}: ${shadowValue};`)
+    .join('\n');
+  const bgVariables = Object.entries(options.backgrounds)
+    .map(([backgroundName, backgroundValue]) => `--background${backgroundName}: ${backgroundValue};`)
+    .join('\n');
+
+  const variables = `:root {
   ${colorVariables}
   ${shadowVariables}
   ${bgVariables}
 }`;
 
-      const colors = Object.keys(options.colors).map((colorName) => {
-        return `
+  const colors = Object.keys(options.colors).map((colorName) => {
+    return `
 .color_${colorName},
 .color_h_${colorName}:hover,
 ._h:hover>.color_h_${colorName} {
@@ -151,10 +148,10 @@ export function boxTheme(options: BoxThemeOptions): PluginOption {
     stroke: var(--color${colorName});
   }
 }`;
-      });
+  });
 
-      const shadows = Object.keys(options.shadows).map((shadowName) => {
-        return `
+  const shadows = Object.keys(options.shadows).map((shadowName) => {
+    return `
 .shadow_${shadowName},
 .shadow_h_${shadowName}:hover,
 ._h:hover>.shadow_h_${shadowName} {
@@ -169,10 +166,10 @@ export function boxTheme(options: BoxThemeOptions): PluginOption {
 .shadow_a_${shadowName}:active {
   box-shadow: var(--shadow${shadowName});
 }`;
-      });
+  });
 
-      const backgrounds = Object.keys(options.backgrounds).map((backgroundName) => {
-        return `
+  const backgrounds = Object.keys(options.backgrounds).map((backgroundName) => {
+    return `
 .bg_${backgroundName},
 .bg_h_${backgroundName}:hover,
 ._h:hover>.bg_h_${backgroundName} {
@@ -187,18 +184,19 @@ export function boxTheme(options: BoxThemeOptions): PluginOption {
 .bg_a_${backgroundName}:active {
   background: var(--background${backgroundName});
 }`;
-      });
+  });
 
-      const colorType = Object.keys(options.colors)
-        .map((item) => `'${item}'`)
-        .join(' | ');
-      const backgroundType = Object.keys(options.backgrounds)
-        .map((item) => `'${item}'`)
-        .join(' | ');
-      const shadowType = Object.keys(options.shadows)
-        .map((item) => `'${item}'`)
-        .join(' | ');
-      const boxTypings = `import '@cronocode/react-box';
+  const colorType = Object.keys(options.colors)
+    .map((item) => `'${item}'`)
+    .join(' | ');
+  const backgroundType = Object.keys(options.backgrounds)
+    .map((item) => `'${item}'`)
+    .join(' | ');
+  const shadowType = Object.keys(options.shadows)
+    .map((item) => `'${item}'`)
+    .join(' | ');
+
+  const boxTypings = `import '@cronocode/react-box';
 
 declare module '@cronocode/react-box' {
   type ColorType = ${colorType};
@@ -244,7 +242,7 @@ declare module '@cronocode/react-box' {
 }
 `;
 
-      const baseSvgTypings = `import '@cronocode/react-box/components/baseSvg';
+  const baseSvgTypings = `import '@cronocode/react-box/components/baseSvg';
 
 declare module '@cronocode/react-box/components/baseSvg' {
   type ColorType = ${colorType};
@@ -266,9 +264,9 @@ declare module '@cronocode/react-box/components/baseSvg' {
 }
 `;
 
-      fs.writeFileSync(options.cssPath, [variables, ...colors, ...shadows, ...backgrounds].join('\n'));
-      fs.writeFileSync(options.boxDtsPath, boxTypings);
-      fs.writeFileSync(options.baseSvgDtsPath, baseSvgTypings);
-    },
+  return {
+    themeCss: [variables, ...colors, ...shadows, ...backgrounds].join('\n'),
+    boxDts: boxTypings,
+    baseSvgDts: baseSvgTypings,
   };
 }

@@ -1,28 +1,28 @@
 {
   "name": "@cronocode/react-box",
-  "version": "1.4.1",
+  "version": "1.4.2",
   "main": "./box.cjs.js",
-  "module": "./box.mjs.js",
+  "module": "./box.es.js",
   "types": "./box.d.ts",
   "exports": {
     ".": {
-      "import": "./box.mjs.js",
+      "import": "./box.es.js",
       "require": "./box.cjs.js",
       "types": "./box.d.ts"
     },
     "./style.css": "./style.css",
     "./theme": {
-      "import": "./theme.mjs.js",
+      "import": "./theme.es.js",
       "require": "./theme.cjs.js",
       "types": "./theme.d.ts"
     },
     "./components/*": {
-      "import": "./components/*.mjs.js",
+      "import": "./components/*.es.js",
       "require": "./components/*.cjs.js",
       "types": "./components/*.d.ts"
     },
     "./plugins": {
-      "import": "./plugins.mjs.js",
+      "import": "./plugins.es.js",
       "require": "./plugins.cjs.js",
       "types": "./plugins.d.ts"
     }
