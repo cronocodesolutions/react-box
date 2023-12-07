@@ -1,5 +1,3 @@
-import { SvgStyles } from './components/baseSvg/baseSvg';
-
 export type Hovered<T> = {
   [K in keyof T as K extends string ? `${K}H` : never]: T[K];
 };
@@ -400,7 +398,15 @@ export const themeClasses: Partial<Record<string, string>> = {
   outlineColorA: 'outlineColor_a_',
 };
 
-export const themeSvgClasses: Partial<Record<keyof SvgStyles, string>> = {
+interface SvgNormalStyles {
+  // fill?: ColorType | string;
+  // stroke?: ColorType | string;
+  rotate?: 0 | 90 | 180 | 270;
+  flip?: 'xAxis' | 'yAxis';
+}
+export type SvgStyles = SvgNormalStyles & Hovered<SvgNormalStyles> & Focused<SvgNormalStyles> & Activated<SvgNormalStyles>;
+
+export const themeSvgClasses: Partial<Record<string, string>> = {
   fill: 'fill_',
   fillH: 'fill_h_',
   fillF: 'fill_f_',

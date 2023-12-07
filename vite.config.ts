@@ -23,7 +23,12 @@ export default defineConfig(({ mode }) => {
         beforeWriteFile(filePath, content) {
           const { dir } = path.parse(filePath);
 
-          return { filePath: dir.includes('components') ? `${dir}.d.ts` : filePath, content: content.replace(/..\/..\//g, '../') };
+          let newFilePath = filePath;
+          if (dir.includes('components') || dir.includes('plugins')) {
+            newFilePath = `${dir}.d.ts`;
+          }
+
+          return { filePath: newFilePath, content: content.replace(/..\/..\//g, '../') };
         },
       }),
       reactPlugin(),
@@ -93,6 +98,10 @@ export default defineConfig(({ mode }) => {
               return result;
             }
 
+            if (id.includes('/plugins/')) {
+              return 'plugins';
+            }
+
             return 'utils';
           },
 
@@ -119,6 +128,10 @@ export default defineConfig(({ mode }) => {
 
             if (chunkInfo.name === 'utils') {
               return 'utils/[name].mjs';
+            }
+
+            if (chunkInfo.name === 'plugins') {
+              return '[name].mjs';
             }
 
             return 'components/[name].mjs';

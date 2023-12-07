@@ -1,21 +1,17 @@
 import React, { useState } from 'react';
-import { Activated, ColorType, Focused, Hovered, themeSvgClasses } from '../../types';
+import { Activated, Focused, Hovered, themeSvgClasses, SvgStyles } from '../../types';
 import ClassNameUtils from '../../utils/className/classNameUtils';
 import classes from './baseSvg.module.css';
-
-interface SvgNormalStyles {
-  fill?: ColorType | string;
-  stroke?: ColorType | string;
-  rotate?: 0 | 90 | 180 | 270;
-  flip?: 'xAxis' | 'yAxis';
-}
-export type SvgStyles = SvgNormalStyles & Hovered<SvgNormalStyles> & Focused<SvgNormalStyles> & Activated<SvgNormalStyles>;
 
 type AllSvgProps = React.SVGProps<SVGElement>;
 type SvgPropsType = Omit<AllSvgProps, 'className' | 'style' | 'width' | 'height'>;
 type SvgStyleType = Omit<React.CSSProperties, 'width' | 'height'>;
 
-interface Props extends SvgStyles {
+export namespace Augmented {
+  export interface Props {}
+}
+
+interface Props extends SvgStyles, Augmented.Props {
   children?: React.ReactNode | ((props: { isHover: boolean }) => React.ReactNode);
   props?: SvgPropsType;
   style?: SvgStyleType;
@@ -35,7 +31,7 @@ export default function BaseSvg(props: Props) {
       classNames.push(classToAdd);
     } else {
       if (key in themeSvgClasses) {
-        classNames.push(`${themeSvgClasses[key as keyof SvgStyles]}${value}`);
+        classNames.push(`${themeSvgClasses[key]}${value}`);
       }
     }
   });

@@ -1,6 +1,6 @@
 {
   "name": "@cronocode/react-box",
-  "version": "1.3.9",
+  "version": "1.4.0",
   "main": "./box.mjs",
   "module": "./box.mjs",
   "types": "./box.d.ts",
@@ -20,6 +20,11 @@
       "import": "./components/*.mjs",
       "require": "./components/*.mjs",
       "types": "./components/*.d.ts"
+    },
+    "./plugins": {
+      "import": "./plugins.mjs",
+      "require": "./plugins.mjs",
+      "types": "./plugins.d.ts"
     }
   },
   "scripts": {
@@ -28,7 +33,7 @@
     "preview": "vite preview",
     "build": "vite build",
     "build:dev": "vite build --mode dev",
-    "postbuild": "cp package.json dist & cp LICENSE dist & cp -r plugins dist & rm ./dist/index.d.ts & rm ./dist/index.js",
+    "postbuild": "cp package.json dist & cp LICENSE dist & rm ./dist/index.d.ts & rm ./dist/index.js",
     "compile": "tsc --noEmit --skipLibCheck",
     "test": "echo \"Error: no test specified\" && exit 1"
   },

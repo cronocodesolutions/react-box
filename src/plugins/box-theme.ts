@@ -3,13 +3,14 @@ import { PluginOption } from 'vite';
 
 interface BoxThemeOptions {
   cssPath: string;
-  dtsPath: string;
+  boxDtsPath: string;
+  baseSvgDtsPath: string;
   colors: Record<string, string>;
   shadows: Record<string, string>;
   backgrounds: Record<string, string>;
 }
 
-export default function boxTheme(options: BoxThemeOptions): PluginOption {
+export function boxTheme(options: BoxThemeOptions): PluginOption {
   return {
     name: 'boxTheme',
     configResolved(_config) {
@@ -197,7 +198,7 @@ export default function boxTheme(options: BoxThemeOptions): PluginOption {
       const shadowType = Object.keys(options.shadows)
         .map((item) => `'${item}'`)
         .join(' | ');
-      const typings = `import '@cronocode/react-box';
+      const boxTypings = `import '@cronocode/react-box';
 
 declare module '@cronocode/react-box' {
   type ColorType = ${colorType};
@@ -243,8 +244,31 @@ declare module '@cronocode/react-box' {
 }
 `;
 
+      const baseSvgTypings = `import '@cronocode/react-box/components/baseSvg';
+
+declare module '@cronocode/react-box/components/baseSvg' {
+  type ColorType = ${colorType};
+  type BackgroundType = ${backgroundType};
+  type ShadowType = ${shadowType};
+
+  namespace Augmented {
+    interface Props {
+      fill?: ColorType;
+      fillH?: ColorType;
+      fillF?: ColorType;
+      fillA?: ColorType;
+      stroke?: ColorType;
+      strokeH?: ColorType;
+      strokeF?: ColorType;
+      strokeA?: ColorType;
+    }
+  }
+}
+`;
+
       fs.writeFileSync(options.cssPath, [variables, ...colors, ...shadows, ...backgrounds].join('\n'));
-      fs.writeFileSync(options.dtsPath, typings);
+      fs.writeFileSync(options.boxDtsPath, boxTypings);
+      fs.writeFileSync(options.baseSvgDtsPath, baseSvgTypings);
     },
   };
 }

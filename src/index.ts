@@ -13,3 +13,4 @@ import('./components/textbox/textbox');
 import('./components/tooltip/tooltip');
 
 import('./theme');
+import('./plugins/box-theme');
