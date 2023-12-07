@@ -62,7 +62,7 @@ export default defineConfig(({ mode }) => {
       lib: {
         entry: path.resolve(__dirname, './src/index.ts'),
         fileName: (format) => 'index.js',
-        formats: ['es'],
+        formats: ['es', 'cjs'],
       },
       rollupOptions: {
         external: ['react', 'react-dom', 'react/jsx-runtime'],
@@ -82,8 +82,6 @@ export default defineConfig(({ mode }) => {
             }
 
             if (id.includes('/baseSvg.module.css')) {
-              console.log('baseSvg.module.css');
-
               return 'baseSvg.module.css';
             }
 
@@ -107,34 +105,34 @@ export default defineConfig(({ mode }) => {
 
           chunkFileNames(chunkInfo) {
             if (chunkInfo.name === 'index') {
-              return '[name].mjs';
+              return '[name].[format].js';
             }
 
             if (chunkInfo.name === 'box') {
-              return '[name].mjs';
+              return '[name].[format].js';
             }
 
             if (chunkInfo.name === 'box.module.css') {
-              return '[name].mjs';
+              return '[name].[format].js';
             }
 
             if (chunkInfo.name === 'baseSvg.module.css') {
-              return '[name].mjs';
+              return '[name].[format].js';
             }
 
             if (chunkInfo.name === 'theme') {
-              return '[name].mjs';
+              return '[name].[format].js';
             }
 
             if (chunkInfo.name === 'utils') {
-              return 'utils/[name].mjs';
+              return 'utils/[name].[format].js';
             }
 
             if (chunkInfo.name === 'plugins') {
-              return '[name].mjs';
+              return '[name].[format].js';
             }
 
-            return 'components/[name].mjs';
+            return 'components/[name].[format].js';
           },
         },
       },
