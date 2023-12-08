@@ -33,6 +33,21 @@ export default defineConfig(({ mode }) => {
       }),
       reactPlugin(),
       moduleCssPlugin(jsonCache),
+      {
+        name: 'fix-extensions',
+        apply: 'build',
+        enforce: 'post',
+        generateBundle(_options, bundle, _isWrite) {
+          Object.values(bundle).forEach((item) => {
+            if (item.fileName.endsWith('.cjs.js')) {
+              item.fileName = item.fileName.replace('.cjs.js', '.cjs');
+            }
+            if (item.fileName.endsWith('.es.js')) {
+              item.fileName = item.fileName.replace('.es.js', '.mjs');
+            }
+          });
+        },
+      },
     ],
     css: {
       devSourcemap: mode === 'dev',
