@@ -13,6 +13,7 @@ import moduleCssPlugin from './buildHelpers/plugins/moduleCssPlugin';
 
 const identity = new IdentityFactory();
 const jsonCache: Record<string, Record<string, string>> = {};
+let extension: string;
 
 export default defineConfig(({ mode }) => {
   console.log('NODE_ENV', process.env.NODE_ENV);
@@ -33,21 +34,6 @@ export default defineConfig(({ mode }) => {
       }),
       reactPlugin(),
       moduleCssPlugin(jsonCache),
-      {
-        name: 'fix-extensions',
-        apply: 'build',
-        enforce: 'post',
-        generateBundle(_options, bundle, _isWrite) {
-          Object.values(bundle).forEach((item) => {
-            if (item.fileName.endsWith('.cjs.js')) {
-              item.fileName = item.fileName.replace('.cjs.js', '.cjs');
-            }
-            if (item.fileName.endsWith('.es.js')) {
-              item.fileName = item.fileName.replace('.es.js', '.mjs');
-            }
-          });
-        },
-      },
     ],
     css: {
       devSourcemap: mode === 'dev',
@@ -76,7 +62,12 @@ export default defineConfig(({ mode }) => {
       minify: mode !== 'dev',
       lib: {
         entry: path.resolve(__dirname, './src/index.ts'),
-        fileName: (format) => 'index.js',
+        fileName: (format) => {
+          if (format === 'cjs') extension = 'cjs';
+          if (format === 'es') extension = 'mjs';
+
+          return 'index.js';
+        },
         formats: ['es', 'cjs'],
       },
       rollupOptions: {
@@ -120,34 +111,34 @@ export default defineConfig(({ mode }) => {
 
           chunkFileNames(chunkInfo) {
             if (chunkInfo.name === 'index') {
-              return '[name].[format].js';
+              return `[name].${extension}`;
             }
 
             if (chunkInfo.name === 'box') {
-              return '[name].[format].js';
+              return `[name].${extension}`;
             }
 
             if (chunkInfo.name === 'box.module.css') {
-              return '[name].[format].js';
+              return `[name].${extension}`;
             }
 
             if (chunkInfo.name === 'baseSvg.module.css') {
-              return '[name].[format].js';
+              return `[name].${extension}`;
             }
 
             if (chunkInfo.name === 'theme') {
-              return '[name].[format].js';
+              return `[name].${extension}`;
             }
 
             if (chunkInfo.name === 'utils') {
-              return 'utils/[name].[format].js';
+              return `utils/[name].${extension}`;
             }
 
             if (chunkInfo.name === 'plugins') {
-              return '[name].[format].js';
+              return `[name].${extension}`;
             }
 
-            return 'components/[name].[format].js';
+            return `components/[name].${extension}`;
           },
         },
       },
