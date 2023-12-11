@@ -7,7 +7,6 @@ interface BoxThemeOptions {
 interface BoxThemeResources {
   themeCss: string;
   boxDts: string;
-  baseSvgDts: string;
 }
 
 export function boxTheme(options: BoxThemeOptions): BoxThemeResources {
@@ -196,7 +195,7 @@ export function boxTheme(options: BoxThemeOptions): BoxThemeResources {
     .map((item) => `'${item}'`)
     .join(' | ');
 
-  const boxTypings = `import '@cronocode/react-box';
+  const boxTypings = `import {ColorType} from '@cronocode/react-box';
 
 declare module '@cronocode/react-box' {
   type ColorType = ${colorType};
@@ -240,15 +239,8 @@ declare module '@cronocode/react-box' {
     }
   }
 }
-`;
-
-  const baseSvgTypings = `import '@cronocode/react-box/components/baseSvg';
 
 declare module '@cronocode/react-box/components/baseSvg' {
-  type ColorType = ${colorType};
-  type BackgroundType = ${backgroundType};
-  type ShadowType = ${shadowType};
-
   namespace Augmented {
     interface Props {
       fill?: ColorType;
@@ -267,6 +259,5 @@ declare module '@cronocode/react-box/components/baseSvg' {
   return {
     themeCss: [variables, ...colors, ...shadows, ...backgrounds].join('\n'),
     boxDts: boxTypings,
-    baseSvgDts: baseSvgTypings,
   };
 }
