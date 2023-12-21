@@ -1,10 +1,10 @@
 import { createPortal } from 'react-dom';
 import Box from '../../box';
 import React, { useCallback, useLayoutEffect, useRef, useState } from 'react';
-import { BoxPosition } from '../../types';
+import { BoxPosition, BoxSize } from '../../types';
 import usePortalContainer from '../../hooks/usePortalContainer';
 
-interface Props extends BoxPosition {
+interface Props extends BoxPosition, BoxSize {
   children: React.ReactNode;
   style?: React.ComponentProps<'div'>['style'];
   onPositionChange?(position: { top: number; left: number }): void;
@@ -13,7 +13,7 @@ interface Props extends BoxPosition {
 export default function Tooltip(props: Props) {
   const { children, onPositionChange } = props;
   const ref = useRef<HTMLDivElement>(null);
-  const [position, setPosition] = useState<{ top: number; left: number } | undefined>();
+  const [position, setPosition] = useState<{ top: number; left: number; width?: number } | undefined>();
   const portalContainer = usePortalContainer();
 
   const observeScroll = useCallback(
@@ -55,7 +55,7 @@ export default function Tooltip(props: Props) {
 
       if (position?.top !== top || position?.left !== left) {
         onPositionChange?.({ top, left });
-        setPosition({ top: rect.top + window.scrollY, left: rect.left + window.scrollX });
+        setPosition({ top: rect.top + window.scrollY, left: rect.left + window.scrollX, width: rect.width > 0 ? rect.width : undefined });
       }
     }
   }, [position]);
@@ -83,7 +83,7 @@ export default function Tooltip(props: Props) {
             top={0}
             left={0}
             transition="none"
-            style={{ transform: `translate(${position.left}px,${position.top}px)` }}
+            style={{ transform: `translate(${position.left}px,${position.top}px)`, width: position.width }}
           >
             {children}
           </Box>,

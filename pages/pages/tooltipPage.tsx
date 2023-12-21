@@ -9,10 +9,23 @@ export default function TooltipPage() {
   const [open2, setOpen2] = useState(false);
   const [open3, setOpen3] = useState(false);
   const [open4, setOpen4] = useState(false);
+  const [openDD, setOpenDD] = useState(false);
 
   return (
     <Box>
       <Box>This is Tooltip page</Box>
+
+      <Box position="relative" inline>
+        <Button onClick={() => setOpenDD(!openDD)}>Click me ↓↑</Button>
+        {openDD && (
+          <Tooltip width="fit" top={8}>
+            <Box b={1} bgColor="violet">
+              <Box>Item 1</Box>
+              <Box>Item 2</Box>
+            </Box>
+          </Tooltip>
+        )}
+      </Box>
 
       <Box mt={40} style={{ width: 800, height: 300 }} b={1} overflow="auto" bgColor="violet" position="relative">
         <Box>overflow hidden box</Box>

@@ -174,7 +174,7 @@ export interface BoxPosition {
   left?: SizeType;
 }
 
-interface BoxSize {
+export interface BoxSize {
   width?: BoxSizeValue;
   height?: BoxSizeValue;
   minWidth?: BoxSizeValue;

@@ -12,19 +12,19 @@ interface BoxThemeResources {
 export function boxTheme(options: BoxThemeOptions): BoxThemeResources {
   const colorVariables = Object.entries(options.colors)
     .map(([colorName, colorValue]) => `--color${colorName}: ${colorValue};`)
-    .join('\n');
+    .join('\n  ');
   const shadowVariables = Object.entries(options.shadows)
     .map(([shadowName, shadowValue]) => `--shadow${shadowName}: ${shadowValue};`)
-    .join('\n');
+    .join('\n  ');
   const bgVariables = Object.entries(options.backgrounds)
     .map(([backgroundName, backgroundValue]) => `--background${backgroundName}: ${backgroundValue};`)
-    .join('\n');
+    .join('\n  ');
 
-  const variables = `:root {
-  ${colorVariables}
-  ${shadowVariables}
-  ${bgVariables}
-}`;
+  const variables = [':root {'];
+  colorVariables && variables.push(`  ${colorVariables}`);
+  shadowVariables && variables.push(`  ${shadowVariables}`);
+  bgVariables && variables.push(`  ${bgVariables}`);
+  variables.push('}');
 
   const colors = Object.keys(options.colors).map((colorName) => {
     return `
@@ -257,7 +257,7 @@ declare module '@cronocode/react-box/components/baseSvg' {
 `;
 
   return {
-    themeCss: [variables, ...colors, ...shadows, ...backgrounds].join('\n'),
+    themeCss: [variables.join('\n'), ...colors, ...shadows, ...backgrounds].join('\n'),
     boxDts: boxTypings,
   };
 }
