@@ -73,6 +73,7 @@ export default function Tooltip(props: Props) {
             position="absolute"
             top={0}
             left={0}
+            transition="none"
             style={{ transform: `translate(${position.left}px,${position.top}px)`, width: position.width }}
           >
             <Box position="absolute" width="fit" {...props} />
