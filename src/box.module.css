@@ -1,27 +1,16 @@
 :root {
-  --none: none;
-  --transparent: transparent;
-  --black: black;
-  --white: white;
-  --blue: blue;
-  --red: red;
-  --purple: purple;
-  --yellow: yellow;
-  --pink: pink;
-  --green: green;
-  --orange: orange;
-  --navy: navy;
-  --teal: teal;
-  --violet: violet;
-  --gray: gray;
-  --brown: brown;
-  --orange: orange;
-
   --borderColor: black;
   --outlineColor: black;
   --lineHeight: 1.2;
   --fontSize: 14px;
   --transitionTime: 0.25s;
+
+  #crono-box {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 0;
+  }
 }
 
 html {

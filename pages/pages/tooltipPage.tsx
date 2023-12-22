@@ -15,13 +15,19 @@ export default function TooltipPage() {
     <Box>
       <Box>This is Tooltip page</Box>
 
-      <Box position="relative" inline>
+      <Box bgColor="violetLighter" inline>
         <Button onClick={() => setOpenDD(!openDD)}>Click me ↓↑</Button>
         {openDD && (
-          <Tooltip width="fit" top={8}>
+          <Tooltip>
             <Box b={1} bgColor="violet">
               <Box>Item 1</Box>
               <Box>Item 2</Box>
+              <Box>Item 3</Box>
+              <Box>Item 4</Box>
+              <Box>Item 5</Box>
+              <Box>Item 6</Box>
+              <Box>Item 7</Box>
+              <Box>Item 8</Box>
             </Box>
           </Tooltip>
         )}
