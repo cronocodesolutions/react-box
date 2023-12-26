@@ -122,6 +122,7 @@ type SizeType = (typeof styleVariables.sizes)[number];
 type CursorType = (typeof styleVariables.cursors)[number];
 type OverflowType = (typeof styleVariables.overflows)[number];
 type FontSizeType = (typeof styleVariables.fontSizes)[number];
+type FontStyleType = (typeof styleVariables.fontStyle)[number];
 type FontWeightType = (typeof styleVariables.fontWeight)[number];
 type ZIndexSizeType = (typeof styleVariables.zIndexSizes)[number];
 type OpacitySizeType = (typeof styleVariables.opacity)[number];
@@ -133,6 +134,8 @@ type TransitionType = (typeof styleVariables.transition)[number];
 type UserSelectType = (typeof styleVariables.userSelect)[number];
 type AppearanceType = (typeof styleVariables.appearance)[number];
 type PointerEventsType = (typeof styleVariables.pointerEvents)[number];
+type WhiteSpaceType = (typeof styleVariables.whiteSpace)[number];
+type TextOverflowType = (typeof styleVariables.textOverflow)[number];
 
 interface BoxPseudoClasses {
   hover?: boolean;
@@ -256,12 +259,15 @@ interface BoxFont {
   lineHeight?: FontSizeType;
   fontWeight?: FontWeightType;
   letterSpacing?: SizeType;
+  fontStyle?: FontStyleType;
 }
 
 interface BoxText {
   textDecoration?: TextDecorationType;
   textTransform?: TextTransformType;
   textAlign?: TextAlignType;
+  whiteSpace?: WhiteSpaceType;
+  textOverflow?: TextOverflowType;
 }
 
 interface BoxFlex {
