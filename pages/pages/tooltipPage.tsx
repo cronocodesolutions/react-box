@@ -47,7 +47,7 @@ export default function TooltipPage() {
           <Button m={4} ml={60} position="relative" onClick={() => setOpen2(!open2)}>
             Click me!
             {open2 && (
-              <Tooltip top={11}>
+              <Tooltip top={-15}>
                 <Box overflow="hidden" b={1} borderRadius={2}>
                   <Box style={{ height: 400 }} overflow="auto">
                     <Box style={{ width: 300, height: 900 }} bgColor="violetLight">

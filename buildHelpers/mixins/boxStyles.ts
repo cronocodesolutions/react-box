@@ -43,19 +43,6 @@ const boxStyles = {};
     });
   }
 
-  function newStylesCssVariables(
-    styles: StylesType,
-    className: string,
-    values: readonly number[] | readonly string[],
-    styleName?: string[],
-    justValue: boolean = false,
-  ) {
-    values.forEach((value) => {
-      const variableName = justValue ? value : className + value;
-      addStyle(styles, className, value, styleName || [className], 'var(--' + variableName + ')');
-    });
-  }
-
   function newStylesWithSizes(
     styles: StylesType,
     className: string,
@@ -165,23 +152,6 @@ const boxStyles = {};
   newStylesWithSizes(boxStyles, 'borderRadiusBottomLeft', styleVariables.sizes, 'rem', ['border-bottom-left-radius']);
   newStylesWithSizes(boxStyles, 'borderRadiusBottomRight', styleVariables.sizes, 'rem', ['border-bottom-right-radius']);
 
-  // shadow
-  // newStylesCssVariables(boxStyles, 'shadow', styleVariables.shadows, ['box-shadow']);
-
-  // backgrounds
-  // newStyles(boxStyles, 'background', styleVariables.background, undefined);
-  // newStylesCssVariables(boxStyles, 'background', styleVariables.backgrounds, ['background'], ['bg']);
-
-  // colors
-  // newStylesCssVariables(boxStyles, 'color', styleVariables.baseColors, ['color'], [], true);
-  // newStylesCssVariables(boxStyles, 'color', styleVariables.fontColors, ['color'], []);
-  // newStylesCssVariables(boxStyles, 'backgroundColor', styleVariables.baseColors, ['background-color'], ['bgColor'], true);
-  // newStylesCssVariables(boxStyles, 'backgroundColor', styleVariables.bgColors, ['background-color'], ['bgColor']);
-  // newStylesCssVariables(boxStyles, 'borderColor', styleVariables.baseColors, ['border-color'], [], true);
-  // newStylesCssVariables(boxStyles, 'borderColor', styleVariables.borderColors, ['border-color'], []);
-  // newStylesCssVariables(boxStyles, 'outlineColor', styleVariables.baseColors, ['outline-color'], [], true);
-  // newStylesCssVariables(boxStyles, 'outlineColor', styleVariables.outlineColors, ['outline-color'], []);
-
   // cursor
   newStyles(boxStyles, 'cursor', styleVariables.cursors);
 
@@ -198,6 +168,7 @@ const boxStyles = {};
 
   // font
   newStylesWithSizes(boxStyles, 'fontSize', styleVariables.fontSizes, 'px', ['font-size']);
+  newStyles(boxStyles, 'fontStyle', styleVariables.fontStyle, ['font-style']);
   newStylesWithSizes(boxStyles, 'lineHeight', styleVariables.fontSizes, 'px', ['line-height']);
   newStylesWithSizes(boxStyles, 'fontWeight', styleVariables.fontWeight, '', ['font-weight']);
   newStylesWithSizes(boxStyles, 'letterSpacing', styleVariables.sizes, 'px', ['letter-spacing']);
@@ -239,6 +210,12 @@ const boxStyles = {};
 
   // pointer-events
   newStyles(boxStyles, 'pointerEvents', styleVariables.pointerEvents, ['pointer-events']);
+
+  // white-space
+  newStyles(boxStyles, 'whiteSpace', styleVariables.whiteSpace, ['white-space']);
+
+  // text-overflow
+  newStyles(boxStyles, 'textOverflow', styleVariables.textOverflow, ['text-overflow']);
 });
 
 export default {

@@ -61,32 +61,15 @@ export const styleVariables = {
   ] as const,
   sizes: [
     0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 22, 24, 26, 28, 30, 32, 34, 36, 38, 40, 42, 44, 46, 48, 50,
-    52, 54, 56, 58, 60, 62, 64, 66, 68, 70, 72, 74, 76, 78, 80, 82, 84, 86, 88, 90, 92, 94, 96, 98, 100,
+    52, 54, 56, 58, 60, 62, 64, 66, 68, 70, 72, 74, 76, 78, 80, 82, 84, 86, 88, 90, 92, 94, 96, 98, 100, -1, -2, -3, -4, -5, -6, -7, -8, -9,
+    -10, -11, -12, -13, -14, -15,
   ] as const,
   sizeMultiplier: 0.25,
-  // baseColors: [
-  //   'none',
-  //   'transparent',
-  //   'black',
-  //   'white',
-  //   'blue',
-  //   'red',
-  //   'purple',
-  //   'yellow',
-  //   'pink',
-  //   'green',
-  //   'orange',
-  //   'navy',
-  //   'teal',
-  //   'violet',
-  //   'gray',
-  //   'brown',
-  //   'orange',
-  // ] as const,
   borderSizes: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10] as const,
   fontSizes: [
-    6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30, 32, 34, 36, 38, 40, 42, 44, 46, 48, 50, 54, 58, 64, 70, 78, 86, 96,
+    6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30, 32, 34, 36, 38, 40, 42, 44, 46, 48, 50, 52, 54, 56, 58, 60, 64, 70, 78, 86, 96,
   ] as const,
+  fontStyle: ['italic', 'normal', 'oblique'] as const,
   fontWeight: [100, 200, 300, 400, 500, 600, 700, 800, 900] as const,
   zIndexSizes: [1, 2, 3, 4, 5, 10, 11, 12, 13, 14, 15, 100, 101, 102, 103, 104, 105, 1000, 1001, 1002, 1003, 1004, 1005] as const,
   justifyContent: [
@@ -125,16 +108,17 @@ export const styleVariables = {
   outlineOffset: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10] as const,
   transition: ['none'] as const,
   background: ['none'] as const,
-  userSelect: ['none'] as const,
+  userSelect: ['none', 'auto', 'text', 'all'] as const,
   appearance: ['none'] as const,
-  pointerEvents: ['none'] as const,
+  pointerEvents: ['none', 'auto', 'all'] as const,
+  whiteSpace: ['break-spaces', 'normal', 'nowrap', 'pre', 'pre-line', 'pre-wrap'] as const,
+  textOverflow: ['clip', 'ellipsis'] as const,
 };
 
 type GapType = (typeof styleVariables.gap)[number];
 type BoxSizeValue = (typeof styleVariables.sizeSpecialValues)[number];
 type BorderSizeType = (typeof styleVariables.borderSizes)[number];
 type SizeType = (typeof styleVariables.sizes)[number];
-// export type ColorType = string; // (typeof styleVariables.baseColors)[number];
 type CursorType = (typeof styleVariables.cursors)[number];
 type OverflowType = (typeof styleVariables.overflows)[number];
 type FontSizeType = (typeof styleVariables.fontSizes)[number];
@@ -146,7 +130,6 @@ type TextTransformType = (typeof styleVariables.textTransform)[number];
 type TextAlignType = (typeof styleVariables.textAlign)[number];
 type BorderAndOutlineStyleType = (typeof styleVariables.borderAndOutlineStyles)[number];
 type TransitionType = (typeof styleVariables.transition)[number];
-// type BackgroundType = (typeof styleVariables.background)[number];
 type UserSelectType = (typeof styleVariables.userSelect)[number];
 type AppearanceType = (typeof styleVariables.appearance)[number];
 type PointerEventsType = (typeof styleVariables.pointerEvents)[number];
@@ -250,23 +233,6 @@ interface BoxBorder {
   borderRadiusBottomRight?: SizeType;
 }
 
-interface BoxShadow {
-  // shadow?: string;
-}
-
-interface BoxBackground {
-  // background?: BackgroundType | string;
-  // bg?: BackgroundType | string;
-}
-
-interface BoxColors {
-  // color?: ColorType | string;
-  // backgroundColor?: ColorType | string;
-  // bgColor?: ColorType | string;
-  // borderColor?: ColorType | string;
-  // outlineColor?: ColorType | string;
-}
-
 interface BoxCursor {
   cursor?: CursorType;
 }
@@ -343,9 +309,6 @@ type BoxNormalStyles = BoxPseudoClasses &
   BoxMargin &
   BoxPadding &
   BoxBorder &
-  BoxShadow &
-  BoxBackground &
-  BoxColors &
   BoxCursor &
   BoxZIndex &
   BoxOverflow &
@@ -399,9 +362,7 @@ export const themeClasses: Partial<Record<string, string>> = {
 };
 
 interface SvgNormalStyles {
-  // fill?: ColorType | string;
-  // stroke?: ColorType | string;
-  rotate?: 0 | 90 | 180 | 270;
+  rotate?: 0 | 90 | 180 | 270 | -90 | -180 | -270;
   flip?: 'xAxis' | 'yAxis';
 }
 export type SvgStyles = SvgNormalStyles & Hovered<SvgNormalStyles> & Focused<SvgNormalStyles> & Activated<SvgNormalStyles>;

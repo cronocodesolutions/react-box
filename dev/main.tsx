@@ -1,7 +1,7 @@
 import React, { useRef, useState } from 'react';
 import ReactDOM from 'react-dom/client';
 // import Box from './../src/box';
-import ButtonCore from './../src/components/buttonCore/buttonCore';
+// import ButtonCore from './../src/components/buttonCore/buttonCore';
 // import UncontrolledTextboxCore from '../src/components/textboxCore/textboxCore';
 // import Flex from './../src/components/flex/flex';
 // import FormAsync from '../src/components/formAsync/formAsync';
@@ -10,7 +10,7 @@ import ButtonCore from './../src/components/buttonCore/buttonCore';
 import '/theme.css';
 // import BaseSvg from '../src/components/baseSvg/baseSvg';
 // import ClassNameUtils from '../src/utils/className/classNameUtils';
-import TextboxCore from '../src/components/textboxCore/textboxCore';
+// import TextboxCore from '../src/components/textboxCore/textboxCore';
 import Box from '../src/box';
 import Flex from '../src/components/flex/flex';
 import AutoColumnsDataGrid from './components/dataGrid/autoColumnsDataGrid';
@@ -80,7 +80,7 @@ function TestRef() {
   return (
     <Box ref={boxRef}>
       <Box>test</Box>
-      <TextboxCore
+      {/* <TextboxCore
         name="test"
         ref={textboxRef}
         type="date"
@@ -91,7 +91,7 @@ function TestRef() {
         }}
         inline={false}
       />
-      <ButtonCore onClick={() => alert(1)}>Click me</ButtonCore>
+      <ButtonCore onClick={() => alert(1)}>Click me</ButtonCore> */}
     </Box>
   );
 }

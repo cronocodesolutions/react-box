@@ -80,12 +80,10 @@ const aliases: Partial<Record<keyof BoxStyles, keyof BoxStyles>> = {
   br: 'borderRight',
   bb: 'borderBottom',
   bl: 'borderLeft',
-  // bg: 'background',
   jc: 'justifyContent',
   ai: 'alignItems',
   ac: 'alignContent',
   d: 'flexDirection',
-  // bgColor: 'backgroundColor',
 };
 
 const aliasesToUse: Partial<Record<keyof BoxStyles, keyof BoxStyles>> = Object.entries(aliases).reduce((acc, [alias, property]) => {

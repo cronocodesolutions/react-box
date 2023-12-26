@@ -102,9 +102,6 @@ const svgStyles = {};
     });
   }
 
-  // newStylesCssVariables(svgStyles, 'fill', styleVariables.baseColors, ['fill'], [], ['path', 'circle', 'rect', 'line'], true);
-  // newStylesCssVariables(svgStyles, 'stroke', styleVariables.baseColors, ['stroke'], [], ['path', 'circle', 'rect', 'line'], true);
-
   newStylesWithMapping(svgStyles, 'rotate', [0, 90, 180, 270], (value, className) => `${value}deg`, ['rotate']);
   newStylesWithMapping(svgStyles, 'flip', ['xAxis', 'yAxis'], (value, className) => (value === 'xAxis' ? '-1 1' : '1 -1'), ['scale']);
 });
