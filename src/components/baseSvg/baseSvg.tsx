@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Activated, Focused, Hovered, themeSvgClasses, SvgStyles } from '../../types';
+import { themeSvgClasses, SvgStyles } from '../../types';
 import ClassNameUtils from '../../utils/className/classNameUtils';
 import classes from './baseSvg.module.css';
 
@@ -7,11 +7,7 @@ type AllSvgProps = React.SVGProps<SVGElement>;
 type SvgPropsType = Omit<AllSvgProps, 'className' | 'style' | 'width' | 'height'>;
 type SvgStyleType = Omit<React.CSSProperties, 'width' | 'height'>;
 
-export namespace Augmented {
-  export interface Props {}
-}
-
-interface Props extends SvgStyles, Augmented.Props {
+interface Props extends SvgStyles {
   children?: React.ReactNode | ((props: { isHover: boolean }) => React.ReactNode);
   props?: SvgPropsType;
   style?: SvgStyleType;

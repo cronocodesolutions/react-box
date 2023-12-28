@@ -328,7 +328,16 @@ type BoxNormalStyles = BoxPseudoClasses &
   BoxAppearance &
   BoxPointerEvents;
 
-export type BoxStyles = BoxNormalStyles & Hovered<BoxNormalStyles> & Focused<BoxNormalStyles> & Activated<BoxNormalStyles>;
+namespace Augmented {
+  export interface BoxProps {}
+  export interface SvgProps {}
+}
+
+export type BoxStyles = BoxNormalStyles &
+  Hovered<BoxNormalStyles> &
+  Focused<BoxNormalStyles> &
+  Activated<BoxNormalStyles> &
+  Augmented.BoxProps;
 
 export const themeClasses: Partial<Record<string, string>> = {
   hover: '_h',
@@ -371,7 +380,11 @@ interface SvgNormalStyles {
   rotate?: 0 | 90 | 180 | 270 | -90 | -180 | -270;
   flip?: 'xAxis' | 'yAxis';
 }
-export type SvgStyles = SvgNormalStyles & Hovered<SvgNormalStyles> & Focused<SvgNormalStyles> & Activated<SvgNormalStyles>;
+export type SvgStyles = SvgNormalStyles &
+  Hovered<SvgNormalStyles> &
+  Focused<SvgNormalStyles> &
+  Activated<SvgNormalStyles> &
+  Augmented.SvgProps;
 
 export const themeSvgClasses: Partial<Record<string, string>> = {
   fill: 'fill_',

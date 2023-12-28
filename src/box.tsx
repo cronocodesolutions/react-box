@@ -7,11 +7,7 @@ import { ThemeComponentProps, useTheme } from './theme';
 type AllProps<TTag extends keyof React.ReactHTML> = React.ComponentProps<TTag>;
 type TagPropsType<TTag extends keyof React.ReactHTML> = Omit<AllProps<TTag>, 'className' | 'style' | 'ref'>;
 
-export namespace Augmented {
-  export interface Props {}
-}
-
-interface Props<TTag extends keyof React.ReactHTML> extends BoxStyles, ThemeComponentProps, Augmented.Props {
+interface Props<TTag extends keyof React.ReactHTML> extends BoxStyles, ThemeComponentProps {
   children?: React.ReactNode | ((props: { isHover: boolean }) => React.ReactNode);
   tag?: TTag;
   props?: TagPropsType<TTag>;

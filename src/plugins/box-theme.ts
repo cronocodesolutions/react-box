@@ -195,15 +195,15 @@ export function boxTheme(options: BoxThemeOptions): BoxThemeResources {
     .map((item) => `'${item}'`)
     .join(' | ');
 
-  const boxTypings = `import {ColorType} from '@cronocode/react-box';
+  const boxTypings = `import {ColorType} from '@cronocode/react-box/types';
 
-declare module '@cronocode/react-box' {
+declare module '@cronocode/react-box/types' {
   type ColorType = ${colorType};
   type BackgroundType = ${backgroundType};
   type ShadowType = ${shadowType};
 
   namespace Augmented {
-    interface Props {
+    interface BoxProps {
       color?: ColorType;
       colorH?: ColorType;
       colorF?: ColorType;
@@ -237,12 +237,8 @@ declare module '@cronocode/react-box' {
       shadowF?: ShadowType;
       shadowA?: ShadowType;
     }
-  }
-}
 
-declare module '@cronocode/react-box/components/baseSvg' {
-  namespace Augmented {
-    interface Props {
+    interface SvgProps {
       fill?: ColorType;
       fillH?: ColorType;
       fillF?: ColorType;
