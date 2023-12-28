@@ -195,7 +195,7 @@ export function boxTheme(options: BoxThemeOptions): BoxThemeResources {
     .map((item) => `'${item}'`)
     .join(' | ');
 
-  const boxTypings = `import {ColorType} from '@cronocode/react-box/types';
+  const boxTypings = `import '@cronocode/react-box';
 
 declare module '@cronocode/react-box/types' {
   type ColorType = ${colorType};

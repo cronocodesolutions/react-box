@@ -328,7 +328,7 @@ type BoxNormalStyles = BoxPseudoClasses &
   BoxAppearance &
   BoxPointerEvents;
 
-namespace Augmented {
+export namespace Augmented {
   export interface BoxProps {}
   export interface SvgProps {}
 }
