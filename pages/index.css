@@ -1,0 +1,7 @@
+@import url(./box-theme.generated.css);
+
+html {
+  font-family: Roboto;
+  font-weight: 400;
+  color: var(--colorblack);
+}

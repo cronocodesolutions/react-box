@@ -10,22 +10,24 @@ export default function DataGrid<T extends {}>(props: Props<T>) {
 
   const grid = useGrid(data);
 
-  if (grid.columns.length === 0) {
-    return <Box display="grid">empty grid</Box>;
-  }
-
   return (
-    <Box display="grid">
-      {grid.columns.map((column, index) => (
-        <Box key={column.key.toString()} style={{ gridColumn: index + 1 }}>
-          {column.key.toString()}
-        </Box>
-      ))}
-      {grid.rows.map((row, rowIndex) => {
-        return row.cells.map((cell) => {
-          return <Box key={cell.key.toString() + rowIndex}>{cell.value}</Box>;
-        });
-      })}
+    <Box display="grid" b={1} borderRadius={1}>
+      {grid.columns.length === 0 ? (
+        <>empty grid</>
+      ) : (
+        <>
+          {grid.columns.map((column, index) => (
+            <Box key={column.key.toString()} style={{ gridColumn: index + 1 }}>
+              {column.key.toString()}
+            </Box>
+          ))}
+          {grid.rows.map((row, rowIndex) => {
+            return row.cells.map((cell) => {
+              return <Box key={cell.key.toString() + rowIndex}>{cell.value}</Box>;
+            });
+          })}
+        </>
+      )}
     </Box>
   );
 }

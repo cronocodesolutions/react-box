@@ -33,6 +33,7 @@
   "scripts": {
     "dev": "vite ./pages --config ./pages.vite.config.ts --mode dev",
     "build:pages": "vite build ./pages --config ./pages.vite.config.ts --outDir ../dist --mode production",
+    "build:make404": "cp ./dist/index.html ./dist/404.html",
     "preview": "vite preview",
     "build": "vite build",
     "build:dev": "vite build --mode dev",

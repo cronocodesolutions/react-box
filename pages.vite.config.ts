@@ -1,8 +1,8 @@
 import { defineConfig, PluginOption } from 'vite';
 import reactPlugin from '@vitejs/plugin-react';
 import IdentityFactory from '@cronocode/identity-factory';
-import dts from 'vite-plugin-dts';
 import path from 'path';
+import fs from 'fs';
 
 // @ts-ignore
 import boxStylesMixins from './buildHelpers/mixins/boxStyles';
@@ -10,6 +10,15 @@ import boxStylesMixins from './buildHelpers/mixins/boxStyles';
 import svgStylesMixins from './buildHelpers/mixins/svgStyles';
 // @ts-ignore
 import moduleCssPlugin from './buildHelpers/plugins/moduleCssPlugin';
+
+// @ts-ignore
+import { boxTheme } from './src/plugins/box-theme';
+// @ts-ignore
+import { theme } from './pages/theme';
+
+const result = boxTheme(theme);
+fs.writeFileSync('./pages/box-theme.generated.css', result.themeCss);
+fs.writeFileSync('./pages/box.generated.d.ts', result.boxDts);
 
 const identity = new IdentityFactory();
 const jsonCache: Record<string, Record<string, string>> = {};
