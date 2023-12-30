@@ -5,3 +5,27 @@ html {
   font-weight: 400;
   color: var(--colorblack);
 }
+
+.hljs-keyword {
+  color: #3b75e9;
+}
+.hljs-string {
+  color: #f37836;
+}
+
+.hljs-title.function_ {
+  color: #8e8738;
+}
+.language-xml .hljs-name,
+.language-xml .hljs-tag,
+.hljs-title.class_ {
+  color: #319670;
+}
+
+.hljs-params {
+  color: #4f4a17;
+}
+
+.hljs-meta.prompt_ {
+  color: #3b75e9;
+}

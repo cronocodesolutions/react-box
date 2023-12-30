@@ -1,8 +1,21 @@
 import Box from '../../src/box';
 import Button from '../../src/components/button/button';
 import Flex from '../../src/components/flex/flex';
+import hljs from 'highlight.js';
 
 export default function HomePage() {
+  const npmInstall = hljs.highlight('> npm install @cronocode/react-box', { language: 'shell' }).value;
+  const importDeps = hljs.highlight('@cronocode/react-box/style.css', { language: 'javascript' }).value;
+  const highlightedCode = hljs.highlight(
+    `import Box from '@cronocode/react-box';
+  
+function Component () {
+  return <Box>Hello world</Box>;
+}
+`,
+    { language: 'js' },
+  ).value;
+
   return (
     <Flex ai="center" width="fit" mt={20} d="column">
       {/* <Box> */}
@@ -11,17 +24,17 @@ export default function HomePage() {
       </Box>
       <Box fontSize={24}>to rapidly build modern web app based on React library.</Box>
       {/* </Box> */}
-      <Box mt={20}>
-        <Button>Get started</Button>
+      <Box mt={20} fontSize={30}>
+        Steps to start
       </Box>
 
-      <Box mt={20}>
+      <Box mt={12}>
         <Flex ai="center" gap={3}>
           <Box component="number">1</Box>
           <Box>Install npm library</Box>
         </Flex>
-        <Box component="code" mt={1}>
-          npm install @cronocode/react-box
+        <Box tag="pre">
+          <Box component="code" tag="code" mt={1} props={{ dangerouslySetInnerHTML: { __html: npmInstall } }} />
         </Box>
         <Flex ai="center" gap={3} mt={5}>
           <Box component="number">2</Box>
@@ -36,17 +49,15 @@ export default function HomePage() {
             </Box>
           </Box>
         </Flex>
-        <Box component="code" mt={1}>
-          @cronocode/react-box/style.css
+        <Box tag="pre">
+          <Box component="code" tag="code" mt={1} props={{ dangerouslySetInnerHTML: { __html: importDeps } }} />
         </Box>
         <Flex ai="center" gap={3} mt={5}>
           <Box component="number">3</Box>
           <Box>Use Box</Box>
         </Flex>
-        <Box component="code" mt={1}>
-          <Box>{`function YourComponent() {`}</Box>
-          <Box ml={4}>{`return <Box>This is box component</Box>;`}</Box>
-          <Box>{`}`}</Box>
+        <Box tag="pre">
+          <Box component="code" tag="code" mt={1} props={{ dangerouslySetInnerHTML: { __html: highlightedCode } }} />
         </Box>
       </Box>
     </Flex>

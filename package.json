@@ -76,6 +76,7 @@
     "react-router-dom": "^6.16.0",
     "typescript": "^5.0.2",
     "vite": "^4.2.1",
-    "vite-plugin-dts": "^2.1.0"
+    "vite-plugin-dts": "^2.1.0",
+    "highlight.js": "^11.9.0"
   }
 }
