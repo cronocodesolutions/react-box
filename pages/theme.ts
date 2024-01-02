@@ -10,7 +10,6 @@ export const theme = {
     violetLight: '#e8edfd',
     violetLighter: '#f6f8fe',
     gray1: '#94a3b833',
-    gray2: '#94a3b8',
   },
   backgrounds: {
     none: 'none',
@@ -30,15 +29,6 @@ Theme.setup({
       bgColorH: 'violetLight',
       borderColor: 'violetLighter',
       borderColorH: 'violet',
-    },
-    disabled: {
-      bgColor: 'violetLight',
-      bgColorH: 'violetLight',
-      color: 'gray2',
-      colorH: 'gray2',
-      cursor: 'not-allowed',
-      borderColor: 'violetLighter',
-      borderColorH: 'violetLighter',
     },
   },
   components: {
