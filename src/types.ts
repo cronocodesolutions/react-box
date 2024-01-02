@@ -59,10 +59,13 @@ export const styleVariables = {
     'grab',
     'grabbing',
   ] as const,
-  sizes: [
+  positiveSizes: [
     0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 22, 24, 26, 28, 30, 32, 34, 36, 38, 40, 42, 44, 46, 48, 50,
-    52, 54, 56, 58, 60, 62, 64, 66, 68, 70, 72, 74, 76, 78, 80, 82, 84, 86, 88, 90, 92, 94, 96, 98, 100, -1, -2, -3, -4, -5, -6, -7, -8, -9,
-    -10, -11, -12, -13, -14, -15,
+    52, 54, 56, 58, 60, 64, 68, 72, 76, 80, 88, 96, 100,
+  ] as const,
+  negativeSizes: [
+    -1, -2, -3, -4, -5, -6, -7, -8, -9, -10, -11, -12, -13, -14, -15, -16, -20, -24, -28, -32, -36, -40, -44, -48, -52, -56, -60, -68, -76,
+    -84, -92, -100,
   ] as const,
   sizeMultiplier: 0.25,
   borderSizes: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10] as const,
@@ -113,12 +116,14 @@ export const styleVariables = {
   pointerEvents: ['none', 'auto', 'all'] as const,
   whiteSpace: ['break-spaces', 'normal', 'nowrap', 'pre', 'pre-line', 'pre-wrap'] as const,
   textOverflow: ['clip', 'ellipsis'] as const,
+  gridColumns: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20] as const,
 };
+export const sizes = [...styleVariables.positiveSizes, ...styleVariables.negativeSizes] as const;
 
 type GapType = (typeof styleVariables.gap)[number];
 type BoxSizeValue = (typeof styleVariables.sizeSpecialValues)[number];
 type BorderSizeType = (typeof styleVariables.borderSizes)[number];
-type SizeType = (typeof styleVariables.sizes)[number];
+type SizeType = (typeof sizes)[number];
 type CursorType = (typeof styleVariables.cursors)[number];
 type OverflowType = (typeof styleVariables.overflows)[number];
 type FontSizeType = (typeof styleVariables.fontSizes)[number];
@@ -153,7 +158,7 @@ interface BoxSizing {
 
 export interface BoxPosition {
   position?: (typeof styleVariables.position)[number];
-  inset?: SizeType;
+  inset?: (typeof styleVariables.positiveSizes)[number];
   top?: SizeType;
   right?: SizeType;
   bottom?: SizeType;
@@ -170,12 +175,12 @@ export interface BoxSize {
 }
 
 interface BoxMargin {
-  margin?: SizeType | 'auto';
-  m?: SizeType | 'auto';
-  marginHorizontal?: SizeType | 'auto';
-  mx?: SizeType | 'auto';
-  marginVertical?: SizeType | 'auto';
-  my?: SizeType | 'auto';
+  margin?: (typeof styleVariables.positiveSizes)[number] | 'auto';
+  m?: (typeof styleVariables.positiveSizes)[number] | 'auto';
+  marginHorizontal?: (typeof styleVariables.positiveSizes)[number] | 'auto';
+  mx?: (typeof styleVariables.positiveSizes)[number] | 'auto';
+  marginVertical?: (typeof styleVariables.positiveSizes)[number] | 'auto';
+  my?: (typeof styleVariables.positiveSizes)[number] | 'auto';
   marginTop?: SizeType | 'auto';
   mt?: SizeType | 'auto';
   marginRight?: SizeType | 'auto';
@@ -187,12 +192,12 @@ interface BoxMargin {
 }
 
 interface BoxPadding {
-  padding?: SizeType;
-  p?: SizeType;
-  paddingHorizontal?: SizeType;
-  px?: SizeType;
-  paddingVertical?: SizeType;
-  py?: SizeType;
+  padding?: (typeof styleVariables.positiveSizes)[number];
+  p?: (typeof styleVariables.positiveSizes)[number];
+  paddingHorizontal?: (typeof styleVariables.positiveSizes)[number];
+  px?: (typeof styleVariables.positiveSizes)[number];
+  paddingVertical?: (typeof styleVariables.positiveSizes)[number];
+  py?: (typeof styleVariables.positiveSizes)[number];
   paddingTop?: SizeType;
   pt?: SizeType;
   paddingRight?: SizeType;
@@ -225,15 +230,15 @@ interface BoxBorder {
   borderLeft?: BorderSizeType;
   bl?: BorderSizeType;
   borderStyle?: BorderAndOutlineStyleType;
-  borderRadius?: SizeType;
-  borderRadiusTop?: SizeType;
-  borderRadiusRight?: SizeType;
-  borderRadiusBottom?: SizeType;
-  borderRadiusLeft?: SizeType;
-  borderRadiusTopLeft?: SizeType;
-  borderRadiusTopRight?: SizeType;
-  borderRadiusBottomLeft?: SizeType;
-  borderRadiusBottomRight?: SizeType;
+  borderRadius?: (typeof styleVariables.positiveSizes)[number];
+  borderRadiusTop?: (typeof styleVariables.positiveSizes)[number];
+  borderRadiusRight?: (typeof styleVariables.positiveSizes)[number];
+  borderRadiusBottom?: (typeof styleVariables.positiveSizes)[number];
+  borderRadiusLeft?: (typeof styleVariables.positiveSizes)[number];
+  borderRadiusTopLeft?: (typeof styleVariables.positiveSizes)[number];
+  borderRadiusTopRight?: (typeof styleVariables.positiveSizes)[number];
+  borderRadiusBottomLeft?: (typeof styleVariables.positiveSizes)[number];
+  borderRadiusBottomRight?: (typeof styleVariables.positiveSizes)[number];
 }
 
 interface BoxCursor {
@@ -256,7 +261,7 @@ interface BoxOpacity {
 
 interface BoxFont {
   fontSize?: FontSizeType;
-  lineHeight?: FontSizeType;
+  lineHeight?: FontSizeType | 'font-size';
   fontWeight?: FontWeightType;
   letterSpacing?: SizeType;
   fontStyle?: FontStyleType;
@@ -289,6 +294,13 @@ interface BoxFlex {
   flexShrink?: (typeof styleVariables.flexShrink)[number];
   alignSelf?: (typeof styleVariables.flexSelf)[number];
   justifySelf?: (typeof styleVariables.flexSelf)[number];
+}
+
+interface BoxGrid {
+  gridColumns?: (typeof styleVariables.gridColumns)[number];
+  colSpan?: (typeof styleVariables.gridColumns)[number] | 'full-row';
+  colStart?: (typeof styleVariables.gridColumns)[number];
+  colEnd?: (typeof styleVariables.gridColumns)[number];
 }
 
 interface BoxTransition {
@@ -326,7 +338,8 @@ type BoxNormalStyles = BoxPseudoClasses &
   BoxTransition &
   BoxUserSelect &
   BoxAppearance &
-  BoxPointerEvents;
+  BoxPointerEvents &
+  BoxGrid;
 
 export namespace Augmented {
   export interface BoxProps {}

@@ -3,6 +3,7 @@ import ButtonPage from '../pages/buttonPage';
 import CheckboxPage from '../pages/checkboxPage';
 import DataGridPage from '../pages/dataGridPage';
 import FlexPage from '../pages/flexPage';
+import GridPage from '../pages/gridPage';
 import HomePage from '../pages/homePage';
 import RadioButtonPage from '../pages/radioButtonPage';
 import TextboxPage from '../pages/textboxPage';
@@ -23,6 +24,7 @@ export default function App() {
         </MenuItem>
         <MenuItem to="/box">Box</MenuItem>
         <MenuItem to="/flex">Flex</MenuItem>
+        <MenuItem to="/grid">Grid</MenuItem>
         <MenuItem to="/textbox">Textbox</MenuItem>
         <MenuItem to="/datagrid">Data Grid</MenuItem>
         <MenuItem to="/button">Button</MenuItem>
@@ -35,6 +37,7 @@ export default function App() {
           <Route index element={<HomePage />} />
           <Route path="/box" element={<BoxPage />} />
           <Route path="/flex" element={<FlexPage />} />
+          <Route path="/grid" element={<GridPage />} />
           <Route path="/textbox" element={<TextboxPage />} />
           <Route path="/datagrid" element={<DataGridPage />} />
           <Route path="/button" element={<ButtonPage />} />
