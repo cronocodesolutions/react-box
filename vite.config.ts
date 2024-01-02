@@ -19,6 +19,7 @@ export default defineConfig(({ mode }) => {
   return {
     plugins: [
       dts({
+        entryRoot: './src',
         beforeWriteFile(filePath, content) {
           const { dir } = path.parse(filePath);
 

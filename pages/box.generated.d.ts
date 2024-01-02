@@ -1,7 +1,7 @@
 import '@cronocode/react-box';
 
 declare module '@cronocode/react-box/types' {
-  type ColorType = 'none' | 'white' | 'black' | 'black1' | 'violet' | 'violetLight' | 'violetLighter' | 'gray1' | 'gray2' | 'dark';
+  type ColorType = 'none' | 'white' | 'black' | 'black1' | 'violet' | 'violetLight' | 'violetLighter' | 'gray1' | 'gray2' | 'dark' | 'red';
   type BackgroundType = 'none' | 'stripes';
   type ShadowType = 'none';
 

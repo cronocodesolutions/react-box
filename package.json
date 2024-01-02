@@ -35,6 +35,7 @@
     "build:pages": "vite build ./pages --config ./pages.vite.config.ts --outDir ../dist --mode production",
     "preview": "vite preview",
     "build": "vite build",
+    "postbuild": "cp package.json dist & cp LICENSE dist & cp README.md dist & rm ./dist/index.d.ts & rm ./dist/index.js",
     "build:dev": "vite build --mode dev",
     "compile": "tsc --noEmit --skipLibCheck",
     "test": "echo \"Error: no test specified\" && exit 1"

@@ -9,6 +9,7 @@
   --colorgray1: #94a3b833;
   --colorgray2: #94a3b8;
   --colordark: #272822;
+  --colorred: red;
   --shadownone: none;
   --backgroundnone: none;
   --backgroundstripes: linear-gradient(135deg,var(--colorviolet) 10%,#0000 0,#0000 50%,var(--colorviolet) 0,var(--colorviolet) 60%,#0000 0,#0000);;
@@ -1211,6 +1212,126 @@
   rect,
   line {
     stroke: var(--colordark);
+  }
+}
+
+.color_red,
+.color_h_red:hover,
+._h:hover>.color_h_red {
+  color: var(--colorred);
+}
+
+.color_f_red:focus-within,
+._f:focus-within>.color_f_red {
+  color: var(--colorred);
+}
+
+.color_a_red:active {
+  color: var(--colorred);
+}
+
+.bgColor_red,
+.bgColor_h_red:hover,
+._h:hover>.bgColor_h_red {
+  background-color: var(--colorred);
+}
+
+.bgColor_f_red:focus-within,
+._f:focus-within>.bgColor_f_red {
+  background-color: var(--colorred);
+}
+
+.bgColor_a_red:active {
+  background-color: var(--colorred);
+}
+
+.borderColor_red,
+.borderColor_h_red:hover,
+._h:hover>.borderColor_h_red {
+  border-color: var(--colorred);
+}
+
+.borderColor_f_red:focus-within,
+._f:focus-within>.borderColor_f_red {
+  border-color: var(--colorred);
+}
+
+.borderColor_a_red:active {
+  border-color: var(--colorred);
+}
+
+.outlineColor_red,
+.outlineColor_h_red:hover,
+._h:hover>.outlineColor_h_red {
+  outline-color: var(--colorred);
+}
+
+.outlineColor_f_red:focus-within,
+._f:focus-within>.outlineColor_f_red {
+  outline-color: var(--colorred);
+}
+
+.outlineColor_a_red:active {
+  outline-color: var(--colorred);
+}
+
+.fill_red,
+.fill_h_red:hover,
+._h:hover>.fill_h_red {
+  path,
+  circle,
+  rect,
+  line {
+    fill: var(--colorred);
+  }
+}
+
+.fill_f_red:focus-within,
+._f:focus-within>.fill_f_red {
+  path,
+  circle,
+  rect,
+  line {
+    fill: var(--colorred);
+  }
+}
+
+.fill_a_red:active {
+  path,
+  circle,
+  rect,
+  line {
+    fill: var(--colorred);
+  }
+}
+
+.stroke_red,
+.stroke_h_red:hover,
+._h:hover>.stroke_h_red {
+  path,
+  circle,
+  rect,
+  line {
+    stroke: var(--colorred);
+  }
+}
+
+.stroke_f_red:focus-within,
+._f:focus-within>.stroke_f_red {
+  path,
+  circle,
+  rect,
+  line {
+    stroke: var(--colorred);
+  }
+}
+
+.stroke_a_red:active {
+  path,
+  circle,
+  rect,
+  line {
+    stroke: var(--colorred);
   }
 }
 

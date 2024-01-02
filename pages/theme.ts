@@ -12,6 +12,7 @@ export const theme = {
     gray1: '#94a3b833',
     gray2: '#94a3b8',
     dark: '#272822',
+    red: 'red',
   },
   backgrounds: {
     none: 'none',
