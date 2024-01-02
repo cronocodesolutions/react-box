@@ -1,8 +1,8 @@
 import Box from '../../src/box';
-import hljs from 'highlight.js';
 import Flex from '../../src/components/flex/flex';
 import Textbox from '../../src/components/textbox/textbox';
 import { useState } from 'react';
+import Code from '../components/code';
 
 export default function BoxPage() {
   const [props, setProps] = useState({
@@ -15,16 +15,6 @@ export default function BoxPage() {
   const stringProps = Object.entries(props)
     .map(([key, value]) => `${key}={${value}}`)
     .join(' ');
-
-  const highlightedCode = hljs.highlight(
-    `import Box from '@cronocode/react-box';
-  
-function Component () {
-  return <Box ${stringProps}>Hello world</Box>;
-}
-`,
-    { language: 'js' },
-  ).value;
 
   return (
     <Flex height="fit-screen">
@@ -56,9 +46,13 @@ function Component () {
       </Flex>
       <Flex flex1 d="column">
         <Flex flex1 ai="center" jc="center" bb={1}>
-          <Flex tag="pre">
-            <Box tag="code" lineHeight={20} component="code" props={{ dangerouslySetInnerHTML: { __html: highlightedCode } }} />
-          </Flex>
+          <Code language="javascript">
+            {`import Box from '@cronocode/react-box';
+
+function Component () {
+  <Box ${stringProps}>Hello world</Box>;
+}`}
+          </Code>
         </Flex>
         <Flex flex1 ai="center" jc="center">
           <Box {...props}>Hello world</Box>

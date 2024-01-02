@@ -1,20 +1,13 @@
+import { useLayoutEffect } from 'react';
 import Box from '../../src/box';
-import Button from '../../src/components/button/button';
 import Flex from '../../src/components/flex/flex';
-import hljs from 'highlight.js';
+import Prism from 'prismjs';
+import Code from '../components/code';
 
 export default function HomePage() {
-  const npmInstall = hljs.highlight('> npm install @cronocode/react-box', { language: 'shell' }).value;
-  const importDeps = hljs.highlight('@cronocode/react-box/style.css', { language: 'javascript' }).value;
-  const highlightedCode = hljs.highlight(
-    `import Box from '@cronocode/react-box';
-  
-function Component () {
-  return <Box>Hello world</Box>;
-}
-`,
-    { language: 'js' },
-  ).value;
+  useLayoutEffect(() => {
+    Prism.highlightAll();
+  }, []);
 
   return (
     <Flex ai="center" width="fit" mt={20} d="column">
@@ -33,9 +26,7 @@ function Component () {
           <Box component="number">1</Box>
           <Box>Install npm library</Box>
         </Flex>
-        <Box tag="pre">
-          <Box component="code" tag="code" mt={1} props={{ dangerouslySetInnerHTML: { __html: npmInstall } }} />
-        </Box>
+        <Code language="shell">{`npm install @cronocode/react-box`}</Code>
         <Flex ai="center" gap={3} mt={5}>
           <Box component="number">2</Box>
           <Box>
@@ -49,16 +40,18 @@ function Component () {
             </Box>
           </Box>
         </Flex>
-        <Box tag="pre">
-          <Box component="code" tag="code" mt={1} props={{ dangerouslySetInnerHTML: { __html: importDeps } }} />
-        </Box>
+        <Code language="javascript">{`@cronocode/react-box/style.css`}</Code>
         <Flex ai="center" gap={3} mt={5}>
           <Box component="number">3</Box>
           <Box>Use Box</Box>
         </Flex>
-        <Box tag="pre">
-          <Box component="code" tag="code" mt={1} props={{ dangerouslySetInnerHTML: { __html: highlightedCode } }} />
-        </Box>
+        <Code language="javascript">
+          {`import Box from '@cronocode/react-box';
+
+function Component () {
+  return <Box>Hello world</Box>;
+}`}
+        </Code>
       </Box>
     </Flex>
   );
