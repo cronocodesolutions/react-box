@@ -20,7 +20,7 @@ export const styleVariables = {
   textDecoration: ['none', 'underline'] as const,
   textTransform: ['none', 'capitalize', 'lowercase', 'uppercase'] as const,
   textAlign: ['left', 'right', 'center', 'justify'] as const,
-  opacity: [10, 20, 30, 40, 50, 60, 70, 80, 90, 100] as const,
+  opacity: [0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100] as const,
   cursors: [
     'auto',
     'default',

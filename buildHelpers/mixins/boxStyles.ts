@@ -176,7 +176,7 @@ const boxStyles = {};
   newStylesWithSizes(boxStyles, 'fontSize', styleVariables.fontSizes, 'px', ['font-size']);
   newStyles(boxStyles, 'fontStyle', styleVariables.fontStyle, ['font-style']);
   newStylesWithSizes(boxStyles, 'fontWeight', styleVariables.fontWeight, '', ['font-weight']);
-  newStylesWithSizes(boxStyles, 'letterSpacing', sizes, 'px', ['letter-spacing']);
+  newStylesWithSizes(boxStyles, 'letterSpacing', styleVariables.positiveSizes, 'px', ['letter-spacing']);
 
   // line-height
   newStylesWithSizes(boxStyles, 'lineHeight', styleVariables.fontSizes, 'px', ['line-height']);
