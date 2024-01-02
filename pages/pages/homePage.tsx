@@ -1,13 +1,20 @@
-import { useLayoutEffect } from 'react';
 import Box from '../../src/box';
+import Button from '../../src/components/button/button';
 import Flex from '../../src/components/flex/flex';
-import Prism from 'prismjs';
-import Code from '../components/code';
+import hljs from 'highlight.js';
 
 export default function HomePage() {
-  useLayoutEffect(() => {
-    Prism.highlightAll();
-  }, []);
+  const npmInstall = hljs.highlight('> npm install @cronocode/react-box', { language: 'shell' }).value;
+  const importDeps = hljs.highlight('@cronocode/react-box/style.css', { language: 'javascript' }).value;
+  const highlightedCode = hljs.highlight(
+    `import Box from '@cronocode/react-box';
+  
+function Component () {
+  return <Box>Hello world</Box>;
+}
+`,
+    { language: 'js' },
+  ).value;
 
   return (
     <Flex ai="center" width="fit" mt={20} d="column">
@@ -26,7 +33,9 @@ export default function HomePage() {
           <Box component="number">1</Box>
           <Box>Install npm library</Box>
         </Flex>
-        <Code language="shell">{`npm install @cronocode/react-box`}</Code>
+        <Box tag="pre">
+          <Box component="code" tag="code" mt={1} props={{ dangerouslySetInnerHTML: { __html: npmInstall } }} />
+        </Box>
         <Flex ai="center" gap={3} mt={5}>
           <Box component="number">2</Box>
           <Box>
@@ -40,18 +49,16 @@ export default function HomePage() {
             </Box>
           </Box>
         </Flex>
-        <Code language="javascript">{`@cronocode/react-box/style.css`}</Code>
+        <Box tag="pre">
+          <Box component="code" tag="code" mt={1} props={{ dangerouslySetInnerHTML: { __html: importDeps } }} />
+        </Box>
         <Flex ai="center" gap={3} mt={5}>
           <Box component="number">3</Box>
           <Box>Use Box</Box>
         </Flex>
-        <Code language="javascript">
-          {`import Box from '@cronocode/react-box';
-
-function Component () {
-  return <Box>Hello world</Box>;
-}`}
-        </Code>
+        <Box tag="pre">
+          <Box component="code" tag="code" mt={1} props={{ dangerouslySetInnerHTML: { __html: highlightedCode } }} />
+        </Box>
       </Box>
     </Flex>
   );
