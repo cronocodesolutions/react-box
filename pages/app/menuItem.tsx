@@ -14,7 +14,7 @@ export default function MenuItem(props: Props) {
     <NavLink to={to}>
       {({ isActive }) => (
         <Box
-          my={1}
+          my={2}
           bgColor={isActive ? 'violetLight' : undefined}
           bgColorH="violetLight"
           color={isActive ? 'violet' : undefined}

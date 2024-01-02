@@ -30,7 +30,7 @@ export default function App() {
         <MenuItem to="/radiobutton">Radio Button</MenuItem>
         <MenuItem to="/tooltip">Tooltip</MenuItem>
       </Box>
-      <Box p={3} flex1>
+      <Box p={3}>
         <Routes>
           <Route index element={<HomePage />} />
           <Route path="/box" element={<BoxPage />} />

@@ -16,6 +16,8 @@ const jsonCache: Record<string, Record<string, string>> = {};
 let extension: string;
 
 export default defineConfig(({ mode }) => {
+  console.log('NODE_ENV', process.env.NODE_ENV);
+
   return {
     plugins: [
       dts({
