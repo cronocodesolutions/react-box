@@ -41,18 +41,12 @@ Theme.setup({
       borderColorH: 'violetLighter',
     },
   },
-  textbox: {
-    styles: {
-      p: 2,
-    },
-  },
   components: {
     code: {
       styles: {
-        inline: true,
         bgColor: 'black1',
         color: 'white',
-        p: 4,
+        p: 2,
         borderRadius: 1,
       },
     },
