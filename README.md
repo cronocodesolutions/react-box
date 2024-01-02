@@ -4,15 +4,11 @@ This is a react base component which will reduce considerably necessity to write
 
 ## Getting Started
 
-All what you need to do is to right your react components implementing the business logic and do not repeat the css styles for every html tag.
-
 1. Installation
 
 ```
 npm install @cronocode/react-box
 ```
-
-## Getting Started
 
 2. Import styles
 
@@ -34,33 +30,40 @@ Sizes are divided to `4`
 In the example below is creating a box with `maring: 0.5rem` and `padding: 1.75rem`
 
 Root `font-size` is set to `16px`
-Root `font-size` is set to `16px`
 
 ```
 import Box from "@cronocode/react-box";
+
 export default function Component(props: Props) {
   return (
     <Box className="custom-class" m={2} p={7}>
-    <Box className="custom-class" m={2} p={3}>
       basic example
     </Box>
   );
-@@ -45,11 +34,7 @@ export default function Component(props: Props) {
+}
+```
 
 ## Components
 
 - **Box** - base component with a tons of props
 
 ```
-
 import Box from "@cronocode/react-box";
-
 ```
-- **Box** - base component [docs](docs/box.md)
 
 <br/>
 
-@@ -67,24 +52,12 @@ import Flex from "@cronocode/react-box/components/flex";
+### Alias-shortcuts components
+
+- **Flex** - this is a `Box` component with `display: flex` style
+
+```
+import Flex from "@cronocode/react-box/components/flex";
+```
+
+- **Button** - this is a `Box` component with html tag `button` and `onClick` prop
+
+```
 import Button from "@cronocode/react-box/components/button";
 ```
 
@@ -84,8 +87,4 @@ import Tooltip from "@cronocode/react-box/components/tooltip";
   --lineHeight: 1.2;
   --fontSize: 14px;
   --transitionTime: 0.25s;
---lineHeight
---fontSize
---borderColor
-and colors
 ```
