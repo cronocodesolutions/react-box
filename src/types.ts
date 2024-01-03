@@ -15,6 +15,37 @@ export const styleVariables = {
   boxSizing: ['border-box', 'content-box'] as const,
   position: ['static', 'relative', 'absolute', 'fixed', 'sticky'] as const,
   sizeSpecialValues: ['fit', 'fit-screen', 'auto', 'fit-content', 'max-content', 'min-content'] as const,
+  widthHeightSizes: [
+    0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 14, 16, 18, 20, 24, 28, 32, 36, 40, 44, 48, 52, 56, 60, 64, 68, 72, 76, 80, 88, 96, 100,
+  ] as const,
+  widthHeightStringSizes: [
+    '1/2',
+    '1/3',
+    '2/3',
+    '1/4',
+    '2/4',
+    '3/4',
+    '1/5',
+    '2/5',
+    '3/5',
+    '4/5',
+    '1/6',
+    '2/6',
+    '3/6',
+    '4/6',
+    '5/6',
+    '1/12',
+    '2/12',
+    '3/12',
+    '4/12',
+    '5/12',
+    '6/12',
+    '7/12',
+    '8/12',
+    '9/12',
+    '10/12',
+    '11/12',
+  ] as const,
   borderAndOutlineStyles: ['solid', 'dashed', 'dotted', 'double', 'groove', 'ridge', 'inset', 'outset', 'none', 'hidden'] as const,
   overflows: ['auto', 'hidden', 'scroll', 'visible'] as const,
   textDecoration: ['none', 'underline'] as const,
@@ -121,7 +152,10 @@ export const styleVariables = {
 export const sizes = [...styleVariables.positiveSizes, ...styleVariables.negativeSizes] as const;
 
 type GapType = (typeof styleVariables.gap)[number];
-type BoxSizeValue = (typeof styleVariables.sizeSpecialValues)[number];
+type WidthHeightSizeType =
+  | (typeof styleVariables.sizeSpecialValues)[number]
+  | (typeof styleVariables.widthHeightSizes)[number]
+  | (typeof styleVariables.widthHeightStringSizes)[number];
 type BorderSizeType = (typeof styleVariables.borderSizes)[number];
 type SizeType = (typeof sizes)[number];
 type CursorType = (typeof styleVariables.cursors)[number];
@@ -166,12 +200,12 @@ export interface BoxPosition {
 }
 
 export interface BoxSize {
-  width?: BoxSizeValue;
-  height?: BoxSizeValue;
-  minWidth?: BoxSizeValue;
-  minHeight?: BoxSizeValue;
-  maxWidth?: BoxSizeValue;
-  maxHeight?: BoxSizeValue;
+  width?: WidthHeightSizeType;
+  height?: WidthHeightSizeType;
+  minWidth?: WidthHeightSizeType;
+  minHeight?: WidthHeightSizeType;
+  maxWidth?: WidthHeightSizeType;
+  maxHeight?: WidthHeightSizeType;
 }
 
 interface BoxMargin {

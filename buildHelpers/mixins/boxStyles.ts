@@ -8,6 +8,10 @@ const boxStyles = {};
   function getClassNames(className: string, value: string | boolean | number) {
     const classNames: string[] = [];
 
+    if (value.toString().includes('/')) {
+      value = value.toString().replace('/', '-');
+    }
+
     if (pseudoClass === 'hover') {
       classNames.push('.' + className + value);
       classNames.push('.' + className + 'H' + value + ':hover');
@@ -102,8 +106,26 @@ const boxStyles = {};
   newStylesWithMapping(boxStyles, 'minHeight', styleVariables.sizeSpecialValues, specialSizeMap, ['min-height']);
   newStylesWithMapping(boxStyles, 'maxHeight', styleVariables.sizeSpecialValues, specialSizeMap, ['max-height']);
 
+  newStylesWithSizes(boxStyles, 'width', styleVariables.widthHeightSizes);
+  newStylesWithSizes(boxStyles, 'minWidth', styleVariables.widthHeightSizes, 'rem', ['min-width']);
+  newStylesWithSizes(boxStyles, 'maxWidth', styleVariables.widthHeightSizes, 'rem', ['max-width']);
+  newStylesWithSizes(boxStyles, 'height', styleVariables.widthHeightSizes);
+  newStylesWithSizes(boxStyles, 'minHeight', styleVariables.widthHeightSizes, 'rem', ['min-height']);
+  newStylesWithSizes(boxStyles, 'maxHeight', styleVariables.widthHeightSizes, 'rem', ['max-height']);
+
+  const widthPercentage = (value: (typeof styleVariables.widthHeightStringSizes)[number]) => {
+    const [a, b] = value.split('/');
+    return `${(+a / +b) * 100}%`;
+  };
+  newStylesWithMapping(boxStyles, 'width', styleVariables.widthHeightStringSizes, widthPercentage);
+  newStylesWithMapping(boxStyles, 'minWidth', styleVariables.widthHeightStringSizes, widthPercentage, ['min-width']);
+  newStylesWithMapping(boxStyles, 'maxWidth', styleVariables.widthHeightStringSizes, widthPercentage, ['max-width']);
+  newStylesWithMapping(boxStyles, 'height', styleVariables.widthHeightStringSizes, widthPercentage);
+  newStylesWithMapping(boxStyles, 'minHeight', styleVariables.widthHeightStringSizes, widthPercentage, ['min-height']);
+  newStylesWithMapping(boxStyles, 'maxHeight', styleVariables.widthHeightStringSizes, widthPercentage, ['max-height']);
+
   // margin
-  newStylesWithSizes(boxStyles, 'margin', styleVariables.positiveSizes, 'rem', undefined);
+  newStylesWithSizes(boxStyles, 'margin', styleVariables.positiveSizes);
   addStyle(boxStyles, 'margin', 'auto', ['margin'], 'auto');
   newStylesWithSizes(boxStyles, 'marginHorizontal', styleVariables.positiveSizes, 'rem', ['margin-inline']);
   addStyle(boxStyles, 'marginHorizontal', 'auto', ['margin-inline'], 'auto');
@@ -119,7 +141,7 @@ const boxStyles = {};
   addStyle(boxStyles, 'marginLeft', 'auto', ['margin-left'], 'auto');
 
   // padding
-  newStylesWithSizes(boxStyles, 'padding', styleVariables.positiveSizes, 'rem', undefined);
+  newStylesWithSizes(boxStyles, 'padding', styleVariables.positiveSizes);
   newStylesWithSizes(boxStyles, 'paddingHorizontal', styleVariables.positiveSizes, 'rem', ['padding-inline']);
   newStylesWithSizes(boxStyles, 'paddingVertical', styleVariables.positiveSizes, 'rem', ['padding-block']);
   newStylesWithSizes(boxStyles, 'paddingTop', sizes, 'rem', ['padding-top']);

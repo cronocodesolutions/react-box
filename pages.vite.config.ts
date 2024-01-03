@@ -25,7 +25,7 @@ const jsonCache: Record<string, Record<string, string>> = {};
 
 export default defineConfig(({ mode }) => {
   return {
-    plugins: [reactPlugin(), moduleCssPlugin(jsonCache)],
+    plugins: [reactPlugin(), moduleCssPlugin(jsonCache, mode)],
     define: {
       'process.env.NODE_ENV': JSON.stringify(mode),
     },

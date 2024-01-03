@@ -12,7 +12,7 @@ export default function GridPage() {
           <Box border={1} borderColor="violet" bgColor="violet" borderRadius={1} p={6} colSpan={2}>
             colspan 2
           </Box>
-          <Box border={1} borderColor="violet" bgColor="violet" borderRadius={1} p={6} style={{ gridColumn: '1/-1' }}>
+          <Box border={1} borderColor="violet" bgColor="violet" borderRadius={1} p={6} colSpan="full-row">
             colspan full row
           </Box>
           <Box border={1} borderColor="violet" bgColor="violet" borderRadius={1} p={6}>
@@ -21,7 +21,7 @@ export default function GridPage() {
           <Box border={1} borderColor="violet" bgColor="violet" borderRadius={1} p={6}>
             Cell
           </Box>
-          <Box border={1} borderColor="violet" bgColor="violet" borderRadius={1} p={6} colStart={2}>
+          <Box border={1} borderColor="violet" bgColor="violet" borderRadius={1} p={6} colStart={2} paddingH={7}>
             colstart 2
           </Box>
           <Box border={1} borderColor="violet" bgColor="violet" borderRadius={1} p={6} colSpan={2} colStart={2}>

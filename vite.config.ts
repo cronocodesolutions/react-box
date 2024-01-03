@@ -32,7 +32,7 @@ export default defineConfig(({ mode }) => {
         },
       }),
       reactPlugin(),
-      moduleCssPlugin(jsonCache),
+      moduleCssPlugin(jsonCache, mode),
     ],
     css: {
       devSourcemap: mode === 'dev',
