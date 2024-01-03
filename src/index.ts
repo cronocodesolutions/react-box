@@ -6,6 +6,7 @@ import('./components/button/button');
 import('./components/checkbox/checkbox');
 import('./components/dataGrid/dataGrid');
 import('./components/flex/flex');
+import('./components/grid/grid');
 import('./components/form/form');
 import('./components/radioButton/radioButton');
 import('./components/textarea/textarea');

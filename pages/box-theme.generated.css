@@ -8,8 +8,11 @@
   --colorvioletLighter: #f6f8fe;
   --colorgray1: #94a3b833;
   --colorgray2: #94a3b8;
+  --colordark: #272822;
+  --colorred: red;
   --shadownone: none;
   --backgroundnone: none;
+  --backgroundstripes: linear-gradient(135deg,var(--colorviolet) 10%,#0000 0,#0000 50%,var(--colorviolet) 0,var(--colorviolet) 60%,#0000 0,#0000);;
 }
 
 .color_none,
@@ -1092,6 +1095,246 @@
   }
 }
 
+.color_dark,
+.color_h_dark:hover,
+._h:hover>.color_h_dark {
+  color: var(--colordark);
+}
+
+.color_f_dark:focus-within,
+._f:focus-within>.color_f_dark {
+  color: var(--colordark);
+}
+
+.color_a_dark:active {
+  color: var(--colordark);
+}
+
+.bgColor_dark,
+.bgColor_h_dark:hover,
+._h:hover>.bgColor_h_dark {
+  background-color: var(--colordark);
+}
+
+.bgColor_f_dark:focus-within,
+._f:focus-within>.bgColor_f_dark {
+  background-color: var(--colordark);
+}
+
+.bgColor_a_dark:active {
+  background-color: var(--colordark);
+}
+
+.borderColor_dark,
+.borderColor_h_dark:hover,
+._h:hover>.borderColor_h_dark {
+  border-color: var(--colordark);
+}
+
+.borderColor_f_dark:focus-within,
+._f:focus-within>.borderColor_f_dark {
+  border-color: var(--colordark);
+}
+
+.borderColor_a_dark:active {
+  border-color: var(--colordark);
+}
+
+.outlineColor_dark,
+.outlineColor_h_dark:hover,
+._h:hover>.outlineColor_h_dark {
+  outline-color: var(--colordark);
+}
+
+.outlineColor_f_dark:focus-within,
+._f:focus-within>.outlineColor_f_dark {
+  outline-color: var(--colordark);
+}
+
+.outlineColor_a_dark:active {
+  outline-color: var(--colordark);
+}
+
+.fill_dark,
+.fill_h_dark:hover,
+._h:hover>.fill_h_dark {
+  path,
+  circle,
+  rect,
+  line {
+    fill: var(--colordark);
+  }
+}
+
+.fill_f_dark:focus-within,
+._f:focus-within>.fill_f_dark {
+  path,
+  circle,
+  rect,
+  line {
+    fill: var(--colordark);
+  }
+}
+
+.fill_a_dark:active {
+  path,
+  circle,
+  rect,
+  line {
+    fill: var(--colordark);
+  }
+}
+
+.stroke_dark,
+.stroke_h_dark:hover,
+._h:hover>.stroke_h_dark {
+  path,
+  circle,
+  rect,
+  line {
+    stroke: var(--colordark);
+  }
+}
+
+.stroke_f_dark:focus-within,
+._f:focus-within>.stroke_f_dark {
+  path,
+  circle,
+  rect,
+  line {
+    stroke: var(--colordark);
+  }
+}
+
+.stroke_a_dark:active {
+  path,
+  circle,
+  rect,
+  line {
+    stroke: var(--colordark);
+  }
+}
+
+.color_red,
+.color_h_red:hover,
+._h:hover>.color_h_red {
+  color: var(--colorred);
+}
+
+.color_f_red:focus-within,
+._f:focus-within>.color_f_red {
+  color: var(--colorred);
+}
+
+.color_a_red:active {
+  color: var(--colorred);
+}
+
+.bgColor_red,
+.bgColor_h_red:hover,
+._h:hover>.bgColor_h_red {
+  background-color: var(--colorred);
+}
+
+.bgColor_f_red:focus-within,
+._f:focus-within>.bgColor_f_red {
+  background-color: var(--colorred);
+}
+
+.bgColor_a_red:active {
+  background-color: var(--colorred);
+}
+
+.borderColor_red,
+.borderColor_h_red:hover,
+._h:hover>.borderColor_h_red {
+  border-color: var(--colorred);
+}
+
+.borderColor_f_red:focus-within,
+._f:focus-within>.borderColor_f_red {
+  border-color: var(--colorred);
+}
+
+.borderColor_a_red:active {
+  border-color: var(--colorred);
+}
+
+.outlineColor_red,
+.outlineColor_h_red:hover,
+._h:hover>.outlineColor_h_red {
+  outline-color: var(--colorred);
+}
+
+.outlineColor_f_red:focus-within,
+._f:focus-within>.outlineColor_f_red {
+  outline-color: var(--colorred);
+}
+
+.outlineColor_a_red:active {
+  outline-color: var(--colorred);
+}
+
+.fill_red,
+.fill_h_red:hover,
+._h:hover>.fill_h_red {
+  path,
+  circle,
+  rect,
+  line {
+    fill: var(--colorred);
+  }
+}
+
+.fill_f_red:focus-within,
+._f:focus-within>.fill_f_red {
+  path,
+  circle,
+  rect,
+  line {
+    fill: var(--colorred);
+  }
+}
+
+.fill_a_red:active {
+  path,
+  circle,
+  rect,
+  line {
+    fill: var(--colorred);
+  }
+}
+
+.stroke_red,
+.stroke_h_red:hover,
+._h:hover>.stroke_h_red {
+  path,
+  circle,
+  rect,
+  line {
+    stroke: var(--colorred);
+  }
+}
+
+.stroke_f_red:focus-within,
+._f:focus-within>.stroke_f_red {
+  path,
+  circle,
+  rect,
+  line {
+    stroke: var(--colorred);
+  }
+}
+
+.stroke_a_red:active {
+  path,
+  circle,
+  rect,
+  line {
+    stroke: var(--colorred);
+  }
+}
+
 .shadow_none,
 .shadow_h_none:hover,
 ._h:hover>.shadow_h_none {
@@ -1120,4 +1363,19 @@
 
 .bg_a_none:active {
   background: var(--backgroundnone);
+}
+
+.bg_stripes,
+.bg_h_stripes:hover,
+._h:hover>.bg_h_stripes {
+  background: var(--backgroundstripes);
+}
+
+.bg_f_stripes:focus-within,
+._f:focus-within>.bg_f_stripes {
+  background: var(--backgroundstripes);
+}
+
+.bg_a_stripes:active {
+  background: var(--backgroundstripes);
 }

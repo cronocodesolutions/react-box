@@ -11,9 +11,12 @@ export const theme = {
     violetLighter: '#f6f8fe',
     gray1: '#94a3b833',
     gray2: '#94a3b8',
+    dark: '#272822',
+    red: 'red',
   },
   backgrounds: {
     none: 'none',
+    stripes: 'linear-gradient(135deg,var(--colorviolet) 10%,#0000 0,#0000 50%,var(--colorviolet) 0,var(--colorviolet) 60%,#0000 0,#0000);',
   },
   shadows: {
     none: 'none',

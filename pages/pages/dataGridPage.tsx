@@ -41,7 +41,9 @@ export default function DataGridPage() {
   return (
     <Box>
       <Box fontSize={24}>Component status:</Box>
-      <Box fontSize={18}>Work in progress</Box>
+      <Box fontSize={18} color="red">
+        Work in progress
+      </Box>
       <Box p={2} mt={4}>
         <DataGrid />
       </Box>

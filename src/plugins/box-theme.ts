@@ -253,7 +253,7 @@ declare module '@cronocode/react-box/types' {
 `;
 
   return {
-    themeCss: [variables.join('\n'), ...colors, ...shadows, ...backgrounds].join('\n'),
+    themeCss: [variables.join('\n'), ...colors, ...shadows, ...backgrounds].join('\n') + '\n',
     boxDts: boxTypings,
   };
 }

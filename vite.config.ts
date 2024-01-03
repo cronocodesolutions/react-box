@@ -19,6 +19,7 @@ export default defineConfig(({ mode }) => {
   return {
     plugins: [
       dts({
+        entryRoot: './src',
         beforeWriteFile(filePath, content) {
           const { dir } = path.parse(filePath);
 
@@ -31,7 +32,7 @@ export default defineConfig(({ mode }) => {
         },
       }),
       reactPlugin(),
-      moduleCssPlugin(jsonCache),
+      moduleCssPlugin(jsonCache, mode),
     ],
     css: {
       devSourcemap: mode === 'dev',
