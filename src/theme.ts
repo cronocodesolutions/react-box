@@ -107,15 +107,15 @@ export interface ThemeComponentProps {
   theme?: string;
 }
 
-export function useTheme(props: ThemeComponentProps): BoxStyles {
+export function useTheme(props: ThemeComponentProps): BoxStyles | undefined {
   const { clean, disabled, theme, component } = props;
 
   return useMemo(() => {
-    if (clean) return {};
+    if (clean) return undefined;
 
     let componentStyles = (Styles[component as keyof ThemeSetup] ??
       Styles.components?.[component as keyof ThemeSetup['components']]) as ThemeComponentStyles;
-    if (!componentStyles) return {};
+    if (!componentStyles) return undefined;
 
     let themeStyles = theme ? { ...componentStyles.styles, ...componentStyles.themes?.[theme].styles } : componentStyles.styles;
 

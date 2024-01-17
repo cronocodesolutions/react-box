@@ -31,8 +31,10 @@ export default function DoxPage() {
       >
         test2
       </Dox>
-      <Dox padding={3} border={1} m={7}>
-        <Dox tag="input" p={2} border={1} borderRadius={2} />
+      <Dox bgColor="violet" p={3}>
+        <Dox bgColorH="violetLighter" p={4}>
+          <Dox tag="input" p={2} border={1} borderRadius={2} bgColorF="violet" />
+        </Dox>
       </Dox>
     </Dox>
   );

@@ -22,7 +22,7 @@ function Box<TTag extends keyof React.ReactHTML = 'div'>(props: Props<TTag>, ref
   const themeStyles = useTheme(props);
   const className = useMemo(() => {
     const classNames = userClassName ? ClassNameUtils.classNames(classes.box, userClassName) : [classes.box];
-    const newProps = { ...replaceAliases(themeStyles), ...replaceAliases(props) };
+    const newProps = themeStyles ? { ...replaceAliases(themeStyles), ...replaceAliases(props) } : replaceAliases(props);
 
     Object.entries(newProps).forEach(([key, value]) => {
       const classToAdd = classes[(key as string) + value];

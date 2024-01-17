@@ -1,3 +1,5 @@
+import { ThemeComponentProps } from '../../theme';
+
 type Hovered<T> = {
   [K in keyof T as K extends string ? `${K}H` : never]: T[K];
 };
@@ -16,6 +18,11 @@ export interface StyleValues {
   formatValue?: (key: string, value: string | number | boolean) => string;
 }
 
+export interface ThemeItem {
+  cssNames: string[];
+  formatValue: (key: string, value: string | number | boolean) => string;
+}
+
 export const pseudoClassSuffixes = ['H', 'F', 'A'] as const;
 export type PseudoClassSuffix = (typeof pseudoClassSuffixes)[number];
 
@@ -25,6 +32,7 @@ export interface StyleItem {
   values2: StyleValues;
   values3: StyleValues;
   pseudoSuffix?: PseudoClassSuffix;
+  isThemeStyle?: boolean;
 }
 const positiveSizes = [
   0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 22, 24, 26, 28, 30, 32, 34, 36, 38, 40, 42, 44, 46, 48, 50, 52,
@@ -59,6 +67,9 @@ namespace ValueFormatters {
         return value as string;
     }
   }
+  export function variables(prefix: string) {
+    return (key: string, value: string | number | boolean) => `var(--${prefix}${value});`;
+  }
 }
 
 namespace ClassNameFormatters {
@@ -66,6 +77,15 @@ namespace ClassNameFormatters {
     return `${key}${(value as string).replace('/', '-')}`;
   }
 }
+
+export const themeStyles = {
+  shadow: { cssNames: ['shadow'], formatValue: ValueFormatters.variables('shadow') },
+  background: { cssNames: ['background'], formatValue: ValueFormatters.variables('background') },
+  color: { cssNames: ['color'], formatValue: ValueFormatters.variables('color') },
+  bgColor: { cssNames: ['background-color'], formatValue: ValueFormatters.variables('color') },
+  borderColor: { cssNames: ['border-color'], formatValue: ValueFormatters.variables('color') },
+  outlineColor: { cssNames: ['outline-color'], formatValue: ValueFormatters.variables('color') },
+} satisfies Record<string, ThemeItem>;
 
 export const doxStyles = {
   display: {
@@ -669,6 +689,12 @@ export const doxStyles = {
   },
 } satisfies Record<string, StyleItem>;
 
+Object.keys(themeStyles).forEach((key) => {
+  // @ts-ignore
+  doxStyles[key as StyleKey] = themeStyles[key as ThemeKey];
+  (doxStyles[key as StyleKey] as StyleItem).isThemeStyle = true;
+});
+
 type AliasType = { key: StyleKey };
 export const aliases = {
   m: { ...doxStyles.margin, key: 'margin' },
@@ -698,11 +724,19 @@ export const aliases = {
   d: { ...doxStyles.flexDirection, key: 'flexDirection' },
 } satisfies Record<string, AliasType>;
 
+const doxStylesKeys = Object.keys(doxStyles);
+const aliasKeys = Object.keys(aliases);
 pseudoClassSuffixes.forEach((pseudoSuffix) => {
-  Object.keys(doxStyles).forEach((key) => {
+  doxStylesKeys.forEach((key) => {
     // @ts-ignore
-    doxStyles[`${key}${pseudoSuffix}` as StyleKey] = { ...doxStyles[key as keyof typeof doxStyles] };
-    (doxStyles[`${key}${pseudoSuffix}` as keyof typeof doxStyles] as StyleItem).pseudoSuffix = pseudoSuffix;
+    doxStyles[`${key}${pseudoSuffix}` as StyleKey] = { ...doxStyles[key as StyleKey] };
+    (doxStyles[`${key}${pseudoSuffix}` as StyleKey] as StyleItem).pseudoSuffix = pseudoSuffix;
+  });
+
+  aliasKeys.forEach((key) => {
+    // @ts-ignore
+    aliases[`${key}${pseudoSuffix}` as AliasKey] = { ...aliases[key as AliasKey], key: `${aliases[key as AliasKey].key}${pseudoSuffix}` };
+    (aliases[`${key}${pseudoSuffix}` as AliasKey] as StyleItem).pseudoSuffix = pseudoSuffix;
   });
 });
 
@@ -712,5 +746,6 @@ type Styles<T extends Record<string, StyleItem>> = {
 
 export type StyleKey = keyof typeof doxStyles;
 export type AliasKey = keyof typeof aliases;
-type DoxNormalStyles = Styles<typeof doxStyles> & Styles<typeof aliases>;
+export type ThemeKey = keyof typeof themeStyles;
+type DoxNormalStyles = Styles<typeof doxStyles> & Styles<typeof aliases> & ThemeComponentProps;
 export type DoxStyleProps = DoxNormalStyles & Hovered<DoxNormalStyles> & Focused<DoxNormalStyles> & Activated<DoxNormalStyles>;

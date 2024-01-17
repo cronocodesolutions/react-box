@@ -1,11 +1,20 @@
-import { aliases, AliasKey, doxStyles, PseudoClassSuffix, pseudoClassSuffixes, StyleItem, StyleKey, StyleValues } from './doxStyles';
+import {
+  aliases,
+  AliasKey,
+  doxStyles,
+  PseudoClassSuffix,
+  StyleItem,
+  StyleKey,
+  StyleValues,
+  ThemeItem,
+  ThemeKey,
+  themeStyles,
+} from './doxStyles';
 import IdentityFactory from '@cronocode/identity-factory';
 
 export namespace StylesContext {
   const identity = new IdentityFactory();
-  const propKeys = pseudoClassSuffixes.reduce((acc, pseudoClassSuffix) => {
-    return [...acc, ...Object.keys(doxStyles).map((key) => `${key}${pseudoClassSuffix}`)];
-  }, Object.keys(doxStyles)) as StyleKey[];
+  const propKeys = [...Object.keys(doxStyles), ...Object.keys(themeStyles)] as StyleKey[];
 
   const el = getElement();
 
@@ -79,8 +88,12 @@ export namespace StylesContext {
       }, classes);
   }
 
-  function getValueItem(key: StyleKey, value: string | number | boolean) {
+  function getValueItem(key: StyleKey, value: string | number | boolean): StyleValues {
     const item = doxStyles[key];
+
+    if ((item as StyleItem).isThemeStyle) {
+      return item as unknown as StyleValues;
+    }
 
     const valueItem: StyleValues = (item.values1.values as Readonly<Array<string | number | boolean>>).includes(value)
       ? item.values1
