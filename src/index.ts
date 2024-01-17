@@ -2,6 +2,7 @@ import('./box');
 
 import('./components/baseSvg/baseSvg');
 
+import('./components/dox/dox');
 import('./components/button/button');
 import('./components/checkbox/checkbox');
 import('./components/dataGrid/dataGrid');

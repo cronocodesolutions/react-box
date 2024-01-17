@@ -1,6 +1,6 @@
 {
   "name": "@cronocode/react-box",
-  "version": "1.5.7",
+  "version": "1.5.8",
   "main": "./box.cjs",
   "module": "./box.mjs",
   "types": "./box.d.ts",
@@ -55,8 +55,10 @@
   },
   "homepage": "https://github.com/cronocodesolutions/react-box#readme",
   "description": "",
+  "dependencies": {
+    "@cronocode/identity-factory": "^0.0.6"
+  },
   "devDependencies": {
-    "@cronocode/identity-factory": "^0.0.6",
     "@rollup/pluginutils": "^5.0.2",
     "@types/node": "^18.15.7",
     "@types/postcss-mixins": "^9.0.0",

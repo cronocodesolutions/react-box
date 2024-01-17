@@ -1,12 +1,12 @@
-export type Hovered<T> = {
+type Hovered<T> = {
   [K in keyof T as K extends string ? `${K}H` : never]: T[K];
 };
 
-export type Focused<T> = {
+type Focused<T> = {
   [K in keyof T as K extends string ? `${K}F` : never]: T[K];
 };
 
-export type Activated<T> = {
+type Activated<T> = {
   [K in keyof T as K extends string ? `${K}A` : never]: T[K];
 };
 
