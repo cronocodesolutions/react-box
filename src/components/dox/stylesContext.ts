@@ -28,13 +28,9 @@ export namespace StylesContext {
 
   export const doxClassName = '_dox';
 
-  export function get(key: StyleKey | AliasKey, value: string | number | boolean) {
+  export function get(key: string, value: string | number | boolean) {
     if (key in doxStyles) {
       return getClassName(key as StyleKey, value);
-    }
-
-    if (key in aliases) {
-      return getClassName(aliases[key as AliasKey].key, value);
     }
   }
 

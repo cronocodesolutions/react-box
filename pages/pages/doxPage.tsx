@@ -16,6 +16,7 @@ export default function DoxPage() {
       </Dox>
 
       <Dox
+        p={4}
         width="2/4"
         margin={2}
         marginVertical={4}
@@ -31,7 +32,7 @@ export default function DoxPage() {
       >
         test2
       </Dox>
-      <Dox bgColor="violet" p={3}>
+      <Dox bgColor="violet" p={3} component="test">
         <Dox bgColorH="violetLighter" p={4}>
           <Dox tag="input" p={2} border={1} borderRadius={2} bgColorF="violet" />
         </Dox>

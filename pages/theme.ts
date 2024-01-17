@@ -50,6 +50,11 @@ Theme.setup({
     },
   },
   components: {
+    test: {
+      styles: {
+        padding: 3,
+      },
+    },
     code: {
       styles: {
         inline: true,
