@@ -4,12 +4,15 @@ export interface StyleValues {
   formatValue?: (key: string, value: string | number | boolean) => string;
 }
 
+export const pseudoClassSuffixes = ['H', 'F', 'A'] as const;
+export type PseudoClassSuffix = (typeof pseudoClassSuffixes)[number];
+
 export interface StyleItem {
-  cssName?: string;
-  cssNames?: string[];
+  cssNames: string[];
   values1: StyleValues;
   values2: StyleValues;
   values3: StyleValues;
+  pseudoSuffix?: PseudoClassSuffix;
 }
 const positiveSizes = [
   0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 22, 24, 26, 28, 30, 32, 34, 36, 38, 40, 42, 44, 46, 48, 50, 52,
@@ -54,18 +57,19 @@ namespace ClassNameFormatters {
 
 export const doxStyles = {
   display: {
+    cssNames: ['display'],
     values1: { values: ['none', 'block', 'inline-block', 'flex', 'inline-flex', 'grid', 'inline-grid', 'contents'] as const },
     values2: { values: [] as const },
     values3: { values: [] as const },
   },
   boxSizing: {
-    cssName: 'box-sizing',
+    cssNames: ['box-sizing'],
     values1: { values: ['border-box', 'content-box'] as const },
     values2: { values: [] as const },
     values3: { values: [] as const },
   },
   width: {
-    cssName: 'width',
+    cssNames: ['width'],
     values1: {
       values: ['fit', 'fit-screen', 'auto', 'fit-content', 'max-content', 'min-content'] as const,
       formatValue: ValueFormatters.heightWidth,
@@ -105,167 +109,175 @@ export const doxStyles = {
     },
   },
   position: {
+    cssNames: ['position'],
     values1: { values: ['static', 'relative', 'absolute', 'fixed', 'sticky'] as const },
     values2: { values: [] as const },
     values3: { values: [] as const },
   },
   top: {
+    cssNames: ['top'],
     values1: { values: sizes, formatValue: ValueFormatters.rem },
     values2: { values: [] as const },
     values3: { values: [] as const },
   },
   right: {
+    cssNames: ['right'],
     values1: { values: sizes, formatValue: ValueFormatters.rem },
     values2: { values: [] as const },
     values3: { values: [] as const },
   },
   bottom: {
+    cssNames: ['bottom'],
     values1: { values: sizes, formatValue: ValueFormatters.rem },
     values2: { values: [] as const },
     values3: { values: [] as const },
   },
   left: {
+    cssNames: ['left'],
     values1: { values: sizes, formatValue: ValueFormatters.rem },
     values2: { values: [] as const },
     values3: { values: [] as const },
   },
   inset: {
+    cssNames: ['inset'],
     values1: { values: sizes, formatValue: ValueFormatters.rem },
     values2: { values: [] as const },
     values3: { values: [] as const },
   },
   margin: {
+    cssNames: ['margin'],
     values1: { values: sizes, formatValue: ValueFormatters.rem },
     values2: { values: ['auto'] as const },
     values3: { values: [] as const },
   },
   marginHorizontal: {
-    cssName: 'margin-inline',
+    cssNames: ['margin-inline'],
     values1: { values: sizes, formatValue: ValueFormatters.rem },
     values2: { values: ['auto'] as const },
     values3: { values: [] as const },
   },
   marginVertical: {
-    cssName: 'margin-block',
+    cssNames: ['margin-block'],
     values1: { values: sizes, formatValue: ValueFormatters.rem },
     values2: { values: ['auto'] as const },
     values3: { values: [] as const },
   },
   marginTop: {
-    cssName: 'margin-top',
+    cssNames: ['margin-top'],
     values1: { values: sizes, formatValue: ValueFormatters.rem },
     values2: { values: ['auto'] as const },
     values3: { values: [] as const },
   },
   marginRight: {
-    cssName: 'margin-right',
+    cssNames: ['margin-right'],
     values1: { values: sizes, formatValue: ValueFormatters.rem },
     values2: { values: ['auto'] as const },
     values3: { values: [] as const },
   },
   marginBottom: {
-    cssName: 'margin-bottom',
+    cssNames: ['margin-bottom'],
     values1: { values: sizes, formatValue: ValueFormatters.rem },
     values2: { values: ['auto'] as const },
     values3: { values: [] as const },
   },
   marginLeft: {
-    cssName: 'margin-left',
+    cssNames: ['margin-left'],
     values1: { values: sizes, formatValue: ValueFormatters.rem },
     values2: { values: ['auto'] as const },
     values3: { values: [] as const },
   },
   padding: {
+    cssNames: ['padding'],
     values1: { values: sizes, formatValue: ValueFormatters.rem },
     values2: { values: [] as const },
     values3: { values: [] as const },
   },
   paddingHorizontal: {
-    cssName: 'padding-inline',
+    cssNames: ['padding-inline'],
     values1: { values: sizes, formatValue: ValueFormatters.rem },
     values2: { values: [] as const },
     values3: { values: [] as const },
   },
   paddingVertical: {
-    cssName: 'padding-block',
+    cssNames: ['padding-block'],
     values1: { values: sizes, formatValue: ValueFormatters.rem },
     values2: { values: [] as const },
     values3: { values: [] as const },
   },
   paddingTop: {
-    cssName: 'padding-top',
+    cssNames: ['padding-top'],
     values1: { values: sizes, formatValue: ValueFormatters.rem },
     values2: { values: [] as const },
     values3: { values: [] as const },
   },
   paddingRight: {
-    cssName: 'padding-right',
+    cssNames: ['padding-right'],
     values1: { values: sizes, formatValue: ValueFormatters.rem },
     values2: { values: [] as const },
     values3: { values: [] as const },
   },
   paddingBottom: {
-    cssName: 'padding-bottom',
+    cssNames: ['padding-bottom'],
     values1: { values: sizes, formatValue: ValueFormatters.rem },
     values2: { values: [] as const },
     values3: { values: [] as const },
   },
   paddingLeft: {
-    cssName: 'padding-left',
+    cssNames: ['padding-left'],
     values1: { values: sizes, formatValue: ValueFormatters.rem },
     values2: { values: [] as const },
     values3: { values: [] as const },
   },
   border: {
-    cssName: 'border-width',
+    cssNames: ['border-width'],
     values1: { values: positiveSizes, formatValue: ValueFormatters.px },
     values2: { values: [] as const },
     values3: { values: [] as const },
   },
   borderHorizontal: {
-    cssName: 'border-inline-width',
+    cssNames: ['border-inline-width'],
     values1: { values: sizes, formatValue: ValueFormatters.px },
     values2: { values: [] as const },
     values3: { values: [] as const },
   },
   borderVertical: {
-    cssName: 'border-block-width',
+    cssNames: ['border-block-width'],
     values1: { values: sizes, formatValue: ValueFormatters.px },
     values2: { values: [] as const },
     values3: { values: [] as const },
   },
   borderTop: {
-    cssName: 'border-top-width',
+    cssNames: ['border-top-width'],
     values1: { values: sizes, formatValue: ValueFormatters.px },
     values2: { values: [] as const },
     values3: { values: [] as const },
   },
   borderRight: {
-    cssName: 'border-right-width',
+    cssNames: ['border-right-width'],
     values1: { values: sizes, formatValue: ValueFormatters.px },
     values2: { values: [] as const },
     values3: { values: [] as const },
   },
   borderBottom: {
-    cssName: 'border-bottom-width',
+    cssNames: ['border-bottom-width'],
     values1: { values: sizes, formatValue: ValueFormatters.px },
     values2: { values: [] as const },
     values3: { values: [] as const },
   },
   borderLeft: {
-    cssName: 'border-left-width',
+    cssNames: ['border-left-width'],
     values1: { values: sizes, formatValue: ValueFormatters.px },
     values2: { values: [] as const },
     values3: { values: [] as const },
   },
   borderStyle: {
-    cssName: 'border-style',
+    cssNames: ['border-style'],
     values1: { values: borderAndOutlineStyles },
     values2: { values: [] as const },
     values3: { values: [] as const },
   },
   borderRadius: {
-    cssName: 'border-radius',
+    cssNames: ['border-radius'],
     values1: { values: positiveSizes, formatValue: ValueFormatters.rem },
     values2: { values: [] as const },
     values3: { values: [] as const },
@@ -295,30 +307,31 @@ export const doxStyles = {
     values3: { values: [] as const },
   },
   borderRadiusTopLeft: {
-    cssName: 'border-top-left-radius',
+    cssNames: ['border-top-left-radius'],
     values1: { values: positiveSizes, formatValue: ValueFormatters.rem },
     values2: { values: [] as const },
     values3: { values: [] as const },
   },
   borderRadiusTopRight: {
-    cssName: 'border-top-right-radius',
+    cssNames: ['border-top-right-radius'],
     values1: { values: positiveSizes, formatValue: ValueFormatters.rem },
     values2: { values: [] as const },
     values3: { values: [] as const },
   },
   borderRadiusBottomLeft: {
-    cssName: 'border-bottom-left-radius',
+    cssNames: ['border-bottom-left-radius'],
     values1: { values: positiveSizes, formatValue: ValueFormatters.rem },
     values2: { values: [] as const },
     values3: { values: [] as const },
   },
   borderRadiusBottomRight: {
-    cssName: 'border-bottom-right-radius',
+    cssNames: ['border-bottom-right-radius'],
     values1: { values: positiveSizes, formatValue: ValueFormatters.rem },
     values2: { values: [] as const },
     values3: { values: [] as const },
   },
   cursor: {
+    cssNames: ['cursor'],
     values1: {
       values: [
         'auto',
@@ -363,7 +376,7 @@ export const doxStyles = {
     values3: { values: [] as const },
   },
   zIndex: {
-    cssName: 'z-index',
+    cssNames: ['z-index'],
     values1: {
       values: [1, 2, 3, 4, 5, 10, 11, 12, 13, 14, 15, 100, 101, 102, 103, 104, 105, 1000, 1001, 1002, 1003, 1004, 1005] as const,
     },
@@ -371,83 +384,85 @@ export const doxStyles = {
     values3: { values: [] as const },
   },
   overflow: {
+    cssNames: ['overflow'],
     values1: { values: overflows },
     values2: { values: [] as const },
     values3: { values: [] as const },
   },
   overflowX: {
-    cssName: 'overflow-x',
+    cssNames: ['overflow-x'],
     values1: { values: overflows },
     values2: { values: [] as const },
     values3: { values: [] as const },
   },
   overflowY: {
-    cssName: 'overflow-y',
+    cssNames: ['overflow-y'],
     values1: { values: overflows },
     values2: { values: [] as const },
     values3: { values: [] as const },
   },
   opacity: {
+    cssNames: ['opacity'],
     values1: { values: [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1] as const },
     values2: { values: [] as const },
     values3: { values: [] as const },
   },
   fontSize: {
-    cssName: 'font-size',
+    cssNames: ['font-size'],
     values1: { values: positiveSizes, formatValue: ValueFormatters.px },
     values2: { values: [] as const },
     values3: { values: [] as const },
   },
   fontStyle: {
-    cssName: 'font-style',
+    cssNames: ['font-style'],
     values1: { values: ['italic', 'normal', 'oblique'] as const },
     values2: { values: [] as const },
     values3: { values: [] as const },
   },
   fontWeight: {
-    cssName: 'font-weight',
+    cssNames: ['font-weight'],
     values1: { values: [100, 200, 300, 400, 500, 600, 700, 800, 900] as const },
     values2: { values: [] as const },
     values3: { values: [] as const },
   },
   letterSpacing: {
-    cssName: 'letter-spacing',
+    cssNames: ['letter-spacing'],
     values1: { values: positiveSizes, formatValue: ValueFormatters.px },
     values2: { values: [] as const },
     values3: { values: [] as const },
   },
   lineHeight: {
-    cssName: 'line-height',
+    cssNames: ['line-height'],
     values1: { values: positiveSizes, formatValue: ValueFormatters.px },
     values2: { values: ['font-size'] as const, formatValue: () => '1' },
     values3: { values: [] as const },
   },
   textDecoration: {
-    cssName: 'text-decoration',
+    cssNames: ['text-decoration'],
     values1: { values: ['none', 'underline', 'overline', 'line-through'] as const },
     values2: { values: [] as const },
     values3: { values: [] as const },
   },
   textTransform: {
-    cssName: 'text-transform',
+    cssNames: ['text-transform'],
     values1: { values: ['none', 'capitalize', 'lowercase', 'uppercase'] as const },
     values2: { values: [] as const },
     values3: { values: [] as const },
   },
   textAlign: {
-    cssName: 'text-align',
+    cssNames: ['text-align'],
     values1: { values: ['left', 'right', 'center', 'justify'] as const },
     values2: { values: [] as const },
     values3: { values: [] as const },
   },
   flexWrap: {
-    cssName: 'flex-wrap',
+    cssNames: ['flex-wrap'],
     values1: { values: ['nowrap', 'wrap', 'wrap-reverse'] as const },
     values2: { values: [] as const },
     values3: { values: [] as const },
   },
   justifyContent: {
-    cssName: 'justify-content',
+    cssNames: ['justify-content'],
     values1: {
       values: [
         'start',
@@ -467,7 +482,7 @@ export const doxStyles = {
     values3: { values: [] as const },
   },
   alignItems: {
-    cssName: 'align-items',
+    cssNames: ['align-items'],
     values1: {
       values: ['stretch', 'flex-start', 'flex-end', 'center', 'baseline', 'start', 'end', 'self-start', 'self-end'] as const,
     },
@@ -475,7 +490,7 @@ export const doxStyles = {
     values3: { values: [] as const },
   },
   alignContent: {
-    cssName: 'align-content',
+    cssNames: ['align-content'],
     values1: {
       values: [
         'flex-start',
@@ -494,144 +509,169 @@ export const doxStyles = {
     values3: { values: [] as const },
   },
   flex1: {
-    cssName: 'flex',
+    cssNames: ['flex'],
     values1: { values: [true] as const, formatValue: () => '1' },
     values2: { values: [] as const },
     values3: { values: [] as const },
   },
   flexDirection: {
-    cssName: 'flex-direction',
+    cssNames: ['flex-direction'],
     values1: { values: ['row', 'row-reverse', 'column', 'column-reverse'] as const },
     values2: { values: [] as const },
     values3: { values: [] as const },
   },
   gap: {
+    cssNames: ['gap'],
     values1: { values: positiveSizes, formatValue: ValueFormatters.rem },
     values2: { values: [] as const },
     values3: { values: [] as const },
   },
   rowGap: {
-    cssName: 'row-gap',
+    cssNames: ['row-gap'],
     values1: { values: positiveSizes, formatValue: ValueFormatters.rem },
     values2: { values: [] as const },
     values3: { values: [] as const },
   },
   columnGap: {
-    cssName: 'column-gap',
+    cssNames: ['column-gap'],
     values1: { values: positiveSizes, formatValue: ValueFormatters.rem },
     values2: { values: [] as const },
     values3: { values: [] as const },
   },
   order: {
+    cssNames: ['order'],
     values1: { values: positiveSizes },
     values2: { values: [] as const },
     values3: { values: [] as const },
   },
   flexGrow: {
-    cssName: 'flex-grow',
+    cssNames: ['flex-grow'],
     values1: { values: positiveSizes },
     values2: { values: [] as const },
     values3: { values: [] as const },
   },
   flexShrink: {
-    cssName: 'flex-shrink',
+    cssNames: ['flex-shrink'],
     values1: { values: positiveSizes },
     values2: { values: [] as const },
     values3: { values: [] as const },
   },
   flexSelf: {
-    cssName: 'align-self',
+    cssNames: ['align-self'],
     values1: { values: ['auto', 'flex-start', 'flex-end', 'center', 'baseline', 'stretch'] as const },
     values2: { values: [] as const },
     values3: { values: [] as const },
   },
   justifySelf: {
-    cssName: 'justify-self',
+    cssNames: ['justify-self'],
     values1: { values: ['auto', 'flex-start', 'flex-end', 'center', 'baseline', 'stretch'] as const },
     values2: { values: [] as const },
     values3: { values: [] as const },
   },
   gridColumns: {
-    cssName: 'grid-template-columns',
+    cssNames: ['grid-template-columns'],
     values1: { values: positiveSizes, formatValue: (key, value) => `repeat(${value},minmax(0,1fr))` },
     values2: { values: [] as const },
     values3: { values: [] as const },
   },
   colSpan: {
-    cssName: 'grid-column',
+    cssNames: ['grid-column'],
     values1: { values: positiveSizes, formatValue: (key, value) => `span ${value}/span ${value}` },
     values2: { values: ['full-row'] as const, formatValue: (key, value) => '1/-1' },
     values3: { values: [] as const },
   },
   colStart: {
-    cssName: 'grid-column-start',
+    cssNames: ['grid-column-start'],
     values1: { values: positiveSizes, formatValue: (key, value) => `${value}` },
     values2: { values: [] as const },
     values3: { values: [] as const },
   },
   colEnd: {
-    cssName: 'grid-column-end',
+    cssNames: ['grid-column-end'],
     values1: { values: positiveSizes, formatValue: (key, value) => `${value}` },
     values2: { values: [] as const },
     values3: { values: [] as const },
   },
   outline: {
-    cssName: 'outline-width',
+    cssNames: ['outline-width'],
     values1: { values: positiveSizes, formatValue: ValueFormatters.px },
     values2: { values: [] as const },
     values3: { values: [] as const },
   },
   outlineStyle: {
-    cssName: 'outline-style',
+    cssNames: ['outline-style'],
     values1: { values: borderAndOutlineStyles },
     values2: { values: [] as const },
     values3: { values: [] as const },
   },
   outlineOffset: {
-    cssName: 'outline-offset',
+    cssNames: ['outline-offset'],
     values1: { values: positiveSizes, formatValue: ValueFormatters.px },
     values2: { values: [] as const },
     values3: { values: [] as const },
   },
   transition: {
+    cssNames: ['transition'],
     values1: { values: ['none'] as const },
     values2: { values: [] as const },
     values3: { values: [] as const },
   },
   userSelect: {
-    cssName: 'user-select',
+    cssNames: ['user-select'],
     values1: { values: ['none', 'auto', 'text', 'all'] as const },
     values2: { values: [] as const },
     values3: { values: [] as const },
   },
   appearance: {
+    cssNames: ['appearance'],
     values1: { values: ['none'] as const },
     values2: { values: [] as const },
     values3: { values: [] as const },
   },
   pointerEvents: {
-    cssName: 'pointer-events',
+    cssNames: ['pointer-events'],
     values1: { values: ['none', 'auto', 'all'] as const },
     values2: { values: [] as const },
     values3: { values: [] as const },
   },
   whiteSpace: {
-    cssName: 'white-space',
+    cssNames: ['white-space'],
     values1: { values: ['break-spaces', 'normal', 'nowrap', 'pre', 'pre-line', 'pre-wrap'] as const },
     values2: { values: [] as const },
     values3: { values: [] as const },
   },
   textOverflow: {
-    cssName: 'text-overflow',
+    cssNames: ['text-overflow'],
     values1: { values: ['clip', 'ellipsis'] as const },
     values2: { values: [] as const },
     values3: { values: [] as const },
   },
 } satisfies Record<string, StyleItem>;
 
+pseudoClassSuffixes.forEach((pseudoSuffix) => {
+  Object.keys(doxStyles).forEach((key) => {
+    // @ts-ignore
+    doxStyles[`${key}${pseudoSuffix}` as keyof typeof doxStyles] = { ...doxStyles[key as keyof typeof doxStyles] };
+    (doxStyles[`${key}${pseudoSuffix}` as keyof typeof doxStyles] as StyleItem).pseudoSuffix = pseudoSuffix;
+  });
+});
+
 type Styles<T extends Record<string, StyleItem>> = {
   [K in keyof T]?: T[K]['values1']['values'][number] | T[K]['values2']['values'][number] | T[K]['values3']['values'][number];
 };
 
+type Hovered<T> = {
+  [K in keyof T as K extends string ? `${K}H` : never]: T[K];
+};
+
+type Focused<T> = {
+  [K in keyof T as K extends string ? `${K}F` : never]: T[K];
+};
+
+type Activated<T> = {
+  [K in keyof T as K extends string ? `${K}A` : never]: T[K];
+};
+
 export type StyleKey = keyof typeof doxStyles;
-export type DoxStyleProps = Styles<typeof doxStyles>;
+type DoxNormalStyles = Styles<typeof doxStyles>;
+export type DoxStyleProps = DoxNormalStyles & Hovered<DoxNormalStyles> & Focused<DoxNormalStyles> & Activated<DoxNormalStyles>;

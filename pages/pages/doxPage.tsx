@@ -26,9 +26,13 @@ export default function DoxPage() {
         display="flex"
         flex1
         fontSize={test}
+        fontSizeH={30}
         props={{ onClick: () => setTest(20) }}
       >
         test2
+      </Dox>
+      <Dox padding={2} border={1}>
+        <Dox tag="input" padding={2} paddingH={3} paddingF={4} paddingA={5} />
       </Dox>
     </Dox>
   );
