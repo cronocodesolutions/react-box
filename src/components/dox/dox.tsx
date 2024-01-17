@@ -11,10 +11,11 @@ interface Props<TTag extends keyof React.ReactHTML> extends DoxStyleProps {
   tag?: TTag;
   props?: TagPropsType<TTag>;
   className?: ClassNameUtils.ClassNameType;
+  style?: React.ComponentProps<TTag>['style'];
 }
 
 function Dox<TTag extends keyof React.ReactHTML = 'div'>(props: Props<TTag>, ref: Ref<HTMLElement>) {
-  const { tag, children, props: tagProps, className: userClassName } = props;
+  const { tag, children, props: tagProps, className: userClassName, style } = props;
 
   const styleClasses = useStyles(props);
   const className = useMemo(() => {
@@ -24,6 +25,7 @@ function Dox<TTag extends keyof React.ReactHTML = 'div'>(props: Props<TTag>, ref
   }, [props]);
 
   const finalTagProps = { ...tagProps, className } as AllProps<TTag>;
+  style && (finalTagProps.style = style);
   ref && (finalTagProps.ref = ref);
 
   const [isHover, setIsHover] = useState(false);

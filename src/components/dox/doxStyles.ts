@@ -46,6 +46,35 @@ const negativeSizes = [
 const sizes = [...positiveSizes, ...negativeSizes] as const;
 const borderAndOutlineStyles = ['solid', 'dashed', 'dotted', 'double', 'groove', 'ridge', 'inset', 'outset', 'none', 'hidden'] as const;
 const overflows = ['auto', 'hidden', 'scroll', 'visible'] as const;
+const widthHeightFractions = [
+  '1/2',
+  '1/3',
+  '2/3',
+  '1/4',
+  '2/4',
+  '3/4',
+  '1/5',
+  '2/5',
+  '3/5',
+  '4/5',
+  '1/6',
+  '2/6',
+  '3/6',
+  '4/6',
+  '5/6',
+  '1/12',
+  '2/12',
+  '3/12',
+  '4/12',
+  '5/12',
+  '6/12',
+  '7/12',
+  '8/12',
+  '9/12',
+  '10/12',
+  '11/12',
+] as const;
+const widthHeightValues = ['fit', 'fit-screen', 'auto', 'fit-content', 'max-content', 'min-content'] as const;
 
 namespace ValueFormatters {
   export function rem(_key: string, value: string | number | boolean) {
@@ -58,7 +87,7 @@ namespace ValueFormatters {
     const [a, b] = (value as string).split('/');
     return `${(+a / +b) * 100}%`;
   }
-  export function heightWidth(key: string, value: string | number | boolean) {
+  export function widthHeight(key: string, value: string | number | boolean) {
     switch (value) {
       case 'fit':
         return '100%';
@@ -80,7 +109,7 @@ namespace ClassNameFormatters {
 }
 
 export const themeStyles = {
-  shadow: { cssNames: ['shadow'], formatValue: ValueFormatters.variables('shadow') },
+  shadow: { cssNames: ['box-shadow'], formatValue: ValueFormatters.variables('shadow') },
   background: { cssNames: ['background'], formatValue: ValueFormatters.variables('background') },
   color: { cssNames: ['color'], formatValue: ValueFormatters.variables('color') },
   bgColor: { cssNames: ['background-color'], formatValue: ValueFormatters.variables('color') },
@@ -103,43 +132,39 @@ export const doxStyles = {
   },
   width: {
     cssNames: ['width'],
-    values1: {
-      values: ['fit', 'fit-screen', 'auto', 'fit-content', 'max-content', 'min-content'] as const,
-      formatValue: ValueFormatters.heightWidth,
-    },
+    values1: { values: widthHeightValues, formatValue: ValueFormatters.widthHeight },
     values2: { values: positiveSizes, formatValue: ValueFormatters.rem },
-    values3: {
-      values: [
-        '1/2',
-        '1/3',
-        '2/3',
-        '1/4',
-        '2/4',
-        '3/4',
-        '1/5',
-        '2/5',
-        '3/5',
-        '4/5',
-        '1/6',
-        '2/6',
-        '3/6',
-        '4/6',
-        '5/6',
-        '1/12',
-        '2/12',
-        '3/12',
-        '4/12',
-        '5/12',
-        '6/12',
-        '7/12',
-        '8/12',
-        '9/12',
-        '10/12',
-        '11/12',
-      ] as const,
-      formatValue: ValueFormatters.fraction,
-      formatClassName: ClassNameFormatters.fraction,
-    },
+    values3: { values: widthHeightFractions, formatValue: ValueFormatters.fraction, formatClassName: ClassNameFormatters.fraction },
+  },
+  minWidth: {
+    cssNames: ['min-width'],
+    values1: { values: widthHeightValues, formatValue: ValueFormatters.widthHeight },
+    values2: { values: positiveSizes, formatValue: ValueFormatters.rem },
+    values3: { values: widthHeightFractions, formatValue: ValueFormatters.fraction, formatClassName: ClassNameFormatters.fraction },
+  },
+  maxWidth: {
+    cssNames: ['max-width'],
+    values1: { values: widthHeightValues, formatValue: ValueFormatters.widthHeight },
+    values2: { values: positiveSizes, formatValue: ValueFormatters.rem },
+    values3: { values: widthHeightFractions, formatValue: ValueFormatters.fraction, formatClassName: ClassNameFormatters.fraction },
+  },
+  height: {
+    cssNames: ['height'],
+    values1: { values: widthHeightValues, formatValue: ValueFormatters.widthHeight },
+    values2: { values: positiveSizes, formatValue: ValueFormatters.rem },
+    values3: { values: widthHeightFractions, formatValue: ValueFormatters.fraction, formatClassName: ClassNameFormatters.fraction },
+  },
+  minHeight: {
+    cssNames: ['min-height'],
+    values1: { values: widthHeightValues, formatValue: ValueFormatters.widthHeight },
+    values2: { values: positiveSizes, formatValue: ValueFormatters.rem },
+    values3: { values: widthHeightFractions, formatValue: ValueFormatters.fraction, formatClassName: ClassNameFormatters.fraction },
+  },
+  maxHeight: {
+    cssNames: ['max-height'],
+    values1: { values: widthHeightValues, formatValue: ValueFormatters.widthHeight },
+    values2: { values: positiveSizes, formatValue: ValueFormatters.rem },
+    values3: { values: widthHeightFractions, formatValue: ValueFormatters.fraction, formatClassName: ClassNameFormatters.fraction },
   },
   position: {
     cssNames: ['position'],
@@ -589,7 +614,7 @@ export const doxStyles = {
     values2: { values: [] as const },
     values3: { values: [] as const },
   },
-  flexSelf: {
+  alignSelf: {
     cssNames: ['align-self'],
     values1: { values: ['auto', 'flex-start', 'flex-end', 'center', 'baseline', 'stretch'] as const },
     values2: { values: [] as const },
