@@ -1,5 +1,5 @@
 import Box from '../../src/box';
-import Flex from '../../src/components/flex/flex';
+import Flex from '../../src/components/flex';
 
 export default function FlexPage() {
   return (

@@ -1,18 +1,18 @@
 import('./box');
 
-import('./components/baseSvg/baseSvg');
+import('./components/baseSvg');
 
-import('./components/dox/dox');
-import('./components/button/button');
-import('./components/checkbox/checkbox');
-import('./components/dataGrid/dataGrid');
-import('./components/flex/flex');
-import('./components/grid/grid');
-import('./components/form/form');
-import('./components/radioButton/radioButton');
-import('./components/textarea/textarea');
-import('./components/textbox/textbox');
-import('./components/tooltip/tooltip');
+import('./components/dox');
+import('./components/button');
+import('./components/checkbox');
+import('./components/dataGrid');
+import('./components/flex');
+import('./components/grid');
+import('./components/form');
+import('./components/radioButton');
+import('./components/textarea');
+import('./components/textbox');
+import('./components/tooltip');
 
 import('./theme');
-import('./plugins/box-theme');
+import('./plugins');

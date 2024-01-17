@@ -1,7 +1,7 @@
 import React, { forwardRef, Ref, useMemo, useState } from 'react';
-import ClassNameUtils from '../../utils/className/classNameUtils';
-import { DoxStyleProps } from './doxStyles';
-import useStyles from './useStyles';
+import ClassNameUtils from '../utils/className/classNameUtils';
+import { DoxStyleProps } from './dox/doxStyles';
+import useStyles from './dox/useStyles';
 
 type AllProps<TTag extends keyof React.ReactHTML> = React.ComponentProps<TTag>;
 type TagPropsType<TTag extends keyof React.ReactHTML> = Omit<AllProps<TTag>, 'className' | 'style' | 'ref'>;

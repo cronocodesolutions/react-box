@@ -1,5 +1,5 @@
 import Box from '../../src/box';
-import DataGrid from '../../src/components/dataGrid/dataGrid';
+import DataGrid from '../../src/components/dataGrid';
 
 interface Person {
   firstName: string;

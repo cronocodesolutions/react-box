@@ -1,11 +1,11 @@
-import { useEffect, useMemo } from 'react';
+import { useLayoutEffect, useMemo } from 'react';
 import { AliasKey, DoxStyleProps, StyleKey, aliases } from './doxStyles';
 import { StylesContext } from './stylesContext';
 import { useTheme } from '../../theme';
 
 export default function useStyles(props: DoxStyleProps) {
   const themeProps = useTheme(props) as DoxStyleProps;
-  useEffect(StylesContext.flush, [props]);
+  useLayoutEffect(StylesContext.flush, [props]);
 
   return useMemo(() => {
     const classNames: (string | undefined)[] = [StylesContext.doxClassName];

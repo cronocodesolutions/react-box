@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import Dox from '../../src/components/dox/dox';
+import Dox from '../../src/components/dox';
 
 type FontSizeType = React.ComponentProps<typeof Dox>['fontSize'];
 

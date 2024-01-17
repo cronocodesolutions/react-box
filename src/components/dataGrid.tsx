@@ -1,5 +1,5 @@
-import Box from '../../box';
-import useGrid from './useGrid';
+import Box from '../box';
+import useGrid from './dataGrid/useGrid';
 
 interface Props<T extends {}> {
   data?: T[];

@@ -1,5 +1,5 @@
 import Box from '../../src/box';
-import Grid from '../../src/components/grid/grid';
+import Grid from '../../src/components/grid';
 
 export default function GridPage() {
   return (

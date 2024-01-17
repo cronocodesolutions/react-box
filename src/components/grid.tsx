@@ -1,5 +1,5 @@
 import { Ref, forwardRef } from 'react';
-import Box from '../../box';
+import Box from '../box';
 
 type BoxProps<TTag extends keyof React.ReactHTML> = Omit<React.ComponentProps<typeof Box<TTag>>, 'ref'>;
 

@@ -1,7 +1,7 @@
 import { createPortal } from 'react-dom';
-import Box from '../../box';
+import Box from '../box';
 import React, { useCallback, useLayoutEffect, useRef, useState } from 'react';
-import usePortalContainer from '../../hooks/usePortalContainer';
+import usePortalContainer from '../hooks/usePortalContainer';
 
 const positionDigitsAfterComma = 2;
 

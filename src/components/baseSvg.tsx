@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { themeSvgClasses, SvgStyles } from '../../types';
-import ClassNameUtils from '../../utils/className/classNameUtils';
-import classes from './baseSvg.module.css';
+import { themeSvgClasses, SvgStyles } from '../types';
+import ClassNameUtils from '../utils/className/classNameUtils';
+import classes from './baseSvg/baseSvg.module.css';
 
 type AllSvgProps = React.SVGProps<SVGElement>;
 type SvgPropsType = Omit<AllSvgProps, 'className' | 'style' | 'width' | 'height'>;

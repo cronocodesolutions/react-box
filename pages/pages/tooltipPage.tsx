@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import Box from '../../src/box';
-import Tooltip from '../../src/components/tooltip/tooltip';
-import Button from '../../src/components/button/button';
-import Flex from '../../src/components/flex/flex';
+import Tooltip from '../../src/components/tooltip';
+import Button from '../../src/components/button';
+import Flex from '../../src/components/flex';
 
 export default function TooltipPage() {
   const [open1, setOpen1] = useState(false);

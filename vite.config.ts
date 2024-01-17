@@ -20,16 +20,6 @@ export default defineConfig(({ mode }) => {
     plugins: [
       dts({
         entryRoot: './src',
-        beforeWriteFile(filePath, content) {
-          const { dir } = path.parse(filePath);
-
-          let newFilePath = filePath;
-          if (dir.includes('components') || dir.includes('plugins')) {
-            newFilePath = `${dir}.d.ts`;
-          }
-
-          return { filePath: newFilePath, content: content.replace(/..\/..\//g, '../') };
-        },
       }),
       reactPlugin(),
       moduleCssPlugin(jsonCache, mode),
@@ -96,12 +86,16 @@ export default defineConfig(({ mode }) => {
 
             if (id.includes('/src/components/')) {
               const re = new RegExp('(.*)src/components/(.*)');
-              const result = re.exec(id)[2].split('/')[0];
+              const result = re.exec(id)[2];
 
-              return result;
+              if (result.includes('/')) {
+                return result.split('/')[0];
+              }
+
+              return result.split('.')[0];
             }
 
-            if (id.includes('/plugins/')) {
+            if (id.includes('/plugins')) {
               return 'plugins';
             }
 

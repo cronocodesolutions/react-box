@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import Box from '../../src/box';
-import Textbox from '../../src/components/textbox/textbox';
+import Textbox from '../../src/components/textbox';
 
 export default function TextboxPage() {
   const [controlledValue, setControlledValue] = useState('controlled');

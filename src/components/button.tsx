@@ -1,6 +1,6 @@
 import { forwardRef, Ref } from 'react';
-import Box from '../../box';
-import ObjectUtils from '../../utils/object/objectUtils';
+import Box from '../box';
+import ObjectUtils from '../utils/object/objectUtils';
 
 type BoxProps = Omit<React.ComponentProps<typeof Box<'button'>>, 'ref' | 'tag'>;
 type BoxTagProps = Required<BoxProps>['props'];

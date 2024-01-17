@@ -1,6 +1,6 @@
 import { useLayoutEffect } from 'react';
 import Box from '../../src/box';
-import Flex from '../../src/components/flex/flex';
+import Flex from '../../src/components/flex';
 import Prism from 'prismjs';
 import Code from '../components/code';
 

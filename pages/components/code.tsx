@@ -1,8 +1,8 @@
 import { useEffect, useLayoutEffect, useState } from 'react';
 import Prism from 'prismjs';
 import 'prismjs/themes/prism-okaidia.css';
-import Button from '../../src/components/button/button';
-import Flex from '../../src/components/flex/flex';
+import Button from '../../src/components/button';
+import Flex from '../../src/components/flex';
 import Box from '../../src/box';
 
 interface Props {

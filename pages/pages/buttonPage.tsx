@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import Box from '../../src/box';
-import Button from '../../src/components/button/button';
-import Flex from '../../src/components/flex/flex';
+import Button from '../../src/components/button';
+import Flex from '../../src/components/flex';
 
 export default function ButtonPage() {
   const [counter, setCounter] = useState(0);

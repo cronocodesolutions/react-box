@@ -1,6 +1,6 @@
 import Box from '../../src/box';
-import Flex from '../../src/components/flex/flex';
-import RadioButton from '../../src/components/radioButton/radioButton';
+import Flex from '../../src/components/flex';
+import RadioButton from '../../src/components/radioButton';
 
 export default function RadioButtonPage() {
   return (

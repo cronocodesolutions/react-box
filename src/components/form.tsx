@@ -1,6 +1,6 @@
 import { useCallback, useRef } from 'react';
-import Box from '../../box';
-import FormUtils from '../../utils/form/formUtils';
+import Box from '../box';
+import FormUtils from '../utils/form/formUtils';
 
 type BoxProps = React.ComponentProps<typeof Box<'form'>>;
 type BoxTagProps = Required<BoxProps>['props'];
