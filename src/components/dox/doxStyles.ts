@@ -410,7 +410,7 @@ export const doxStyles = {
   fontSize: {
     cssNames: ['font-size'],
     values1: { values: positiveSizes, formatValue: ValueFormatters.px },
-    values2: { values: [] as const },
+    values2: { values: ['inherit'] as const },
     values3: { values: [] as const },
   },
   fontStyle: {
@@ -611,8 +611,17 @@ export const doxStyles = {
     values3: { values: [] as const },
   },
   transition: {
-    cssNames: ['transition'],
-    values1: { values: ['none'] as const },
+    cssNames: ['transition-property'],
+    values1: { values: ['none', 'all'] as const },
+    values2: { values: [] as const },
+    values3: { values: [] as const },
+  },
+  transitionDuration: {
+    cssNames: ['transition-duration'],
+    values1: {
+      values: [50, 100, 150, 200, 250, 300, 350, 400, 450, 500, 550, 600, 650, 700, 750, 800, 850, 900, 950, 1000] as const,
+      formatValue: (_key, value) => `${value}ms`,
+    },
     values2: { values: [] as const },
     values3: { values: [] as const },
   },

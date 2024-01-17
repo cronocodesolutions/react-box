@@ -6,7 +6,7 @@ export default function useStyles(props: DoxStyleProps) {
   useEffect(StylesContext.flush, [props]);
 
   return useMemo(() => {
-    const classNames: (string | undefined)[] = [];
+    const classNames: (string | undefined)[] = [StylesContext.doxClassName];
 
     Object.entries(props).forEach(([key, value]) => {
       classNames.push(StylesContext.get(key as StyleKey, value));

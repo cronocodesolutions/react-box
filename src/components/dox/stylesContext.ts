@@ -17,6 +17,8 @@ export namespace StylesContext {
     return acc;
   }, {} as Record<StyleKey, Set<string | number | boolean>>);
 
+  export const doxClassName = '_dox';
+
   export function get(key: StyleKey, value: string | number | boolean) {
     if (key in styles) {
       if (!styles[key].has(value)) {
@@ -35,10 +37,12 @@ export namespace StylesContext {
     if (requireFlush) {
       console.info('%c💬Flush Dox Styles', 'color: #00ffff');
 
-      let items = getClassNames([]);
-      items = getClassNames(items, 'H');
-      items = getClassNames(items, 'F');
-      items = getClassNames(items, 'A');
+      const defaultStyles = `.${doxClassName}{display: block;border: 0 solid black;outline: 0px solid black;margin: 0;padding: 0;background-color: initial;transition: all 250ms;box-sizing: border-box;font-family: inherit;font-size: inherit;}`;
+
+      let items = generateStyles([defaultStyles]);
+      items = generateStyles(items, 'H');
+      items = generateStyles(items, 'F');
+      items = generateStyles(items, 'A');
 
       el.innerHTML = items.join('');
 
@@ -46,7 +50,7 @@ export namespace StylesContext {
     }
   }
 
-  function getClassNames(classes: string[], pseudoSuffix?: PseudoClassSuffix) {
+  function generateStyles(classes: string[], pseudoSuffix?: PseudoClassSuffix) {
     return Object.entries(styles)
       .filter(([key]) => (doxStyles[key as StyleKey] as StyleItem)?.pseudoSuffix === pseudoSuffix)
       .reduce((acc, [key, values]) => {
