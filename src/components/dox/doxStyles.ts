@@ -1,4 +1,5 @@
 import { ThemeComponentProps } from '../../theme';
+import { Augmented } from '../../types';
 
 type Hovered<T> = {
   [K in keyof T as K extends string ? `${K}H` : never]: T[K];
@@ -748,4 +749,8 @@ export type StyleKey = keyof typeof doxStyles;
 export type AliasKey = keyof typeof aliases;
 export type ThemeKey = keyof typeof themeStyles;
 type DoxNormalStyles = Styles<typeof doxStyles> & Styles<typeof aliases> & ThemeComponentProps;
-export type DoxStyleProps = DoxNormalStyles & Hovered<DoxNormalStyles> & Focused<DoxNormalStyles> & Activated<DoxNormalStyles>;
+export type DoxStyleProps = DoxNormalStyles &
+  Hovered<DoxNormalStyles> &
+  Focused<DoxNormalStyles> &
+  Activated<DoxNormalStyles> &
+  Augmented.BoxProps;
