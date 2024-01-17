@@ -1,4 +1,4 @@
-import { doxStyles, PseudoClassSuffix, pseudoClassSuffixes, StyleItem, StyleKey, StyleValues } from './doxStyles';
+import { aliases, AliasKey, doxStyles, PseudoClassSuffix, pseudoClassSuffixes, StyleItem, StyleKey, StyleValues } from './doxStyles';
 import IdentityFactory from '@cronocode/identity-factory';
 
 export namespace StylesContext {
@@ -19,17 +19,13 @@ export namespace StylesContext {
 
   export const doxClassName = '_dox';
 
-  export function get(key: StyleKey, value: string | number | boolean) {
-    if (key in styles) {
-      if (!styles[key].has(value)) {
-        requireFlush = true;
-        styles[key].add(value);
-      }
+  export function get(key: StyleKey | AliasKey, value: string | number | boolean) {
+    if (key in doxStyles) {
+      return getClassName(key as StyleKey, value);
+    }
 
-      const valueItem: StyleValues = getValueItem(key as StyleKey, value);
-      const className = valueItem.formatClassName?.(key as StyleKey, value) ?? `${key}${value}`;
-
-      return `-${identity.getIdentity(className)}`;
+    if (key in aliases) {
+      return getClassName(aliases[key as AliasKey].key, value);
     }
   }
 
@@ -50,23 +46,34 @@ export namespace StylesContext {
     }
   }
 
+  function getClassName(styleKey: StyleKey, value: string | number | boolean) {
+    if (!styles[styleKey].has(value)) {
+      requireFlush = true;
+      styles[styleKey].add(value);
+    }
+
+    const valueItem: StyleValues = getValueItem(styleKey as StyleKey, value);
+    const className = valueItem.formatClassName?.(styleKey as StyleKey, value) ?? `${styleKey}${value}`;
+
+    return `-${identity.getIdentity(className)}`;
+  }
+
   function generateStyles(classes: string[], pseudoSuffix?: PseudoClassSuffix) {
     return Object.entries(styles)
       .filter(([key]) => (doxStyles[key as StyleKey] as StyleItem)?.pseudoSuffix === pseudoSuffix)
       .reduce((acc, [key, values]) => {
         values.forEach((value) => {
-          const valueItem: StyleValues = getValueItem(key as StyleKey, value);
-          let className = valueItem.formatClassName?.(key as StyleKey, value) ?? `${key}${value}`;
-          className = identity.getIdentity(className);
+          let className = getClassName(key as StyleKey, value);
           if (pseudoSuffix === 'H') className = `${className}:hover`;
           if (pseudoSuffix === 'F') className = `${className}:focus-within`;
           if (pseudoSuffix === 'A') className = `${className}:active`;
 
+          const valueItem: StyleValues = getValueItem(key as StyleKey, value);
           const cssValue = valueItem.formatValue?.(key as StyleKey, value) ?? value;
           const cssNames = (doxStyles[key as StyleKey] as StyleItem).cssNames;
           const styles = cssNames.map((cssName) => `${cssName}:${cssValue};`).join('');
 
-          acc.push(`.-${className}{${styles}}`);
+          acc.push(`.${className}{${styles}}`);
         });
         return acc;
       }, classes);

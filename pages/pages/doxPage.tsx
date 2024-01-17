@@ -31,8 +31,8 @@ export default function DoxPage() {
       >
         test2
       </Dox>
-      <Dox padding={2} border={1}>
-        <Dox tag="input" padding={2} paddingH={3} paddingF={4} paddingA={5} />
+      <Dox padding={3} border={1} m={7}>
+        <Dox tag="input" p={2} border={1} borderRadius={2} />
       </Dox>
     </Dox>
   );

@@ -1,3 +1,15 @@
+type Hovered<T> = {
+  [K in keyof T as K extends string ? `${K}H` : never]: T[K];
+};
+
+type Focused<T> = {
+  [K in keyof T as K extends string ? `${K}F` : never]: T[K];
+};
+
+type Activated<T> = {
+  [K in keyof T as K extends string ? `${K}A` : never]: T[K];
+};
+
 export interface StyleValues {
   values: Readonly<Array<string | number | boolean>>;
   formatClassName?: (key: string, value: string | number | boolean) => string;
@@ -657,10 +669,39 @@ export const doxStyles = {
   },
 } satisfies Record<string, StyleItem>;
 
+type AliasType = { key: StyleKey };
+export const aliases = {
+  m: { ...doxStyles.margin, key: 'margin' },
+  mx: { ...doxStyles.marginHorizontal, key: 'marginHorizontal' },
+  my: { ...doxStyles.marginVertical, key: 'marginVertical' },
+  mt: { ...doxStyles.marginTop, key: 'marginTop' },
+  mr: { ...doxStyles.marginRight, key: 'marginRight' },
+  mb: { ...doxStyles.marginBottom, key: 'marginBottom' },
+  ml: { ...doxStyles.marginLeft, key: 'marginLeft' },
+  p: { ...doxStyles.padding, key: 'padding' },
+  px: { ...doxStyles.paddingHorizontal, key: 'paddingHorizontal' },
+  py: { ...doxStyles.paddingVertical, key: 'paddingVertical' },
+  pt: { ...doxStyles.paddingTop, key: 'paddingTop' },
+  pr: { ...doxStyles.paddingRight, key: 'paddingRight' },
+  pb: { ...doxStyles.paddingBottom, key: 'paddingBottom' },
+  pl: { ...doxStyles.paddingLeft, key: 'paddingLeft' },
+  b: { ...doxStyles.border, key: 'border' },
+  bx: { ...doxStyles.borderHorizontal, key: 'borderHorizontal' },
+  by: { ...doxStyles.borderVertical, key: 'borderVertical' },
+  bt: { ...doxStyles.borderTop, key: 'borderTop' },
+  br: { ...doxStyles.borderRight, key: 'borderRight' },
+  bb: { ...doxStyles.borderBottom, key: 'borderBottom' },
+  bl: { ...doxStyles.borderLeft, key: 'borderLeft' },
+  jc: { ...doxStyles.justifyContent, key: 'justifyContent' },
+  ai: { ...doxStyles.alignItems, key: 'alignItems' },
+  ac: { ...doxStyles.alignContent, key: 'alignContent' },
+  d: { ...doxStyles.flexDirection, key: 'flexDirection' },
+} satisfies Record<string, AliasType>;
+
 pseudoClassSuffixes.forEach((pseudoSuffix) => {
   Object.keys(doxStyles).forEach((key) => {
     // @ts-ignore
-    doxStyles[`${key}${pseudoSuffix}` as keyof typeof doxStyles] = { ...doxStyles[key as keyof typeof doxStyles] };
+    doxStyles[`${key}${pseudoSuffix}` as StyleKey] = { ...doxStyles[key as keyof typeof doxStyles] };
     (doxStyles[`${key}${pseudoSuffix}` as keyof typeof doxStyles] as StyleItem).pseudoSuffix = pseudoSuffix;
   });
 });
@@ -669,18 +710,7 @@ type Styles<T extends Record<string, StyleItem>> = {
   [K in keyof T]?: T[K]['values1']['values'][number] | T[K]['values2']['values'][number] | T[K]['values3']['values'][number];
 };
 
-type Hovered<T> = {
-  [K in keyof T as K extends string ? `${K}H` : never]: T[K];
-};
-
-type Focused<T> = {
-  [K in keyof T as K extends string ? `${K}F` : never]: T[K];
-};
-
-type Activated<T> = {
-  [K in keyof T as K extends string ? `${K}A` : never]: T[K];
-};
-
 export type StyleKey = keyof typeof doxStyles;
-type DoxNormalStyles = Styles<typeof doxStyles>;
+export type AliasKey = keyof typeof aliases;
+type DoxNormalStyles = Styles<typeof doxStyles> & Styles<typeof aliases>;
 export type DoxStyleProps = DoxNormalStyles & Hovered<DoxNormalStyles> & Focused<DoxNormalStyles> & Activated<DoxNormalStyles>;
