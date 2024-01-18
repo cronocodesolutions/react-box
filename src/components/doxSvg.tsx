@@ -21,11 +21,10 @@ export default function DoxSvg(props: Props) {
   const { props: tagProps, style, width, height, viewBox = '0 0 24 24', className } = props;
 
   return (
-    // @ts-ignore
     <Dox
       tag="svg"
       className={className}
-      {...props}
+      {...(props as React.ComponentProps<typeof Dox<'svg'>>)}
       props={{ ...tagProps, viewBox, xmlns: 'http://www.w3.org/2000/svg', fill: 'none' }}
       style={{ ...style, width, height }}
     />
