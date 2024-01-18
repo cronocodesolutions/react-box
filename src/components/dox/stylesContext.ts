@@ -1,21 +1,28 @@
 import {
-  aliases,
-  AliasKey,
   doxStyles,
+  pseudoClassStyles,
   PseudoClassSuffix,
+  PseudoClassType,
   StyleItem,
   StyleKey,
   StyleValues,
-  ThemeItem,
-  ThemeKey,
   themeStyles,
 } from './doxStyles';
 import IdentityFactory from '@cronocode/identity-factory';
 
 export namespace StylesContext {
+  export const doxClassName = '_dox';
+  export const svgClassName = '_svg';
+  const defaultStyles = `:root{--borderColor: black;--outlineColor: black;--lineHeight: 1.2;--fontSize: 14px;--transitionTime: 0.25s;--svgTransitionTime: 0.3s;#crono-box {position: absolute;top: 0;left: 0;height: 0;}}
+html{font-size: 16px;font-family: Arial, sans-serif;}
+body{margin: 0;line-height: var(--lineHeight);font-size: var(--fontSize);}
+a,ul{all: unset;}
+.${doxClassName}{display: block;border: 0 solid var(--borderColor);outline: 0px solid var(--outlineColor);margin: 0;padding: 0;background-color: initial;transition: all var(--transitionTime);box-sizing: border-box;font-family: inherit;font-size: inherit;}
+.${svgClassName}{width: 1.5rem;transition: all var(--svgTransitionTime);path,circle,rect,line {transition: all var(--svgTransitionTime);}}
+`;
   const identity = new IdentityFactory();
-  const propKeys = [...Object.keys(doxStyles), ...Object.keys(themeStyles)] as StyleKey[];
 
+  const propKeys = [...Object.keys(doxStyles), ...Object.keys(themeStyles)] as StyleKey[];
   const el = getElement();
 
   let requireFlush = false;
@@ -26,19 +33,19 @@ export namespace StylesContext {
     return acc;
   }, {} as Record<StyleKey, Set<string | number | boolean>>);
 
-  export const doxClassName = '_dox';
-
   export function get(key: string, value: string | number | boolean) {
     if (key in doxStyles) {
       return getClassName(key as StyleKey, value);
+    }
+
+    if (key in pseudoClassStyles) {
+      return pseudoClassStyles[key as PseudoClassType].className;
     }
   }
 
   export function flush() {
     if (requireFlush) {
       console.info('%c💬Flush Dox Styles', 'color: #00ffff');
-
-      const defaultStyles = `.${doxClassName}{display: block;border: 0 solid black;outline: 0px solid black;margin: 0;padding: 0;background-color: initial;transition: all 250ms;box-sizing: border-box;font-family: inherit;font-size: inherit;}`;
 
       let items = generateStyles([defaultStyles]);
       items = generateStyles(items, 'H');
@@ -69,8 +76,9 @@ export namespace StylesContext {
       .reduce((acc, [key, values]) => {
         values.forEach((value) => {
           let className = getClassName(key as StyleKey, value);
-          if (pseudoSuffix === 'H') className = `${className}:hover`;
-          if (pseudoSuffix === 'F') className = `${className}:focus-within`;
+          if (pseudoSuffix === 'H') className = `${className}:hover,.${pseudoClassStyles.hover.className}:hover>.${className}`;
+          if (pseudoSuffix === 'F')
+            className = `${className}:focus-within,.${pseudoClassStyles.focus.className}:focus-within>.${className}`;
           if (pseudoSuffix === 'A') className = `${className}:active`;
 
           const valueItem: StyleValues = getValueItem(key as StyleKey, value);

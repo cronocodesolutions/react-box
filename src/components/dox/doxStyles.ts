@@ -1,17 +1,6 @@
 import { ThemeComponentProps } from '../../theme';
 import { Augmented } from '../../types';
-
-type Hovered<T> = {
-  [K in keyof T as K extends string ? `${K}H` : never]: T[K];
-};
-
-type Focused<T> = {
-  [K in keyof T as K extends string ? `${K}F` : never]: T[K];
-};
-
-type Activated<T> = {
-  [K in keyof T as K extends string ? `${K}A` : never]: T[K];
-};
+import { DoxStylesFormatters } from './doxStylesFormatters';
 
 export interface StyleValues {
   values: Readonly<Array<string | number | boolean>>;
@@ -34,88 +23,81 @@ export interface StyleItem {
   values3: StyleValues;
   pseudoSuffix?: PseudoClassSuffix;
   isThemeStyle?: boolean;
-}
-const positiveSizes = [
-  0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 22, 24, 26, 28, 30, 32, 34, 36, 38, 40, 42, 44, 46, 48, 50, 52,
-  54, 56, 58, 60, 64, 68, 72, 76, 80, 84, 88, 92, 96, 100,
-] as const;
-const negativeSizes = [
-  -1, -2, -3, -4, -5, -6, -7, -8, -9, -10, -11, -12, -13, -14, -15, -16, -17, -18, -19, -20, -22, -24, -26, -28, -30, -32, -34, -36, -38,
-  -40, -44, -48, -52, -56, -60, -64, -68, -72, -76, -80, -84, -88, -92, -96, -100,
-] as const;
-const sizes = [...positiveSizes, ...negativeSizes] as const;
-const borderAndOutlineStyles = ['solid', 'dashed', 'dotted', 'double', 'groove', 'ridge', 'inset', 'outset', 'none', 'hidden'] as const;
-const overflows = ['auto', 'hidden', 'scroll', 'visible'] as const;
-const widthHeightFractions = [
-  '1/2',
-  '1/3',
-  '2/3',
-  '1/4',
-  '2/4',
-  '3/4',
-  '1/5',
-  '2/5',
-  '3/5',
-  '4/5',
-  '1/6',
-  '2/6',
-  '3/6',
-  '4/6',
-  '5/6',
-  '1/12',
-  '2/12',
-  '3/12',
-  '4/12',
-  '5/12',
-  '6/12',
-  '7/12',
-  '8/12',
-  '9/12',
-  '10/12',
-  '11/12',
-] as const;
-const widthHeightValues = ['fit', 'fit-screen', 'auto', 'fit-content', 'max-content', 'min-content'] as const;
-
-namespace ValueFormatters {
-  export function rem(_key: string, value: string | number | boolean) {
-    return `${(value as number) / 4}rem`;
-  }
-  export function px(_key: string, value: string | number | boolean) {
-    return `${value}px`;
-  }
-  export function fraction(_key: string, value: string | number | boolean) {
-    const [a, b] = (value as string).split('/');
-    return `${(+a / +b) * 100}%`;
-  }
-  export function widthHeight(key: string, value: string | number | boolean) {
-    switch (value) {
-      case 'fit':
-        return '100%';
-      case 'fit-screen':
-        return key.toLocaleLowerCase().includes('height') ? '100vh' : '100vw';
-      default:
-        return value as string;
-    }
-  }
-  export function variables(prefix: string) {
-    return (key: string, value: string | number | boolean) => `var(--${prefix}${value});`;
-  }
+  isPseudoClass?: boolean;
 }
 
-namespace ClassNameFormatters {
-  export function fraction(key: string, value: string | number | boolean) {
-    return `${key}${(value as string).replace('/', '-')}`;
-  }
+namespace Values {
+  export const positiveSizes = [
+    0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 22, 24, 26, 28, 30, 32, 34, 36, 38, 40, 42, 44, 46, 48, 50,
+    52, 54, 56, 58, 60, 64, 68, 72, 76, 80, 84, 88, 92, 96, 100,
+  ] as const;
+  export const negativeSizes = [
+    -1, -2, -3, -4, -5, -6, -7, -8, -9, -10, -11, -12, -13, -14, -15, -16, -17, -18, -19, -20, -22, -24, -26, -28, -30, -32, -34, -36, -38,
+    -40, -44, -48, -52, -56, -60, -64, -68, -72, -76, -80, -84, -88, -92, -96, -100,
+  ] as const;
+  export const sizes = [...Values.positiveSizes, ...negativeSizes] as const;
+  export const borderAndOutlineStyles = [
+    'solid',
+    'dashed',
+    'dotted',
+    'double',
+    'groove',
+    'ridge',
+    'inset',
+    'outset',
+    'none',
+    'hidden',
+  ] as const;
+  export const overflows = ['auto', 'hidden', 'scroll', 'visible'] as const;
+  export const widthHeightFractions = [
+    '1/2',
+    '1/3',
+    '2/3',
+    '1/4',
+    '2/4',
+    '3/4',
+    '1/5',
+    '2/5',
+    '3/5',
+    '4/5',
+    '1/6',
+    '2/6',
+    '3/6',
+    '4/6',
+    '5/6',
+    '1/12',
+    '2/12',
+    '3/12',
+    '4/12',
+    '5/12',
+    '6/12',
+    '7/12',
+    '8/12',
+    '9/12',
+    '10/12',
+    '11/12',
+  ] as const;
+  export const widthHeightValues = ['fit', 'fit-screen', 'auto', 'fit-content', 'max-content', 'min-content'] as const;
+  export const alignSelf = ['auto', 'flex-start', 'flex-end', 'center', 'baseline', 'stretch'] as const;
 }
 
 export const themeStyles = {
-  shadow: { cssNames: ['box-shadow'], formatValue: ValueFormatters.variables('shadow') },
-  background: { cssNames: ['background'], formatValue: ValueFormatters.variables('background') },
-  color: { cssNames: ['color'], formatValue: ValueFormatters.variables('color') },
-  bgColor: { cssNames: ['background-color'], formatValue: ValueFormatters.variables('color') },
-  borderColor: { cssNames: ['border-color'], formatValue: ValueFormatters.variables('color') },
-  outlineColor: { cssNames: ['outline-color'], formatValue: ValueFormatters.variables('color') },
+  shadow: { cssNames: ['box-shadow'], formatValue: DoxStylesFormatters.Value.variables('shadow') },
+  background: { cssNames: ['background'], formatValue: DoxStylesFormatters.Value.variables('background') },
+  color: { cssNames: ['color'], formatValue: DoxStylesFormatters.Value.variables('color') },
+  bgColor: { cssNames: ['background-color'], formatValue: DoxStylesFormatters.Value.variables('color') },
+  borderColor: { cssNames: ['border-color'], formatValue: DoxStylesFormatters.Value.variables('color') },
+  outlineColor: { cssNames: ['outline-color'], formatValue: DoxStylesFormatters.Value.variables('color') },
 } satisfies Record<string, ThemeItem>;
+
+export interface PseudoClassStyleType {
+  className: string;
+}
+export const pseudoClassStyles = {
+  hover: { className: '_h' },
+  focus: { className: '_f' },
+} satisfies Record<string, PseudoClassStyleType>;
+export type PseudoClassType = keyof typeof pseudoClassStyles;
 
 export const doxStyles = {
   display: {
@@ -132,39 +114,63 @@ export const doxStyles = {
   },
   width: {
     cssNames: ['width'],
-    values1: { values: widthHeightValues, formatValue: ValueFormatters.widthHeight },
-    values2: { values: positiveSizes, formatValue: ValueFormatters.rem },
-    values3: { values: widthHeightFractions, formatValue: ValueFormatters.fraction, formatClassName: ClassNameFormatters.fraction },
+    values1: { values: Values.widthHeightValues, formatValue: DoxStylesFormatters.Value.widthHeight },
+    values2: { values: Values.positiveSizes, formatValue: DoxStylesFormatters.Value.rem },
+    values3: {
+      values: Values.widthHeightFractions,
+      formatValue: DoxStylesFormatters.Value.fraction,
+      formatClassName: DoxStylesFormatters.ClassName.fraction,
+    },
   },
   minWidth: {
     cssNames: ['min-width'],
-    values1: { values: widthHeightValues, formatValue: ValueFormatters.widthHeight },
-    values2: { values: positiveSizes, formatValue: ValueFormatters.rem },
-    values3: { values: widthHeightFractions, formatValue: ValueFormatters.fraction, formatClassName: ClassNameFormatters.fraction },
+    values1: { values: Values.widthHeightValues, formatValue: DoxStylesFormatters.Value.widthHeight },
+    values2: { values: Values.positiveSizes, formatValue: DoxStylesFormatters.Value.rem },
+    values3: {
+      values: Values.widthHeightFractions,
+      formatValue: DoxStylesFormatters.Value.fraction,
+      formatClassName: DoxStylesFormatters.ClassName.fraction,
+    },
   },
   maxWidth: {
     cssNames: ['max-width'],
-    values1: { values: widthHeightValues, formatValue: ValueFormatters.widthHeight },
-    values2: { values: positiveSizes, formatValue: ValueFormatters.rem },
-    values3: { values: widthHeightFractions, formatValue: ValueFormatters.fraction, formatClassName: ClassNameFormatters.fraction },
+    values1: { values: Values.widthHeightValues, formatValue: DoxStylesFormatters.Value.widthHeight },
+    values2: { values: Values.positiveSizes, formatValue: DoxStylesFormatters.Value.rem },
+    values3: {
+      values: Values.widthHeightFractions,
+      formatValue: DoxStylesFormatters.Value.fraction,
+      formatClassName: DoxStylesFormatters.ClassName.fraction,
+    },
   },
   height: {
     cssNames: ['height'],
-    values1: { values: widthHeightValues, formatValue: ValueFormatters.widthHeight },
-    values2: { values: positiveSizes, formatValue: ValueFormatters.rem },
-    values3: { values: widthHeightFractions, formatValue: ValueFormatters.fraction, formatClassName: ClassNameFormatters.fraction },
+    values1: { values: Values.widthHeightValues, formatValue: DoxStylesFormatters.Value.widthHeight },
+    values2: { values: Values.positiveSizes, formatValue: DoxStylesFormatters.Value.rem },
+    values3: {
+      values: Values.widthHeightFractions,
+      formatValue: DoxStylesFormatters.Value.fraction,
+      formatClassName: DoxStylesFormatters.ClassName.fraction,
+    },
   },
   minHeight: {
     cssNames: ['min-height'],
-    values1: { values: widthHeightValues, formatValue: ValueFormatters.widthHeight },
-    values2: { values: positiveSizes, formatValue: ValueFormatters.rem },
-    values3: { values: widthHeightFractions, formatValue: ValueFormatters.fraction, formatClassName: ClassNameFormatters.fraction },
+    values1: { values: Values.widthHeightValues, formatValue: DoxStylesFormatters.Value.widthHeight },
+    values2: { values: Values.positiveSizes, formatValue: DoxStylesFormatters.Value.rem },
+    values3: {
+      values: Values.widthHeightFractions,
+      formatValue: DoxStylesFormatters.Value.fraction,
+      formatClassName: DoxStylesFormatters.ClassName.fraction,
+    },
   },
   maxHeight: {
     cssNames: ['max-height'],
-    values1: { values: widthHeightValues, formatValue: ValueFormatters.widthHeight },
-    values2: { values: positiveSizes, formatValue: ValueFormatters.rem },
-    values3: { values: widthHeightFractions, formatValue: ValueFormatters.fraction, formatClassName: ClassNameFormatters.fraction },
+    values1: { values: Values.widthHeightValues, formatValue: DoxStylesFormatters.Value.widthHeight },
+    values2: { values: Values.positiveSizes, formatValue: DoxStylesFormatters.Value.rem },
+    values3: {
+      values: Values.widthHeightFractions,
+      formatValue: DoxStylesFormatters.Value.fraction,
+      formatClassName: DoxStylesFormatters.ClassName.fraction,
+    },
   },
   position: {
     cssNames: ['position'],
@@ -174,217 +180,217 @@ export const doxStyles = {
   },
   top: {
     cssNames: ['top'],
-    values1: { values: sizes, formatValue: ValueFormatters.rem },
+    values1: { values: Values.sizes, formatValue: DoxStylesFormatters.Value.rem },
     values2: { values: [] as const },
     values3: { values: [] as const },
   },
   right: {
     cssNames: ['right'],
-    values1: { values: sizes, formatValue: ValueFormatters.rem },
+    values1: { values: Values.sizes, formatValue: DoxStylesFormatters.Value.rem },
     values2: { values: [] as const },
     values3: { values: [] as const },
   },
   bottom: {
     cssNames: ['bottom'],
-    values1: { values: sizes, formatValue: ValueFormatters.rem },
+    values1: { values: Values.sizes, formatValue: DoxStylesFormatters.Value.rem },
     values2: { values: [] as const },
     values3: { values: [] as const },
   },
   left: {
     cssNames: ['left'],
-    values1: { values: sizes, formatValue: ValueFormatters.rem },
+    values1: { values: Values.sizes, formatValue: DoxStylesFormatters.Value.rem },
     values2: { values: [] as const },
     values3: { values: [] as const },
   },
   inset: {
     cssNames: ['inset'],
-    values1: { values: sizes, formatValue: ValueFormatters.rem },
+    values1: { values: Values.sizes, formatValue: DoxStylesFormatters.Value.rem },
     values2: { values: [] as const },
     values3: { values: [] as const },
   },
   margin: {
     cssNames: ['margin'],
-    values1: { values: sizes, formatValue: ValueFormatters.rem },
+    values1: { values: Values.sizes, formatValue: DoxStylesFormatters.Value.rem },
     values2: { values: ['auto'] as const },
     values3: { values: [] as const },
   },
   marginHorizontal: {
     cssNames: ['margin-inline'],
-    values1: { values: sizes, formatValue: ValueFormatters.rem },
+    values1: { values: Values.sizes, formatValue: DoxStylesFormatters.Value.rem },
     values2: { values: ['auto'] as const },
     values3: { values: [] as const },
   },
   marginVertical: {
     cssNames: ['margin-block'],
-    values1: { values: sizes, formatValue: ValueFormatters.rem },
+    values1: { values: Values.sizes, formatValue: DoxStylesFormatters.Value.rem },
     values2: { values: ['auto'] as const },
     values3: { values: [] as const },
   },
   marginTop: {
     cssNames: ['margin-top'],
-    values1: { values: sizes, formatValue: ValueFormatters.rem },
+    values1: { values: Values.sizes, formatValue: DoxStylesFormatters.Value.rem },
     values2: { values: ['auto'] as const },
     values3: { values: [] as const },
   },
   marginRight: {
     cssNames: ['margin-right'],
-    values1: { values: sizes, formatValue: ValueFormatters.rem },
+    values1: { values: Values.sizes, formatValue: DoxStylesFormatters.Value.rem },
     values2: { values: ['auto'] as const },
     values3: { values: [] as const },
   },
   marginBottom: {
     cssNames: ['margin-bottom'],
-    values1: { values: sizes, formatValue: ValueFormatters.rem },
+    values1: { values: Values.sizes, formatValue: DoxStylesFormatters.Value.rem },
     values2: { values: ['auto'] as const },
     values3: { values: [] as const },
   },
   marginLeft: {
     cssNames: ['margin-left'],
-    values1: { values: sizes, formatValue: ValueFormatters.rem },
+    values1: { values: Values.sizes, formatValue: DoxStylesFormatters.Value.rem },
     values2: { values: ['auto'] as const },
     values3: { values: [] as const },
   },
   padding: {
     cssNames: ['padding'],
-    values1: { values: sizes, formatValue: ValueFormatters.rem },
+    values1: { values: Values.sizes, formatValue: DoxStylesFormatters.Value.rem },
     values2: { values: [] as const },
     values3: { values: [] as const },
   },
   paddingHorizontal: {
     cssNames: ['padding-inline'],
-    values1: { values: sizes, formatValue: ValueFormatters.rem },
+    values1: { values: Values.sizes, formatValue: DoxStylesFormatters.Value.rem },
     values2: { values: [] as const },
     values3: { values: [] as const },
   },
   paddingVertical: {
     cssNames: ['padding-block'],
-    values1: { values: sizes, formatValue: ValueFormatters.rem },
+    values1: { values: Values.sizes, formatValue: DoxStylesFormatters.Value.rem },
     values2: { values: [] as const },
     values3: { values: [] as const },
   },
   paddingTop: {
     cssNames: ['padding-top'],
-    values1: { values: sizes, formatValue: ValueFormatters.rem },
+    values1: { values: Values.sizes, formatValue: DoxStylesFormatters.Value.rem },
     values2: { values: [] as const },
     values3: { values: [] as const },
   },
   paddingRight: {
     cssNames: ['padding-right'],
-    values1: { values: sizes, formatValue: ValueFormatters.rem },
+    values1: { values: Values.sizes, formatValue: DoxStylesFormatters.Value.rem },
     values2: { values: [] as const },
     values3: { values: [] as const },
   },
   paddingBottom: {
     cssNames: ['padding-bottom'],
-    values1: { values: sizes, formatValue: ValueFormatters.rem },
+    values1: { values: Values.sizes, formatValue: DoxStylesFormatters.Value.rem },
     values2: { values: [] as const },
     values3: { values: [] as const },
   },
   paddingLeft: {
     cssNames: ['padding-left'],
-    values1: { values: sizes, formatValue: ValueFormatters.rem },
+    values1: { values: Values.sizes, formatValue: DoxStylesFormatters.Value.rem },
     values2: { values: [] as const },
     values3: { values: [] as const },
   },
   border: {
     cssNames: ['border-width'],
-    values1: { values: positiveSizes, formatValue: ValueFormatters.px },
+    values1: { values: Values.positiveSizes, formatValue: DoxStylesFormatters.Value.px },
     values2: { values: [] as const },
     values3: { values: [] as const },
   },
   borderHorizontal: {
     cssNames: ['border-inline-width'],
-    values1: { values: sizes, formatValue: ValueFormatters.px },
+    values1: { values: Values.sizes, formatValue: DoxStylesFormatters.Value.px },
     values2: { values: [] as const },
     values3: { values: [] as const },
   },
   borderVertical: {
     cssNames: ['border-block-width'],
-    values1: { values: sizes, formatValue: ValueFormatters.px },
+    values1: { values: Values.sizes, formatValue: DoxStylesFormatters.Value.px },
     values2: { values: [] as const },
     values3: { values: [] as const },
   },
   borderTop: {
     cssNames: ['border-top-width'],
-    values1: { values: sizes, formatValue: ValueFormatters.px },
+    values1: { values: Values.sizes, formatValue: DoxStylesFormatters.Value.px },
     values2: { values: [] as const },
     values3: { values: [] as const },
   },
   borderRight: {
     cssNames: ['border-right-width'],
-    values1: { values: sizes, formatValue: ValueFormatters.px },
+    values1: { values: Values.sizes, formatValue: DoxStylesFormatters.Value.px },
     values2: { values: [] as const },
     values3: { values: [] as const },
   },
   borderBottom: {
     cssNames: ['border-bottom-width'],
-    values1: { values: sizes, formatValue: ValueFormatters.px },
+    values1: { values: Values.sizes, formatValue: DoxStylesFormatters.Value.px },
     values2: { values: [] as const },
     values3: { values: [] as const },
   },
   borderLeft: {
     cssNames: ['border-left-width'],
-    values1: { values: sizes, formatValue: ValueFormatters.px },
+    values1: { values: Values.sizes, formatValue: DoxStylesFormatters.Value.px },
     values2: { values: [] as const },
     values3: { values: [] as const },
   },
   borderStyle: {
     cssNames: ['border-style'],
-    values1: { values: borderAndOutlineStyles },
+    values1: { values: Values.borderAndOutlineStyles },
     values2: { values: [] as const },
     values3: { values: [] as const },
   },
   borderRadius: {
     cssNames: ['border-radius'],
-    values1: { values: positiveSizes, formatValue: ValueFormatters.rem },
+    values1: { values: Values.positiveSizes, formatValue: DoxStylesFormatters.Value.rem },
     values2: { values: [] as const },
     values3: { values: [] as const },
   },
   borderRadiusTop: {
     cssNames: ['border-top-left-radius', 'border-top-right-radius'],
-    values1: { values: positiveSizes, formatValue: ValueFormatters.rem },
+    values1: { values: Values.positiveSizes, formatValue: DoxStylesFormatters.Value.rem },
     values2: { values: [] as const },
     values3: { values: [] as const },
   },
   borderRadiusRight: {
     cssNames: ['border-top-right-radius', 'border-bottom-right-radius'],
-    values1: { values: positiveSizes, formatValue: ValueFormatters.rem },
+    values1: { values: Values.positiveSizes, formatValue: DoxStylesFormatters.Value.rem },
     values2: { values: [] as const },
     values3: { values: [] as const },
   },
   borderRadiusBottom: {
     cssNames: ['border-bottom-left-radius', 'border-bottom-right-radius'],
-    values1: { values: positiveSizes, formatValue: ValueFormatters.rem },
+    values1: { values: Values.positiveSizes, formatValue: DoxStylesFormatters.Value.rem },
     values2: { values: [] as const },
     values3: { values: [] as const },
   },
   borderRadiusLeft: {
     cssNames: ['border-top-left-radius', 'border-bottom-left-radius'],
-    values1: { values: positiveSizes, formatValue: ValueFormatters.rem },
+    values1: { values: Values.positiveSizes, formatValue: DoxStylesFormatters.Value.rem },
     values2: { values: [] as const },
     values3: { values: [] as const },
   },
   borderRadiusTopLeft: {
     cssNames: ['border-top-left-radius'],
-    values1: { values: positiveSizes, formatValue: ValueFormatters.rem },
+    values1: { values: Values.positiveSizes, formatValue: DoxStylesFormatters.Value.rem },
     values2: { values: [] as const },
     values3: { values: [] as const },
   },
   borderRadiusTopRight: {
     cssNames: ['border-top-right-radius'],
-    values1: { values: positiveSizes, formatValue: ValueFormatters.rem },
+    values1: { values: Values.positiveSizes, formatValue: DoxStylesFormatters.Value.rem },
     values2: { values: [] as const },
     values3: { values: [] as const },
   },
   borderRadiusBottomLeft: {
     cssNames: ['border-bottom-left-radius'],
-    values1: { values: positiveSizes, formatValue: ValueFormatters.rem },
+    values1: { values: Values.positiveSizes, formatValue: DoxStylesFormatters.Value.rem },
     values2: { values: [] as const },
     values3: { values: [] as const },
   },
   borderRadiusBottomRight: {
     cssNames: ['border-bottom-right-radius'],
-    values1: { values: positiveSizes, formatValue: ValueFormatters.rem },
+    values1: { values: Values.positiveSizes, formatValue: DoxStylesFormatters.Value.rem },
     values2: { values: [] as const },
     values3: { values: [] as const },
   },
@@ -443,19 +449,19 @@ export const doxStyles = {
   },
   overflow: {
     cssNames: ['overflow'],
-    values1: { values: overflows },
+    values1: { values: Values.overflows },
     values2: { values: [] as const },
     values3: { values: [] as const },
   },
   overflowX: {
     cssNames: ['overflow-x'],
-    values1: { values: overflows },
+    values1: { values: Values.overflows },
     values2: { values: [] as const },
     values3: { values: [] as const },
   },
   overflowY: {
     cssNames: ['overflow-y'],
-    values1: { values: overflows },
+    values1: { values: Values.overflows },
     values2: { values: [] as const },
     values3: { values: [] as const },
   },
@@ -467,7 +473,7 @@ export const doxStyles = {
   },
   fontSize: {
     cssNames: ['font-size'],
-    values1: { values: positiveSizes, formatValue: ValueFormatters.px },
+    values1: { values: Values.positiveSizes, formatValue: DoxStylesFormatters.Value.px },
     values2: { values: ['inherit'] as const },
     values3: { values: [] as const },
   },
@@ -485,13 +491,13 @@ export const doxStyles = {
   },
   letterSpacing: {
     cssNames: ['letter-spacing'],
-    values1: { values: positiveSizes, formatValue: ValueFormatters.px },
+    values1: { values: Values.positiveSizes, formatValue: DoxStylesFormatters.Value.px },
     values2: { values: [] as const },
     values3: { values: [] as const },
   },
   lineHeight: {
     cssNames: ['line-height'],
-    values1: { values: positiveSizes, formatValue: ValueFormatters.px },
+    values1: { values: Values.positiveSizes, formatValue: DoxStylesFormatters.Value.px },
     values2: { values: ['font-size'] as const, formatValue: () => '1' },
     values3: { values: [] as const },
   },
@@ -580,91 +586,91 @@ export const doxStyles = {
   },
   gap: {
     cssNames: ['gap'],
-    values1: { values: positiveSizes, formatValue: ValueFormatters.rem },
+    values1: { values: Values.positiveSizes, formatValue: DoxStylesFormatters.Value.rem },
     values2: { values: [] as const },
     values3: { values: [] as const },
   },
   rowGap: {
     cssNames: ['row-gap'],
-    values1: { values: positiveSizes, formatValue: ValueFormatters.rem },
+    values1: { values: Values.positiveSizes, formatValue: DoxStylesFormatters.Value.rem },
     values2: { values: [] as const },
     values3: { values: [] as const },
   },
   columnGap: {
     cssNames: ['column-gap'],
-    values1: { values: positiveSizes, formatValue: ValueFormatters.rem },
+    values1: { values: Values.positiveSizes, formatValue: DoxStylesFormatters.Value.rem },
     values2: { values: [] as const },
     values3: { values: [] as const },
   },
   order: {
     cssNames: ['order'],
-    values1: { values: positiveSizes },
+    values1: { values: Values.positiveSizes },
     values2: { values: [] as const },
     values3: { values: [] as const },
   },
   flexGrow: {
     cssNames: ['flex-grow'],
-    values1: { values: positiveSizes },
+    values1: { values: Values.positiveSizes },
     values2: { values: [] as const },
     values3: { values: [] as const },
   },
   flexShrink: {
     cssNames: ['flex-shrink'],
-    values1: { values: positiveSizes },
+    values1: { values: Values.positiveSizes },
     values2: { values: [] as const },
     values3: { values: [] as const },
   },
   alignSelf: {
     cssNames: ['align-self'],
-    values1: { values: ['auto', 'flex-start', 'flex-end', 'center', 'baseline', 'stretch'] as const },
+    values1: { values: Values.alignSelf },
     values2: { values: [] as const },
     values3: { values: [] as const },
   },
   justifySelf: {
     cssNames: ['justify-self'],
-    values1: { values: ['auto', 'flex-start', 'flex-end', 'center', 'baseline', 'stretch'] as const },
+    values1: { values: Values.alignSelf },
     values2: { values: [] as const },
     values3: { values: [] as const },
   },
   gridColumns: {
     cssNames: ['grid-template-columns'],
-    values1: { values: positiveSizes, formatValue: (key, value) => `repeat(${value},minmax(0,1fr))` },
+    values1: { values: Values.positiveSizes, formatValue: DoxStylesFormatters.Value.gridColumns },
     values2: { values: [] as const },
     values3: { values: [] as const },
   },
   colSpan: {
     cssNames: ['grid-column'],
-    values1: { values: positiveSizes, formatValue: (key, value) => `span ${value}/span ${value}` },
-    values2: { values: ['full-row'] as const, formatValue: (key, value) => '1/-1' },
+    values1: { values: Values.positiveSizes, formatValue: DoxStylesFormatters.Value.gridColumn },
+    values2: { values: ['full-row'] as const, formatValue: DoxStylesFormatters.Value.gridColumn },
     values3: { values: [] as const },
   },
   colStart: {
     cssNames: ['grid-column-start'],
-    values1: { values: positiveSizes, formatValue: (key, value) => `${value}` },
+    values1: { values: Values.positiveSizes },
     values2: { values: [] as const },
     values3: { values: [] as const },
   },
   colEnd: {
     cssNames: ['grid-column-end'],
-    values1: { values: positiveSizes, formatValue: (key, value) => `${value}` },
+    values1: { values: Values.positiveSizes },
     values2: { values: [] as const },
     values3: { values: [] as const },
   },
   outline: {
     cssNames: ['outline-width'],
-    values1: { values: positiveSizes, formatValue: ValueFormatters.px },
+    values1: { values: Values.positiveSizes, formatValue: DoxStylesFormatters.Value.px },
     values2: { values: [] as const },
     values3: { values: [] as const },
   },
   outlineStyle: {
     cssNames: ['outline-style'],
-    values1: { values: borderAndOutlineStyles },
+    values1: { values: Values.borderAndOutlineStyles },
     values2: { values: [] as const },
     values3: { values: [] as const },
   },
   outlineOffset: {
     cssNames: ['outline-offset'],
-    values1: { values: positiveSizes, formatValue: ValueFormatters.px },
+    values1: { values: Values.positiveSizes, formatValue: DoxStylesFormatters.Value.px },
     values2: { values: [] as const },
     values3: { values: [] as const },
   },
@@ -678,7 +684,7 @@ export const doxStyles = {
     cssNames: ['transition-duration'],
     values1: {
       values: [50, 100, 150, 200, 250, 300, 350, 400, 450, 500, 550, 600, 650, 700, 750, 800, 850, 900, 950, 1000] as const,
-      formatValue: (_key, value) => `${value}ms`,
+      formatValue: DoxStylesFormatters.Value.ms,
     },
     values2: { values: [] as const },
     values3: { values: [] as const },
@@ -773,8 +779,14 @@ type Styles<T extends Record<string, StyleItem>> = {
 export type StyleKey = keyof typeof doxStyles;
 export type AliasKey = keyof typeof aliases;
 export type ThemeKey = keyof typeof themeStyles;
+
 type DoxNormalStyles = Styles<typeof doxStyles> & Styles<typeof aliases> & ThemeComponentProps;
+interface DoxPseudoClasses {
+  hover?: boolean;
+  focus?: boolean;
+}
 export type DoxStyleProps = DoxNormalStyles &
+  DoxPseudoClasses &
   Hovered<DoxNormalStyles> &
   Focused<DoxNormalStyles> &
   Activated<DoxNormalStyles> &

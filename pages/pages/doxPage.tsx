@@ -32,8 +32,8 @@ export default function DoxPage() {
       >
         test2
       </Dox>
-      <Dox bgColor="violet" p={3} component="test">
-        <Dox bgColorH="violetLighter" p={4}>
+      <Dox bgColor="violet" p={3} component="test" hover focus>
+        <Dox bgColorH="violetLighter" p={4} bgColorF="red">
           <Dox tag="input" p={2} border={1} borderRadius={2} bgColorF="violet" />
         </Dox>
       </Dox>
