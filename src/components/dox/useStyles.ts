@@ -3,12 +3,12 @@ import { AliasKey, DoxStyleProps, StyleKey, aliases } from './doxStyles';
 import { StylesContext } from './stylesContext';
 import { useTheme } from '../../theme';
 
-export default function useStyles(props: DoxStyleProps) {
+export default function useStyles(props: DoxStyleProps, isSvg: boolean) {
   const themeProps = useTheme(props) as DoxStyleProps;
   useLayoutEffect(StylesContext.flush, [props]);
 
   return useMemo(() => {
-    const classNames: (string | undefined)[] = [StylesContext.doxClassName];
+    const classNames: (string | undefined)[] = [isSvg ? StylesContext.svgClassName : StylesContext.doxClassName];
     const propsToUse = themeProps ? { ...replaceAliases(themeProps), ...replaceAliases(props) } : replaceAliases(props);
 
     Object.entries(propsToUse).forEach(([key, value]) => {

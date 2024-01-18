@@ -1,13 +1,4 @@
-import {
-  doxStyles,
-  pseudoClassStyles,
-  PseudoClassSuffix,
-  PseudoClassType,
-  StyleItem,
-  StyleKey,
-  StyleValues,
-  themeStyles,
-} from './doxStyles';
+import { doxStyles, pseudoClassStyles, PseudoClassSuffix, PseudoClassType, StyleItem, StyleKey, StyleValues, svgStyles } from './doxStyles';
 import IdentityFactory from '@cronocode/identity-factory';
 
 export namespace StylesContext {
@@ -18,11 +9,11 @@ html{font-size: 16px;font-family: Arial, sans-serif;}
 body{margin: 0;line-height: var(--lineHeight);font-size: var(--fontSize);}
 a,ul{all: unset;}
 .${doxClassName}{display: block;border: 0 solid var(--borderColor);outline: 0px solid var(--outlineColor);margin: 0;padding: 0;background-color: initial;transition: all var(--transitionTime);box-sizing: border-box;font-family: inherit;font-size: inherit;}
-.${svgClassName}{width: 1.5rem;transition: all var(--svgTransitionTime);path,circle,rect,line {transition: all var(--svgTransitionTime);}}
+.${svgClassName}{width: 1.5rem;transition: all var(--svgTransitionTime);}.${svgClassName} path,.${svgClassName} circle,.${svgClassName} rect,.${svgClassName} line {transition: all var(--svgTransitionTime);}
 `;
   const identity = new IdentityFactory();
 
-  const propKeys = [...Object.keys(doxStyles), ...Object.keys(themeStyles)] as StyleKey[];
+  const propKeys = Object.keys(doxStyles) as StyleKey[];
   const el = getElement();
 
   let requireFlush = false;
@@ -40,6 +31,10 @@ a,ul{all: unset;}
 
     if (key in pseudoClassStyles) {
       return pseudoClassStyles[key as PseudoClassType].className;
+    }
+
+    if (key in svgStyles) {
+      return getClassName(key as StyleKey, value);
     }
   }
 
@@ -75,21 +70,39 @@ a,ul{all: unset;}
       .filter(([key]) => (doxStyles[key as StyleKey] as StyleItem)?.pseudoSuffix === pseudoSuffix)
       .reduce((acc, [key, values]) => {
         values.forEach((value) => {
-          let className = getClassName(key as StyleKey, value);
-          if (pseudoSuffix === 'H') className = `${className}:hover,.${pseudoClassStyles.hover.className}:hover>.${className}`;
-          if (pseudoSuffix === 'F')
-            className = `${className}:focus-within,.${pseudoClassStyles.focus.className}:focus-within>.${className}`;
-          if (pseudoSuffix === 'A') className = `${className}:active`;
-
           const valueItem: StyleValues = getValueItem(key as StyleKey, value);
+
+          const selector = `.${getClassName(key as StyleKey, value)}`;
+          let selectors: string[] = [];
+
+          if (!pseudoSuffix) {
+            selectors = formatSelector(selector, valueItem);
+          } else if (pseudoSuffix === 'H') {
+            selectors = [
+              ...formatSelector(`${selector}:hover`, valueItem),
+              ...formatSelector(`.${pseudoClassStyles.hover.className}:hover>${selector}`, valueItem),
+            ];
+          } else if (pseudoSuffix === 'F') {
+            selectors = [
+              ...formatSelector(`${selector}:focus-within`, valueItem),
+              ...formatSelector(`.${pseudoClassStyles.focus.className}:focus-within>${selector}`, valueItem),
+            ];
+          } else if (pseudoSuffix === 'A') {
+            selectors = formatSelector(`${selector}:active`, valueItem);
+          }
+
           const cssValue = valueItem.formatValue?.(key as StyleKey, value) ?? value;
           const cssNames = (doxStyles[key as StyleKey] as StyleItem).cssNames;
           const styles = cssNames.map((cssName) => `${cssName}:${cssValue};`).join('');
 
-          acc.push(`.${className}{${styles}}`);
+          acc.push(`${selectors.join(',')}{${styles}}`);
         });
         return acc;
       }, classes);
+
+    function formatSelector(selector: string, valueItem: StyleValues) {
+      return valueItem.formatSelector ? valueItem.formatSelector(selector) : [selector];
+    }
   }
 
   function getValueItem(key: StyleKey, value: string | number | boolean): StyleValues {

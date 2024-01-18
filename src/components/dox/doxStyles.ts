@@ -5,12 +5,15 @@ import { DoxStylesFormatters } from './doxStylesFormatters';
 export interface StyleValues {
   values: Readonly<Array<string | number | boolean>>;
   formatClassName?: (key: string, value: string | number | boolean) => string;
+  formatSelector?: (selector: string) => string[];
   formatValue?: (key: string, value: string | number | boolean) => string;
 }
 
 export interface ThemeItem {
   cssNames: string[];
-  formatValue: (key: string, value: string | number | boolean) => string;
+  formatClassName?: (key: string, value: string | number | boolean) => string;
+  formatSelector?: (selector: string) => string[];
+  formatValue?: (key: string, value: string | number | boolean) => string;
 }
 
 export const pseudoClassSuffixes = ['H', 'F', 'A'] as const;
@@ -23,7 +26,6 @@ export interface StyleItem {
   values3: StyleValues;
   pseudoSuffix?: PseudoClassSuffix;
   isThemeStyle?: boolean;
-  isPseudoClass?: boolean;
 }
 
 namespace Values {
@@ -81,13 +83,26 @@ namespace Values {
   export const alignSelf = ['auto', 'flex-start', 'flex-end', 'center', 'baseline', 'stretch'] as const;
 }
 
-export const themeStyles = {
+export const doxThemeStyles = {
   shadow: { cssNames: ['box-shadow'], formatValue: DoxStylesFormatters.Value.variables('shadow') },
   background: { cssNames: ['background'], formatValue: DoxStylesFormatters.Value.variables('background') },
   color: { cssNames: ['color'], formatValue: DoxStylesFormatters.Value.variables('color') },
   bgColor: { cssNames: ['background-color'], formatValue: DoxStylesFormatters.Value.variables('color') },
   borderColor: { cssNames: ['border-color'], formatValue: DoxStylesFormatters.Value.variables('color') },
   outlineColor: { cssNames: ['outline-color'], formatValue: DoxStylesFormatters.Value.variables('color') },
+} satisfies Record<string, ThemeItem>;
+
+export const svgThemeStyles = {
+  fill: {
+    cssNames: ['fill'],
+    formatValue: DoxStylesFormatters.Value.svgVariables('color'),
+    formatSelector: DoxStylesFormatters.ClassName.svg,
+  },
+  stroke: {
+    cssNames: ['stroke'],
+    formatValue: DoxStylesFormatters.Value.svgVariables('color'),
+    formatSelector: DoxStylesFormatters.ClassName.svg,
+  },
 } satisfies Record<string, ThemeItem>;
 
 export interface PseudoClassStyleType {
@@ -119,7 +134,7 @@ export const doxStyles = {
     values3: {
       values: Values.widthHeightFractions,
       formatValue: DoxStylesFormatters.Value.fraction,
-      formatClassName: DoxStylesFormatters.ClassName.fraction,
+      // formatClassName: DoxStylesFormatters.ClassName.fraction,
     },
   },
   minWidth: {
@@ -129,7 +144,7 @@ export const doxStyles = {
     values3: {
       values: Values.widthHeightFractions,
       formatValue: DoxStylesFormatters.Value.fraction,
-      formatClassName: DoxStylesFormatters.ClassName.fraction,
+      // formatClassName: DoxStylesFormatters.ClassName.fraction,
     },
   },
   maxWidth: {
@@ -139,7 +154,7 @@ export const doxStyles = {
     values3: {
       values: Values.widthHeightFractions,
       formatValue: DoxStylesFormatters.Value.fraction,
-      formatClassName: DoxStylesFormatters.ClassName.fraction,
+      // formatClassName: DoxStylesFormatters.ClassName.fraction,
     },
   },
   height: {
@@ -149,7 +164,7 @@ export const doxStyles = {
     values3: {
       values: Values.widthHeightFractions,
       formatValue: DoxStylesFormatters.Value.fraction,
-      formatClassName: DoxStylesFormatters.ClassName.fraction,
+      // formatClassName: DoxStylesFormatters.ClassName.fraction,
     },
   },
   minHeight: {
@@ -159,7 +174,7 @@ export const doxStyles = {
     values3: {
       values: Values.widthHeightFractions,
       formatValue: DoxStylesFormatters.Value.fraction,
-      formatClassName: DoxStylesFormatters.ClassName.fraction,
+      // formatClassName: DoxStylesFormatters.ClassName.fraction,
     },
   },
   maxHeight: {
@@ -169,7 +184,7 @@ export const doxStyles = {
     values3: {
       values: Values.widthHeightFractions,
       formatValue: DoxStylesFormatters.Value.fraction,
-      formatClassName: DoxStylesFormatters.ClassName.fraction,
+      // formatClassName: DoxStylesFormatters.ClassName.fraction,
     },
   },
   position: {
@@ -721,14 +736,42 @@ export const doxStyles = {
   },
 } satisfies Record<string, StyleItem>;
 
-Object.keys(themeStyles).forEach((key) => {
+export const svgStyles = {
+  rotate: {
+    cssNames: ['rotate'],
+    values1: { values: [0, 90, 180, 270, -90, -180, -270] as const, formatValue: DoxStylesFormatters.Value.rotate },
+    values2: { values: [] as const },
+    values3: { values: [] as const },
+  },
+  flip: {
+    cssNames: ['scale'],
+    values1: { values: ['xAxis', 'yAxis'] as const, formatValue: DoxStylesFormatters.Value.flip },
+    values2: { values: [] as const },
+    values3: { values: [] as const },
+  },
+} satisfies Record<string, StyleItem>;
+
+Object.keys(svgStyles).forEach((key) => {
   // @ts-ignore
-  doxStyles[key as StyleKey] = themeStyles[key as ThemeKey];
+  doxStyles[key] = svgStyles[key];
+});
+
+Object.keys(doxThemeStyles).forEach((key) => {
+  // @ts-ignore
+  doxStyles[key as StyleKey] = doxThemeStyles[key];
+  (doxStyles[key as StyleKey] as StyleItem).isThemeStyle = true;
+});
+
+Object.keys(svgThemeStyles).forEach((key) => {
+  // @ts-ignore
+  doxStyles[key as StyleKey] = svgThemeStyles[key];
   (doxStyles[key as StyleKey] as StyleItem).isThemeStyle = true;
 });
 
 type AliasType = { key: StyleKey };
 export const aliases = {
+  w: { ...doxStyles.width, key: 'width' },
+  h: { ...doxStyles.height, key: 'height' },
   m: { ...doxStyles.margin, key: 'margin' },
   mx: { ...doxStyles.marginHorizontal, key: 'marginHorizontal' },
   my: { ...doxStyles.marginVertical, key: 'marginVertical' },
@@ -778,7 +821,6 @@ type Styles<T extends Record<string, StyleItem>> = {
 
 export type StyleKey = keyof typeof doxStyles;
 export type AliasKey = keyof typeof aliases;
-export type ThemeKey = keyof typeof themeStyles;
 
 type DoxNormalStyles = Styles<typeof doxStyles> & Styles<typeof aliases> & ThemeComponentProps;
 interface DoxPseudoClasses {
@@ -791,3 +833,10 @@ export type DoxStyleProps = DoxNormalStyles &
   Focused<DoxNormalStyles> &
   Activated<DoxNormalStyles> &
   Augmented.BoxProps;
+
+type SvgNormalStyles = Styles<typeof svgStyles> & ThemeComponentProps;
+export type DoxSvgStyles = SvgNormalStyles &
+  Hovered<SvgNormalStyles> &
+  Focused<SvgNormalStyles> &
+  Activated<SvgNormalStyles> &
+  Augmented.SvgProps;

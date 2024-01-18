@@ -3,10 +3,10 @@ import ClassNameUtils from '../utils/className/classNameUtils';
 import { DoxStyleProps } from './dox/doxStyles';
 import useStyles from './dox/useStyles';
 
-type AllProps<TTag extends keyof React.ReactHTML> = React.ComponentProps<TTag>;
-type TagPropsType<TTag extends keyof React.ReactHTML> = Omit<AllProps<TTag>, 'className' | 'style' | 'ref'>;
+type AllProps<TTag extends keyof JSX.IntrinsicElements> = React.ComponentProps<TTag>;
+type TagPropsType<TTag extends keyof JSX.IntrinsicElements> = Omit<AllProps<TTag>, 'className' | 'style' | 'ref'>;
 
-interface Props<TTag extends keyof React.ReactHTML> extends DoxStyleProps {
+interface Props<TTag extends keyof JSX.IntrinsicElements> extends DoxStyleProps {
   children?: React.ReactNode | ((props: { isHover: boolean }) => React.ReactNode);
   tag?: TTag;
   props?: TagPropsType<TTag>;
@@ -14,10 +14,10 @@ interface Props<TTag extends keyof React.ReactHTML> extends DoxStyleProps {
   style?: React.ComponentProps<TTag>['style'];
 }
 
-function Dox<TTag extends keyof React.ReactHTML = 'div'>(props: Props<TTag>, ref: Ref<HTMLElement>) {
+function Dox<TTag extends keyof JSX.IntrinsicElements = 'div'>(props: Props<TTag>, ref: Ref<HTMLElement>) {
   const { tag, children, props: tagProps, className: userClassName, style } = props;
 
-  const styleClasses = useStyles(props);
+  const styleClasses = useStyles(props, tag === 'svg');
   const className = useMemo(() => {
     const classNames = ClassNameUtils.classNames(userClassName, styleClasses);
 
@@ -38,4 +38,4 @@ function Dox<TTag extends keyof React.ReactHTML = 'div'>(props: Props<TTag>, ref
   return React.createElement(tag || 'div', finalTagProps, needsHoverState ? children({ isHover }) : children);
 }
 
-export default forwardRef(Dox) as <TTag extends keyof React.ReactHTML = 'div'>(props: Props<TTag>) => JSX.Element;
+export default forwardRef(Dox) as <TTag extends keyof JSX.IntrinsicElements = 'div'>(props: Props<TTag>) => JSX.Element;

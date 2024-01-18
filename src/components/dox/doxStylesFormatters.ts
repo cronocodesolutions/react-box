@@ -3,6 +3,10 @@ export namespace DoxStylesFormatters {
     export function fraction(key: string, value: string | number | boolean) {
       return `${key}${(value as string).replace('/', '-')}`;
     }
+
+    export function svg(selector: string) {
+      return [`${selector} path`, `${selector} circle`, `${selector} rect`, `${selector} line`];
+    }
   }
 
   export namespace Value {
@@ -29,6 +33,9 @@ export namespace DoxStylesFormatters {
     export function variables(prefix: string) {
       return (key: string, value: string | number | boolean) => `var(--${prefix}${value});`;
     }
+    export function svgVariables(prefix: string) {
+      return (key: string, value: string | number | boolean) => `var(--${prefix}${value});`;
+    }
     export function gridColumns(key: string, value: string | number | boolean) {
       return `repeat(${value},minmax(0,1fr))`;
     }
@@ -41,6 +48,12 @@ export namespace DoxStylesFormatters {
     }
     export function ms(key: string, value: string | number | boolean) {
       return `${value}ms`;
+    }
+    export function rotate(key: string, value: string | number | boolean) {
+      return `${value}deg`;
+    }
+    export function flip(key: string, value: string | number | boolean) {
+      return value === 'xAxis' ? '-1 1' : '1 -1';
     }
   }
 }
