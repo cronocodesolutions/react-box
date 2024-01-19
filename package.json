@@ -1,6 +1,6 @@
 {
   "name": "@cronocode/react-box",
-  "version": "1.6.7",
+  "version": "1.6.8",
   "main": "./box.cjs",
   "module": "./box.mjs",
   "types": "./box.d.ts",
@@ -59,26 +59,26 @@
     "@cronocode/identity-factory": "^0.0.6"
   },
   "devDependencies": {
-    "@rollup/pluginutils": "^5.0.2",
-    "@types/node": "^18.15.7",
-    "@types/postcss-mixins": "^9.0.0",
+    "@rollup/pluginutils": "^5.1.0",
+    "@types/node": "^20.11.5",
+    "@types/postcss-mixins": "^9.0.5",
     "@types/prismjs": "^1.26.3",
-    "@types/react": "^18.0.27",
-    "@types/react-dom": "^18.0.10",
-    "@vitejs/plugin-react": "^3.1.0",
-    "autoprefixer": "^10.4.14",
-    "postcss": "^8.4.21",
+    "@types/react": "^18.2.48",
+    "@types/react-dom": "^18.2.18",
+    "@vitejs/plugin-react": "^4.2.1",
+    "autoprefixer": "^10.4.17",
+    "postcss": "^8.4.33",
     "postcss-each": "^1.1.0",
     "postcss-mixins": "^9.0.4",
     "postcss-nested": "^6.0.1",
     "postcss-simple-vars": "^7.0.1",
-    "prettier": "^2.8.7",
+    "prettier": "^3.2.4",
     "prismjs": "^1.29.0",
     "react": "^18.1.0",
     "react-dom": "^18.2.0",
-    "react-router-dom": "^6.16.0",
-    "typescript": "^5.0.2",
-    "vite": "^4.2.1",
-    "vite-plugin-dts": "^2.1.0"
+    "react-router-dom": "^6.21.3",
+    "typescript": "^5.3.3",
+    "vite": "^5.0.12",
+    "vite-plugin-dts": "^3.7.1"
   }
 }

@@ -4,10 +4,18 @@ import { DoxStyleProps } from './dox/doxStyles';
 import useStyles from './dox/useStyles';
 import { StylesContext } from './dox/stylesContext';
 
-type AllProps<TTag extends keyof JSX.IntrinsicElements> = React.ComponentProps<TTag>;
-type TagPropsType<TTag extends keyof JSX.IntrinsicElements> = Omit<AllProps<TTag>, 'className' | 'style' | 'ref'>;
+type ExtractElementType<T> = T extends React.DetailedHTMLProps<React.HTMLAttributes<infer E>, infer E>
+  ? E
+  : T extends React.SVGProps<infer E>
+  ? E
+  : never;
 
-interface Props<TTag extends keyof JSX.IntrinsicElements> extends DoxStyleProps {
+type ExtractElementFromTag<T extends keyof React.JSX.IntrinsicElements> = ExtractElementType<React.JSX.IntrinsicElements[T]>;
+
+type AllProps<TTag extends keyof React.JSX.IntrinsicElements> = React.ComponentProps<TTag>;
+type TagPropsType<TTag extends keyof React.JSX.IntrinsicElements> = Omit<AllProps<TTag>, 'className' | 'style' | 'ref'>;
+
+interface Props<TTag extends keyof React.JSX.IntrinsicElements> extends DoxStyleProps {
   children?: React.ReactNode | ((props: { isHover: boolean }) => React.ReactNode);
   tag?: TTag;
   props?: TagPropsType<TTag>;
@@ -15,7 +23,7 @@ interface Props<TTag extends keyof JSX.IntrinsicElements> extends DoxStyleProps 
   style?: React.ComponentProps<TTag>['style'];
 }
 
-function Dox<TTag extends keyof JSX.IntrinsicElements = 'div'>(props: Props<TTag>, ref: Ref<ExtractElementFromTag<TTag>>) {
+function Dox<TTag extends keyof React.JSX.IntrinsicElements = 'div'>(props: Props<TTag>, ref: Ref<ExtractElementFromTag<TTag>>) {
   const { tag = 'div', children, props: tagProps, className: userClassName, style } = props;
 
   const styleClasses = useStyles(props, tag === 'svg');
@@ -39,9 +47,9 @@ function Dox<TTag extends keyof JSX.IntrinsicElements = 'div'>(props: Props<TTag
   return React.createElement(tag, finalTagProps, needsHoverState ? children({ isHover }) : children);
 }
 
-export default forwardRef(Dox) as <TTag extends keyof JSX.IntrinsicElements = 'div'>(
+export default forwardRef(Dox) as <TTag extends keyof React.JSX.IntrinsicElements = 'div'>(
   props: Props<TTag> & RefAttributes<ExtractElementFromTag<TTag>>,
-) => JSX.Element;
+) => React.ReactNode;
 
 const { flush: flushStyles } = StylesContext;
 

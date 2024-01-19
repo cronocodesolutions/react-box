@@ -2,6 +2,18 @@ import { ThemeComponentProps } from '../../theme';
 import { Augmented } from '../../types';
 import { DoxStylesFormatters } from './doxStylesFormatters';
 
+type Hovered<T> = {
+  [K in keyof T as K extends string ? `${K}H` : never]: T[K];
+};
+
+type Focused<T> = {
+  [K in keyof T as K extends string ? `${K}F` : never]: T[K];
+};
+
+type Activated<T> = {
+  [K in keyof T as K extends string ? `${K}A` : never]: T[K];
+};
+
 export interface StyleValues {
   values: Readonly<Array<string | number | boolean>>;
   formatClassName?: (key: string, value: string | number | boolean) => string;
