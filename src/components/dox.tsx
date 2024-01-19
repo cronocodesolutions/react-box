@@ -1,4 +1,4 @@
-import React, { forwardRef, Ref, useMemo, useState } from 'react';
+import React, { forwardRef, Ref, RefAttributes, useMemo, useState } from 'react';
 import ClassNameUtils from '../utils/className/classNameUtils';
 import { DoxStyleProps } from './dox/doxStyles';
 import useStyles from './dox/useStyles';
@@ -14,8 +14,8 @@ interface Props<TTag extends keyof JSX.IntrinsicElements> extends DoxStyleProps 
   style?: React.ComponentProps<TTag>['style'];
 }
 
-function Dox<TTag extends keyof JSX.IntrinsicElements = 'div'>(props: Props<TTag>, ref: Ref<HTMLElement>) {
-  const { tag, children, props: tagProps, className: userClassName, style } = props;
+function Dox<TTag extends keyof JSX.IntrinsicElements = 'div'>(props: Props<TTag>, ref: Ref<ExtractElementFromTag<TTag>>) {
+  const { tag = 'div', children, props: tagProps, className: userClassName, style } = props;
 
   const styleClasses = useStyles(props, tag === 'svg');
   const className = useMemo(() => {
@@ -26,7 +26,7 @@ function Dox<TTag extends keyof JSX.IntrinsicElements = 'div'>(props: Props<TTag
 
   const finalTagProps = { ...tagProps, className } as AllProps<TTag>;
   style && (finalTagProps.style = style);
-  ref && (finalTagProps.ref = ref);
+  ref && (finalTagProps.ref = ref as React.RefObject<HTMLElement>);
 
   const [isHover, setIsHover] = useState(false);
   const needsHoverState = typeof children === 'function';
@@ -35,7 +35,9 @@ function Dox<TTag extends keyof JSX.IntrinsicElements = 'div'>(props: Props<TTag
     finalTagProps.onMouseLeave = () => setIsHover(false);
   }
 
-  return React.createElement(tag || 'div', finalTagProps, needsHoverState ? children({ isHover }) : children);
+  return React.createElement(tag, finalTagProps, needsHoverState ? children({ isHover }) : children);
 }
 
-export default forwardRef(Dox) as <TTag extends keyof JSX.IntrinsicElements = 'div'>(props: Props<TTag>) => JSX.Element;
+export default forwardRef(Dox) as <TTag extends keyof JSX.IntrinsicElements = 'div'>(
+  props: Props<TTag> & RefAttributes<ExtractElementFromTag<TTag>>,
+) => JSX.Element;
