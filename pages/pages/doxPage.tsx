@@ -2,6 +2,9 @@ import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import Dox from '../../src/components/dox';
 import DoxSvg from '../../src/components/doxSvg';
 import Button from '../../src/components/button';
+import Grid from '../../src/components/grid';
+import Box from '../../src/box';
+import Flex from '../../src/components/flex';
 
 type FontSizeType = React.ComponentProps<typeof Dox>['fontSize'];
 
@@ -16,6 +19,12 @@ export default function DoxPage() {
 
   return (
     <Dox w="2/3">
+      <Box inline>test</Box>
+      <Box inline>test2</Box>
+      <Flex>flex1</Flex>
+      <Flex inline>flex2</Flex>
+      <Grid>Grid1</Grid>
+      <Grid inline>Grid2</Grid>
       <Dox hover>
         <DoxSvg viewBox="0 0 16 16" className="test" rotateH={90} fill="violet" fillH="red" width="2rem" ref={ref}>
           <path

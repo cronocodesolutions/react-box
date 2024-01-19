@@ -2,6 +2,7 @@ import React, { forwardRef, Ref, RefAttributes, useMemo, useState } from 'react'
 import ClassNameUtils from '../utils/className/classNameUtils';
 import { DoxStyleProps } from './dox/doxStyles';
 import useStyles from './dox/useStyles';
+import { StylesContext } from './dox/stylesContext';
 
 type AllProps<TTag extends keyof JSX.IntrinsicElements> = React.ComponentProps<TTag>;
 type TagPropsType<TTag extends keyof JSX.IntrinsicElements> = Omit<AllProps<TTag>, 'className' | 'style' | 'ref'>;
@@ -41,3 +42,7 @@ function Dox<TTag extends keyof JSX.IntrinsicElements = 'div'>(props: Props<TTag
 export default forwardRef(Dox) as <TTag extends keyof JSX.IntrinsicElements = 'div'>(
   props: Props<TTag> & RefAttributes<ExtractElementFromTag<TTag>>,
 ) => JSX.Element;
+
+const { flush: flushStyles } = StylesContext;
+
+export { flushStyles };

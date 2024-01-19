@@ -1,11 +1,14 @@
-import { useLayoutEffect, useMemo } from 'react';
+import { useLayoutEffect, useEffect, useMemo } from 'react';
 import { AliasKey, DoxStyleProps, StyleKey, aliases } from './doxStyles';
 import { StylesContext } from './stylesContext';
 import { useTheme } from '../../theme';
 
+const isBrowser = typeof window !== 'undefined' && typeof window.document !== 'undefined';
+const useEff = isBrowser ? useLayoutEffect : useEffect;
+
 export default function useStyles(props: DoxStyleProps, isSvg: boolean) {
   const themeProps = useTheme(props) as DoxStyleProps;
-  useLayoutEffect(StylesContext.flush, [props]);
+  useEff(StylesContext.flush, [props]);
 
   return useMemo(() => {
     const classNames: (string | undefined)[] = [isSvg ? StylesContext.svgClassName : StylesContext.doxClassName];

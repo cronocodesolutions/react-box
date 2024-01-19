@@ -123,6 +123,9 @@ a,ul{all: unset;}
 
   function getElement() {
     const elId = 'crono-styles';
+    const isBrowser = typeof window !== 'undefined' && typeof window.document !== 'undefined';
+    const document = isBrowser ? window.document : global.document;
+
     let portalContainer = document.getElementById(elId);
 
     if (!portalContainer) {

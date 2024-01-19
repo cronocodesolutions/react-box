@@ -121,6 +121,12 @@ export const doxStyles = {
     values2: { values: [] as const },
     values3: { values: [] as const },
   },
+  inline: {
+    cssNames: ['display'],
+    values1: { values: [true] as const, formatValue: () => `inline-block` },
+    values2: { values: [] as const },
+    values3: { values: [] as const },
+  },
   boxSizing: {
     cssNames: ['box-sizing'],
     values1: { values: ['border-box', 'content-box'] as const },
