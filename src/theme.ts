@@ -25,10 +25,11 @@ export interface ThemeSetup {
   radioButton?: ThemeComponentStyles;
 }
 
+// IMPORTANT!!!  DO NOT USE INLINE PROP IN THESE DEFAULT VALUES
 const defaultTheme: ThemeSetup = {
   button: {
     styles: {
-      inline: true,
+      display: 'inline-block',
       p: 3,
       cursor: 'pointer',
       b: 1,
@@ -40,21 +41,21 @@ const defaultTheme: ThemeSetup = {
   },
   checkbox: {
     styles: {
-      inline: true,
+      display: 'inline-block',
       b: 1,
       p: 2,
     },
   },
   radioButton: {
     styles: {
-      inline: true,
+      display: 'inline-block',
       b: 1,
       p: 2,
     },
   },
   textbox: {
     styles: {
-      inline: true,
+      display: 'inline-block',
       b: 1,
       borderRadius: 1,
       p: 3,
@@ -62,7 +63,7 @@ const defaultTheme: ThemeSetup = {
   },
   textarea: {
     styles: {
-      inline: true,
+      display: 'inline-block',
       b: 1,
       borderRadius: 1,
     },

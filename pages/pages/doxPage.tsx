@@ -19,6 +19,7 @@ export default function DoxPage() {
 
   return (
     <Dox w="2/3">
+      <Button>Click</Button>
       <Box inline>test</Box>
       <Box inline>test2</Box>
       <Flex>flex1</Flex>

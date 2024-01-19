@@ -26,6 +26,7 @@ export const theme = {
 Theme.setup({
   button: {
     styles: {
+      display: 'inline-flex',
       padding: 3,
       color: 'white',
       bgColor: 'violet',
