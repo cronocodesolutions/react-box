@@ -84,54 +84,25 @@ export default defineConfig(({ mode }) => {
               return 'theme';
             }
 
+            if (id.includes('/plugins.ts')) {
+              return 'plugins';
+            }
+
             if (id.includes('/src/components/')) {
               const re = new RegExp('(.*)src/components/(.*)');
               const result = re.exec(id)[2];
 
               if (result.includes('/')) {
-                return result.split('/')[0];
+                return `components/${result.split('/')[0]}`;
               }
 
-              return result.split('.')[0];
-            }
-
-            if (id.includes('/plugins')) {
-              return 'plugins';
+              return `components/${result.split('.')[0]}`;
             }
 
             return 'utils';
           },
-
           chunkFileNames(chunkInfo) {
-            if (chunkInfo.name === 'index') {
-              return `[name].${extension}`;
-            }
-
-            if (chunkInfo.name === 'box') {
-              return `[name].${extension}`;
-            }
-
-            if (chunkInfo.name === 'box.module.css') {
-              return `[name].${extension}`;
-            }
-
-            if (chunkInfo.name === 'baseSvg.module.css') {
-              return `[name].${extension}`;
-            }
-
-            if (chunkInfo.name === 'theme') {
-              return `[name].${extension}`;
-            }
-
-            if (chunkInfo.name === 'utils') {
-              return `utils/[name].${extension}`;
-            }
-
-            if (chunkInfo.name === 'plugins') {
-              return `[name].${extension}`;
-            }
-
-            return `components/[name].${extension}`;
+            return `[name].${extension}`;
           },
         },
       },
