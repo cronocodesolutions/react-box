@@ -1,56 +1,32 @@
-// import React, { useState } from 'react';
-// import { themeSvgClasses, SvgStyles } from '../types';
-// import ClassNameUtils from '../utils/className/classNameUtils';
-// import classes from './baseSvg/baseSvg.module.css';
+import { forwardRef, Ref } from 'react';
+import Dox from './dox';
+import ClassNameUtils from '../utils/className/classNameUtils';
+import { DoxSvgStyles } from './dox/doxStyles';
 
-// type AllSvgProps = React.SVGProps<SVGElement>;
-// type SvgPropsType = Omit<AllSvgProps, 'className' | 'style' | 'width' | 'height'>;
-// type SvgStyleType = Omit<React.CSSProperties, 'width' | 'height'>;
+type SvgTagProps = Required<React.ComponentProps<typeof Dox<'svg'>>>['props'];
+type DoxSvgTagProps = Omit<SvgTagProps, 'viewBox' | 'width' | 'height'>;
 
-// interface Props extends SvgStyles {
-//   children?: React.ReactNode | ((props: { isHover: boolean }) => React.ReactNode);
-//   props?: SvgPropsType;
-//   style?: SvgStyleType;
-//   className?: ClassNameUtils.ClassNameType;
-//   viewBox?: string;
-//   width?: string;
-//   height?: string;
-// }
+interface Props extends DoxSvgStyles {
+  children?: React.ReactNode | ((props: { isHover: boolean }) => React.ReactNode);
+  props?: DoxSvgTagProps;
+  style?: React.ComponentProps<'svg'>['style'];
+  className?: ClassNameUtils.ClassNameType;
+  viewBox?: string;
+  width?: string;
+  height?: string;
+}
 
-// export default function BaseSvg(props: Props) {
-//   const { children, props: tagProps, className, style, viewBox, width, height } = props;
+function BaseSvg(props: Props, ref: Ref<SVGSVGElement>) {
+  const { viewBox = '0 0 24 24', width = '1.5rem', height, props: tagProps, ...restProps } = props;
 
-//   const classNames = className ? ClassNameUtils.classNames(className, classes.base) : [classes.base];
-//   Object.entries(props).forEach(([key, value]) => {
-//     const classToAdd = classes[key + value];
-//     if (classToAdd) {
-//       classNames.push(classToAdd);
-//     } else {
-//       if (key in themeSvgClasses) {
-//         classNames.push(`${themeSvgClasses[key]}${value}`);
-//       }
-//     }
-//   });
+  return (
+    <Dox
+      tag="svg"
+      ref={ref}
+      props={{ ...tagProps, viewBox, width, height, xmlns: 'http://www.w3.org/2000/svg', fill: 'none' }}
+      {...restProps}
+    />
+  );
+}
 
-//   const finalTagProps = {
-//     ...tagProps,
-//     style: { ...style, width, height },
-//     className: classNames.join(' '),
-//     viewBox: viewBox || '0 0 24 24',
-//     xmlns: 'http://www.w3.org/2000/svg',
-//     fill: 'none',
-//   };
-
-//   const [isHover, setIsHover] = useState(false);
-//   const needsHoverState = typeof children === 'function';
-//   if (needsHoverState) {
-//     finalTagProps.onMouseEnter = () => setIsHover(true);
-//     finalTagProps.onMouseLeave = () => setIsHover(false);
-//   }
-
-//   return React.createElement('svg', finalTagProps, needsHoverState ? children({ isHover }) : children);
-// }
-
-import DoxSvg from './doxSvg';
-
-export default DoxSvg;
+export default forwardRef(BaseSvg);

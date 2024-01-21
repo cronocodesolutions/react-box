@@ -1,18 +1,18 @@
-import('./box');
+import Box from './box';
 
-import('./components/baseSvg');
+import Dox from './components/dox';
+import BaseSvg from './components/baseSvg';
+import Button from './components/button';
+import Checkbox from './components/checkbox';
+import DataGrid from './components/dataGrid';
+import Flex from './components/flex';
+import Grid from './components/grid';
+import Form from './components/form';
+import RadioButton from './components/radioButton';
+import Textarea from './components/textarea';
+import Textbox from './components/textbox';
+import Tooltip from './components/tooltip';
 
-import('./components/dox');
-import('./components/doxSvg');
-import('./components/button');
-import('./components/checkbox');
-import('./components/dataGrid');
-import('./components/flex');
-import('./components/grid');
-import('./components/form');
-import('./components/radioButton');
-import('./components/textarea');
-import('./components/textbox');
-import('./components/tooltip');
+import Theme from './theme';
 
-import('./theme');
+export { Box, Dox, BaseSvg, Button, Checkbox, DataGrid, Flex, Grid, Form, RadioButton, Textarea, Textbox, Tooltip, Theme };
