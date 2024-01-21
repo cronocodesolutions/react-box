@@ -1,115 +1,53 @@
-// import React, { forwardRef, Ref, useMemo, useState } from 'react';
-// import classes from './box.module.css';
-// import { BoxStyles, themeClasses } from './types';
-// import ClassNameUtils from './utils/className/classNameUtils';
-// import { ThemeComponentProps, useTheme } from './theme';
+import React, { forwardRef, Ref, RefAttributes, useMemo, useState } from 'react';
+import ClassNameUtils from './utils/className/classNameUtils';
+import { DoxStyleProps } from './components/dox/doxStyles';
+import useStyles from './components/dox/useStyles';
+import { StylesContext } from './components/dox/stylesContext';
 
-// type AllProps<TTag extends keyof React.ReactHTML> = React.ComponentProps<TTag>;
-// type TagPropsType<TTag extends keyof React.ReactHTML> = Omit<AllProps<TTag>, 'className' | 'style' | 'ref'>;
+type ExtractElementType<T> =
+  T extends React.DetailedHTMLProps<React.HTMLAttributes<infer E>, infer E> ? E : T extends React.SVGProps<infer E> ? E : never;
 
-// interface Props<TTag extends keyof React.ReactHTML> extends BoxStyles, ThemeComponentProps {
-//   children?: React.ReactNode | ((props: { isHover: boolean }) => React.ReactNode);
-//   tag?: TTag;
-//   props?: TagPropsType<TTag>;
-//   style?: React.ComponentProps<TTag>['style'];
-//   className?: ClassNameUtils.ClassNameType;
-//   ref?: Ref<HTMLElement>;
-// }
+type ExtractElementFromTag<T extends keyof React.JSX.IntrinsicElements> = ExtractElementType<React.JSX.IntrinsicElements[T]>;
 
-// function Box<TTag extends keyof React.ReactHTML = 'div'>(props: Props<TTag>, ref: Ref<HTMLElement>) {
-//   const { tag, children, props: tagProps, className: userClassName, style } = props;
+type AllProps<TTag extends keyof React.JSX.IntrinsicElements> = React.ComponentProps<TTag>;
+type TagPropsType<TTag extends keyof React.JSX.IntrinsicElements> = Omit<AllProps<TTag>, 'className' | 'style' | 'ref'>;
 
-//   const themeStyles = useTheme(props);
-//   const className = useMemo(() => {
-//     const classNames = userClassName ? ClassNameUtils.classNames(classes.box, userClassName) : [classes.box];
-//     const newProps = themeStyles ? { ...replaceAliases(themeStyles), ...replaceAliases(props) } : replaceAliases(props);
+interface Props<TTag extends keyof React.JSX.IntrinsicElements> extends DoxStyleProps {
+  children?: React.ReactNode | ((props: { isHover: boolean }) => React.ReactNode);
+  tag?: TTag;
+  props?: TagPropsType<TTag>;
+  className?: ClassNameUtils.ClassNameType;
+  style?: React.ComponentProps<TTag>['style'];
+}
 
-//     Object.entries(newProps).forEach(([key, value]) => {
-//       const classToAdd = classes[(key as string) + value];
-//       if (classToAdd) {
-//         classNames.push(classToAdd);
-//       } else {
-//         if ((key as keyof BoxStyles) in themeClasses) {
-//           classNames.push(`${themeClasses[key as keyof BoxStyles]}${value}`);
-//         }
-//       }
-//     });
+function Box<TTag extends keyof React.JSX.IntrinsicElements = 'div'>(props: Props<TTag>, ref: Ref<ExtractElementFromTag<TTag>>) {
+  const { tag = 'div', children, props: tagProps, className: userClassName, style } = props;
 
-//     return classNames.join(' ');
-//   }, [props]);
+  const styleClasses = useStyles(props, tag === 'svg');
+  const className = useMemo(() => {
+    const classNames = ClassNameUtils.classNames(userClassName, styleClasses);
 
-//   const finalTagProps = { ...tagProps, className } as AllProps<TTag>;
-//   style && (finalTagProps.style = style);
-//   ref && (finalTagProps.ref = ref);
+    return classNames.join(' ');
+  }, [props]);
 
-//   const [isHover, setIsHover] = useState(false);
-//   const needsHoverState = typeof children === 'function';
-//   if (needsHoverState) {
-//     finalTagProps.onMouseEnter = () => setIsHover(true);
-//     finalTagProps.onMouseLeave = () => setIsHover(false);
-//   }
+  const finalTagProps = { ...tagProps, className } as AllProps<TTag>;
+  style && (finalTagProps.style = style);
+  ref && (finalTagProps.ref = ref as React.RefObject<HTMLElement>);
 
-//   return React.createElement(tag || 'div', finalTagProps, needsHoverState ? children({ isHover }) : children);
-// }
+  const [isHover, setIsHover] = useState(false);
+  const needsHoverState = typeof children === 'function';
+  if (needsHoverState) {
+    finalTagProps.onMouseEnter = () => setIsHover(true);
+    finalTagProps.onMouseLeave = () => setIsHover(false);
+  }
 
-// export default forwardRef(Box) as <TTag extends keyof React.ReactHTML = 'div'>(props: Props<TTag>) => JSX.Element;
+  return React.createElement(tag, finalTagProps, needsHoverState ? children({ isHover }) : children);
+}
 
-// const aliases: Partial<Record<keyof BoxStyles, keyof BoxStyles>> = {
-//   m: 'margin',
-//   mx: 'marginHorizontal',
-//   my: 'marginVertical',
-//   mt: 'marginTop',
-//   mr: 'marginRight',
-//   mb: 'marginBottom',
-//   ml: 'marginLeft',
-//   p: 'padding',
-//   px: 'paddingHorizontal',
-//   py: 'paddingVertical',
-//   pt: 'paddingTop',
-//   pr: 'paddingRight',
-//   pb: 'paddingBottom',
-//   pl: 'paddingLeft',
-//   b: 'border',
-//   bx: 'borderHorizontal',
-//   by: 'borderVertical',
-//   bt: 'borderTop',
-//   br: 'borderRight',
-//   bb: 'borderBottom',
-//   bl: 'borderLeft',
-//   jc: 'justifyContent',
-//   ai: 'alignItems',
-//   ac: 'alignContent',
-//   d: 'flexDirection',
-// };
+export default forwardRef(Box) as <TTag extends keyof React.JSX.IntrinsicElements = 'div'>(
+  props: Props<TTag> & RefAttributes<ExtractElementFromTag<TTag>>,
+) => React.ReactNode;
 
-// const aliasesToUse: Partial<Record<keyof BoxStyles, keyof BoxStyles>> = Object.entries(aliases).reduce((acc, [alias, property]) => {
-//   acc[alias as keyof BoxStyles] = property;
-//   acc[`${alias}H` as keyof BoxStyles] = `${property}H` as keyof BoxStyles;
-//   acc[`${alias}F` as keyof BoxStyles] = `${property}F` as keyof BoxStyles;
-//   acc[`${alias}A` as keyof BoxStyles] = `${property}A` as keyof BoxStyles;
+const { flush: flushStyles } = StylesContext;
 
-//   return acc;
-// }, {} as Partial<Record<keyof BoxStyles, keyof BoxStyles>>);
-
-// function replaceAliases(props: BoxStyles) {
-//   const newProps: BoxStyles = { ...props };
-//   const keys = Object.keys(newProps) as (keyof BoxStyles)[];
-
-//   keys.forEach((key) => {
-//     const mainPropKey = aliasesToUse[key];
-//     if (mainPropKey) {
-//       //
-//       if (mainPropKey in newProps === false) {
-//         (newProps[mainPropKey] as any) = newProps[key];
-//       }
-
-//       delete newProps[key];
-//     }
-//   });
-
-//   return newProps;
-// }
-
-import Dox from './components/dox';
-
-export default Dox;
+export { flushStyles };

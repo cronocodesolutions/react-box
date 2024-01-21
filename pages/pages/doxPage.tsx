@@ -1,5 +1,5 @@
 import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
-import Dox from '../../src/components/dox';
+import Dox from '../../src/box';
 import BaseSvg from '../../src/components/baseSvg';
 import Button from '../../src/components/button';
 import Grid from '../../src/components/grid';

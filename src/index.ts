@@ -1,6 +1,5 @@
-import Box from './box';
+import Box, { flushStyles } from './box';
 
-import Dox from './components/dox';
 import BaseSvg from './components/baseSvg';
 import Button from './components/button';
 import Checkbox from './components/checkbox';
@@ -15,4 +14,4 @@ import Tooltip from './components/tooltip';
 
 import Theme from './theme';
 
-export { Box, Dox, BaseSvg, Button, Checkbox, DataGrid, Flex, Grid, Form, RadioButton, Textarea, Textbox, Tooltip, Theme };
+export { Box, flushStyles, BaseSvg, Button, Checkbox, DataGrid, Flex, Grid, Form, RadioButton, Textarea, Textbox, Tooltip, Theme };

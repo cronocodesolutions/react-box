@@ -1,9 +1,9 @@
 import { forwardRef, Ref } from 'react';
-import Dox from './dox';
+import Box from '../box';
 import ClassNameUtils from '../utils/className/classNameUtils';
 import { DoxSvgStyles } from './dox/doxStyles';
 
-type SvgTagProps = Required<React.ComponentProps<typeof Dox<'svg'>>>['props'];
+type SvgTagProps = Required<React.ComponentProps<typeof Box<'svg'>>>['props'];
 type DoxSvgTagProps = Omit<SvgTagProps, 'viewBox' | 'width' | 'height'>;
 
 interface Props extends DoxSvgStyles {
@@ -20,7 +20,7 @@ function BaseSvg(props: Props, ref: Ref<SVGSVGElement>) {
   const { viewBox = '0 0 24 24', width = '1.5rem', height, props: tagProps, ...restProps } = props;
 
   return (
-    <Dox
+    <Box
       tag="svg"
       ref={ref}
       props={{ ...tagProps, viewBox, width, height, xmlns: 'http://www.w3.org/2000/svg', fill: 'none' }}
