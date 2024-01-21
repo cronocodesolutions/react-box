@@ -1,6 +1,6 @@
 import Theme from '../src/theme';
 
-export const theme = {
+export const themeProps = {
   colors: {
     none: 'none',
     white: '#fff',

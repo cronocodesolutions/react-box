@@ -1,4 +1,4 @@
-import { defineConfig, PluginOption } from 'vite';
+import { defineConfig } from 'vite';
 import reactPlugin from '@vitejs/plugin-react';
 import IdentityFactory from '@cronocode/identity-factory';
 import path from 'path';
@@ -10,14 +10,13 @@ import boxStylesMixins from './buildHelpers/mixins/boxStyles';
 import svgStylesMixins from './buildHelpers/mixins/svgStyles';
 // @ts-ignore
 import moduleCssPlugin from './buildHelpers/plugins/moduleCssPlugin';
-
 // @ts-ignore
-import { boxTheme } from './src/plugins/box-theme';
-// @ts-ignore
-import { theme } from './pages/theme';
+import { themeProps } from './pages/theme';
+import Theme from './src/theme';
 
-const result = boxTheme(theme);
-fs.writeFileSync('./pages/box-theme.generated.css', result.themeCss);
+const result = Theme.setupAugmentedProps(themeProps, { namespacePath: '../src/types' });
+
+fs.writeFileSync('./pages/box-theme.generated.css', result.variables);
 fs.writeFileSync('./pages/box.generated.d.ts', result.boxDts);
 
 const identity = new IdentityFactory();

@@ -13,7 +13,6 @@ import moduleCssPlugin from './buildHelpers/plugins/moduleCssPlugin';
 
 const identity = new IdentityFactory();
 const jsonCache: Record<string, Record<string, string>> = {};
-let extension: string;
 
 export default defineConfig(({ mode }) => {
   return {
@@ -51,13 +50,8 @@ export default defineConfig(({ mode }) => {
       minify: mode !== 'dev',
       lib: {
         entry: path.resolve(__dirname, './src/index.ts'),
-        fileName: (format) => {
-          if (format === 'cjs') extension = 'cjs';
-          if (format === 'es') extension = 'mjs';
-
-          return 'index.js';
-        },
-        formats: ['es', 'cjs'],
+        fileName: () => 'index.js',
+        formats: ['es'],
       },
       rollupOptions: {
         external: ['react', 'react-dom', 'react/jsx-runtime'],
@@ -84,10 +78,6 @@ export default defineConfig(({ mode }) => {
               return 'theme';
             }
 
-            if (id.includes('/plugins.ts')) {
-              return 'plugins';
-            }
-
             if (id.includes('/src/components/')) {
               const re = new RegExp('(.*)src/components/(.*)');
               const result = re.exec(id)[2];
@@ -102,7 +92,7 @@ export default defineConfig(({ mode }) => {
             return 'utils';
           },
           chunkFileNames(chunkInfo) {
-            return `[name].${extension}`;
+            return `[name].js`;
           },
         },
       },

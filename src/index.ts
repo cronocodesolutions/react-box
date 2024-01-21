@@ -16,4 +16,3 @@ import('./components/textbox');
 import('./components/tooltip');
 
 import('./theme');
-import('./plugins');
