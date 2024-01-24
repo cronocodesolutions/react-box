@@ -13,7 +13,6 @@ a,ul{all: unset;}
 `;
   const identity = new IdentityFactory();
   const propKeys = Object.keys(boxStyles) as StyleKey[];
-  const el = getElement();
 
   let requireFlush = false;
 
@@ -44,6 +43,8 @@ a,ul{all: unset;}
       items = generateStyles(items, 'H');
       items = generateStyles(items, 'F');
       items = generateStyles(items, 'A');
+
+      const el = getElement();
 
       el.innerHTML = items.join('');
 
@@ -124,16 +125,16 @@ a,ul{all: unset;}
     const isBrowser = typeof window !== 'undefined' && typeof window.document !== 'undefined';
     const document = isBrowser ? window.document : global.document;
 
-    let portalContainer = document.getElementById(elId);
+    let stylesElement = document.getElementById(elId);
 
-    if (!portalContainer) {
-      portalContainer = document.createElement('style');
-      portalContainer.setAttribute('id', elId);
-      portalContainer.setAttribute('type', 'text/css');
-      document.head.insertBefore(portalContainer, document.head.firstChild);
+    if (!stylesElement) {
+      stylesElement = document.createElement('style');
+      stylesElement.setAttribute('id', elId);
+      stylesElement.setAttribute('type', 'text/css');
+      document.head.insertBefore(stylesElement, document.head.firstChild);
     }
 
-    return portalContainer;
+    return stylesElement;
   }
 }
 
