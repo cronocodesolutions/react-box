@@ -1,16 +1,16 @@
 import { forwardRef, Ref } from 'react';
 import Box from '../box';
-import ClassNameUtils from '../utils/className/classNameUtils';
-import { DoxSvgStyles } from './dox/doxStyles';
+import { BoxSvgStyles } from '../core/types';
+import { ClassNameType } from '../core/classNames';
 
 type SvgTagProps = Required<React.ComponentProps<typeof Box<'svg'>>>['props'];
-type DoxSvgTagProps = Omit<SvgTagProps, 'viewBox' | 'width' | 'height'>;
+type BoxSvgTagProps = Omit<SvgTagProps, 'viewBox' | 'width' | 'height'>;
 
-interface Props extends DoxSvgStyles {
+interface Props extends BoxSvgStyles {
   children?: React.ReactNode | ((props: { isHover: boolean }) => React.ReactNode);
-  props?: DoxSvgTagProps;
+  props?: BoxSvgTagProps;
   style?: React.ComponentProps<'svg'>['style'];
-  className?: ClassNameUtils.ClassNameType;
+  className?: ClassNameType;
   viewBox?: string;
   width?: string;
   height?: string;

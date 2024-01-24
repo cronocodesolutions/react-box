@@ -1,17 +1,18 @@
 import { useLayoutEffect, useEffect, useMemo } from 'react';
-import { AliasKey, DoxStyleProps, StyleKey, aliases } from './doxStyles';
-import { StylesContext } from './stylesContext';
-import { useTheme } from '../../theme';
+import { AliasKey, StyleKey, aliases } from './boxStyles';
+import StylesContext from './stylesContext';
+import { BoxStyleProps } from './types';
+import { useTheme } from './useTheme';
 
 const isBrowser = typeof window !== 'undefined' && typeof window.document !== 'undefined';
 const useEff = isBrowser ? useLayoutEffect : useEffect;
 
-export default function useStyles(props: DoxStyleProps, isSvg: boolean) {
-  const themeProps = useTheme(props) as DoxStyleProps;
+export default function useStyles(props: BoxStyleProps, isSvg: boolean) {
+  const themeProps = useTheme(props) as BoxStyleProps;
   useEff(StylesContext.flush, [props]);
 
   return useMemo(() => {
-    const classNames: (string | undefined)[] = [isSvg ? StylesContext.svgClassName : StylesContext.doxClassName];
+    const classNames: (string | undefined)[] = [isSvg ? StylesContext.svgClassName : StylesContext.boxClassName];
     const propsToUse = themeProps ? { ...replaceAliases(themeProps), ...replaceAliases(props) } : replaceAliases(props);
 
     if ('inline' in propsToUse) {
@@ -47,9 +48,9 @@ export default function useStyles(props: DoxStyleProps, isSvg: boolean) {
   }, [props, themeProps]);
 }
 
-function replaceAliases(props: DoxStyleProps) {
-  const newProps: DoxStyleProps = { ...props };
-  const keys = Object.keys(newProps) as (keyof DoxStyleProps)[];
+function replaceAliases(props: BoxStyleProps) {
+  const newProps: BoxStyleProps = { ...props };
+  const keys = Object.keys(newProps) as (keyof BoxStyleProps)[];
 
   keys.forEach((key) => {
     const mainPropItem = aliases[key as AliasKey];

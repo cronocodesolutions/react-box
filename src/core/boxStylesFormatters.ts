@@ -1,4 +1,4 @@
-export namespace DoxStylesFormatters {
+export namespace BoxStylesFormatters {
   export namespace ClassName {
     export function fraction(key: string, value: string | number | boolean) {
       return `${key}${(value as string).replace('/', '-')}`;

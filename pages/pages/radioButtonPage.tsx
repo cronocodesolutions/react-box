@@ -15,8 +15,8 @@ export default function RadioButtonPage() {
           <RadioButton clean name="Clean" /> Clean 2
         </Flex>
         <Flex mt={2} gap={2}>
-          <RadioButton native name="native" /> Native
-          <RadioButton native name="native" /> Native
+          <RadioButton name="native" /> Native
+          <RadioButton name="native" /> Native
         </Flex>
       </Box>
     </Box>

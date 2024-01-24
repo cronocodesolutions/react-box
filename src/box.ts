@@ -1,22 +1,16 @@
 import React, { forwardRef, Ref, RefAttributes, useMemo, useState } from 'react';
-import ClassNameUtils from './utils/className/classNameUtils';
-import { DoxStyleProps } from './components/dox/doxStyles';
-import useStyles from './components/dox/useStyles';
-import { StylesContext } from './components/dox/stylesContext';
-
-type ExtractElementType<T> =
-  T extends React.DetailedHTMLProps<React.HTMLAttributes<infer E>, infer E> ? E : T extends React.SVGProps<infer E> ? E : never;
-
-type ExtractElementFromTag<T extends keyof React.JSX.IntrinsicElements> = ExtractElementType<React.JSX.IntrinsicElements[T]>;
+import { BoxStyleProps, ExtractElementFromTag } from './core/types';
+import useStyles from './core/useStyles';
+import { classNames, ClassNameType } from './core/classNames';
 
 type AllProps<TTag extends keyof React.JSX.IntrinsicElements> = React.ComponentProps<TTag>;
 type TagPropsType<TTag extends keyof React.JSX.IntrinsicElements> = Omit<AllProps<TTag>, 'className' | 'style' | 'ref'>;
 
-interface Props<TTag extends keyof React.JSX.IntrinsicElements> extends DoxStyleProps {
+interface Props<TTag extends keyof React.JSX.IntrinsicElements> extends BoxStyleProps {
   children?: React.ReactNode | ((props: { isHover: boolean }) => React.ReactNode);
   tag?: TTag;
   props?: TagPropsType<TTag>;
-  className?: ClassNameUtils.ClassNameType;
+  className?: ClassNameType;
   style?: React.ComponentProps<TTag>['style'];
 }
 
@@ -24,11 +18,7 @@ function Box<TTag extends keyof React.JSX.IntrinsicElements = 'div'>(props: Prop
   const { tag = 'div', children, props: tagProps, className: userClassName, style } = props;
 
   const styleClasses = useStyles(props, tag === 'svg');
-  const className = useMemo(() => {
-    const classNames = ClassNameUtils.classNames(userClassName, styleClasses);
-
-    return classNames.join(' ');
-  }, [props]);
+  const className = useMemo(() => classNames(styleClasses, userClassName).join(' '), [props]);
 
   const finalTagProps = { ...tagProps, className } as AllProps<TTag>;
   style && (finalTagProps.style = style);
@@ -48,6 +38,6 @@ export default forwardRef(Box) as <TTag extends keyof React.JSX.IntrinsicElement
   props: Props<TTag> & RefAttributes<ExtractElementFromTag<TTag>>,
 ) => React.ReactNode;
 
-const { flush: flushStyles } = StylesContext;
+// const { flush: flushStyles } = StylesContext;
 
-export { flushStyles };
+// export { flushStyles };

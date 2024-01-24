@@ -1,7 +1,7 @@
 import Box from '../../src/box';
 import Flex from '../../src/components/flex';
 import Textbox from '../../src/components/textbox';
-import React, { useState } from 'react';
+import { useState } from 'react';
 import Code from '../components/code';
 
 export default function BoxPage() {
@@ -55,6 +55,7 @@ function Component () {
           </Code>
         </Flex>
         <Flex flex1 ai="center" jc="center">
+          {/* @ts-ignore */}
           <Box {...props}>Hello world</Box>
         </Flex>
       </Flex>

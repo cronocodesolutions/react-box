@@ -1,5 +1,3 @@
-import { BoxStyles } from '../../types';
-
 namespace ObjectUtils {
   export function moveToTagProps<T extends Object, TKey extends keyof T>(props: T, ...keys: TKey[]) {
     const newProps = { ...props };

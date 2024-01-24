@@ -1,56 +1,30 @@
-import { defineConfig, PluginOption } from 'vite';
-import reactPlugin from '@vitejs/plugin-react';
-import IdentityFactory from '@cronocode/identity-factory';
+import { defineConfig } from 'vite';
 import dts from 'vite-plugin-dts';
 import path from 'path';
+import fs from 'fs';
 
-// @ts-ignore
-import boxStylesMixins from './buildHelpers/mixins/boxStyles';
-// @ts-ignore
-import svgStylesMixins from './buildHelpers/mixins/svgStyles';
-// @ts-ignore
-import moduleCssPlugin from './buildHelpers/plugins/moduleCssPlugin';
+const files = fs.readdirSync(path.resolve(__dirname, './src/components'));
+const componentsEntry = files.reduce((acc, fileName) => {
+  acc[`components/${path.parse(fileName).name}`] = path.resolve(__dirname, 'src/components', fileName);
 
-const identity = new IdentityFactory();
-const jsonCache: Record<string, Record<string, string>> = {};
+  return acc;
+}, {});
+
+const entry = {
+  box: path.resolve(__dirname, './src/box.ts'),
+  theme: path.resolve(__dirname, './src/theme.ts'),
+  ssg: path.resolve(__dirname, './src/ssg.ts'),
+  ...componentsEntry,
+};
 
 export default defineConfig(({ mode }) => {
   return {
-    plugins: [
-      dts({
-        entryRoot: './src',
-      }),
-      reactPlugin(),
-      moduleCssPlugin(jsonCache, mode),
-    ],
-    css: {
-      devSourcemap: mode === 'dev',
-      postcss: {
-        plugins: [
-          require('postcss-mixins')({ mixins: { ...boxStylesMixins, ...svgStylesMixins } }),
-          require('postcss-nested'),
-          require('postcss-simple-vars')({ silent: true }),
-          require('autoprefixer'),
-          require('postcss-each'),
-        ],
-      },
-      modules: {
-        generateScopedName: (name: string, filename: string, css: string) => {
-          if (name === 'hovertrue') return '_h';
-          if (name === 'focustrue') return '_f';
-
-          return mode === 'dev' ? name : identity.getIdentity(name);
-        },
-        getJSON: (cssFileName, json, outputFileName) => {
-          jsonCache[cssFileName] = json;
-        },
-      },
-    },
+    plugins: [dts({ entryRoot: './src', exclude: ['./pages/**'] })],
     build: {
       minify: mode !== 'dev',
       lib: {
-        entry: path.resolve(__dirname, './src/index.ts'),
-        fileName: () => 'index.js',
+        entry,
+        fileName: (format, entryName) => `${entryName}.js`,
         formats: ['es'],
       },
       rollupOptions: {
@@ -58,27 +32,15 @@ export default defineConfig(({ mode }) => {
         output: {
           inlineDynamicImports: false,
           manualChunks(id: string) {
-            if (id.endsWith('src/index.ts')) {
-              return 'index';
+            if (id.includes('/core/')) {
+              return 'core';
             }
 
-            if (id.includes('/box.tsx')) {
-              return 'box';
+            if (id.includes('/utils/')) {
+              return 'utils';
             }
 
-            if (id.includes('/box.module.css')) {
-              return 'box.module.css';
-            }
-
-            if (id.includes('/baseSvg.module.css')) {
-              return 'baseSvg.module.css';
-            }
-
-            if (id.includes('/theme.ts')) {
-              return 'theme';
-            }
-
-            if (id.includes('/src/components/')) {
+            if (id.includes('/components/')) {
               const re = new RegExp('(.*)src/components/(.*)');
               const result = re.exec(id)[2];
 
@@ -89,11 +51,13 @@ export default defineConfig(({ mode }) => {
               return `components/${result.split('.')[0]}`;
             }
 
-            return 'utils';
+            if (id.endsWith('src/box.ts')) {
+              return 'box';
+            }
+
+            // console.log(id);
           },
-          chunkFileNames(chunkInfo) {
-            return `[name].js`;
-          },
+          chunkFileNames: '[name].js',
         },
       },
     },

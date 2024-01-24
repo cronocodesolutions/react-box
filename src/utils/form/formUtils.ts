@@ -5,20 +5,23 @@ interface FormObject {
 
 namespace FormUtils {
   export function getFormEntries(form: HTMLFormElement) {
-    const elementsGroupByName = Array.from(form.elements).reduce((state, element) => {
-      const name = (element as HTMLInputElement).name;
-      if (!name) {
+    const elementsGroupByName = Array.from(form.elements).reduce(
+      (state, element) => {
+        const name = (element as HTMLInputElement).name;
+        if (!name) {
+          return state;
+        }
+
+        if (!state[name]) {
+          state[name] = [];
+        }
+
+        state[name].push(element as HTMLInputElement);
+
         return state;
-      }
-
-      if (!state[name]) {
-        state[name] = [];
-      }
-
-      state[name].push(element as HTMLInputElement);
-
-      return state;
-    }, {} as Record<string, HTMLInputElement[]>);
+      },
+      {} as Record<string, HTMLInputElement[]>,
+    );
 
     return Object.entries(elementsGroupByName).reduce((obj, [name, elements]) => {
       if (elements.length === 1) {

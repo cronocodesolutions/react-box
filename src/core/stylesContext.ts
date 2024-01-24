@@ -1,40 +1,38 @@
-import { doxStyles, pseudoClassStyles, PseudoClassSuffix, PseudoClassType, StyleItem, StyleKey, StyleValues, svgStyles } from './doxStyles';
+import { PseudoClassClassNameKey, PseudoClassSuffix, StyleItem, StyleKey, StyleValues, boxStyles, pseudoClassClassName } from './boxStyles';
 import IdentityFactory from '@cronocode/identity-factory';
 
-export namespace StylesContext {
-  export const doxClassName = '_dox';
+namespace StylesContext {
+  export const boxClassName = '_box';
   export const svgClassName = '_svg';
   const defaultStyles = `:root{--borderColor: black;--outlineColor: black;--lineHeight: 1.2;--fontSize: 14px;--transitionTime: 0.25s;--svgTransitionTime: 0.3s;#crono-box {position: absolute;top: 0;left: 0;height: 0;}}
 html{font-size: 16px;font-family: Arial, sans-serif;}
 body{margin: 0;line-height: var(--lineHeight);font-size: var(--fontSize);}
 a,ul{all: unset;}
-.${doxClassName}{display: block;border: 0 solid var(--borderColor);outline: 0px solid var(--outlineColor);margin: 0;padding: 0;background-color: initial;transition: all var(--transitionTime);box-sizing: border-box;font-family: inherit;font-size: inherit;}
+.${boxClassName}{display: block;border: 0 solid var(--borderColor);outline: 0px solid var(--outlineColor);margin: 0;padding: 0;background-color: initial;transition: all var(--transitionTime);box-sizing: border-box;font-family: inherit;font-size: inherit;}
 .${svgClassName}{transition: all var(--svgTransitionTime);}.${svgClassName} path,.${svgClassName} circle,.${svgClassName} rect,.${svgClassName} line {transition: all var(--svgTransitionTime);}
 `;
   const identity = new IdentityFactory();
-
-  const propKeys = Object.keys(doxStyles) as StyleKey[];
+  const propKeys = Object.keys(boxStyles) as StyleKey[];
   const el = getElement();
 
   let requireFlush = false;
 
-  const styles = propKeys.reduce((acc, key) => {
-    acc[key] = new Set();
+  const styles = propKeys.reduce(
+    (acc, key) => {
+      acc[key] = new Set();
 
-    return acc;
-  }, {} as Record<StyleKey, Set<string | number | boolean>>);
+      return acc;
+    },
+    {} as Record<StyleKey, Set<string | number | boolean>>,
+  );
 
   export function get(key: string, value: string | number | boolean) {
-    if (key in doxStyles) {
+    if (key in boxStyles) {
       return getClassName(key as StyleKey, value);
     }
 
-    if (key in pseudoClassStyles) {
-      return pseudoClassStyles[key as PseudoClassType].className;
-    }
-
-    if (key in svgStyles) {
-      return getClassName(key as StyleKey, value);
+    if (key in pseudoClassClassName) {
+      return pseudoClassClassName[key as PseudoClassClassNameKey].className;
     }
   }
 
@@ -67,7 +65,7 @@ a,ul{all: unset;}
 
   function generateStyles(classes: string[], pseudoSuffix?: PseudoClassSuffix) {
     return Object.entries(styles)
-      .filter(([key]) => (doxStyles[key as StyleKey] as StyleItem)?.pseudoSuffix === pseudoSuffix)
+      .filter(([key]) => (boxStyles[key as StyleKey] as StyleItem)?.pseudoSuffix === pseudoSuffix)
       .reduce((acc, [key, values]) => {
         values.forEach((value) => {
           const valueItem: StyleValues = getValueItem(key as StyleKey, value);
@@ -80,19 +78,19 @@ a,ul{all: unset;}
           } else if (pseudoSuffix === 'H') {
             selectors = [
               ...formatSelector(`${selector}:hover`, valueItem),
-              ...formatSelector(`.${pseudoClassStyles.hover.className}:hover>${selector}`, valueItem),
+              ...formatSelector(`.${pseudoClassClassName.hover.className}:hover>${selector}`, valueItem),
             ];
           } else if (pseudoSuffix === 'F') {
             selectors = [
               ...formatSelector(`${selector}:focus-within`, valueItem),
-              ...formatSelector(`.${pseudoClassStyles.focus.className}:focus-within>${selector}`, valueItem),
+              ...formatSelector(`.${pseudoClassClassName.focus.className}:focus-within>${selector}`, valueItem),
             ];
           } else if (pseudoSuffix === 'A') {
             selectors = formatSelector(`${selector}:active`, valueItem);
           }
 
           const cssValue = valueItem.formatValue?.(key as StyleKey, value) ?? value;
-          const cssNames = (doxStyles[key as StyleKey] as StyleItem).cssNames;
+          const cssNames = boxStyles[key as StyleKey].cssNames;
           const styles = cssNames.map((cssName) => `${cssName}:${cssValue};`).join('');
 
           acc.push(`${selectors.join(',')}{${styles}}`);
@@ -106,7 +104,7 @@ a,ul{all: unset;}
   }
 
   function getValueItem(key: StyleKey, value: string | number | boolean): StyleValues {
-    const item = doxStyles[key];
+    const item = boxStyles[key];
 
     if ((item as StyleItem).isThemeStyle) {
       return item as unknown as StyleValues;
@@ -115,8 +113,8 @@ a,ul{all: unset;}
     const valueItem: StyleValues = (item.values1.values as Readonly<Array<string | number | boolean>>).includes(value)
       ? item.values1
       : (item.values2.values as Readonly<Array<string | number | boolean>>).includes(value)
-      ? item.values2
-      : item.values3;
+        ? item.values2
+        : item.values3;
 
     return valueItem;
   }
@@ -138,3 +136,5 @@ a,ul{all: unset;}
     return portalContainer;
   }
 }
+
+export default StylesContext;

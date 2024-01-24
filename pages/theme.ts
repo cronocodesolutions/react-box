@@ -1,4 +1,4 @@
-import Theme from '../src/theme';
+import Theme from '../src/core/theme';
 
 export const themeProps = {
   colors: {
