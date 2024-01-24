@@ -17,6 +17,13 @@ const entry = {
   ...componentsEntry,
 };
 
+const extensions = {
+  es: 'mjs',
+  cjs: 'cjs',
+};
+
+let currentFormat;
+
 export default defineConfig(({ mode }) => {
   return {
     plugins: [dts({ entryRoot: './src', exclude: ['./pages/**'] })],
@@ -24,8 +31,11 @@ export default defineConfig(({ mode }) => {
       minify: mode !== 'dev',
       lib: {
         entry,
-        fileName: (format, entryName) => `${entryName}.js`,
-        formats: ['es'],
+        fileName: (format, entryName) => {
+          currentFormat = format;
+          return `${entryName}.${extensions[format]}`;
+        },
+        formats: ['es', 'cjs'],
       },
       rollupOptions: {
         external: ['react', 'react-dom', 'react/jsx-runtime'],
@@ -57,7 +67,7 @@ export default defineConfig(({ mode }) => {
 
             // console.log(id);
           },
-          chunkFileNames: '[name].js',
+          chunkFileNames: (info) => `[name].${extensions[currentFormat]}`,
         },
       },
     },
