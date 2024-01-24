@@ -16,25 +16,25 @@ export default function useStyles(props: BoxStyleProps, isSvg: boolean) {
     const propsToUse = themeProps ? { ...replaceAliases(themeProps), ...replaceAliases(props) } : replaceAliases(props);
 
     if ('inline' in propsToUse) {
-      if (propsToUse.display === 'block') propsToUse.display = 'inline-block';
+      if (propsToUse.display === 'block' || !propsToUse.display) propsToUse.display = 'inline-block';
       else if (propsToUse.display === 'flex') propsToUse.display = 'inline-flex';
       else if (propsToUse.display === 'grid') propsToUse.display = 'inline-grid';
       delete propsToUse.inline;
     }
     if ('inlineH' in propsToUse) {
-      if (propsToUse.displayH === 'block') propsToUse.displayH = 'inline-block';
+      if (propsToUse.displayH === 'block' || !propsToUse.displayH) propsToUse.displayH = 'inline-block';
       else if (propsToUse.displayH === 'flex') propsToUse.displayH = 'inline-flex';
       else if (propsToUse.displayH === 'grid') propsToUse.displayH = 'inline-grid';
       delete propsToUse.inlineH;
     }
     if ('inlineF' in propsToUse) {
-      if (propsToUse.displayF === 'block') propsToUse.displayF = 'inline-block';
+      if (propsToUse.displayF === 'block' || !propsToUse.displayF) propsToUse.displayF = 'inline-block';
       else if (propsToUse.displayF === 'flex') propsToUse.displayF = 'inline-flex';
       else if (propsToUse.displayF === 'grid') propsToUse.displayF = 'inline-grid';
       delete propsToUse.inlineF;
     }
     if ('inlineA' in propsToUse) {
-      if (propsToUse.displayA === 'block') propsToUse.displayA = 'inline-block';
+      if (propsToUse.displayA === 'block' || !propsToUse.displayA) propsToUse.displayA = 'inline-block';
       else if (propsToUse.displayA === 'flex') propsToUse.displayA = 'inline-flex';
       else if (propsToUse.displayA === 'grid') propsToUse.displayA = 'inline-grid';
       delete propsToUse.inlineA;
