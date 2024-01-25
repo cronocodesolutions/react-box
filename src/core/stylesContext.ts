@@ -4,6 +4,8 @@ import IdentityFactory from '@cronocode/identity-factory';
 namespace StylesContext {
   export const boxClassName = '_box';
   export const svgClassName = '_svg';
+  export const cronoStylesElementId = 'crono-styles';
+
   const defaultStyles = `:root{--borderColor: black;--outlineColor: black;--lineHeight: 1.2;--fontSize: 14px;--transitionTime: 0.25s;--svgTransitionTime: 0.3s;#crono-box {position: absolute;top: 0;left: 0;height: 0;}}
 html{font-size: 16px;font-family: Arial, sans-serif;}
 body{margin: 0;line-height: var(--lineHeight);font-size: var(--fontSize);}
@@ -61,7 +63,7 @@ a,ul{all: unset;}
     const valueItem: StyleValues = getValueItem(styleKey as StyleKey, value);
     const className = valueItem.formatClassName?.(styleKey as StyleKey, value) ?? `${styleKey}${value}`;
 
-    return `-${identity.getIdentity(className)}`;
+    return identity.getIdentity(className);
   }
 
   function generateStyles(classes: string[], pseudoSuffix?: PseudoClassSuffix) {
@@ -121,15 +123,14 @@ a,ul{all: unset;}
   }
 
   function getElement() {
-    const elId = 'crono-styles';
     const isBrowser = typeof window !== 'undefined' && typeof window.document !== 'undefined';
     const document = isBrowser ? window.document : global.document;
 
-    let stylesElement = document.getElementById(elId);
+    let stylesElement = document.getElementById(cronoStylesElementId);
 
     if (!stylesElement) {
       stylesElement = document.createElement('style');
-      stylesElement.setAttribute('id', elId);
+      stylesElement.setAttribute('id', cronoStylesElementId);
       stylesElement.setAttribute('type', 'text/css');
       document.head.insertBefore(stylesElement, document.head.firstChild);
     }
