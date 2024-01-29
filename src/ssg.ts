@@ -22,7 +22,7 @@ const document = {
 global.document = document as any;
 
 export function renderToStaticMarkup(element: React.ReactElement, addStylesToHead = true) {
-  el.innerHTML = '';
+  StylesContext.clear();
   let html = ReactDOMServer.renderToStaticMarkup(element);
   StylesContext.flush();
 

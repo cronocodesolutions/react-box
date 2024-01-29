@@ -18,7 +18,7 @@ a,ul{all: unset;}
 
   let requireFlush = false;
 
-  const styles = propKeys.reduce(
+  let styles = propKeys.reduce(
     (acc, key) => {
       acc[key] = new Set();
 
@@ -52,6 +52,17 @@ a,ul{all: unset;}
 
       requireFlush = false;
     }
+  }
+
+  export function clear() {
+    styles = propKeys.reduce(
+      (acc, key) => {
+        acc[key] = new Set();
+
+        return acc;
+      },
+      {} as Record<StyleKey, Set<string | number | boolean>>,
+    );
   }
 
   function getClassName(styleKey: StyleKey, value: string | number | boolean) {
