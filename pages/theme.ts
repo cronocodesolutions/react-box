@@ -51,9 +51,22 @@ Theme.setup({
     },
   },
   components: {
-    test: {
+    mycomponent: {
       styles: {
         padding: 3,
+        b: 1,
+      },
+      children: {
+        item1: {
+          styles: {
+            textTransform: 'uppercase',
+          },
+        },
+        item2: {
+          styles: {
+            textDecoration: 'underline',
+          },
+        },
       },
     },
     code: {

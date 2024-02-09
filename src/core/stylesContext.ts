@@ -16,7 +16,7 @@ a,ul{all: unset;}
   const identity = new IdentityFactory();
   const propKeys = Object.keys(boxStyles) as StyleKey[];
 
-  let requireFlush = false;
+  let requireFlush = true;
 
   let styles = propKeys.reduce(
     (acc, key) => {
@@ -39,8 +39,6 @@ a,ul{all: unset;}
 
   export function flush() {
     if (requireFlush) {
-      console.info('%c💬Flush Dox Styles', 'color: #00ffff');
-
       let items = generateStyles([defaultStyles]);
       items = generateStyles(items, 'H');
       items = generateStyles(items, 'F');

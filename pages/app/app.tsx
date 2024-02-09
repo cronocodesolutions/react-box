@@ -2,7 +2,6 @@ import BoxPage from '../pages/boxPage';
 import ButtonPage from '../pages/buttonPage';
 import CheckboxPage from '../pages/checkboxPage';
 import DataGridPage from '../pages/dataGridPage';
-import DoxPage from '../pages/doxPage';
 import FlexPage from '../pages/flexPage';
 import GridPage from '../pages/gridPage';
 import HomePage from '../pages/homePage';
@@ -24,7 +23,6 @@ export default function App() {
           </Box>
         </MenuItem>
         <MenuItem to="/box">Box</MenuItem>
-        <MenuItem to="/dox">Dox</MenuItem>
         <MenuItem to="/flex">Flex</MenuItem>
         <MenuItem to="/grid">Grid</MenuItem>
         <MenuItem to="/textbox">Textbox</MenuItem>
@@ -38,7 +36,6 @@ export default function App() {
         <Routes>
           <Route index element={<HomePage />} />
           <Route path="/box" element={<BoxPage />} />
-          <Route path="/dox" element={<DoxPage />} />
           <Route path="/flex" element={<FlexPage />} />
           <Route path="/grid" element={<GridPage />} />
           <Route path="/textbox" element={<TextboxPage />} />

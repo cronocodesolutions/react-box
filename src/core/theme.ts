@@ -11,6 +11,9 @@ export interface ThemeComponentStyles {
   themes?: {
     [name: string]: ThemeStyles;
   };
+  children?: {
+    [name: string]: ThemeComponentStyles;
+  };
 }
 
 export interface ThemeSetup {
@@ -79,6 +82,7 @@ namespace Theme {
   export let Styles: ThemeSetup = defaultTheme;
 
   export function setup(styles: ThemeSetup) {
+    extractChildren(styles);
     Styles = styles;
 
     assignDefaultStyles();
@@ -167,6 +171,7 @@ namespace Theme {
   }
 
   function assignDefaultStyles() {
+    extractChildren(defaultTheme);
     const components = Object.keys(defaultTheme) as (keyof ThemeSetup)[];
 
     components.forEach((component) => {
@@ -183,6 +188,44 @@ namespace Theme {
         Styles[component] = defaultTheme[component] as any;
       }
     });
+  }
+
+  function extractChildren(styles: ThemeSetup) {
+    if (!styles.components) return;
+
+    const componentsNames = Object.keys(styles.components);
+
+    for (const componentName of componentsNames) {
+      const component = styles.components[componentName];
+      const children = getChildren(componentName, component);
+      delete component.children;
+
+      for (const item of children) {
+        const [name, childrenStyles] = item;
+
+        styles.components[name] = childrenStyles;
+      }
+    }
+  }
+
+  function getChildren(componentName: string, componentStyles: ThemeComponentStyles): [string, ThemeComponentStyles][] {
+    if (!componentStyles.children) return [];
+
+    const childrenNames = Object.keys(componentStyles.children);
+    const acc: [string, ThemeComponentStyles][] = [];
+
+    for (const childName of childrenNames) {
+      const name = `${componentName}.${childName}`;
+      const component = componentStyles.children[childName];
+      const children = getChildren(name, component);
+
+      acc.push(...children);
+      delete component.children;
+
+      acc.push([name, component]);
+    }
+
+    return acc;
   }
 }
 
