@@ -37,7 +37,3 @@ function Box<TTag extends keyof React.JSX.IntrinsicElements = 'div'>(props: Prop
 export default forwardRef(Box) as <TTag extends keyof React.JSX.IntrinsicElements = 'div'>(
   props: Props<TTag> & RefAttributes<ExtractElementFromTag<TTag>>,
 ) => React.ReactNode;
-
-// const { flush: flushStyles } = StylesContext;
-
-// export { flushStyles };

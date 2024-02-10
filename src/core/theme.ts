@@ -31,6 +31,7 @@ interface BoxAugmentedProps {
   colors: Record<string, string>;
   shadows: Record<string, string>;
   backgrounds: Record<string, string>;
+  backgroundImages: Record<string, string>;
 }
 
 // IMPORTANT!!!  DO NOT USE INLINE PROP IN THESE DEFAULT VALUES
@@ -42,6 +43,7 @@ const defaultTheme: ThemeSetup = {
       cursor: 'pointer',
       b: 1,
       borderRadius: 1,
+      userSelect: 'none',
     },
     disabled: {
       cursor: 'default',
@@ -50,8 +52,6 @@ const defaultTheme: ThemeSetup = {
   checkbox: {
     styles: {
       display: 'inline-block',
-      b: 1,
-      p: 2,
     },
   },
   radioButton: {
@@ -98,17 +98,24 @@ namespace Theme {
     const bgVariables = Object.entries(props.backgrounds)
       .map(([backgroundName, backgroundValue]) => `--background${backgroundName}: ${backgroundValue};`)
       .join('\n  ');
+    const bgImagesVariables = Object.entries(props.backgroundImages)
+      .map(([backgroundImageName, backgroundImageValue]) => `--backgroundImage${backgroundImageName}: ${backgroundImageValue};`)
+      .join('\n  ');
 
     const variables = [':root {'];
     colorVariables && variables.push(`  ${colorVariables}`);
     shadowVariables && variables.push(`  ${shadowVariables}`);
     bgVariables && variables.push(`  ${bgVariables}`);
+    bgImagesVariables && variables.push(`  ${bgImagesVariables}`);
     variables.push('}');
 
     const colorType = Object.keys(props.colors)
       .map((item) => `'${item}'`)
       .join(' | ');
     const backgroundType = Object.keys(props.backgrounds)
+      .map((item) => `'${item}'`)
+      .join(' | ');
+    const backgroundImageType = Object.keys(props.backgroundImages)
       .map((item) => `'${item}'`)
       .join(' | ');
     const shadowType = Object.keys(props.shadows)
@@ -120,6 +127,7 @@ namespace Theme {
   declare module '${options?.namespacePath ?? '@cronocode/react-box/core/types'}' {
     type ColorType = ${colorType};
     type BackgroundType = ${backgroundType};
+    type BackgroundImageType = ${backgroundImageType};
     type ShadowType = ${shadowType};
   
     namespace Augmented {
@@ -128,26 +136,38 @@ namespace Theme {
         colorH?: ColorType;
         colorF?: ColorType;
         colorA?: ColorType;
+        colorC?: ColorType;
         bgColor?: ColorType;
         bgColorH?: ColorType;
         bgColorF?: ColorType;
         bgColorA?: ColorType;
+        bgColorC?: ColorType;
         borderColor?: ColorType;
         borderColorH?: ColorType;
         borderColorF?: ColorType;
         borderColorA?: ColorType;
+        borderColorC?: ColorType;
         outlineColor?: ColorType;
         outlineColorH?: ColorType;
         outlineColorF?: ColorType;
         outlineColorA?: ColorType;
+        outlineColorC?: ColorType;
         background?: BackgroundType;
         backgroundH?: BackgroundType;
         backgroundF?: BackgroundType;
         backgroundA?: BackgroundType;
+        backgroundC?: BackgroundType;
+        backgroundImage?: BackgroundImageType;
+        backgroundImageH?: BackgroundImageType;
+        backgroundImageF?: BackgroundImageType;
+        backgroundImageA?: BackgroundImageType;
+        backgroundImageC?: BackgroundImageType;
         shadow?: ShadowType;
         shadowH?: ShadowType;
         shadowF?: ShadowType;
+        shadowF?: ShadowType;
         shadowA?: ShadowType;
+        shadowC?: ShadowType;
       }
   
       interface SvgProps {
@@ -155,10 +175,12 @@ namespace Theme {
         fillH?: ColorType;
         fillF?: ColorType;
         fillA?: ColorType;
+        fillC?: ColorType;
         stroke?: ColorType;
         strokeH?: ColorType;
         strokeF?: ColorType;
         strokeA?: ColorType;
+        strokeC?: ColorType;
       }
     }
   }

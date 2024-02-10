@@ -6,6 +6,7 @@
   --colorviolet: #988bee;
   --colorvioletLight: #e8edfd;
   --colorvioletLighter: #f6f8fe;
+  --colorvioletDark: #5f3e66;
   --colorgray1: #94a3b833;
   --colorgray2: #94a3b8;
   --colordark: #272822;
@@ -13,4 +14,6 @@
   --shadownone: none;
   --backgroundnone: none;
   --backgroundstripes: linear-gradient(135deg,var(--colorviolet) 10%,#0000 0,#0000 50%,var(--colorviolet) 0,var(--colorviolet) 60%,#0000 0,#0000);;
+  --backgroundImagecheck: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' width='100%' viewBox='0 0 20 20'%3e%3cpath fill='none' stroke='%23FFF' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M6 10l3 3l6-6'/%3e%3c/svg%3e");
+  --backgroundImageradio: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' width='100%' viewBox='0 0 20 20'%3e%3ccircle fill='%23FFF' cx='10' cy='10' r='5'/%3e%3c/svg%3e");
 }

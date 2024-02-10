@@ -1,4 +1,4 @@
-import { StyleItem, aliases, boxStyles } from './boxStyles';
+import { PseudoClassSuffix, StyleItem, aliases, boxStyles } from './boxStyles';
 import { ThemeComponentProps } from './useTheme';
 
 export type ExtractElementType<T> =
@@ -6,16 +6,8 @@ export type ExtractElementType<T> =
 
 export type ExtractElementFromTag<T extends keyof React.JSX.IntrinsicElements> = ExtractElementType<React.JSX.IntrinsicElements[T]>;
 
-export type Hovered<T> = {
-  [K in keyof T as K extends string ? `${K}H` : never]: T[K];
-};
-
-export type Focused<T> = {
-  [K in keyof T as K extends string ? `${K}F` : never]: T[K];
-};
-
-export type Activated<T> = {
-  [K in keyof T as K extends string ? `${K}A` : never]: T[K];
+export type PseudoClass<T, TSuffix extends PseudoClassSuffix> = {
+  [K in keyof T as K extends string ? `${K}${TSuffix}` : never]: T[K];
 };
 
 export namespace Augmented {
@@ -34,9 +26,10 @@ interface BoxPseudoClasses {
 }
 export type BoxStyleProps = BoxNormalStyles &
   BoxPseudoClasses &
-  Hovered<BoxNormalStyles> &
-  Focused<BoxNormalStyles> &
-  Activated<BoxNormalStyles> &
+  PseudoClass<BoxNormalStyles, 'H'> &
+  PseudoClass<BoxNormalStyles, 'F'> &
+  PseudoClass<BoxNormalStyles, 'A'> &
+  PseudoClass<BoxNormalStyles, 'C'> &
   ThemeComponentProps &
   Augmented.BoxProps;
 
@@ -46,8 +39,9 @@ interface SvgNormalStyles {
   transitionDuration?: BoxNormalStyles['transitionDuration'];
 }
 export type BoxSvgStyles = SvgNormalStyles &
-  Hovered<SvgNormalStyles> &
-  Focused<SvgNormalStyles> &
-  Activated<SvgNormalStyles> &
+  PseudoClass<SvgNormalStyles, 'H'> &
+  PseudoClass<SvgNormalStyles, 'F'> &
+  PseudoClass<SvgNormalStyles, 'A'> &
+  PseudoClass<SvgNormalStyles, 'C'> &
   ThemeComponentProps &
   Augmented.SvgProps;

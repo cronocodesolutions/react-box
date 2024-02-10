@@ -43,6 +43,7 @@ a,ul{all: unset;}
       items = generateStyles(items, 'H');
       items = generateStyles(items, 'F');
       items = generateStyles(items, 'A');
+      items = generateStyles(items, 'C');
 
       const el = getElement();
 
@@ -99,6 +100,8 @@ a,ul{all: unset;}
             ];
           } else if (pseudoSuffix === 'A') {
             selectors = formatSelector(`${selector}:active`, valueItem);
+          } else if (pseudoSuffix === 'C') {
+            selectors = formatSelector(`${selector}:checked`, valueItem);
           }
 
           const cssValue = valueItem.formatValue?.(key as StyleKey, value) ?? value;

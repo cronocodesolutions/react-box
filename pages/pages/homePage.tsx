@@ -29,21 +29,7 @@ export default function HomePage() {
         <Code language="shell">{`npm install @cronocode/react-box`}</Code>
         <Flex ai="center" gap={3} mt={5}>
           <Box component="number">2</Box>
-          <Box>
-            Import CSS file in main{' '}
-            <Box inline fontWeight={700}>
-              .tsx
-            </Box>{' '}
-            or
-            <Box inline fontWeight={700}>
-              .css
-            </Box>
-          </Box>
-        </Flex>
-        <Code language="javascript">{`@cronocode/react-box/style.css`}</Code>
-        <Flex ai="center" gap={3} mt={5}>
-          <Box component="number">3</Box>
-          <Box>Use Box</Box>
+          <Box>Usage</Box>
         </Flex>
         <Code language="javascript">
           {`import Box from '@cronocode/react-box';

@@ -4,7 +4,7 @@ import Grid from '../../src/components/grid';
 export default function GridPage() {
   return (
     <Box p={10}>
-      <Grid borderRadius={1} gap={4} p={4} background="stripes" gridColumns={5} style={{ backgroundSize: '7.07px 7.07px' }}>
+      <Grid borderRadius={1} gap={4} p={4} background="stripes" gridColumns={5} style={{ backgroundSize: '7.07px 7.07px' }} color="white">
         <Box border={1} borderColor="violet" bgColor="violet" borderRadius={1} p={6}>
           Cell
         </Box>
@@ -20,7 +20,7 @@ export default function GridPage() {
         <Box border={1} borderColor="violet" bgColor="violet" borderRadius={1} p={6}>
           Cell
         </Box>
-        <Box border={1} borderColor="violet" bgColor="violet" borderRadius={1} p={6} colStart={2} paddingH={7}>
+        <Box border={1} borderColor="violet" bgColor="violet" borderRadius={1} p={6} colStart={2}>
           colstart 2
         </Box>
         <Box border={1} borderColor="violet" bgColor="violet" borderRadius={1} p={6} colSpan={2} colStart={2}>

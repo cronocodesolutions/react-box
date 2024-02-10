@@ -12,10 +12,11 @@ import Box from './../../src/box';
 import Flex from '../../src/components/flex';
 import MenuItem from './menuItem';
 import { Routes, Route } from 'react-router-dom';
+import TextareaPage from '../pages/textareaPage';
 
 export default function App() {
   return (
-    <Flex height="fit-screen">
+    <Flex height="fit-screen" color="violetDark">
       <Box height="fit-screen" style={{ width: '200px' }} bgColor="violetLighter" px={2}>
         <MenuItem to="/" bgColor={undefined} bgColorH={undefined} color={undefined}>
           <Box fontWeight={700} py={5}>
@@ -25,12 +26,13 @@ export default function App() {
         <MenuItem to="/box">Box</MenuItem>
         <MenuItem to="/flex">Flex</MenuItem>
         <MenuItem to="/grid">Grid</MenuItem>
-        <MenuItem to="/textbox">Textbox</MenuItem>
-        <MenuItem to="/datagrid">Data Grid</MenuItem>
         <MenuItem to="/button">Button</MenuItem>
+        <MenuItem to="/textbox">Textbox</MenuItem>
+        <MenuItem to="/textarea">Textarea</MenuItem>
         <MenuItem to="/checkbox">Checkbox</MenuItem>
         <MenuItem to="/radiobutton">Radio Button</MenuItem>
         <MenuItem to="/tooltip">Tooltip</MenuItem>
+        <MenuItem to="/datagrid">Data Grid</MenuItem>
       </Box>
       <Box flex1>
         <Routes>
@@ -39,6 +41,7 @@ export default function App() {
           <Route path="/flex" element={<FlexPage />} />
           <Route path="/grid" element={<GridPage />} />
           <Route path="/textbox" element={<TextboxPage />} />
+          <Route path="/textarea" element={<TextareaPage />} />
           <Route path="/datagrid" element={<DataGridPage />} />
           <Route path="/button" element={<ButtonPage />} />
           <Route path="/checkbox" element={<CheckboxPage />} />

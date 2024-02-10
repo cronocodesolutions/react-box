@@ -12,7 +12,7 @@ export default function TooltipPage() {
   const [openDD, setOpenDD] = useState(false);
 
   return (
-    <Box>
+    <Box p={10}>
       <Box>This is Tooltip page</Box>
 
       <Box bgColor="violetLighter" inline>
@@ -33,7 +33,7 @@ export default function TooltipPage() {
         )}
       </Box>
 
-      <Box mt={40} style={{ width: 800, height: 300 }} b={1} overflow="auto" bgColor="violet" position="relative">
+      <Box mt={10} style={{ width: 800, height: 300 }} b={1} overflow="auto" bgColor="violet" position="relative">
         <Box>overflow hidden box</Box>
         <Flex>
           <Box m={4} position="relative">

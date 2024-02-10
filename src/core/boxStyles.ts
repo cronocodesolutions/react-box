@@ -711,6 +711,7 @@ export const boxStyles = {
 export const boxThemeStyles = {
   shadow: { cssNames: ['box-shadow'], formatValue: BoxStylesFormatters.Value.variables('shadow') },
   background: { cssNames: ['background'], formatValue: BoxStylesFormatters.Value.variables('background') },
+  backgroundImage: { cssNames: ['background-image'], formatValue: BoxStylesFormatters.Value.variables('backgroundImage') },
   color: { cssNames: ['color'], formatValue: BoxStylesFormatters.Value.variables('color') },
   bgColor: { cssNames: ['background-color'], formatValue: BoxStylesFormatters.Value.variables('color') },
   borderColor: { cssNames: ['border-color'], formatValue: BoxStylesFormatters.Value.variables('color') },
@@ -730,7 +731,20 @@ export const svgThemeStyles = {
   },
 } satisfies Record<string, ThemeItem>;
 
-export const pseudoClassSuffixes = ['H', 'F', 'A'] as const;
+// :hover
+// :active
+// :focus
+// :focus-visible
+// :focus-within
+
+// :checked
+// :indeterminate
+// :valid
+// :invalid
+// :required
+// :optional
+
+export const pseudoClassSuffixes = ['H', 'F', 'A', 'C'] as const;
 export type PseudoClassSuffix = (typeof pseudoClassSuffixes)[number];
 
 export const pseudoClassClassName = {

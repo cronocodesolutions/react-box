@@ -9,6 +9,7 @@ export const themeProps = {
     violet: '#988bee',
     violetLight: '#e8edfd',
     violetLighter: '#f6f8fe',
+    violetDark: '#5f3e66', // '#4a324f',
     gray1: '#94a3b833',
     gray2: '#94a3b8',
     dark: '#272822',
@@ -17,6 +18,12 @@ export const themeProps = {
   backgrounds: {
     none: 'none',
     stripes: 'linear-gradient(135deg,var(--colorviolet) 10%,#0000 0,#0000 50%,var(--colorviolet) 0,var(--colorviolet) 60%,#0000 0,#0000);',
+  },
+  backgroundImages: {
+    check:
+      "url(\"data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' width='100%' viewBox='0 0 20 20'%3e%3cpath fill='none' stroke='%23FFF' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M6 10l3 3l6-6'/%3e%3c/svg%3e\")",
+    radio:
+      "url(\"data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' width='100%' viewBox='0 0 20 20'%3e%3ccircle fill='%23FFF' cx='10' cy='10' r='5'/%3e%3c/svg%3e\")",
   },
   shadows: {
     none: 'none',
@@ -30,17 +37,59 @@ Theme.setup({
       padding: 3,
       color: 'white',
       bgColor: 'violet',
-      colorH: 'black',
+      colorH: 'violetDark',
       bgColorH: 'violetLight',
       borderColor: 'violetLighter',
       borderColorH: 'violet',
     },
     disabled: {
+      cursor: 'not-allowed',
       bgColor: 'violetLight',
       bgColorH: 'violetLight',
       color: 'gray2',
       colorH: 'gray2',
+      borderColor: 'violetLighter',
+      borderColorH: 'violetLighter',
+    },
+  },
+  checkbox: {
+    styles: {
+      appearance: 'none',
+      b: 1,
+      borderColor: 'violet',
+      borderRadius: 1,
+      p: 2,
+      cursor: 'pointer',
+      bgColorC: 'violet',
+      bgColorH: 'violetLight',
+      backgroundImageC: 'check',
+    },
+    disabled: {
       cursor: 'not-allowed',
+      bgColor: 'violetLight',
+      bgColorH: 'violetLight',
+      bgColorC: 'violetLight',
+      borderColor: 'violetLighter',
+      borderColorH: 'violetLighter',
+    },
+  },
+  radioButton: {
+    styles: {
+      appearance: 'none',
+      b: 1,
+      borderColor: 'violet',
+      borderRadius: 3,
+      p: 2,
+      cursor: 'pointer',
+      bgColorC: 'violet',
+      bgColorH: 'violetLight',
+      backgroundImageC: 'radio',
+    },
+    disabled: {
+      cursor: 'not-allowed',
+      bgColor: 'violetLight',
+      bgColorH: 'violetLight',
+      bgColorC: 'violetLight',
       borderColor: 'violetLighter',
       borderColorH: 'violetLighter',
     },
@@ -48,6 +97,35 @@ Theme.setup({
   textbox: {
     styles: {
       p: 2,
+      b: 1,
+      borderColor: 'violet',
+      bgColorH: 'violetLighter',
+      bgColorF: 'violetLighter',
+      color: 'violetDark',
+    },
+    disabled: {
+      cursor: 'not-allowed',
+      borderColor: 'violetLighter',
+      bgColor: 'violetLight',
+      bgColorH: 'violetLight',
+      color: 'gray2',
+    },
+  },
+  textarea: {
+    styles: {
+      p: 2,
+      b: 1,
+      borderColor: 'violet',
+      bgColorH: 'violetLighter',
+      bgColorF: 'violetLighter',
+      color: 'violetDark',
+    },
+    disabled: {
+      cursor: 'not-allowed',
+      borderColor: 'violetLighter',
+      bgColor: 'violetLight',
+      bgColorH: 'violetLight',
+      color: 'gray2',
     },
   },
   components: {

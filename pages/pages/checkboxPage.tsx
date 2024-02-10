@@ -4,16 +4,14 @@ import Flex from '../../src/components/flex';
 
 export default function CheckboxPage() {
   return (
-    <Box>
+    <Box p={10}>
       <Box py={3}>
         <Flex gap={2}>
           <Checkbox /> Theme
         </Flex>
         <Flex mt={2} gap={2}>
-          <Checkbox clean /> Clean
-        </Flex>
-        <Flex mt={2} gap={2}>
-          <Checkbox native /> Native
+          <Checkbox disabled /> Disabled
+          <Checkbox disabled defaultChecked /> Disabled Checked
         </Flex>
       </Box>
     </Box>
