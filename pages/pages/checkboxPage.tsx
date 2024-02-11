@@ -13,6 +13,7 @@ export default function CheckboxPage() {
           <Checkbox disabled /> Disabled
           <Checkbox disabled defaultChecked /> Disabled Checked
         </Flex>
+        <Checkbox mt={2} indeterminate /> Indeterminate
       </Box>
     </Box>
   );

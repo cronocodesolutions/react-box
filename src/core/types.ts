@@ -29,7 +29,12 @@ export type BoxStyleProps = BoxNormalStyles &
   PseudoClass<BoxNormalStyles, 'H'> &
   PseudoClass<BoxNormalStyles, 'F'> &
   PseudoClass<BoxNormalStyles, 'A'> &
-  PseudoClass<BoxNormalStyles, 'C'> &
+  PseudoClass<BoxNormalStyles, 'Checked'> &
+  PseudoClass<BoxNormalStyles, 'Indeterminate'> &
+  PseudoClass<BoxNormalStyles, 'Valid'> &
+  PseudoClass<BoxNormalStyles, 'Invalid'> &
+  PseudoClass<BoxNormalStyles, 'Required'> &
+  PseudoClass<BoxNormalStyles, 'Optional'> &
   ThemeComponentProps &
   Augmented.BoxProps;
 
@@ -42,6 +47,11 @@ export type BoxSvgStyles = SvgNormalStyles &
   PseudoClass<SvgNormalStyles, 'H'> &
   PseudoClass<SvgNormalStyles, 'F'> &
   PseudoClass<SvgNormalStyles, 'A'> &
-  PseudoClass<SvgNormalStyles, 'C'> &
+  PseudoClass<SvgNormalStyles, 'Checked'> &
+  PseudoClass<SvgNormalStyles, 'Indeterminate'> &
+  PseudoClass<SvgNormalStyles, 'Valid'> &
+  PseudoClass<SvgNormalStyles, 'Invalid'> &
+  PseudoClass<SvgNormalStyles, 'Required'> &
+  PseudoClass<SvgNormalStyles, 'Optional'> &
   ThemeComponentProps &
   Augmented.SvgProps;

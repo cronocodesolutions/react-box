@@ -43,7 +43,11 @@ a,ul{all: unset;}
       items = generateStyles(items, 'H');
       items = generateStyles(items, 'F');
       items = generateStyles(items, 'A');
-      items = generateStyles(items, 'C');
+      items = generateStyles(items, 'Checked');
+      items = generateStyles(items, 'Indeterminate');
+      items = generateStyles(items, 'Valid');
+      items = generateStyles(items, 'Invalid');
+      items = generateStyles(items, 'Required');
 
       const el = getElement();
 
@@ -100,8 +104,18 @@ a,ul{all: unset;}
             ];
           } else if (pseudoSuffix === 'A') {
             selectors = formatSelector(`${selector}:active`, valueItem);
-          } else if (pseudoSuffix === 'C') {
+          } else if (pseudoSuffix === 'Checked') {
             selectors = formatSelector(`${selector}:checked`, valueItem);
+          } else if (pseudoSuffix === 'Indeterminate') {
+            selectors = formatSelector(`${selector}:indeterminate`, valueItem);
+          } else if (pseudoSuffix === 'Valid') {
+            selectors = formatSelector(`${selector}:valid`, valueItem);
+          } else if (pseudoSuffix === 'Invalid') {
+            selectors = formatSelector(`${selector}:invalid`, valueItem);
+          } else if (pseudoSuffix === 'Required') {
+            selectors = formatSelector(`${selector}:required`, valueItem);
+          } else if (pseudoSuffix === 'Optional') {
+            selectors = formatSelector(`${selector}:optional`, valueItem);
           }
 
           const cssValue = valueItem.formatValue?.(key as StyleKey, value) ?? value;

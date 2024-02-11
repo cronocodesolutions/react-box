@@ -37,3 +37,6 @@ function Box<TTag extends keyof React.JSX.IntrinsicElements = 'div'>(props: Prop
 export default forwardRef(Box) as <TTag extends keyof React.JSX.IntrinsicElements = 'div'>(
   props: Props<TTag> & RefAttributes<ExtractElementFromTag<TTag>>,
 ) => React.ReactNode;
+
+export type BoxProps<TTag extends keyof React.JSX.IntrinsicElements = 'div'> = React.ComponentProps<typeof Box<TTag>>;
+export type BoxTagProps<TTag extends keyof React.JSX.IntrinsicElements = 'div'> = Required<BoxProps<TTag>>['props'];

@@ -1,27 +1,24 @@
-import React, { forwardRef, Ref } from 'react';
-import Box from '../box';
-import ObjectUtils from '../utils/object/objectUtils';
-
-type BoxProps = Omit<React.ComponentProps<typeof Box<'input'>>, 'ref' | 'tag'>;
-type BoxTagProps = Required<BoxProps>['props'];
+import React, { forwardRef, Ref, useEffect, useRef } from 'react';
+import Box, { BoxTagProps, BoxProps } from '../box';
 
 const tagProps = [
   'name',
   'onInput',
   'onChange',
-  'disabled',
   'autoFocus',
   'readOnly',
   'required',
   'value',
   'checked',
   'defaultChecked',
+  'disabled',
 ] as const;
 type TagPropsType = (typeof tagProps)[number];
 
-type CheckboxTagProps = Omit<BoxTagProps, TagPropsType | 'type'>;
+type CheckboxProps = Omit<BoxProps<'input'>, 'tag' | 'props'>;
+type CheckboxTagProps = Omit<BoxTagProps<'input'>, TagPropsType | 'type'>;
 
-interface Props extends Omit<BoxProps, 'props'> {
+interface Props extends CheckboxProps {
   name?: string;
   props?: CheckboxTagProps;
   onInput?: (e: React.ChangeEvent<HTMLInputElement>) => void;
@@ -32,12 +29,44 @@ interface Props extends Omit<BoxProps, 'props'> {
   required?: boolean;
   checked?: boolean;
   defaultChecked?: boolean;
+  indeterminate?: boolean;
 }
 
-function Checkbox(props: Props, ref: Ref<HTMLInputElement>) {
-  const newProps = ObjectUtils.buildProps(props, tagProps, { type: 'checkbox' });
+function Checkbox(props: Props, ref: Ref<HTMLInputElement> | null) {
+  const {
+    name,
+    onInput,
+    onChange,
+    value,
+    autoFocus,
+    readOnly,
+    required,
+    checked,
+    defaultChecked,
+    indeterminate,
+    props: tagProps,
+    ...restProps
+  } = props;
 
-  return <Box ref={ref} tag="input" component="checkbox" {...newProps} />;
+  const checkboxRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (ref && typeof ref !== 'function' && ref.current) {
+      ref.current.indeterminate = Boolean(indeterminate);
+    } else if (checkboxRef.current) {
+      checkboxRef.current.indeterminate = Boolean(indeterminate);
+    }
+  }, [ref, checkboxRef, indeterminate]);
+
+  return (
+    <Box
+      tag="input"
+      ref={ref || checkboxRef}
+      component="checkbox"
+      props={{ ...tagProps, type: 'checkbox', name, onInput, onChange, value, autoFocus, readOnly, required, checked, defaultChecked }}
+      {...restProps}
+    />
+  );
 }
 
 export default forwardRef(Checkbox);

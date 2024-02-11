@@ -1,3 +1,4 @@
+import { pseudoClassSuffixes } from './boxStyles';
 import { BoxStyleProps } from './types';
 
 export interface ThemeStyles {
@@ -132,55 +133,18 @@ namespace Theme {
   
     namespace Augmented {
       interface BoxProps {
-        color?: ColorType;
-        colorH?: ColorType;
-        colorF?: ColorType;
-        colorA?: ColorType;
-        colorC?: ColorType;
-        bgColor?: ColorType;
-        bgColorH?: ColorType;
-        bgColorF?: ColorType;
-        bgColorA?: ColorType;
-        bgColorC?: ColorType;
-        borderColor?: ColorType;
-        borderColorH?: ColorType;
-        borderColorF?: ColorType;
-        borderColorA?: ColorType;
-        borderColorC?: ColorType;
-        outlineColor?: ColorType;
-        outlineColorH?: ColorType;
-        outlineColorF?: ColorType;
-        outlineColorA?: ColorType;
-        outlineColorC?: ColorType;
-        background?: BackgroundType;
-        backgroundH?: BackgroundType;
-        backgroundF?: BackgroundType;
-        backgroundA?: BackgroundType;
-        backgroundC?: BackgroundType;
-        backgroundImage?: BackgroundImageType;
-        backgroundImageH?: BackgroundImageType;
-        backgroundImageF?: BackgroundImageType;
-        backgroundImageA?: BackgroundImageType;
-        backgroundImageC?: BackgroundImageType;
-        shadow?: ShadowType;
-        shadowH?: ShadowType;
-        shadowF?: ShadowType;
-        shadowF?: ShadowType;
-        shadowA?: ShadowType;
-        shadowC?: ShadowType;
+${getPseudoClassProps('color', 'ColorType')}
+${getPseudoClassProps('bgColor', 'ColorType')}
+${getPseudoClassProps('borderColor', 'ColorType')}
+${getPseudoClassProps('outlineColor', 'ColorType')}
+${getPseudoClassProps('background', 'BackgroundType')}
+${getPseudoClassProps('backgroundImage', 'BackgroundImageType')}
+${getPseudoClassProps('shadow', 'ShadowType')}
       }
   
       interface SvgProps {
-        fill?: ColorType;
-        fillH?: ColorType;
-        fillF?: ColorType;
-        fillA?: ColorType;
-        fillC?: ColorType;
-        stroke?: ColorType;
-        strokeH?: ColorType;
-        strokeF?: ColorType;
-        strokeA?: ColorType;
-        strokeC?: ColorType;
+${getPseudoClassProps('fill', 'ColorType')}
+${getPseudoClassProps('stroke', 'ColorType')}
       }
     }
   }
@@ -190,6 +154,15 @@ namespace Theme {
       variables: variables.join('\n'),
       boxDts,
     };
+  }
+
+  function getPseudoClassProps(propName: string, propType: string) {
+    const pseudoClasses = pseudoClassSuffixes.map((p) => {
+      return `        ${propName}${p}?: ${propType};`;
+    });
+    pseudoClasses.unshift(`        ${propName}?: ${propType};`);
+
+    return pseudoClasses.join('\n');
   }
 
   function assignDefaultStyles() {
