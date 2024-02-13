@@ -731,6 +731,7 @@ export const svgThemeStyles = {
   },
 } satisfies Record<string, ThemeItem>;
 
+// :disabled
 // :hover
 // :active
 // :focus

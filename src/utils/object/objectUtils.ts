@@ -1,18 +1,4 @@
 namespace ObjectUtils {
-  export function moveToTagProps<T extends Object, TKey extends keyof T>(props: T, ...keys: TKey[]) {
-    const newProps = { ...props };
-    const tagProps = {} as Record<TKey, T[TKey]>;
-
-    keys.forEach((key) => {
-      if (key in newProps) {
-        tagProps[key] = newProps[key];
-        delete newProps[key];
-      }
-    });
-
-    return [tagProps, newProps];
-  }
-
   export function buildProps<T extends { props?: Object }, TKey extends keyof T>(props: T, keys: Readonly<TKey[]>, extraTagProps?: Object) {
     const newProps = { ...props };
     const tagProps = (newProps.props || {}) as Record<TKey, T[TKey]>;
@@ -20,8 +6,6 @@ namespace ObjectUtils {
     keys.forEach((key) => {
       if (key in newProps) {
         tagProps[key] = newProps[key];
-
-        if (key === 'disabled') return;
 
         delete newProps[key];
       }

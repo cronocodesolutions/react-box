@@ -5,7 +5,7 @@ import ObjectUtils from '../utils/object/objectUtils';
 type BoxProps = Omit<React.ComponentProps<typeof Box<'button'>>, 'ref' | 'tag'>;
 type BoxTagProps = Required<BoxProps>['props'];
 
-const tagProps = ['type', 'onClick', 'disabled'] as const;
+const tagProps = ['type', 'onClick'] as const;
 type TagPropsType = (typeof tagProps)[number];
 
 type ButtonTagProps = Omit<BoxTagProps, TagPropsType>;

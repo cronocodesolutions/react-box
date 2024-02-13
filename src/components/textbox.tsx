@@ -11,7 +11,6 @@ const tagProps = [
   'onChange',
   'type',
   'placeholder',
-  'disabled',
   'defaultValue',
   'autoFocus',
   'readOnly',

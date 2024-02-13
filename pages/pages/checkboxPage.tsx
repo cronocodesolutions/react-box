@@ -9,7 +9,7 @@ export default function CheckboxPage() {
         <Flex gap={2}>
           <Checkbox /> Theme
         </Flex>
-        <Flex mt={2} gap={2}>
+        <Flex mt={2} gap={2} disabled>
           <Checkbox disabled /> Disabled
           <Checkbox disabled defaultChecked /> Disabled Checked
         </Flex>

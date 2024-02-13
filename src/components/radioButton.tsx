@@ -5,18 +5,7 @@ import ObjectUtils from '../utils/object/objectUtils';
 type BoxProps = Omit<React.ComponentProps<typeof Box<'input'>>, 'ref' | 'tag'>;
 type BoxTagProps = Required<BoxProps>['props'];
 
-const tagProps = [
-  'name',
-  'onInput',
-  'onChange',
-  'disabled',
-  'value',
-  'autoFocus',
-  'readOnly',
-  'required',
-  'checked',
-  'defaultChecked',
-] as const;
+const tagProps = ['name', 'onInput', 'onChange', 'value', 'autoFocus', 'readOnly', 'required', 'checked', 'defaultChecked'] as const;
 type TagPropsType = (typeof tagProps)[number];
 
 type RadioButtonTagProps = Omit<BoxTagProps, TagPropsType | 'type'>;

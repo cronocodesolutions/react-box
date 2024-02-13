@@ -10,7 +10,6 @@ const tagProps = [
   'onInput',
   'onChange',
   'placeholder',
-  'disabled',
   'value',
   'defaultValue',
   'rows',
