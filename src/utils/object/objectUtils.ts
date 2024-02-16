@@ -21,6 +21,10 @@ namespace ObjectUtils {
 
     return newProps;
   }
+
+  export function isObject(value: unknown): value is object {
+    return typeof value === 'object' && value !== null;
+  }
 }
 
 export default ObjectUtils;

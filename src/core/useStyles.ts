@@ -12,7 +12,7 @@ export default function useStyles(props: BoxStyleProps, isSvg: boolean) {
   useEff(StylesContext.flush, [props]);
 
   return useMemo(() => {
-    const classNames: (string | undefined)[] = [isSvg ? StylesContext.svgClassName : StylesContext.boxClassName];
+    const classNames: string[] = [isSvg ? StylesContext.svgClassName : StylesContext.boxClassName];
     const propsToUse = themeProps ? { ...replaceAliases(themeProps), ...replaceAliases(props) } : replaceAliases(props);
 
     if ('inline' in propsToUse) {
@@ -41,7 +41,7 @@ export default function useStyles(props: BoxStyleProps, isSvg: boolean) {
     }
 
     Object.entries(propsToUse).forEach(([key, value]) => {
-      classNames.push(StylesContext.get(key as StyleKey, value));
+      StylesContext.get(classNames, key as StyleKey, value);
     });
 
     return classNames;

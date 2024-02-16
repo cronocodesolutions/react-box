@@ -8,7 +8,6 @@ export interface ThemeStyles {
 
 export interface ThemeComponentStyles {
   styles: BoxStyleProps;
-  disabled?: BoxStyleProps;
   themes?: {
     [name: string]: ThemeStyles;
   };
@@ -46,9 +45,9 @@ const defaultTheme: ThemeSetup = {
       borderRadius: 1,
       userSelect: 'none',
     },
-    disabled: {
-      cursor: 'default',
-    },
+    // disabled: {
+    //   cursor: 'default',
+    // },
   },
   checkbox: {
     styles: {
@@ -175,10 +174,6 @@ ${getPseudoClassProps('stroke', 'ColorType')}
 
       if (componentStyles) {
         componentStyles.styles = { ...componentDefaultStyles.styles, ...componentStyles.styles };
-
-        if (componentStyles.disabled && componentDefaultStyles.disabled) {
-          componentStyles.disabled = { ...componentDefaultStyles.disabled, ...componentStyles.disabled };
-        }
       } else {
         Styles[component] = defaultTheme[component] as any;
       }

@@ -24,8 +24,14 @@ interface BoxPseudoClasses {
   hover?: boolean;
   focus?: boolean;
 }
+interface BoxPseudoClasses2 {
+  disabled?: boolean | (BoxNormalStyles & Augmented.BoxProps) | [boolean, BoxNormalStyles & Augmented.BoxProps];
+  // | [boolean, BoxNormalStyles & Augmented.BoxProps, Record<string, BoxNormalStyles & Augmented.BoxProps>];
+}
+
 export type BoxStyleProps = BoxNormalStyles &
   BoxPseudoClasses &
+  BoxPseudoClasses2 &
   PseudoClass<BoxNormalStyles, 'H'> &
   PseudoClass<BoxNormalStyles, 'F'> &
   PseudoClass<BoxNormalStyles, 'A'> &

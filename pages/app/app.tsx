@@ -13,8 +13,10 @@ import Flex from '../../src/components/flex';
 import MenuItem from './menuItem';
 import { Routes, Route } from 'react-router-dom';
 import TextareaPage from '../pages/textareaPage';
+import Checkbox from '../../src/components/checkbox';
 
 export default function App() {
+  return <Checkbox disabled />;
   return (
     <Flex height="fit-screen" color="violetDark">
       <Box height="fit-screen" style={{ width: '200px' }} bgColor="violetLighter" px={2}>

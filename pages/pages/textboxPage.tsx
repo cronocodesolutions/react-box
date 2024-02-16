@@ -9,7 +9,7 @@ export default function TextboxPage() {
   return (
     <Box p={10}>
       <Box py={3}>
-        <Textbox defaultValue="uncontrolled" />
+        <Textbox defaultValue="uncontrolled" bgColorF="red" bgColorH="violet" />
       </Box>
       <Flex py={3}>
         <Box tag="label">

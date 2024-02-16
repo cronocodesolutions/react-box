@@ -44,15 +44,15 @@ Theme.setup({
       borderColor: 'violetLighter',
       borderColorH: 'violet',
     },
-    disabled: {
-      cursor: 'not-allowed',
-      bgColor: 'violetLight',
-      bgColorH: 'violetLight',
-      color: 'gray2',
-      colorH: 'gray2',
-      borderColor: 'violetLighter',
-      borderColorH: 'violetLighter',
-    },
+    // disabled: {
+    //   cursor: 'not-allowed',
+    //   bgColor: 'violetLight',
+    //   bgColorH: 'violetLight',
+    //   color: 'gray2',
+    //   colorH: 'gray2',
+    //   borderColor: 'violetLighter',
+    //   borderColorH: 'violetLighter',
+    // },
   },
   checkbox: {
     styles: {
@@ -66,15 +66,18 @@ Theme.setup({
       bgColorH: 'violetLight',
       backgroundImageChecked: 'check',
       backgroundImageIndeterminate: 'indeterminate',
+      disabled: {
+        cursor: 'not-allowed',
+      },
     },
-    disabled: {
-      cursor: 'not-allowed',
-      bgColor: 'violetLight',
-      bgColorH: 'violetLight',
-      bgColorChecked: 'violetLight',
-      borderColor: 'violetLighter',
-      borderColorH: 'violetLighter',
-    },
+    // disabled: {
+    //   cursor: 'not-allowed',
+    //   bgColor: 'violetLight',
+    //   bgColorH: 'violetLight',
+    //   bgColorChecked: 'violetLight',
+    //   borderColor: 'violetLighter',
+    //   borderColorH: 'violetLighter',
+    // },
   },
   radioButton: {
     styles: {
@@ -88,14 +91,14 @@ Theme.setup({
       bgColorH: 'violetLight',
       backgroundImageChecked: 'radio',
     },
-    disabled: {
-      cursor: 'not-allowed',
-      bgColor: 'violetLight',
-      bgColorH: 'violetLight',
-      bgColorChecked: 'violetLight',
-      borderColor: 'violetLighter',
-      borderColorH: 'violetLighter',
-    },
+    // disabled: {
+    //   cursor: 'not-allowed',
+    //   bgColor: 'violetLight',
+    //   bgColorH: 'violetLight',
+    //   bgColorChecked: 'violetLight',
+    //   borderColor: 'violetLighter',
+    //   borderColorH: 'violetLighter',
+    // },
   },
   textbox: {
     styles: {
@@ -106,13 +109,13 @@ Theme.setup({
       bgColorF: 'violetLighter',
       color: 'violetDark',
     },
-    disabled: {
-      cursor: 'not-allowed',
-      borderColor: 'violetLighter',
-      bgColor: 'violetLight',
-      bgColorH: 'violetLight',
-      color: 'gray2',
-    },
+    // disabled: {
+    //   cursor: 'not-allowed',
+    //   borderColor: 'violetLighter',
+    //   bgColor: 'violetLight',
+    //   bgColorH: 'violetLight',
+    //   color: 'gray2',
+    // },
   },
   textarea: {
     styles: {
@@ -123,13 +126,13 @@ Theme.setup({
       bgColorF: 'violetLighter',
       color: 'violetDark',
     },
-    disabled: {
-      cursor: 'not-allowed',
-      borderColor: 'violetLighter',
-      bgColor: 'violetLight',
-      bgColorH: 'violetLight',
-      color: 'gray2',
-    },
+    // disabled: {
+    //   cursor: 'not-allowed',
+    //   borderColor: 'violetLighter',
+    //   bgColor: 'violetLight',
+    //   bgColorH: 'violetLight',
+    //   color: 'gray2',
+    // },
   },
   components: {
     mycomponent: {

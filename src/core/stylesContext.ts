@@ -1,3 +1,4 @@
+import ObjectUtils from '../utils/object/objectUtils';
 import { PseudoClassClassNameKey, PseudoClassSuffix, StyleItem, StyleKey, StyleValues, boxStyles, pseudoClassClassName } from './boxStyles';
 import IdentityFactory from '@cronocode/identity-factory';
 
@@ -27,13 +28,27 @@ a,ul{all: unset;}
     {} as Record<StyleKey, Set<string | number | boolean>>,
   );
 
-  export function get(key: string, value: string | number | boolean) {
+  export function get(classNames: (string | undefined)[], key: string, value: string | number | boolean) {
     if (key in boxStyles) {
-      return getClassName(key as StyleKey, value);
+      classNames.push(getClassName(key as StyleKey, value));
+    }
+
+    if (key === 'disabled') {
+      if (Array.isArray(value)) {
+        const [val, props] = value;
+
+        Object.entries(props).forEach(([key, dValue]) => {
+          StylesContext.get(classNames, `${key}Disabled` as StyleKey, dValue as string | number | boolean);
+        });
+      } else if (ObjectUtils.isObject(value)) {
+        Object.entries(value).forEach(([key, dValue]) => {
+          StylesContext.get(classNames, `${key}Disabled` as StyleKey, dValue as string | number | boolean);
+        });
+      }
     }
 
     if (key in pseudoClassClassName) {
-      return pseudoClassClassName[key as PseudoClassClassNameKey].className;
+      classNames.push(pseudoClassClassName[key as PseudoClassClassNameKey].className);
     }
   }
 
@@ -48,6 +63,7 @@ a,ul{all: unset;}
       items = generateStyles(items, 'Valid');
       items = generateStyles(items, 'Invalid');
       items = generateStyles(items, 'Required');
+      items = generateStyles(items, 'Disabled');
 
       const el = getElement();
 
@@ -66,6 +82,10 @@ a,ul{all: unset;}
       },
       {} as Record<StyleKey, Set<string | number | boolean>>,
     );
+  }
+
+  function handleDisabledProp() {
+    //
   }
 
   function getClassName(styleKey: StyleKey, value: string | number | boolean) {
@@ -116,6 +136,8 @@ a,ul{all: unset;}
             selectors = formatSelector(`${selector}:required`, valueItem);
           } else if (pseudoSuffix === 'Optional') {
             selectors = formatSelector(`${selector}:optional`, valueItem);
+          } else if (pseudoSuffix === 'Disabled') {
+            selectors = formatSelector(`${selector}:disabled`, valueItem);
           }
 
           const cssValue = valueItem.formatValue?.(key as StyleKey, value) ?? value;
