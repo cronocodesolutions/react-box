@@ -206,7 +206,7 @@ ${getPseudoClassProps('stroke', 'ColorType')}
     if (!componentStyles.children) return [];
 
     const childrenNames = Object.keys(componentStyles.children);
-    const acc: [string, ThemeComponentStyles][] = [];
+    const acc: [string, ThemeComponentStyles<BoxThemeProps>][] = [];
 
     for (const childName of childrenNames) {
       const name = `${componentName}.${childName}`;
