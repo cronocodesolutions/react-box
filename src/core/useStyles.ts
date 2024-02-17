@@ -15,6 +15,13 @@ export default function useStyles(props: BoxStyleProps, isSvg: boolean) {
     const classNames: (string | undefined)[] = [isSvg ? StylesContext.svgClassName : StylesContext.boxClassName];
     const propsToUse = themeProps ? { ...replaceAliases(themeProps), ...replaceAliases(props) } : replaceAliases(props);
 
+    if (Array.isArray(propsToUse.disabled)) {
+      Object.entries(propsToUse.disabled[1]).forEach(([name, value]) => {
+        propsToUse[`${name}Disabled` as keyof BoxStyleProps] = value;
+      });
+      delete propsToUse.disabled;
+    }
+
     if ('inline' in propsToUse) {
       if (propsToUse.display === 'block' || !propsToUse.display) propsToUse.display = 'inline-block';
       else if (propsToUse.display === 'flex') propsToUse.display = 'inline-flex';

@@ -746,7 +746,20 @@ export const svgThemeStyles = {
 // :optional
 
 export const pseudoClassSuffixes = ['H', 'F', 'A', 'Checked', 'Indeterminate', 'Valid', 'Invalid', 'Required', 'Optional'] as const;
+export const pseudoClassSuffixesExtended = [
+  'H',
+  'F',
+  'A',
+  'Checked',
+  'Indeterminate',
+  'Valid',
+  'Invalid',
+  'Required',
+  'Optional',
+  'Disabled',
+] as const;
 export type PseudoClassSuffix = (typeof pseudoClassSuffixes)[number];
+export type PseudoClassSuffixExtended = (typeof pseudoClassSuffixesExtended)[number];
 
 export const pseudoClassClassName = {
   hover: { className: '_h' },
@@ -804,7 +817,7 @@ export const aliases = {
 
 const boxStylesKeys = Object.keys(boxStyles);
 const aliasKeys = Object.keys(aliases);
-pseudoClassSuffixes.forEach((pseudoSuffix) => {
+pseudoClassSuffixesExtended.forEach((pseudoSuffix) => {
   boxStylesKeys.forEach((key) => {
     // @ts-ignore
     boxStyles[`${key}${pseudoSuffix}`] = { ...boxStyles[key] };

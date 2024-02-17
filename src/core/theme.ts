@@ -1,31 +1,29 @@
 import { pseudoClassSuffixes } from './boxStyles';
 import { BoxStyleProps } from './types';
+import { BoxThemeProps } from './types';
 
-export interface ThemeStyles {
-  styles: BoxStyleProps;
-  disabled?: BoxStyleProps;
+export interface ThemeStyles<T> {
+  styles: T;
 }
 
-export interface ThemeComponentStyles {
-  styles: BoxStyleProps;
-  disabled?: BoxStyleProps;
+export interface ThemeComponentStyles<T = BoxStyleProps> extends ThemeStyles<T> {
   themes?: {
-    [name: string]: ThemeStyles;
+    [name: string]: ThemeStyles<T>;
   };
   children?: {
-    [name: string]: ThemeComponentStyles;
+    [name: string]: ThemeComponentStyles<T>;
   };
 }
 
-export interface ThemeSetup {
+export interface ThemeSetup<T = BoxStyleProps> {
   components?: {
-    [name: string]: ThemeComponentStyles;
+    [name: string]: ThemeComponentStyles<T>;
   };
-  button?: ThemeComponentStyles;
-  textbox?: ThemeComponentStyles;
-  textarea?: ThemeComponentStyles;
-  checkbox?: ThemeComponentStyles;
-  radioButton?: ThemeComponentStyles;
+  button?: ThemeComponentStyles<T>;
+  textbox?: ThemeComponentStyles<T>;
+  textarea?: ThemeComponentStyles<T>;
+  checkbox?: ThemeComponentStyles<T>;
+  radioButton?: ThemeComponentStyles<T>;
 }
 
 interface BoxAugmentedProps {
@@ -36,7 +34,7 @@ interface BoxAugmentedProps {
 }
 
 // IMPORTANT!!!  DO NOT USE INLINE PROP IN THESE DEFAULT VALUES
-const defaultTheme: ThemeSetup = {
+const defaultTheme: ThemeSetup<BoxThemeProps> = {
   button: {
     styles: {
       display: 'inline-block',
@@ -45,9 +43,9 @@ const defaultTheme: ThemeSetup = {
       b: 1,
       borderRadius: 1,
       userSelect: 'none',
-    },
-    disabled: {
-      cursor: 'default',
+      disabled: {
+        cursor: 'default',
+      },
     },
   },
   checkbox: {
@@ -80,11 +78,12 @@ const defaultTheme: ThemeSetup = {
 };
 
 namespace Theme {
-  export let Styles: ThemeSetup = defaultTheme;
+  export let Styles: ThemeSetup<BoxStyleProps>;
 
-  export function setup(styles: ThemeSetup) {
+  export function setup(styles: ThemeSetup<BoxThemeProps>) {
     extractChildren(styles);
-    Styles = styles;
+    extractPseudoClasses(styles);
+    Styles = styles as ThemeSetup<BoxStyleProps>;
 
     assignDefaultStyles();
   }
@@ -167,25 +166,22 @@ ${getPseudoClassProps('stroke', 'ColorType')}
 
   function assignDefaultStyles() {
     extractChildren(defaultTheme);
-    const components = Object.keys(defaultTheme) as (keyof ThemeSetup)[];
+    extractPseudoClasses(defaultTheme);
+    const components = Object.keys(defaultTheme) as (keyof ThemeSetup<BoxStyleProps>)[];
 
     components.forEach((component) => {
       const componentStyles = Styles[component];
-      const componentDefaultStyles = defaultTheme[component]!;
+      const componentDefaultStyles = (defaultTheme as ThemeSetup<BoxStyleProps>)[component]!;
 
       if (componentStyles) {
         componentStyles.styles = { ...componentDefaultStyles.styles, ...componentStyles.styles };
-
-        if (componentStyles.disabled && componentDefaultStyles.disabled) {
-          componentStyles.disabled = { ...componentDefaultStyles.disabled, ...componentStyles.disabled };
-        }
       } else {
         Styles[component] = defaultTheme[component] as any;
       }
     });
   }
 
-  function extractChildren(styles: ThemeSetup) {
+  function extractChildren(styles: ThemeSetup<BoxThemeProps>) {
     if (!styles.components) return;
 
     const componentsNames = Object.keys(styles.components);
@@ -203,7 +199,10 @@ ${getPseudoClassProps('stroke', 'ColorType')}
     }
   }
 
-  function getChildren(componentName: string, componentStyles: ThemeComponentStyles): [string, ThemeComponentStyles][] {
+  function getChildren(
+    componentName: string,
+    componentStyles: ThemeComponentStyles<BoxThemeProps>,
+  ): [string, ThemeComponentStyles<BoxThemeProps>][] {
     if (!componentStyles.children) return [];
 
     const childrenNames = Object.keys(componentStyles.children);
@@ -221,6 +220,23 @@ ${getPseudoClassProps('stroke', 'ColorType')}
     }
 
     return acc;
+  }
+
+  function extractPseudoClasses(styles: ThemeSetup<BoxThemeProps>) {
+    const { components, ...restStyles } = styles;
+
+    const componentStyles = Object.values(restStyles);
+    components && componentStyles.push(...Object.values(components));
+
+    for (const component of componentStyles) {
+      if ('disabled' in component.styles) {
+        Object.entries(component.styles.disabled!).map(([name, value]) => {
+          component.styles[`${name}Disabled` as keyof BoxThemeProps] = value;
+        });
+
+        delete component.styles.disabled;
+      }
+    }
   }
 }
 

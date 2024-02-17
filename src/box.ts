@@ -20,7 +20,7 @@ function Box<TTag extends keyof React.JSX.IntrinsicElements = 'div'>(props: Prop
   const styleClasses = useStyles(props, tag === 'svg');
   const className = useMemo(() => classNames(styleClasses, userClassName).join(' '), [props]);
 
-  const finalTagProps = { ...tagProps, className, disabled } as AllProps<TTag>;
+  const finalTagProps = { ...tagProps, className, disabled: Array.isArray(disabled) ? disabled[0] : disabled } as AllProps<TTag>;
   style && (finalTagProps.style = style);
   ref && (finalTagProps.ref = ref as React.RefObject<HTMLElement>);
 

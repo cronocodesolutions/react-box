@@ -1,4 +1,12 @@
-import { PseudoClassClassNameKey, PseudoClassSuffix, StyleItem, StyleKey, StyleValues, boxStyles, pseudoClassClassName } from './boxStyles';
+import {
+  PseudoClassClassNameKey,
+  PseudoClassSuffixExtended,
+  StyleItem,
+  StyleKey,
+  StyleValues,
+  boxStyles,
+  pseudoClassClassName,
+} from './boxStyles';
 import IdentityFactory from '@cronocode/identity-factory';
 
 namespace StylesContext {
@@ -48,6 +56,7 @@ a,ul{all: unset;}
       items = generateStyles(items, 'Valid');
       items = generateStyles(items, 'Invalid');
       items = generateStyles(items, 'Required');
+      items = generateStyles(items, 'Disabled');
 
       const el = getElement();
 
@@ -80,7 +89,7 @@ a,ul{all: unset;}
     return identity.getIdentity(className);
   }
 
-  function generateStyles(classes: string[], pseudoSuffix?: PseudoClassSuffix) {
+  function generateStyles(classes: string[], pseudoSuffix?: PseudoClassSuffixExtended) {
     return Object.entries(styles)
       .filter(([key]) => (boxStyles[key as StyleKey] as StyleItem)?.pseudoSuffix === pseudoSuffix)
       .reduce((acc, [key, values]) => {
@@ -116,6 +125,8 @@ a,ul{all: unset;}
             selectors = formatSelector(`${selector}:required`, valueItem);
           } else if (pseudoSuffix === 'Optional') {
             selectors = formatSelector(`${selector}:optional`, valueItem);
+          } else if (pseudoSuffix === 'Disabled') {
+            selectors = formatSelector(`${selector}:disabled`, valueItem);
           }
 
           const cssValue = valueItem.formatValue?.(key as StyleKey, value) ?? value;

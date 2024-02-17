@@ -19,14 +19,16 @@ type BoxStyles<T extends Record<string, StyleItem>> = {
   [K in keyof T]?: T[K]['values1']['values'][number] | T[K]['values2']['values'][number] | T[K]['values3']['values'][number];
 };
 
-type BoxNormalStyles = BoxStyles<typeof boxStyles> & BoxStyles<typeof aliases>;
+type BoxNormalStyles = BoxStyles<typeof boxStyles> & BoxStyles<typeof aliases> & Augmented.BoxProps;
 interface BoxPseudoClasses {
   hover?: boolean;
   focus?: boolean;
 }
-export type BoxStyleProps = BoxNormalStyles &
-  BoxPseudoClasses &
-  PseudoClass<BoxNormalStyles, 'H'> &
+interface BoxPseudoClasses2 {
+  disabled?: boolean | [boolean, BoxNormalStyles];
+}
+
+type BoxPseudoClassStyles = PseudoClass<BoxNormalStyles, 'H'> &
   PseudoClass<BoxNormalStyles, 'F'> &
   PseudoClass<BoxNormalStyles, 'A'> &
   PseudoClass<BoxNormalStyles, 'Checked'> &
@@ -34,9 +36,14 @@ export type BoxStyleProps = BoxNormalStyles &
   PseudoClass<BoxNormalStyles, 'Valid'> &
   PseudoClass<BoxNormalStyles, 'Invalid'> &
   PseudoClass<BoxNormalStyles, 'Required'> &
-  PseudoClass<BoxNormalStyles, 'Optional'> &
-  ThemeComponentProps &
-  Augmented.BoxProps;
+  PseudoClass<BoxNormalStyles, 'Optional'>;
+
+interface BoxThemePseudoClassProps {
+  disabled?: BoxNormalStyles;
+}
+export type BoxThemeProps = BoxNormalStyles & BoxThemePseudoClassProps & BoxPseudoClassStyles;
+
+export type BoxStyleProps = BoxNormalStyles & BoxPseudoClasses & BoxPseudoClasses2 & BoxPseudoClassStyles & ThemeComponentProps;
 
 interface SvgNormalStyles {
   rotate?: BoxNormalStyles['rotate'];
