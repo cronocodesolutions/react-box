@@ -1,4 +1,4 @@
-import { PseudoClassSuffix, StyleItem, aliases, boxStyles } from './boxStyles';
+import { PseudoClassSuffix, StyleItem, boxStyles } from './boxStyles';
 import { ThemeComponentProps } from './useTheme';
 
 export type ExtractElementType<T> =
@@ -19,7 +19,7 @@ type BoxStyles<T extends Record<string, StyleItem>> = {
   [K in keyof T]?: T[K]['values1']['values'][number] | T[K]['values2']['values'][number] | T[K]['values3']['values'][number];
 };
 
-type BoxNormalStyles = BoxStyles<typeof boxStyles> & BoxStyles<typeof aliases> & Augmented.BoxProps;
+type BoxNormalStyles = BoxStyles<typeof boxStyles> & Augmented.BoxProps;
 interface BoxPseudoClasses {
   hover?: boolean;
   focus?: boolean;

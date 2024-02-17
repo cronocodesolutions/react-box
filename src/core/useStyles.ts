@@ -1,5 +1,5 @@
 import { useLayoutEffect, useEffect, useMemo } from 'react';
-import { AliasKey, StyleKey, aliases } from './boxStyles';
+import { StyleKey } from './boxStyles';
 import StylesContext from './stylesContext';
 import { BoxStyleProps } from './types';
 import { useTheme } from './useTheme';
@@ -13,7 +13,7 @@ export default function useStyles(props: BoxStyleProps, isSvg: boolean) {
 
   return useMemo(() => {
     const classNames: (string | undefined)[] = [isSvg ? StylesContext.svgClassName : StylesContext.boxClassName];
-    const propsToUse = themeProps ? { ...replaceAliases(themeProps), ...replaceAliases(props) } : replaceAliases(props);
+    const propsToUse = themeProps ? { ...themeProps, ...props } : { ...props };
 
     if (Array.isArray(propsToUse.disabled)) {
       Object.entries(propsToUse.disabled[1]).forEach(([name, value]) => {
@@ -53,23 +53,4 @@ export default function useStyles(props: BoxStyleProps, isSvg: boolean) {
 
     return classNames;
   }, [props, themeProps]);
-}
-
-function replaceAliases(props: BoxStyleProps) {
-  const newProps: BoxStyleProps = { ...props };
-  const keys = Object.keys(newProps) as (keyof BoxStyleProps)[];
-
-  keys.forEach((key) => {
-    const mainPropItem = aliases[key as AliasKey];
-    if (mainPropItem) {
-      //
-      if (mainPropItem.key in newProps === false) {
-        (newProps[mainPropItem.key] as any) = newProps[key];
-      }
-
-      delete newProps[key];
-    }
-  });
-
-  return newProps;
 }

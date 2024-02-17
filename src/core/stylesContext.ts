@@ -32,10 +32,10 @@ a,ul{all: unset;}
 
       return acc;
     },
-    {} as Record<StyleKey, Set<string | number | boolean>>,
+    {} as Record<StyleKey, Set<unknown>>,
   );
 
-  export function get(key: string, value: string | number | boolean) {
+  export function get(key: string, value: unknown) {
     if (key in boxStyles) {
       return getClassName(key as StyleKey, value);
     }
@@ -73,11 +73,11 @@ a,ul{all: unset;}
 
         return acc;
       },
-      {} as Record<StyleKey, Set<string | number | boolean>>,
+      {} as Record<StyleKey, Set<unknown>>,
     );
   }
 
-  function getClassName(styleKey: StyleKey, value: string | number | boolean) {
+  function getClassName(styleKey: StyleKey, value: unknown) {
     if (!styles[styleKey].has(value)) {
       requireFlush = true;
       styles[styleKey].add(value);
@@ -143,16 +143,16 @@ a,ul{all: unset;}
     }
   }
 
-  function getValueItem(key: StyleKey, value: string | number | boolean): StyleValues {
+  function getValueItem(key: StyleKey, value: unknown): StyleValues {
     const item = boxStyles[key];
 
     if ((item as StyleItem).isThemeStyle) {
       return item as unknown as StyleValues;
     }
 
-    const valueItem: StyleValues = (item.values1.values as Readonly<Array<string | number | boolean>>).includes(value)
+    const valueItem: StyleValues = (item.values1.values as Readonly<Array<unknown>>).includes(value)
       ? item.values1
-      : (item.values2.values as Readonly<Array<string | number | boolean>>).includes(value)
+      : (item.values2.values as Readonly<Array<unknown>>).includes(value)
         ? item.values2
         : item.values3;
 

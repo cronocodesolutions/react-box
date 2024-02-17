@@ -36,7 +36,7 @@ Theme.setup({
   button: {
     styles: {
       display: 'inline-flex',
-      padding: 3,
+      p: 3,
       color: 'white',
       bgColor: 'violet',
       colorH: 'violetDark',
@@ -134,7 +134,7 @@ Theme.setup({
   components: {
     mycomponent: {
       styles: {
-        padding: 3,
+        p: 3,
         b: 1,
       },
       children: {

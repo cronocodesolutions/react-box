@@ -1,17 +1,17 @@
 import { BoxStylesFormatters } from './boxStylesFormatters';
 
 export interface StyleValues {
-  values: Readonly<Array<string | number | boolean>>;
-  formatClassName?: (key: string, value: string | number | boolean) => string;
+  values: Readonly<Array<unknown>>;
+  formatClassName?: (key: string, value: any) => string;
   formatSelector?: (selector: string) => string[];
-  formatValue?: (key: string, value: string | number | boolean) => string;
+  formatValue?: (key: string, value: any) => string;
 }
 
 export interface ThemeItem {
   cssNames: string[];
-  formatClassName?: (key: string, value: string | number | boolean) => string;
+  formatClassName?: (key: string, value: any) => string;
   formatSelector?: (selector: string) => string[];
-  formatValue?: (key: string, value: string | number | boolean) => string;
+  formatValue?: (key: string, value: any) => string;
 }
 
 export interface StyleItem {
@@ -25,7 +25,7 @@ export interface StyleItem {
 
 const positiveSizes = [
   0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 22, 24, 26, 28, 30, 32, 34, 36, 38, 40, 42, 44, 46, 48, 50, 52,
-  54, 56, 58, 60, 64, 68, 72, 76, 80, 84, 88, 92, 96, 100,
+  54, 56, 58, 60, 64, 68, 72, 76, 80, 84, 88, 92, 96, 100, 120, 140, 160, 180, 200, 250, 300,
 ] as const;
 const negativeSizes = [
   -1, -2, -3, -4, -5, -6, -7, -8, -9, -10, -11, -12, -13, -14, -15, -16, -17, -18, -19, -20, -22, -24, -26, -28, -30, -32, -34, -36, -38,
@@ -183,127 +183,127 @@ export const boxStyles = {
     values2: { values: [] as const },
     values3: { values: [] as const },
   },
-  margin: {
+  m: {
     cssNames: ['margin'],
     values1: { values: sizes, formatValue: BoxStylesFormatters.Value.rem },
     values2: { values: ['auto'] as const },
     values3: { values: [] as const },
   },
-  marginHorizontal: {
+  mx: {
     cssNames: ['margin-inline'],
     values1: { values: sizes, formatValue: BoxStylesFormatters.Value.rem },
     values2: { values: ['auto'] as const },
     values3: { values: [] as const },
   },
-  marginVertical: {
+  my: {
     cssNames: ['margin-block'],
     values1: { values: sizes, formatValue: BoxStylesFormatters.Value.rem },
     values2: { values: ['auto'] as const },
     values3: { values: [] as const },
   },
-  marginTop: {
+  mt: {
     cssNames: ['margin-top'],
     values1: { values: sizes, formatValue: BoxStylesFormatters.Value.rem },
     values2: { values: ['auto'] as const },
     values3: { values: [] as const },
   },
-  marginRight: {
+  mr: {
     cssNames: ['margin-right'],
     values1: { values: sizes, formatValue: BoxStylesFormatters.Value.rem },
     values2: { values: ['auto'] as const },
     values3: { values: [] as const },
   },
-  marginBottom: {
+  mb: {
     cssNames: ['margin-bottom'],
     values1: { values: sizes, formatValue: BoxStylesFormatters.Value.rem },
     values2: { values: ['auto'] as const },
     values3: { values: [] as const },
   },
-  marginLeft: {
+  ml: {
     cssNames: ['margin-left'],
     values1: { values: sizes, formatValue: BoxStylesFormatters.Value.rem },
     values2: { values: ['auto'] as const },
     values3: { values: [] as const },
   },
-  padding: {
+  p: {
     cssNames: ['padding'],
     values1: { values: sizes, formatValue: BoxStylesFormatters.Value.rem },
     values2: { values: [] as const },
     values3: { values: [] as const },
   },
-  paddingHorizontal: {
+  px: {
     cssNames: ['padding-inline'],
     values1: { values: sizes, formatValue: BoxStylesFormatters.Value.rem },
     values2: { values: [] as const },
     values3: { values: [] as const },
   },
-  paddingVertical: {
+  py: {
     cssNames: ['padding-block'],
     values1: { values: sizes, formatValue: BoxStylesFormatters.Value.rem },
     values2: { values: [] as const },
     values3: { values: [] as const },
   },
-  paddingTop: {
+  pt: {
     cssNames: ['padding-top'],
     values1: { values: sizes, formatValue: BoxStylesFormatters.Value.rem },
     values2: { values: [] as const },
     values3: { values: [] as const },
   },
-  paddingRight: {
+  pr: {
     cssNames: ['padding-right'],
     values1: { values: sizes, formatValue: BoxStylesFormatters.Value.rem },
     values2: { values: [] as const },
     values3: { values: [] as const },
   },
-  paddingBottom: {
+  pb: {
     cssNames: ['padding-bottom'],
     values1: { values: sizes, formatValue: BoxStylesFormatters.Value.rem },
     values2: { values: [] as const },
     values3: { values: [] as const },
   },
-  paddingLeft: {
+  pl: {
     cssNames: ['padding-left'],
     values1: { values: sizes, formatValue: BoxStylesFormatters.Value.rem },
     values2: { values: [] as const },
     values3: { values: [] as const },
   },
-  border: {
+  b: {
     cssNames: ['border-width'],
     values1: { values: positiveSizes, formatValue: BoxStylesFormatters.Value.px },
     values2: { values: [] as const },
     values3: { values: [] as const },
   },
-  borderHorizontal: {
+  bx: {
     cssNames: ['border-inline-width'],
     values1: { values: sizes, formatValue: BoxStylesFormatters.Value.px },
     values2: { values: [] as const },
     values3: { values: [] as const },
   },
-  borderVertical: {
+  by: {
     cssNames: ['border-block-width'],
     values1: { values: sizes, formatValue: BoxStylesFormatters.Value.px },
     values2: { values: [] as const },
     values3: { values: [] as const },
   },
-  borderTop: {
+  bt: {
     cssNames: ['border-top-width'],
     values1: { values: sizes, formatValue: BoxStylesFormatters.Value.px },
     values2: { values: [] as const },
     values3: { values: [] as const },
   },
-  borderRight: {
+  br: {
     cssNames: ['border-right-width'],
     values1: { values: sizes, formatValue: BoxStylesFormatters.Value.px },
     values2: { values: [] as const },
     values3: { values: [] as const },
   },
-  borderBottom: {
+  bb: {
     cssNames: ['border-bottom-width'],
     values1: { values: sizes, formatValue: BoxStylesFormatters.Value.px },
     values2: { values: [] as const },
     values3: { values: [] as const },
   },
-  borderLeft: {
+  bl: {
     cssNames: ['border-left-width'],
     values1: { values: sizes, formatValue: BoxStylesFormatters.Value.px },
     values2: { values: [] as const },
@@ -500,7 +500,7 @@ export const boxStyles = {
     values2: { values: [] as const },
     values3: { values: [] as const },
   },
-  justifyContent: {
+  jc: {
     cssNames: ['justify-content'],
     values1: {
       values: [
@@ -520,7 +520,7 @@ export const boxStyles = {
     values2: { values: [] as const },
     values3: { values: [] as const },
   },
-  alignItems: {
+  ai: {
     cssNames: ['align-items'],
     values1: {
       values: ['stretch', 'flex-start', 'flex-end', 'center', 'baseline', 'start', 'end', 'self-start', 'self-end'] as const,
@@ -553,7 +553,7 @@ export const boxStyles = {
     values2: { values: [] as const },
     values3: { values: [] as const },
   },
-  flexDirection: {
+  d: {
     cssNames: ['flex-direction'],
     values1: { values: ['row', 'row-reverse', 'column', 'column-reverse'] as const },
     values2: { values: [] as const },
@@ -782,53 +782,13 @@ Object.keys(svgThemeStyles).forEach((key) => {
 });
 
 export type StyleKey = keyof typeof boxStyles;
-export type AliasKey = keyof typeof aliases;
-type AliasType = { key: StyleKey };
-
-export const aliases = {
-  w: { ...boxStyles.width, key: 'width' },
-  h: { ...boxStyles.height, key: 'height' },
-  m: { ...boxStyles.margin, key: 'margin' },
-  mx: { ...boxStyles.marginHorizontal, key: 'marginHorizontal' },
-  my: { ...boxStyles.marginVertical, key: 'marginVertical' },
-  mt: { ...boxStyles.marginTop, key: 'marginTop' },
-  mr: { ...boxStyles.marginRight, key: 'marginRight' },
-  mb: { ...boxStyles.marginBottom, key: 'marginBottom' },
-  ml: { ...boxStyles.marginLeft, key: 'marginLeft' },
-  p: { ...boxStyles.padding, key: 'padding' },
-  px: { ...boxStyles.paddingHorizontal, key: 'paddingHorizontal' },
-  py: { ...boxStyles.paddingVertical, key: 'paddingVertical' },
-  pt: { ...boxStyles.paddingTop, key: 'paddingTop' },
-  pr: { ...boxStyles.paddingRight, key: 'paddingRight' },
-  pb: { ...boxStyles.paddingBottom, key: 'paddingBottom' },
-  pl: { ...boxStyles.paddingLeft, key: 'paddingLeft' },
-  b: { ...boxStyles.border, key: 'border' },
-  bx: { ...boxStyles.borderHorizontal, key: 'borderHorizontal' },
-  by: { ...boxStyles.borderVertical, key: 'borderVertical' },
-  bt: { ...boxStyles.borderTop, key: 'borderTop' },
-  br: { ...boxStyles.borderRight, key: 'borderRight' },
-  bb: { ...boxStyles.borderBottom, key: 'borderBottom' },
-  bl: { ...boxStyles.borderLeft, key: 'borderLeft' },
-  jc: { ...boxStyles.justifyContent, key: 'justifyContent' },
-  ai: { ...boxStyles.alignItems, key: 'alignItems' },
-  ac: { ...boxStyles.alignContent, key: 'alignContent' },
-  d: { ...boxStyles.flexDirection, key: 'flexDirection' },
-} satisfies Record<string, AliasType>;
 
 const boxStylesKeys = Object.keys(boxStyles);
-const aliasKeys = Object.keys(aliases);
 pseudoClassSuffixesExtended.forEach((pseudoSuffix) => {
   boxStylesKeys.forEach((key) => {
     // @ts-ignore
     boxStyles[`${key}${pseudoSuffix}`] = { ...boxStyles[key] };
     // @ts-ignore
     boxStyles[`${key}${pseudoSuffix}`].pseudoSuffix = pseudoSuffix;
-  });
-
-  aliasKeys.forEach((key) => {
-    // @ts-ignore
-    aliases[`${key}${pseudoSuffix}`] = { ...aliases[key], key: `${aliases[key].key}${pseudoSuffix}` };
-    // @ts-ignore
-    aliases[`${key}${pseudoSuffix}`].pseudoSuffix = pseudoSuffix;
   });
 });
