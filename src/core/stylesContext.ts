@@ -1,12 +1,4 @@
-import {
-  PseudoClassClassNameKey,
-  PseudoClassSuffixExtended,
-  StyleItem,
-  StyleKey,
-  StyleValues,
-  boxStyles,
-  pseudoClassClassName,
-} from './boxStyles';
+import { PseudoClassClassNameKey, PseudoClassSuffix, StyleItem, StyleKey, StyleValues, boxStyles, pseudoClassClassName } from './boxStyles';
 import IdentityFactory from '@cronocode/identity-factory';
 
 namespace StylesContext {
@@ -40,7 +32,7 @@ a,ul{all: unset;}
       return getClassName(key as StyleKey, value);
     }
 
-    if (key in pseudoClassClassName) {
+    if (key in pseudoClassClassName && value) {
       return pseudoClassClassName[key as PseudoClassClassNameKey].className;
     }
   }
@@ -89,7 +81,7 @@ a,ul{all: unset;}
     return identity.getIdentity(className);
   }
 
-  function generateStyles(classes: string[], pseudoSuffix?: PseudoClassSuffixExtended) {
+  function generateStyles(classes: string[], pseudoSuffix?: PseudoClassSuffix) {
     return Object.entries(styles)
       .filter(([key]) => (boxStyles[key as StyleKey] as StyleItem)?.pseudoSuffix === pseudoSuffix)
       .reduce((acc, [key, values]) => {

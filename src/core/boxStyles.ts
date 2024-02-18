@@ -745,7 +745,6 @@ export const svgThemeStyles = {
 // :required
 // :optional
 
-export const pseudoClassSuffixes = ['H', 'F', 'A'] as const;
 export const pseudoClassSuffixesExtended = [
   'H',
   'F',
@@ -758,8 +757,7 @@ export const pseudoClassSuffixesExtended = [
   'Optional',
   'Disabled',
 ] as const;
-export type PseudoClassSuffix = (typeof pseudoClassSuffixes)[number];
-export type PseudoClassSuffixExtended = (typeof pseudoClassSuffixesExtended)[number];
+export type PseudoClassSuffix = (typeof pseudoClassSuffixesExtended)[number];
 
 export const pseudoClassClassName = {
   hover: { className: '_h' },

@@ -18,7 +18,7 @@ export default function App() {
   return (
     <Flex height="fit-screen" color="violetDark">
       <Box height="fit-screen" style={{ width: '200px' }} bgColor="violetLighter" px={2}>
-        <MenuItem to="/" bgColor={undefined} bgColorH={undefined} color={undefined}>
+        <MenuItem to="/" bgColor={undefined} hover={{ bgColor: undefined }} color={undefined}>
           <Box fontWeight={700} py={5}>
             React Box
           </Box>

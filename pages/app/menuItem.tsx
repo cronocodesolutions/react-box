@@ -16,14 +16,13 @@ export default function MenuItem(props: Props) {
         <Box
           my={1}
           bgColor={isActive ? 'violetLight' : undefined}
-          bgColorH="violetLight"
           color={isActive ? 'violet' : undefined}
-          colorH="violet"
           cursor={isActive ? 'default' : 'pointer'}
           py={3}
           px={6}
           borderRadius={1}
           transition="none"
+          hover={{ bgColor: 'violetLight', color: 'violet' }}
           {...props}
         />
       )}

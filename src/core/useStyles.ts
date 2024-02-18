@@ -3,6 +3,7 @@ import { StyleKey } from './boxStyles';
 import StylesContext from './stylesContext';
 import { BoxStyleProps } from './types';
 import { useTheme } from './useTheme';
+import ObjectUtils from '../utils/object/objectUtils';
 
 const isBrowser = typeof window !== 'undefined' && typeof window.document !== 'undefined';
 const useEff = isBrowser ? useLayoutEffect : useEffect;
@@ -22,29 +23,43 @@ export default function useStyles(props: BoxStyleProps, isSvg: boolean) {
       delete propsToUse.disabled;
     }
 
+    if (Array.isArray(propsToUse.hover)) {
+      Object.entries(propsToUse.hover[1]).forEach(([name, value]) => {
+        propsToUse[`${name}H` as keyof BoxStyleProps] = value;
+      });
+      propsToUse.hover = propsToUse.hover[0];
+    } else if (ObjectUtils.isObject(propsToUse.hover)) {
+      Object.entries(propsToUse.hover).forEach(([name, value]) => {
+        propsToUse[`${name}H` as keyof BoxStyleProps] = value;
+      });
+      delete propsToUse.hover;
+    }
+
+    if (Array.isArray(propsToUse.focus)) {
+      Object.entries(propsToUse.focus[1]).forEach(([name, value]) => {
+        propsToUse[`${name}F` as keyof BoxStyleProps] = value;
+      });
+      propsToUse.focus = propsToUse.focus[0];
+    } else if (ObjectUtils.isObject(propsToUse.focus)) {
+      Object.entries(propsToUse.focus).forEach(([name, value]) => {
+        propsToUse[`${name}F` as keyof BoxStyleProps] = value;
+      });
+      delete propsToUse.focus;
+    }
+
+    if (propsToUse.active) {
+      Object.entries(propsToUse.active).forEach(([name, value]) => {
+        propsToUse[`${name}A` as keyof BoxStyleProps] = value;
+      });
+      delete propsToUse.active;
+    }
+
+    // TODO: add support for inline in pseudo classes
     if ('inline' in propsToUse) {
       if (propsToUse.display === 'block' || !propsToUse.display) propsToUse.display = 'inline-block';
       else if (propsToUse.display === 'flex') propsToUse.display = 'inline-flex';
       else if (propsToUse.display === 'grid') propsToUse.display = 'inline-grid';
       delete propsToUse.inline;
-    }
-    if ('inlineH' in propsToUse) {
-      if (propsToUse.displayH === 'block' || !propsToUse.displayH) propsToUse.displayH = 'inline-block';
-      else if (propsToUse.displayH === 'flex') propsToUse.displayH = 'inline-flex';
-      else if (propsToUse.displayH === 'grid') propsToUse.displayH = 'inline-grid';
-      delete propsToUse.inlineH;
-    }
-    if ('inlineF' in propsToUse) {
-      if (propsToUse.displayF === 'block' || !propsToUse.displayF) propsToUse.displayF = 'inline-block';
-      else if (propsToUse.displayF === 'flex') propsToUse.displayF = 'inline-flex';
-      else if (propsToUse.displayF === 'grid') propsToUse.displayF = 'inline-grid';
-      delete propsToUse.inlineF;
-    }
-    if ('inlineA' in propsToUse) {
-      if (propsToUse.displayA === 'block' || !propsToUse.displayA) propsToUse.displayA = 'inline-block';
-      else if (propsToUse.displayA === 'flex') propsToUse.displayA = 'inline-flex';
-      else if (propsToUse.displayA === 'grid') propsToUse.displayA = 'inline-grid';
-      delete propsToUse.inlineA;
     }
 
     Object.entries(propsToUse).forEach(([key, value]) => {

@@ -1,4 +1,3 @@
-import { pseudoClassSuffixes } from './boxStyles';
 import { BoxStyleProps } from './types';
 import { BoxThemeProps } from './types';
 
@@ -128,18 +127,18 @@ namespace Theme {
   
     namespace Augmented {
       interface BoxProps {
-${getPseudoClassProps('color', 'ColorType')}
-${getPseudoClassProps('bgColor', 'ColorType')}
-${getPseudoClassProps('borderColor', 'ColorType')}
-${getPseudoClassProps('outlineColor', 'ColorType')}
-${getPseudoClassProps('background', 'BackgroundType')}
-${getPseudoClassProps('backgroundImage', 'BackgroundImageType')}
-${getPseudoClassProps('shadow', 'ShadowType')}
+        color?: ColorType;
+        bgColor?: ColorType;
+        borderColor?: ColorType;
+        outlineColor?: ColorType;
+        background?: BackgroundType;
+        backgroundImage?: BackgroundImageType;
+        shadow?: ShadowType;
       }
   
       interface SvgProps {
-${getPseudoClassProps('fill', 'ColorType')}
-${getPseudoClassProps('stroke', 'ColorType')}
+        fill?: ColorType;
+        stroke?: ColorType;
       }
     }
   }
@@ -149,15 +148,6 @@ ${getPseudoClassProps('stroke', 'ColorType')}
       variables: variables.join('\n'),
       boxDts,
     };
-  }
-
-  function getPseudoClassProps(propName: string, propType: string) {
-    const pseudoClasses = pseudoClassSuffixes.map((p) => {
-      return `        ${propName}${p}?: ${propType};`;
-    });
-    pseudoClasses.unshift(`        ${propName}?: ${propType};`);
-
-    return pseudoClasses.join('\n');
   }
 
   function assignThemeStyles(styles: ThemeSetup<BoxThemeProps>) {

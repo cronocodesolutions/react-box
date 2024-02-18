@@ -26,7 +26,7 @@ export default function GridPage() {
         <Box b={1} borderColor="violet" bgColor="violet" borderRadius={1} p={6} colSpan={2} colStart={2}>
           colstart 2 / colspan 2
         </Box>
-        <Box b={1} borderColor="violet" bgColor="violet" borderRadius={1} p={6} colStart={3} colEnd={5} colEndH={6}>
+        <Box b={1} borderColor="violet" bgColor="violet" borderRadius={1} p={6} colStart={3} colEnd={5} hover={{ colEnd: 6 }}>
           colstart 3 / colend 5 / colend hover 6
         </Box>
       </Grid>

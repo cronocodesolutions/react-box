@@ -39,10 +39,12 @@ Theme.setup({
       p: 3,
       color: 'white',
       bgColor: 'violet',
-      colorH: 'violetDark',
-      bgColorH: 'violetLight',
       borderColor: 'violetLighter',
-      borderColorH: 'violet',
+      hover: {
+        color: 'violetDark',
+        bgColor: 'violetLight',
+        borderColor: 'violet',
+      },
       disabled: {
         cursor: 'not-allowed',
         bgColor: 'violetLight',
@@ -59,7 +61,9 @@ Theme.setup({
       borderRadius: 1,
       p: 2,
       cursor: 'pointer',
-      bgColorH: 'violetLight',
+      hover: {
+        bgColor: 'violetLight',
+      },
       checked: {
         bgColor: 'violet',
         backgroundImage: 'check',
@@ -82,7 +86,9 @@ Theme.setup({
       borderRadius: 3,
       p: 2,
       cursor: 'pointer',
-      bgColorH: 'violetLight',
+      hover: {
+        bgColor: 'violetLight',
+      },
       checked: {
         bgColor: 'violet',
         backgroundImage: 'radio',
@@ -99,9 +105,13 @@ Theme.setup({
       p: 2,
       b: 1,
       borderColor: 'violet',
-      bgColorH: 'violetLighter',
-      bgColorF: 'violetLighter',
       color: 'violetDark',
+      hover: {
+        bgColor: 'violetLighter',
+      },
+      focus: {
+        bgColor: 'violetLighter',
+      },
       disabled: {
         cursor: 'not-allowed',
         borderColor: 'violetLighter',
@@ -115,9 +125,13 @@ Theme.setup({
       p: 2,
       b: 1,
       borderColor: 'violet',
-      bgColorH: 'violetLighter',
-      bgColorF: 'violetLighter',
       color: 'violetDark',
+      hover: {
+        bgColor: 'violetLighter',
+      },
+      focus: {
+        bgColor: 'violetLighter',
+      },
       disabled: {
         cursor: 'not-allowed',
         borderColor: 'violetLighter',
