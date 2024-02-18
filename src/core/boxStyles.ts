@@ -787,8 +787,6 @@ const boxStylesKeys = Object.keys(boxStyles);
 pseudoClassSuffixesExtended.forEach((pseudoSuffix) => {
   boxStylesKeys.forEach((key) => {
     // @ts-ignore
-    boxStyles[`${key}${pseudoSuffix}`] = { ...boxStyles[key] };
-    // @ts-ignore
-    boxStyles[`${key}${pseudoSuffix}`].pseudoSuffix = pseudoSuffix;
+    boxStyles[`${key}${pseudoSuffix}`] = { ...boxStyles[key], pseudoSuffix };
   });
 });

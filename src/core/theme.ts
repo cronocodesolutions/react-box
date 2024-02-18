@@ -78,14 +78,10 @@ const defaultTheme: ThemeSetup<BoxThemeProps> = {
 };
 
 namespace Theme {
-  export let Styles: ThemeSetup<BoxStyleProps>;
+  export let Styles = flattenStyles(defaultTheme);
 
   export function setup(styles: ThemeSetup<BoxThemeProps>) {
-    extractChildren(styles);
-    extractPseudoClasses(styles);
-    Styles = styles as ThemeSetup<BoxStyleProps>;
-
-    assignDefaultStyles();
+    Styles = assignThemeStyles(styles);
   }
 
   export function setupAugmentedProps(props: BoxAugmentedProps, options?: { namespacePath?: string }) {
@@ -164,21 +160,29 @@ ${getPseudoClassProps('stroke', 'ColorType')}
     return pseudoClasses.join('\n');
   }
 
-  function assignDefaultStyles() {
-    extractChildren(defaultTheme);
-    extractPseudoClasses(defaultTheme);
+  function assignThemeStyles(styles: ThemeSetup<BoxThemeProps>) {
+    const fStyles = flattenStyles(styles);
     const components = Object.keys(defaultTheme) as (keyof ThemeSetup<BoxStyleProps>)[];
 
     components.forEach((component) => {
-      const componentStyles = Styles[component];
+      const componentStyles = fStyles[component];
       const componentDefaultStyles = (defaultTheme as ThemeSetup<BoxStyleProps>)[component]!;
 
       if (componentStyles) {
         componentStyles.styles = { ...componentDefaultStyles.styles, ...componentStyles.styles };
       } else {
-        Styles[component] = defaultTheme[component] as any;
+        fStyles[component] = defaultTheme[component] as any;
       }
     });
+
+    return fStyles;
+  }
+
+  function flattenStyles(styles: ThemeSetup<BoxThemeProps>): ThemeSetup<BoxStyleProps> {
+    extractChildren(styles);
+    extractPseudoClasses(styles);
+
+    return styles as ThemeSetup<BoxStyleProps>;
   }
 
   function extractChildren(styles: ThemeSetup<BoxThemeProps>) {
