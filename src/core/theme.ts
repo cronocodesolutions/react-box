@@ -229,13 +229,19 @@ ${getPseudoClassProps('stroke', 'ColorType')}
     components && componentStyles.push(...Object.values(components));
 
     for (const component of componentStyles) {
-      if ('disabled' in component.styles) {
-        Object.entries(component.styles.disabled!).map(([name, value]) => {
-          component.styles[`${name}Disabled` as keyof BoxThemeProps] = value;
-        });
+      [
+        ['disabled', 'Disabled'],
+        ['indeterminate', 'Indeterminate'],
+        ['checked', 'Checked'],
+      ].forEach(([name, suffix]) => {
+        if (name in component.styles) {
+          Object.entries(component.styles[name as keyof typeof component.styles]!).map(([name, value]) => {
+            component.styles[`${name}${suffix}` as keyof BoxThemeProps] = value;
+          });
 
-        delete component.styles.disabled;
-      }
+          delete component.styles[name as keyof typeof component.styles];
+        }
+      });
     }
   }
 }

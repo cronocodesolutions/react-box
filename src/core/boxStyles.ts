@@ -745,7 +745,7 @@ export const svgThemeStyles = {
 // :required
 // :optional
 
-export const pseudoClassSuffixes = ['H', 'F', 'A', 'Checked', 'Indeterminate', 'Valid', 'Invalid', 'Required', 'Optional'] as const;
+export const pseudoClassSuffixes = ['H', 'F', 'A'] as const;
 export const pseudoClassSuffixesExtended = [
   'H',
   'F',

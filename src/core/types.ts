@@ -28,18 +28,12 @@ interface BoxPseudoClasses2 {
   disabled?: boolean | [boolean, BoxNormalStyles];
 }
 
-type BoxPseudoClassStyles = PseudoClass<BoxNormalStyles, 'H'> &
-  PseudoClass<BoxNormalStyles, 'F'> &
-  PseudoClass<BoxNormalStyles, 'A'> &
-  PseudoClass<BoxNormalStyles, 'Checked'> &
-  PseudoClass<BoxNormalStyles, 'Indeterminate'> &
-  PseudoClass<BoxNormalStyles, 'Valid'> &
-  PseudoClass<BoxNormalStyles, 'Invalid'> &
-  PseudoClass<BoxNormalStyles, 'Required'> &
-  PseudoClass<BoxNormalStyles, 'Optional'>;
+type BoxPseudoClassStyles = PseudoClass<BoxNormalStyles, 'H'> & PseudoClass<BoxNormalStyles, 'F'> & PseudoClass<BoxNormalStyles, 'A'>;
 
 interface BoxThemePseudoClassProps {
   disabled?: BoxNormalStyles;
+  indeterminate?: BoxNormalStyles;
+  checked?: BoxNormalStyles;
 }
 export type BoxThemeProps = BoxNormalStyles & BoxThemePseudoClassProps & BoxPseudoClassStyles;
 
@@ -54,11 +48,5 @@ export type BoxSvgStyles = SvgNormalStyles &
   PseudoClass<SvgNormalStyles, 'H'> &
   PseudoClass<SvgNormalStyles, 'F'> &
   PseudoClass<SvgNormalStyles, 'A'> &
-  PseudoClass<SvgNormalStyles, 'Checked'> &
-  PseudoClass<SvgNormalStyles, 'Indeterminate'> &
-  PseudoClass<SvgNormalStyles, 'Valid'> &
-  PseudoClass<SvgNormalStyles, 'Invalid'> &
-  PseudoClass<SvgNormalStyles, 'Required'> &
-  PseudoClass<SvgNormalStyles, 'Optional'> &
   ThemeComponentProps &
   Augmented.SvgProps;
