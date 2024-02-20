@@ -2,7 +2,6 @@ import Theme from '../src/core/theme';
 
 export const themeProps = {
   colors: {
-    none: 'none',
     white: '#fff',
     black: '#07071b',
     black1: '#1e293b',
@@ -16,7 +15,6 @@ export const themeProps = {
     red: 'red',
   },
   backgrounds: {
-    none: 'none',
     stripes: 'linear-gradient(135deg,var(--colorviolet) 10%,#0000 0,#0000 50%,var(--colorviolet) 0,var(--colorviolet) 60%,#0000 0,#0000);',
   },
   backgroundImages: {
@@ -26,9 +24,6 @@ export const themeProps = {
       "url(\"data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' width='100%' viewBox='0 0 20 20'%3e%3ccircle fill='%23FFF' cx='10' cy='10' r='5'/%3e%3c/svg%3e\")",
     indeterminate:
       "url(\"data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' width='100%' viewBox='0 0 20 20'%3e%3cline stroke='%23988bee' x1='4' y1='10' x2='16' y2='10' stroke-width='1' /%3e%3c/svg%3e\")",
-  },
-  shadows: {
-    none: 'none',
   },
 };
 

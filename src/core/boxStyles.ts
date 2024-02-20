@@ -76,7 +76,7 @@ export const boxStyles = {
   /** The `inline` property is a shortcut to transform `block`, `flex` and `grid` value to `inline-block`, `inline-flex` and `inline-grid` respectively. */
   inline: {
     cssNames: ['display'],
-    values1: { values: [true] as const },
+    values1: { values: [true] as const, formatValue: () => 'inline-block' },
     values2: { values: [] as const },
     values3: { values: [] as const },
   },

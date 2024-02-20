@@ -1,4 +1,4 @@
-import React, { forwardRef, Ref, useEffect, useRef } from 'react';
+import React, { forwardRef, Ref, useEffect, useRef, useImperativeHandle } from 'react';
 import Box, { BoxTagProps, BoxProps } from '../box';
 import ObjectUtils from '../utils/object/objectUtils';
 
@@ -22,21 +22,20 @@ interface Props extends CheckboxProps {
   indeterminate?: boolean;
 }
 
-function Checkbox(props: Props, ref: Ref<HTMLInputElement> | null) {
+function Checkbox(props: Props, ref: Ref<HTMLInputElement>) {
   const { indeterminate } = props;
   const newProps = ObjectUtils.buildProps(props, tagProps, { type: 'checkbox' });
 
   const checkboxRef = useRef<HTMLInputElement>(null);
+  useImperativeHandle<HTMLInputElement | null, HTMLInputElement | null>(ref, () => checkboxRef.current);
 
   useEffect(() => {
-    if (ref && typeof ref !== 'function' && ref.current) {
-      ref.current.indeterminate = Boolean(indeterminate);
-    } else if (checkboxRef.current) {
+    if (checkboxRef.current) {
       checkboxRef.current.indeterminate = Boolean(indeterminate);
     }
-  }, [ref, checkboxRef, indeterminate]);
+  }, [checkboxRef, indeterminate]);
 
-  return <Box tag="input" ref={ref || checkboxRef} component="checkbox" {...{ ...newProps }} />;
+  return <Box tag="input" ref={checkboxRef} component="checkbox" {...newProps} />;
 }
 
 export default forwardRef(Checkbox);

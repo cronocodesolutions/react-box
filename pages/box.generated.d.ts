@@ -1,9 +1,9 @@
 import '@cronocode/react-box';
   
   declare module '../src/core/types' {
-    type ColorType = 'none' | 'white' | 'black' | 'black1' | 'violet' | 'violetLight' | 'violetLighter' | 'violetDark' | 'gray1' | 'gray2' | 'dark' | 'red';
-    type BackgroundType = 'none' | 'stripes';
-    type BackgroundImageType = 'check' | 'radio' | 'indeterminate';
+    type ColorType = 'white' | 'black' | 'black1' | 'violet' | 'violetLight' | 'violetLighter' | 'violetDark' | 'gray1' | 'gray2' | 'dark' | 'red' | 'none';
+    type BackgroundType = 'stripes' | 'none';
+    type BackgroundImageType = 'check' | 'radio' | 'indeterminate' | 'none';
     type ShadowType = 'none';
   
     namespace Augmented {

@@ -40,6 +40,6 @@ interface SvgNormalStyles {
   rotate?: BoxNormalStyles['rotate'];
   flip?: BoxNormalStyles['flip'];
   transitionDuration?: BoxNormalStyles['transitionDuration'];
-  // hover?: boolean | [boolean, BoxNormalStyles];
+  hover?: boolean | [boolean, BoxNormalStyles];
 }
 export type BoxSvgStyles = SvgNormalStyles & ThemeComponentProps & Augmented.SvgProps;

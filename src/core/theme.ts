@@ -1,3 +1,4 @@
+import { PseudoClassSuffix } from './boxStyles';
 import { BoxStyleProps } from './types';
 import { BoxThemeProps } from './types';
 
@@ -26,10 +27,10 @@ export interface ThemeSetup<T = BoxStyleProps> {
 }
 
 interface BoxAugmentedProps {
-  colors: Record<string, string>;
-  shadows: Record<string, string>;
-  backgrounds: Record<string, string>;
-  backgroundImages: Record<string, string>;
+  colors?: Record<string, string>;
+  shadows?: Record<string, string>;
+  backgrounds?: Record<string, string>;
+  backgroundImages?: Record<string, string>;
 }
 
 // IMPORTANT!!!  DO NOT USE INLINE PROP IN THESE DEFAULT VALUES
@@ -76,6 +77,19 @@ const defaultTheme: ThemeSetup<BoxThemeProps> = {
   },
 };
 
+const pseudoClassSuffixes: Record<PseudoClassSuffix, string> = {
+  H: 'hover',
+  F: 'focus',
+  A: 'active',
+  Checked: 'checked',
+  Indeterminate: 'indeterminate',
+  Valid: 'valid',
+  Invalid: 'invalid',
+  Required: 'required',
+  Optional: 'optional',
+  Disabled: 'disabled',
+};
+
 namespace Theme {
   export let Styles = flattenStyles(defaultTheme);
 
@@ -84,16 +98,22 @@ namespace Theme {
   }
 
   export function setupAugmentedProps(props: BoxAugmentedProps, options?: { namespacePath?: string }) {
-    const colorVariables = Object.entries(props.colors)
+    const { colors = {}, shadows = {}, backgrounds = {}, backgroundImages = {} } = props;
+    colors['none'] = 'none';
+    shadows['none'] = 'none';
+    backgrounds['none'] = 'none';
+    backgroundImages['none'] = 'none';
+
+    const colorVariables = Object.entries(colors)
       .map(([colorName, colorValue]) => `--color${colorName}: ${colorValue};`)
       .join('\n  ');
-    const shadowVariables = Object.entries(props.shadows)
+    const shadowVariables = Object.entries(shadows)
       .map(([shadowName, shadowValue]) => `--shadow${shadowName}: ${shadowValue};`)
       .join('\n  ');
-    const bgVariables = Object.entries(props.backgrounds)
+    const bgVariables = Object.entries(backgrounds)
       .map(([backgroundName, backgroundValue]) => `--background${backgroundName}: ${backgroundValue};`)
       .join('\n  ');
-    const bgImagesVariables = Object.entries(props.backgroundImages)
+    const bgImagesVariables = Object.entries(backgroundImages)
       .map(([backgroundImageName, backgroundImageValue]) => `--backgroundImage${backgroundImageName}: ${backgroundImageValue};`)
       .join('\n  ');
 
@@ -104,16 +124,16 @@ namespace Theme {
     bgImagesVariables && variables.push(`  ${bgImagesVariables}`);
     variables.push('}');
 
-    const colorType = Object.keys(props.colors)
+    const colorType = Object.keys(colors)
       .map((item) => `'${item}'`)
       .join(' | ');
-    const backgroundType = Object.keys(props.backgrounds)
+    const backgroundType = Object.keys(backgrounds)
       .map((item) => `'${item}'`)
       .join(' | ');
-    const backgroundImageType = Object.keys(props.backgroundImages)
+    const backgroundImageType = Object.keys(backgroundImages)
       .map((item) => `'${item}'`)
       .join(' | ');
-    const shadowType = Object.keys(props.shadows)
+    const shadowType = Object.keys(shadows)
       .map((item) => `'${item}'`)
       .join(' | ');
 
@@ -223,11 +243,7 @@ namespace Theme {
     components && componentStyles.push(...Object.values(components));
 
     for (const component of componentStyles) {
-      [
-        ['disabled', 'Disabled'],
-        ['indeterminate', 'Indeterminate'],
-        ['checked', 'Checked'],
-      ].forEach(([name, suffix]) => {
+      Object.entries(pseudoClassSuffixes).forEach(([suffix, name]) => {
         if (name in component.styles) {
           Object.entries(component.styles[name as keyof typeof component.styles]!).map(([name, value]) => {
             component.styles[`${name}${suffix}` as keyof BoxThemeProps] = value;
