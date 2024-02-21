@@ -2,14 +2,12 @@ import { BoxStylesFormatters } from './boxStylesFormatters';
 
 export interface StyleValues {
   values: Readonly<Array<unknown>>;
-  formatClassName?: (key: string, value: any) => string;
   formatSelector?: (selector: string) => string[];
   formatValue?: (key: string, value: any) => string;
 }
 
 export interface ThemeItem {
   cssNames: string[];
-  formatClassName?: (key: string, value: any) => string;
   formatSelector?: (selector: string) => string[];
   formatValue?: (key: string, value: any) => string;
 }
@@ -20,6 +18,7 @@ export interface StyleItem {
   values2: StyleValues;
   values3: StyleValues;
   pseudoSuffix?: PseudoClassSuffix;
+  breakpoint?: BoxBreakpointsType;
   isThemeStyle?: boolean;
 }
 
@@ -759,6 +758,16 @@ export const pseudoClassSuffixesExtended = [
 ] as const;
 export type PseudoClassSuffix = (typeof pseudoClassSuffixesExtended)[number];
 
+export const boxBreakpoints = ['sm', 'md', 'lg', 'xl', 'xxl'] as const;
+export type BoxBreakpointsType = (typeof boxBreakpoints)[number];
+export const boxBreakpointsMinWidth: Record<BoxBreakpointsType, number> = {
+  sm: 640,
+  md: 768,
+  lg: 1024,
+  xl: 1280,
+  xxl: 1536,
+};
+
 export const pseudoClassClassName = {
   hover: { className: '_h' },
   focus: { className: '_f' },
@@ -781,10 +790,16 @@ Object.keys(svgThemeStyles).forEach((key) => {
 
 export type StyleKey = keyof typeof boxStyles;
 
-const boxStylesKeys = Object.keys(boxStyles);
+let boxStylesKeys = Object.keys(boxStyles);
 pseudoClassSuffixesExtended.forEach((pseudoSuffix) => {
   boxStylesKeys.forEach((key) => {
-    // @ts-ignore
-    boxStyles[`${key}${pseudoSuffix}`] = { ...boxStyles[key], pseudoSuffix };
+    (boxStyles[`${key}${pseudoSuffix}` as StyleKey] as StyleItem) = { ...boxStyles[key as StyleKey], pseudoSuffix };
+  });
+});
+
+boxStylesKeys = Object.keys(boxStyles);
+boxBreakpoints.forEach((breakpoint) => {
+  boxStylesKeys.forEach((key) => {
+    (boxStyles[`${breakpoint}${key}` as StyleKey] as StyleItem) = { ...boxStyles[key as StyleKey], breakpoint };
   });
 });

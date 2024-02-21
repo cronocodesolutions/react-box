@@ -1,4 +1,4 @@
-import { PseudoClassSuffix } from './boxStyles';
+import { PseudoClassSuffix, boxBreakpoints } from './boxStyles';
 import { BoxStyleProps } from './types';
 import { BoxThemeProps } from './types';
 
@@ -245,11 +245,30 @@ namespace Theme {
     for (const component of componentStyles) {
       Object.entries(pseudoClassSuffixes).forEach(([suffix, name]) => {
         if (name in component.styles) {
-          Object.entries(component.styles[name as keyof typeof component.styles]!).map(([name, value]) => {
+          const pseudoClassStyles = component.styles[name as keyof typeof component.styles]! as BoxThemeProps;
+
+          Object.entries(pseudoClassStyles).map(([name, value]) => {
             component.styles[`${name}${suffix}` as keyof BoxThemeProps] = value;
           });
 
           delete component.styles[name as keyof typeof component.styles];
+        }
+      });
+      boxBreakpoints.forEach((breakPoint) => {
+        if (breakPoint in component.styles) {
+          const breakPointStyles = component.styles[breakPoint as keyof typeof component.styles]! as BoxThemeProps;
+
+          Object.entries(pseudoClassSuffixes).forEach(([suffix, name]) => {
+            if (name in breakPointStyles) {
+              const pseudoClassStyles = breakPointStyles[name as keyof typeof breakPointStyles] as BoxThemeProps;
+
+              Object.entries(pseudoClassStyles).map(([name, value]) => {
+                breakPointStyles[`${name}${suffix}` as keyof BoxThemeProps] = value;
+              });
+
+              delete breakPointStyles[name as keyof typeof breakPointStyles];
+            }
+          });
         }
       });
     }

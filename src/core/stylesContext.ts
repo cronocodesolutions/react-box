@@ -1,4 +1,15 @@
-import { PseudoClassClassNameKey, PseudoClassSuffix, StyleItem, StyleKey, StyleValues, boxStyles, pseudoClassClassName } from './boxStyles';
+import {
+  BoxBreakpointsType,
+  PseudoClassClassNameKey,
+  PseudoClassSuffix,
+  StyleItem,
+  StyleKey,
+  StyleValues,
+  boxBreakpoints,
+  boxBreakpointsMinWidth,
+  boxStyles,
+  pseudoClassClassName,
+} from './boxStyles';
 import IdentityFactory from '@cronocode/identity-factory';
 
 namespace StylesContext {
@@ -27,9 +38,9 @@ a,ul{all: unset;}
     {} as Record<StyleKey, Set<unknown>>,
   );
 
-  export function get(key: string, value: unknown) {
+  export function get(key: string, value: unknown, breakpoint?: BoxBreakpointsType) {
     if (key in boxStyles) {
-      return getClassName(key as StyleKey, value);
+      return getClassName(key as StyleKey, value, breakpoint);
     }
 
     if (key in pseudoClassClassName && value) {
@@ -40,6 +51,7 @@ a,ul{all: unset;}
   export function flush() {
     if (requireFlush) {
       let items = generateStyles([defaultStyles]);
+
       items = generateStyles(items, 'H');
       items = generateStyles(items, 'F');
       items = generateStyles(items, 'A');
@@ -49,6 +61,21 @@ a,ul{all: unset;}
       items = generateStyles(items, 'Invalid');
       items = generateStyles(items, 'Required');
       items = generateStyles(items, 'Disabled');
+
+      boxBreakpoints.forEach((breakpoint) => {
+        items.push(`@media(min-width: ${boxBreakpointsMinWidth[breakpoint]}px){`);
+        items = generateStyles(items, undefined, breakpoint);
+        items = generateStyles(items, 'H', breakpoint);
+        items = generateStyles(items, 'F', breakpoint);
+        items = generateStyles(items, 'A', breakpoint);
+        items = generateStyles(items, 'Checked', breakpoint);
+        items = generateStyles(items, 'Indeterminate', breakpoint);
+        items = generateStyles(items, 'Valid', breakpoint);
+        items = generateStyles(items, 'Invalid', breakpoint);
+        items = generateStyles(items, 'Required', breakpoint);
+        items = generateStyles(items, 'Disabled', breakpoint);
+        items.push('}');
+      });
 
       const el = getElement();
 
@@ -69,21 +96,26 @@ a,ul{all: unset;}
     );
   }
 
-  function getClassName(styleKey: StyleKey, value: unknown) {
-    if (!styles[styleKey].has(value)) {
+  function getClassName(styleKey: StyleKey, value: unknown, breakpoint?: BoxBreakpointsType) {
+    const key = ((breakpoint ?? '') + styleKey) as StyleKey;
+
+    if (!styles[key].has(value)) {
       requireFlush = true;
-      styles[styleKey].add(value);
+      styles[key].add(value);
     }
 
-    const valueItem: StyleValues = getValueItem(styleKey as StyleKey, value);
-    const className = valueItem.formatClassName?.(styleKey as StyleKey, value) ?? `${styleKey}${value}`;
+    const className = `${key}${value}`;
 
     return identity.getIdentity(className);
   }
 
-  function generateStyles(classes: string[], pseudoSuffix?: PseudoClassSuffix) {
+  function generateStyles(classes: string[], pseudoSuffix?: PseudoClassSuffix, breakpoint?: BoxBreakpointsType) {
     return Object.entries(styles)
-      .filter(([key]) => (boxStyles[key as StyleKey] as StyleItem)?.pseudoSuffix === pseudoSuffix)
+      .filter(
+        ([key]) =>
+          (boxStyles[key as StyleKey] as StyleItem)?.pseudoSuffix === pseudoSuffix &&
+          (boxStyles[key as StyleKey] as StyleItem)?.breakpoint === breakpoint,
+      )
       .reduce((acc, [key, values]) => {
         values.forEach((value) => {
           const valueItem: StyleValues = getValueItem(key as StyleKey, value);

@@ -4,7 +4,14 @@ import Flex from '../../src/components/flex';
 export default function FlexPage() {
   return (
     <Flex p={10} d="column">
-      <Box fontSize={50} lineHeight="font-size" bgColor="violetLight" width="3/5" textDecoration="underline">
+      <Box
+        fontSize={50}
+        lineHeight="font-size"
+        bgColor="violetLight"
+        width="3/5"
+        textDecoration="underline"
+        xl={{ hover: { color: 'violet' } }}
+      >
         This is Flex page
       </Box>
 

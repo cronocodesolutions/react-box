@@ -1,4 +1,4 @@
-import { StyleItem, boxStyles } from './boxStyles';
+import { BoxBreakpointsType, StyleItem, boxStyles } from './boxStyles';
 import { ThemeComponentProps } from './useTheme';
 
 export type ExtractElementType<T> =
@@ -17,7 +17,7 @@ type BoxStyles<T extends Record<string, StyleItem>> = {
 
 type BoxNormalStyles = BoxStyles<typeof boxStyles> & Augmented.BoxProps;
 
-interface BoxPseudoClasses2 {
+interface BoxPseudoClasses {
   disabled?: boolean | [boolean, BoxNormalStyles];
   hover?: boolean | [boolean, BoxNormalStyles] | BoxNormalStyles;
   focus?: boolean | [boolean, BoxNormalStyles] | BoxNormalStyles;
@@ -32,9 +32,17 @@ interface BoxThemePseudoClassProps {
   indeterminate?: BoxNormalStyles;
   checked?: BoxNormalStyles;
 }
-export type BoxThemeProps = BoxNormalStyles & BoxThemePseudoClassProps;
 
-export type BoxStyleProps = BoxNormalStyles & BoxPseudoClasses2 & ThemeComponentProps;
+export interface BoxBreakpoints<T = BoxThemeProps> {
+  sm?: T;
+  md?: T;
+  lg?: T;
+  xl?: T;
+  xxl?: T;
+}
+
+export type BoxThemeProps = BoxNormalStyles & BoxThemePseudoClassProps & BoxBreakpoints;
+export type BoxStyleProps = BoxNormalStyles & BoxPseudoClasses & ThemeComponentProps & BoxBreakpoints<BoxStyleProps>;
 
 interface SvgNormalStyles {
   rotate?: BoxNormalStyles['rotate'];

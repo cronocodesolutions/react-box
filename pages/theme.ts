@@ -46,6 +46,10 @@ Theme.setup({
         color: 'gray2',
         borderColor: 'violetLighter',
       },
+      sm: {
+        p: 3,
+        hover: { p: 4 },
+      },
     },
   },
   checkbox: {

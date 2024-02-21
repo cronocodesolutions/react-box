@@ -1,5 +1,5 @@
 import { useLayoutEffect, useEffect, useMemo } from 'react';
-import { PseudoClassSuffix, StyleKey } from './boxStyles';
+import { PseudoClassSuffix, StyleKey, boxBreakpoints } from './boxStyles';
 import StylesContext from './stylesContext';
 import { BoxStyleProps } from './types';
 import { useTheme } from './useTheme';
@@ -16,10 +16,21 @@ export default function useStyles(props: BoxStyleProps, isSvg: boolean) {
     const classNames: (string | undefined)[] = [isSvg ? StylesContext.svgClassName : StylesContext.boxClassName];
     const propsToUse = themeProps ? { ...themeProps, ...props } : { ...props };
 
-    flatten(propsToUse, 'disabled', 'Disabled');
-    flatten(propsToUse, 'hover', 'H');
-    flatten(propsToUse, 'focus', 'F');
-    flatten(propsToUse, 'active', 'A');
+    flattenWrapper(propsToUse);
+
+    boxBreakpoints.forEach((boxBreakpoint) => {
+      if (boxBreakpoint in propsToUse) {
+        const breakpointProps = propsToUse[boxBreakpoint]!;
+
+        flattenWrapper(breakpointProps);
+
+        Object.entries(breakpointProps).forEach(([key, value]) => {
+          classNames.push(StylesContext.get(key as StyleKey, value, boxBreakpoint));
+        });
+
+        delete propsToUse[boxBreakpoint];
+      }
+    });
 
     Object.entries(propsToUse).forEach(([key, value]) => {
       classNames.push(StylesContext.get(key as StyleKey, value));
@@ -27,6 +38,13 @@ export default function useStyles(props: BoxStyleProps, isSvg: boolean) {
 
     return classNames;
   }, [props, themeProps]);
+}
+
+function flattenWrapper(props: BoxStyleProps) {
+  flatten(props, 'disabled', 'Disabled');
+  flatten(props, 'hover', 'H');
+  flatten(props, 'focus', 'F');
+  flatten(props, 'active', 'A');
 }
 
 function flatten<T extends BoxStyleProps>(props: T, key: keyof T, suffix: PseudoClassSuffix) {
