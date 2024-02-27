@@ -19,6 +19,6 @@ export function useTheme(props: ThemeComponentProps): BoxStyleProps | undefined 
       Theme.Styles.components?.[component as keyof ThemeSetup['components']]) as ThemeComponentStyles;
     if (!componentStyles) return undefined;
 
-    return theme ? { ...componentStyles.styles, ...componentStyles.themes?.[theme].styles } : componentStyles.styles;
+    return theme ? { ...componentStyles.styles, ...componentStyles.themes?.[theme] } : componentStyles.styles;
   }, [component, clean, theme]);
 }

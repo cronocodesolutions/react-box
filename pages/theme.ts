@@ -46,9 +46,19 @@ Theme.setup({
         color: 'gray2',
         borderColor: 'violetLighter',
       },
-      sm: {
-        p: 3,
-        hover: { p: 4 },
+    },
+    themes: {
+      ghost: {
+        bgColor: 'dark',
+        color: 'white',
+        hover: {
+          color: 'white',
+          bgColor: 'black1',
+        },
+        disabled: {
+          bgColor: 'gray1',
+        },
+        //
       },
     },
   },

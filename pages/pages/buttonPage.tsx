@@ -15,6 +15,17 @@ export default function ButtonPage() {
       <Button disabled onClick={() => alert('Click')}>
         Disabled
       </Button>
+
+      <Box mt={2}>
+        <Button theme="ghost" onClick={() => alert('ghost')}>
+          Ghost
+        </Button>
+      </Box>
+      <Box mt={2}>
+        <Button theme="ghost" disabled onClick={() => alert('ghost')}>
+          Ghost disabled
+        </Button>
+      </Box>
     </Box>
   );
 }

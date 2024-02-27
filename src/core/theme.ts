@@ -1,6 +1,5 @@
 import { PseudoClassSuffix, boxBreakpoints } from './boxStyles';
-import { BoxStyleProps } from './types';
-import { BoxThemeProps } from './types';
+import { BoxStyleProps, BoxThemeProps } from './types';
 
 export interface ThemeStyles<T> {
   styles: T;
@@ -8,7 +7,7 @@ export interface ThemeStyles<T> {
 
 export interface ThemeComponentStyles<T = BoxStyleProps> extends ThemeStyles<T> {
   themes?: {
-    [name: string]: ThemeStyles<T>;
+    [name: string]: T;
   };
   children?: {
     [name: string]: ThemeComponentStyles<T>;
@@ -91,9 +90,10 @@ const pseudoClassSuffixes: Record<PseudoClassSuffix, string> = {
 };
 
 namespace Theme {
-  export let Styles = flattenStyles(defaultTheme);
+  export let Styles = {} as ThemeSetup;
 
   export function setup(styles: ThemeSetup<BoxThemeProps>) {
+    Styles = flattenStyles(defaultTheme);
     Styles = assignThemeStyles(styles);
   }
 
@@ -239,39 +239,48 @@ namespace Theme {
   function extractPseudoClasses(styles: ThemeSetup<BoxThemeProps>) {
     const { components, ...restStyles } = styles;
 
-    const componentStyles = Object.values(restStyles);
-    components && componentStyles.push(...Object.values(components));
+    const componentsToFlatten = Object.values(restStyles) as ThemeComponentStyles<BoxThemeProps>[];
+    components && componentsToFlatten.push(...(Object.values(components) as ThemeComponentStyles<BoxThemeProps>[]));
 
-    for (const component of componentStyles) {
-      Object.entries(pseudoClassSuffixes).forEach(([suffix, name]) => {
-        if (name in component.styles) {
-          const pseudoClassStyles = component.styles[name as keyof typeof component.styles]! as BoxThemeProps;
+    for (const component of componentsToFlatten) {
+      flattenPseudoClasses(component.styles);
 
-          Object.entries(pseudoClassStyles).map(([name, value]) => {
-            component.styles[`${name}${suffix}` as keyof BoxThemeProps] = value;
-          });
-
-          delete component.styles[name as keyof typeof component.styles];
-        }
-      });
       boxBreakpoints.forEach((breakPoint) => {
         if (breakPoint in component.styles) {
-          const breakPointStyles = component.styles[breakPoint as keyof typeof component.styles]! as BoxThemeProps;
+          const breakPointStyles = component.styles[breakPoint as keyof typeof component.styles] as BoxThemeProps;
 
-          Object.entries(pseudoClassSuffixes).forEach(([suffix, name]) => {
-            if (name in breakPointStyles) {
-              const pseudoClassStyles = breakPointStyles[name as keyof typeof breakPointStyles] as BoxThemeProps;
-
-              Object.entries(pseudoClassStyles).map(([name, value]) => {
-                breakPointStyles[`${name}${suffix}` as keyof BoxThemeProps] = value;
-              });
-
-              delete breakPointStyles[name as keyof typeof breakPointStyles];
-            }
-          });
+          flattenPseudoClasses(breakPointStyles);
         }
       });
+
+      if (component.themes) {
+        Object.values(component.themes).forEach((themeStyles) => {
+          flattenPseudoClasses(themeStyles);
+
+          boxBreakpoints.forEach((breakPoint) => {
+            if (breakPoint in themeStyles) {
+              const breakPointStyles = themeStyles[breakPoint as keyof typeof themeStyles] as BoxThemeProps;
+
+              flattenPseudoClasses(breakPointStyles);
+            }
+          });
+        });
+      }
     }
+  }
+
+  function flattenPseudoClasses(styles: BoxThemeProps) {
+    Object.entries(pseudoClassSuffixes).forEach(([suffix, pseudoClassPropName]) => {
+      if (pseudoClassPropName in styles) {
+        const pseudoClassStyles = styles[pseudoClassPropName as keyof BoxThemeProps] as BoxThemeProps;
+
+        Object.entries(pseudoClassStyles).map(([name, value]) => {
+          styles[`${name}${suffix}` as keyof BoxThemeProps] = value;
+        });
+
+        delete styles[pseudoClassPropName as keyof BoxThemeProps];
+      }
+    });
   }
 }
 
