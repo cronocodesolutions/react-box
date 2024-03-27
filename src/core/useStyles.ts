@@ -18,6 +18,10 @@ export default function useStyles(props: BoxStyleProps, isSvg: boolean) {
 
     flattenWrapper(propsToUse);
 
+    Object.entries(propsToUse).forEach(([key, value]) => {
+      classNames.push(StylesContext.get(key as StyleKey, value));
+    });
+
     boxBreakpoints.forEach((boxBreakpoint) => {
       if (boxBreakpoint in propsToUse) {
         const breakpointProps = propsToUse[boxBreakpoint]!;
@@ -32,19 +36,15 @@ export default function useStyles(props: BoxStyleProps, isSvg: boolean) {
       }
     });
 
-    Object.entries(propsToUse).forEach(([key, value]) => {
-      classNames.push(StylesContext.get(key as StyleKey, value));
-    });
-
     return classNames;
   }, [props, themeProps]);
 }
 
 function flattenWrapper(props: BoxStyleProps) {
   flatten(props, 'disabled', 'Disabled');
-  flatten(props, 'hover', 'H');
-  flatten(props, 'focus', 'F');
-  flatten(props, 'active', 'A');
+  flatten(props, 'hover', 'Hover');
+  flatten(props, 'focus', 'Focus');
+  flatten(props, 'active', 'Active');
 }
 
 function flatten<T extends BoxStyleProps>(props: T, key: keyof T, suffix: PseudoClassSuffix) {

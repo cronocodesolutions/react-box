@@ -745,9 +745,9 @@ export const svgThemeStyles = {
 // :optional
 
 export const pseudoClassSuffixesExtended = [
-  'H',
-  'F',
-  'A',
+  'Hover',
+  'Focus',
+  'Active',
   'Checked',
   'Indeterminate',
   'Valid',

@@ -9,6 +9,7 @@ import {
   boxBreakpointsMinWidth,
   boxStyles,
   pseudoClassClassName,
+  pseudoClassSuffixesExtended,
 } from './boxStyles';
 import IdentityFactory from '@cronocode/identity-factory';
 
@@ -52,28 +53,18 @@ a,ul{all: unset;}
     if (requireFlush) {
       let items = generateStyles([defaultStyles]);
 
-      items = generateStyles(items, 'H');
-      items = generateStyles(items, 'F');
-      items = generateStyles(items, 'A');
-      items = generateStyles(items, 'Checked');
-      items = generateStyles(items, 'Indeterminate');
-      items = generateStyles(items, 'Valid');
-      items = generateStyles(items, 'Invalid');
-      items = generateStyles(items, 'Required');
-      items = generateStyles(items, 'Disabled');
+      pseudoClassSuffixesExtended.forEach((pseudoClassSuffix) => {
+        items = generateStyles(items, pseudoClassSuffix);
+      });
 
       boxBreakpoints.forEach((breakpoint) => {
         items.push(`@media(min-width: ${boxBreakpointsMinWidth[breakpoint]}px){`);
+
         items = generateStyles(items, undefined, breakpoint);
-        items = generateStyles(items, 'H', breakpoint);
-        items = generateStyles(items, 'F', breakpoint);
-        items = generateStyles(items, 'A', breakpoint);
-        items = generateStyles(items, 'Checked', breakpoint);
-        items = generateStyles(items, 'Indeterminate', breakpoint);
-        items = generateStyles(items, 'Valid', breakpoint);
-        items = generateStyles(items, 'Invalid', breakpoint);
-        items = generateStyles(items, 'Required', breakpoint);
-        items = generateStyles(items, 'Disabled', breakpoint);
+        pseudoClassSuffixesExtended.forEach((pseudoClassSuffix) => {
+          items = generateStyles(items, pseudoClassSuffix, breakpoint);
+        });
+
         items.push('}');
       });
 
@@ -125,17 +116,17 @@ a,ul{all: unset;}
 
           if (!pseudoSuffix) {
             selectors = formatSelector(selector, valueItem);
-          } else if (pseudoSuffix === 'H') {
+          } else if (pseudoSuffix === 'Hover') {
             selectors = [
               ...formatSelector(`${selector}:hover`, valueItem),
               ...formatSelector(`.${pseudoClassClassName.hover.className}:hover>${selector}`, valueItem),
             ];
-          } else if (pseudoSuffix === 'F') {
+          } else if (pseudoSuffix === 'Focus') {
             selectors = [
               ...formatSelector(`${selector}:focus-within`, valueItem),
               ...formatSelector(`.${pseudoClassClassName.focus.className}:focus-within>${selector}`, valueItem),
             ];
-          } else if (pseudoSuffix === 'A') {
+          } else if (pseudoSuffix === 'Active') {
             selectors = formatSelector(`${selector}:active`, valueItem);
           } else if (pseudoSuffix === 'Checked') {
             selectors = formatSelector(`${selector}:checked`, valueItem);

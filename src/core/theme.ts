@@ -77,9 +77,9 @@ const defaultTheme: ThemeSetup<BoxThemeProps> = {
 };
 
 const pseudoClassSuffixes: Record<PseudoClassSuffix, string> = {
-  H: 'hover',
-  F: 'focus',
-  A: 'active',
+  Hover: 'hover',
+  Focus: 'focus',
+  Active: 'active',
   Checked: 'checked',
   Indeterminate: 'indeterminate',
   Valid: 'valid',

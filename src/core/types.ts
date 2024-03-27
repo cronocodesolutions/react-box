@@ -1,4 +1,4 @@
-import { BoxBreakpointsType, StyleItem, boxStyles } from './boxStyles';
+import { StyleItem, boxStyles } from './boxStyles';
 import { ThemeComponentProps } from './useTheme';
 
 export type ExtractElementType<T> =

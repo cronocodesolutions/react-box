@@ -10,26 +10,13 @@ This is a react base component which will reduce considerably necessity to write
 npm install @cronocode/react-box
 ```
 
-2. Import styles
+2. Use component
 
-```
-import "@cronocode/react-box/styles.css";
-```
+Sizes is equal to `1/4rem`
 
-OR
-
-```
-@import "@cronocode/react-box/styles.css";
-```
-
-3. Use component
-
-Sizes are divided to `4`
-`padding={3}` means `1rem/4 => 0.75rem`
+`padding={3}` means `1/4 * 3 => 0.75rem`
 
 In the example below is creating a box with `maring: 0.5rem` and `padding: 1.75rem`
-
-Root `font-size` is set to `16px`
 
 ```
 import Box from "@cronocode/react-box";
@@ -42,6 +29,8 @@ export default function Component(props: Props) {
   );
 }
 ```
+
+**NOTE**: Root `font-size` is set to `16px`
 
 ## Components
 
@@ -67,7 +56,7 @@ import Flex from "@cronocode/react-box/components/flex";
 import Button from "@cronocode/react-box/components/button";
 ```
 
-- **Textbox**
+- **Textbox** - this is a `Box` component with html tag `input`
 
 ```
 import Textbox from "@cronocode/react-box/components/textbox";

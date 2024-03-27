@@ -6,10 +6,10 @@ import Code from '../components/code';
 
 export default function BoxPage() {
   const [props, setProps] = useState({
-    border: 0,
+    b: 0,
     borderRadius: 0,
-    margin: 0,
-    padding: 0,
+    m: 0,
+    p: 0,
   });
 
   const stringProps = Object.entries(props)
@@ -21,7 +21,7 @@ export default function BoxPage() {
       <Flex style={{ width: 300 }} br={1} p={2} d="column" gap={3}>
         <Box>
           Border
-          <Textbox defaultValue={props.border} type="number" onChange={(e) => setProps((prev) => ({ ...prev, border: +e.target.value }))} />
+          <Textbox defaultValue={props.b} type="number" onChange={(e) => setProps((prev) => ({ ...prev, b: +e.target.value }))} />
         </Box>
         <Box>
           Border radius
@@ -33,15 +33,11 @@ export default function BoxPage() {
         </Box>
         <Box>
           Margin
-          <Textbox defaultValue={props.margin} type="number" onChange={(e) => setProps((prev) => ({ ...prev, margin: +e.target.value }))} />
+          <Textbox defaultValue={props.m} type="number" onChange={(e) => setProps((prev) => ({ ...prev, m: +e.target.value }))} />
         </Box>
         <Box>
           Padding
-          <Textbox
-            defaultValue={props.padding}
-            type="number"
-            onChange={(e) => setProps((prev) => ({ ...prev, padding: +e.target.value }))}
-          />
+          <Textbox defaultValue={props.p} type="number" onChange={(e) => setProps((prev) => ({ ...prev, p: +e.target.value }))} />
         </Box>
       </Flex>
       <Flex flex1 d="column">
