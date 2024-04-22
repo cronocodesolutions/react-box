@@ -1,7 +1,10 @@
 name: Tests
 on:
-  check_run:
-    types: [created]
+  push:
+    branches: ['main']
+  pull_request:
+    branches: ['main']
+
 jobs:
   build:
     runs-on: ubuntu-latest
