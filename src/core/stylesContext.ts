@@ -1,15 +1,14 @@
 import {
   BoxBreakpointsType,
-  PseudoClassClassNameKey,
   PseudoClassSuffix,
   StyleItem,
   StyleKey,
   StyleValues,
+  addCustomPseudoClassProps,
   boxBreakpoints,
   boxBreakpointsMinWidth,
   boxStyles,
-  pseudoClassClassName,
-  pseudoClassSuffixesExtended,
+  pseudoClassSuffixes,
 } from './boxStyles';
 import IdentityFactory from '@cronocode/identity-factory';
 
@@ -44,8 +43,8 @@ a,ul{all: unset;}
       return getClassName(key as StyleKey, value, breakpoint);
     }
 
-    if (key in pseudoClassClassName && value) {
-      return pseudoClassClassName[key as PseudoClassClassNameKey].className;
+    if (['disabledGroup', 'hoverGroup', 'focusGroup', 'activeGroup'].includes(key)) {
+      return key + value;
     }
   }
 
@@ -53,7 +52,7 @@ a,ul{all: unset;}
     if (requireFlush) {
       let items = generateStyles([defaultStyles]);
 
-      pseudoClassSuffixesExtended.forEach((pseudoClassSuffix) => {
+      pseudoClassSuffixes.forEach((pseudoClassSuffix) => {
         items = generateStyles(items, pseudoClassSuffix);
       });
 
@@ -61,7 +60,7 @@ a,ul{all: unset;}
         items.push(`@media(min-width: ${boxBreakpointsMinWidth[breakpoint]}px){`);
 
         items = generateStyles(items, undefined, breakpoint);
-        pseudoClassSuffixesExtended.forEach((pseudoClassSuffix) => {
+        pseudoClassSuffixes.forEach((pseudoClassSuffix) => {
           items = generateStyles(items, pseudoClassSuffix, breakpoint);
         });
 
@@ -85,6 +84,17 @@ a,ul{all: unset;}
       },
       {} as Record<StyleKey, Set<unknown>>,
     );
+
+    const el = getElement();
+    el.innerHTML = '';
+  }
+
+  export function addCustomPseudoClass(suffix: PseudoClassSuffix, customName: string, parentKey: string) {
+    const newKeys = addCustomPseudoClassProps(suffix, customName, parentKey);
+
+    newKeys.forEach((newKey) => {
+      styles[newKey as StyleKey] = new Set();
+    });
   }
 
   function getClassName(styleKey: StyleKey, value: unknown, breakpoint?: BoxBreakpointsType) {
@@ -97,51 +107,51 @@ a,ul{all: unset;}
 
     const className = `${key}${value}`;
 
+    if (process.env.NODE_ENV === 'test') {
+      return className;
+    }
+
     return identity.getIdentity(className);
   }
 
   function generateStyles(classes: string[], pseudoSuffix?: PseudoClassSuffix, breakpoint?: BoxBreakpointsType) {
     return Object.entries(styles)
       .filter(
-        ([key]) =>
+        ([key, values]) =>
           (boxStyles[key as StyleKey] as StyleItem)?.pseudoSuffix === pseudoSuffix &&
-          (boxStyles[key as StyleKey] as StyleItem)?.breakpoint === breakpoint,
+          (boxStyles[key as StyleKey] as StyleItem)?.breakpoint === breakpoint &&
+          values.size > 0,
       )
       .reduce((acc, [key, values]) => {
         values.forEach((value) => {
-          const valueItem: StyleValues = getValueItem(key as StyleKey, value);
+          const styleItem = boxStyles[key as StyleKey] as StyleItem;
+          const valueItem = getValueItem(styleItem, value);
 
           const selector = `.${getClassName(key as StyleKey, value)}`;
           let selectors: string[] = [];
 
           if (!pseudoSuffix) {
-            selectors = formatSelector(selector, valueItem);
+            selectors = formatSelector(selector, styleItem, valueItem);
           } else if (pseudoSuffix === 'Hover') {
-            selectors = [
-              ...formatSelector(`${selector}:hover`, valueItem),
-              ...formatSelector(`.${pseudoClassClassName.hover.className}:hover>${selector}`, valueItem),
-            ];
+            selectors = formatSelector(selector, styleItem, valueItem, 'hover');
           } else if (pseudoSuffix === 'Focus') {
-            selectors = [
-              ...formatSelector(`${selector}:focus-within`, valueItem),
-              ...formatSelector(`.${pseudoClassClassName.focus.className}:focus-within>${selector}`, valueItem),
-            ];
+            selectors = formatSelector(selector, styleItem, valueItem, 'focus-within');
           } else if (pseudoSuffix === 'Active') {
-            selectors = formatSelector(`${selector}:active`, valueItem);
+            selectors = formatSelector(selector, styleItem, valueItem, 'active');
           } else if (pseudoSuffix === 'Checked') {
-            selectors = formatSelector(`${selector}:checked`, valueItem);
+            selectors = formatSelector(selector, styleItem, valueItem, 'checked');
           } else if (pseudoSuffix === 'Indeterminate') {
-            selectors = formatSelector(`${selector}:indeterminate`, valueItem);
+            selectors = formatSelector(selector, styleItem, valueItem, 'indeterminate');
           } else if (pseudoSuffix === 'Valid') {
-            selectors = formatSelector(`${selector}:valid`, valueItem);
+            selectors = formatSelector(selector, styleItem, valueItem, 'valid');
           } else if (pseudoSuffix === 'Invalid') {
-            selectors = formatSelector(`${selector}:invalid`, valueItem);
+            selectors = formatSelector(selector, styleItem, valueItem, 'invalid');
           } else if (pseudoSuffix === 'Required') {
-            selectors = formatSelector(`${selector}:required`, valueItem);
+            selectors = formatSelector(selector, styleItem, valueItem, 'required');
           } else if (pseudoSuffix === 'Optional') {
-            selectors = formatSelector(`${selector}:optional`, valueItem);
+            selectors = formatSelector(selector, styleItem, valueItem, 'optional');
           } else if (pseudoSuffix === 'Disabled') {
-            selectors = formatSelector(`${selector}:disabled`, valueItem);
+            selectors = formatSelector(selector, styleItem, valueItem, 'disabled');
           }
 
           const cssValue = valueItem.formatValue?.(key as StyleKey, value) ?? value;
@@ -153,28 +163,34 @@ a,ul{all: unset;}
         return acc;
       }, classes);
 
-    function formatSelector(selector: string, valueItem: StyleValues) {
-      return valueItem.formatSelector ? valueItem.formatSelector(selector) : [selector];
+    function formatSelector(selector: string, styleItem: StyleItem, valueItem: StyleValues, pseudoSelector?: string) {
+      let selectorToUse = selector;
+
+      if (pseudoSelector) {
+        selectorToUse = styleItem.customPseudoSuffix
+          ? `.${styleItem.customPseudoSuffix}:${pseudoSelector} ${selector}`
+          : `${selector}:${pseudoSelector}`;
+      }
+
+      return valueItem.formatSelector ? valueItem.formatSelector(selectorToUse) : [selectorToUse];
     }
   }
 
-  function getValueItem(key: StyleKey, value: unknown): StyleValues {
-    const item = boxStyles[key];
-
-    if ((item as StyleItem).isThemeStyle) {
-      return item as unknown as StyleValues;
+  function getValueItem(styleItem: StyleItem, value: unknown): StyleValues {
+    if (styleItem.isThemeStyle) {
+      return styleItem as unknown as StyleValues;
     }
 
-    const valueItem: StyleValues = (item.values1.values as Readonly<Array<unknown>>).includes(value)
-      ? item.values1
-      : (item.values2.values as Readonly<Array<unknown>>).includes(value)
-        ? item.values2
-        : item.values3;
+    const valueItem: StyleValues = styleItem.values1.values.includes(value)
+      ? styleItem.values1
+      : styleItem.values2.values.includes(value)
+        ? styleItem.values2
+        : styleItem.values3;
 
-    return valueItem;
+    return valueItem as unknown as StyleItem & StyleValues;
   }
 
-  function getElement() {
+  export function getElement() {
     const isBrowser = typeof window !== 'undefined' && typeof window.document !== 'undefined';
     const document = isBrowser ? window.document : global.document;
 

@@ -19,7 +19,23 @@ export default function TextboxPage() {
           <Textbox value="controlled without update" />
         </Box>
       </Flex>
-      <Textbox disabled mt={3} defaultValue="disabled" />
+      <Box>
+        <Textbox disabled mt={3} defaultValue="disabled" />
+      </Box>
+
+      <Box focusGroup="text">
+        <Textbox mt={3} defaultValue="focus group" />
+        <Box mt={2} focusGroup={{ text: { color: 'red' } }}>
+          change label color when focus textbox
+        </Box>
+      </Box>
+
+      <Box focusGroup="text">
+        <Textbox mt={3} defaultValue="focus group" />
+        <Box mt={2} focusGroup={{ text: { color: 'violet' } }}>
+          change label color when focus textbox
+        </Box>
+      </Box>
     </Box>
   );
 }

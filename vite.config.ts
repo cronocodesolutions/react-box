@@ -1,4 +1,4 @@
-import { defineConfig } from 'vite';
+import { defineConfig } from 'vitest/config';
 import dts from 'vite-plugin-dts';
 import path from 'path';
 import fs from 'fs';
@@ -64,12 +64,13 @@ export default defineConfig(({ mode }) => {
             if (id.endsWith('src/box.ts')) {
               return 'box';
             }
-
-            // console.log(id);
           },
           chunkFileNames: (info) => `[name].${extensions[currentFormat]}`,
         },
       },
+    },
+    test: {
+      environment: 'happy-dom',
     },
   };
 });

@@ -26,6 +26,20 @@ export default function ButtonPage() {
           Ghost disabled
         </Button>
       </Box>
+
+      <Box mt={2} hoverGroup="test" inline>
+        <Button
+          disabled={[true, { color: 'violet' }]}
+          width={40}
+          hoverGroup={{ test: { width: 60 } }}
+          onClick={() => alert('disabled group')}
+        >
+          Disabled group
+          <Box ml={2} hoverGroup={{ test: { color: 'red' } }}>
+            test
+          </Box>
+        </Button>
+      </Box>
     </Box>
   );
 }

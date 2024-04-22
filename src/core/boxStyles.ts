@@ -18,6 +18,7 @@ export interface StyleItem {
   values2: StyleValues;
   values3: StyleValues;
   pseudoSuffix?: PseudoClassSuffix;
+  customPseudoSuffix?: string;
   breakpoint?: BoxBreakpointsType;
   isThemeStyle?: boolean;
 }
@@ -744,7 +745,7 @@ export const svgThemeStyles = {
 // :required
 // :optional
 
-export const pseudoClassSuffixesExtended = [
+export const pseudoClassSuffixes = [
   'Hover',
   'Focus',
   'Active',
@@ -756,7 +757,7 @@ export const pseudoClassSuffixesExtended = [
   'Optional',
   'Disabled',
 ] as const;
-export type PseudoClassSuffix = (typeof pseudoClassSuffixesExtended)[number];
+export type PseudoClassSuffix = (typeof pseudoClassSuffixes)[number];
 
 export const boxBreakpoints = ['sm', 'md', 'lg', 'xl', 'xxl'] as const;
 export type BoxBreakpointsType = (typeof boxBreakpoints)[number];
@@ -767,12 +768,6 @@ export const boxBreakpointsMinWidth: Record<BoxBreakpointsType, number> = {
   xl: 1280,
   xxl: 1536,
 };
-
-export const pseudoClassClassName = {
-  hover: { className: '_h' },
-  focus: { className: '_f' },
-} satisfies Record<string, { className: string }>;
-export type PseudoClassClassNameKey = keyof typeof pseudoClassClassName;
 
 Object.keys(boxThemeStyles).forEach((key) => {
   // @ts-ignore
@@ -791,7 +786,7 @@ Object.keys(svgThemeStyles).forEach((key) => {
 export type StyleKey = keyof typeof boxStyles;
 
 let boxStylesKeys = Object.keys(boxStyles);
-pseudoClassSuffixesExtended.forEach((pseudoSuffix) => {
+pseudoClassSuffixes.forEach((pseudoSuffix) => {
   boxStylesKeys.forEach((key) => {
     (boxStyles[`${key}${pseudoSuffix}` as StyleKey] as StyleItem) = { ...boxStyles[key as StyleKey], pseudoSuffix };
   });
@@ -803,3 +798,23 @@ boxBreakpoints.forEach((breakpoint) => {
     (boxStyles[`${breakpoint}${key}` as StyleKey] as StyleItem) = { ...boxStyles[key as StyleKey], breakpoint };
   });
 });
+
+export function addCustomPseudoClassProps(suffix: PseudoClassSuffix, customName: string, parentKey: string) {
+  const keys = Object.entries(boxStyles)
+    .filter(
+      ([key, value]) =>
+        (value as StyleItem).pseudoSuffix === suffix &&
+        !(value as StyleItem).customPseudoSuffix &&
+        `${key}${customName}` in boxStyles === false,
+    )
+    .map(([key]) => key);
+
+  keys.forEach((key) => {
+    (boxStyles[`${key}${customName}` as StyleKey] as StyleItem) = {
+      ...boxStyles[key as StyleKey],
+      customPseudoSuffix: parentKey + customName,
+    };
+  });
+
+  return keys.map((key) => `${key}${customName}`);
+}
