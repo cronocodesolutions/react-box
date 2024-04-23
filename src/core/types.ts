@@ -19,9 +19,13 @@ type BoxNormalStyles = BoxStyles<typeof boxStyles> & Augmented.BoxProps;
 
 interface BoxPseudoClasses {
   disabled?: boolean | [boolean, BoxNormalStyles];
-  hover?: boolean | [boolean, BoxNormalStyles] | BoxNormalStyles;
-  focus?: boolean | [boolean, BoxNormalStyles] | BoxNormalStyles;
+  disabledGroup?: string | Record<string, BoxNormalStyles>;
+  hover?: BoxNormalStyles;
+  hoverGroup?: string | Record<string, BoxNormalStyles>;
+  focus?: BoxNormalStyles;
+  focusGroup?: string | Record<string, BoxNormalStyles>;
   active?: BoxNormalStyles;
+  activeGroup?: string | Record<string, BoxNormalStyles>;
 }
 
 interface BoxThemePseudoClassProps {
@@ -48,6 +52,13 @@ interface SvgNormalStyles {
   rotate?: BoxNormalStyles['rotate'];
   flip?: BoxNormalStyles['flip'];
   transitionDuration?: BoxNormalStyles['transitionDuration'];
-  hover?: boolean | [boolean, BoxNormalStyles];
+
+  disabledGroup?: Record<string, SvgNormalStyles>;
+  hover?: SvgNormalStyles;
+  hoverGroup?: string | Record<string, SvgNormalStyles>;
+  focus?: SvgNormalStyles;
+  focusGroup?: string | Record<string, SvgNormalStyles>;
+  active?: SvgNormalStyles;
+  activeGroup?: string | Record<string, SvgNormalStyles>;
 }
 export type BoxSvgStyles = SvgNormalStyles & ThemeComponentProps & Augmented.SvgProps;

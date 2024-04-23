@@ -41,22 +41,47 @@ export default function useStyles(props: BoxStyleProps, isSvg: boolean) {
 }
 
 function flattenWrapper(props: BoxStyleProps) {
-  flatten(props, 'disabled', 'Disabled');
-  flatten(props, 'hover', 'Hover');
-  flatten(props, 'focus', 'Focus');
-  flatten(props, 'active', 'Active');
+  flattenSingle(props, 'hover', 'Hover');
+  flattenSingle(props, 'focus', 'Focus');
+  flattenSingle(props, 'active', 'Active');
+  flattenSingle(props, 'disabled', 'Disabled');
+
+  flattenGroup(props, 'hoverGroup', 'Hover');
+  flattenGroup(props, 'focusGroup', 'Focus');
+  flattenGroup(props, 'activeGroup', 'Active');
+  flattenGroup(props, 'disabledGroup', 'Disabled');
 }
 
-function flatten<T extends BoxStyleProps>(props: T, key: keyof T, suffix: PseudoClassSuffix) {
+function flattenSingle<T extends BoxStyleProps>(props: T, key: keyof T, suffix: PseudoClassSuffix) {
   if (key in props === false) return;
 
-  if (Array.isArray(props[key])) {
-    Object.entries((props[key] as [boolean, BoxStyleProps])[1]).forEach(([name, value]) => {
+  flatten(props, key, suffix, props[key] as [boolean, BoxStyleProps] | BoxStyleProps);
+}
+
+function flattenGroup<T extends BoxStyleProps>(props: T, key: keyof T, suffix: PseudoClassSuffix) {
+  if (key in props === false) return;
+  if (!ObjectUtils.isObject(props[key])) return;
+
+  Object.entries(props[key] as Record<string, BoxStyleProps>).forEach(([customName, value]) => {
+    StylesContext.addCustomPseudoClass(suffix, customName, key as string);
+
+    flatten(props, key, (suffix + customName) as PseudoClassSuffix, value);
+  });
+}
+
+function flatten<T extends BoxStyleProps>(
+  props: T,
+  key: keyof T,
+  suffix: PseudoClassSuffix,
+  innerProps: [boolean, BoxStyleProps] | BoxStyleProps,
+) {
+  if (Array.isArray(innerProps)) {
+    Object.entries(innerProps[1]).forEach(([name, value]) => {
       props[`${name}${suffix}` as keyof BoxStyleProps] = value;
     });
-    props[key] = (props[key] as [boolean, BoxStyleProps])[0] as T[keyof T];
-  } else if (ObjectUtils.isObject(props[key])) {
-    Object.entries(props[key] as BoxStyleProps).forEach(([name, value]) => {
+    props[key] = innerProps[0] as T[keyof T];
+  } else if (ObjectUtils.isObject(innerProps)) {
+    Object.entries(innerProps).forEach(([name, value]) => {
       props[`${name}${suffix}` as keyof BoxStyleProps] = value;
     });
     delete props[key];
