@@ -65,7 +65,7 @@ const widthHeightFractions = [
 const widthHeightValues = ['fit', 'fit-screen', 'auto', 'fit-content', 'max-content', 'min-content'] as const;
 const alignSelf = ['auto', 'flex-start', 'flex-end', 'center', 'baseline', 'stretch'] as const;
 
-export const boxStyles = {
+const simpleBoxStyles = {
   /** The `display` CSS property sets whether an element is treated as a block or inline box and the layout used for its children, such as flow layout, grid or flex. */
   display: {
     cssNames: ['display'],
@@ -708,6 +708,8 @@ export const boxStyles = {
   },
 } satisfies Record<string, StyleItem>;
 
+export type StyleKey = keyof typeof simpleBoxStyles;
+
 export const boxThemeStyles = {
   shadow: { cssNames: ['box-shadow'], formatValue: BoxStylesFormatters.Value.variables('shadow') },
   background: { cssNames: ['background'], formatValue: BoxStylesFormatters.Value.variables('background') },
@@ -769,35 +771,41 @@ export const boxBreakpointsMinWidth: Record<BoxBreakpointsType, number> = {
   xxl: 1536,
 };
 
-Object.keys(boxThemeStyles).forEach((key) => {
-  // @ts-ignore
-  boxStyles[key] = boxThemeStyles[key];
-  // @ts-ignore
-  boxStyles[key].isThemeStyle = true;
-});
+function buildBoxStyles() {
+  const boxStyles: Record<string, StyleItem> = { ...simpleBoxStyles };
 
-Object.keys(svgThemeStyles).forEach((key) => {
-  // @ts-ignore
-  boxStyles[key] = svgThemeStyles[key];
-  // @ts-ignore
-  boxStyles[key].isThemeStyle = true;
-});
-
-export type StyleKey = keyof typeof boxStyles;
-
-let boxStylesKeys = Object.keys(boxStyles);
-pseudoClassSuffixes.forEach((pseudoSuffix) => {
-  boxStylesKeys.forEach((key) => {
-    (boxStyles[`${key}${pseudoSuffix}` as StyleKey] as StyleItem) = { ...boxStyles[key as StyleKey], pseudoSuffix };
+  Object.keys(boxThemeStyles).forEach((key) => {
+    boxStyles[key] = boxThemeStyles[key as keyof typeof boxThemeStyles] as unknown as StyleItem;
+    boxStyles[key].isThemeStyle = true;
   });
-});
 
-boxStylesKeys = Object.keys(boxStyles);
-boxBreakpoints.forEach((breakpoint) => {
-  boxStylesKeys.forEach((key) => {
-    (boxStyles[`${breakpoint}${key}` as StyleKey] as StyleItem) = { ...boxStyles[key as StyleKey], breakpoint };
+  Object.keys(svgThemeStyles).forEach((key) => {
+    boxStyles[key] = svgThemeStyles[key as keyof typeof svgThemeStyles] as unknown as StyleItem;
+    boxStyles[key].isThemeStyle = true;
   });
-});
+
+  let boxStylesWithThemeAndSvgKeys = Object.keys(boxStyles);
+  pseudoClassSuffixes.forEach((pseudoSuffix) => {
+    boxStylesWithThemeAndSvgKeys.forEach((key) => {
+      (boxStyles[`${key}${pseudoSuffix}` as StyleKey] as StyleItem) = { ...boxStyles[key as StyleKey], pseudoSuffix };
+    });
+  });
+
+  boxStylesWithThemeAndSvgKeys = Object.keys(boxStyles);
+  boxBreakpoints.forEach((breakpoint) => {
+    boxStylesWithThemeAndSvgKeys.forEach((key) => {
+      (boxStyles[`${breakpoint}${key}` as StyleKey] as StyleItem) = { ...boxStyles[key as StyleKey], breakpoint };
+    });
+  });
+
+  return boxStyles;
+}
+
+export let boxStyles = buildBoxStyles();
+
+export function rebuildBoxStyles() {
+  boxStyles = buildBoxStyles();
+}
 
 export function addCustomPseudoClassProps(suffix: PseudoClassSuffix, customName: string, parentKey: string) {
   const keys = Object.entries(boxStyles)

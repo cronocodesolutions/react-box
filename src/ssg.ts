@@ -22,7 +22,6 @@ const document = {
 global.document = document as any;
 
 export function renderToStaticMarkup(element: React.ReactElement, addStylesToHead = true) {
-  StylesContext.clear();
   let html = ReactDOMServer.renderToStaticMarkup(element);
   StylesContext.flush();
 
@@ -37,6 +36,8 @@ export function renderToStaticMarkup(element: React.ReactElement, addStylesToHea
       html = html.substring(0, stylesLocationIndex) + styles + html.substring(stylesLocationIndex);
     }
   }
+
+  StylesContext.clear();
 
   return {
     html,
