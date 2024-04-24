@@ -65,7 +65,7 @@ const widthHeightFractions = [
 const widthHeightValues = ['fit', 'fit-screen', 'auto', 'fit-content', 'max-content', 'min-content'] as const;
 const alignSelf = ['auto', 'flex-start', 'flex-end', 'center', 'baseline', 'stretch'] as const;
 
-const simpleBoxStyles = {
+export const simpleBoxStyles = {
   /** The `display` CSS property sets whether an element is treated as a block or inline box and the layout used for its children, such as flow layout, grid or flex. */
   display: {
     cssNames: ['display'],
