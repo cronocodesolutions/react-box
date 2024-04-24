@@ -9,6 +9,7 @@ import {
   boxBreakpointsMinWidth,
   boxStyles,
   pseudoClassSuffixes,
+  rebuildBoxStyles,
 } from './boxStyles';
 import IdentityFactory from '@cronocode/identity-factory';
 
@@ -25,18 +26,10 @@ a,ul{all: unset;}
 .${svgClassName}{transition: all var(--svgTransitionTime);}.${svgClassName} path,.${svgClassName} circle,.${svgClassName} rect,.${svgClassName} line {transition: all var(--svgTransitionTime);}
 `;
   const identity = new IdentityFactory();
-  const propKeys = Object.keys(boxStyles) as StyleKey[];
-
   let requireFlush = true;
 
-  let styles = propKeys.reduce(
-    (acc, key) => {
-      acc[key] = new Set();
-
-      return acc;
-    },
-    {} as Record<StyleKey, Set<unknown>>,
-  );
+  let styles = {} as Record<StyleKey, Set<unknown>>;
+  clear();
 
   export function get(key: string, value: unknown, breakpoint?: BoxBreakpointsType) {
     if (key in boxStyles) {
@@ -76,6 +69,10 @@ a,ul{all: unset;}
   }
 
   export function clear() {
+    rebuildBoxStyles();
+
+    const propKeys = Object.keys(boxStyles) as StyleKey[];
+
     styles = propKeys.reduce(
       (acc, key) => {
         acc[key] = new Set();
@@ -84,9 +81,6 @@ a,ul{all: unset;}
       },
       {} as Record<StyleKey, Set<unknown>>,
     );
-
-    const el = getElement();
-    el.innerHTML = '';
   }
 
   export function addCustomPseudoClass(suffix: PseudoClassSuffix, customName: string, parentKey: string) {
