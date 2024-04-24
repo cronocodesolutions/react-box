@@ -19,6 +19,6 @@ jobs:
       - name: Install dependencies 🔧
         run: npm install
       - name: Check compiling 🔧
-        run: npm run compiltypee
+        run: npm run compile
       - name: Check testing 🔧
         run: npm run test:all
