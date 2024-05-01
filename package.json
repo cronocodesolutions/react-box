@@ -1,6 +1,6 @@
 {
   "name": "@cronocode/react-box",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "type": "module",
   "main": "./box.cjs",
   "module": "./box.mjs",
@@ -11,10 +11,10 @@
       "require": "./box.cjs",
       "types": "./box.d.ts"
     },
-    "./theme": {
-      "import": "./theme.mjs",
-      "require": "./theme.cjs",
-      "types": "./theme.d.ts"
+    "./core/theme": {
+      "import": "./core/theme.mjs",
+      "require": "./core/theme.cjs",
+      "types": "./core/theme.d.ts"
     },
     "./core/types": {
       "types": "./core/types.d.ts"

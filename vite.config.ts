@@ -12,7 +12,7 @@ const componentsEntry = files.reduce((acc, fileName) => {
 
 const entry = {
   box: path.resolve(__dirname, './src/box.ts'),
-  theme: path.resolve(__dirname, './src/theme.ts'),
+  'core/theme': path.resolve(__dirname, './src/core/theme.ts'),
   ssg: path.resolve(__dirname, './src/ssg.ts'),
   ...componentsEntry,
 };
