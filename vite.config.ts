@@ -26,7 +26,7 @@ let currentFormat;
 
 export default defineConfig(({ mode }) => {
   return {
-    plugins: [dts({ entryRoot: './src', exclude: ['./pages/**'] })],
+    plugins: [dts({ entryRoot: './src', exclude: ['./pages/**', './src/**/*.test.*'] })],
     build: {
       minify: mode !== 'dev',
       lib: {
@@ -38,7 +38,7 @@ export default defineConfig(({ mode }) => {
         formats: ['es', 'cjs'],
       },
       rollupOptions: {
-        external: ['react', 'react-dom', 'react/jsx-runtime'],
+        external: ['react', 'react-dom', 'react/jsx-runtime', 'react-dom/server'],
         output: {
           inlineDynamicImports: false,
           manualChunks(id: string) {
