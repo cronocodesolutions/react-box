@@ -12,7 +12,7 @@ const componentsEntry = files.reduce((acc, fileName) => {
 
 const entry = {
   box: path.resolve(__dirname, './src/box.ts'),
-  theme: path.resolve(__dirname, './src/theme.ts'),
+  'core/theme': path.resolve(__dirname, './src/core/theme.ts'),
   ssg: path.resolve(__dirname, './src/ssg.ts'),
   ...componentsEntry,
 };
@@ -26,7 +26,7 @@ let currentFormat;
 
 export default defineConfig(({ mode }) => {
   return {
-    plugins: [dts({ entryRoot: './src', exclude: ['./pages/**'] })],
+    plugins: [dts({ entryRoot: './src', exclude: ['./pages/**', './src/**/*.test.*'] })],
     build: {
       minify: mode !== 'dev',
       lib: {
@@ -38,7 +38,7 @@ export default defineConfig(({ mode }) => {
         formats: ['es', 'cjs'],
       },
       rollupOptions: {
-        external: ['react', 'react-dom', 'react/jsx-runtime'],
+        external: ['react', 'react-dom', 'react/jsx-runtime', 'react-dom/server'],
         output: {
           inlineDynamicImports: false,
           manualChunks(id: string) {
