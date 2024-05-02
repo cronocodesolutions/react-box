@@ -5,7 +5,7 @@ import { ClassNameType } from '../core/classNames';
 
 type BoxSvgTagProps = Omit<BoxTagProps<'svg'>, 'viewBox' | 'width' | 'height'>;
 
-interface Props extends BoxSvgStyles {
+interface Props extends Omit<BoxSvgStyles, 'width' | 'height'> {
   children?: React.ReactNode | ((props: { isHover: boolean }) => React.ReactNode);
   props?: BoxSvgTagProps;
   style?: React.ComponentProps<'svg'>['style'];

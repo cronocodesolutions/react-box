@@ -673,7 +673,7 @@ export const simpleBoxStyles = {
   },
   appearance: {
     cssNames: ['appearance'],
-    values1: { values: ['none'] as const },
+    values1: { values: ['none', 'auto', 'menulist-button', 'textfield', 'button', 'checkbox'] as const },
     values2: { values: [] as const },
     values3: { values: [] as const },
   },

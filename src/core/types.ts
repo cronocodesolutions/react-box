@@ -16,16 +16,17 @@ type BoxStyles<T extends Record<string, StyleItem>> = {
 };
 
 type BoxNormalStyles = BoxStyles<typeof simpleBoxStyles> & Augmented.BoxProps;
+type SvgNormalStyles = BoxStyles<typeof simpleBoxStyles> & Augmented.SvgProps;
 
-interface BoxPseudoClasses {
-  disabled?: boolean | [boolean, BoxNormalStyles];
-  disabledGroup?: string | Record<string, BoxNormalStyles>;
-  hover?: BoxNormalStyles;
-  hoverGroup?: string | Record<string, BoxNormalStyles>;
-  focus?: BoxNormalStyles;
-  focusGroup?: string | Record<string, BoxNormalStyles>;
-  active?: BoxNormalStyles;
-  activeGroup?: string | Record<string, BoxNormalStyles>;
+interface BoxPseudoClasses<T> {
+  disabled?: boolean | [boolean, T];
+  disabledGroup?: string | Record<string, T>;
+  hover?: T;
+  hoverGroup?: string | Record<string, T>;
+  focus?: T;
+  focusGroup?: string | Record<string, T>;
+  active?: T;
+  activeGroup?: string | Record<string, T>;
 }
 
 interface BoxThemePseudoClassProps {
@@ -46,19 +47,6 @@ export interface BoxBreakpoints<T = BoxThemeProps> {
 }
 
 export type BoxThemeProps = BoxNormalStyles & BoxThemePseudoClassProps & BoxBreakpoints;
-export type BoxStyleProps = BoxNormalStyles & BoxPseudoClasses & ThemeComponentProps & BoxBreakpoints<BoxStyleProps>;
 
-interface SvgNormalStyles {
-  rotate?: BoxNormalStyles['rotate'];
-  flip?: BoxNormalStyles['flip'];
-  transitionDuration?: BoxNormalStyles['transitionDuration'];
-
-  disabledGroup?: Record<string, SvgNormalStyles>;
-  hover?: SvgNormalStyles;
-  hoverGroup?: string | Record<string, SvgNormalStyles>;
-  focus?: SvgNormalStyles;
-  focusGroup?: string | Record<string, SvgNormalStyles>;
-  active?: SvgNormalStyles;
-  activeGroup?: string | Record<string, SvgNormalStyles>;
-}
-export type BoxSvgStyles = SvgNormalStyles & ThemeComponentProps & Augmented.SvgProps;
+export type BoxStyleProps = BoxNormalStyles & BoxPseudoClasses<BoxNormalStyles> & ThemeComponentProps & BoxBreakpoints<BoxStyleProps>;
+export type BoxSvgStyles = SvgNormalStyles & BoxPseudoClasses<SvgNormalStyles> & ThemeComponentProps & BoxBreakpoints<BoxSvgStyles>;
