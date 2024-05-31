@@ -16,7 +16,7 @@ export default function TextboxPage() {
           <Textbox value={controlledValue} onChange={(e) => setControlledValue(e.target.value)} />
         </Box>
         <Box tag="label" ml={4}>
-          <Textbox value="controlled without update" />
+          <Textbox value="controlled without update" onChange={() => {}} />
         </Box>
       </Flex>
       <Box>

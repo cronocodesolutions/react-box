@@ -16,29 +16,32 @@ import TextareaPage from '../pages/textareaPage';
 
 export default function App() {
   return (
-    <Flex height="fit-screen" color="violetDark">
-      <Box height="fit-screen" style={{ width: '200px' }} bgColor="violetLighter" px={2}>
+    <Flex height="fit-screen" color="violetDark" backgroundImage="bg">
+      <Box height="fit-screen" width={60} px={2}>
         <MenuItem to="/" bgColor={undefined} hover={{ bgColor: undefined }} color={undefined}>
           <Box fontWeight={700} py={5}>
             React Box
           </Box>
         </MenuItem>
-        <MenuItem to="/box">Box</MenuItem>
-        <MenuItem to="/flex">Flex</MenuItem>
-        <MenuItem to="/grid">Grid</MenuItem>
+        <Box ml={4} color="black" fontWeight={500}>
+          Components
+        </Box>
+        {/* <MenuItem to="/box">Box</MenuItem> */}
+        {/* <MenuItem to="/flex">Flex</MenuItem> */}
         <MenuItem to="/button">Button</MenuItem>
         <MenuItem to="/textbox">Textbox</MenuItem>
         <MenuItem to="/textarea">Textarea</MenuItem>
         <MenuItem to="/checkbox">Checkbox</MenuItem>
         <MenuItem to="/radiobutton">Radio Button</MenuItem>
         <MenuItem to="/tooltip">Tooltip</MenuItem>
+        <MenuItem to="/grid">Grid</MenuItem>
         <MenuItem to="/datagrid">Data Grid</MenuItem>
       </Box>
-      <Box flex1>
+      <Box flex1 bl={1} borderColor="violet">
         <Routes>
           <Route index element={<HomePage />} />
-          <Route path="/box" element={<BoxPage />} />
-          <Route path="/flex" element={<FlexPage />} />
+          {/* <Route path="/box" element={<BoxPage />} />
+          <Route path="/flex" element={<FlexPage />} /> */}
           <Route path="/grid" element={<GridPage />} />
           <Route path="/textbox" element={<TextboxPage />} />
           <Route path="/textarea" element={<TextareaPage />} />

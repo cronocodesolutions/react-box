@@ -11,12 +11,15 @@ export default function HomePage() {
 
   return (
     <Flex ai="center" width="fit" mt={20} d="column">
-      {/* <Box> */}
-      <Box fontSize={60} color="violet">
-        Productivity tool
-      </Box>
-      <Box fontSize={24}>to rapidly build modern web app based on React library.</Box>
-      {/* </Box> */}
+      <Flex d="column" ai="center" textAlign="center">
+        <Box fontSize={44} fontWeight={500} maxWidth={200}>
+          Productivity tool to rapidly build modern web app based on React library
+        </Box>
+        <Box fontSize={18} fontWeight={300} mt={6}>
+          <Box>Utility framework with multiple props which cover all CSS styles.</Box>
+          <Box> Never DRY with your CSS styles. Keep typescript compilation power.</Box>
+        </Box>
+      </Flex>
       <Box mt={20} fontSize={30}>
         Steps to start
       </Box>
@@ -27,7 +30,7 @@ export default function HomePage() {
           <Box>Install npm library</Box>
         </Flex>
         <Code language="shell">{`npm install @cronocode/react-box`}</Code>
-        <Flex ai="center" gap={3} mt={5}>
+        <Flex ai="center" gap={3} mt={10}>
           <Box component="number">2</Box>
           <Box>Usage</Box>
         </Flex>

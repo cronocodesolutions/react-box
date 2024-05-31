@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import Box from '../../src/box';
 import Button from '../../src/components/button';
 import Flex from '../../src/components/flex';
@@ -6,6 +6,7 @@ import BaseSvg from '../../src/components/baseSvg';
 
 export default function ButtonPage() {
   const [counter, setCounter] = useState(0);
+  const ref = useRef(null);
 
   return (
     <Box p={10}>
@@ -13,7 +14,7 @@ export default function ButtonPage() {
         <Button onClick={() => setCounter((prev) => prev + 1)}>Click me!</Button>
         {counter > 0 && <Box fontSize={18}>{counter}</Box>}
       </Flex>
-      <Button disabled onClick={() => alert('Click')}>
+      <Button disabled onClick={() => alert('Click')} ref={ref}>
         Disabled
       </Button>
 

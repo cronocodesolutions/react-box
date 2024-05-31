@@ -18,7 +18,7 @@ export default function MenuItem(props: Props) {
           bgColor={isActive ? 'violetLight' : undefined}
           color={isActive ? 'violet' : undefined}
           cursor={isActive ? 'default' : 'pointer'}
-          py={3}
+          py={2}
           px={6}
           borderRadius={1}
           transition="none"

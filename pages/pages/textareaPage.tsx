@@ -16,7 +16,7 @@ export default function TextareaPage() {
           <Textarea value={controlledValue} onChange={(e) => setControlledValue(e.target.value)} />
         </Box>
         <Box tag="label" ml={4}>
-          <Textarea value="controlled without update" />
+          <Textarea value="controlled without update" onChange={() => {}} />
         </Box>
       </Flex>
       <Textarea disabled mt={3} defaultValue="disabled" />

@@ -39,10 +39,12 @@ const data: Person[] = [
 
 export default function DataGridPage() {
   return (
-    <Box>
-      <Box fontSize={24}>Component status:</Box>
-      <Box fontSize={18} color="red">
-        Work in progress
+    <Box p={10}>
+      <Box fontSize={24} inline>
+        Component status:
+      </Box>
+      <Box fontSize={18} color="red" inline ml={2}>
+        Work In Progress
       </Box>
       <Box p={2} mt={4}>
         <DataGrid />

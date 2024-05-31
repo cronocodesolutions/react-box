@@ -1,4 +1,4 @@
-import React, { forwardRef, Ref } from 'react';
+import { forwardRef, Ref } from 'react';
 import Box from '../box';
 import ObjectUtils from '../utils/object/objectUtils';
 

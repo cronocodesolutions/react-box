@@ -13,41 +13,62 @@ export default function TooltipPage() {
 
   return (
     <Box p={10}>
-      <Box>This is Tooltip page</Box>
-
-      <Box bgColor="violetLighter" inline>
-        <Button onClick={() => setOpenDD(!openDD)}>Click me ↓↑</Button>
+      <Button onClick={() => setOpenDD(!openDD)} display="block" mt={2} p={0}>
+        <Box p={3}>Click me ↓↑</Box>
         {openDD && (
-          <Tooltip>
-            <Box b={1} bgColor="violet">
-              <Box>Item 1</Box>
-              <Box>Item 2</Box>
-              <Box>Item 3</Box>
-              <Box>Item 4</Box>
-              <Box>Item 5</Box>
-              <Box>Item 6</Box>
-              <Box>Item 7</Box>
-              <Box>Item 8</Box>
-            </Box>
+          <Tooltip borderRadius={2} p={3} bgColor="violetLight" b={1} borderColor="violet" top={1}>
+            <Box>Item 1</Box>
+            <Box>Item 2</Box>
+            <Box>Item 3</Box>
+            <Box>Item 4</Box>
+            <Box>Item 5</Box>
+            <Box>Item 6</Box>
+            <Box>Item 7</Box>
+            <Box>Item 8</Box>
           </Tooltip>
         )}
-      </Box>
+      </Button>
 
-      <Box mt={10} width={200} height={72} b={1} overflow="auto" bgColor="violet" position="relative">
-        <Box>overflow hidden box</Box>
-        <Flex>
-          <Box m={4} position="relative">
-            <Button onClick={() => setOpen1(!open1)}>Click me! (position absolute)</Button>
+      <Box mt={10} width={200} height={72} b={1} borderRadius={1} overflow="auto" bgColor="violetLighter" position="relative">
+        <Box position="sticky" top={4} textAlign="right" m={4}>
+          overflow hidden box
+        </Box>
+        <Flex ml={4} jc="center">
+          <Button onClick={() => setOpen1(!open1)} position="relative" width={60} jc="center">
+            Click me! (position absolute)
             {open1 && (
-              <Box style={{ width: 300, height: 500 }} b={1} left={0} top={11} bgColor="violetLight" position="absolute">
+              <Box
+                textAlign="left"
+                height={120}
+                width={76}
+                borderRadius={2}
+                p={3}
+                left={0}
+                top={12}
+                color="violetDark"
+                bgColor="violetLight"
+                b={1}
+                borderColor="violet"
+                position="absolute"
+              >
                 position absolute box
               </Box>
             )}
-          </Box>
-          <Box m={4}>
-            <Button onClick={() => setOpen2(!open2)}>Click me! (tooltip)</Button>
+          </Button>
+        </Flex>
+      </Box>
+
+      <Box mt={10} width={200} height={72} b={1} borderRadius={1} overflow="auto" bgColor="violetLighter" position="relative">
+        <Box position="sticky" top={4} textAlign="right" m={4}>
+          overflow hidden box
+        </Box>
+        <Flex ml={4} jc="center">
+          <Box>
+            <Button onClick={() => setOpen2(!open2)} display="block" width={60}>
+              Click me! (tooltip)
+            </Button>
             {open2 && (
-              <Tooltip style={{ width: 300, height: 500 }} b={1} bgColor="violetLight" position="absolute">
+              <Tooltip height={120} width={76} borderRadius={2} p={3} top={1} bgColor="violetLight" b={1} borderColor="violet">
                 tooltip box
               </Tooltip>
             )}
