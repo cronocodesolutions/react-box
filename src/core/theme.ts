@@ -23,6 +23,7 @@ export interface ThemeSetup<T = BoxStyleProps> {
   textarea?: ThemeComponentStyles<T>;
   checkbox?: ThemeComponentStyles<T>;
   radioButton?: ThemeComponentStyles<T>;
+  label?: ThemeComponentStyles<T>;
 }
 
 interface BoxAugmentedProps {
