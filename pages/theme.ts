@@ -136,15 +136,6 @@ Theme.setup({
         borderColor: 'red',
       },
     },
-    children: {
-      error: {
-        styles: {
-          hasInvalid: {
-            color: 'red',
-          },
-        },
-      },
-    },
   },
   textarea: {
     styles: {
