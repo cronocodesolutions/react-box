@@ -41,15 +41,22 @@ export default function useStyles(props: BoxStyleProps, isSvg: boolean) {
 }
 
 function flattenWrapper(props: BoxStyleProps) {
-  flattenSingle(props, 'hover', 'Hover');
-  flattenSingle(props, 'focus', 'Focus');
-  flattenSingle(props, 'active', 'Active');
-  flattenSingle(props, 'disabled', 'Disabled');
+  flattenSingle(props, 'hover', 'hover');
+  flattenSingle(props, 'focus', 'focus');
+  flattenSingle(props, 'active', 'active');
+  flattenSingle(props, 'disabled', 'disabled');
+  flattenSingle(props, 'hasDisabled', 'hasDisabled');
+  flattenSingle(props, 'checked', 'checked');
+  flattenSingle(props, 'hasChecked', 'hasChecked');
+  flattenSingle(props, 'valid', 'valid');
+  flattenSingle(props, 'hasValid', 'hasValid');
+  flattenSingle(props, 'invalid', 'invalid');
+  flattenSingle(props, 'hasInvalid', 'hasInvalid');
 
-  flattenGroup(props, 'hoverGroup', 'Hover');
-  flattenGroup(props, 'focusGroup', 'Focus');
-  flattenGroup(props, 'activeGroup', 'Active');
-  flattenGroup(props, 'disabledGroup', 'Disabled');
+  flattenGroup(props, 'hoverGroup', 'hover');
+  flattenGroup(props, 'focusGroup', 'focus');
+  flattenGroup(props, 'activeGroup', 'active');
+  flattenGroup(props, 'disabledGroup', 'disabled');
 }
 
 function flattenSingle<T extends BoxStyleProps>(props: T, key: keyof T, suffix: PseudoClassSuffix) {

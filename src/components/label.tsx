@@ -1,10 +1,10 @@
-import { forwardRef } from 'react';
+import { Ref, forwardRef } from 'react';
 import Box, { BoxProps } from '../box';
 
-interface Props extends Omit<BoxProps<'label'>, 'tag'> {}
+interface Props extends Omit<BoxProps<'label'>, 'ref' | 'tag'> {}
 
-function Label(props: Props) {
-  return <Box tag="label" component="label" {...props} />;
+function Label(props: Props, ref: Ref<HTMLLabelElement>) {
+  return <Box tag="label" ref={ref} component="label" {...props} />;
 }
 
 export default forwardRef(Label);

@@ -21,12 +21,19 @@ type SvgNormalStyles = BoxStyles<typeof simpleBoxStyles> & Augmented.SvgProps;
 interface BoxPseudoClasses<T> {
   disabled?: boolean | [boolean, T];
   disabledGroup?: string | Record<string, T>;
+  hasDisabled?: T;
   hover?: T;
   hoverGroup?: string | Record<string, T>;
   focus?: T;
   focusGroup?: string | Record<string, T>;
   active?: T;
   activeGroup?: string | Record<string, T>;
+  checked?: T;
+  hasChecked?: T;
+  valid?: T;
+  hasValid?: T;
+  invalid?: T;
+  hasInvalid?: T;
 }
 
 interface BoxThemePseudoClassProps {
@@ -34,8 +41,14 @@ interface BoxThemePseudoClassProps {
   focus?: BoxNormalStyles;
   active?: BoxNormalStyles;
   disabled?: BoxNormalStyles;
+  hasDisabled?: BoxNormalStyles;
   indeterminate?: BoxNormalStyles;
   checked?: BoxNormalStyles;
+  hasChecked?: BoxNormalStyles;
+  valid?: BoxNormalStyles;
+  hasValid?: BoxNormalStyles;
+  invalid?: BoxNormalStyles;
+  hasInvalid?: BoxNormalStyles;
 }
 
 export interface BoxBreakpoints<T = BoxThemeProps> {

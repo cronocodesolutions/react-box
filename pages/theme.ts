@@ -132,6 +132,18 @@ Theme.setup({
         bgColor: 'violetLight',
         color: 'gray2',
       },
+      invalid: {
+        borderColor: 'red',
+      },
+    },
+    children: {
+      error: {
+        styles: {
+          hasInvalid: {
+            color: 'red',
+          },
+        },
+      },
     },
   },
   textarea: {
@@ -151,6 +163,16 @@ Theme.setup({
         borderColor: 'violetLighter',
         bgColor: 'violetLight',
         color: 'gray2',
+      },
+      invalid: {
+        borderColor: 'red',
+      },
+    },
+  },
+  label: {
+    styles: {
+      hasInvalid: {
+        color: 'red',
       },
     },
   },
