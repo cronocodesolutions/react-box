@@ -1,4 +1,4 @@
-import { PseudoClassSuffix, boxBreakpoints } from './boxStyles';
+import { PseudoClassSuffix, boxBreakpoints, pseudoClassSuffixes } from './boxStyles';
 import { BoxStyleProps, BoxThemeProps } from './types';
 
 export interface ThemeStyles<T> {
@@ -77,25 +77,13 @@ const defaultTheme: ThemeSetup<BoxThemeProps> = {
   },
 };
 
-const pseudoClassSuffixes: Record<PseudoClassSuffix, string> = {
-  Hover: 'hover',
-  Focus: 'focus',
-  Active: 'active',
-  Checked: 'checked',
-  Indeterminate: 'indeterminate',
-  Valid: 'valid',
-  Invalid: 'invalid',
-  Required: 'required',
-  Optional: 'optional',
-  Disabled: 'disabled',
-};
-
 namespace Theme {
   export let Styles = {} as ThemeSetup;
 
   export function setup(styles: ThemeSetup<BoxThemeProps>) {
     Styles = flattenStyles(defaultTheme);
-    Styles = assignThemeStyles(styles);
+
+    assignCustomStyles(styles);
   }
 
   export function setupAugmentedProps(props: BoxAugmentedProps, options?: { namespacePath?: string }) {
@@ -171,18 +159,17 @@ namespace Theme {
     };
   }
 
-  function assignThemeStyles(styles: ThemeSetup<BoxThemeProps>) {
+  function assignCustomStyles(styles: ThemeSetup<BoxThemeProps>) {
     const fStyles = flattenStyles(styles);
-    const components = Object.keys(defaultTheme) as (keyof ThemeSetup<BoxStyleProps>)[];
+    if (!fStyles.components) return;
 
-    components.forEach((component) => {
-      const componentStyles = fStyles[component];
-      const componentDefaultStyles = (defaultTheme as ThemeSetup<BoxStyleProps>)[component]!;
+    Object.entries(fStyles.components).forEach(([name, componentStyles]) => {
+      const componentDefaultStyles = Styles.components?.[name];
 
-      if (componentStyles) {
-        componentStyles.styles = { ...componentDefaultStyles.styles, ...componentStyles.styles };
+      if (componentDefaultStyles) {
+        Styles.components![name].styles = { ...componentDefaultStyles.styles, ...componentStyles.styles };
       } else {
-        fStyles[component] = defaultTheme[component] as any;
+        Styles.components![name] = componentStyles;
       }
     });
 
@@ -190,10 +177,29 @@ namespace Theme {
   }
 
   function flattenStyles(styles: ThemeSetup<BoxThemeProps>): ThemeSetup<BoxStyleProps> {
+    moveShortcuts(styles);
     extractChildren(styles);
     extractPseudoClasses(styles);
 
     return styles as ThemeSetup<BoxStyleProps>;
+  }
+
+  function moveShortcuts(styles: ThemeSetup<BoxThemeProps>) {
+    const { components, ...restStyles } = styles;
+
+    const entries = Object.entries(restStyles);
+
+    if (entries.length && !styles.components) {
+      styles.components = {};
+    }
+
+    for (const item of entries) {
+      const [name, value] = item;
+
+      styles.components![name] = value;
+
+      delete styles[name as keyof typeof styles];
+    }
   }
 
   function extractChildren(styles: ThemeSetup<BoxThemeProps>) {
@@ -238,10 +244,9 @@ namespace Theme {
   }
 
   function extractPseudoClasses(styles: ThemeSetup<BoxThemeProps>) {
-    const { components, ...restStyles } = styles;
+    if (!styles.components) return;
 
-    const componentsToFlatten = Object.values(restStyles) as ThemeComponentStyles<BoxThemeProps>[];
-    components && componentsToFlatten.push(...(Object.values(components) as ThemeComponentStyles<BoxThemeProps>[]));
+    const componentsToFlatten = Object.values(styles.components);
 
     for (const component of componentsToFlatten) {
       flattenPseudoClasses(component.styles);
@@ -271,15 +276,15 @@ namespace Theme {
   }
 
   function flattenPseudoClasses(styles: BoxThemeProps) {
-    Object.entries(pseudoClassSuffixes).forEach(([suffix, pseudoClassPropName]) => {
-      if (pseudoClassPropName in styles) {
-        const pseudoClassStyles = styles[pseudoClassPropName as keyof BoxThemeProps] as BoxThemeProps;
+    pseudoClassSuffixes.forEach((suffix) => {
+      if (suffix in styles) {
+        const pseudoClassStyles = styles[suffix as keyof BoxThemeProps] as BoxThemeProps;
 
         Object.entries(pseudoClassStyles).map(([name, value]) => {
           styles[`${name}${suffix}` as keyof BoxThemeProps] = value;
         });
 
-        delete styles[pseudoClassPropName as keyof BoxThemeProps];
+        delete styles[suffix as keyof BoxThemeProps];
       }
     });
   }

@@ -108,6 +108,23 @@ a,ul{all: unset;}
     return identity.getIdentity(className);
   }
 
+  const cssPseudoSelector: Record<PseudoClassSuffix, string> = {
+    hover: 'hover',
+    focus: 'focus',
+    active: 'active',
+    checked: 'checked',
+    hasChecked: 'has(:checked)',
+    indeterminate: 'indeterminate',
+    valid: 'user-valid',
+    hasValid: 'has(:valid)',
+    invalid: 'user-invalid',
+    hasInvalid: 'has(:user-invalid)',
+    required: 'required',
+    optional: 'optional',
+    disabled: 'disabled',
+    hasDisabled: 'has(:disabled)',
+  };
+
   function generateStyles(classes: string[], pseudoSuffix?: PseudoClassSuffix, breakpoint?: BoxBreakpointsType) {
     return Object.entries(styles)
       .filter(
@@ -122,31 +139,12 @@ a,ul{all: unset;}
           const valueItem = getValueItem(styleItem, value);
 
           const selector = `.${getClassName(key as StyleKey, value)}`;
-          let selectors: string[] = [];
-
-          if (!pseudoSuffix) {
-            selectors = formatSelector(selector, styleItem, valueItem);
-          } else if (pseudoSuffix === 'Hover') {
-            selectors = formatSelector(selector, styleItem, valueItem, 'hover');
-          } else if (pseudoSuffix === 'Focus') {
-            selectors = formatSelector(selector, styleItem, valueItem, 'focus-within');
-          } else if (pseudoSuffix === 'Active') {
-            selectors = formatSelector(selector, styleItem, valueItem, 'active');
-          } else if (pseudoSuffix === 'Checked') {
-            selectors = formatSelector(selector, styleItem, valueItem, 'checked');
-          } else if (pseudoSuffix === 'Indeterminate') {
-            selectors = formatSelector(selector, styleItem, valueItem, 'indeterminate');
-          } else if (pseudoSuffix === 'Valid') {
-            selectors = formatSelector(selector, styleItem, valueItem, 'valid');
-          } else if (pseudoSuffix === 'Invalid') {
-            selectors = formatSelector(selector, styleItem, valueItem, 'invalid');
-          } else if (pseudoSuffix === 'Required') {
-            selectors = formatSelector(selector, styleItem, valueItem, 'required');
-          } else if (pseudoSuffix === 'Optional') {
-            selectors = formatSelector(selector, styleItem, valueItem, 'optional');
-          } else if (pseudoSuffix === 'Disabled') {
-            selectors = formatSelector(selector, styleItem, valueItem, 'disabled');
-          }
+          const selectors: string[] = formatSelector(
+            selector,
+            styleItem,
+            valueItem,
+            pseudoSuffix ? cssPseudoSelector[pseudoSuffix] : undefined,
+          );
 
           const cssValue = valueItem.formatValue?.(key as StyleKey, value) ?? value;
           const cssNames = boxStyles[key as StyleKey].cssNames;

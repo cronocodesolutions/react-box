@@ -17,7 +17,7 @@ interface Props extends CheckboxProps {
   autoFocus?: boolean;
   readOnly?: boolean;
   required?: boolean;
-  checked?: boolean;
+  // checked?: boolean;
   defaultChecked?: boolean;
   indeterminate?: boolean;
 }

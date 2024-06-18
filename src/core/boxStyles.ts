@@ -707,6 +707,18 @@ export const simpleBoxStyles = {
     values2: { values: [] as const },
     values3: { values: [] as const },
   },
+  visibility: {
+    cssNames: ['visibility'],
+    values1: { values: ['visible', 'hidden', 'collapse'] as const },
+    values2: { values: [] as const },
+    values3: { values: [] as const },
+  },
+  resize: {
+    cssNames: ['resize'],
+    values1: { values: ['none', 'both', 'horizontal', 'vertical', 'block', 'inline'] as const },
+    values2: { values: [] as const },
+    values3: { values: [] as const },
+  },
 } satisfies Record<string, StyleItem>;
 
 export type StyleKey = keyof typeof simpleBoxStyles;
@@ -734,31 +746,21 @@ export const svgThemeStyles = {
   },
 } satisfies Record<string, ThemeItem>;
 
-// :disabled
-// :hover
-// :active
-// :focus
-// :focus-visible
-// :focus-within
-
-// :checked
-// :indeterminate
-// :valid
-// :invalid
-// :required
-// :optional
-
 export const pseudoClassSuffixes = [
-  'Hover',
-  'Focus',
-  'Active',
-  'Checked',
-  'Indeterminate',
-  'Valid',
-  'Invalid',
-  'Required',
-  'Optional',
-  'Disabled',
+  'hover',
+  'focus',
+  'active',
+  'checked',
+  'hasChecked',
+  'indeterminate',
+  'valid',
+  'hasValid',
+  'invalid',
+  'hasInvalid',
+  'required',
+  'optional',
+  'disabled',
+  'hasDisabled',
 ] as const;
 export type PseudoClassSuffix = (typeof pseudoClassSuffixes)[number];
 

@@ -22,7 +22,7 @@ describe('useStyles', () => {
 
       const el = StylesContext.getElement();
 
-      expect(el.innerHTML).toContain('.displayHoverblock:hover{display:block;}');
+      expect(el.innerHTML).toContain('.displayhoverblock:hover{display:block;}');
     });
 
     it('hoverGroup display block', () => {
@@ -30,7 +30,7 @@ describe('useStyles', () => {
 
       const el = StylesContext.getElement();
 
-      expect(el.innerHTML).toContain('.hoverGrouptest2:hover .displayHovertest2block{display:block;}');
+      expect(el.innerHTML).toContain('.hoverGrouptest2:hover .displayhovertest2block{display:block;}');
     });
 
     it('width 100%', () => {

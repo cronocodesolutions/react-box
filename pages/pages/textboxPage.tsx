@@ -2,6 +2,8 @@ import { useState } from 'react';
 import Box from '../../src/box';
 import Textbox from '../../src/components/textbox';
 import Flex from '../../src/components/flex';
+import Label from '../../src/components/label';
+import Checkbox from '../../src/components/checkbox';
 
 export default function TextboxPage() {
   const [controlledValue, setControlledValue] = useState('controlled');
@@ -19,9 +21,18 @@ export default function TextboxPage() {
           <Textbox value="controlled without update" onChange={() => {}} />
         </Box>
       </Flex>
-      <Box>
-        <Textbox disabled mt={3} defaultValue="disabled" />
+      <Box py={3}>
+        <Textbox disabled defaultValue="disabled" />
       </Box>
+
+      <Box py={3}>
+        <Textbox width={60} required defaultValue="delete me and change focus" />
+      </Box>
+
+      <Label>
+        test
+        <Textbox width={60} invalid={{ borderColor: 'red' }} required defaultValue="delete me and change focus" />
+      </Label>
 
       <Box focusGroup="text">
         <Textbox mt={3} defaultValue="focus group" />
