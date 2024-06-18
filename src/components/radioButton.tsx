@@ -19,7 +19,7 @@ interface Props extends Omit<BoxProps, 'props'> {
   autoFocus?: boolean;
   readOnly?: boolean;
   required?: boolean;
-  checked?: boolean;
+  // checked?: boolean;
   defaultChecked?: boolean;
 }
 

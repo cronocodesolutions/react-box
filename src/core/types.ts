@@ -28,7 +28,7 @@ interface BoxPseudoClasses<T> {
   focusGroup?: string | Record<string, T>;
   active?: T;
   activeGroup?: string | Record<string, T>;
-  checked?: T;
+  checked?: boolean;
   hasChecked?: T;
   valid?: T;
   hasValid?: T;
