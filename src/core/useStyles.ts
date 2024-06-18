@@ -43,6 +43,7 @@ export default function useStyles(props: BoxStyleProps, isSvg: boolean) {
 function flattenWrapper(props: BoxStyleProps) {
   flattenSingle(props, 'hover', 'hover');
   flattenSingle(props, 'focus', 'focus');
+  flattenSingle(props, 'hasFocus', 'hasFocus');
   flattenSingle(props, 'active', 'active');
   flattenSingle(props, 'disabled', 'disabled');
   flattenSingle(props, 'hasDisabled', 'hasDisabled');
@@ -54,7 +55,6 @@ function flattenWrapper(props: BoxStyleProps) {
   flattenSingle(props, 'hasInvalid', 'hasInvalid');
 
   flattenGroup(props, 'hoverGroup', 'hover');
-  flattenGroup(props, 'focusGroup', 'focus');
   flattenGroup(props, 'activeGroup', 'active');
   flattenGroup(props, 'disabledGroup', 'disabled');
 }

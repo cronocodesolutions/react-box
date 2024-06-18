@@ -749,6 +749,7 @@ export const svgThemeStyles = {
 export const pseudoClassSuffixes = [
   'hover',
   'focus',
+  'hasFocus',
   'active',
   'checked',
   'hasChecked',

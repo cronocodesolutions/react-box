@@ -111,6 +111,7 @@ a,ul{all: unset;}
   const cssPseudoSelector: Record<PseudoClassSuffix, string> = {
     hover: 'hover',
     focus: 'focus',
+    hasFocus: 'has(:focus)',
     active: 'active',
     checked: 'checked',
     hasChecked: 'has(:checked)',

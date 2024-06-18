@@ -25,7 +25,7 @@ interface BoxPseudoClasses<T> {
   hover?: T;
   hoverGroup?: string | Record<string, T>;
   focus?: T;
-  focusGroup?: string | Record<string, T>;
+  hasFocus?: T;
   active?: T;
   activeGroup?: string | Record<string, T>;
   checked?: boolean;
@@ -39,6 +39,7 @@ interface BoxPseudoClasses<T> {
 interface BoxThemePseudoClassProps {
   hover?: BoxNormalStyles;
   focus?: BoxNormalStyles;
+  hasFocus?: BoxNormalStyles;
   active?: BoxNormalStyles;
   disabled?: BoxNormalStyles;
   hasDisabled?: BoxNormalStyles;
