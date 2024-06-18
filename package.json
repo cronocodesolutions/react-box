@@ -61,6 +61,7 @@
   },
   "devDependencies": {
     "@rollup/pluginutils": "^5.1.0",
+    "@testing-library/dom": "^10.1.0",
     "@testing-library/react": "^15.0.2",
     "@types/node": "^20.12.7",
     "@types/postcss-mixins": "^9.0.5",
