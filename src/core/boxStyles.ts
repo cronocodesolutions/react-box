@@ -746,6 +746,9 @@ export const svgThemeStyles = {
   },
 } satisfies Record<string, ThemeItem>;
 
+export const pseudoGroupClass = ['disabledGroup', 'hoverGroup', 'focusGroup', 'activeGroup'];
+export type PseudoGroupClass = (typeof pseudoGroupClass)[number];
+
 export const pseudoClassSuffixes = [
   'hover',
   'focus',

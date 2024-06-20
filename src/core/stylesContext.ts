@@ -9,6 +9,7 @@ import {
   boxBreakpointsMinWidth,
   boxStyles,
   pseudoClassSuffixes,
+  pseudoGroupClass,
   rebuildBoxStyles,
 } from './boxStyles';
 import IdentityFactory from '@cronocode/identity-factory';
@@ -36,7 +37,7 @@ a,ul{all: unset;}
       return getClassName(key as StyleKey, value, breakpoint);
     }
 
-    if (['disabledGroup', 'hoverGroup', 'focusGroup', 'activeGroup'].includes(key)) {
+    if (pseudoGroupClass.includes(key)) {
       return key + value;
     }
   }
@@ -110,8 +111,8 @@ a,ul{all: unset;}
 
   const cssPseudoSelector: Record<PseudoClassSuffix, string> = {
     hover: 'hover',
-    focus: 'focus',
-    hasFocus: 'has(:focus)',
+    focus: 'focus-within',
+    hasFocus: 'has(:focus-within)',
     active: 'active',
     checked: 'checked',
     hasChecked: 'has(:checked)',

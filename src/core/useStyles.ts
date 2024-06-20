@@ -55,6 +55,7 @@ function flattenWrapper(props: BoxStyleProps) {
   flattenSingle(props, 'hasInvalid', 'hasInvalid');
 
   flattenGroup(props, 'hoverGroup', 'hover');
+  flattenGroup(props, 'focusGroup', 'focus');
   flattenGroup(props, 'activeGroup', 'active');
   flattenGroup(props, 'disabledGroup', 'disabled');
 }

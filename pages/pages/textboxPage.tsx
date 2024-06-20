@@ -29,9 +29,13 @@ export default function TextboxPage() {
         <Textbox width={60} required defaultValue="delete me and change focus" />
       </Box>
 
-      <Label b={1} borderRadius={1} p={2} mt={2}>
-        <Box>delete text from textbox and change focus</Box>
-        <Textbox width={60} invalid={{ borderColor: 'red' }} required defaultValue="text" />
+      <Label b={1} borderRadius={1} p={2} mt={2} focusGroup="parent">
+        <Box inline focusGroup={{ parent: { b: 1 } }}>
+          delete text from textbox and change focus
+        </Box>
+        <Box mt={2}>
+          <Textbox width={60} invalid={{ borderColor: 'red' }} required defaultValue="text" />
+        </Box>
       </Label>
 
       <Label hasFocus={{ color: 'violet', textDecoration: 'underline' }} b={1} borderRadius={1} p={2} mt={2}>

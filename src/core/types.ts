@@ -26,6 +26,7 @@ interface BoxPseudoClasses<T> {
   hoverGroup?: string | Record<string, T>;
   focus?: T;
   hasFocus?: T;
+  focusGroup?: string | Record<string, T>;
   active?: T;
   activeGroup?: string | Record<string, T>;
   checked?: boolean;
