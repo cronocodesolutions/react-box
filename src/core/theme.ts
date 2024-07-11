@@ -1,4 +1,4 @@
-import { PseudoClassSuffix, boxBreakpoints, pseudoClassSuffixes } from './boxStyles';
+import { boxBreakpoints, pseudoClassSuffixes } from './boxStyles';
 import { BoxStyleProps, BoxThemeProps } from './types';
 
 export interface ThemeStyles<T> {

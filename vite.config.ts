@@ -3,7 +3,7 @@ import dts from 'vite-plugin-dts';
 import path from 'path';
 import fs from 'fs';
 
-const files = fs.readdirSync(path.resolve(__dirname, './src/components'));
+const files = fs.readdirSync(path.resolve(__dirname, './src/components')).filter((fileName) => fileName.includes('.test') === false);
 const componentsEntry = files.reduce((acc, fileName) => {
   acc[`components/${path.parse(fileName).name}`] = path.resolve(__dirname, 'src/components', fileName);
 
