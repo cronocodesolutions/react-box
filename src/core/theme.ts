@@ -168,6 +168,7 @@ namespace Theme {
 
       if (componentDefaultStyles) {
         Styles.components![name].styles = { ...componentDefaultStyles.styles, ...componentStyles.styles };
+        Styles.components![name].themes = componentStyles.themes;
       } else {
         Styles.components![name] = componentStyles;
       }

@@ -164,6 +164,7 @@ Theme.setup({
     styles: {
       hasInvalid: {
         color: 'red',
+        transition: 'none',
       },
     },
   },
