@@ -611,7 +611,7 @@ export const simpleBoxStyles = {
   gridColumns: {
     cssNames: ['grid-template-columns'],
     values1: { values: positiveSizes, formatValue: BoxStylesFormatters.Value.gridColumns },
-    values2: { values: [] as const },
+    values2: { values: ['subgrid'] as const },
     values3: { values: [] as const },
   },
   colSpan: {

@@ -12,6 +12,7 @@ const componentsEntry = files.reduce((acc, fileName) => {
 
 const entry = {
   box: path.resolve(__dirname, './src/box.ts'),
+  box2: path.resolve(__dirname, './src/box2.ts'),
   'core/theme': path.resolve(__dirname, './src/core/theme.ts'),
   ssg: path.resolve(__dirname, './src/ssg.ts'),
   ...componentsEntry,
@@ -63,6 +64,10 @@ export default defineConfig(({ mode }) => {
 
             if (id.endsWith('src/box.ts')) {
               return 'box';
+            }
+
+            if (id.endsWith('src/box2.ts')) {
+              return 'box2';
             }
           },
           chunkFileNames: (info) => `[name].${extensions[currentFormat]}`,

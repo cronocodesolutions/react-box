@@ -13,6 +13,7 @@ import Flex from '../../src/components/flex';
 import MenuItem from './menuItem';
 import { Routes, Route } from 'react-router-dom';
 import TextareaPage from '../pages/textareaPage';
+import Box2Page from '../pages/box2Page';
 
 export default function App() {
   return (
@@ -40,6 +41,7 @@ export default function App() {
       <Box flex1 bl={1} borderColor="violet">
         <Routes>
           <Route index element={<HomePage />} />
+          <Route path="/box2" element={<Box2Page />} />
           {/* <Route path="/box" element={<BoxPage />} />
           <Route path="/flex" element={<FlexPage />} /> */}
           <Route path="/grid" element={<GridPage />} />

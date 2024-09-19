@@ -1,5 +1,6 @@
 import Box from '../../src/box';
 import DataGrid from '../../src/components/dataGrid';
+import Grid from '../../src/components/grid';
 
 interface Person {
   firstName: string;
@@ -40,18 +41,117 @@ const data: Person[] = [
 export default function DataGridPage() {
   return (
     <Box p={10}>
-      <Box fontSize={24} inline>
-        Component status:
-      </Box>
-      <Box fontSize={18} color="red" inline ml={2}>
-        Work In Progress
-      </Box>
-      <Box p={2} mt={4}>
-        <DataGrid />
-      </Box>
-      <Box p={2}>
-        <DataGrid data={data} />
-      </Box>
+      <DataGrid
+        data={data}
+        def={{
+          rowKey: (rowData) => rowData.firstName + rowData.lastName,
+          columns: [{ key: 'firstName' }, { key: 'firstName' }],
+        }}
+      />
+    </Box>
+  );
+  return (
+    <Box p={10} overflow="hidden" width={200} height={60}>
+      {/* <Box height="fit" overflow="scroll"> */}
+      <Grid gridColumns={10} columnGap={10} rowGap={4} style={{ gridTemplateColumns: 'repeat(10 , 1fr)' }} overflow="scroll" height="fit">
+        <Box display="contents">
+          <Box position="sticky" left={0} zIndex={1} top={0}>
+            Header
+          </Box>
+          <Box position="sticky" top={0}>
+            Header
+          </Box>
+          <Box position="sticky" top={0}>
+            Header
+          </Box>
+          <Box position="sticky" top={0}>
+            Header
+          </Box>
+          <Box position="sticky" top={0}>
+            Header
+          </Box>
+          <Box position="sticky" top={0}>
+            Header
+          </Box>
+          <Box position="sticky" top={0}>
+            Header
+          </Box>
+          <Box position="sticky" top={0}>
+            Header
+          </Box>
+          <Box position="sticky" top={0}>
+            Header
+          </Box>
+          <Box position="sticky" right={0} top={0}>
+            Header
+          </Box>
+        </Box>
+        <Box display="contents" hoverGroup="parent">
+          <Box position="sticky" left={0} zIndex={1} hoverGroup={{ parent: { bgColor: 'gray1' } }}>
+            this is cell with data
+          </Box>
+          <Box hoverGroup={{ parent: { bgColor: 'gray1' } }}>this is cell with data</Box>
+          <Box hoverGroup={{ parent: { bgColor: 'gray1' } }}>this is cell with data</Box>
+          <Box hoverGroup={{ parent: { bgColor: 'gray1' } }}>this is cell with data</Box>
+          <Box hoverGroup={{ parent: { bgColor: 'gray1' } }}>this is cell with data</Box>
+          <Box hoverGroup={{ parent: { bgColor: 'gray1' } }}>this is cell with data</Box>
+          <Box hoverGroup={{ parent: { bgColor: 'gray1' } }}>this is cell with data</Box>
+          <Box hoverGroup={{ parent: { bgColor: 'gray1' } }}>this is cell with data</Box>
+          <Box hoverGroup={{ parent: { bgColor: 'gray1' } }}>this is cell with data</Box>
+          <Box position="sticky" right={0} hoverGroup={{ parent: { bgColor: 'gray1' } }}>
+            this is cell with data
+          </Box>
+        </Box>
+        <Box display="contents">
+          <Box position="sticky" left={0} zIndex={1}>
+            this is cell with data
+          </Box>
+          <Box>this is cell with data</Box>
+          <Box>this is cell with data</Box>
+          <Box>this is cell with data</Box>
+          <Box>this is cell with data</Box>
+          <Box>this is cell with data</Box>
+          <Box>this is cell with data</Box>
+          <Box>this is cell with data</Box>
+          <Box>this is cell with data</Box>
+          <Box position="sticky" right={0}>
+            this is cell with data
+          </Box>
+        </Box>
+        <Box display="contents">
+          <Box position="sticky" left={0} zIndex={1}>
+            this is cell with data
+          </Box>
+          <Box>this is cell with data</Box>
+          <Box>this is cell with data</Box>
+          <Box>this is cell with data</Box>
+          <Box>this is cell with data</Box>
+          <Box>this is cell with data</Box>
+          <Box>this is cell with data</Box>
+          <Box>this is cell with data</Box>
+          <Box>this is cell with data</Box>
+          <Box position="sticky" right={0}>
+            this is cell with data
+          </Box>
+        </Box>
+        <Box display="contents">
+          <Box position="sticky" left={0} zIndex={1}>
+            this is cell with data
+          </Box>
+          <Box>this is cell with data</Box>
+          <Box>this is cell with data</Box>
+          <Box>this is cell with data</Box>
+          <Box>this is cell with data</Box>
+          <Box>this is cell with data</Box>
+          <Box>this is cell with data</Box>
+          <Box>this is cell with data</Box>
+          <Box>this is cell with data</Box>
+          <Box position="sticky" right={0}>
+            this is cell with data
+          </Box>
+        </Box>
+      </Grid>
+      {/* </Box> */}
     </Box>
   );
 }
