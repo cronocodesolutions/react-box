@@ -68,12 +68,18 @@ export const cssStyles = {
 
 export type BoxCssStyles = ExtractBoxStyles<typeof cssStyles>;
 
-const pseudoClasses = {
+const pseudo1 = {
   hover: 1,
   focus: 2,
   active: 4,
-  checked: 8,
 };
+
+const pseudo2 = {
+  checked: 8,
+  disabled: 16,
+};
+
+const pseudoClasses = { ...pseudo1, ...pseudo2 };
 
 const pseudoClassesByWeight = Object.entries(pseudoClasses).reduce(
   (acc, [key, weight]) => {
@@ -87,7 +93,10 @@ const pseudoClassesByWeight = Object.entries(pseudoClasses).reduce(
 );
 
 type BoxPseudoClassesStyles = {
-  [K in keyof typeof pseudoClasses]?: BoxStylesWithPseudoClasses;
+  [K in keyof typeof pseudo1]?: BoxStylesWithPseudoClasses;
+};
+type BoxPseudoClassesStyles2 = {
+  [K in keyof typeof pseudo2]?: boolean | [boolean, BoxStylesWithPseudoClasses];
 };
 
 const pseudoGroupClasses = {
@@ -100,7 +109,7 @@ type BoxPseudoGroupClassesStyles = {
   [K in keyof typeof pseudoGroupClasses]?: string | Record<string, BoxCssStyles>;
 };
 
-type BoxStylesWithPseudoClasses = BoxCssStyles & BoxPseudoClassesStyles & BoxPseudoGroupClassesStyles;
+type BoxStylesWithPseudoClasses = BoxCssStyles & BoxPseudoClassesStyles & BoxPseudoClassesStyles2 & BoxPseudoGroupClassesStyles;
 
 const breakpoints = {
   sm: 640,
@@ -172,8 +181,13 @@ function addClassNames(
   Object.entries(props).forEach(([key, value]) => {
     if (key in cssStyles) {
       addClassName(key as keyof BoxCssStyles, value, classNames, currentPseudoClasses, breakpoint, pseudoClassParentName);
-    } else if (key in pseudoClasses) {
+    } else if (key in pseudo1) {
       addClassNames(value as BoxCssStyles, classNames, [...currentPseudoClasses, key], breakpoint, pseudoClassParentName);
+    } else if (key in pseudo2) {
+      if (Array.isArray(value)) {
+        const [_, styles] = value;
+        addClassNames(styles as BoxCssStyles, classNames, [...currentPseudoClasses, key], breakpoint, pseudoClassParentName);
+      }
     } else if (key in breakpoints) {
       addClassNames(value as BoxCssStyles, classNames, currentPseudoClasses, key, pseudoClassParentName);
     } else if (key in pseudoGroupClasses) {
@@ -282,7 +296,7 @@ a,ul{all: unset;}
             const styleName = itemValue?.styleName ?? key;
             const styleValue = itemValue?.valueFormat ? itemValue.valueFormat(value as never) : value;
 
-            acc.push(`.${className}${pseudoClasses.length > 0 ? ':' : ''}${pseudoClasses.join(':')}{${styleName}:${styleValue}}`);
+            acc.push(`.${className}${pseudoClasses.map((p) => (p === 'disabled' ? `[${p}]` : `:${p}`))}{${styleName}:${styleValue}}`);
           });
         });
 
@@ -346,7 +360,7 @@ function createClassName<TKey extends keyof BoxCssStyles>(
 ) {
   const pseudoClasses = pseudoClassesByWeight[weight];
 
-  return `${breakpoint === 'normal' ? '' : `${breakpoint}-`}${pseudoClasses.length > 0 ? `${pseudoClasses.join('-')}-` : ''}${pseudoClassParentName ? `${pseudoClassParentName}-` : ''}${key}-${value as string}`;
+  return `${breakpoint === 'normal' ? '' : `${breakpoint}-`}${pseudoClasses.map((p) => `${p}-`)}${pseudoClassParentName ? `${pseudoClassParentName}-` : ''}${key}-${value as string}`;
 }
 
 export const cronoStylesElementId = 'crono-styles2';

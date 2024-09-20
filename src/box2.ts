@@ -15,13 +15,13 @@ interface Props<TTag extends keyof React.JSX.IntrinsicElements> extends BoxStyle
 }
 
 function Box2<TTag extends keyof React.JSX.IntrinsicElements = 'div'>(props: Props<TTag>, ref: Ref<ExtractElementFromTag<TTag>>) {
-  const { tag = 'div', children, props: tagProps, className: userClassName, style } = props;
+  const { tag = 'div', children, props: tagProps, className: userClassName, style, disabled } = props;
 
   const styleClasses = useStyles(props, tag === 'svg');
 
   const finalTagProps = useMemo(() => {
     const className = classNames(styleClasses, userClassName).join(' ');
-    const props = { ...tagProps, className } as AllProps<TTag>;
+    const props = { ...tagProps, className, disabled: Array.isArray(disabled) ? disabled[0] : disabled } as AllProps<TTag>;
     style && (props.style = style);
     ref && (props.ref = ref as React.RefObject<HTMLElement>);
 
