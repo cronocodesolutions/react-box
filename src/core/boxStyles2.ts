@@ -1,5 +1,6 @@
 import IdentityFactory from '@cronocode/identity-factory';
 import { useEffect, useLayoutEffect, useMemo } from 'react';
+import { ThemeComponentProps, useTheme } from './theme2';
 
 // TYPINGS ====================
 type ArrayType<T> = T extends (infer U)[] ? U : T;
@@ -113,7 +114,8 @@ type BoxBreakpointsStyles = {
   [K in keyof typeof breakpoints]?: BoxStylesWithPseudoClasses;
 };
 
-export type BoxStyles = BoxStylesWithPseudoClasses & BoxBreakpointsStyles;
+export type BoxThemeStyles = BoxStylesWithPseudoClasses & BoxBreakpointsStyles;
+export type BoxStyles = BoxStylesWithPseudoClasses & BoxBreakpointsStyles & ThemeComponentProps;
 
 // TYPINGS ====================
 
@@ -144,16 +146,20 @@ const stylesToGenerate: {
 const boxClassName = '_b';
 const svgClassName = '_s';
 
-export function useStyles(props: BoxCssStyles, isSvg: boolean) {
+export function useStyles(props: BoxStyles, isSvg: boolean) {
   useEff(flush, [props]);
+
+  const theme = useTheme(props);
 
   return useMemo(() => {
     const classNames: string[] = [isSvg ? svgClassName : boxClassName];
 
-    addClassNames(props, classNames, []);
+    const propsToUse = theme ? mergeDeep(theme, props) : props;
+
+    addClassNames(propsToUse, classNames, []);
 
     return classNames;
-  }, [props, isSvg]);
+  }, [props, isSvg, theme]);
 }
 
 function addClassNames(
@@ -248,8 +254,6 @@ a,ul{all: unset;}
   stylesToGenerateEntries.sort(
     ([a], [b]) => (breakpoints[a as keyof typeof breakpoints] ?? 0) - (breakpoints[b as keyof typeof breakpoints] ?? 0),
   );
-
-  console.log(stylesToGenerateEntries);
 
   const styleItems = stylesToGenerateEntries.reduce<string[]>(
     (acc, [breakpoint, weights]) => {
@@ -361,4 +365,25 @@ function getElement() {
   }
 
   return stylesElement;
+}
+
+function mergeDeep(...objects: object[]) {
+  const isObject = (obj?: unknown) => obj && typeof obj === 'object';
+
+  return objects.reduce((prev, obj) => {
+    Object.keys(obj).forEach((key) => {
+      const pVal = (prev as any)[key];
+      const oVal = (obj as any)[key];
+
+      if (Array.isArray(pVal) && Array.isArray(oVal)) {
+        (prev as any)[key] = pVal.concat(...oVal);
+      } else if (isObject(pVal) && isObject(oVal)) {
+        (prev as any)[key] = mergeDeep(pVal, oVal);
+      } else {
+        (prev as any)[key] = oVal;
+      }
+    });
+
+    return prev;
+  }, {});
 }

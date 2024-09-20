@@ -1,5 +1,6 @@
 import Box from '../../src/box';
 import Box2 from '../../src/box2';
+import Button2 from '../../src/components/button2';
 
 export default function Box2Page() {
   return (
@@ -21,6 +22,8 @@ export default function Box2Page() {
         <Box2 hoverGroup={{ parent: { b: 2 } }}>line 1</Box2>
         <Box2 xxl={{ activeGroup: { pp: { display: 'block' } } }}>line 2</Box2>
       </Box2>
+
+      <Button2 width={20}>Click</Button2>
 
       {/* <Box display="block" mt={10} m={4} width={30} xl={{ width: 30 }} md={{ width: 20 }} b={1} hoverGroup="parent">
         <Box>line 1</Box>
