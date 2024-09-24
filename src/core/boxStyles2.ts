@@ -26,7 +26,7 @@ type BoxStyle = (BoxStyleArray | BoxStyleNumber | BoxStyleString) & {
   styleName?: string;
 };
 
-type ExtractBoxStyles<T extends Record<string, BoxStyle[]>> = {
+export type ExtractBoxStyles<T extends Record<string, BoxStyle[]>> = {
   [K in keyof T]?: ExtractBoxStyleType<ArrayType<T[K]>['values']>;
 };
 
@@ -65,6 +65,11 @@ export const cssStyles = {
     },
   ],
 } satisfies Record<string, BoxStyle[]>;
+
+export namespace Augmented {
+  export interface BoxProps {}
+  export interface SvgProps {}
+}
 
 export type BoxCssStyles = ExtractBoxStyles<typeof cssStyles>;
 
@@ -109,7 +114,11 @@ type BoxPseudoGroupClassesStyles = {
   [K in keyof typeof pseudoGroupClasses]?: string | Record<string, BoxCssStyles>;
 };
 
-type BoxStylesWithPseudoClasses = BoxCssStyles & BoxPseudoClassesStyles & BoxPseudoClassesStyles2 & BoxPseudoGroupClassesStyles;
+type BoxStylesWithPseudoClasses = BoxCssStyles &
+  BoxPseudoClassesStyles &
+  BoxPseudoClassesStyles2 &
+  BoxPseudoGroupClassesStyles &
+  Augmented.BoxProps;
 
 const breakpoints = {
   sm: 640,
@@ -123,8 +132,8 @@ type BoxBreakpointsStyles = {
   [K in keyof typeof breakpoints]?: BoxStylesWithPseudoClasses;
 };
 
-export type BoxThemeStyles = BoxStylesWithPseudoClasses & BoxBreakpointsStyles;
-export type BoxStyles = BoxStylesWithPseudoClasses & BoxBreakpointsStyles & ThemeComponentProps;
+export type BoxThemeStyles = BoxStylesWithPseudoClasses & BoxBreakpointsStyles & Augmented.BoxProps;
+export type BoxStyles = BoxStylesWithPseudoClasses & BoxBreakpointsStyles & ThemeComponentProps & Augmented.BoxProps;
 
 // TYPINGS ====================
 
@@ -256,7 +265,7 @@ function flush() {
 
   console.debug('\x1b[36m%s\x1b[0m', '[react-box]: flush');
 
-  const defaultStyles = `:root{--borderColor: black;--outlineColor: black;--lineHeight: 1.2;--fontSize: 14px;--transitionTime: 0.25s;--svgTransitionTime: 0.3s;#crono-box {position: absolute;top: 0;left: 0;height: 0;}}
+  const defaultStyles = `:root{${BoxInternal.getVariables()}--borderColor: black;--outlineColor: black;--lineHeight: 1.2;--fontSize: 14px;--transitionTime: 0.25s;--svgTransitionTime: 0.3s;}#crono-box {position: absolute;top: 0;left: 0;height: 0;}
 html{font-size: 16px;font-family: Arial, sans-serif;}
 body{margin: 0;line-height: var(--lineHeight);font-size: var(--fontSize);}
 a,ul{all: unset;}
@@ -401,3 +410,95 @@ function mergeDeep(...objects: object[]) {
     return prev;
   }, {});
 }
+
+namespace BoxInternal {
+  let _variables: string = '';
+
+  export function setVariables(variables: Record<string, string>) {
+    _variables = Object.entries(variables)
+      .map(([key, val]) => `--${key}: ${val};`)
+      .join('');
+  }
+
+  export function getVariables() {
+    return _variables;
+  }
+
+  export function setProps(props: Record<string, BoxStyle[]>) {
+    Object.entries(props).forEach(([key, val]) => {
+      (cssStyles as Record<string, BoxStyle[]>)[key] = val;
+    });
+  }
+}
+
+namespace Box2 {
+  export function extend<TVar extends string, TProps extends Record<string, BoxStyle[]>>(variables: Record<string, string>, props: TProps) {
+    BoxInternal.setVariables(variables);
+    BoxInternal.setProps(props);
+
+    return props;
+  }
+}
+
+export type ExtendedProps<T extends Record<string, ReadonlyArray<string>>> = {
+  [K in keyof T]?: T[K][number];
+};
+
+const colors = [
+  'white',
+  'black',
+  'black1',
+  'violet',
+  'violetLight',
+  'violetLighter',
+  'violetDark',
+  'gray1',
+  'gray2',
+  'dark',
+  'red',
+] as const;
+
+export const extendedProps = Box2.extend(
+  {
+    white: '#fff',
+    black: '#07071b',
+    black1: '#1e293b',
+    violet: '#988bee',
+    violetLight: '#e8edfd',
+    violetLighter: '#f6f8fe',
+    violetDark: '#5f3e66',
+    gray1: '#94a3b833',
+    gray2: '#94a3b8',
+    dark: '#272822',
+    red: 'red',
+  },
+  {
+    color: [
+      {
+        values: colors,
+        valueFormat: (value: string) => `var(--${value})`,
+      },
+    ],
+    bgColor: [
+      {
+        values: colors,
+        valueFormat: (value: string) => `var(--${value})`,
+        styleName: 'background-color',
+      },
+    ],
+    borderColor: [
+      {
+        values: colors,
+        valueFormat: (value: string) => `var(--${value})`,
+        styleName: 'border-color',
+      },
+    ],
+    outlineColor: [
+      {
+        values: colors,
+        valueFormat: (value: string) => `var(--${value})`,
+        styleName: 'outline-color',
+      },
+    ],
+  },
+);

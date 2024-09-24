@@ -59,6 +59,7 @@ namespace Theme {
   }
 }
 
+// REMOVE THIS
 Theme.setup({
   button: {
     styles: {
