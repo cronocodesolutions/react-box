@@ -1,23 +1,27 @@
 import { forwardRef, Ref } from 'react';
 import Box2 from '../box2';
-// import Box from '../box';
-// import ObjectUtils from '../utils/object/objectUtils';
 
-// type BoxProps = Omit<React.ComponentProps<typeof Box<'button'>>, 'ref' | 'tag'>;
-// type BoxTagProps = Required<BoxProps>['props'];
+const moveTagProps = ['type', 'onClick'] as const;
+type TagPropsType = (typeof moveTagProps)[number];
 
-// const tagProps = ['type', 'onClick'] as const;
-// type TagPropsType = (typeof tagProps)[number];
+type ButtonProps = Omit<React.ComponentProps<typeof Box2<'button'>>, 'tag'>;
+type ButtonTagProps = Omit<Required<ButtonProps>['props'], TagPropsType>;
+type ButtonType = Required<React.ComponentProps<'button'>>['type'];
 
-// type ButtonTagProps = Omit<BoxTagProps, TagPropsType>;
-// type ButtonType = Required<React.ComponentProps<'button'>>['type'];
-
-interface Props extends React.ComponentProps<typeof Box2> {
+interface Props extends Omit<ButtonProps, 'props'> {
+  props?: ButtonTagProps;
   onClick?: (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void;
+  type?: ButtonType;
 }
 
 function Button(props: Props, ref: Ref<HTMLButtonElement>) {
-  return <Box2 ref={ref} tag="button" component="button" {...props} />;
+  const { type, onClick, props: tagProps, ...restProps } = props;
+
+  const tagPropsToUse = (tagProps ?? {}) as Required<ButtonProps>['props'];
+  type && (tagPropsToUse.type = type);
+  onClick && (tagPropsToUse.onClick = onClick);
+
+  return <Box2 ref={ref} tag="button" component="button" {...restProps} props={tagPropsToUse} />;
 }
 
 export default forwardRef(Button);

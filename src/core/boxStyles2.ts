@@ -305,7 +305,9 @@ a,ul{all: unset;}
             const styleName = itemValue?.styleName ?? key;
             const styleValue = itemValue?.valueFormat ? itemValue.valueFormat(value as never) : value;
 
-            acc.push(`.${className}${pseudoClasses.map((p) => (p === 'disabled' ? `[${p}]` : `:${p}`))}{${styleName}:${styleValue}}`);
+            acc.push(
+              `.${className}${pseudoClasses.map((p) => (p === 'disabled' ? `[${p}]` : `:${p}`)).join('')}{${styleName}:${styleValue}}`,
+            );
           });
         });
 
@@ -369,7 +371,7 @@ function createClassName<TKey extends keyof BoxCssStyles>(
 ) {
   const pseudoClasses = pseudoClassesByWeight[weight];
 
-  return `${breakpoint === 'normal' ? '' : `${breakpoint}-`}${pseudoClasses.map((p) => `${p}-`)}${pseudoClassParentName ? `${pseudoClassParentName}-` : ''}${key}-${value as string}`;
+  return `${breakpoint === 'normal' ? '' : `${breakpoint}-`}${pseudoClasses.map((p) => `${p}-`).join('')}${pseudoClassParentName ? `${pseudoClassParentName}-` : ''}${key}-${value as string}`;
 }
 
 export const cronoStylesElementId = 'crono-styles2';
