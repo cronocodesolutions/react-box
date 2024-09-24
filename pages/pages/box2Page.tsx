@@ -1,11 +1,13 @@
+import Box from '../../src/box';
 import Box2 from '../../src/box2';
 import Button2 from '../../src/components/button2';
 
 export default function Box2Page() {
   return (
-    <Box2>
+    <Box borderRadiusTop={2} b={2} bx={10}>
       <Box2
         display="block"
+        inline
         m={4}
         width={30}
         b={1}
@@ -13,6 +15,7 @@ export default function Box2Page() {
         hoverGroup="parent"
         xl={{ width: 30 }}
         md={{ width: 20 }}
+        borderRadiusTop={2}
       >
         <Box2 hoverGroup={{ parent: { b: 2 } }}>line 1</Box2>
         <Box2 xxl={{ activeGroup: { pp: { display: 'block' } } }}>line 2</Box2>
@@ -30,6 +33,6 @@ export default function Box2Page() {
       >
         Click
       </Button2>
-    </Box2>
+    </Box>
   );
 }

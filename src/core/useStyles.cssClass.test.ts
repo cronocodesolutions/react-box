@@ -6,10 +6,10 @@ import StylesContext from './stylesContext';
 
 describe('useStyles', () => {
   describe('creates css class', () => {
-    let fetchSpy: MockInstance<[], void>;
+    let fetchSpy: MockInstance<() => void>;
 
     beforeEach(() => {
-      fetchSpy = vi.spyOn(StylesContext, 'flush');
+      const fetchSpy = vi.spyOn(StylesContext, 'flush');
     });
 
     afterEach(() => {
