@@ -12,7 +12,7 @@ export default function ButtonPage() {
   return (
     <Box p={10}>
       <Box mt={2}>
-        <Button2 type="submit" onClick={() => alert('ghost')}>
+        <Button2 type="submit" onClick={() => alert('ghost')} bgColor="violetDark" color="white" pl={3} p={5} borderRadius={1}>
           Button 2
         </Button2>
       </Box>

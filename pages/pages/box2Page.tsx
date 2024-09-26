@@ -23,14 +23,7 @@ export default function Box2Page() {
 
       <Box2 disabled={[false, { b: 5, width: 10 }]}>test</Box2>
 
-      <Button2
-        color="black"
-        bgColor="violetLight"
-        borderColor="black"
-        hover={{ bgColor: 'violet' }}
-        props={{ tabIndex: 2 }}
-        onClick={() => alert(3)}
-      >
+      <Button2 color="black" bgColor="violetLight" borderColor="black" hover={{ bgColor: 'violet' }} onClick={() => alert(3)}>
         Click
       </Button2>
     </Box>

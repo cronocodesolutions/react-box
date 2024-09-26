@@ -23,7 +23,26 @@ namespace ObjectUtils {
   }
 
   export function isObject(value: unknown): value is object {
-    return typeof value === 'object' && value !== null;
+    return !!value && typeof value === 'object';
+  }
+
+  export function mergeDeep(...objects: object[]) {
+    return objects.reduce((prev, obj) => {
+      Object.keys(obj).forEach((key) => {
+        const pVal = (prev as any)[key];
+        const oVal = (obj as any)[key];
+
+        if (Array.isArray(pVal) && Array.isArray(oVal)) {
+          (prev as any)[key] = pVal.concat(...oVal);
+        } else if (isObject(pVal) && isObject(oVal)) {
+          (prev as any)[key] = mergeDeep(pVal, oVal);
+        } else {
+          (prev as any)[key] = oVal;
+        }
+      });
+
+      return prev;
+    }, {});
   }
 }
 

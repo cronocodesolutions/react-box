@@ -1,3 +1,4 @@
+import Box2 from '../src/box2';
 import Theme from '../src/core/theme';
 
 export const themeProps = {
@@ -209,3 +210,62 @@ Theme.setup({
     },
   },
 });
+
+const colors = [
+  'white',
+  'black',
+  'black1',
+  'violet',
+  'violetLight',
+  'violetLighter',
+  'violetDark',
+  'gray1',
+  'gray2',
+  'dark',
+  'red',
+] as const;
+
+export const extendedProps = Box2.extend(
+  {
+    white: '#fff',
+    black: '#07071b',
+    black1: '#1e293b',
+    violet: '#988bee',
+    violetLight: '#e8edfd',
+    violetLighter: '#f6f8fe',
+    violetDark: '#5f3e66',
+    gray1: '#94a3b833',
+    gray2: '#94a3b8',
+    dark: '#272822',
+    red: 'red',
+  },
+  {
+    color: [
+      {
+        values: colors,
+        valueFormat: (value: string) => `var(--${value})`,
+      },
+    ],
+    bgColor: [
+      {
+        values: colors,
+        valueFormat: (value: string) => `var(--${value})`,
+        styleName: 'background-color',
+      },
+    ],
+    borderColor: [
+      {
+        values: colors,
+        valueFormat: (value: string) => `var(--${value})`,
+        styleName: 'border-color',
+      },
+    ],
+    outlineColor: [
+      {
+        values: colors,
+        valueFormat: (value: string) => `var(--${value})`,
+        styleName: 'outline-color',
+      },
+    ],
+  },
+);

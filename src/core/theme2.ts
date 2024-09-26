@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { BoxThemeStyles } from './boxStyles2';
+import { BoxThemeStyles, ThemeProps } from '../types';
 
 export interface ThemeComponentStyles {
   styles: BoxThemeStyles;
@@ -23,13 +23,7 @@ export interface ThemeSetup {
   label?: ThemeComponentStyles;
 }
 
-export interface ThemeComponentProps {
-  clean?: boolean;
-  component?: string;
-  theme?: string;
-}
-
-export function useTheme(props: ThemeComponentProps): BoxThemeStyles | undefined {
+export function useTheme(props: ThemeProps): BoxThemeStyles | undefined {
   const { clean, theme, component } = props;
 
   return useMemo(() => {
@@ -58,13 +52,3 @@ namespace Theme {
     ThemeInternal.components = com;
   }
 }
-
-// REMOVE THIS
-Theme.setup({
-  button: {
-    styles: {
-      width: 100,
-      b: 1,
-    },
-  },
-});
