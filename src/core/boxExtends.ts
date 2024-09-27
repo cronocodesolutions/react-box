@@ -1,4 +1,4 @@
-import { cssStyles } from './boxStyles2';
+import { cssStyles } from './boxStyles';
 import { BoxStyle } from './coreTypes';
 
 namespace BoxExtends {

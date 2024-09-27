@@ -53,7 +53,14 @@ export default function DataGridPage() {
   return (
     <Box p={10} overflow="hidden" width={200} height={60}>
       {/* <Box height="fit" overflow="scroll"> */}
-      <Grid gridColumns={10} columnGap={10} rowGap={4} style={{ gridTemplateColumns: 'repeat(10 , 1fr)' }} overflow="scroll" height="fit">
+      <Grid
+        gridTemplateColumns={10}
+        columnGap={10}
+        rowGap={4}
+        style={{ gridTemplateColumns: 'repeat(10 , 1fr)' }}
+        overflow="scroll"
+        height="fit"
+      >
         <Box display="contents">
           <Box position="sticky" left={0} zIndex={1} top={0}>
             Header

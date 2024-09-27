@@ -8,6 +8,8 @@ export default function CheckboxPage() {
       <Box py={3}>
         <Flex gap={2}>
           <Checkbox /> Theme
+          <Checkbox checked onChange={() => {}} /> Checked Controlled
+          <Checkbox defaultChecked /> Checked Uncontrolled
         </Flex>
         <Flex mt={2} gap={2} disabled>
           <Checkbox disabled /> Disabled

@@ -2,6 +2,11 @@ export type ArrayType<T> = T extends (infer U)[] ? U : T;
 
 export type BoxStylesType<T> = T extends ReadonlyArray<infer U> ? T[number] : T;
 
+export type ExtractElementType<T> =
+  T extends React.DetailedHTMLProps<React.HTMLAttributes<infer E>, infer E> ? E : T extends React.SVGProps<infer E> ? E : never;
+
+export type ExtractElementFromTag<T extends keyof React.JSX.IntrinsicElements> = ExtractElementType<React.JSX.IntrinsicElements[T]>;
+
 interface BoxStyleArrayString {
   values: ReadonlyArray<string>;
   valueFormat?: (value: string) => string;
@@ -31,18 +36,6 @@ export type BoxStyle = (BoxStyleArrayString | BoxStyleArrayBoolean | BoxStyleArr
   styleName?: string;
 };
 
-export type ExtractBoxPseudoClassesStyles1<T extends Record<string, number>, TT> = {
-  [K in keyof T]?: TT;
-};
-
-export type ExtractBoxPseudoClassesStyles2<T extends Record<string, number>, TT> = {
-  [K in keyof T]?: boolean | [boolean, TT];
-};
-
-export type ExtractBoxPseudoGroupClassesStyles<T extends Record<string, string>, TT> = {
-  [K in keyof T]?: string | Record<string, TT>;
-};
-
-export type ExtractBoxBreakpointsStyles<T extends Record<string, number>, TT> = {
+export type ExtractKeys<T extends Record<string, unknown>, TT> = {
   [K in keyof T]?: TT;
 };

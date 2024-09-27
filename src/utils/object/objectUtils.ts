@@ -1,3 +1,5 @@
+import { pseudo2 } from '../../core/boxStyles';
+
 namespace ObjectUtils {
   export function buildProps<T extends { props?: Object }, TKey extends keyof T>(props: T, keys: Readonly<TKey[]>, extraTagProps?: Object) {
     const newProps = { ...props };
@@ -26,13 +28,17 @@ namespace ObjectUtils {
     return !!value && typeof value === 'object';
   }
 
-  export function mergeDeep(...objects: object[]) {
+  export function mergeDeep<T>(...objects: object[]) {
     return objects.reduce((prev, obj) => {
       Object.keys(obj).forEach((key) => {
         const pVal = (prev as any)[key];
         const oVal = (obj as any)[key];
 
-        if (Array.isArray(pVal) && Array.isArray(oVal)) {
+        if (key in pseudo2 && typeof oVal === 'boolean') {
+          // skip overriding object of styles with a boolean
+        } else if (key in pseudo2 && Array.isArray(oVal)) {
+          (prev as any)[key] = mergeDeep(pVal, oVal[1] ?? {});
+        } else if (Array.isArray(pVal) && Array.isArray(oVal)) {
           (prev as any)[key] = pVal.concat(...oVal);
         } else if (isObject(pVal) && isObject(oVal)) {
           (prev as any)[key] = mergeDeep(pVal, oVal);
@@ -42,7 +48,7 @@ namespace ObjectUtils {
       });
 
       return prev;
-    }, {});
+    }, {} as T);
   }
 }
 

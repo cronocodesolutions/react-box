@@ -11,13 +11,8 @@
       "require": "./box.cjs",
       "types": "./box.d.ts"
     },
-    "./core/theme": {
-      "import": "./core/theme.mjs",
-      "require": "./core/theme.cjs",
-      "types": "./core/theme.d.ts"
-    },
-    "./core/types": {
-      "types": "./core/types.d.ts"
+    "./types": {
+      "types": "./types.d.ts"
     },
     "./ssg": {
       "import": "./ssg.mjs",

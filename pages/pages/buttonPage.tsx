@@ -3,7 +3,6 @@ import Box from '../../src/box';
 import Button from '../../src/components/button';
 import Flex from '../../src/components/flex';
 import BaseSvg from '../../src/components/baseSvg';
-import Button2 from '../../src/components/button2';
 
 export default function ButtonPage() {
   const [counter, setCounter] = useState(0);
@@ -11,11 +10,6 @@ export default function ButtonPage() {
 
   return (
     <Box p={10}>
-      <Box mt={2}>
-        <Button2 type="submit" onClick={() => alert('ghost')} bgColor="violetDark" color="white" pl={3} p={5} borderRadius={1}>
-          Button 2
-        </Button2>
-      </Box>
       <Flex py={3} ai="center" gap={4}>
         <Button props={{}} onClick={() => setCounter((prev) => prev + 1)}>
           Click me!

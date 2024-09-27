@@ -9,7 +9,7 @@ describe('SSG', () => {
 
     const result = renderToStaticMarkup(el);
 
-    expect(result.html).toEqual('<div class="_box">test</div>');
+    expect(result.html).toEqual('<div class="_b">test</div>');
   });
 
   it('generates static html with hoverGroup', () => {
@@ -21,7 +21,7 @@ describe('SSG', () => {
 
     const result = renderToStaticMarkup(el);
 
-    expect(result.html).toEqual('<div class="_box hoverGroupparent"><div class="_box displayhoverparentgrid">test</div></div>');
+    expect(result.html).toEqual('<div class="_b hover-parent"><div class="_b hover-parent-display-grid">test</div></div>');
   });
 
   it('generates static html with hoverGroup2', () => {
@@ -49,13 +49,13 @@ describe('SSG', () => {
 
     const result = renderToStaticMarkup(el);
 
-    const expected = `<html><head><style id="crono-styles">:root{--borderColor: black;--outlineColor: black;--lineHeight: 1.2;--fontSize: 14px;--transitionTime: 0.25s;--svgTransitionTime: 0.3s;#crono-box {position: absolute;top: 0;left: 0;height: 0;}}
+    const expected = `<html><head><style id="crono-styles">:root{--borderColor: black;--outlineColor: black;--lineHeight: 1.2;--fontSize: 14px;--transitionTime: 0.25s;--svgTransitionTime: 0.3s;}#crono-box {position: absolute;top: 0;left: 0;height: 0;}
 html{font-size: 16px;font-family: Arial, sans-serif;}
 body{margin: 0;line-height: var(--lineHeight);font-size: var(--fontSize);}
 a,ul{all: unset;}
-._box{display: block;border: 0 solid var(--borderColor);outline: 0px solid var(--outlineColor);margin: 0;padding: 0;background-color: initial;transition: all var(--transitionTime);box-sizing: border-box;font-family: inherit;font-size: inherit;}
-._svg{display: block;border: 0 solid var(--borderColor);outline: 0px solid var(--outlineColor);margin: 0;padding: 0;transition: all var(--svgTransitionTime);}._svg path,._svg circle,._svg rect,._svg line {transition: all var(--svgTransitionTime);}
-.displayflex{display:flex;}.displaynone{display:none;}.positionrelative{position:relative;}.positionabsolute{position:absolute;}.top6{top:1.5rem;}.right0{right:0rem;}.pb2{padding-bottom:0.5rem;}.pl2{padding-left:0.5rem;}.borderRadius2{border-radius:0.5rem;}.cursorpointer{cursor:pointer;}.aicenter{align-items:center;}.dcolumn{flex-direction:column;}.bgColorwhite{background-color:var(--colorwhite);;}.hoverGroupparent:hover .displayhoverparentblock{display:block;}@media(min-width: 640px){}@media(min-width: 768px){}@media(min-width: 1024px){}@media(min-width: 1280px){}@media(min-width: 1536px){}</style><title>my website</title></head><div class="_box displayflex aicenter positionrelative cursorpointer pb2 pl2 hoverGroupparent"><div class="_box displaynone bgColorwhite positionabsolute right0 top6 borderRadius2 dcolumn displayhoverparentblock"><div class="_box">test</div></div></div></html>`;
+._b{display: block;border: 0 solid var(--borderColor);outline: 0px solid var(--outlineColor);margin: 0;padding: 0;background-color: initial;transition: all var(--transitionTime);box-sizing: border-box;font-family: inherit;font-size: inherit;}
+._s{display: block;border: 0 solid var(--borderColor);outline: 0px solid var(--outlineColor);margin: 0;padding: 0;transition: all var(--svgTransitionTime);}._s path,._s circle,._s rect,._s line {transition: all var(--svgTransitionTime);}
+.borderRadius-2{border-radius:0.5rem}.position-relative{position:relative}.position-absolute{position:absolute}.top-6{top:1.5rem}.right-0{right:0rem}.cursor-pointer{cursor:pointer}.display-flex{display:flex}.display-none{display:none}.ai-center{align-items:center}.d-column{flex-direction:column}.pb-2{padding-bottom:0.5rem}.pl-2{padding-left:0.5rem}.hover-parent:hover .hover-parent-display-block{display:block}</style><title>my website</title></head><div class="_b display-flex ai-center position-relative cursor-pointer pb-2 pl-2 hover-parent"><div class="_b display-none position-absolute right-0 top-6 borderRadius-2 d-column hover-parent-display-block"><div class="_b">test</div></div></div></html>`;
 
     expect(result.html).toEqual(expected);
   });
@@ -70,7 +70,7 @@ a,ul{all: unset;}
     const result = renderToStaticMarkup(el);
     const result2 = renderToStaticMarkup(el);
 
-    const expected = '<div class="_box hoverGroupparent"><div class="_box displayhoverparentgrid">test</div></div>';
+    const expected = '<div class="_b hover-parent"><div class="_b hover-parent-display-grid">test</div></div>';
 
     expect(result.html).toEqual(expected);
     expect(result2.html).toEqual(expected);

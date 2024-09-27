@@ -12,7 +12,7 @@ export default function RadioButtonPage() {
         </Flex>
         <Flex mt={2} gap={2}>
           <RadioButton name="Clean" disabled defaultChecked /> Disabled 1
-          <RadioButton name="Clean" disabled /> Disabled 2
+          <RadioButton name="Clean" disabled={[true, { borderColor: 'red' }]} /> Disabled 2
         </Flex>
       </Box>
     </Box>

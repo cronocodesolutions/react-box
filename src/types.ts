@@ -1,13 +1,5 @@
-import { breakpoints, cssStyles, pseudo1, pseudo2, pseudoGroupClasses } from './core/boxStyles2';
-import {
-  ArrayType,
-  BoxStyle,
-  BoxStylesType,
-  ExtractBoxBreakpointsStyles,
-  ExtractBoxPseudoClassesStyles1,
-  ExtractBoxPseudoClassesStyles2,
-  ExtractBoxPseudoGroupClassesStyles,
-} from './core/coreTypes';
+import { breakpoints, cssStyles, pseudo1, pseudo2, pseudoGroupClasses } from './core/boxStyles';
+import { ArrayType, BoxStyle, BoxStylesType, ExtractKeys } from './core/coreTypes';
 
 export type ExtractBoxStyles<T extends Record<string, BoxStyle[]>> = {
   [K in keyof T]?: BoxStylesType<ArrayType<T[K]>['values']>;
@@ -15,20 +7,17 @@ export type ExtractBoxStyles<T extends Record<string, BoxStyle[]>> = {
 
 export namespace Augmented {
   export interface BoxProps {}
-  export interface SvgProps {}
 }
 
 export type BoxStyles = ExtractBoxStyles<typeof cssStyles> & Augmented.BoxProps;
-// export type SvgStyles = ExtractBoxStyles<typeof cssStyles> & Augmented.SvgProps;
 
-type BoxPseudoClassesStyles1 = ExtractBoxPseudoClassesStyles1<typeof pseudo1, BoxStylesWithPseudoClasses>;
-type BoxPseudoClassesStyles2 = ExtractBoxPseudoClassesStyles2<typeof pseudo2, BoxStylesWithPseudoClasses>;
-export interface BoxStylesWithPseudoClasses extends BoxStyles, BoxPseudoClassesStyles1, BoxPseudoClassesStyles2 {}
+type BoxPseudoClassesStyles1 = ExtractKeys<typeof pseudo1, BoxStylesWithPseudoClasses>;
+type BoxPseudoClassesStyles2Nested = ExtractKeys<typeof pseudo2, BoxStylesWithPseudoClasses>;
+type BoxPseudoClassesStyles2TopLevel = ExtractKeys<typeof pseudo2, boolean | [boolean, BoxStylesWithPseudoClasses]>;
+interface BoxStylesWithPseudoClasses extends BoxStyles, BoxPseudoClassesStyles1, BoxPseudoClassesStyles2Nested {}
 
-type BoxPseudoGroupClassesStyles = ExtractBoxPseudoGroupClassesStyles<typeof pseudoGroupClasses, BoxStyles>;
-export type BoxStylesWithPseudoClassesAndPseudoGroups = BoxStylesWithPseudoClasses & BoxPseudoGroupClassesStyles;
-
-type BoxBreakpointsStyles = ExtractBoxBreakpointsStyles<typeof breakpoints, BoxStylesWithPseudoClassesAndPseudoGroups>;
+type BoxPseudoGroupClassesStyles = ExtractKeys<typeof pseudoGroupClasses, string | Record<string, BoxStyles>>;
+type BoxBreakpointsStyles = ExtractKeys<typeof breakpoints, BoxStylesWithPseudoClasses & BoxPseudoGroupClassesStyles>;
 
 export interface ThemeProps {
   clean?: boolean;
@@ -36,5 +25,10 @@ export interface ThemeProps {
   theme?: string;
 }
 
-export type BoxAllStyles = BoxStylesWithPseudoClassesAndPseudoGroups & BoxBreakpointsStyles & ThemeProps;
+export type BoxStyleProps = BoxStyles &
+  BoxPseudoClassesStyles1 &
+  BoxPseudoClassesStyles2TopLevel &
+  BoxPseudoGroupClassesStyles &
+  BoxBreakpointsStyles &
+  ThemeProps;
 export type BoxThemeStyles = BoxStylesWithPseudoClasses & BoxBreakpointsStyles;

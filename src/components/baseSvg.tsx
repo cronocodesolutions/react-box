@@ -1,11 +1,11 @@
 import { forwardRef, Ref } from 'react';
 import Box, { BoxTagProps } from '../box';
-import { BoxSvgStyles } from '../core/types';
+import { BoxStyleProps } from '../types';
 import { ClassNameType } from '../core/classNames';
 
 type BoxSvgTagProps = Omit<BoxTagProps<'svg'>, 'viewBox' | 'width' | 'height'>;
 
-interface Props extends Omit<BoxSvgStyles, 'width' | 'height'> {
+interface Props extends Omit<BoxStyleProps, 'width' | 'height'> {
   children?: React.ReactNode | ((props: { isHover: boolean }) => React.ReactNode);
   props?: BoxSvgTagProps;
   style?: React.ComponentProps<'svg'>['style'];

@@ -8,16 +8,15 @@ import HomePage from '../pages/homePage';
 import RadioButtonPage from '../pages/radioButtonPage';
 import TextboxPage from '../pages/textboxPage';
 import TooltipPage from '../pages/tooltipPage';
-import Box from './../../src/box';
+import Box from '../../src/box';
 import Flex from '../../src/components/flex';
 import MenuItem from './menuItem';
 import { Routes, Route } from 'react-router-dom';
 import TextareaPage from '../pages/textareaPage';
-import Box2Page from '../pages/box2Page';
 
 export default function App() {
   return (
-    <Flex height="fit-screen" color="violetDark" backgroundImage="bg">
+    <Flex height="fit-screen" color="violetDark" backgroundImage="bgImg1">
       <Box height="fit-screen" width={60} px={2}>
         <MenuItem to="/" bgColor={undefined} hover={{ bgColor: undefined }} color={undefined}>
           <Box fontWeight={700} py={5}>
@@ -41,7 +40,7 @@ export default function App() {
       <Box flex1 bl={1} borderColor="violet">
         <Routes>
           <Route index element={<HomePage />} />
-          <Route path="/box2" element={<Box2Page />} />
+          {/* <Route path="/box" element={<BoxPage />} /> */}
           {/* <Route path="/box" element={<BoxPage />} />
           <Route path="/flex" element={<FlexPage />} /> */}
           <Route path="/grid" element={<GridPage />} />

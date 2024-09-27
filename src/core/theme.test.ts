@@ -1,12 +1,13 @@
 import { describe, expect, it } from 'vitest';
 import Theme from './theme';
+import { ThemeInternal } from './useTheme';
 
 describe('Theme', () => {
   describe('button component', () => {
     it('has default cursor pointer', () => {
       Theme.setup({});
 
-      expect(Theme.Styles.components?.button?.styles.cursor).to.eq('pointer');
+      expect(ThemeInternal.components?.button?.styles.cursor).to.eq('pointer');
     });
 
     it('may have ghost theme', () => {
@@ -27,9 +28,9 @@ describe('Theme', () => {
         },
       });
 
-      expect(Theme.Styles.components?.button?.themes?.ghost.cursor).to.eq('copy');
-      // @ts-ignore
-      expect(Theme.Styles.components?.button?.themes?.ghost.cursorhover).to.eq('crosshair');
+      expect(ThemeInternal.components?.button?.themes?.ghost.cursor).to.eq('copy');
+
+      expect(ThemeInternal.components?.button?.themes?.ghost.hover?.cursor).to.eq('crosshair');
     });
   });
 });

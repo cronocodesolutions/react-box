@@ -1,97 +1,291 @@
-import { useLayoutEffect, useEffect, useMemo } from 'react';
-import { PseudoClassSuffix, StyleKey, boxBreakpoints } from './boxStyles';
-import StylesContext from './stylesContext';
-import { BoxStyleProps } from './types';
-import { useTheme } from './useTheme';
+import { useEffect, useLayoutEffect, useMemo } from 'react';
+import { BoxStyleProps, BoxStyles } from '../types';
 import ObjectUtils from '../utils/object/objectUtils';
+import { breakpoints, cssStyles, pseudo1, pseudo2, pseudoClasses, pseudoClassesByWeight, pseudoGroupClasses } from './boxStyles';
+import IdentityFactory from '@cronocode/identity-factory';
+import BoxExtends from './boxExtends';
+import { BoxStyle } from './coreTypes';
+import { useTheme } from './useTheme';
 
-const isBrowser = typeof window !== 'undefined' && typeof window.document !== 'undefined';
-const useEff = isBrowser ? useLayoutEffect : useEffect;
+const identity = new IdentityFactory();
+
+// const isBrowser = typeof window !== 'undefined' && typeof window.document !== 'undefined';
+// const useEff = isBrowser ? useLayoutEffect : useEffect;
+const useEff = useEffect;
+
+const boxClassName = '_b';
+const svgClassName = '_s';
 
 export default function useStyles(props: BoxStyleProps, isSvg: boolean) {
-  const themeProps = useTheme(props) as BoxStyleProps;
-  useEff(StylesContext.flush, [props]);
+  useEff(StylesContextImpl.flush, [props]);
+
+  const theme = useTheme(props);
 
   return useMemo(() => {
-    const classNames: (string | undefined)[] = [isSvg ? StylesContext.svgClassName : StylesContext.boxClassName];
-    const propsToUse = themeProps ? { ...themeProps, ...props } : { ...props };
+    const classNames: string[] = [isSvg ? svgClassName : boxClassName];
 
-    flattenWrapper(propsToUse);
+    if ((props as any).props?.name === 'Clean') {
+      const a = 1;
+    }
 
-    Object.entries(propsToUse).forEach(([key, value]) => {
-      classNames.push(StylesContext.get(key as StyleKey, value));
-    });
+    const propsToUse = theme ? ObjectUtils.mergeDeep<BoxStyleProps>(theme, props) : props;
 
-    boxBreakpoints.forEach((boxBreakpoint) => {
-      if (boxBreakpoint in propsToUse) {
-        const breakpointProps = propsToUse[boxBreakpoint]!;
-
-        flattenWrapper(breakpointProps);
-
-        Object.entries(breakpointProps).forEach(([key, value]) => {
-          classNames.push(StylesContext.get(key as StyleKey, value, boxBreakpoint));
-        });
-
-        delete propsToUse[boxBreakpoint];
-      }
-    });
+    StylesContextImpl.addClassNames(propsToUse, classNames, []);
 
     return classNames;
-  }, [props, themeProps]);
+  }, [props, isSvg, theme]);
 }
 
-function flattenWrapper(props: BoxStyleProps) {
-  flattenSingle(props, 'hover', 'hover');
-  flattenSingle(props, 'focus', 'focus');
-  flattenSingle(props, 'hasFocus', 'hasFocus');
-  flattenSingle(props, 'active', 'active');
-  flattenSingle(props, 'disabled', 'disabled');
-  flattenSingle(props, 'hasDisabled', 'hasDisabled');
-  flattenSingle(props, 'checked', 'checked');
-  flattenSingle(props, 'hasChecked', 'hasChecked');
-  flattenSingle(props, 'valid', 'valid');
-  flattenSingle(props, 'hasValid', 'hasValid');
-  flattenSingle(props, 'invalid', 'invalid');
-  flattenSingle(props, 'hasInvalid', 'hasInvalid');
+namespace StylesContextImpl {
+  let requireFlush = true;
 
-  flattenGroup(props, 'hoverGroup', 'hover');
-  flattenGroup(props, 'focusGroup', 'focus');
-  flattenGroup(props, 'activeGroup', 'active');
-  flattenGroup(props, 'disabledGroup', 'disabled');
-}
+  let stylesToGenerate: {
+    // key = breakpoint name
+    [key: string]: {
+      // key = weight of pseudo classes
+      [key: number]: {
+        // key = css style (box props)
+        [key: string]: Set<unknown>;
+      } & {
+        __parents?: {
+          // key = parent name
+          [key: string]: {
+            // key = css style (box props)
+            [key: string]: Set<unknown>;
+          };
+        };
+      };
+    };
+  } = {};
 
-function flattenSingle<T extends BoxStyleProps>(props: T, key: keyof T, suffix: PseudoClassSuffix) {
-  if (key in props === false) return;
-
-  flatten(props, key, suffix, props[key] as [boolean, BoxStyleProps] | BoxStyleProps);
-}
-
-function flattenGroup<T extends BoxStyleProps>(props: T, key: keyof T, suffix: PseudoClassSuffix) {
-  if (key in props === false) return;
-  if (!ObjectUtils.isObject(props[key])) return;
-
-  Object.entries(props[key] as Record<string, BoxStyleProps>).forEach(([customName, value]) => {
-    StylesContext.addCustomPseudoClass(suffix, customName, key as string);
-
-    flatten(props, key, (suffix + customName) as PseudoClassSuffix, value);
-  });
-}
-
-function flatten<T extends BoxStyleProps>(
-  props: T,
-  key: keyof T,
-  suffix: PseudoClassSuffix,
-  innerProps: [boolean, BoxStyleProps] | BoxStyleProps,
-) {
-  if (Array.isArray(innerProps)) {
-    Object.entries(innerProps[1]).forEach(([name, value]) => {
-      props[`${name}${suffix}` as keyof BoxStyleProps] = value;
+  export function addClassNames(
+    props: BoxStyleProps,
+    classNames: string[],
+    currentPseudoClasses: string[],
+    breakpoint?: string,
+    pseudoClassParentName?: string,
+  ) {
+    Object.entries(props).forEach(([key, value]) => {
+      if (key in cssStyles) {
+        addClassName(key as keyof BoxStyles, value, classNames, currentPseudoClasses, breakpoint, pseudoClassParentName);
+      } else if (key in pseudo1) {
+        addClassNames(value as BoxStyleProps, classNames, [...currentPseudoClasses, key], breakpoint, pseudoClassParentName);
+      } else if (key in pseudo2) {
+        if (Array.isArray(value)) {
+          const [_, styles] = value;
+          addClassNames(styles as BoxStyleProps, classNames, [...currentPseudoClasses, key], breakpoint, pseudoClassParentName);
+        }
+        if (ObjectUtils.isObject(value)) {
+          addClassNames(value as BoxStyleProps, classNames, [...currentPseudoClasses, key], breakpoint, pseudoClassParentName);
+        }
+      } else if (key in breakpoints) {
+        addClassNames(value as BoxStyleProps, classNames, currentPseudoClasses, key, pseudoClassParentName);
+      } else if (key in pseudoGroupClasses) {
+        if (typeof value === 'string') {
+          classNames.push(`${pseudoGroupClasses[key as keyof typeof pseudoGroupClasses]}-${value}`);
+        } else {
+          Object.entries(value).forEach(([name, pseudoClassProps]) => {
+            addClassNames(
+              pseudoClassProps as BoxStyles,
+              classNames,
+              [...currentPseudoClasses, pseudoGroupClasses[key as keyof typeof pseudoGroupClasses]],
+              breakpoint,
+              name,
+            );
+          });
+        }
+      }
     });
-    props[key] = innerProps[0] as T[keyof T];
-  } else if (ObjectUtils.isObject(innerProps)) {
-    Object.entries(innerProps).forEach(([name, value]) => {
-      props[`${name}${suffix}` as keyof BoxStyleProps] = value;
-    });
-    delete props[key];
   }
+
+  export function flush() {
+    if (!requireFlush) return;
+
+    console.debug('\x1b[36m%s\x1b[0m', '[react-box]: flush');
+
+    const cssStylesIndex: Record<string, number> = Object.entries(cssStyles).reduce<Record<string, number>>((acc, [key], index) => {
+      acc[key] = index;
+      return acc;
+    }, {});
+
+    const defaultStyles = `:root{${BoxExtends.getVariables()}--borderColor: black;--outlineColor: black;--lineHeight: 1.2;--fontSize: 14px;--transitionTime: 0.25s;--svgTransitionTime: 0.3s;}#crono-box {position: absolute;top: 0;left: 0;height: 0;}
+html{font-size: 16px;font-family: Arial, sans-serif;}
+body{margin: 0;line-height: var(--lineHeight);font-size: var(--fontSize);}
+a,ul{all: unset;}
+.${boxClassName}{display: block;border: 0 solid var(--borderColor);outline: 0px solid var(--outlineColor);margin: 0;padding: 0;background-color: initial;transition: all var(--transitionTime);box-sizing: border-box;font-family: inherit;font-size: inherit;}
+.${svgClassName}{display: block;border: 0 solid var(--borderColor);outline: 0px solid var(--outlineColor);margin: 0;padding: 0;transition: all var(--svgTransitionTime);}.${svgClassName} path,.${svgClassName} circle,.${svgClassName} rect,.${svgClassName} line {transition: all var(--svgTransitionTime);}
+`;
+    const stylesToGenerateEntries = Object.entries(stylesToGenerate);
+
+    stylesToGenerateEntries.sort(
+      ([a], [b]) => (breakpoints[a as keyof typeof breakpoints] ?? 0) - (breakpoints[b as keyof typeof breakpoints] ?? 0),
+    );
+
+    const styleItems = stylesToGenerateEntries.reduce<string[]>(
+      (acc, [breakpoint, weights]) => {
+        if (breakpoint !== 'normal') {
+          acc.push(`@media(min-width: ${breakpoints[breakpoint as keyof typeof breakpoints]}px){`);
+        }
+
+        Object.entries(weights).forEach(([weight, boxStyles]) => {
+          const { __parents, ...styles } = boxStyles;
+
+          const stylesToUse = Object.entries(styles);
+          stylesToUse.sort(([a], [b]) => cssStylesIndex[a] - cssStylesIndex[b]);
+
+          stylesToUse.forEach(([key, values]) => {
+            values.forEach((value) => {
+              const pseudoClasses = pseudoClassesByWeight[+weight];
+              const className = createClassName(key as keyof BoxStyles, value as BoxStyles[keyof BoxStyles], +weight, breakpoint);
+
+              const item = cssStyles[key as keyof typeof cssStyles] as BoxStyle[];
+
+              const itemValue = item.find((x) => {
+                if (Array.isArray(x.values)) {
+                  return x.values.includes(value);
+                }
+
+                return typeof value === typeof x.values;
+              });
+
+              const styleName = itemValue?.styleName ?? key;
+              const styleValue = itemValue?.valueFormat ? itemValue.valueFormat(value as never) : value;
+
+              acc.push(
+                `.${className}${pseudoClasses.map((p) => (p === 'disabled' ? `[${p}]` : `:${p}`)).join('')}{${styleName}:${styleValue}}`,
+              );
+            });
+          });
+
+          if (__parents) {
+            Object.entries(__parents).forEach(([name, styles]) => {
+              const stylesToUse = Object.entries(styles);
+              stylesToUse.sort(([a], [b]) => cssStylesIndex[a] - cssStylesIndex[b]);
+
+              stylesToUse.forEach(([key, values]) => {
+                values.forEach((value) => {
+                  const pseudoClasses = pseudoClassesByWeight[+weight];
+                  const className = createClassName(key as keyof BoxStyles, value as BoxStyles[keyof BoxStyles], +weight, breakpoint, name);
+
+                  const item = cssStyles[key as keyof typeof cssStyles] as BoxStyle[];
+
+                  const itemValue = item.find((x) => {
+                    if (Array.isArray(x.values)) {
+                      return x.values.includes(value);
+                    }
+
+                    return typeof value === typeof x.values;
+                  });
+
+                  const styleName = itemValue?.styleName ?? key;
+                  const styleValue = itemValue?.valueFormat ? itemValue.valueFormat(value as never) : value;
+
+                  const [pseudoClass] = pseudoClasses;
+
+                  acc.push(`.${pseudoClass}-${name}:${pseudoClass} .${className}{${styleName}:${styleValue}}`);
+                });
+              });
+            });
+          }
+        });
+
+        if (breakpoint !== 'normal') {
+          acc.push('}');
+        }
+
+        return acc;
+      },
+      [defaultStyles],
+    );
+
+    const el = getElement();
+
+    el.innerHTML = styleItems.join('');
+
+    requireFlush = false;
+  }
+
+  export function clear() {
+    stylesToGenerate = {};
+  }
+
+  function addClassName<TKey extends keyof BoxStyles, TValue extends BoxStyles[TKey]>(
+    key: TKey,
+    value: TValue | undefined | null,
+    classNames: string[],
+    currentPseudoClasses: string[],
+    breakpoint: string = 'normal',
+    pseudoClassParentName?: string,
+  ) {
+    if (value === undefined || value === null) return;
+
+    const weight = currentPseudoClasses.reduce((sum, pseudoClass) => sum + pseudoClasses[pseudoClass as keyof typeof pseudoClasses], 0);
+
+    if (!stylesToGenerate[breakpoint]) {
+      stylesToGenerate[breakpoint] = { [weight]: { [key]: new Set() } };
+    } else if (!stylesToGenerate[breakpoint][weight]) {
+      stylesToGenerate[breakpoint][weight] = { [key]: new Set() };
+    } else if (!stylesToGenerate[breakpoint][weight][key]) {
+      stylesToGenerate[breakpoint][weight][key] = new Set();
+    }
+
+    if (pseudoClassParentName) {
+      if (!stylesToGenerate[breakpoint][weight].__parents) {
+        stylesToGenerate[breakpoint][weight].__parents = { [pseudoClassParentName]: { [key]: new Set() } };
+      } else if (!stylesToGenerate[breakpoint][weight].__parents![pseudoClassParentName]) {
+        stylesToGenerate[breakpoint][weight].__parents![pseudoClassParentName] = { [key]: new Set() };
+      } else if (!stylesToGenerate[breakpoint][weight].__parents![pseudoClassParentName][key]) {
+        stylesToGenerate[breakpoint][weight].__parents![pseudoClassParentName][key] = new Set();
+      }
+
+      if (!stylesToGenerate[breakpoint][weight].__parents![pseudoClassParentName][key].has(value)) {
+        stylesToGenerate[breakpoint][weight].__parents![pseudoClassParentName][key].add(value);
+        requireFlush = true;
+      }
+    } else {
+      if (!stylesToGenerate[breakpoint][weight][key].has(value)) {
+        stylesToGenerate[breakpoint][weight][key].add(value);
+        requireFlush = true;
+      }
+    }
+
+    const className = createClassName(key, value, weight, breakpoint, pseudoClassParentName);
+
+    classNames.push(className);
+  }
+
+  function createClassName<TKey extends keyof BoxStyles, TValue extends BoxStyles[TKey]>(
+    key: TKey,
+    value: TValue,
+    weight: number,
+    breakpoint: string,
+    pseudoClassParentName?: string,
+  ) {
+    const pseudoClasses = pseudoClassesByWeight[weight];
+
+    return `${breakpoint === 'normal' ? '' : `${breakpoint}-`}${pseudoClasses.map((p) => `${p}-`).join('')}${pseudoClassParentName ? `${pseudoClassParentName}-` : ''}${key}-${value as string}`;
+  }
+
+  const cronoStylesElementId = 'crono-styles';
+
+  function getElement() {
+    const isBrowser = typeof window !== 'undefined' && typeof window.document !== 'undefined';
+    const document = isBrowser ? window.document : global.document;
+
+    let stylesElement = document.getElementById(cronoStylesElementId);
+
+    if (!stylesElement) {
+      stylesElement = document.createElement('style');
+      stylesElement.setAttribute('id', cronoStylesElementId);
+      stylesElement.setAttribute('type', 'text/css');
+      document.head.insertBefore(stylesElement, document.head.firstChild);
+    }
+
+    return stylesElement;
+  }
+}
+
+export namespace StylesContext {
+  export const flush = StylesContextImpl.flush;
+  export const clear = StylesContextImpl.clear;
 }

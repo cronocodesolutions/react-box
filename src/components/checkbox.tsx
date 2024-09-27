@@ -17,14 +17,12 @@ interface Props extends CheckboxProps {
   autoFocus?: boolean;
   readOnly?: boolean;
   required?: boolean;
-  // checked?: boolean;
   defaultChecked?: boolean;
-  indeterminate?: boolean;
 }
 
 function Checkbox(props: Props, ref: Ref<HTMLInputElement>) {
-  const { indeterminate } = props;
   const newProps = ObjectUtils.buildProps(props, tagProps, { type: 'checkbox' });
+  const indeterminate = Array.isArray(props.indeterminate) ? props.indeterminate[0] : props.indeterminate;
 
   const checkboxRef = useRef<HTMLInputElement>(null);
   useImperativeHandle<HTMLInputElement | null, HTMLInputElement | null>(ref, () => checkboxRef.current);

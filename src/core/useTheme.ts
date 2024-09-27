@@ -1,23 +1,21 @@
 import { useMemo } from 'react';
-import Theme, { ThemeComponentStyles, ThemeSetup } from './theme';
-import { BoxStyleProps } from './types';
+import { ThemeProps, BoxThemeStyles } from '../types';
+import { ThemeSetup, ThemeComponentStyles } from './theme';
+import ObjectUtils from '../utils/object/objectUtils';
 
-type ReservedComponentName = Exclude<string, keyof Omit<ThemeSetup, 'components'>>;
-export interface ThemeComponentProps {
-  clean?: boolean;
-  component?: ReservedComponentName;
-  theme?: string;
+export namespace ThemeInternal {
+  export let components: { [name: string]: ThemeComponentStyles } = {};
 }
 
-export function useTheme(props: ThemeComponentProps): BoxStyleProps | undefined {
+export function useTheme(props: ThemeProps): BoxThemeStyles | undefined {
   const { clean, theme, component } = props;
 
   return useMemo(() => {
     if (clean) return undefined;
 
-    let componentStyles = Theme.Styles.components?.[component as keyof ThemeSetup['components']] as ThemeComponentStyles;
+    let componentStyles = ThemeInternal.components?.[component as keyof ThemeSetup['components']] as ThemeComponentStyles;
     if (!componentStyles) return undefined;
 
-    return theme ? { ...componentStyles.styles, ...componentStyles.themes?.[theme] } : componentStyles.styles;
+    return theme ? ObjectUtils.mergeDeep(componentStyles.styles, componentStyles.themes?.[theme] ?? {}) : componentStyles.styles;
   }, [component, clean, theme]);
 }
