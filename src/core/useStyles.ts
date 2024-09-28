@@ -264,7 +264,7 @@ a,ul{all: unset;}
     const pseudoClasses = pseudoClassesByWeight[weight];
 
     const className = `${breakpoint === 'normal' ? '' : `${breakpoint}-`}${pseudoClasses.map((p) => `${p}-`).join('')}${pseudoClassParentName ? `${pseudoClassParentName}-` : ''}${key}-${value}`;
-
+    return className;
     return identity.getIdentity(className);
   }
 

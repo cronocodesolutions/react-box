@@ -36,10 +36,10 @@ export default function TextboxPage() {
         </Box>
       </Label>
 
-      {/* <Label hasFocus={{ color: 'violet', textDecoration: 'underline' }} b={1} borderRadius={1} p={2} mt={2}>
+      <Label hasFocus={{ color: 'violet', textDecoration: 'underline' }} b={1} borderRadius={1} p={2} mt={2}>
         <Box mt={2}>change label color when focus textbox</Box>
         <Textbox mt={3} defaultValue="focus group" />
-      </Label> */}
+      </Label>
     </Box>
   );
 }

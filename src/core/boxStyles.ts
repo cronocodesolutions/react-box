@@ -1127,8 +1127,16 @@ export const cssStyles = {
 export const pseudo1 = {
   hover: ':hover',
   focus: ':focus-within',
+  hasFocus: ':has(:focus)',
   active: ':active',
+  valid: ':user-valid',
+  hasValid: ':has(:valid)',
   invalid: ':user-invalid',
+  hasInvalid: ':has(:user-invalid)',
+  required: ':required',
+  optional: ':optional',
+  hasChecked: ':has(:checked)',
+  hasDisabled: ':has([disabled])',
 };
 
 export const pseudo2 = {
