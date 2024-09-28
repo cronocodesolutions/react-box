@@ -1,9 +1,11 @@
-import { breakpoints, cssStyles, pseudo1, pseudo2, pseudoGroupClasses } from './core/boxStyles';
+import { breakpoints, cssStyles, pseudo1, pseudo2, pseudoClasses, pseudoGroupClasses } from './core/boxStyles';
 import { ArrayType, BoxStyle, BoxStylesType, ExtractKeys } from './core/coreTypes';
 
 export type ExtractBoxStyles<T extends Record<string, BoxStyle[]>> = {
   [K in keyof T]?: BoxStylesType<ArrayType<T[K]>['values']>;
 };
+
+export type PseudoClassesType = keyof typeof pseudoClasses;
 
 export namespace Augmented {
   export interface BoxProps {}

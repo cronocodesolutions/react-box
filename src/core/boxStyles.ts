@@ -1,3 +1,4 @@
+import { BoxStylesFormatters } from './boxStylesFormatters';
 import { BoxStyle } from './coreTypes';
 
 export const cssStyles = {
@@ -12,7 +13,7 @@ export const cssStyles = {
     {
       values: 0,
       styleName: 'border-width',
-      valueFormat: (value: number) => `${value}px`,
+      valueFormat: BoxStylesFormatters.Value.px,
     },
   ],
   /** The border-width shorthand CSS property sets the width of an element's left and right border. */
@@ -20,7 +21,7 @@ export const cssStyles = {
     {
       values: 0,
       styleName: 'border-inline-width',
-      valueFormat: (value: number) => `${value}px`,
+      valueFormat: BoxStylesFormatters.Value.px,
     },
   ],
   /** The border-width shorthand CSS property sets the width of an element's top and bottom border. */
@@ -28,7 +29,7 @@ export const cssStyles = {
     {
       values: 0,
       styleName: 'border-block-width',
-      valueFormat: (value: number) => `${value}px`,
+      valueFormat: BoxStylesFormatters.Value.px,
     },
   ],
   /** The border-top-width CSS property sets the width of the top border of an element. */
@@ -36,7 +37,7 @@ export const cssStyles = {
     {
       values: 0,
       styleName: 'border-top-width',
-      valueFormat: (value: number) => `${value}px`,
+      valueFormat: BoxStylesFormatters.Value.px,
     },
   ],
   /** The border-right-width CSS property sets the width of the right border of an element. */
@@ -44,7 +45,7 @@ export const cssStyles = {
     {
       values: 0,
       styleName: 'border-right-width',
-      valueFormat: (value: number) => `${value}px`,
+      valueFormat: BoxStylesFormatters.Value.px,
     },
   ],
   /** The border-bottom-width CSS property sets the width of the bottom border of an element. */
@@ -52,7 +53,7 @@ export const cssStyles = {
     {
       values: 0,
       styleName: 'border-bottom-width',
-      valueFormat: (value: number) => `${value}px`,
+      valueFormat: BoxStylesFormatters.Value.px,
     },
   ],
   /** The border-left-width CSS property sets the width of the left border of an element. */
@@ -60,7 +61,7 @@ export const cssStyles = {
     {
       values: 0,
       styleName: 'border-left-width',
-      valueFormat: (value: number) => `${value}px`,
+      valueFormat: BoxStylesFormatters.Value.px,
     },
   ],
   /** The border-style shorthand CSS property sets the line style for all four sides of an element's border. */
@@ -75,7 +76,7 @@ export const cssStyles = {
     {
       styleName: 'border-radius',
       values: 0,
-      valueFormat: (value: number) => `${value / 4}rem`,
+      valueFormat: BoxStylesFormatters.Value.rem,
     },
   ],
   /** The border-top-radius CSS property rounds the top corners of an element by specifying the radius (or the radius of the semi-major and semi-minor axes) of the ellipse defining the curvature of the corner. */
@@ -152,35 +153,35 @@ export const cssStyles = {
   top: [
     {
       values: 0,
-      valueFormat: (value: number) => `${value / 4}rem`,
+      valueFormat: BoxStylesFormatters.Value.rem,
     },
   ],
   /** The right CSS property participates in specifying the horizontal position of a positioned element. This inset property has no effect on non-positioned elements. */
   right: [
     {
       values: 0,
-      valueFormat: (value: number) => `${value / 4}rem`,
+      valueFormat: BoxStylesFormatters.Value.rem,
     },
   ],
   /** The bottom CSS property participates in setting the vertical position of a positioned element. This inset property has no effect on non-positioned elements. */
   bottom: [
     {
       values: 0,
-      valueFormat: (value: number) => `${value / 4}rem`,
+      valueFormat: BoxStylesFormatters.Value.rem,
     },
   ],
   /** The left CSS property participates in specifying the horizontal position of a positioned element. This inset property has no effect on non-positioned elements. */
   left: [
     {
       values: 0,
-      valueFormat: (value: number) => `${value / 4}rem`,
+      valueFormat: BoxStylesFormatters.Value.rem,
     },
   ],
   /** The inset CSS property is a shorthand that corresponds to the top, right, bottom, and/or left properties. It has the same multi-value syntax of the margin shorthand. */
   inset: [
     {
       values: 0,
-      valueFormat: (value: number) => `${value / 4}rem`,
+      valueFormat: BoxStylesFormatters.Value.rem,
     },
   ],
   /** The `box-sizing` CSS property sets how the total width and height of an element is calculated. */
@@ -353,7 +354,7 @@ export const cssStyles = {
     {
       styleName: 'font-size',
       values: 0,
-      valueFormat: (value: number) => `${value}px`,
+      valueFormat: BoxStylesFormatters.Value.px,
     },
     {
       styleName: 'font-size',
@@ -378,7 +379,7 @@ export const cssStyles = {
   gap: [
     {
       values: 0,
-      valueFormat: (value: number) => `${value / 4}rem`,
+      valueFormat: BoxStylesFormatters.Value.rem,
     },
   ],
   /** The row-gap CSS property sets the size of the gap (gutter) between an element's rows. */
@@ -386,7 +387,7 @@ export const cssStyles = {
     {
       styleName: 'row-gap',
       values: 0,
-      valueFormat: (value: number) => `${value / 4}rem`,
+      valueFormat: BoxStylesFormatters.Value.rem,
     },
   ],
   /** The column-gap CSS property sets the size of the gap (gutter) between an element's columns. */
@@ -394,7 +395,7 @@ export const cssStyles = {
     {
       styleName: 'column-gap',
       values: 0,
-      valueFormat: (value: number) => `${value / 4}rem`,
+      valueFormat: BoxStylesFormatters.Value.rem,
     },
   ],
   /** The order CSS property sets the order to lay out an item in a flex or grid container. Items in a container are sorted by ascending order value and then by their source code order. Items not given an explicit order value are assigned the default value of 0. */
@@ -719,7 +720,7 @@ export const cssStyles = {
     {
       styleName: 'letter-spacing',
       values: 0,
-      valueFormat: (value: number) => `${value}px`,
+      valueFormat: BoxStylesFormatters.Value.px,
     },
   ],
   /** The line-height CSS property sets the height of a line box in horizontal writing modes. In vertical writing modes, it sets the width of a line box. It's commonly used to set the distance between lines of text. On block-level elements in horizontal writing modes, it specifies the preferred height of line boxes within the element, and on non-replaced inline elements, it specifies the height that is used to calculate line box height. */
@@ -727,7 +728,7 @@ export const cssStyles = {
     {
       styleName: 'line-height',
       values: 0,
-      valueFormat: (value: number) => `${value}px`,
+      valueFormat: BoxStylesFormatters.Value.px,
     },
     {
       styleName: 'line-height',
@@ -747,7 +748,7 @@ export const cssStyles = {
     {
       values: 0,
       styleName: 'margin',
-      valueFormat: (value: number) => `${value / 4}rem`,
+      valueFormat: BoxStylesFormatters.Value.rem,
     },
     {
       values: ['auto'] as const,
@@ -759,7 +760,7 @@ export const cssStyles = {
     {
       values: 0,
       styleName: 'margin-inline',
-      valueFormat: (value: number) => `${value / 4}rem`,
+      valueFormat: BoxStylesFormatters.Value.rem,
     },
     {
       values: ['auto'] as const,
@@ -771,7 +772,7 @@ export const cssStyles = {
     {
       values: 0,
       styleName: 'margin-block',
-      valueFormat: (value: number) => `${value / 4}rem`,
+      valueFormat: BoxStylesFormatters.Value.rem,
     },
     {
       values: ['auto'] as const,
@@ -783,7 +784,7 @@ export const cssStyles = {
     {
       values: 0,
       styleName: 'margin-top',
-      valueFormat: (value: number) => `${value / 4}rem`,
+      valueFormat: BoxStylesFormatters.Value.rem,
     },
     {
       values: ['auto'] as const,
@@ -795,7 +796,7 @@ export const cssStyles = {
     {
       values: 0,
       styleName: 'margin-right',
-      valueFormat: (value: number) => `${value / 4}rem`,
+      valueFormat: BoxStylesFormatters.Value.rem,
     },
     {
       values: ['auto'] as const,
@@ -807,7 +808,7 @@ export const cssStyles = {
     {
       values: 0,
       styleName: 'margin-bottom',
-      valueFormat: (value: number) => `${value / 4}rem`,
+      valueFormat: BoxStylesFormatters.Value.rem,
     },
     {
       values: ['auto'] as const,
@@ -819,7 +820,7 @@ export const cssStyles = {
     {
       values: 0,
       styleName: 'margin-left',
-      valueFormat: (value: number) => `${value / 4}rem`,
+      valueFormat: BoxStylesFormatters.Value.rem,
     },
     {
       values: ['auto'] as const,
@@ -831,7 +832,7 @@ export const cssStyles = {
     {
       values: 0,
       styleName: 'padding',
-      valueFormat: (value: number) => `${value / 4}rem`,
+      valueFormat: BoxStylesFormatters.Value.rem,
     },
   ],
   /** The padding-inline CSS shorthand property defines the logical inline start and end padding of an element, which maps to physical padding properties depending on the element's writing mode, directionality, and text orientation. */
@@ -839,7 +840,7 @@ export const cssStyles = {
     {
       values: 0,
       styleName: 'padding-inline',
-      valueFormat: (value: number) => `${value / 4}rem`,
+      valueFormat: BoxStylesFormatters.Value.rem,
     },
   ],
   /** The padding-block CSS shorthand property defines the logical block start and end padding of an element, which maps to physical padding properties depending on the element's writing mode, directionality, and text orientation. */
@@ -847,7 +848,7 @@ export const cssStyles = {
     {
       values: 0,
       styleName: 'padding-block',
-      valueFormat: (value: number) => `${value / 4}rem`,
+      valueFormat: BoxStylesFormatters.Value.rem,
     },
   ],
   /** The padding-top CSS property sets the height of the padding area on the top of an element. */
@@ -855,7 +856,7 @@ export const cssStyles = {
     {
       values: 0,
       styleName: 'padding-top',
-      valueFormat: (value: number) => `${value / 4}rem`,
+      valueFormat: BoxStylesFormatters.Value.rem,
     },
   ],
   /** The padding-right CSS property sets the width of the padding area on the right of an element. */
@@ -863,7 +864,7 @@ export const cssStyles = {
     {
       values: 0,
       styleName: 'padding-right',
-      valueFormat: (value: number) => `${value / 4}rem`,
+      valueFormat: BoxStylesFormatters.Value.rem,
     },
   ],
   /** The padding-bottom CSS property sets the height of the padding area on the bottom of an element. */
@@ -871,7 +872,7 @@ export const cssStyles = {
     {
       values: 0,
       styleName: 'padding-bottom',
-      valueFormat: (value: number) => `${value / 4}rem`,
+      valueFormat: BoxStylesFormatters.Value.rem,
     },
   ],
   /** The padding-left CSS property sets the width of the padding area to the left of an element. */
@@ -879,7 +880,7 @@ export const cssStyles = {
     {
       values: 0,
       styleName: 'padding-left',
-      valueFormat: (value: number) => `${value / 4}rem`,
+      valueFormat: BoxStylesFormatters.Value.rem,
     },
   ],
   /** The object-fit CSS property sets how the content of a replaced element, such as an <img> or <video>, should be resized to fit its container. */
@@ -900,7 +901,7 @@ export const cssStyles = {
     {
       styleName: 'outline-width',
       values: 0,
-      valueFormat: (value: number) => `${value}px`,
+      valueFormat: BoxStylesFormatters.Value.px,
     },
   ],
   /** The outline-style CSS property sets the style of an element's outline. An outline is a line that is drawn around an element, outside the border. */
@@ -915,7 +916,7 @@ export const cssStyles = {
     {
       styleName: 'outline-offset',
       values: 0,
-      valueFormat: (value: number) => `${value}px`,
+      valueFormat: BoxStylesFormatters.Value.px,
     },
   ],
   /** The overflow CSS shorthand property sets the desired behavior when content does not fit in the element's padding box (overflows) in the horizontal and/or vertical direction. */
@@ -1124,29 +1125,40 @@ export const cssStyles = {
 } satisfies Record<string, BoxStyle[]>;
 
 export const pseudo1 = {
-  hover: 1,
-  focus: 2,
-  active: 4,
-  invalid: 8,
+  hover: ':hover',
+  focus: ':focus-within',
+  active: ':active',
+  invalid: ':user-invalid',
 };
 
 export const pseudo2 = {
-  indeterminate: 16,
-  checked: 32,
-  disabled: 64,
+  indeterminate: ':indeterminate',
+  checked: ':checked',
+  disabled: '[disabled]',
 };
 
 export const pseudoClasses = { ...pseudo1, ...pseudo2 };
+export const pseudoClassesWeight = Object.entries(pseudoClasses).reduce(
+  (acc, [key], index) => {
+    acc[key as keyof typeof pseudoClasses] = Math.pow(2, index);
+
+    return acc;
+  },
+  {} as Record<keyof typeof pseudoClasses, number>,
+);
+
+console.log(pseudoClassesWeight);
 
 export const pseudoClassesByWeight = Object.entries(pseudoClasses).reduce(
-  (acc, [key, weight]) => {
-    Object.entries(acc).forEach(([prevWeight, pseudoClasses]) => {
-      acc[+prevWeight + weight] = [...pseudoClasses, key];
+  (acc, [key]) => {
+    const weight = pseudoClassesWeight[key as keyof typeof pseudoClasses];
+    Object.entries(acc).forEach(([prevWeight, pseudoClassesToUse]) => {
+      acc[+prevWeight + weight] = [...pseudoClassesToUse, key as keyof typeof pseudoClasses];
     });
 
     return acc;
   },
-  { 0: [] } as { [key: number]: string[] },
+  { 0: [] } as { [key: number]: (keyof typeof pseudoClasses)[] },
 );
 
 export const pseudoGroupClasses = {

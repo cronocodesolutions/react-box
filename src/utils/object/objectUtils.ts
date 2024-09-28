@@ -50,6 +50,10 @@ namespace ObjectUtils {
       return prev;
     }, {} as T);
   }
+
+  export function isKeyOf<T extends object>(key: any, obj: T): key is keyof T {
+    return key in obj;
+  }
 }
 
 export default ObjectUtils;

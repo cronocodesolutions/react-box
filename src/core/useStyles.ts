@@ -1,7 +1,16 @@
 import { useEffect, useLayoutEffect, useMemo } from 'react';
-import { BoxStyleProps, BoxStyles } from '../types';
+import { BoxStyleProps, BoxStyles, PseudoClassesType } from '../types';
 import ObjectUtils from '../utils/object/objectUtils';
-import { breakpoints, cssStyles, pseudo1, pseudo2, pseudoClasses, pseudoClassesByWeight, pseudoGroupClasses } from './boxStyles';
+import {
+  breakpoints,
+  cssStyles,
+  pseudo1,
+  pseudo2,
+  pseudoClasses,
+  pseudoClassesByWeight,
+  pseudoClassesWeight,
+  pseudoGroupClasses,
+} from './boxStyles';
 import IdentityFactory from '@cronocode/identity-factory';
 import BoxExtends from './boxExtends';
 import { BoxStyle } from './coreTypes';
@@ -9,9 +18,8 @@ import { useTheme } from './useTheme';
 
 const identity = new IdentityFactory();
 
-// const isBrowser = typeof window !== 'undefined' && typeof window.document !== 'undefined';
-// const useEff = isBrowser ? useLayoutEffect : useEffect;
-const useEff = useEffect;
+const isBrowser = typeof window !== 'undefined' && typeof window.document !== 'undefined';
+const useEff = isBrowser ? useLayoutEffect : useEffect;
 
 const boxClassName = '_b';
 const svgClassName = '_s';
@@ -45,13 +53,13 @@ namespace StylesContextImpl {
       // key = weight of pseudo classes
       [key: number]: {
         // key = css style (box props)
-        [key: string]: Set<unknown>;
+        [key: string]: Set<string | number | boolean>;
       } & {
         __parents?: {
           // key = parent name
           [key: string]: {
             // key = css style (box props)
-            [key: string]: Set<unknown>;
+            [key: string]: Set<string | number | boolean>;
           };
         };
       };
@@ -61,37 +69,31 @@ namespace StylesContextImpl {
   export function addClassNames(
     props: BoxStyleProps,
     classNames: string[],
-    currentPseudoClasses: string[],
+    currentPseudoClasses: PseudoClassesType[],
     breakpoint?: string,
     pseudoClassParentName?: string,
   ) {
     Object.entries(props).forEach(([key, value]) => {
-      if (key in cssStyles) {
-        addClassName(key as keyof BoxStyles, value, classNames, currentPseudoClasses, breakpoint, pseudoClassParentName);
-      } else if (key in pseudo1) {
+      if (ObjectUtils.isKeyOf(key, cssStyles)) {
+        addClassName(key, value, classNames, currentPseudoClasses, breakpoint, pseudoClassParentName);
+      } else if (ObjectUtils.isKeyOf(key, pseudo1)) {
         addClassNames(value as BoxStyleProps, classNames, [...currentPseudoClasses, key], breakpoint, pseudoClassParentName);
-      } else if (key in pseudo2) {
+      } else if (ObjectUtils.isKeyOf(key, pseudo2)) {
         if (Array.isArray(value)) {
-          const [_, styles] = value;
-          addClassNames(styles as BoxStyleProps, classNames, [...currentPseudoClasses, key], breakpoint, pseudoClassParentName);
+          const [_, styles] = value as [unknown, BoxStyleProps];
+          addClassNames(styles, classNames, [...currentPseudoClasses, key], breakpoint, pseudoClassParentName);
         }
         if (ObjectUtils.isObject(value)) {
           addClassNames(value as BoxStyleProps, classNames, [...currentPseudoClasses, key], breakpoint, pseudoClassParentName);
         }
-      } else if (key in breakpoints) {
+      } else if (ObjectUtils.isKeyOf(key, breakpoints)) {
         addClassNames(value as BoxStyleProps, classNames, currentPseudoClasses, key, pseudoClassParentName);
-      } else if (key in pseudoGroupClasses) {
+      } else if (ObjectUtils.isKeyOf(key, pseudoGroupClasses)) {
         if (typeof value === 'string') {
-          classNames.push(`${pseudoGroupClasses[key as keyof typeof pseudoGroupClasses]}-${value}`);
+          classNames.push(`${pseudoGroupClasses[key]}-${value}`);
         } else {
           Object.entries(value).forEach(([name, pseudoClassProps]) => {
-            addClassNames(
-              pseudoClassProps as BoxStyles,
-              classNames,
-              [...currentPseudoClasses, pseudoGroupClasses[key as keyof typeof pseudoGroupClasses]],
-              breakpoint,
-              name,
-            );
+            addClassNames(pseudoClassProps as BoxStyles, classNames, [...currentPseudoClasses, pseudoGroupClasses[key]], breakpoint, name);
           });
         }
       }
@@ -135,9 +137,6 @@ a,ul{all: unset;}
 
           stylesToUse.forEach(([key, values]) => {
             values.forEach((value) => {
-              const pseudoClasses = pseudoClassesByWeight[+weight];
-              const className = createClassName(key as keyof BoxStyles, value as BoxStyles[keyof BoxStyles], +weight, breakpoint);
-
               const item = cssStyles[key as keyof typeof cssStyles] as BoxStyle[];
 
               const itemValue = item.find((x) => {
@@ -148,12 +147,14 @@ a,ul{all: unset;}
                 return typeof value === typeof x.values;
               });
 
-              const styleName = itemValue?.styleName ?? key;
-              const styleValue = itemValue?.valueFormat ? itemValue.valueFormat(value as never) : value;
+              if (!itemValue) return;
 
-              acc.push(
-                `.${className}${pseudoClasses.map((p) => (p === 'disabled' ? `[${p}]` : `:${p}`)).join('')}{${styleName}:${styleValue}}`,
-              );
+              const className = createClassName(key as keyof BoxStyles, value as BoxStyles[keyof BoxStyles], +weight, breakpoint);
+              const styleName = itemValue.styleName ?? key;
+              const styleValue = itemValue.valueFormat?.(value as never) ?? value;
+              const pseudoClassesToUse = pseudoClassesByWeight[+weight];
+
+              acc.push(`.${className}${pseudoClassesToUse.map((p) => pseudoClasses[p]).join('')}{${styleName}:${styleValue}}`);
             });
           });
 
@@ -164,9 +165,6 @@ a,ul{all: unset;}
 
               stylesToUse.forEach(([key, values]) => {
                 values.forEach((value) => {
-                  const pseudoClasses = pseudoClassesByWeight[+weight];
-                  const className = createClassName(key as keyof BoxStyles, value as BoxStyles[keyof BoxStyles], +weight, breakpoint, name);
-
                   const item = cssStyles[key as keyof typeof cssStyles] as BoxStyle[];
 
                   const itemValue = item.find((x) => {
@@ -177,10 +175,12 @@ a,ul{all: unset;}
                     return typeof value === typeof x.values;
                   });
 
-                  const styleName = itemValue?.styleName ?? key;
-                  const styleValue = itemValue?.valueFormat ? itemValue.valueFormat(value as never) : value;
+                  if (!itemValue) return;
 
-                  const [pseudoClass] = pseudoClasses;
+                  const className = createClassName(key as keyof BoxStyles, value as BoxStyles[keyof BoxStyles], +weight, breakpoint, name);
+                  const styleName = itemValue.styleName ?? key;
+                  const styleValue = itemValue.valueFormat?.(value as never) ?? value;
+                  const [pseudoClass] = pseudoClassesByWeight[+weight];
 
                   acc.push(`.${pseudoClass}-${name}:${pseudoClass} .${className}{${styleName}:${styleValue}}`);
                 });
@@ -213,13 +213,13 @@ a,ul{all: unset;}
     key: TKey,
     value: TValue | undefined | null,
     classNames: string[],
-    currentPseudoClasses: string[],
+    currentPseudoClasses: PseudoClassesType[],
     breakpoint: string = 'normal',
     pseudoClassParentName?: string,
   ) {
     if (value === undefined || value === null) return;
 
-    const weight = currentPseudoClasses.reduce((sum, pseudoClass) => sum + pseudoClasses[pseudoClass as keyof typeof pseudoClasses], 0);
+    const weight = currentPseudoClasses.reduce((sum, pseudoClass) => sum + pseudoClassesWeight[pseudoClass], 0);
 
     if (!stylesToGenerate[breakpoint]) {
       stylesToGenerate[breakpoint] = { [weight]: { [key]: new Set() } };
@@ -263,7 +263,9 @@ a,ul{all: unset;}
   ) {
     const pseudoClasses = pseudoClassesByWeight[weight];
 
-    return `${breakpoint === 'normal' ? '' : `${breakpoint}-`}${pseudoClasses.map((p) => `${p}-`).join('')}${pseudoClassParentName ? `${pseudoClassParentName}-` : ''}${key}-${value as string}`;
+    const className = `${breakpoint === 'normal' ? '' : `${breakpoint}-`}${pseudoClasses.map((p) => `${p}-`).join('')}${pseudoClassParentName ? `${pseudoClassParentName}-` : ''}${key}-${value}`;
+
+    return identity.getIdentity(className);
   }
 
   const cronoStylesElementId = 'crono-styles';
