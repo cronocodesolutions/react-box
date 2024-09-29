@@ -1,16 +1,16 @@
 import { forwardRef, Ref } from 'react';
-import Box from '../box';
+import Box, { BoxProps } from '../box';
 import ObjectUtils from '../utils/object/objectUtils';
 
-type BoxProps = Omit<React.ComponentProps<typeof Box<'input'>>, 'ref' | 'tag'>;
-type BoxTagProps = Required<BoxProps>['props'];
+type RadioButtonProps = Omit<BoxProps<'input'>, 'ref' | 'tag'>;
+type BoxTagProps = Required<RadioButtonProps>['props'];
 
 const tagProps = ['name', 'onInput', 'onChange', 'value', 'autoFocus', 'readOnly', 'defaultChecked'] as const;
 type TagPropsType = (typeof tagProps)[number];
 
 type RadioButtonTagProps = Omit<BoxTagProps, TagPropsType | 'type'>;
 
-interface Props extends Omit<BoxProps, 'props'> {
+interface Props extends Omit<RadioButtonProps, 'props'> {
   name?: string;
   props?: RadioButtonTagProps;
   onInput?: (e: React.ChangeEvent<HTMLInputElement>) => void;

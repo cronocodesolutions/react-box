@@ -66,5 +66,5 @@ Box.themeSetup = Theme.setup;
 
 export default Box;
 
-export type BoxProps<TTag extends keyof React.JSX.IntrinsicElements = 'div'> = React.ComponentProps<typeof Box<TTag>>;
+export type BoxProps<TTag extends keyof React.JSX.IntrinsicElements = 'div'> = React.ComponentProps<typeof BoxComponent<TTag>>;
 export type BoxTagProps<TTag extends keyof React.JSX.IntrinsicElements = 'div'> = Required<BoxProps<TTag>>['props'];

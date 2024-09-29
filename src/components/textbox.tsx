@@ -1,9 +1,9 @@
 import { forwardRef, Ref } from 'react';
-import Box from '../box';
+import Box, { BoxProps } from '../box';
 import ObjectUtils from '../utils/object/objectUtils';
 
-type BoxProps = Omit<React.ComponentProps<typeof Box<'input'>>, 'ref' | 'tag'>;
-type BoxTagProps = Required<BoxProps>['props'];
+type TextareaProps = Omit<BoxProps<'input'>, 'ref' | 'tag'>;
+type BoxTagProps = Required<TextareaProps>['props'];
 
 const tagProps = [
   'name',
@@ -36,7 +36,7 @@ type TextboxType =
   | 'url'
   | 'week';
 
-interface Props extends Omit<BoxProps, 'props'> {
+interface Props extends Omit<TextareaProps, 'props'> {
   name?: string;
   props?: TextboxTagProps;
   onInput?: (e: React.ChangeEvent<HTMLInputElement>) => void;

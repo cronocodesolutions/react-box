@@ -1,13 +1,12 @@
 import { useCallback, useRef } from 'react';
-import Box from '../box';
+import Box, { BoxProps } from '../box';
 import FormUtils from '../utils/form/formUtils';
 
-type BoxProps = React.ComponentProps<typeof Box<'form'>>;
-type BoxTagProps = Required<BoxProps>['props'];
+type BoxTagProps = Required<BoxProps<'form'>>['props'];
 
 type FormTagProps = Omit<BoxTagProps, 'onSubmit' | 'ref'>;
 
-interface Props<T> extends Omit<BoxProps, 'props' | 'tag'> {
+interface Props<T> extends Omit<BoxProps<'form'>, 'props' | 'tag'> {
   props?: FormTagProps;
   onSubmit: (obj: T, e: React.ChangeEvent<HTMLFormElement>) => void;
 }
