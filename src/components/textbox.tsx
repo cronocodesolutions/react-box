@@ -48,7 +48,6 @@ interface Props extends Omit<BoxProps, 'props'> {
   pattern?: string;
   autoFocus?: boolean;
   readOnly?: boolean;
-  required?: boolean;
   step?: number | string;
 }
 

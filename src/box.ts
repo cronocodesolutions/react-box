@@ -1,13 +1,16 @@
 import React, { forwardRef, memo, Ref, RefAttributes, useMemo, useState } from 'react';
 import { classNames, ClassNameType } from './core/classNames';
-import { BoxStyle, ExtractElementFromTag } from './core/coreTypes';
+import { ExtractElementFromTag } from './core/coreTypes';
 import { BoxStyleProps } from './types';
 import useStyles from './core/useStyles';
 import BoxExtends from './core/boxExtends';
-import Theme, { ThemeSetup } from './core/theme';
+import Theme from './core/theme';
 
 type AllProps<TTag extends keyof React.JSX.IntrinsicElements> = React.ComponentProps<TTag>;
-type TagPropsType<TTag extends keyof React.JSX.IntrinsicElements> = Omit<AllProps<TTag>, 'className' | 'style' | 'ref' | 'disabled'>;
+type TagPropsType<TTag extends keyof React.JSX.IntrinsicElements> = Omit<
+  AllProps<TTag>,
+  'className' | 'style' | 'ref' | 'disabled' | 'required' | 'checked'
+>;
 
 interface Props<TTag extends keyof React.JSX.IntrinsicElements> extends BoxStyleProps {
   children?: React.ReactNode | ((props: { isHover: boolean }) => React.ReactNode);
@@ -18,13 +21,19 @@ interface Props<TTag extends keyof React.JSX.IntrinsicElements> extends BoxStyle
 }
 
 function BoxComponent<TTag extends keyof React.JSX.IntrinsicElements = 'div'>(props: Props<TTag>, ref: Ref<ExtractElementFromTag<TTag>>) {
-  const { tag = 'div', children, props: tagProps, className: userClassName, style, disabled } = props;
+  const { tag = 'div', children, props: tagProps, className: userClassName, style, disabled, required, checked } = props;
 
   const styleClasses = useStyles(props, tag === 'svg');
 
   const finalTagProps = useMemo(() => {
     const className = classNames(styleClasses, userClassName).join(' ');
-    const props = { ...tagProps, className, disabled: Array.isArray(disabled) ? disabled[0] : disabled } as AllProps<TTag>;
+    const props = {
+      ...tagProps,
+      className,
+    } as AllProps<TTag>;
+    disabled ? ((props as any).disabled = Array.isArray(disabled) ? disabled[0] : disabled) : 1;
+    required ? ((props as any).required = Array.isArray(required) ? required[0] : required) : 1;
+    checked ? ((props as any).checked = Array.isArray(checked) ? checked[0] : checked) : 1;
     style && (props.style = style);
     ref && (props.ref = ref as React.RefObject<HTMLElement>);
 

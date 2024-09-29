@@ -2,7 +2,7 @@ import { forwardRef, Ref, useEffect, useRef, useImperativeHandle } from 'react';
 import Box, { BoxTagProps, BoxProps } from '../box';
 import ObjectUtils from '../utils/object/objectUtils';
 
-const tagProps = ['name', 'onInput', 'onChange', 'autoFocus', 'readOnly', 'required', 'value', 'checked', 'defaultChecked'] as const;
+const tagProps = ['name', 'onInput', 'onChange', 'autoFocus', 'readOnly', 'value', 'defaultChecked'] as const;
 type TagPropsType = (typeof tagProps)[number];
 
 type CheckboxProps = Omit<BoxProps<'input'>, 'tag' | 'props'>;
@@ -16,7 +16,6 @@ interface Props extends CheckboxProps {
   value?: string | number;
   autoFocus?: boolean;
   readOnly?: boolean;
-  required?: boolean;
   defaultChecked?: boolean;
 }
 

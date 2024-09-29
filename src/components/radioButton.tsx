@@ -5,7 +5,7 @@ import ObjectUtils from '../utils/object/objectUtils';
 type BoxProps = Omit<React.ComponentProps<typeof Box<'input'>>, 'ref' | 'tag'>;
 type BoxTagProps = Required<BoxProps>['props'];
 
-const tagProps = ['name', 'onInput', 'onChange', 'value', 'autoFocus', 'readOnly', 'required', 'checked', 'defaultChecked'] as const;
+const tagProps = ['name', 'onInput', 'onChange', 'value', 'autoFocus', 'readOnly', 'defaultChecked'] as const;
 type TagPropsType = (typeof tagProps)[number];
 
 type RadioButtonTagProps = Omit<BoxTagProps, TagPropsType | 'type'>;
@@ -18,8 +18,6 @@ interface Props extends Omit<BoxProps, 'props'> {
   value?: string | number;
   autoFocus?: boolean;
   readOnly?: boolean;
-  required?: boolean;
-  // checked?: boolean;
   defaultChecked?: boolean;
 }
 

@@ -1133,15 +1133,16 @@ export const pseudo1 = {
   hasValid: ':has(:valid)',
   invalid: ':user-invalid',
   hasInvalid: ':has(:user-invalid)',
-  required: ':required',
   optional: ':optional',
   hasChecked: ':has(:checked)',
+  hasRequired: ':has(:required)',
   hasDisabled: ':has([disabled])',
 };
 
 export const pseudo2 = {
   indeterminate: ':indeterminate',
   checked: ':checked',
+  required: ':required',
   disabled: '[disabled]',
 };
 
@@ -1154,8 +1155,6 @@ export const pseudoClassesWeight = Object.entries(pseudoClasses).reduce(
   },
   {} as Record<keyof typeof pseudoClasses, number>,
 );
-
-console.log(pseudoClassesWeight);
 
 export const pseudoClassesByWeight = Object.entries(pseudoClasses).reduce(
   (acc, [key]) => {

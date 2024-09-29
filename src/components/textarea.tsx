@@ -18,7 +18,6 @@ const tagProps = [
   'maxLength',
   'minLength',
   'readOnly',
-  'required',
 ] as const;
 type TagPropsType = (typeof tagProps)[number];
 type TextareaTagProps = Omit<BoxTagProps, TagPropsType>;
