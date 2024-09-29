@@ -19,7 +19,9 @@ import { useTheme } from './useTheme';
 const identity = new IdentityFactory();
 
 const isBrowser = typeof window !== 'undefined' && typeof window.document !== 'undefined';
-const useEff = isBrowser ? useLayoutEffect : useEffect;
+const isTestEnv = typeof process === 'object' && process.env?.NODE_ENV === 'test';
+
+const useEff = isBrowser && !isTestEnv ? useLayoutEffect : useEffect;
 
 const boxClassName = '_b';
 const svgClassName = '_s';
@@ -264,16 +266,13 @@ a,ul{all: unset;}
     const pseudoClasses = pseudoClassesByWeight[weight];
 
     const className = `${breakpoint === 'normal' ? '' : `${breakpoint}-`}${pseudoClasses.map((p) => `${p}-`).join('')}${pseudoClassParentName ? `${pseudoClassParentName}-` : ''}${key}-${value}`;
-    return className;
-    return identity.getIdentity(className);
+
+    return isTestEnv ? className : identity.getIdentity(className);
   }
 
   const cronoStylesElementId = 'crono-styles';
 
   function getElement() {
-    const isBrowser = typeof window !== 'undefined' && typeof window.document !== 'undefined';
-    const document = isBrowser ? window.document : global.document;
-
     let stylesElement = document.getElementById(cronoStylesElementId);
 
     if (!stylesElement) {
