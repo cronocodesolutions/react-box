@@ -154,9 +154,11 @@ a,ul{all: unset;}
               const className = createClassName(key as keyof BoxStyles, value as BoxStyles[keyof BoxStyles], +weight, breakpoint);
               const styleName = itemValue.styleName ?? key;
               const styleValue = itemValue.valueFormat?.(value as never) ?? value;
-              const pseudoClassesToUse = pseudoClassesByWeight[+weight];
 
-              acc.push(`.${className}${pseudoClassesToUse.map((p) => pseudoClasses[p]).join('')}{${styleName}:${styleValue}}`);
+              const pseudoClassesToUse = pseudoClassesByWeight[+weight].map((p) => pseudoClasses[p]).join('');
+              const selector = itemValue.selector?.(`.${className}`, pseudoClassesToUse) ?? `.${className}${pseudoClassesToUse}`;
+
+              acc.push(`${selector}{${styleName}:${styleValue}}`);
             });
           });
 
@@ -184,7 +186,11 @@ a,ul{all: unset;}
                   const styleValue = itemValue.valueFormat?.(value as never) ?? value;
                   const [pseudoClass] = pseudoClassesByWeight[+weight];
 
-                  acc.push(`.${pseudoClass}-${name}:${pseudoClass} .${className}{${styleName}:${styleValue}}`);
+                  const selector =
+                    itemValue.selector?.(`.${pseudoClass}-${name}:${pseudoClass} .${className}`, '') ??
+                    `.${pseudoClass}-${name}:${pseudoClass} .${className}`;
+
+                  acc.push(`${selector}{${styleName}:${styleValue}}`);
                 });
               });
             });

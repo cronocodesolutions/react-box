@@ -34,6 +34,7 @@ interface BoxStyleString {
 
 export type BoxStyle = (BoxStyleArrayString | BoxStyleArrayBoolean | BoxStyleArrayNumber | BoxStyleNumber | BoxStyleString) & {
   styleName?: string;
+  selector?: (className: string, pseudoClass: string) => string;
 };
 
 export type ExtractKeys<T extends Record<string, unknown>, TT> = {

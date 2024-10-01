@@ -259,7 +259,19 @@ export const extendedProps = Box.extend(
         styleName: 'background-image',
       },
     ],
-    fill: [{ values: colors, valueFormat: (value: string) => `var(--${value})` }],
-    stroke: [{ values: colors, valueFormat: (value: string) => `var(--${value})` }],
+    fill: [
+      {
+        values: colors,
+        valueFormat: (value: string) => `var(--${value})`,
+        selector: (className, pseudoClass) => ['path', 'circle', 'rect', 'line'].map((x) => `${className}${pseudoClass} ${x}`).join(','),
+      },
+    ],
+    stroke: [
+      {
+        values: colors,
+        valueFormat: (value: string) => `var(--${value})`,
+        selector: (className, pseudoClass) => ['path', 'circle', 'rect', 'line'].map((x) => `${className}${pseudoClass} ${x}`).join(','),
+      },
+    ],
   },
 );
