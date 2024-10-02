@@ -1,5 +1,5 @@
 import React from 'react';
-import StylesContext from './core/stylesContext';
+import { StylesContext } from './core/useStyles';
 import ReactDOMServer from 'react-dom/server';
 
 const el = {

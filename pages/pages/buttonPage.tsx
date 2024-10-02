@@ -6,7 +6,7 @@ import BaseSvg from '../../src/components/baseSvg';
 
 export default function ButtonPage() {
   const [counter, setCounter] = useState(0);
-  const ref = useRef(null);
+  const ref = useRef<HTMLButtonElement>(null);
 
   return (
     <Box p={10}>

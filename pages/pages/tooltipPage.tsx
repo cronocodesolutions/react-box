@@ -39,7 +39,7 @@ export default function TooltipPage() {
             {open1 && (
               <Box
                 textAlign="left"
-                height={120}
+                height={80}
                 width={76}
                 borderRadius={2}
                 p={3}
@@ -68,7 +68,7 @@ export default function TooltipPage() {
               Click me! (tooltip)
             </Button>
             {open2 && (
-              <Tooltip height={120} width={76} borderRadius={2} p={3} top={1} bgColor="violetLight" b={1} borderColor="violet">
+              <Tooltip height={80} width={76} borderRadius={2} p={3} top={1} bgColor="violetLight" b={1} borderColor="violet">
                 tooltip box
               </Tooltip>
             )}

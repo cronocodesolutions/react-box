@@ -1,11 +1,11 @@
 import { createPortal } from 'react-dom';
-import Box from '../box';
-import React, { useCallback, useLayoutEffect, useRef, useState } from 'react';
+import Box, { BoxProps } from '../box';
+import { useCallback, useLayoutEffect, useRef, useState } from 'react';
 import usePortalContainer from '../hooks/usePortalContainer';
 
 const positionDigitsAfterComma = 2;
 
-interface Props extends React.ComponentProps<typeof Box> {
+interface Props extends BoxProps {
   onPositionChange?(position: { top: number; left: number }): void;
 }
 

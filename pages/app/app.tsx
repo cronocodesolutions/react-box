@@ -8,7 +8,7 @@ import HomePage from '../pages/homePage';
 import RadioButtonPage from '../pages/radioButtonPage';
 import TextboxPage from '../pages/textboxPage';
 import TooltipPage from '../pages/tooltipPage';
-import Box from './../../src/box';
+import Box from '../../src/box';
 import Flex from '../../src/components/flex';
 import MenuItem from './menuItem';
 import { Routes, Route } from 'react-router-dom';

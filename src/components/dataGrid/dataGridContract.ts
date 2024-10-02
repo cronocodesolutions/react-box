@@ -1,18 +1,27 @@
-export interface GridCell<T> {
-  key: keyof T;
+import { Key } from 'react';
+
+type KeysMatching<T, V> = { [K in keyof T]-?: T[K] extends V ? K : never }[keyof T];
+
+export interface GridDef<TRow> {
+  rowKey?: KeysMatching<TRow, Key> | ((rowData: TRow) => Key);
+  columns: GridColumn<TRow>[];
+}
+
+export interface GridCell<TRow> {
+  key: keyof TRow;
   value: React.ReactNode;
 }
 
-export interface GridColumn<T extends {}> {
-  key: keyof T;
+export interface GridColumn<TRow> {
+  key: keyof TRow;
 }
 
-export interface GridRow<T extends {}> {
-  dataRow: T;
-  cells: GridCell<T>[];
+export interface GridRow<TRow> {
+  dataRow: TRow;
+  cells: GridCell<TRow>[];
 }
 
-export interface Grid<T extends {}> {
-  columns: GridColumn<T>[];
-  rows: GridRow<T>[];
+export interface GridData<TRow> {
+  columns: GridColumn<TRow>[];
+  rows: GridRow<TRow>[];
 }

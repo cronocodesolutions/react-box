@@ -10,10 +10,10 @@ export namespace BoxStylesFormatters {
   }
 
   export namespace Value {
-    export function rem(_key: string, value: number) {
+    export function rem(value: number) {
       return `${value / 4}rem`;
     }
-    export function px(_key: string, value: number) {
+    export function px(value: number) {
       return `${value}px`;
     }
     export function fraction(_key: string, value: string) {

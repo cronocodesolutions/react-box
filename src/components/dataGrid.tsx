@@ -1,33 +1,57 @@
+import { Key, useId } from 'react';
 import Box from '../box';
-import useGrid from './dataGrid/useGrid';
+import { GridDef } from './dataGrid/dataGridContract';
+import Grid from './grid';
 
-interface Props<T extends {}> {
-  data?: T[];
+interface Props<TRow> {
+  data?: TRow[];
+  def: GridDef<TRow>;
 }
 
-export default function DataGrid<T extends {}>(props: Props<T>) {
-  const { data } = props;
+export default function DataGrid<TRow extends {}>(props: Props<TRow>) {
+  const { data, def } = props;
 
-  const grid = useGrid(data);
+  const { rowKey, columns } = def;
+
+  if (columns.length === 0) {
+    console.error('Cannot render grid without column definitions');
+
+    return null;
+  }
 
   return (
-    <Box display="grid" b={1} borderRadius={1}>
-      {grid.columns.length === 0 ? (
-        <>empty grid</>
-      ) : (
-        <>
-          {grid.columns.map((column, index) => (
-            <Box key={column.key.toString()} style={{ gridColumn: index + 1 }}>
-              {column.key.toString()}
-            </Box>
-          ))}
-          {grid.rows.map((row, rowIndex) => {
-            return row.cells.map((cell) => {
-              return <Box key={cell.key.toString() + rowIndex}>{cell.value}</Box>;
-            });
-          })}
-        </>
-      )}
+    <Box component="dataGrid">
+      <Grid b={1} borderRadius={1}>
+        {columns.map((column, index) => (
+          <Box key={column.key.toString()} style={{ gridColumn: index + 1 }}>
+            {column.key.toString()}
+          </Box>
+        ))}
+
+        {(data?.length ?? 0) === 0 && <Box>Empty table</Box>}
+
+        {(data?.length ?? 0) > 0 && (
+          <>
+            {data?.map((row, index) => {
+              const key = rowKey ? ((typeof rowKey === 'function' ? rowKey(row) : row[rowKey]) as Key) : index;
+
+              return (
+                <Grid key={key} style={{ gridTemplateRows: 'subgrid' }}>
+                  {columns.map((column, i) => (
+                    <Box style={{ gridColumn: i + 1 }}>tes {i}</Box>
+                  ))}
+                </Grid>
+              );
+            })}
+          </>
+        )}
+      </Grid>
     </Box>
   );
+}
+
+function DataGridRow() {
+  const id = useId();
+
+  return <Box key={id}>row</Box>;
 }

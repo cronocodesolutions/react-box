@@ -1,9 +1,9 @@
 import { forwardRef, Ref } from 'react';
-import Box from '../box';
+import Box, { BoxProps } from '../box';
 import ObjectUtils from '../utils/object/objectUtils';
 
-type BoxProps = Omit<React.ComponentProps<typeof Box<'textarea'>>, 'ref' | 'tag'>;
-type BoxTagProps = Required<BoxProps>['props'];
+type TextareaProps = Omit<BoxProps<'textarea'>, 'ref' | 'tag'>;
+type BoxTagProps = Required<TextareaProps>['props'];
 
 const tagProps = [
   'name',
@@ -18,12 +18,11 @@ const tagProps = [
   'maxLength',
   'minLength',
   'readOnly',
-  'required',
 ] as const;
 type TagPropsType = (typeof tagProps)[number];
 type TextareaTagProps = Omit<BoxTagProps, TagPropsType>;
 
-interface Props extends Omit<BoxProps, 'props'> {
+interface Props extends Omit<TextareaProps, 'props'> {
   name?: string;
   props?: TextareaTagProps;
   onInput?: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
