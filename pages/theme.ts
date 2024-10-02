@@ -130,12 +130,10 @@ Box.themeSetup({
   },
   label: {
     styles: {
-      // has: {
-      //   invalid: {
-      //     color: 'red',
-      //     transition: 'none',
-      //   },
-      // },
+      hasInvalid: {
+        color: 'red',
+        transition: 'none',
+      },
     },
   },
   components: {

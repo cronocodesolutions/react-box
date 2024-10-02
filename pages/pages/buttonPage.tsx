@@ -11,9 +11,7 @@ export default function ButtonPage() {
   return (
     <Box p={10}>
       <Flex py={3} ai="center" gap={4}>
-        <Button props={{}} onClick={() => setCounter((prev) => prev + 1)}>
-          Click me!
-        </Button>
+        <Button onClick={() => setCounter((prev) => prev + 1)}>Click me!</Button>
         {counter > 0 && <Box fontSize={18}>{counter}</Box>}
       </Flex>
       <Button disabled onClick={() => alert('Click')} ref={ref}>

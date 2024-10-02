@@ -40,7 +40,6 @@ export default function App() {
       <Box flex1 bl={1} borderColor="violet">
         <Routes>
           <Route index element={<HomePage />} />
-          {/* <Route path="/box" element={<BoxPage />} /> */}
           {/* <Route path="/box" element={<BoxPage />} />
           <Route path="/flex" element={<FlexPage />} /> */}
           <Route path="/grid" element={<GridPage />} />
