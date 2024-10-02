@@ -83,64 +83,64 @@ export const cssStyles = {
   borderRadiusTop: [
     {
       values: 0,
-      styleName: 'border-radius',
-      valueFormat: (value: number) => `${value / 4}rem ${value / 4}rem 0 0`,
+      styleName: ['border-top-left-radius', 'border-top-right-radius'],
+      valueFormat: BoxStylesFormatters.Value.rem,
     },
   ],
   /** The border-right-radius CSS property rounds the right corners of an element by specifying the radius (or the radius of the semi-major and semi-minor axes) of the ellipse defining the curvature of the corner. */
   borderRadiusRight: [
     {
       values: 0,
-      styleName: 'border-radius',
-      valueFormat: (value: number) => `0 ${value / 4}rem ${value / 4}rem 0`,
+      styleName: ['border-top-right-radius', 'border-bottom-right-radius'],
+      valueFormat: BoxStylesFormatters.Value.rem,
     },
   ],
   /** The border-bottom-radius CSS property rounds the bottom corners of an element by specifying the radius (or the radius of the semi-major and semi-minor axes) of the ellipse defining the curvature of the corner. */
   borderRadiusBottom: [
     {
       values: 0,
-      styleName: 'border-radius',
-      valueFormat: (value: number) => `0 0 ${value / 4}rem ${value / 4}rem`,
+      styleName: ['border-bottom-left-radius', 'border-bottom-right-radius'],
+      valueFormat: BoxStylesFormatters.Value.rem,
     },
   ],
   /** The border-left-radius CSS property rounds the left corners of an element by specifying the radius (or the radius of the semi-major and semi-minor axes) of the ellipse defining the curvature of the corner. */
   borderRadiusLeft: [
     {
       values: 0,
-      styleName: 'border-radius',
-      valueFormat: (value: number) => `${value / 4}rem 0 0 ${value / 4}rem`,
+      styleName: ['border-top-left-radius', 'border-bottom-left-radius'],
+      valueFormat: BoxStylesFormatters.Value.rem,
     },
   ],
   /** The border-top-left-radius CSS property rounds the top-left corner of an element by specifying the radius (or the radius of the semi-major and semi-minor axes) of the ellipse defining the curvature of the corner. */
   borderRadiusTopLeft: [
     {
       values: 0,
-      styleName: 'border-radius',
-      valueFormat: (value: number) => `${value / 4}rem 0 0 0`,
+      styleName: 'border-top-left-radius',
+      valueFormat: BoxStylesFormatters.Value.rem,
     },
   ],
   /** The border-top-right-radius CSS property rounds the top-right corner of an element by specifying the radius (or the radius of the semi-major and semi-minor axes) of the ellipse defining the curvature of the corner. */
   borderRadiusTopRight: [
     {
       values: 0,
-      styleName: 'border-radius',
-      valueFormat: (value: number) => `0 ${value / 4}rem 0 0`,
+      styleName: 'border-top-right-radius',
+      valueFormat: BoxStylesFormatters.Value.rem,
     },
   ],
   /** The border-bottom-right-radius CSS property rounds the bottom-right corner of an element by specifying the radius (or the radius of the semi-major and semi-minor axes) of the ellipse defining the curvature of the corner. */
   borderRadiusBottomRight: [
     {
       values: 0,
-      styleName: 'border-radius',
-      valueFormat: (value: number) => `0 0 ${value / 4}rem 0`,
+      styleName: 'border-bottom-right-radius',
+      valueFormat: BoxStylesFormatters.Value.rem,
     },
   ],
   /** The border-bottom-left-radius CSS property rounds the bottom-left corner of an element by specifying the radius (or the radius of the semi-major and semi-minor axes) of the ellipse defining the curvature of the corner. */
   borderRadiusBottomLeft: [
     {
       values: 0,
-      styleName: 'border-radius',
-      valueFormat: (value: number) => `0 0 0 ${value / 4}rem`,
+      styleName: 'border-bottom-left-radius',
+      valueFormat: BoxStylesFormatters.Value.rem,
     },
   ],
   /** The position CSS property sets how an element is positioned in a document. The top, right, bottom, and left properties determine the final location of positioned elements. */
@@ -1172,6 +1172,7 @@ export const pseudoGroupClasses = {
   hoverGroup: 'hover',
   focusGroup: 'focus',
   activeGroup: 'active',
+  disabledGroup: 'disabled',
 } satisfies { [key: string]: keyof typeof pseudoClasses };
 
 export const breakpoints = {

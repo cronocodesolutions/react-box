@@ -152,13 +152,13 @@ a,ul{all: unset;}
               if (!itemValue) return;
 
               const className = createClassName(key as keyof BoxStyles, value as BoxStyles[keyof BoxStyles], +weight, breakpoint);
-              const styleName = itemValue.styleName ?? key;
-              const styleValue = itemValue.valueFormat?.(value as never) ?? value;
-
               const pseudoClassesToUse = pseudoClassesByWeight[+weight].map((p) => pseudoClasses[p]).join('');
               const selector = itemValue.selector?.(`.${className}`, pseudoClassesToUse) ?? `.${className}${pseudoClassesToUse}`;
 
-              acc.push(`${selector}{${styleName}:${styleValue}}`);
+              const styleName = Array.isArray(itemValue.styleName) ? itemValue.styleName : [itemValue.styleName ?? key];
+              const styleValue = itemValue.valueFormat?.(value as never) ?? value;
+
+              acc.push(`${selector}{${styleName.map((s) => `${s}:${styleValue}`).join(';')}}`);
             });
           });
 
@@ -182,15 +182,16 @@ a,ul{all: unset;}
                   if (!itemValue) return;
 
                   const className = createClassName(key as keyof BoxStyles, value as BoxStyles[keyof BoxStyles], +weight, breakpoint, name);
-                  const styleName = itemValue.styleName ?? key;
-                  const styleValue = itemValue.valueFormat?.(value as never) ?? value;
                   const [pseudoClass] = pseudoClassesByWeight[+weight];
 
                   const selector =
                     itemValue.selector?.(`.${pseudoClass}-${name}:${pseudoClass} .${className}`, '') ??
                     `.${pseudoClass}-${name}:${pseudoClass} .${className}`;
 
-                  acc.push(`${selector}{${styleName}:${styleValue}}`);
+                  const styleName = Array.isArray(itemValue.styleName) ? itemValue.styleName : [itemValue.styleName ?? key];
+                  const styleValue = itemValue.valueFormat?.(value as never) ?? value;
+
+                  acc.push(`${selector}{${styleName.map((s) => `${s}:${styleValue}`).join(';')}}`);
                 });
               });
             });

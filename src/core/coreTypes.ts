@@ -33,7 +33,7 @@ interface BoxStyleString {
 }
 
 export type BoxStyle = (BoxStyleArrayString | BoxStyleArrayBoolean | BoxStyleArrayNumber | BoxStyleNumber | BoxStyleString) & {
-  styleName?: string;
+  styleName?: string | string[];
   selector?: (className: string, pseudoClass: string) => string;
 };
 
