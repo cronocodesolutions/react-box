@@ -16,7 +16,7 @@ import TextareaPage from '../pages/textareaPage';
 
 export default function App() {
   return (
-    <Flex height="fit-screen" color="violetDark" backgroundImage="bgImg1">
+    <Flex height="fit-screen" color="violetDark" backgroundImage="bg">
       <Box height="fit-screen" width={60} px={2}>
         <MenuItem to="/" bgColor={undefined} hover={{ bgColor: undefined }} color={undefined}>
           <Box fontWeight={700} py={5}>

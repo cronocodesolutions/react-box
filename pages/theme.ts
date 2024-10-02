@@ -48,10 +48,10 @@ Box.themeSetup({
       },
       checked: {
         bgColor: 'violet',
-        backgroundImage: 'bgImgCheck',
+        backgroundImage: 'check',
       },
       indeterminate: {
-        backgroundImage: 'bgImgIndeterminate',
+        backgroundImage: 'indeterminate',
       },
       disabled: {
         cursor: 'not-allowed',
@@ -73,7 +73,7 @@ Box.themeSetup({
       },
       checked: {
         bgColor: 'violet',
-        backgroundImage: 'bgImgRadio',
+        backgroundImage: 'radio',
       },
       disabled: {
         cursor: 'not-allowed',
@@ -196,80 +196,87 @@ const colors = [
 
 export const extendedProps = Box.extend(
   {
-    white: '#fff',
-    black: '#07071b',
-    black1: '#1e293b',
-    violet: '#988bee',
-    violetLight: '#e8edfd',
-    violetLighter: '#f6f8fe',
-    violetDark: '#5f3e66',
-    gray1: '#94a3b833',
-    gray2: '#94a3b8',
-    dark: '#272822',
-    red: 'red',
-    bgImg1: 'linear-gradient(19deg, white 80%, rgba(183, 33, 255, 0.05) 94%)',
-    bgImgCheck:
+    colorwhite: ' #fff',
+    colorblack: ' #07071b',
+    colorblack1: ' #1e293b',
+    colorviolet: ' #988bee',
+    colorvioletLight: ' #e8edfd',
+    colorvioletLighter: ' #f6f8fe',
+    colorvioletDark: ' #5f3e66',
+    colorgray1: ' #94a3b833',
+    colorgray2: ' #94a3b8',
+    colordark: ' #272822',
+    colorred: ' red',
+    colornone: ' none',
+    shadownone: ' none',
+    backgroundstripes:
+      'linear-gradient(135deg,var(--colorviolet) 10%,#0000 0,#0000 50%,var(--colorviolet) 0,var(--colorviolet) 60%,#0000 0,#0000)',
+    backgroundbg: ' url(img/bg.jpg)',
+    backgroundbg2: ' background: linear-gradient(rgba(255,255,255,.5), rgba(255,255,255,.5)), url(img/bg.jpg)',
+    backgroundnone: ' none',
+    backgroundImagebg: ' linear-gradient(19deg, white 80%, rgba(183, 33, 255, 0.05) 94%)',
+    backgroundImagecheck:
       "url(\"data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' width='100%' viewBox='0 0 20 20'%3e%3cpath fill='none' stroke='%23FFF' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M6 10l3 3l6-6'/%3e%3c/svg%3e\")",
-    bgImgRadio:
+    backgroundImageradio:
       "url(\"data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' width='100%' viewBox='0 0 20 20'%3e%3ccircle fill='%23FFF' cx='10' cy='10' r='5'/%3e%3c/svg%3e\")",
-    bgImgRadio2:
+    backgroundImageradio2:
       "url(\"data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' width='100%' viewBox='0 0 20 20'%3e%3ccircle fill='%23FFF' cx='10' cy='10' r='5'/%3e%3c/svg%3e\")",
-    bgImgIndeterminate:
+    backgroundImageindeterminate:
       "url(\"data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' width='100%' viewBox='0 0 20 20'%3e%3cline stroke='%23988bee' x1='4' y1='10' x2='16' y2='10' stroke-width='1' /%3e%3c/svg%3e\")",
-    stripes: 'linear-gradient(135deg,var(--violet) 10%,#0000 0,#0000 50%,var(--violet) 0,var(--violet) 60%,#0000 0,#0000)',
+    backgroundImagenone: 'none',
   },
   {
     color: [
       {
         values: colors,
-        valueFormat: (value: string) => `var(--${value})`,
+        valueFormat: (value: string) => `var(--color${value})`,
       },
     ],
     bgColor: [
       {
         values: colors,
-        valueFormat: (value: string) => `var(--${value})`,
+        valueFormat: (value: string) => `var(--color${value})`,
         styleName: 'background-color',
       },
     ],
     borderColor: [
       {
         values: colors,
-        valueFormat: (value: string) => `var(--${value})`,
+        valueFormat: (value: string) => `var(--color${value})`,
         styleName: 'border-color',
       },
     ],
     outlineColor: [
       {
         values: colors,
-        valueFormat: (value: string) => `var(--${value})`,
+        valueFormat: (value: string) => `var(--color${value})`,
         styleName: 'outline-color',
       },
     ],
     background: [
       {
         values: ['stripes'] as const,
-        valueFormat: (value: string) => `var(--${value})`,
+        valueFormat: (value: string) => `var(--background${value})`,
       },
     ],
     backgroundImage: [
       {
-        values: ['bgImg1', 'bgImgCheck', 'bgImgRadio', 'bgImgRadio2', 'bgImgIndeterminate'] as const,
-        valueFormat: (value: string) => `var(--${value})`,
+        values: ['bg', 'check', 'radio', 'radio2', 'indeterminate'] as const,
+        valueFormat: (value: string) => `var(--backgroundImage${value})`,
         styleName: 'background-image',
       },
     ],
     fill: [
       {
         values: colors,
-        valueFormat: (value: string) => `var(--${value})`,
+        valueFormat: (value: string) => `var(--color${value})`,
         selector: (className, pseudoClass) => ['path', 'circle', 'rect', 'line'].map((x) => `${className}${pseudoClass} ${x}`).join(','),
       },
     ],
     stroke: [
       {
         values: colors,
-        valueFormat: (value: string) => `var(--${value})`,
+        valueFormat: (value: string) => `var(--color${value})`,
         selector: (className, pseudoClass) => ['path', 'circle', 'rect', 'line'].map((x) => `${className}${pseudoClass} ${x}`).join(','),
       },
     ],
