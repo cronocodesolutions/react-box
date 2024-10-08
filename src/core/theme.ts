@@ -7,9 +7,9 @@ export interface ThemeComponentStyles {
   themes?: {
     [name: string]: BoxThemeStyles;
   };
-  // children?: {
-  //   [name: string]: ThemeComponentStyles;
-  // };
+  children?: {
+    [name: string]: ThemeComponentStyles;
+  };
 }
 
 export interface ThemeSetup {
@@ -22,6 +22,7 @@ export interface ThemeSetup {
   checkbox?: ThemeComponentStyles;
   radioButton?: ThemeComponentStyles;
   label?: ThemeComponentStyles;
+  dropdown?: ThemeComponentStyles;
 }
 
 namespace Theme {
@@ -67,6 +68,22 @@ namespace Theme {
         borderRadius: 1,
       },
     },
+    // dropdown: {
+    //   styles: {
+    //     width: 'min-content',
+    //     b: 1,
+    //     borderRadius: 1,
+    //     p: 3,
+    //     cursor: 'pointer',
+    //   },
+    //   children: {
+    //     items: {
+    //       styles: {
+    //         b: 1,
+    //       },
+    //     },
+    //   },
+    // },
   };
 
   export function setup(styles: ThemeSetup) {

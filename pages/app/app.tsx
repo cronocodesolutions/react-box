@@ -13,6 +13,8 @@ import Flex from '../../src/components/flex';
 import MenuItem from './menuItem';
 import { Routes, Route } from 'react-router-dom';
 import TextareaPage from '../pages/textareaPage';
+// import DropdownPage from '../pages/dropdownPage';
+import ColorPage from '../pages/colorPage';
 
 export default function App() {
   return (
@@ -35,13 +37,16 @@ export default function App() {
         <MenuItem to="/radiobutton">Radio Button</MenuItem>
         <MenuItem to="/tooltip">Tooltip</MenuItem>
         <MenuItem to="/grid">Grid</MenuItem>
+        <MenuItem to="/dropdown">Dropdown</MenuItem>
         <MenuItem to="/datagrid">Data Grid</MenuItem>
+        <MenuItem to="/colors">Colors</MenuItem>
       </Box>
-      <Box flex1 bl={1} borderColor="violet">
+      <Box flex1 bl={1} borderColor="violet" overflow="auto">
         <Routes>
           <Route index element={<HomePage />} />
           {/* <Route path="/box" element={<BoxPage />} />
-          <Route path="/flex" element={<FlexPage />} /> */}
+           */}
+          <Route path="/flex" element={<FlexPage />} />
           <Route path="/grid" element={<GridPage />} />
           <Route path="/textbox" element={<TextboxPage />} />
           <Route path="/textarea" element={<TextareaPage />} />
@@ -50,6 +55,8 @@ export default function App() {
           <Route path="/checkbox" element={<CheckboxPage />} />
           <Route path="/radiobutton" element={<RadioButtonPage />} />
           <Route path="/tooltip" element={<TooltipPage />} />
+          {/* <Route path="/dropdown" element={<DropdownPage />} /> */}
+          <Route path="/colors" element={<ColorPage />} />
         </Routes>
       </Box>
     </Flex>

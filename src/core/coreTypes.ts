@@ -1,5 +1,3 @@
-export type ArrayType<T> = T extends (infer U)[] ? U : T;
-
 export type BoxStylesType<T> = T extends ReadonlyArray<infer U> ? T[number] : T;
 
 export type ExtractElementType<T> =
@@ -9,7 +7,7 @@ export type ExtractElementFromTag<T extends keyof React.JSX.IntrinsicElements> =
 
 interface BoxStyleArrayString {
   values: ReadonlyArray<string>;
-  valueFormat?: (value: string) => string;
+  valueFormat?: (value: string, useVariable: (name: string) => string) => string;
 }
 
 interface BoxStyleArrayBoolean {
