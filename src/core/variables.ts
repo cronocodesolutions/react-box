@@ -254,7 +254,7 @@ namespace Variables {
   const _usedVariables: Record<string, string> = {};
   let _userVariables: Record<string, string> = {};
 
-  export function useVariable(name: string) {
+  export function getVariableValue(name: string) {
     if (name in _userVariables) {
       _usedVariables[name] = _userVariables[name];
     } else if (name in colors) {

@@ -102,7 +102,7 @@ export const { extendedProps, extendedPropTypes } = Box.extend(
     color: [
       {
         values: ['dark', 'light'],
-        valueFormat: (value, useVariable) => useVariable(value),
+        valueFormat: (value, getVariableValue) => getVariableValue(value),
       },
     ],
   }

@@ -7,7 +7,7 @@ export type ExtractElementFromTag<T extends keyof React.JSX.IntrinsicElements> =
 
 interface BoxStyleArrayString {
   values: ReadonlyArray<string>;
-  valueFormat?: (value: string, useVariable: (name: string) => string) => string;
+  valueFormat?: (value: string, getVariableValue: (name: string) => string) => string;
 }
 
 interface BoxStyleArrayBoolean {

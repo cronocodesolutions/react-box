@@ -156,7 +156,7 @@ a,ul{all: unset;}
               const selector = itemValue.selector?.(`.${className}`, pseudoClassesToUse) ?? `.${className}${pseudoClassesToUse}`;
 
               const styleName = Array.isArray(itemValue.styleName) ? itemValue.styleName : [itemValue.styleName ?? key];
-              const styleValue = itemValue.valueFormat?.(value as never, Variables.useVariable) ?? value;
+              const styleValue = itemValue.valueFormat?.(value as never, Variables.getVariableValue) ?? value;
 
               acc.push(`${selector}{${styleName.map((s) => `${s}:${styleValue}`).join(';')}}`);
             });
@@ -189,7 +189,7 @@ a,ul{all: unset;}
                     `.${pseudoClass}-${name}:${pseudoClass} .${className}`;
 
                   const styleName = Array.isArray(itemValue.styleName) ? itemValue.styleName : [itemValue.styleName ?? key];
-                  const styleValue = itemValue.valueFormat?.(value as never, Variables.useVariable) ?? value;
+                  const styleValue = itemValue.valueFormat?.(value as never, Variables.getVariableValue) ?? value;
 
                   acc.push(`${selector}{${styleName.map((s) => `${s}:${styleValue}`).join(';')}}`);
                 });

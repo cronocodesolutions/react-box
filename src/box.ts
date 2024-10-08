@@ -5,6 +5,7 @@ import { BoxStyleProps } from './types';
 import useStyles from './core/useStyles';
 import BoxExtends from './core/boxExtends';
 import Theme from './core/theme';
+import Variables from './core/variables';
 
 type AllProps<TTag extends keyof React.JSX.IntrinsicElements> = React.ComponentProps<TTag>;
 type TagPropsType<TTag extends keyof React.JSX.IntrinsicElements> = Omit<
@@ -56,6 +57,7 @@ interface BoxType {
   ): React.ReactNode;
   extend: typeof BoxExtends.extend;
   themeSetup: typeof Theme.setup;
+  getVariableValue: typeof Variables.getVariableValue;
 }
 
 const Box = memo(forwardRef(BoxComponent)) as unknown as BoxType;
@@ -63,6 +65,7 @@ const Box = memo(forwardRef(BoxComponent)) as unknown as BoxType;
 
 Box.extend = BoxExtends.extend;
 Box.themeSetup = Theme.setup;
+Box.getVariableValue = Variables.getVariableValue;
 
 export default Box;
 

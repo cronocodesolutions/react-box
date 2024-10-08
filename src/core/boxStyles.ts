@@ -1126,27 +1126,27 @@ export const cssStyles = {
   color: [
     {
       values: Object.keys(Variables.colors) as Variables.ColorType[],
-      valueFormat: (value, useVariable) => useVariable(value),
+      valueFormat: (value, getVariableValue) => getVariableValue(value),
     },
   ],
   bgColor: [
     {
       values: Object.keys(Variables.colors) as Variables.ColorType[],
-      valueFormat: (value, useVariable) => useVariable(value),
+      valueFormat: (value, getVariableValue) => getVariableValue(value),
       styleName: 'background-color',
     },
   ],
   borderColor: [
     {
       values: Object.keys(Variables.colors) as Variables.ColorType[],
-      valueFormat: (value, useVariable) => useVariable(value),
+      valueFormat: (value, getVariableValue) => getVariableValue(value),
       styleName: 'border-color',
     },
   ],
   outlineColor: [
     {
       values: Object.keys(Variables.colors) as Variables.ColorType[],
-      valueFormat: (value, useVariable) => useVariable(value),
+      valueFormat: (value, getVariableValue) => getVariableValue(value),
       styleName: 'outline-color',
     },
   ],

@@ -235,27 +235,27 @@ export const { extendedProps, extendedPropTypes } = Box.extend(
     background: [
       {
         values: ['none', 'stripes'] as const,
-        valueFormat: (value, useVariable) => useVariable(`background${value}`),
+        valueFormat: (value, getVariableValue) => getVariableValue(`background${value}`),
       },
     ],
     backgroundImage: [
       {
         values: ['bg', 'check', 'radio', 'radio2', 'indeterminate'] as const,
-        valueFormat: (value, useVariable) => useVariable(`backgroundImage${value}`),
+        valueFormat: (value, getVariableValue) => getVariableValue(`backgroundImage${value}`),
         styleName: 'background-image',
       },
     ],
     fill: [
       {
         values: colors,
-        valueFormat: (value, useVariable) => useVariable(`color${value}`),
+        valueFormat: (value, getVariableValue) => getVariableValue(`color${value}`),
         selector: (className, pseudoClass) => ['path', 'circle', 'rect', 'line'].map((x) => `${className}${pseudoClass} ${x}`).join(','),
       },
     ],
     stroke: [
       {
         values: colors,
-        valueFormat: (value, useVariable) => useVariable(`color${value}`),
+        valueFormat: (value, getVariableValue) => getVariableValue(`color${value}`),
         selector: (className, pseudoClass) => ['path', 'circle', 'rect', 'line'].map((x) => `${className}${pseudoClass} ${x}`).join(','),
       },
     ],
@@ -271,27 +271,27 @@ export const { extendedProps, extendedPropTypes } = Box.extend(
     color: [
       {
         values: colors,
-        valueFormat: (value, useVariable) => useVariable(`color${value}`),
+        valueFormat: (value, getVariableValue) => getVariableValue(`color${value}`),
       },
     ],
     bgColor: [
       {
         values: colors,
-        valueFormat: (value, useVariable) => useVariable(`color${value}`),
+        valueFormat: (value, getVariableValue) => getVariableValue(`color${value}`),
         styleName: 'background-color',
       },
     ],
     borderColor: [
       {
         values: colors,
-        valueFormat: (value, useVariable) => useVariable(`color${value}`),
+        valueFormat: (value, getVariableValue) => getVariableValue(`color${value}`),
         styleName: 'border-color',
       },
     ],
     outlineColor: [
       {
         values: colors,
-        valueFormat: (value, useVariable) => useVariable(`color${value}`),
+        valueFormat: (value, getVariableValue) => getVariableValue(`color${value}`),
         styleName: 'outline-color',
       },
     ],
