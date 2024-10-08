@@ -235,27 +235,27 @@ export const { extendedProps, extendedPropTypes } = Box.extend(
     background: [
       {
         values: ['none', 'stripes'] as const,
-        valueFormat: (value: string) => `var(--background${value})`,
+        valueFormat: (value, useVariable) => useVariable(`background${value}`),
       },
     ],
     backgroundImage: [
       {
         values: ['bg', 'check', 'radio', 'radio2', 'indeterminate'] as const,
-        valueFormat: (value: string) => `var(--backgroundImage${value})`,
+        valueFormat: (value, useVariable) => useVariable(`backgroundImage${value}`),
         styleName: 'background-image',
       },
     ],
     fill: [
       {
         values: colors,
-        valueFormat: (value: string) => `var(--color${value})`,
+        valueFormat: (value, useVariable) => useVariable(`color${value}`),
         selector: (className, pseudoClass) => ['path', 'circle', 'rect', 'line'].map((x) => `${className}${pseudoClass} ${x}`).join(','),
       },
     ],
     stroke: [
       {
         values: colors,
-        valueFormat: (value: string) => `var(--color${value})`,
+        valueFormat: (value, useVariable) => useVariable(`color${value}`),
         selector: (className, pseudoClass) => ['path', 'circle', 'rect', 'line'].map((x) => `${className}${pseudoClass} ${x}`).join(','),
       },
     ],
