@@ -1,23 +1,25 @@
 import { cssStyles } from './boxStyles';
 import { BoxStyle } from './coreTypes';
+import Variables from './variables';
 
 namespace BoxExtends {
-  let _variables: string = '';
+  export function extend<TProps extends Record<string, BoxStyle[]>, TPropTypes extends Record<string, BoxStyle[]>>(
+    variables: Record<string, string>,
+    extendedProps: TProps,
+    extendedPropTypes: TPropTypes,
+  ) {
+    Variables.setUserVariables(variables);
 
-  export function extend<TProps extends Record<string, BoxStyle[]>>(variables: Record<string, string>, props: TProps) {
-    _variables = Object.entries(variables)
-      .map(([key, val]) => `--${key}: ${val};`)
-      .join('');
-
-    Object.entries(props).forEach(([key, val]) => {
+    Object.entries(extendedProps).forEach(([key, val]) => {
       (cssStyles as Record<string, BoxStyle[]>)[key] = val;
     });
 
-    return props;
-  }
+    Object.entries(extendedPropTypes).forEach(([key, val]) => {
+      const prev = cssStyles[key as keyof typeof cssStyles];
+      (cssStyles as Record<string, BoxStyle[]>)[key] = prev ? [...val, ...prev] : val;
+    });
 
-  export function getVariables() {
-    return _variables;
+    return { extendedProps, extendedPropTypes };
   }
 }
 

@@ -1,5 +1,6 @@
 import { BoxStylesFormatters } from './boxStylesFormatters';
 import { BoxStyle } from './coreTypes';
+import Variables from './variables';
 
 export const cssStyles = {
   /** The appearance CSS property is used to display UI elements with platform-specific styling, based on the operating system's theme. */
@@ -1120,6 +1121,33 @@ export const cssStyles = {
     {
       styleName: 'grid-row-end',
       values: 0,
+    },
+  ],
+  color: [
+    {
+      values: Object.keys(Variables.colors) as Variables.ColorType[],
+      valueFormat: (value, useVariable) => useVariable(value),
+    },
+  ],
+  bgColor: [
+    {
+      values: Object.keys(Variables.colors) as Variables.ColorType[],
+      valueFormat: (value, useVariable) => useVariable(value),
+      styleName: 'background-color',
+    },
+  ],
+  borderColor: [
+    {
+      values: Object.keys(Variables.colors) as Variables.ColorType[],
+      valueFormat: (value, useVariable) => useVariable(value),
+      styleName: 'border-color',
+    },
+  ],
+  outlineColor: [
+    {
+      values: Object.keys(Variables.colors) as Variables.ColorType[],
+      valueFormat: (value, useVariable) => useVariable(value),
+      styleName: 'outline-color',
     },
   ],
 } satisfies Record<string, BoxStyle[]>;

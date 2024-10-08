@@ -13,7 +13,13 @@ export function useTheme(props: ThemeProps): BoxThemeStyles | undefined {
   return useMemo(() => {
     if (clean) return undefined;
 
-    let componentStyles = ThemeInternal.components?.[component as keyof ThemeSetup['components']] as ThemeComponentStyles;
+    const names = component?.split('.');
+    if (!names) return undefined;
+
+    const componentStyles = names.reduce<Maybe<ThemeComponentStyles>>((acc, item, index) => {
+      return index === 0 ? ThemeInternal.components?.[item] : acc?.children?.[item];
+    }, undefined);
+
     if (!componentStyles) return undefined;
 
     return theme ? ObjectUtils.mergeDeep(componentStyles.styles, componentStyles.themes?.[theme] ?? {}) : componentStyles.styles;
