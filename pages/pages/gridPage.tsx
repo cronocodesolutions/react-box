@@ -16,10 +16,10 @@ export default function GridPage() {
         <Box b={1} borderColor="violet" bgColor="violet" borderRadius={1} p={6}>
           Cell
         </Box>
-        <Box b={1} borderColor="violet" bgColor="violet" borderRadius={1} p={6} gridColumn={2}>
+        <Box b={1} borderColor="violet" bgColor="violet" borderRadius={1} p={6} colSpan={2}>
           colspan 2
         </Box>
-        <Box b={1} borderColor="violet" bgColor="violet" borderRadius={1} p={6} gridColumn="full-row">
+        <Box b={1} borderColor="violet" bgColor="violet" borderRadius={1} p={6} colSpan="full-row">
           colspan full row
         </Box>
         <Box b={1} borderColor="violet" bgColor="violet" borderRadius={1} p={6}>
@@ -31,7 +31,7 @@ export default function GridPage() {
         <Box b={1} borderColor="violet" bgColor="violet" borderRadius={1} p={6} gridColumnStart={2}>
           colstart 2
         </Box>
-        <Box b={1} borderColor="violet" bgColor="violet" borderRadius={1} p={6} gridColumn={2} gridColumnStart={2}>
+        <Box b={1} borderColor="violet" bgColor="violet" borderRadius={1} p={6} colSpan={2} gridColumnStart={2}>
           colstart 2 / colspan 2
         </Box>
         <Box
