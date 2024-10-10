@@ -12,9 +12,9 @@ import {
   pseudoGroupClasses,
 } from './boxStyles';
 import IdentityFactory from '@cronocode/identity-factory';
-import BoxExtends from './boxExtends';
 import { BoxStyle } from './coreTypes';
 import { useTheme } from './useTheme';
+import Variables from './variables';
 
 const identity = new IdentityFactory();
 
@@ -112,7 +112,7 @@ namespace StylesContextImpl {
       return acc;
     }, {});
 
-    const defaultStyles = `:root{${BoxExtends.getVariables()}--borderColor: black;--outlineColor: black;--lineHeight: 1.2;--fontSize: 14px;--transitionTime: 0.25s;--svgTransitionTime: 0.3s;}#crono-box {position: absolute;top: 0;left: 0;height: 0;}
+    const defaultStyles = `:root{--borderColor: black;--outlineColor: black;--lineHeight: 1.2;--fontSize: 14px;--transitionTime: 0.25s;--svgTransitionTime: 0.3s;}#crono-box {position: absolute;top: 0;left: 0;height: 0;}
 html{font-size: 16px;font-family: Arial, sans-serif;}
 body{margin: 0;line-height: var(--lineHeight);font-size: var(--fontSize);}
 a,ul{all: unset;}
@@ -156,7 +156,7 @@ a,ul{all: unset;}
               const selector = itemValue.selector?.(`.${className}`, pseudoClassesToUse) ?? `.${className}${pseudoClassesToUse}`;
 
               const styleName = Array.isArray(itemValue.styleName) ? itemValue.styleName : [itemValue.styleName ?? key];
-              const styleValue = itemValue.valueFormat?.(value as never) ?? value;
+              const styleValue = itemValue.valueFormat?.(value as never, Variables.getVariableValue) ?? value;
 
               acc.push(`${selector}{${styleName.map((s) => `${s}:${styleValue}`).join(';')}}`);
             });
@@ -189,7 +189,7 @@ a,ul{all: unset;}
                     `.${pseudoClass}-${name}:${pseudoClass} .${className}`;
 
                   const styleName = Array.isArray(itemValue.styleName) ? itemValue.styleName : [itemValue.styleName ?? key];
-                  const styleValue = itemValue.valueFormat?.(value as never) ?? value;
+                  const styleValue = itemValue.valueFormat?.(value as never, Variables.getVariableValue) ?? value;
 
                   acc.push(`${selector}{${styleName.map((s) => `${s}:${styleValue}`).join(';')}}`);
                 });
@@ -206,6 +206,8 @@ a,ul{all: unset;}
       },
       [defaultStyles],
     );
+
+    styleItems.unshift(`:root{${Variables.generateVariables()}}`);
 
     const el = getElement();
 

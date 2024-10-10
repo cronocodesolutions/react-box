@@ -49,13 +49,13 @@ describe('SSG', () => {
 
     const result = renderToStaticMarkup(el);
 
-    const expected = `<html><head><style id="crono-styles">:root{--borderColor: black;--outlineColor: black;--lineHeight: 1.2;--fontSize: 14px;--transitionTime: 0.25s;--svgTransitionTime: 0.3s;}#crono-box {position: absolute;top: 0;left: 0;height: 0;}
+    const expected = `<html><head><style id="crono-styles">:root{--white: #fff;}:root{--borderColor: black;--outlineColor: black;--lineHeight: 1.2;--fontSize: 14px;--transitionTime: 0.25s;--svgTransitionTime: 0.3s;}#crono-box {position: absolute;top: 0;left: 0;height: 0;}
 html{font-size: 16px;font-family: Arial, sans-serif;}
 body{margin: 0;line-height: var(--lineHeight);font-size: var(--fontSize);}
 a,ul{all: unset;}
 ._b{display: block;border: 0 solid var(--borderColor);outline: 0px solid var(--outlineColor);margin: 0;padding: 0;background-color: initial;transition: all var(--transitionTime);box-sizing: border-box;font-family: inherit;font-size: inherit;}
 ._s{display: block;border: 0 solid var(--borderColor);outline: 0px solid var(--outlineColor);margin: 0;padding: 0;transition: all var(--svgTransitionTime);}._s path,._s circle,._s rect,._s line {transition: all var(--svgTransitionTime);}
-.borderRadius-2{border-radius:0.5rem}.position-relative{position:relative}.position-absolute{position:absolute}.top-6{top:1.5rem}.right-0{right:0rem}.cursor-pointer{cursor:pointer}.display-flex{display:flex}.display-none{display:none}.ai-center{align-items:center}.d-column{flex-direction:column}.pb-2{padding-bottom:0.5rem}.pl-2{padding-left:0.5rem}.hover-parent:hover .hover-parent-display-block{display:block}</style><title>my website</title></head><div class="_b display-flex ai-center position-relative cursor-pointer pb-2 pl-2 hover-parent"><div class="_b display-none position-absolute right-0 top-6 borderRadius-2 d-column hover-parent-display-block"><div class="_b">test</div></div></div></html>`;
+.borderRadius-2{border-radius:0.5rem}.position-relative{position:relative}.position-absolute{position:absolute}.top-6{top:1.5rem}.right-0{right:0rem}.cursor-pointer{cursor:pointer}.display-flex{display:flex}.display-none{display:none}.ai-center{align-items:center}.d-column{flex-direction:column}.pb-2{padding-bottom:0.5rem}.pl-2{padding-left:0.5rem}.bgColor-white{background-color:var(--white)}.hover-parent:hover .hover-parent-display-block{display:block}</style><title>my website</title></head><div class="_b display-flex ai-center position-relative cursor-pointer pb-2 pl-2 hover-parent"><div class="_b display-none bgColor-white position-absolute right-0 top-6 borderRadius-2 d-column hover-parent-display-block"><div class="_b">test</div></div></div></html>`;
 
     expect(result.html).toEqual(expected);
   });

@@ -1,5 +1,6 @@
 import { BoxStylesFormatters } from './boxStylesFormatters';
 import { BoxStyle } from './coreTypes';
+import Variables from './variables';
 
 export const cssStyles = {
   /** The appearance CSS property is used to display UI elements with platform-specific styling, based on the operating system's theme. */
@@ -1069,7 +1070,7 @@ export const cssStyles = {
     },
   ],
   /** The grid-column CSS shorthand property specifies a grid item's size and location within a grid column by contributing a line, a span, or nothing (automatic) to its grid placement, thereby specifying the inline-start and inline-end edge of its grid area. */
-  gridColumn: [
+  colSpan: [
     {
       styleName: 'grid-column',
       values: 0,
@@ -1120,6 +1121,33 @@ export const cssStyles = {
     {
       styleName: 'grid-row-end',
       values: 0,
+    },
+  ],
+  color: [
+    {
+      values: Object.keys(Variables.colors) as Variables.ColorType[],
+      valueFormat: (value, getVariableValue) => getVariableValue(value),
+    },
+  ],
+  bgColor: [
+    {
+      values: Object.keys(Variables.colors) as Variables.ColorType[],
+      valueFormat: (value, getVariableValue) => getVariableValue(value),
+      styleName: 'background-color',
+    },
+  ],
+  borderColor: [
+    {
+      values: Object.keys(Variables.colors) as Variables.ColorType[],
+      valueFormat: (value, getVariableValue) => getVariableValue(value),
+      styleName: 'border-color',
+    },
+  ],
+  outlineColor: [
+    {
+      values: Object.keys(Variables.colors) as Variables.ColorType[],
+      valueFormat: (value, getVariableValue) => getVariableValue(value),
+      styleName: 'outline-color',
     },
   ],
 } satisfies Record<string, BoxStyle[]>;

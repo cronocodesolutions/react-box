@@ -6,7 +6,7 @@ This is a react base component which will reduce considerably necessity to write
 
 1. Installation
 
-```
+```bash
 npm install @cronocode/react-box
 ```
 
@@ -18,7 +18,7 @@ Sizes is equal to `1/4rem`
 
 In the example below is creating a box with `maring: 0.5rem` and `padding: 1.75rem`
 
-```
+```JS
 import Box from "@cronocode/react-box";
 
 export default function Component(props: Props) {
@@ -36,7 +36,7 @@ export default function Component(props: Props) {
 
 - **Box** - base component with a tons of props
 
-```
+```JS
 import Box from "@cronocode/react-box";
 ```
 
@@ -46,72 +46,83 @@ import Box from "@cronocode/react-box";
 
 - **Flex** - this is a `Box` component with `display: flex` style
 
-```
+```JS
 import Flex from "@cronocode/react-box/components/flex";
 ```
 
 - **Button** - this is a `Box` component with html tag `button` and `onClick` prop
 
-```
+```JS
 import Button from "@cronocode/react-box/components/button";
 ```
 
 - **Textbox** - this is a `Box` component with html tag `input`
 
-```
+```JS
 import Textbox from "@cronocode/react-box/components/textbox";
 ```
 
 - **Tooltip** - this is useful when you need a position absolute and the parent has overflow hidden.
 
-```
+```JS
 import Tooltip from "@cronocode/react-box/components/tooltip";
 ```
 
 ## Extend props
 
-1. It is possible to extend some props like `color`, `background`, `backgroundImage` and `shadow`
+It is possible to add your own props to define your custom styles.
+You need to do a few steps.
+
+1. In a project root file you need to define your extends
 
 ```JS
-function themePlugin() {
-  return {
-    name: 'themePlugin',
-    configResolved() {
-      const result = Theme.setupAugmentedProps({
-        colors: {
-          primary: '#445566'
-        },
-        backgroundImages: {
-          gradient: 'linear-gradient(to right, #77A1D3 0%, #79CBCA  51%, #77A1D3  100%)'
-        },
-        shadows: {
-          1: '0 4px 10px rgb(224 224 224 / 52%)',
-        }
-      });
+import Box from "@cronocode/react-box";
 
-      fs.writeFileSync('./src/box-theme.generated.css', result.variables);
-      fs.writeFileSync('./src/box.generated.d.ts', result.boxDts);
-    },
+export const { extendedProps, extendedPropTypes } = Box.extend(
+  // css variables
+  {
+    dark: '#123123',
+    light: '#ededed',
+    cssVarName: 'cssVarValue',
+    myShadow: '10px 5px 5px red',
+    myGradient1: 'linear-gradient(#e66465, #9198e5)',
+    myGradient2: 'linear-gradient(black, white)',
+  },
+  // new custom props
+  {
+    background: [
+      {
+        values: ['myGradient1', 'myGradient2'] as const,
+        valueFormat: (value: string) => `var(--background${value})`,
+      },
+    ],
+  },
+  // extend values for existing props
+  {
+    color: [
+      {
+        values: ['dark', 'light'],
+        valueFormat: (value, getVariableValue) => getVariableValue(value),
+      },
+    ],
+  }
+);
+```
+
+2. Now you have to add typings to the Box in order to have intellisense for you new props and value.
+   You need to create a `box.d.ts`
+
+```JS
+import '@cronocode/react-box';
+import { ExtractBoxStyles } from '@cronocode/react-box/types';
+import { extendedProps, extendedPropTypes } from './path-to-your-b0x-extends-declaration';
+
+declare module '@cronocode/react-box/types' {
+  namespace Augmented {
+    interface BoxProps extends ExtractBoxStyles<typeof extendedProps> {}
+    interface BoxPropTypes extends ExtractBoxStyles<typeof extendedPropTypes> {}
   }
 }
-
-```
-
-2. Add this plugin to your build tool
-
-Vitejs
-
-```JS
-// https://vitejs.dev/config/
-export default defineConfig({
-  plugins: [..., themePlugin()],
-})
-```
-
-3. Include `box-theme.generated.css` in your root file
-
-```JS
-import './box-theme.generated.css';
 ```
 
 ## Theme for components
