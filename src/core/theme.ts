@@ -30,14 +30,37 @@ namespace Theme {
   const defaultTheme: ThemeSetup = {
     button: {
       styles: {
-        display: 'inline-block',
+        display: 'inline-flex',
+        color: 'white',
+        bgColor: 'violet-400',
+        borderColor: 'violet-500',
         p: 3,
         cursor: 'pointer',
         b: 1,
         borderRadius: 1,
         userSelect: 'none',
+        hover: {
+          color: 'slate-700',
+          bgColor: 'violet-100',
+          borderColor: 'violet-300',
+        },
         disabled: {
-          cursor: 'default',
+          cursor: 'not-allowed',
+          bgColor: 'violet-50',
+          color: 'slate-400',
+          borderColor: 'gray-300',
+        },
+      },
+      themes: {
+        reverse: {
+          color: 'slate-700',
+          bgColor: 'violet-100',
+          borderColor: 'violet-300',
+          hover: {
+            color: 'white',
+            bgColor: 'violet-400',
+            borderColor: 'violet-500',
+          },
         },
       },
     },
@@ -68,22 +91,54 @@ namespace Theme {
         borderRadius: 1,
       },
     },
-    // dropdown: {
-    //   styles: {
-    //     width: 'min-content',
-    //     b: 1,
-    //     borderRadius: 1,
-    //     p: 3,
-    //     cursor: 'pointer',
-    //   },
-    //   children: {
-    //     items: {
-    //       styles: {
-    //         b: 1,
-    //       },
-    //     },
-    //   },
-    // },
+    dropdown: {
+      styles: {
+        display: 'inline-flex',
+        bgColor: 'white',
+        color: 'violet-800',
+        p: 3,
+        cursor: 'pointer',
+        b: 1,
+        borderRadius: 1,
+        userSelect: 'none',
+        borderColor: 'violet-400',
+        lineHeight: 20,
+        hover: {
+          bgColor: 'violet-50',
+        },
+        disabled: {
+          cursor: 'not-allowed',
+          bgColor: 'violet-200',
+          color: 'gray-400',
+          borderColor: 'gray-300',
+        },
+      },
+      children: {
+        items: {
+          styles: {
+            b: 1,
+            borderRadius: 1,
+            position: 'relative',
+            top: 1,
+            bgColor: 'white',
+            overflow: 'auto',
+            maxHeight: 45,
+            borderColor: 'violet-400',
+            color: 'violet-800',
+          },
+        },
+        item: {
+          styles: {
+            p: 3,
+            cursor: 'pointer',
+            lineHeight: 20,
+            hover: {
+              bgColor: 'violet-50',
+            },
+          },
+        },
+      },
+    },
   };
 
   export function setup(styles: ThemeSetup) {

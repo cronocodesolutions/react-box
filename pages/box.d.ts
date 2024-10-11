@@ -1,6 +1,6 @@
 import '@cronocode/react-box';
 import { ExtractBoxStyles } from '../src/types';
-import { extendedProps, extendedPropTypes } from './theme';
+import { extendedProps, extendedPropTypes } from './extends';
 
 declare module '../src/types' {
   namespace Augmented {
