@@ -6,6 +6,7 @@ import useStyles from './core/useStyles';
 import BoxExtends from './core/boxExtends';
 import Theme from './core/theme';
 import Variables from './core/variables';
+import BoxUtils from './utils/box/boxUtils';
 
 type AllProps<TTag extends keyof React.JSX.IntrinsicElements> = React.ComponentProps<TTag>;
 type TagPropsType<TTag extends keyof React.JSX.IntrinsicElements> = Omit<
@@ -32,9 +33,9 @@ function BoxComponent<TTag extends keyof React.JSX.IntrinsicElements = 'div'>(pr
       ...tagProps,
       className,
     } as AllProps<TTag>;
-    disabled ? ((props as any).disabled = Array.isArray(disabled) ? disabled[0] : disabled) : 1;
-    required ? ((props as any).required = Array.isArray(required) ? required[0] : required) : 1;
-    checked ? ((props as any).checked = Array.isArray(checked) ? checked[0] : checked) : 1;
+    BoxUtils.assignBooleanProp(disabled, 'disabled', props);
+    BoxUtils.assignBooleanProp(required, 'required', props);
+    BoxUtils.assignBooleanProp(checked, 'checked', props);
     style && (props.style = style);
     ref && (props.ref = ref as React.RefObject<HTMLElement>);
 

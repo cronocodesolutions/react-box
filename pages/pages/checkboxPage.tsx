@@ -1,8 +1,11 @@
+import { useState } from 'react';
 import Box from '../../src/box';
 import Checkbox from '../../src/components/checkbox';
 import Flex from '../../src/components/flex';
 
 export default function CheckboxPage() {
+  const [test, setTest] = useState(false);
+
   return (
     <Box p={10}>
       <Box py={3}>
@@ -16,6 +19,9 @@ export default function CheckboxPage() {
           <Checkbox disabled defaultChecked /> Disabled Checked
         </Flex>
         <Checkbox mt={2} indeterminate /> Indeterminate
+        <Box mt={4}>
+          <Checkbox checked={test} onChange={() => setTest((prev) => !prev)} />
+        </Box>
       </Box>
     </Box>
   );

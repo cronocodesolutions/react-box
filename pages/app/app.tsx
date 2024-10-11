@@ -15,6 +15,7 @@ import { Routes, Route } from 'react-router-dom';
 import TextareaPage from '../pages/textareaPage';
 // import DropdownPage from '../pages/dropdownPage';
 import ColorPage from '../pages/colorPage';
+import DropdownPage from '../pages/dropdownPage';
 
 export default function App() {
   return (
@@ -55,7 +56,7 @@ export default function App() {
           <Route path="/checkbox" element={<CheckboxPage />} />
           <Route path="/radiobutton" element={<RadioButtonPage />} />
           <Route path="/tooltip" element={<TooltipPage />} />
-          {/* <Route path="/dropdown" element={<DropdownPage />} /> */}
+          <Route path="/dropdown" element={<DropdownPage />} />
           <Route path="/colors" element={<ColorPage />} />
         </Routes>
       </Box>
