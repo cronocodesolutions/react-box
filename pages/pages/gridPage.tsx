@@ -4,6 +4,9 @@ import Grid from '../../src/components/grid';
 export default function GridPage() {
   return (
     <Box p={10}>
+      <Box mb={3} fontSize={24}>
+        Grid
+      </Box>
       <Grid
         borderRadius={1}
         gap={4}
