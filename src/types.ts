@@ -17,12 +17,11 @@ export type ExtractBoxStyles<T extends Record<string, BoxStyle[]>> = {
 
 export type PseudoClassesType = keyof typeof pseudoClasses;
 export type BoxStyles = ExtractBoxStylesInternal<typeof cssStyles> & Augmented.BoxProps;
-export type BooleanPseudoClassesValue = boolean | [boolean, BoxStylesWithPseudoClasses];
 
 type BoxPseudoClassesStyles1 = ExtractKeys<typeof pseudo1, BoxStylesWithPseudoClasses>;
 type BoxPseudoClassesStyles2Nested = ExtractKeys<typeof pseudo2, BoxStylesWithPseudoClasses>;
-type BoxPseudoClassesStyles2TopLevel = ExtractKeys<typeof pseudo2, BooleanPseudoClassesValue>;
-interface BoxStylesWithPseudoClasses extends BoxStyles, BoxPseudoClassesStyles1, BoxPseudoClassesStyles2Nested {}
+type BoxPseudoClassesStyles2TopLevel = ExtractKeys<typeof pseudo2, boolean | [boolean, BoxStylesWithPseudoClasses]>;
+export interface BoxStylesWithPseudoClasses extends BoxStyles, BoxPseudoClassesStyles1, BoxPseudoClassesStyles2Nested {}
 
 type BoxPseudoGroupClassesStyles = ExtractKeys<typeof pseudoGroupClasses, string | Record<string, BoxStyles>>;
 type BoxBreakpointsStyles = ExtractKeys<typeof breakpoints, BoxStylesWithPseudoClasses & BoxPseudoGroupClassesStyles>;

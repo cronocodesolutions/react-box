@@ -1,25 +1,18 @@
-import { useState } from 'react';
 import Box from '../../src/box';
 import Textarea from '../../src/components/textarea';
-import Flex from '../../src/components/flex';
 
 export default function TextareaPage() {
-  const [controlledValue, setControlledValue] = useState('controlled');
-
   return (
     <Box p={10}>
-      <Box py={3}>
-        <Textarea defaultValue="uncontrolled" />
+      <Box mb={3} fontSize={24}>
+        Textarea
       </Box>
-      <Flex py={3}>
-        <Box tag="label">
-          <Textarea value={controlledValue} onChange={(e) => setControlledValue(e.target.value)} />
-        </Box>
-        <Box tag="label" ml={4}>
-          <Textarea value="controlled without update" onChange={() => {}} />
-        </Box>
-      </Flex>
-      <Textarea disabled mt={3} defaultValue="disabled" />
+      <Box py={3}>
+        <Textarea placeholder="ex. description" />
+      </Box>
+      <Box py={3}>
+        <Textarea disabled defaultValue="Disabled" />
+      </Box>
     </Box>
   );
 }

@@ -66,13 +66,23 @@ a,ul{all: unset;}
         <Box hoverGroup={{ parent: { display: 'grid' } }}>test</Box>
       </Box>
     );
+    const el2 = (
+      <Box inline>
+        <Box width={20}>test</Box>
+      </Box>
+    );
 
     const result = renderToStaticMarkup(el);
-    const result2 = renderToStaticMarkup(el);
+    const result2 = renderToStaticMarkup(el2);
 
-    const expected = '<div class="_b hover-parent"><div class="_b hover-parent-display-grid">test</div></div>';
+    const expected1 = '<div class="_b hover-parent"><div class="_b hover-parent-display-grid">test</div></div>';
+    const expected2 = '<div class="_b inline-true"><div class="_b width-20">test</div></div>';
 
-    expect(result.html).toEqual(expected);
-    expect(result2.html).toEqual(expected);
+    expect(result.html).toEqual(expected1);
+    expect(result2.html).toEqual(expected2);
+
+    expect(result.styles).includes('display:grid');
+    expect(result2.styles).not.includes('display:grid');
+    expect(result2.styles).includes('display:inline-block');
   });
 });

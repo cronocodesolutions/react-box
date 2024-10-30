@@ -33,11 +33,6 @@ export default function useStyles(props: BoxStyleProps, isSvg: boolean) {
 
   return useMemo(() => {
     const classNames: string[] = [isSvg ? svgClassName : boxClassName];
-
-    if ((props as any).props?.name === 'Clean') {
-      const a = 1;
-    }
-
     const propsToUse = theme ? ObjectUtils.mergeDeep<BoxStyleProps>(theme, props) : props;
 
     StylesContextImpl.addClassNames(propsToUse, classNames, []);

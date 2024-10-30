@@ -3,7 +3,7 @@ import Flex from '../../src/components/flex';
 import Grid from '../../src/components/grid';
 
 const colors: Record<string, BoxProps['color'][]> = {
-  1: ['none', 'white', 'black', 'transparent', 'current'],
+  1: ['none', 'white', 'black', 'transparent', 'currentColor'],
   slate: [
     'slate-50',
     'slate-100',

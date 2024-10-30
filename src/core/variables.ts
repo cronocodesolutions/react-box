@@ -1,8 +1,11 @@
 namespace Variables {
   export const colors = {
-    inherit: 'inherit',
-    current: 'currentColor',
+    currentColor: 'currentColor',
     transparent: 'transparent',
+    green: 'green',
+    red: 'red',
+    blue: 'blue',
+    gray: 'gray',
     black: '#000',
     white: '#fff',
     'slate-50': '#f8fafc',
@@ -193,6 +196,7 @@ namespace Variables {
     'indigo-900': '#312e81',
     'indigo-950': '#1e1b4b',
     'violet-50': '#f5f3ff',
+    'violet-XX': '#9747FF',
     'violet-100': '#ede9fe',
     'violet-200': '#ddd6fe',
     'violet-300': '#c4b5fd',
@@ -203,6 +207,7 @@ namespace Variables {
     'violet-800': '#5b21b6',
     'violet-900': '#4c1d95',
     'violet-950': '#2e1065',
+    vi: '#7949FF',
     'purple-50': '#faf5ff',
     'purple-100': '#f3e8ff',
     'purple-200': '#e9d5ff',
@@ -251,14 +256,26 @@ namespace Variables {
 
   export type ColorType = keyof typeof colors;
 
+  const internalVariables = {
+    inherit: 'inherit',
+    none: 'none',
+    'bg-img-checked': `url("data:image/svg+xml,${encodeURIComponent(`<svg xmlns='http://www.w3.org/2000/svg' width='100%' viewBox='0 0 20 20'><path fill='none' stroke='#FFF' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M6 10l3 3l6-6'/></svg>`)}")`,
+    'bg-img-indeterminate': `url("data:image/svg+xml,${encodeURIComponent(`<svg xmlns='http://www.w3.org/2000/svg' width='100%' viewBox='0 0 20 20'><line stroke='${colors['violet-400']}' x1='4' y1='10' x2='16' y2='10' stroke-width='1' /></svg>`)}")`,
+    'bg-img-radio': `url("data:image/svg+xml,${encodeURIComponent(`<svg xmlns='http://www.w3.org/2000/svg' width='100%' viewBox='0 0 20 20'><circle fill='#FFF' cx='10' cy='10' r='5'/></svg>`)}")`,
+  };
+
   const _usedVariables: Record<string, string> = {};
   let _userVariables: Record<string, string> = {};
 
   export function getVariableValue(name: string) {
     if (name in _userVariables) {
       _usedVariables[name] = _userVariables[name];
+    } else if (name in internalVariables) {
+      _usedVariables[name] = internalVariables[name as keyof typeof internalVariables];
     } else if (name in colors) {
       _usedVariables[name] = colors[name as keyof typeof colors];
+    } else {
+      _usedVariables[name] = name;
     }
 
     return `var(--${name})`;

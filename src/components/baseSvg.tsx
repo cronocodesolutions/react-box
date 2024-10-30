@@ -29,3 +29,5 @@ function BaseSvg(props: Props, ref: Ref<SVGSVGElement>) {
 }
 
 export default forwardRef(BaseSvg);
+
+export type BaseSvgProps = React.ComponentProps<typeof BaseSvg>;

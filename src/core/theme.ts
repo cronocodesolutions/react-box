@@ -1,6 +1,7 @@
 import { BoxThemeStyles } from '../types';
 import ObjectUtils from '../utils/object/objectUtils';
 import { ThemeInternal } from './useTheme';
+import Variables from './variables';
 
 export interface ThemeComponentStyles {
   styles: BoxThemeStyles;
@@ -32,7 +33,7 @@ namespace Theme {
       styles: {
         display: 'inline-flex',
         color: 'white',
-        bgColor: 'violet-400',
+        bgColor: 'violet-500',
         borderColor: 'violet-500',
         p: 3,
         cursor: 'pointer',
@@ -40,75 +41,163 @@ namespace Theme {
         borderRadius: 1,
         userSelect: 'none',
         hover: {
-          color: 'slate-700',
-          bgColor: 'violet-100',
-          borderColor: 'violet-300',
+          bgColor: 'violet-600',
+          borderColor: 'violet-600',
         },
         disabled: {
           cursor: 'not-allowed',
           bgColor: 'violet-50',
-          color: 'slate-400',
+          color: 'gray-400',
           borderColor: 'gray-300',
         },
-      },
-      themes: {
-        reverse: {
-          color: 'slate-700',
-          bgColor: 'violet-100',
-          borderColor: 'violet-300',
-          hover: {
-            color: 'white',
-            bgColor: 'violet-400',
-            borderColor: 'violet-500',
-          },
-        },
-      },
-    },
-    checkbox: {
-      styles: {
-        display: 'inline-block',
-      },
-    },
-    radioButton: {
-      styles: {
-        display: 'inline-block',
-        b: 1,
-        p: 2,
       },
     },
     textbox: {
       styles: {
         display: 'inline-block',
         b: 1,
+        borderColor: 'violet-200',
+        bgColor: 'violet-50',
+        color: 'violet-950',
         borderRadius: 1,
         p: 3,
+        transition: 'none',
+        hover: {
+          borderColor: 'violet-300',
+        },
+        focus: {
+          outline: 1,
+          borderColor: 'violet-500',
+          outlineColor: 'violet-500',
+        },
+        disabled: {
+          cursor: 'not-allowed',
+          bgColor: 'violet-50',
+          color: 'gray-400',
+          borderColor: 'gray-300',
+        },
       },
     },
     textarea: {
       styles: {
         display: 'inline-block',
         b: 1,
+        borderColor: 'violet-200',
+        bgColor: 'violet-50',
+        color: 'violet-950',
         borderRadius: 1,
+        p: 3,
+        transition: 'none',
+        hover: {
+          borderColor: 'violet-300',
+        },
+        focus: {
+          outline: 1,
+          borderColor: 'violet-500',
+          outlineColor: 'violet-500',
+        },
+        disabled: {
+          cursor: 'not-allowed',
+          bgColor: 'violet-50',
+          color: 'gray-400',
+          borderColor: 'gray-300',
+          resize: 'none',
+        },
+      },
+    },
+    checkbox: {
+      styles: {
+        display: 'inline-block',
+        appearance: 'none',
+        b: 1,
+        borderColor: 'violet-300',
+        borderRadius: 1,
+        p: 2,
+        cursor: 'pointer',
+        transition: 'none',
+        hover: {
+          borderColor: 'violet-500',
+        },
+        focus: {
+          outline: 2,
+          outlineOffset: 2,
+          outlineColor: 'violet-500',
+        },
+        checked: {
+          bgColor: 'violet-500',
+          borderColor: 'violet-500',
+          bgImage: 'bg-img-checked',
+        },
+        indeterminate: {
+          color: 'violet-500',
+          bgImage: 'bg-img-indeterminate',
+        },
+        disabled: {
+          cursor: 'not-allowed',
+          bgColor: 'violet-100',
+          color: 'gray-400',
+          borderColor: 'gray-300',
+        },
+      },
+    },
+    radioButton: {
+      styles: {
+        appearance: 'none',
+        b: 1,
+        borderColor: 'violet-300',
+        borderRadius: 3,
+        p: 2,
+        cursor: 'pointer',
+        transition: 'none',
+        hover: {
+          borderColor: 'violet-500',
+        },
+        focus: {
+          outline: 2,
+          outlineOffset: 2,
+          outlineColor: 'violet-500',
+        },
+        checked: {
+          bgColor: 'violet-500',
+          borderColor: 'violet-500',
+          bgImage: 'bg-img-radio',
+        },
+        disabled: {
+          cursor: 'not-allowed',
+          bgColor: 'violet-100',
+          color: 'gray-400',
+          borderColor: 'violet-200',
+        },
       },
     },
     dropdown: {
       styles: {
         display: 'inline-flex',
-        bgColor: 'white',
-        color: 'violet-800',
+        ai: 'center',
+        gap: 2,
+        jc: 'space-between',
         p: 3,
         cursor: 'pointer',
+        bgColor: 'violet-50',
+        color: 'violet-950',
         b: 1,
+        borderColor: 'violet-200',
         borderRadius: 1,
         userSelect: 'none',
-        borderColor: 'violet-400',
         lineHeight: 20,
+        minWidth: 40,
+        transition: 'none',
         hover: {
-          bgColor: 'violet-50',
+          borderColor: 'violet-300',
+        },
+        focus: {
+          outline: 1,
+          borderColor: 'violet-500',
+          outlineColor: 'violet-500',
         },
         disabled: {
           cursor: 'not-allowed',
-          bgColor: 'violet-200',
+          bgColor: 'violet-50',
           color: 'gray-400',
           borderColor: 'gray-300',
         },
@@ -116,23 +205,30 @@ namespace Theme {
       children: {
         items: {
           styles: {
+            p: 1,
             b: 1,
             borderRadius: 1,
             position: 'relative',
             top: 1,
             bgColor: 'white',
             overflow: 'auto',
-            maxHeight: 45,
-            borderColor: 'violet-400',
-            color: 'violet-800',
+            maxHeight: 62,
+            borderColor: 'violet-300',
+            color: 'violet-950',
           },
         },
         item: {
           styles: {
+            display: 'flex',
+            width: 'fit',
             p: 3,
             cursor: 'pointer',
             lineHeight: 20,
+            borderRadius: 1,
             hover: {
+              bgColor: 'violet-50',
+            },
+            focus: {
               bgColor: 'violet-50',
             },
           },
@@ -151,6 +247,8 @@ namespace Theme {
 
     ThemeInternal.components = ObjectUtils.mergeDeep<{ [name: string]: ThemeComponentStyles }>(defaultTheme, com);
   }
+
+  ThemeInternal.components = { ...defaultTheme } as { [name: string]: ThemeComponentStyles };
 }
 
 export default Theme;

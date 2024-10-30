@@ -1,28 +1,25 @@
-import { useState } from 'react';
 import Box from '../../src/box';
 import Checkbox from '../../src/components/checkbox';
 import Flex from '../../src/components/flex';
 
 export default function CheckboxPage() {
-  const [test, setTest] = useState(false);
-
   return (
     <Box p={10}>
-      <Box py={3}>
-        <Flex gap={2}>
-          <Checkbox /> Theme
-          <Checkbox checked onChange={() => {}} /> Checked Controlled
-          <Checkbox defaultChecked /> Checked Uncontrolled
-        </Flex>
-        <Flex mt={2} gap={2} disabled>
-          <Checkbox disabled /> Disabled
-          <Checkbox disabled defaultChecked /> Disabled Checked
-        </Flex>
-        <Checkbox mt={2} indeterminate /> Indeterminate
-        <Box mt={4}>
-          <Checkbox checked={test} onChange={() => setTest((prev) => !prev)} />
-        </Box>
+      <Box mb={3} fontSize={24}>
+        Checkbox
       </Box>
+      <Flex py={3} gap={2} ai="center">
+        <Checkbox /> Default
+      </Flex>
+      <Flex py={3} gap={2} ai="center">
+        <Checkbox clean /> Clean
+      </Flex>
+      <Flex py={3} gap={2} ai="center">
+        <Checkbox disabled /> Disabled
+      </Flex>
+      <Flex py={3} gap={2} ai="center">
+        <Checkbox indeterminate /> Indeterminate
+      </Flex>
     </Box>
   );
 }

@@ -30,7 +30,7 @@ namespace ObjectUtils {
 
   export function mergeDeep<T>(...objects: object[]) {
     return objects.reduce((prev, obj) => {
-      Object.keys(obj).forEach((key) => {
+      Object.keys(obj ?? {}).forEach((key) => {
         const pVal = (prev as any)[key];
         const oVal = (obj as any)[key];
 

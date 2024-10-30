@@ -1,28 +1,29 @@
 import React from 'react';
-import Box from '../../src/box';
 import { NavLink } from 'react-router-dom';
 import { BoxStyleProps } from '../../src/types';
+import Flex from '../../src/components/flex';
 
 interface Props extends BoxStyleProps {
   children: React.ReactNode;
   to: string;
 }
 export default function MenuItem(props: Props) {
-  const { children, to } = props;
+  const { to } = props;
 
   return (
     <NavLink to={to}>
       {({ isActive }) => (
-        <Box
+        <Flex
+          gap={2}
           my={1}
-          bgColor={isActive ? 'violetLight' : undefined}
-          color={isActive ? 'violet' : undefined}
+          bgColor={isActive ? 'violet-100' : undefined}
+          color={isActive ? 'violet-800' : undefined}
           cursor={isActive ? 'default' : 'pointer'}
-          py={2}
+          py={3}
           px={6}
           borderRadius={1}
           transition="none"
-          hover={{ bgColor: 'violetLight', color: 'violet' }}
+          hover={{ bgColor: 'violet-100', color: 'violet-800' }}
           {...props}
         />
       )}

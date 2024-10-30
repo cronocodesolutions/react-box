@@ -1150,6 +1150,13 @@ export const cssStyles = {
       styleName: 'outline-color',
     },
   ],
+  bgImage: [
+    {
+      values: ['none', 'bg-img-checked', 'bg-img-indeterminate', 'bg-img-radio'] as const,
+      valueFormat: (value, getVariableValue) => getVariableValue(value),
+      styleName: 'background-image',
+    },
+  ],
 } satisfies Record<string, BoxStyle[]>;
 
 export const pseudo1 = {
