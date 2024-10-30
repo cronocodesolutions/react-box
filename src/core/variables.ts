@@ -196,7 +196,6 @@ namespace Variables {
     'indigo-900': '#312e81',
     'indigo-950': '#1e1b4b',
     'violet-50': '#f5f3ff',
-    'violet-XX': '#9747FF',
     'violet-100': '#ede9fe',
     'violet-200': '#ddd6fe',
     'violet-300': '#c4b5fd',
@@ -254,7 +253,7 @@ namespace Variables {
     'rose-950': '#4c0519',
   };
 
-  export type ColorType = keyof typeof colors;
+  export type ColorType = keyof typeof colors | 'none';
 
   const internalVariables = {
     inherit: 'inherit',

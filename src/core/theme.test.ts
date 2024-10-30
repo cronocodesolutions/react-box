@@ -14,7 +14,7 @@ describe('Theme', () => {
       Theme.setup({
         button: {
           styles: {
-            bgColor: 'dark',
+            bgColor: 'violet-950',
             cursor: 'alias',
           },
           themes: {

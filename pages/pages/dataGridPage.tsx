@@ -94,18 +94,18 @@ export default function DataGridPage() {
           </Box>
         </Box>
         <Box display="contents" hoverGroup="parent">
-          <Box position="sticky" left={0} zIndex={1} hoverGroup={{ parent: { bgColor: 'gray1' } }}>
+          <Box position="sticky" left={0} zIndex={1} hoverGroup={{ parent: { bgColor: 'gray-300' } }}>
             this is cell with data
           </Box>
-          <Box hoverGroup={{ parent: { bgColor: 'gray1' } }}>this is cell with data</Box>
-          <Box hoverGroup={{ parent: { bgColor: 'gray1' } }}>this is cell with data</Box>
-          <Box hoverGroup={{ parent: { bgColor: 'gray1' } }}>this is cell with data</Box>
-          <Box hoverGroup={{ parent: { bgColor: 'gray1' } }}>this is cell with data</Box>
-          <Box hoverGroup={{ parent: { bgColor: 'gray1' } }}>this is cell with data</Box>
-          <Box hoverGroup={{ parent: { bgColor: 'gray1' } }}>this is cell with data</Box>
-          <Box hoverGroup={{ parent: { bgColor: 'gray1' } }}>this is cell with data</Box>
-          <Box hoverGroup={{ parent: { bgColor: 'gray1' } }}>this is cell with data</Box>
-          <Box position="sticky" right={0} hoverGroup={{ parent: { bgColor: 'gray1' } }}>
+          <Box hoverGroup={{ parent: { bgColor: 'gray-300' } }}>this is cell with data</Box>
+          <Box hoverGroup={{ parent: { bgColor: 'gray-300' } }}>this is cell with data</Box>
+          <Box hoverGroup={{ parent: { bgColor: 'gray-300' } }}>this is cell with data</Box>
+          <Box hoverGroup={{ parent: { bgColor: 'gray-300' } }}>this is cell with data</Box>
+          <Box hoverGroup={{ parent: { bgColor: 'gray-300' } }}>this is cell with data</Box>
+          <Box hoverGroup={{ parent: { bgColor: 'gray-300' } }}>this is cell with data</Box>
+          <Box hoverGroup={{ parent: { bgColor: 'gray-300' } }}>this is cell with data</Box>
+          <Box hoverGroup={{ parent: { bgColor: 'gray-300' } }}>this is cell with data</Box>
+          <Box position="sticky" right={0} hoverGroup={{ parent: { bgColor: 'gray-300' } }}>
             this is cell with data
           </Box>
         </Box>

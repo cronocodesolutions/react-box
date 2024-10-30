@@ -7,15 +7,15 @@ export default function FlexPage() {
       <Box
         fontSize={50}
         lineHeight="font-size"
-        bgColor="violetLight"
+        bgColor="violet-100"
         width="3/5"
         textDecoration="underline"
-        xl={{ hover: { color: 'violet' } }}
+        xl={{ hover: { color: 'violet-500' } }}
       >
         This is Flex page
       </Box>
 
-      <Box component="mycomponent" mt={4} hover={{ bgColor: 'violet' }} hoverGroup="group">
+      <Box component="mycomponent" mt={4} hover={{ bgColor: 'violet-500' }} hoverGroup="group">
         <Box component="mycomponent.item1" hoverGroup={{ group: { color: 'red' } }}>
           this is item 1
         </Box>
