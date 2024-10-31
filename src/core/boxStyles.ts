@@ -1179,6 +1179,7 @@ export const pseudo2 = {
   checked: ':checked',
   required: ':required',
   disabled: '[disabled]',
+  selected: '[aria-selected="true"]',
 };
 
 export const pseudoClasses = { ...pseudo1, ...pseudo2 };

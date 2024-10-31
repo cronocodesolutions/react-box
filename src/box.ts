@@ -23,7 +23,7 @@ interface Props<TTag extends keyof React.JSX.IntrinsicElements> extends BoxStyle
 }
 
 function BoxComponent<TTag extends keyof React.JSX.IntrinsicElements = 'div'>(props: Props<TTag>, ref: Ref<ExtractElementFromTag<TTag>>) {
-  const { tag = 'div', children, props: tagProps, className: userClassName, style, disabled, required, checked } = props;
+  const { tag = 'div', children, props: tagProps, className: userClassName, style, disabled, required, checked, selected } = props;
 
   const styleClasses = useStyles(props, tag === 'svg');
 
@@ -36,6 +36,7 @@ function BoxComponent<TTag extends keyof React.JSX.IntrinsicElements = 'div'>(pr
     BoxUtils.assignBooleanProp(disabled, 'disabled', props);
     BoxUtils.assignBooleanProp(required, 'required', props);
     BoxUtils.assignBooleanProp(checked, 'checked', props);
+    BoxUtils.assignBooleanProp(selected, 'selected', props);
     style && (props.style = style);
     ref && (props.ref = ref as React.RefObject<HTMLElement>);
 

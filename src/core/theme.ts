@@ -40,6 +40,7 @@ namespace Theme {
         b: 1,
         borderRadius: 1,
         userSelect: 'none',
+        lineHeight: 20,
         hover: {
           bgColor: 'violet-600',
           borderColor: 'violet-600',
@@ -62,6 +63,7 @@ namespace Theme {
         borderRadius: 1,
         p: 3,
         transition: 'none',
+        lineHeight: 20,
         hover: {
           borderColor: 'violet-300',
         },
@@ -205,6 +207,9 @@ namespace Theme {
       children: {
         items: {
           styles: {
+            display: 'flex',
+            d: 'column',
+            gap: 1,
             p: 1,
             b: 1,
             borderRadius: 1,
@@ -231,6 +236,42 @@ namespace Theme {
             focus: {
               bgColor: 'violet-50',
             },
+            selected: {
+              bgColor: 'violet-50',
+              cursor: 'default',
+            },
+          },
+        },
+        nullItem: {
+          styles: {
+            display: 'flex',
+            width: 'fit',
+            p: 3,
+            cursor: 'pointer',
+            lineHeight: 20,
+            borderRadius: 1,
+            color: 'violet-400',
+            hover: {
+              bgColor: 'violet-50',
+            },
+            focus: {
+              bgColor: 'violet-50',
+            },
+            selected: {
+              bgColor: 'violet-50',
+              cursor: 'default',
+            },
+          },
+        },
+        noItems: {
+          styles: {
+            display: 'flex',
+            width: 'fit',
+            p: 3,
+            cursor: 'default',
+            lineHeight: 20,
+            borderRadius: 1,
+            color: 'violet-400',
           },
         },
       },

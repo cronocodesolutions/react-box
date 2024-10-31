@@ -1,6 +1,6 @@
 import { createPortal } from 'react-dom';
 import Box, { BoxProps } from '../box';
-import { useCallback, useLayoutEffect, useRef, useState } from 'react';
+import { forwardRef, Ref, useCallback, useLayoutEffect, useRef, useState } from 'react';
 import usePortalContainer from '../hooks/usePortalContainer';
 
 const positionDigitsAfterComma = 2;
@@ -9,9 +9,9 @@ interface Props extends BoxProps {
   onPositionChange?(position: { top: number; left: number }): void;
 }
 
-export default function Tooltip(props: Props) {
+function Tooltip(props: Props, ref: Ref<HTMLDivElement>) {
   const { onPositionChange } = props;
-  const ref = useRef<HTMLDivElement>(null);
+  const positionRef = useRef<HTMLDivElement>(null);
   const [position, setPosition] = useState<{ top: number; left: number; width?: number } | undefined>();
   const portalContainer = usePortalContainer();
 
@@ -61,10 +61,10 @@ export default function Tooltip(props: Props) {
   );
 
   useLayoutEffect(() => {
-    if (ref.current) {
-      positionHandler(ref.current);
-      const scrollHandlerDispose = observeScroll(ref.current, positionHandler);
-      const resizeHandlerDispose = observeResize(ref.current, positionHandler);
+    if (positionRef.current) {
+      positionHandler(positionRef.current);
+      const scrollHandlerDispose = observeScroll(positionRef.current, positionHandler);
+      const resizeHandlerDispose = observeResize(positionRef.current, positionHandler);
 
       return () => {
         scrollHandlerDispose();
@@ -75,10 +75,11 @@ export default function Tooltip(props: Props) {
 
   return (
     <>
-      <Box ref={ref} />
+      <Box ref={positionRef} />
       {position &&
         createPortal(
           <Box
+            ref={ref}
             position="absolute"
             top={0}
             left={0}
@@ -92,3 +93,5 @@ export default function Tooltip(props: Props) {
     </>
   );
 }
+
+export default forwardRef(Tooltip);
