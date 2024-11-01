@@ -9,7 +9,7 @@ export default function ButtonPage() {
 
   return (
     <Box p={10}>
-      <Box mb={3} fontSize={24}>
+      <Box tag="h1" mb={3} fontSize={24}>
         Button
       </Box>
       <Flex gap={3} ai="center" py={3}>

@@ -2,7 +2,7 @@ import BaseSvg, { BaseSvgProps } from '../../src/components/baseSvg';
 
 export default function PointerSvg(props: BaseSvgProps) {
   return (
-    <BaseSvg width="16" viewBox="0 0 256 256" {...props}>
+    <BaseSvg width="20" viewBox="0 0 256 256" {...props}>
       <g
         stroke="none"
         strokeWidth={0}
@@ -10,7 +10,6 @@ export default function PointerSvg(props: BaseSvgProps) {
         strokeLinecap="butt"
         strokeLinejoin="miter"
         strokeMiterlimit={10}
-        fill="none"
         fillRule="nonzero"
       >
         <path
@@ -21,7 +20,7 @@ export default function PointerSvg(props: BaseSvgProps) {
           strokeLinecap="butt"
           strokeLinejoin="miter"
           strokeMiterlimit="10"
-          fill="#000"
+          fill="currentColor"
           fillRule="nonzero"
           transform="matrix(2.81 0 0 2.81 1.407 1.407)"
           style={{ transition: 'none' }}

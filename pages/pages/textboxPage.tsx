@@ -8,7 +8,7 @@ export default function TextboxPage() {
 
   return (
     <Box p={10}>
-      <Box mb={3} fontSize={24}>
+      <Box tag="h1" mb={3} fontSize={24}>
         Textbox
       </Box>
       <Box py={3}>

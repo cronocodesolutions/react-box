@@ -58,6 +58,9 @@ function DropdownImpl<TVal>(props: Props<TVal>, ref: Ref<HTMLInputElement>): Rea
   const displayButtonRef = useRef<HTMLButtonElement>(null);
   const itemsRef = useRef<HTMLDivElement>(null);
 
+  const [openPosition, setOpenPosition] = useState(0);
+  const openUp = useMemo(() => openPosition > window.innerHeight / 2, [openPosition]);
+
   const openDropdownHandler = useCallback(() => {
     setOpen((prev) => !prev);
   }, [setOpen]);
@@ -95,6 +98,7 @@ function DropdownImpl<TVal>(props: Props<TVal>, ref: Ref<HTMLInputElement>): Rea
             clean
             flex1
             width={1}
+            lineHeight={20}
             placeholder={searchPlaceholder}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
@@ -118,11 +122,13 @@ function DropdownImpl<TVal>(props: Props<TVal>, ref: Ref<HTMLInputElement>): Rea
         </BaseSvg>
       </Button>
       {isOpen && (
-        <Tooltip ref={itemsRef}>
+        <Tooltip ref={itemsRef} bottom={openUp ? 13 : undefined} onPositionChange={(data) => setOpenPosition(data.top)}>
           {(kids.length > 0 || nullItem || noItems) && (
             <Box component="dropdown.items">
-              {nullItem && <DropdownNullItem {...nullItem.props} selected={!selectedKid} onClick={(e) => kidClickHandler(e, nullItem)} />}
-              {kids.map((kid, index) => (
+              {nullItem && kids.length > 0 && (
+                <DropdownNullItem {...nullItem.props} selected={!selectedKid} onClick={(e) => kidClickHandler(e, nullItem)} />
+              )}
+              {kids.map((kid) => (
                 <DropdownItem
                   key={kid.props.value?.toString()}
                   {...kid.props}
@@ -130,7 +136,7 @@ function DropdownImpl<TVal>(props: Props<TVal>, ref: Ref<HTMLInputElement>): Rea
                   onClick={(e) => kidClickHandler(e, kid)}
                 />
               ))}
-              {kids.length === 0 && !nullItem && noItems}
+              {kids.length === 0 && noItems}
             </Box>
           )}
         </Tooltip>

@@ -5,7 +5,7 @@ import RadioButton from '../../src/components/radioButton';
 export default function RadioButtonPage() {
   return (
     <Box p={10}>
-      <Box mb={3} fontSize={24}>
+      <Box tag="h1" mb={3} fontSize={24}>
         Radio Button
       </Box>
 

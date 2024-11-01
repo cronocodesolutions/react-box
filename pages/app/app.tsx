@@ -13,39 +13,61 @@ import Flex from '../../src/components/flex';
 import MenuItem from './menuItem';
 import { Routes, Route } from 'react-router-dom';
 import TextareaPage from '../pages/textareaPage';
-// import DropdownPage from '../pages/dropdownPage';
 import ColorPage from '../pages/colorPage';
 import DropdownPage from '../pages/dropdownPage';
 import PointerSvg from '../svgs/pointerSvg';
+import TextboxSvg from '../svgs/textboxSvg';
+import TextareaSvg from '../svgs/textareaSvg';
+import CheckboxSvg from '../svgs/checkboxSvg';
+import TooltipSvg from '../svgs/tooltipSvg';
+import GridSvg from '../svgs/gridSvg';
+import DropdownSvg from '../svgs/dropdownSvg';
+import DataGridSvg from '../svgs/dataGridSvg';
+import ColorsSvg from '../svgs/colorsSvg';
+import RadioSvg from '../svgs/radioSvg';
+import BoxSvg from '../svgs/boxSvg';
 
 export default function App() {
   return (
     <Flex height="fit-screen" color="violet-950" bgImage="body-bg">
-      <Box height="fit-screen" width={60} px={2}>
-        <MenuItem to="/" bgColor={undefined} hover={{ bgColor: undefined }} color={undefined}>
+      <Box height="fit-screen" md={{ width: 55, px: 2 }} width={14} px={1}>
+        <MenuItem to="/" bgColor={undefined} hover={{ bgColor: undefined }} color={undefined} Icon={BoxSvg}>
           <Box fontWeight={700} py={5}>
             React Box
           </Box>
         </MenuItem>
-        <Box ml={4} mb={4} color="black" fontWeight={500}>
-          Components
-        </Box>
-        {/* <MenuItem to="/box">Box</MenuItem> */}
-        {/* <MenuItem to="/flex">Flex</MenuItem> */}
-        <MenuItem to="/button">Button</MenuItem>
-        {/* <PointerSvg fill="currentColor" transition="none" /> Button
-        </MenuItem> */}
-        <MenuItem to="/textbox">Textbox</MenuItem>
-        <MenuItem to="/textarea">Textarea</MenuItem>
-        <MenuItem to="/checkbox">Checkbox</MenuItem>
-        <MenuItem to="/radiobutton">Radio Button</MenuItem>
-        <MenuItem to="/tooltip">Tooltip</MenuItem>
-        <MenuItem to="/grid">Grid</MenuItem>
-        <MenuItem to="/dropdown">Dropdown</MenuItem>
-        <MenuItem to="/datagrid">Data Grid</MenuItem>
-        <MenuItem to="/colors">Colors</MenuItem>
+        <MenuItem to="/button" Icon={PointerSvg}>
+          Button
+        </MenuItem>
+        <MenuItem to="/textbox" Icon={TextboxSvg}>
+          Textbox
+        </MenuItem>
+        <MenuItem to="/textarea" Icon={TextareaSvg}>
+          Textarea
+        </MenuItem>
+        <MenuItem to="/checkbox" Icon={CheckboxSvg}>
+          Checkbox
+        </MenuItem>
+        <MenuItem to="/radiobutton" Icon={RadioSvg}>
+          Radio Button
+        </MenuItem>
+        <MenuItem to="/tooltip" Icon={TooltipSvg}>
+          Tooltip
+        </MenuItem>
+        <MenuItem to="/grid" Icon={GridSvg}>
+          Grid
+        </MenuItem>
+        <MenuItem to="/dropdown" Icon={DropdownSvg}>
+          Dropdown
+        </MenuItem>
+        <MenuItem to="/datagrid" Icon={DataGridSvg}>
+          Data Grid
+        </MenuItem>
+        <MenuItem to="/colors" Icon={ColorsSvg}>
+          Colors
+        </MenuItem>
       </Box>
-      <Box flex1 bl={1} borderColor="violet-100" overflow="auto">
+      <Box flex1 bl={1} borderColor="violet-100" overflow="auto" px={3}>
         <Routes>
           <Route index element={<HomePage />} />
           {/* <Route path="/box" element={<BoxPage />} />

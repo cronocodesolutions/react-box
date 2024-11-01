@@ -5,7 +5,7 @@ import Flex from '../../src/components/flex';
 export default function CheckboxPage() {
   return (
     <Box p={10}>
-      <Box mb={3} fontSize={24}>
+      <Box tag="h1" mb={3} fontSize={24}>
         Checkbox
       </Box>
       <Flex py={3} gap={2} ai="center">

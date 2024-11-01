@@ -4,7 +4,7 @@ import Textarea from '../../src/components/textarea';
 export default function TextareaPage() {
   return (
     <Box p={10}>
-      <Box mb={3} fontSize={24}>
+      <Box tag="h1" mb={3} fontSize={24}>
         Textarea
       </Box>
       <Box py={3}>

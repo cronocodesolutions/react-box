@@ -23,7 +23,7 @@ export default function DataGrid<TRow extends {}>(props: Props<TRow>) {
     <Box component="dataGrid">
       <Grid b={1} borderRadius={1}>
         {columns.map((column, index) => (
-          <Box key={column.key.toString()} style={{ gridColumn: index + 1 }}>
+          <Box key={index} style={{ gridColumn: index + 1 }}>
             {column.key.toString()}
           </Box>
         ))}
@@ -38,7 +38,9 @@ export default function DataGrid<TRow extends {}>(props: Props<TRow>) {
               return (
                 <Grid key={key} style={{ gridTemplateRows: 'subgrid' }}>
                   {columns.map((column, i) => (
-                    <Box style={{ gridColumn: i + 1 }}>tes {i}</Box>
+                    <Box key={i} style={{ gridColumn: i + 1 }}>
+                      tes {i}
+                    </Box>
                   ))}
                 </Grid>
               );

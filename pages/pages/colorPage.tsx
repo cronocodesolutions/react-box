@@ -174,7 +174,7 @@ const colors: Record<string, BoxProps['color'][]> = {
 export default function ColorPage() {
   return (
     <Flex gap={10} d="column" p={10}>
-      <Box mb={3} fontSize={24}>
+      <Box tag="h1" mb={3} fontSize={24}>
         Color
       </Box>
       {Object.entries(colors).map(([group, items]) => (

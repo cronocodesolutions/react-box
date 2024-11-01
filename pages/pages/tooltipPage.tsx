@@ -10,10 +10,10 @@ export default function TooltipPage() {
 
   return (
     <Box p={10}>
-      <Box mb={3} fontSize={24}>
+      <Box tag="h1" mb={3} fontSize={24}>
         Tooltip
       </Box>
-      <Box mt={10} width={200} height={72} b={1} borderRadius={1} overflow="auto" bgColor="violet-100" position="relative">
+      <Box mt={10} maxWidth={200} height={72} b={1} borderRadius={1} overflow="auto" bgColor="violet-100" position="relative">
         <Box position="sticky" top={4} textAlign="right" m={4}>
           overflow hidden box
         </Box>
@@ -41,7 +41,7 @@ export default function TooltipPage() {
         </Flex>
       </Box>
 
-      <Box mt={10} width={200} height={72} b={1} borderRadius={1} overflow="auto" bgColor="violet-100" position="relative">
+      <Box mt={10} maxWidth={200} height={72} b={1} borderRadius={1} overflow="auto" bgColor="violet-100" position="relative">
         <Box position="sticky" top={4} textAlign="right" m={4}>
           overflow hidden box
         </Box>

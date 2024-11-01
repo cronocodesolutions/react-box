@@ -17,9 +17,9 @@ export default function useVisibility<T extends HTMLElement = HTMLDivElement>(
       }
     }
 
-    function resizeHandler() {
-      setVisibility(false);
-    }
+    // function resizeHandler() {
+    //   setVisibility(false);
+    // }
 
     function hideVisibilityKeyboardHandler(e: KeyboardEvent) {
       if (e.key === 'Escape') setVisibility(false);
@@ -27,13 +27,13 @@ export default function useVisibility<T extends HTMLElement = HTMLDivElement>(
 
     if (isVisible) {
       window.addEventListener('mousedown', clickHandler);
-      window.addEventListener('resize', resizeHandler);
+      // window.addEventListener('resize', resizeHandler);
       window.addEventListener('keydown', hideVisibilityKeyboardHandler);
     }
 
     return () => {
       window.removeEventListener('mousedown', clickHandler);
-      window.removeEventListener('resize', resizeHandler);
+      // window.removeEventListener('resize', resizeHandler);
       window.removeEventListener('keydown', hideVisibilityKeyboardHandler);
     };
   }, [node, isVisible]);

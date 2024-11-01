@@ -1150,6 +1150,18 @@ export const cssStyles = {
       styleName: 'outline-color',
     },
   ],
+  fill: [
+    {
+      values: Object.keys(Variables.colors) as Variables.ColorType[],
+      valueFormat: (value, getVariableValue) => getVariableValue(value),
+    },
+  ],
+  stroke: [
+    {
+      values: Object.keys(Variables.colors) as Variables.ColorType[],
+      valueFormat: (value, getVariableValue) => getVariableValue(value),
+    },
+  ],
   bgImage: [
     {
       values: ['none', 'bg-img-checked', 'bg-img-indeterminate', 'bg-img-radio'] as const,
