@@ -8,9 +8,11 @@ import Box from '../../src/box';
 interface Props {
   language: 'javascript' | 'shell' | 'auto';
   children: string;
+  label: string;
+  number: number;
 }
 
-export default function Code({ children, language }: Props) {
+export default function Code({ children, language, number, label }: Props) {
   const [copied, setCopied] = useState(false);
 
   function copyHandler() {
@@ -29,11 +31,17 @@ export default function Code({ children, language }: Props) {
 
   return (
     <Box>
-      <Flex jc="end" ai="center">
-        {copied && <Box>✔️</Box>}
-        <Button py={1} onClick={() => copyHandler()}>
-          Copy
-        </Button>
+      <Flex jc="space-between" ai="center">
+        <Flex ai="center" gap={2}>
+          <Box component="number">{number}</Box>
+          <Box>{label}</Box>
+        </Flex>
+        <Flex ai="center">
+          {copied && <Box>✔️</Box>}
+          <Button py={1} onClick={() => copyHandler()}>
+            Copy
+          </Button>
+        </Flex>
       </Flex>
 
       <Box tag="pre">

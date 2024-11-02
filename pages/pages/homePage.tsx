@@ -10,7 +10,7 @@ export default function HomePage() {
   }, []);
 
   return (
-    <Flex ai="center" width="fit" mt={20} d="column">
+    <Box mt={20} pb={10}>
       <Flex d="column" ai="center" textAlign="center">
         <Box fontSize={44} fontWeight={500} maxWidth={200}>
           Productivity tool to rapidly build modern web app based on React library
@@ -20,28 +20,21 @@ export default function HomePage() {
           <Box> Never DRY with your CSS styles. Keep typescript compilation power.</Box>
         </Box>
       </Flex>
-      <Box mt={20} fontSize={30}>
+      <Flex mt={20} jc="center" fontSize={30}>
         Steps to start
-      </Box>
+      </Flex>
 
-      <Box mt={12}>
-        <Flex ai="center" gap={3}>
-          <Box component="number">1</Box>
-          <Box>Install npm library</Box>
-        </Flex>
-        <Code language="shell">{`npm install @cronocode/react-box`}</Code>
-        <Flex ai="center" gap={3} mt={10}>
-          <Box component="number">2</Box>
-          <Box>Usage</Box>
-        </Flex>
-        <Code language="javascript">
+      <Flex mt={12} maxWidth={100} d="column" gap={10} mx="auto">
+        <Code label="Install npm library" number={1} language="shell">{`npm install @cronocode/react-box`}</Code>
+
+        <Code label="Usage" number={2} language="javascript">
           {`import Box from '@cronocode/react-box';
 
 function Component () {
   return <Box>Hello world</Box>;
 }`}
         </Code>
-      </Box>
-    </Flex>
+      </Flex>
+    </Box>
   );
 }
