@@ -7,6 +7,7 @@ import BoxExtends from './core/boxExtends';
 import Theme from './core/theme';
 import Variables from './core/variables';
 import BoxUtils from './utils/box/boxUtils';
+import './array';
 
 type AllProps<TTag extends keyof React.JSX.IntrinsicElements> = React.ComponentProps<TTag>;
 type TagPropsType<TTag extends keyof React.JSX.IntrinsicElements> = Omit<

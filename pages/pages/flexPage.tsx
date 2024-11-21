@@ -1,5 +1,6 @@
 import Box from '../../src/box';
 import Flex from '../../src/components/flex';
+import Form from '../../src/components/form';
 
 export default function FlexPage() {
   return (
@@ -21,6 +22,27 @@ export default function FlexPage() {
         </Box>
         <Box component="mycomponent.item2">this is item 2</Box>
       </Box>
+
+      <Form
+        onSubmit={(obj, e) => {
+          // e.preventDefault();
+          // var formData = new FormData(e.currentTarget);
+
+          // console.log(Object.fromEntries(formData));
+          console.log(obj);
+        }}
+      >
+        <input name="test" type="hidden" value="2" />
+        <input name="test" type="hidden" value="3" />
+        {/* <select name="test" multiple>
+          <option>test1</option>
+          <option>test2</option>
+          <option>test3</option>
+          <option>test4</option>
+        </select> */}
+
+        <button type="submit">click</button>
+      </Form>
     </Flex>
   );
 }

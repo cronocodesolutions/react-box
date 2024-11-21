@@ -1,4 +1,4 @@
-import { forwardRef, Ref, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { forwardRef, Ref, useCallback, useEffect, useMemo, useRef, useState, Children } from 'react';
 import Box, { BoxProps } from '../box';
 import Tooltip from './tooltip';
 import BaseSvg from './baseSvg';
@@ -18,17 +18,18 @@ interface Props<TVal> extends BoxProps {
   isSearchable?: boolean;
   searchPlaceholder?: string;
   onChange?: (value: TVal) => void;
-  selectedValue?: TVal;
+  defaultValue?: TVal | Array<TVal>;
+  multiple?: boolean;
 }
 
 function DropdownImpl<TVal>(props: Props<TVal>, ref: Ref<HTMLInputElement>): React.ReactNode {
-  const { children, name, isSearchable, searchPlaceholder, onChange, selectedValue } = props;
+  const { children, name, isSearchable, searchPlaceholder, onChange, defaultValue, multiple } = props;
 
+  const allKids = useMemo(() => (Array.isArray(children) ? children : [children]), [children]);
   const [search, setSearch] = useState<string>('');
-  const kids = useMemo(() => {
-    const arr = Array.isArray(children) ? children : [children];
 
-    return arr.filter((x) => {
+  const kids = useMemo(() => {
+    return allKids.filter((x) => {
       if ((x.type as any)?.componentName !== 'DropdownItem') return false;
 
       if (isSearchable && search) {
@@ -39,20 +40,16 @@ function DropdownImpl<TVal>(props: Props<TVal>, ref: Ref<HTMLInputElement>): Rea
 
       return true;
     });
-  }, [isSearchable, search, children]);
-  const nullItem = useMemo(() => {
-    const arr = Array.isArray(children) ? children : [children];
+  }, [isSearchable, search, allKids]);
 
-    return arr.find((x) => (x.type as any)?.componentName === 'DropdownNullItem');
-  }, [isSearchable, search, children]);
-  const noItems = useMemo(() => {
-    const arr = Array.isArray(children) ? children : [children];
-
-    return arr.find((x) => (x.type as any)?.componentName === 'DropdownNoItems');
-  }, [isSearchable, search, children]);
-  const [selectedKid, setSelectedKid] = useState<Maybe<React.ReactElement<DropdownItemProps<TVal>>>>(
-    kids.find((k) => k.props.value === selectedValue),
+  const nullItem = useMemo(
+    () => allKids.find((x) => (x.type as any)?.componentName === 'DropdownNullItem'),
+    [isSearchable, search, allKids],
   );
+
+  const noItems = useMemo(() => allKids.find((x) => (x.type as any)?.componentName === 'DropdownNoItems'), [isSearchable, search, allKids]);
+  const [selectedValues, setSelectedValues] = useState(Array.isArray(defaultValue) ? defaultValue : defaultValue ? [defaultValue] : []);
+
   const [isOpen, setOpen, refToUse] = useVisibility();
   const searchBoxRef = useRef<HTMLInputElement>(null);
   const displayButtonRef = useRef<HTMLButtonElement>(null);
@@ -65,16 +62,30 @@ function DropdownImpl<TVal>(props: Props<TVal>, ref: Ref<HTMLInputElement>): Rea
     setOpen((prev) => !prev);
   }, [setOpen]);
 
-  const kidClickHandler = useCallback((e: React.MouseEvent, kid: React.ReactElement<DropdownItemProps<TVal>>) => {
-    setSelectedKid(kid);
-    setOpen(false);
+  const kidClickHandler = useCallback(
+    (e: React.MouseEvent, kid: React.ReactElement<DropdownItemProps<TVal>>) => {
+      setSelectedValues((prev) => {
+        if (multiple) {
+          const values = prev.filter((value) => value !== kid.props.value);
 
-    kid.props.onClick?.(e);
+          return values.length < prev.length ? values : [...values, kid.props.value];
+        } else {
+          return [kid.props.value];
+        }
+      });
 
-    onChange?.(kid.props.value);
+      kid.props.onClick?.(e);
+      onChange?.(kid.props.value);
 
-    setTimeout(() => displayButtonRef.current?.focus(), 0);
-  }, []);
+      if (multiple) {
+        e.stopPropagation();
+      } else {
+        setOpen(false);
+        setTimeout(() => displayButtonRef.current?.focus(), 0);
+      }
+    },
+    [multiple, setSelectedValues],
+  );
 
   useEffect(() => {
     if (isOpen) {
@@ -87,9 +98,27 @@ function DropdownImpl<TVal>(props: Props<TVal>, ref: Ref<HTMLInputElement>): Rea
     }
   }, [isOpen]);
 
+  const display = useMemo(() => {
+    const selectedKids = kids.filter((k) => selectedValues.includes(k.props.value));
+
+    if (multiple && selectedKids.length > 1) {
+      return selectedKids.map((x) => searchItemText(x)).join(', ');
+    }
+
+    const selectedKid = selectedKids.at(0);
+
+    return (
+      (selectedKid?.props.children as React.ReactElement<DropdownItemProps<TVal>>) ??
+      selectedKid?.props.value ??
+      nullItem?.props.children ?? <Box height={5} />
+    );
+  }, [multiple, kids, nullItem, selectedValues]);
+
   return (
     <Box ref={refToUse} width="fit-content">
-      <Textbox ref={ref} name={name} type="hidden" value={(selectedKid?.props?.value as string) ?? ''} />
+      {selectedValues.map((x) => (
+        <Textbox key={JSON.stringify(x)} ref={ref} name={name} type="hidden" value={JSON.stringify(x) ?? ''} />
+      ))}
 
       <Button ref={displayButtonRef} component="dropdown" {...props} props={{ onMouseDown: openDropdownHandler }}>
         {isSearchable && (
@@ -112,27 +141,25 @@ function DropdownImpl<TVal>(props: Props<TVal>, ref: Ref<HTMLInputElement>): Rea
             }}
           />
         )}
-        <Flex display={isOpen && isSearchable ? 'none' : 'flex'}>
-          {(selectedKid?.props.children as React.ReactElement<DropdownItemProps<TVal>>) ??
-            selectedKid?.props.value ??
-            nullItem?.props.children ?? <Box height={5} />}
+        <Flex display={isOpen && isSearchable ? 'none' : 'flex'} textWrap="nowrap" overflow="hidden" textOverflow="ellipsis">
+          {display}
         </Flex>
-        <BaseSvg viewBox="0 0 10 6" width="0.6rem" rotate={isOpen ? 180 : 0}>
-          <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 1 4 4 4-4" />
-        </BaseSvg>
+        <Box>
+          <BaseSvg viewBox="0 0 10 6" width="0.6rem" rotate={isOpen ? 180 : 0}>
+            <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 1 4 4 4-4" />
+          </BaseSvg>
+        </Box>
       </Button>
       {isOpen && (
         <Tooltip ref={itemsRef} bottom={openUp ? 13 : undefined} onPositionChange={(data) => setOpenPosition(data.top)}>
           {(kids.length > 0 || nullItem || noItems) && (
             <Box component="dropdown.items">
-              {nullItem && kids.length > 0 && (
-                <DropdownNullItem {...nullItem.props} selected={!selectedKid} onClick={(e) => kidClickHandler(e, nullItem)} />
-              )}
+              {nullItem && kids.length > 0 && <DropdownNullItem {...nullItem.props} onClick={(e) => setSelectedValues([])} />}
               {kids.map((kid) => (
                 <DropdownItem
                   key={kid.props.value?.toString()}
                   {...kid.props}
-                  selected={kid === selectedKid}
+                  selected={selectedValues.includes(kid.props.value)}
                   onClick={(e) => kidClickHandler(e, kid)}
                 />
               ))}
@@ -146,22 +173,30 @@ function DropdownImpl<TVal>(props: Props<TVal>, ref: Ref<HTMLInputElement>): Rea
 }
 
 function DropdownItem<TVal>(props: DropdownItemProps<TVal>) {
-  return <Button component="dropdown.item" {...props} props={{ onMouseDown: props.onClick }} />;
+  const { onClick, ...restProps } = props;
+
+  return <Button component="dropdown.item" {...restProps} props={{ onMouseDown: onClick }} />;
 }
 (DropdownItem as any).componentName = 'DropdownItem';
 
 function DropdownNullItem<TVal>(props: Omit<DropdownItemProps<TVal>, 'value'>) {
-  return <Button component="dropdown.nullItem" {...props} props={{ onMouseDown: props.onClick }} />;
+  const { onClick, ...restProps } = props;
+
+  return <Button component="dropdown.nullItem" {...restProps} props={{ onMouseDown: props.onClick }} />;
 }
 (DropdownNullItem as any).componentName = 'DropdownNullItem';
 
 function DropdownNoItems<TVal>(props: Omit<DropdownItemProps<TVal>, 'value'>) {
-  return <Box component="dropdown.noItems" {...props} />;
+  const { onClick, ...restProps } = props;
+
+  return <Box component="dropdown.noItems" {...restProps} />;
 }
 (DropdownNoItems as any).componentName = 'DropdownNoItems';
 
 function DropdownDisplay<TVal>(props: DropdownItemProps<TVal>) {
-  return <Box component="dropdown.display" {...props} props={{ onMouseDown: props.onClick }} />;
+  const { onClick, ...restProps } = props;
+
+  return <Box component="dropdown.display" {...restProps} props={{ onMouseDown: props.onClick }} />;
 }
 (DropdownDisplay as any).componentName = 'DropdownDisplay';
 
