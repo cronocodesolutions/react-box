@@ -42,7 +42,7 @@ export default function BoxPage() {
       </Flex>
       <Flex flex1 d="column">
         <Flex flex1 ai="center" jc="center" bb={1}>
-          <Code language="javascript">
+          <Code language="javascript" label={'Box'} number={0}>
             {`import Box from '@cronocode/react-box';
 
 function Component () {
