@@ -45,7 +45,7 @@ export default function App() {
         <MenuItem to="/textarea" Icon={TextareaSvg}>
           Textarea
         </MenuItem>
-        <MenuItem to="/checkbox" Icon={CheckboxSvg}>
+        <MenuItem to="/checkbox" Icon={() => <CheckboxSvg checked />}>
           Checkbox
         </MenuItem>
         <MenuItem to="/radiobutton" Icon={RadioSvg}>

@@ -231,7 +231,7 @@ namespace Theme {
             lineHeight: 20,
             borderRadius: 1,
             hover: {
-              bgColor: 'violet-50',
+              bgColor: 'gray-100',
             },
             focus: {
               bgColor: 'violet-50',
@@ -239,10 +239,20 @@ namespace Theme {
             selected: {
               bgColor: 'violet-50',
               cursor: 'default',
+              hover: {
+                bgColor: 'violet-100',
+              },
+            },
+          },
+          themes: {
+            multiple: {
+              selected: {
+                cursor: 'pointer',
+              },
             },
           },
         },
-        nullItem: {
+        unselectItem: {
           styles: {
             display: 'flex',
             width: 'fit',
@@ -263,7 +273,7 @@ namespace Theme {
             },
           },
         },
-        noItems: {
+        emptyItem: {
           styles: {
             display: 'flex',
             width: 'fit',
