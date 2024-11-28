@@ -228,7 +228,6 @@ namespace Theme {
             width: 'fit',
             p: 3,
             cursor: 'pointer',
-            lineHeight: 20,
             borderRadius: 1,
             hover: {
               bgColor: 'gray-100',

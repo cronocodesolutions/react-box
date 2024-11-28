@@ -125,6 +125,7 @@ function DropdownImpl<TVal>(props: Props<TVal>, ref: Ref<HTMLInputElement>): Rea
             clean
             flex1
             width={1}
+            minHeight={5}
             placeholder={searchPlaceholder}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
@@ -150,7 +151,6 @@ function DropdownImpl<TVal>(props: Props<TVal>, ref: Ref<HTMLInputElement>): Rea
 
       {isOpen && (
         <Tooltip
-          key={JSON.stringify(selectedValues)}
           ref={itemsRef}
           top={openUp ? undefined : 0}
           bottom={openUp ? 2 : undefined}
