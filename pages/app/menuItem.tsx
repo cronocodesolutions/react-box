@@ -17,11 +17,11 @@ export default function MenuItem(props: Props) {
     <NavLink to={to}>
       {({ isActive }) => (
         <Flex
+          pl={10}
+          userSelect="none"
           gap={2}
           my={1}
           ai="center"
-          jc="center"
-          md={{ jc: 'left' }}
           bgColor={isActive ? 'violet-100' : undefined}
           color={isActive ? 'violet-800' : undefined}
           cursor={isActive ? 'default' : 'pointer'}
@@ -32,9 +32,7 @@ export default function MenuItem(props: Props) {
           {...restProps}
         >
           {Icon && <Icon />}
-          <Box display="none" md={{ display: 'block' }}>
-            {children}
-          </Box>
+          {children}
         </Flex>
       )}
     </NavLink>

@@ -1,18 +1,34 @@
 import { useEffect, useLayoutEffect, useState } from 'react';
 import Prism from 'prismjs';
+// import 'prismjs/components/prism-bash';
+// import 'prismjs/components/prism-css';
+// import 'prismjs/components/prism-csv';
+// import 'prismjs/components/prism-docker';
+// import 'prismjs/components/prism-git';
+// import 'prismjs/components/prism-json';
+import 'prismjs/components/prism-jsx';
+// import 'prismjs/components/prism-markdown';
+// import 'prismjs/components/prism-markup';
+// import 'prismjs/components/prism-mongodb';
+// import 'prismjs/components/prism-python';
+// import 'prismjs/components/prism-regex';
+// import 'prismjs/components/prism-sql';
+// import 'prismjs/components/prism-typescript';
+// import 'prismjs/components/prism-yaml';
 import 'prismjs/themes/prism-okaidia.css';
 import Button from '../../src/components/button';
 import Flex from '../../src/components/flex';
 import Box from '../../src/box';
+import CopySvg from '../svgs/copySvg';
 
 interface Props {
-  language: 'javascript' | 'shell' | 'auto';
+  language?: 'javascript' | 'shell' | 'jsx' | 'auto';
   children: string;
-  label: string;
-  number: number;
+  label?: string;
+  number?: number;
 }
 
-export default function Code({ children, language, number, label }: Props) {
+export default function Code({ children, language = 'jsx', number, label }: Props) {
   const [copied, setCopied] = useState(false);
 
   function copyHandler() {
@@ -31,17 +47,15 @@ export default function Code({ children, language, number, label }: Props) {
 
   return (
     <Box>
-      <Flex jc="space-between" ai="center">
+      <Flex jc="space-between" ai="center" position="relative">
         <Flex ai="center" gap={2}>
-          <Box component="number">{number}</Box>
-          <Box>{label}</Box>
+          {number && <Box component="number">{number}</Box>}
+          {label && <Box>{label}</Box>}
         </Flex>
-        <Flex ai="center">
-          {copied && <Box>✔️</Box>}
-          <Button py={1} onClick={() => copyHandler()}>
-            Copy
-          </Button>
-        </Flex>
+
+        <Button clean cursor="pointer" position="absolute" right={0} bottom={1} onClick={() => copyHandler()}>
+          {copied ? <Box>✔️</Box> : <CopySvg width="16px" />}
+        </Button>
       </Flex>
 
       <Box tag="pre">

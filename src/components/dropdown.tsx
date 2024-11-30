@@ -93,6 +93,7 @@ function DropdownImpl<TVal>(props: Props<TVal>, ref: Ref<HTMLInputElement>): Rea
 
       if (multiple) {
         e.stopPropagation();
+
         setTimeout(() => searchBoxRef.current?.focus(), 0);
       } else {
         setOpen(false);
@@ -139,7 +140,7 @@ function DropdownImpl<TVal>(props: Props<TVal>, ref: Ref<HTMLInputElement>): Rea
             }}
           />
         )}
-        <Flex display={isOpen && isSearchable ? 'none' : 'flex'} flex1 minHeight={5}>
+        <Flex component="dropdown.display" display={isOpen && isSearchable ? 'none' : 'flex'} flex1 minHeight={5}>
           {display}
         </Flex>
         <Box>

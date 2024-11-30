@@ -1169,6 +1169,20 @@ export const cssStyles = {
       styleName: 'background-image',
     },
   ],
+  shadow: [
+    {
+      values: ['small-shadow', 'medium-shadow', 'large-shadow'] as const,
+      valueFormat: (value, getVariableValue) => getVariableValue(value),
+      styleName: 'box-shadow',
+    },
+  ],
+  translateX: [
+    {
+      values: 0,
+      valueFormat: (value: number) => `translateX(${value / 4}rem)`,
+      styleName: 'transform',
+    },
+  ],
 } satisfies Record<string, BoxStyle[]>;
 
 export const pseudo1 = {
@@ -1224,9 +1238,14 @@ export const pseudoGroupClasses = {
 } satisfies { [key: string]: keyof typeof pseudoClasses };
 
 export const breakpoints = {
+  /** Styles applied for small screens and larger. >= 640 */
   sm: 640,
+  /** Styles applied for medium screens and larger. >= 768 */
   md: 768,
+  /** Styles applied for large screens and larger. >= 1024 */
   lg: 1024,
+  /** Styles applied for extra-large screens and larger. >= 1280 */
   xl: 1280,
+  /** Styles applied for 2x extra-large screens and larger. >= 1536 */
   xxl: 1536,
 };

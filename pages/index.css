@@ -27,3 +27,7 @@ html {
 .hljs-meta.prompt_ {
   color: #3b75e9;
 }
+
+.token.tag {
+  color: #4ec9b0;
+}

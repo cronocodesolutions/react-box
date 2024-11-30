@@ -40,7 +40,7 @@ const data: Person[] = [
 
 export default function DataGridPage() {
   return (
-    <Box p={10}>
+    <Box>
       <Box tag="h1" mb={3} fontSize={24}>
         DataGrid
       </Box>

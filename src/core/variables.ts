@@ -261,6 +261,9 @@ namespace Variables {
     'bg-img-checked': `url("data:image/svg+xml,${encodeURIComponent(`<svg xmlns='http://www.w3.org/2000/svg' width='100%' viewBox='0 0 20 20'><path fill='none' stroke='#FFF' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M6 10l3 3l6-6'/></svg>`)}")`,
     'bg-img-indeterminate': `url("data:image/svg+xml,${encodeURIComponent(`<svg xmlns='http://www.w3.org/2000/svg' width='100%' viewBox='0 0 20 20'><line stroke='${colors['violet-400']}' x1='4' y1='10' x2='16' y2='10' stroke-width='1' /></svg>`)}")`,
     'bg-img-radio': `url("data:image/svg+xml,${encodeURIComponent(`<svg xmlns='http://www.w3.org/2000/svg' width='100%' viewBox='0 0 20 20'><circle fill='#FFF' cx='10' cy='10' r='5'/></svg>`)}")`,
+    'small-shadow': 'rgba(0, 0, 0, 0.16) 0px 1px 4px',
+    'medium-shadow': 'rgba(0, 0, 0, 0.24) 0px 3px 8px',
+    'large-shadow': 'rgba(17, 17, 26, 0.1) 0px 4px 16px, rgba(17, 17, 26, 0.05) 0px 8px 32px',
   };
 
   const _usedVariables: Record<string, string> = {};

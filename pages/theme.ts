@@ -2,6 +2,11 @@ import Box from '../src/box';
 import './extends';
 
 Box.themeSetup({
+  button: {
+    styles: {
+      //
+    },
+  },
   components: {
     colorBox: {
       styles: {

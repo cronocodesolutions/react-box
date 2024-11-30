@@ -1,9 +1,9 @@
 import { BoxThemeStyles } from '../types';
 import ObjectUtils from '../utils/object/objectUtils';
 import { ThemeInternal } from './useTheme';
-import Variables from './variables';
 
 export interface ThemeComponentStyles {
+  clean?: boolean;
   styles: BoxThemeStyles;
   themes?: {
     [name: string]: BoxThemeStyles;
@@ -205,6 +205,13 @@ namespace Theme {
         },
       },
       children: {
+        display: {
+          styles: {
+            whiteSpace: 'nowrap',
+            textOverflow: 'ellipsis',
+            overflow: 'hidden',
+          },
+        },
         items: {
           styles: {
             display: 'flex',
@@ -220,6 +227,7 @@ namespace Theme {
             maxHeight: 62,
             borderColor: 'violet-300',
             color: 'violet-950',
+            shadow: 'medium-shadow',
           },
         },
         item: {
@@ -293,6 +301,12 @@ namespace Theme {
 
     Object.entries(restStyles).forEach(([name, componentStructure]) => {
       com[name] = componentStructure;
+    });
+
+    Object.keys(com).forEach((name) => {
+      if (com[name].clean && name in defaultTheme) {
+        delete defaultTheme[name as keyof ThemeSetup];
+      }
     });
 
     ThemeInternal.components = ObjectUtils.mergeDeep<{ [name: string]: ThemeComponentStyles }>(defaultTheme, com);

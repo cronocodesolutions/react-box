@@ -7,7 +7,7 @@ export default function DropdownPage() {
   const [selectedValues, setSelectedValues] = useState<number[]>([]);
 
   return (
-    <Box p={10} pb={500}>
+    <Box pb={500}>
       <Box tag="h1" mb={3} fontSize={24}>
         Dropdown
       </Box>
@@ -71,7 +71,7 @@ export default function DropdownPage() {
         </Dropdown>
       </Box>
       <Box py={3}>
-        <Dropdown name="item" maxWidth={45} multiple onChange={(value, values) => console.log(value, values)}>
+        <Dropdown name="item" multiple onChange={(value, values) => console.log(value, values)}>
           <Dropdown.EmptyItem>No options</Dropdown.EmptyItem>
           <Dropdown.Item value={10}>ten</Dropdown.Item>
           <Dropdown.Item value={JSON.stringify({ a: 4, b: 4 })}>twenty</Dropdown.Item>

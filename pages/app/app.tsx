@@ -1,4 +1,3 @@
-import BoxPage from '../pages/boxPage';
 import ButtonPage from '../pages/buttonPage';
 import CheckboxPage from '../pages/checkboxPage';
 import DataGridPage from '../pages/dataGridPage';
@@ -10,68 +9,48 @@ import TextboxPage from '../pages/textboxPage';
 import TooltipPage from '../pages/tooltipPage';
 import Box from '../../src/box';
 import Flex from '../../src/components/flex';
-import MenuItem from './menuItem';
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route, useLocation, NavLink } from 'react-router-dom';
 import TextareaPage from '../pages/textareaPage';
 import ColorPage from '../pages/colorPage';
 import DropdownPage from '../pages/dropdownPage';
-import PointerSvg from '../svgs/pointerSvg';
-import TextboxSvg from '../svgs/textboxSvg';
-import TextareaSvg from '../svgs/textareaSvg';
-import CheckboxSvg from '../svgs/checkboxSvg';
-import TooltipSvg from '../svgs/tooltipSvg';
-import GridSvg from '../svgs/gridSvg';
-import DropdownSvg from '../svgs/dropdownSvg';
-import DataGridSvg from '../svgs/dataGridSvg';
-import ColorsSvg from '../svgs/colorsSvg';
-import RadioSvg from '../svgs/radioSvg';
+import Button from '../../src/components/button';
+import { useLayoutEffect, useState } from 'react';
+import MenuSvg from '../svgs/menuSvg';
+import Sidebar from './sidebar';
 import BoxSvg from '../svgs/boxSvg';
 
 export default function App() {
+  const [open, setOpen] = useState(false);
+
+  const location = useLocation();
+  useLayoutEffect(() => setOpen(false), [location]);
+
   return (
-    <Flex height="fit-screen" color="violet-950" bgImage="body-bg">
-      <Box height="fit-screen" md={{ width: 55, px: 2 }} width={14} px={1}>
-        <MenuItem to="/" bgColor={undefined} hover={{ bgColor: undefined }} color={undefined} Icon={BoxSvg}>
-          <Box fontWeight={700} py={5}>
-            React Box
-          </Box>
-        </MenuItem>
-        <MenuItem to="/button" Icon={PointerSvg}>
-          Button
-        </MenuItem>
-        <MenuItem to="/textbox" Icon={TextboxSvg}>
-          Textbox
-        </MenuItem>
-        <MenuItem to="/textarea" Icon={TextareaSvg}>
-          Textarea
-        </MenuItem>
-        <MenuItem to="/checkbox" Icon={() => <CheckboxSvg checked />}>
-          Checkbox
-        </MenuItem>
-        <MenuItem to="/radiobutton" Icon={RadioSvg}>
-          Radio Button
-        </MenuItem>
-        <MenuItem to="/tooltip" Icon={TooltipSvg}>
-          Tooltip
-        </MenuItem>
-        <MenuItem to="/grid" Icon={GridSvg}>
-          Grid
-        </MenuItem>
-        <MenuItem to="/dropdown" Icon={DropdownSvg}>
-          Dropdown
-        </MenuItem>
-        <MenuItem to="/datagrid" Icon={DataGridSvg}>
-          Data Grid
-        </MenuItem>
-        <MenuItem to="/colors" Icon={ColorsSvg}>
-          Colors
-        </MenuItem>
+    <Flex color="violet-950" bgImage="body-bg" position="relative" minHeight="fit-screen">
+      <Box position="absolute" lg={{ display: 'none' }} zIndex={1}>
+        <Flex gap={3} p={3}>
+          <NavLink to="/">
+            <BoxSvg />
+          </NavLink>
+          <Button clean onClick={() => setOpen(!open)}>
+            <MenuSvg />
+          </Button>
+        </Flex>
       </Box>
-      <Box flex1 bl={1} borderColor="violet-100" overflow="auto" px={3}>
+      <Box
+        style={{ backgroundColor: 'rgba(0,0,0,.3)' }}
+        position="absolute"
+        inset={open ? 0 : undefined}
+        lg={{ position: 'static' }}
+        props={{ onClick: () => setOpen(!open) }}
+        zIndex={1}
+      >
+        <Sidebar width={70} position="sticky" top={0} ml={open ? 0 : -70} lg={{ ml: 0 }} />
+      </Box>
+
+      <Box flex1 overflow="auto" px={8} pt={14} lg={{ pt: 6, pr: 70 }}>
         <Routes>
           <Route index element={<HomePage />} />
-          {/* <Route path="/box" element={<BoxPage />} />
-           */}
           <Route path="/flex" element={<FlexPage />} />
           <Route path="/grid" element={<GridPage />} />
           <Route path="/textbox" element={<TextboxPage />} />

@@ -4,7 +4,7 @@ import Form from '../../src/components/form';
 
 export default function FlexPage() {
   return (
-    <Flex p={10} d="column">
+    <Flex d="column">
       <Box
         fontSize={50}
         lineHeight="font-size"

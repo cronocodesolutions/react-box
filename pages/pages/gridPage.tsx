@@ -3,7 +3,7 @@ import Grid from '../../src/components/grid';
 
 export default function GridPage() {
   return (
-    <Box p={10}>
+    <Box>
       <Box tag="h1" mb={3} fontSize={24}>
         Grid
       </Box>

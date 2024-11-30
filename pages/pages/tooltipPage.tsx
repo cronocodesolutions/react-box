@@ -9,7 +9,7 @@ export default function TooltipPage() {
   const [open2, setOpen2] = useState(false);
 
   return (
-    <Box p={6}>
+    <Box>
       <Box tag="h1" mb={3} fontSize={24}>
         Tooltip
       </Box>
