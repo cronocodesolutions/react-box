@@ -27,7 +27,7 @@ export default function HomePage() {
       <Flex mt={12} maxWidth={100} d="column" gap={10} mx="auto">
         <Code label="Install npm library" number={1} language="shell">{`npm install @cronocode/react-box`}</Code>
 
-        <Code label="Usage" number={2} language="javascript">
+        <Code label="Usage" number={2} language="jsx">
           {`import Box from '@cronocode/react-box';
 
 function Component () {

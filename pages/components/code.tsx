@@ -1,6 +1,6 @@
 import { useEffect, useLayoutEffect, useState } from 'react';
 import Prism from 'prismjs';
-// import 'prismjs/components/prism-bash';
+import 'prismjs/components/prism-bash';
 // import 'prismjs/components/prism-css';
 // import 'prismjs/components/prism-csv';
 // import 'prismjs/components/prism-docker';
