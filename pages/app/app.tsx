@@ -14,7 +14,7 @@ import TextareaPage from '../pages/textareaPage';
 import ColorPage from '../pages/colorPage';
 import DropdownPage from '../pages/dropdownPage';
 import Button from '../../src/components/button';
-import { useLayoutEffect, useState } from 'react';
+import { useState } from 'react';
 import MenuSvg from '../svgs/menuSvg';
 import Sidebar from './sidebar';
 import BoxSvg from '../svgs/boxSvg';
@@ -22,19 +22,16 @@ import BoxSvg from '../svgs/boxSvg';
 export default function App() {
   const [open, setOpen] = useState(false);
 
-  const location = useLocation();
-  useLayoutEffect(() => setOpen(false), [location]);
-
   return (
     <Flex color="violet-950" bgImage="body-bg" position="relative" minHeight="fit-screen">
-      <Box position="absolute" lg={{ display: 'none' }} zIndex={1}>
-        <Flex gap={3} p={3}>
+      <Box position="absolute" lg={{ display: 'none' }} zIndex={1} width="fit">
+        <Flex gap={3} pl={8} py={5}>
+          <Button clean onClick={() => setOpen(!open)} borderRadius={1} shadow="small-shadow" px={1} borderColor="violet-950">
+            <MenuSvg color="violet-950" />
+          </Button>
           <NavLink to="/">
             <BoxSvg />
           </NavLink>
-          <Button clean onClick={() => setOpen(!open)}>
-            <MenuSvg />
-          </Button>
         </Flex>
       </Box>
       <Box
@@ -48,7 +45,7 @@ export default function App() {
         <Sidebar width={70} position="sticky" top={0} ml={open ? 0 : -70} lg={{ ml: 0 }} />
       </Box>
 
-      <Box flex1 overflow="auto" px={8} pt={14} lg={{ pt: 6, pr: 70 }}>
+      <Box flex1 overflow="auto" px={8} pt={16} lg={{ pt: 7, pr: 70 }}>
         <Routes>
           <Route index element={<HomePage />} />
           <Route path="/flex" element={<FlexPage />} />

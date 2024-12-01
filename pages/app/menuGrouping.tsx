@@ -27,7 +27,12 @@ export default function MenuGrouping(props: Props) {
         transition="none"
         hover={{ bgColor: 'violet-100', color: 'violet-800' }}
         {...restProps}
-        props={{ onClick: () => setOpen(open === 'closed' ? 'open' : 'closed') }}
+        props={{
+          onClick: (e) => {
+            e.stopPropagation();
+            setOpen(open === 'closed' ? 'open' : 'closed');
+          },
+        }}
       >
         <Flex gap={2} ai="center" flex1>
           <Icon />
