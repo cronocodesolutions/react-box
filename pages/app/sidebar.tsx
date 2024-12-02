@@ -19,7 +19,7 @@ export default function Sidebar(props: BoxProps) {
           {/* <MenuItem to="/theme" Icon={ThemeSetupSvg}> */}
           Installation
         </MenuItem>
-        <MenuItem to="/theme">
+        <MenuItem to="/theme-setup">
           {/* <MenuItem to="/theme" Icon={ThemeSetupSvg}> */}
           Theme setup
         </MenuItem>

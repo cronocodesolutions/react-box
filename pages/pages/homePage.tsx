@@ -1,14 +1,8 @@
-import { useLayoutEffect } from 'react';
 import Box from '../../src/box';
 import Flex from '../../src/components/flex';
-import Prism from 'prismjs';
 import Code from '../components/code';
 
 export default function HomePage() {
-  useLayoutEffect(() => {
-    Prism.highlightAll();
-  }, []);
-
   return (
     <Box mt={20} pb={10}>
       <Flex d="column" ai="center" textAlign="center">
