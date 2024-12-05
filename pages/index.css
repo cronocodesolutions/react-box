@@ -31,3 +31,8 @@ html {
 .token.tag {
   color: #4ec9b0;
 }
+
+pre[class*='language-'] {
+  margin-block: 0;
+  border-radius: 0;
+}

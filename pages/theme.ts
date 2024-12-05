@@ -1,7 +1,8 @@
 import Box from '../src/box';
+import { ThemeSetup } from '../src/core/theme';
 import './extends';
 
-Box.themeSetup({
+export const themeStyles: ThemeSetup = {
   button: {
     styles: {
       //
@@ -30,4 +31,6 @@ Box.themeSetup({
       },
     },
   },
-});
+};
+
+Box.themeSetup(themeStyles);

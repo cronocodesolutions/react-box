@@ -25,8 +25,8 @@ export default function App() {
   const [open, setOpen] = useState(false);
 
   return (
-    <Box color="violet-950" bgImage="body-bg" minHeight="fit-screen" position="relative" pb={10}>
-      <Box position="sticky" top={0} lg={{ display: 'none' }} bgImage="body-bg">
+    <Box color="violet-950" bgImage="body-bg" minHeight="fit-screen" position="relative">
+      <Box position="sticky" top={0} lg={{ display: 'none' }} bgImage="body-bg" bgColor="white" zIndex={1}>
         <Flex gap={3} pl={8} py={5}>
           <Button clean onClick={() => setOpen(!open)} borderRadius={1} shadow="small-shadow" px={1} borderColor="violet-950">
             <MenuSvg color="violet-950" />
@@ -48,7 +48,7 @@ export default function App() {
           <Sidebar width={70} position="sticky" top={0} ml={open ? 0 : -70} lg={{ ml: 0 }} />
         </Box>
 
-        <Box flex1 overflow="auto" px={8} pt={6} lg={{ pr: 70 }}>
+        <Box flex1 overflow="auto" px={8} pt={6} pb={16} lg={{ pr: 70 }}>
           <Routes>
             <Route index element={<HomePage />} />
             <Route path="/installation" element={<InstallationPage />} />

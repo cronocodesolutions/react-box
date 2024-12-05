@@ -15,24 +15,33 @@ import 'prismjs/components/prism-jsx';
 // import 'prismjs/components/prism-sql';
 // import 'prismjs/components/prism-typescript';
 // import 'prismjs/components/prism-yaml';
+
+// import 'prismjs/themes/prism-coy.css';
+// import 'prismjs/themes/prism-dark.css';
+// import 'prismjs/themes/prism-funky.css';
+// import 'prismjs/themes/prism-tomorrow.css';
+// import 'prismjs/themes/prism-twilight.css';
 import 'prismjs/themes/prism-okaidia.css';
 import Button from '../../src/components/button';
-import Flex from '../../src/components/flex';
-import Box from '../../src/box';
+import Box, { BoxProps } from '../../src/box';
 import CopySvg from '../svgs/copySvg';
+import Label from '../../src/components/label';
+import CheckboxSvg from '../svgs/checkboxSvg';
+import Flex from '../../src/components/flex';
 
-interface Props {
+interface Props extends BoxProps {
   language?: 'javascript' | 'shell' | 'jsx' | 'auto';
-  children: string;
   label?: string;
   number?: number;
+  code?: string;
 }
 
-export default function Code({ children, language = 'jsx', number, label }: Props) {
+export default function Code(props: Props) {
+  const { children, language = 'jsx', number, label, code, ...restProps } = props;
   const [copied, setCopied] = useState(false);
 
   function copyHandler() {
-    navigator.clipboard.writeText(children);
+    navigator.clipboard.writeText(code!);
 
     setCopied(true);
   }
@@ -43,24 +52,33 @@ export default function Code({ children, language = 'jsx', number, label }: Prop
 
   useLayoutEffect(() => {
     Prism.highlightAll();
-  }, [children]);
+  }, [code]);
 
   return (
-    <Box>
-      <Flex jc="space-between" ai="center" position="relative">
-        <Flex ai="center" gap={2}>
-          {number && <Box component="number">{number}</Box>}
-          {label && <Box>{label}</Box>}
-        </Flex>
+    <Box {...restProps}>
+      <Label fontSize={22} mb={2}>
+        {label}
+      </Label>
+      <Box shadow="small-shadow" b={1} borderColor="gray-300" borderRadius={1} overflow="hidden">
+        <Box position="relative">
+          <Box tag="pre">
+            <Flex bb={1} borderColor="white" pb={3}>
+              {code && (
+                <Button clean cursor={copied ? 'default' : 'pointer'} onClick={() => copyHandler()}>
+                  {copied ? <CheckboxSvg noFrame checked stroke="white" width="16px" /> : <CopySvg fill="white" width="16px" />}
+                </Button>
+              )}
+            </Flex>
+            <Box tag="code" className={`language-${language}`} mt={3} py={3}>
+              {code}
+            </Box>
+          </Box>
 
-        <Button clean cursor="pointer" position="absolute" right={0} bottom={1} onClick={() => copyHandler()}>
-          {copied ? <Box>✔️</Box> : <CopySvg width="16px" />}
-        </Button>
-      </Flex>
-
-      <Box tag="pre">
-        <Box mt={1} tag="code" className={`language-${language}`}>
-          {children}
+          {children && (
+            <Box px={3} py={6}>
+              {children}
+            </Box>
+          )}
         </Box>
       </Box>
     </Box>

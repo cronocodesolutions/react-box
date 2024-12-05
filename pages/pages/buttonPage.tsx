@@ -1,9 +1,8 @@
-import { useRef, useState } from 'react';
+import { useState } from 'react';
 import Box from '../../src/box';
 import Button from '../../src/components/button';
 import Flex from '../../src/components/flex';
 import Code from '../components/code';
-import Label from '../../src/components/label';
 
 export default function ButtonPage() {
   const [counter, setCounter] = useState(0);
@@ -15,27 +14,40 @@ export default function ButtonPage() {
       </Box>
 
       <Box tag="h4" fontSize={18} fontWeight={400} mb={10}>
-        Use button component in order to handle user click/tap behavior
+        Use button component in order to handle user click behavior
       </Box>
 
-      <Label fontSize={22}>Import</Label>
-      <Code>{`import Button from '@cronocode/react-box/components/button';`}</Code>
+      <Code label="Import" code="import Button from '@cronocode/react-box/components/button';" />
 
-      <Button mt={10}>Basic</Button>
-      <Code>{`<Button>Basic</Button>`}</Code>
+      <Code label="Basic Button" code="<Button>Basic</Button>" mt={10}>
+        <Button>Basic</Button>
+      </Code>
 
-      <Flex gap={3} ai="center" mt={10}>
-        <Button onClick={() => setCounter((prev) => prev + 1)}>Increase count!</Button>
-        <Box fontSize={18}>{counter}</Box>
-      </Flex>
-      <Code>{`<Button onClick={() => setCounter((prev) => prev + 1)}>
-  Increase count!
-</Button>`}</Code>
+      <Code label="Disabled Button" code="<Button disabled>Disabled</Button>" mt={10}>
+        <Button disabled onClick={() => alert('Click')}>
+          Disabled
+        </Button>
+      </Code>
 
-      <Button disabled onClick={() => alert('Click')} mt={10}>
-        Disabled
-      </Button>
-      <Code>{`<Button disabled>Disabled</Button>`}</Code>
+      <Code
+        label="Increment Button"
+        code={`function Component() {
+  const [counter, setCounter] = useState(0);
+
+  return (
+    <Flex gap={3} ai="center">
+      <Button onClick={() => setCounter((prev) => prev + 1)}>Increase count!</Button>
+      <Box fontSize={18}>{counter}</Box>
+    </Flex>
+  );
+}`}
+        mt={10}
+      >
+        <Flex gap={3} ai="center">
+          <Button onClick={() => setCounter((prev) => prev + 1)}>Increase count!</Button>
+          <Box fontSize={18}>{counter}</Box>
+        </Flex>
+      </Code>
     </Box>
   );
 }
