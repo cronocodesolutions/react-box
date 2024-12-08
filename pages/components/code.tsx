@@ -61,7 +61,12 @@ export default function Code(props: Props) {
       </Label>
       <Box shadow="small-shadow" b={1} borderColor="gray-300" borderRadius={1} overflow="hidden">
         <Box position="relative">
-          <Box tag="pre" maxHeight={100}>
+          {children && (
+            <Box px={3} py={6}>
+              {children}
+            </Box>
+          )}
+          <Box tag="pre">
             <Flex bb={1} borderColor="white" pb={3}>
               {code && (
                 <Button clean cursor={copied ? 'default' : 'pointer'} onClick={() => copyHandler()}>
@@ -69,16 +74,10 @@ export default function Code(props: Props) {
                 </Button>
               )}
             </Flex>
-            <Box tag="code" className={`language-${language}`} mt={3} py={3}>
+            <Box tag="code" className={`language-${language}`} mt={3} py={3} maxHeight={100} overflow="auto">
               {code}
             </Box>
           </Box>
-
-          {children && (
-            <Box px={3} py={6}>
-              {children}
-            </Box>
-          )}
         </Box>
       </Box>
     </Box>
