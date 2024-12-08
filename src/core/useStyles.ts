@@ -13,7 +13,7 @@ import {
 } from './boxStyles';
 import IdentityFactory from '@cronocode/identity-factory';
 import { BoxStyle } from './coreTypes';
-import { useTheme } from './useTheme';
+import useTheme from './theme/useTheme';
 import Variables from './variables';
 
 const identity = new IdentityFactory();

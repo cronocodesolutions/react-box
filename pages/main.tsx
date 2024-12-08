@@ -3,14 +3,18 @@ import ReactDOM from 'react-dom/client';
 import App from './app/app';
 import './index.css';
 import { HashRouter } from 'react-router-dom';
+import Box from '../src/box';
 import './theme';
+import './extends';
 
 const root = ReactDOM.createRoot(document.getElementById('root')!);
 
 root.render(
   <React.StrictMode>
     <HashRouter>
-      <App />
+      <Box.Theme theme="mainTheme">
+        <App />
+      </Box.Theme>
     </HashRouter>
   </React.StrictMode>,
 );

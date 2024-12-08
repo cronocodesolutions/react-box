@@ -1,44 +1,11 @@
-import { useEffect, useLayoutEffect, useRef } from 'react';
 import Box from '../../src/box';
 import Button from '../../src/components/button';
 import Code from '../components/code';
 import Flex from '../../src/components/flex';
-import { themeStyles } from '../theme';
+import LightSvg from '../svgs/lightSvg';
+import DarkSvg from '../svgs/darkSvg';
 
 export default function ThemeSetupPage() {
-  const initialRenderRef = useRef(true);
-
-  if (initialRenderRef.current) {
-    initialRenderRef.current = false;
-    Box.themeSetup({
-      button: {
-        styles: {
-          bgColor: 'blue-500',
-          b: 0,
-          hover: {
-            bgColor: 'blue-400',
-          },
-        },
-        themes: {
-          primary: {
-            bgColor: 'sky-400',
-            hover: {
-              bgColor: 'sky-500',
-            },
-          },
-          secondary: {
-            bgColor: 'indigo-400',
-            hover: {
-              bgColor: 'indigo-500',
-            },
-          },
-        },
-      },
-    });
-  }
-
-  useEffect(() => () => Box.themeSetup(themeStyles), []);
-
   return (
     <Box>
       <Box tag="h1" mb={3} fontSize={24}>
@@ -52,57 +19,151 @@ export default function ThemeSetupPage() {
       <Code
         label="Define your own styles"
         code={`import Box from '@cronocode/react-box';
+import Flex from '@cronocode/react-box/components/flex';
+import Button from '@cronocode/react-box/components/button';
         
 Box.themeSetup({
-  button: {
-    styles: {
-      bgColor: 'blue-500',
-      b: 0,
-      hover: {
-        bgColor: 'blue-400',
-      },
-    },
-    themes: {
-      primary: {
-        bgColor: 'sky-400',
+  demoTheme: {
+    button: {
+      styles: {
+        bgColor: 'blue-500',
+        b: 0,
         hover: {
-          bgColor: 'sky-500',
+          bgColor: 'blue-400',
         },
       },
-      secondary: {
-        bgColor: 'indigo-400',
-        hover: {
-          bgColor: 'indigo-500',
+      themes: {
+        primary: {
+          bgColor: 'sky-400',
+          hover: {
+            bgColor: 'sky-500',
+          },
+        },
+        secondary: {
+          bgColor: 'indigo-400',
+          hover: {
+            bgColor: 'indigo-500',
+          },
         },
       },
     },
   },
-});`}
-        mt={10}
-      ></Code>
+});
 
-      <Code
-        label="Usage"
-        code={`import Button from '@cronocode/react-box/components/button';
-        
-function Component() {
+function App() {
   return (
-    <Flex gap={3}>
-      <Button>Default</Button>
-      <Button theme="primary">Primary</Button>
-      <Button theme="secondary">Secondary</Button>
-    </Flex>
+    <Box.Theme theme="demoTheme">
+      <Flex gap={3}>
+        <Button>Default</Button>
+        <Button theme="primary">Primary</Button>
+        <Button theme="secondary">Secondary</Button>
+      </Flex>
+    </Box.Theme>
   );
 }
 `}
         mt={10}
       >
-        <Flex gap={3}>
-          <Button>Default</Button>
-          <Button theme="primary">Primary</Button>
-          <Button theme="secondary">Secondary</Button>
-        </Flex>
+        <Box.Theme theme="demoTheme">
+          <Flex gap={3}>
+            <Button>Default</Button>
+            <Button theme="primary">Primary</Button>
+            <Button theme="secondary">Secondary</Button>
+          </Flex>
+        </Box.Theme>
       </Code>
+
+      <Code
+        label="Change theme from the child component"
+        code={`import Box from '@cronocode/react-box';
+        
+Box.themeSetup({
+  light: {
+    components: {
+      bg: {
+        styles: {
+          color: 'indigo-950',
+          bgColor: 'white',
+        },
+      },
+      icon: {
+        styles: {
+          fill: 'indigo-950',
+        },
+      },
+    },
+  },
+  dark: {
+    components: {
+      bg: {
+        styles: {
+          color: 'white',
+          bgColor: 'indigo-950',
+        },
+      },
+      icon: {
+        styles: {
+          fill: 'white',
+        },
+      },
+    },
+  },
+});
+
+function App() {
+  return (
+    <Box.Theme theme="light">
+      <Sample />
+    </Box.Theme>
+  );
+}
+
+function Sample() {
+  const [theme, setTheme] = Box.useTheme();
+
+  return (
+    <Box component="bg" p={3} borderRadius={2} b={1}>
+      <Flex gap={3}>
+        <Button bgColor="transparent" onClick={() => setTheme('light')}>
+          <LightSvg component="icon" />
+        </Button>
+        <Button bgColor="transparent" onClick={() => setTheme('dark')}>
+          <DarkSvg component="icon" />
+        </Button>
+      </Flex>
+      <Box p={3} textTransform="capitalize">
+        {theme}
+      </Box>
+    </Box>
+  );
+}
+`}
+        mt={10}
+      >
+        <Box.Theme theme="light">
+          <Sample />
+        </Box.Theme>
+      </Code>
+    </Box>
+  );
+}
+
+function Sample() {
+  const [theme, setTheme] = Box.useTheme();
+
+  return (
+    <Box component="bg" p={3} borderRadius={2} b={1}>
+      <Flex gap={3} ai="center">
+        <Button bgColor="transparent" onClick={() => setTheme('light')}>
+          <LightSvg component="icon" />
+        </Button>
+        <Button bgColor="transparent" onClick={() => setTheme('dark')}>
+          <DarkSvg component="icon" />
+        </Button>
+        <Box textTransform="capitalize" p={3}>
+          This is {theme} theme
+        </Box>
+      </Flex>
     </Box>
   );
 }

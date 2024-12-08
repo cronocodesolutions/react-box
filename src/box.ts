@@ -4,7 +4,7 @@ import { ExtractElementFromTag } from './core/coreTypes';
 import { BoxStyleProps } from './types';
 import useStyles from './core/useStyles';
 import BoxExtends from './core/boxExtends';
-import Theme from './core/theme';
+import Theme from './core/theme/theme';
 import Variables from './core/variables';
 import BoxUtils from './utils/box/boxUtils';
 import './array';
@@ -60,6 +60,8 @@ interface BoxType {
   ): React.ReactNode;
   extend: typeof BoxExtends.extend;
   themeSetup: typeof Theme.setup;
+  Theme: typeof Theme;
+  useTheme: typeof Theme.useTheme;
   getVariableValue: typeof Variables.getVariableValue;
 }
 
@@ -68,6 +70,8 @@ const Box = memo(forwardRef(BoxComponent)) as unknown as BoxType;
 
 Box.extend = BoxExtends.extend;
 Box.themeSetup = Theme.setup;
+Box.Theme = Theme;
+Box.useTheme = Theme.useTheme;
 Box.getVariableValue = Variables.getVariableValue;
 
 export default Box;

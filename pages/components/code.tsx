@@ -61,7 +61,7 @@ export default function Code(props: Props) {
       </Label>
       <Box shadow="small-shadow" b={1} borderColor="gray-300" borderRadius={1} overflow="hidden">
         <Box position="relative">
-          <Box tag="pre">
+          <Box tag="pre" maxHeight={100}>
             <Flex bb={1} borderColor="white" pb={3}>
               {code && (
                 <Button clean cursor={copied ? 'default' : 'pointer'} onClick={() => copyHandler()}>

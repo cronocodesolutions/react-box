@@ -48,7 +48,7 @@ export default function App() {
           <Sidebar width={70} position="sticky" top={0} ml={open ? 0 : -70} lg={{ ml: 0 }} />
         </Box>
 
-        <Box flex1 overflow="auto" px={8} pt={6} pb={16} lg={{ pr: 70 }}>
+        <Box flex1 overflow="auto" px={8} pt={6} pb={16}>
           <Routes>
             <Route index element={<HomePage />} />
             <Route path="/installation" element={<InstallationPage />} />
