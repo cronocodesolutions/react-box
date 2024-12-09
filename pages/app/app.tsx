@@ -36,7 +36,7 @@ export default function App() {
           </NavLink>
         </Flex>
       </Box>
-      <Flex>
+      <Flex jc="space-between">
         <Box
           style={{ backgroundColor: 'rgba(0,0,0,.3)' }}
           position="absolute"
@@ -48,7 +48,7 @@ export default function App() {
           <Sidebar width={70} position="sticky" top={0} ml={open ? 0 : -70} lg={{ ml: 0 }} />
         </Box>
 
-        <Box flex1 overflow="auto" px={8} pt={6} pb={16}>
+        <Box flex1 overflow="auto" px={8} pt={6} pb={16} maxWidth={270}>
           <Routes>
             <Route index element={<HomePage />} />
             <Route path="/installation" element={<InstallationPage />} />
@@ -66,6 +66,7 @@ export default function App() {
             <Route path="/colors" element={<ColorPage />} />
           </Routes>
         </Box>
+        <Box width={0} xl={{ width: 70 }} />
       </Flex>
     </Box>
   );
