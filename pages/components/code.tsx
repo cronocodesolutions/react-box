@@ -66,7 +66,7 @@ export default function Code(props: Props) {
               {children}
             </Box>
           )}
-          <Box tag="pre">
+          <Box tag="pre" className={`language-${language}`}>
             <Flex bb={1} borderColor="white" pb={3}>
               {code && (
                 <Button clean cursor={copied ? 'default' : 'pointer'} onClick={() => copyHandler()}>

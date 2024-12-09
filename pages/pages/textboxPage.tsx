@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import Box from '../../src/box';
 import Textbox from '../../src/components/textbox';
-import Flex from '../../src/components/flex';
+import Code from '../components/code';
 
 export default function TextboxPage() {
   const [controlledValue, setControlledValue] = useState('');
@@ -11,17 +11,19 @@ export default function TextboxPage() {
       <Box tag="h1" mb={3} fontSize={24}>
         Textbox
       </Box>
-      <Box py={3}>
+      <Box tag="h4" fontSize={18} fontWeight={400} mb={10}>
+        Use textbox component in order to enter and edit users data
+      </Box>
+
+      <Code label="Import" code="import Textbox from '@cronocode/react-box/components/textbox';" />
+
+      <Code label="Basic Textbox" code='<Textbox placeholder="ex. John" />' mt={10}>
         <Textbox placeholder="ex. John" />
-      </Box>
-      <Flex py={3}>
-        <Box tag="label">
-          <Textbox placeholder="ex. Doe" value={controlledValue} onChange={(e) => setControlledValue(e.target.value)} />
-        </Box>
-      </Flex>
-      <Box py={3}>
+      </Code>
+
+      <Code label="Disabled Textbox" code='<Textbox disabled defaultValue="Disabled" />' mt={10}>
         <Textbox disabled defaultValue="Disabled" />
-      </Box>
+      </Code>
     </Box>
   );
 }

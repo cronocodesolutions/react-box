@@ -156,7 +156,7 @@ function DropdownImpl<TVal>(props: Props<TVal>, ref: Ref<HTMLInputElement>): Rea
           top={openUp ? undefined : 0}
           bottom={openUp ? 2 : undefined}
           style={{ transform: `translateY(-${translateY}px)` }}
-          onPositionChange={(data) => setOpenPosition(data.top)}
+          onPositionChange={(data) => setOpenPosition(data.top - window.scrollY)}
         >
           {(items.length > 0 || emptyItem) && (
             <Box component="dropdown.items">
