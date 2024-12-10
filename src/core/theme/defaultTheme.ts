@@ -232,7 +232,28 @@ const defaultTheme: ThemeSetup = {
           },
         },
       },
-      unselectItem: {
+      unselect: {
+        styles: {
+          display: 'flex',
+          width: 'fit',
+          p: 3,
+          cursor: 'pointer',
+          lineHeight: 20,
+          borderRadius: 1,
+          color: 'violet-400',
+          hover: {
+            bgColor: 'violet-50',
+          },
+          focus: {
+            bgColor: 'violet-50',
+          },
+          selected: {
+            bgColor: 'violet-50',
+            cursor: 'default',
+          },
+        },
+      },
+      selectAll: {
         styles: {
           display: 'flex',
           width: 'fit',

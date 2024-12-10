@@ -36,14 +36,14 @@ export default function DropdownPage() {
       <Code
         label="Unselect Item"
         code={`<Dropdown>
-  <Dropdown.UnselectItem>Select</Dropdown.UnselectItem>
+  <Dropdown.Unselect>Select</Dropdown.Unselect>
   <Dropdown.Item value={1}>Option 1</Dropdown.Item>
   <Dropdown.Item value={2}>Option 2</Dropdown.Item>
 </Dropdown>`}
         mt={10}
       >
         <Dropdown>
-          <Dropdown.UnselectItem>Select</Dropdown.UnselectItem>
+          <Dropdown.Unselect>Select</Dropdown.Unselect>
           <Dropdown.Item value={1}>Option 1</Dropdown.Item>
           <Dropdown.Item value={2}>Option 2</Dropdown.Item>
         </Dropdown>
@@ -52,14 +52,14 @@ export default function DropdownPage() {
       <Code
         label="Disabled"
         code={`<Dropdown disabled>
-  <Dropdown.UnselectItem>Select</Dropdown.UnselectItem>
+  <Dropdown.Unselect>Select</Dropdown.Unselect>
   <Dropdown.Item value={1}>Option 1</Dropdown.Item>
   <Dropdown.Item value={2}>Option 2</Dropdown.Item>
 </Dropdown>`}
         mt={10}
       >
         <Dropdown disabled>
-          <Dropdown.UnselectItem>Select</Dropdown.UnselectItem>
+          <Dropdown.Unselect>Select</Dropdown.Unselect>
           <Dropdown.Item value={1}>Option 1</Dropdown.Item>
           <Dropdown.Item value={2}>Option 2</Dropdown.Item>
         </Dropdown>
@@ -68,7 +68,7 @@ export default function DropdownPage() {
       <Code
         label="Searchable"
         code={`<Dropdown isSearchable>
-  <Dropdown.UnselectItem>Select</Dropdown.UnselectItem>
+  <Dropdown.Unselect>Select</Dropdown.Unselect>
   <Dropdown.Item value={1}>John Doe</Dropdown.Item>
   <Dropdown.Item value={2}>Joe Smith</Dropdown.Item>
   <Dropdown.Item value={3}>Alice</Dropdown.Item>
@@ -77,7 +77,7 @@ export default function DropdownPage() {
         mt={10}
       >
         <Dropdown isSearchable>
-          <Dropdown.UnselectItem>Select</Dropdown.UnselectItem>
+          <Dropdown.Unselect>Select</Dropdown.Unselect>
           <Dropdown.Item value={1}>John Doe</Dropdown.Item>
           <Dropdown.Item value={2}>Joe Smith</Dropdown.Item>
           <Dropdown.Item value={3}>Alice</Dropdown.Item>
@@ -89,7 +89,7 @@ export default function DropdownPage() {
         label="Searchable with no options item"
         code={`<Dropdown isSearchable>
   <Dropdown.EmptyItem>No options</Dropdown.EmptyItem>
-  <Dropdown.UnselectItem>Select</Dropdown.UnselectItem>
+  <Dropdown.Unselect>Select</Dropdown.Unselect>
   <Dropdown.Item value={1}>John Doe</Dropdown.Item>
   <Dropdown.Item value={2}>Joe Smith</Dropdown.Item>
   <Dropdown.Item value={3}>Alice</Dropdown.Item>
@@ -99,7 +99,7 @@ export default function DropdownPage() {
       >
         <Dropdown isSearchable>
           <Dropdown.EmptyItem>No options</Dropdown.EmptyItem>
-          <Dropdown.UnselectItem>Select</Dropdown.UnselectItem>
+          <Dropdown.Unselect>Select</Dropdown.Unselect>
           <Dropdown.Item value={1}>John Doe</Dropdown.Item>
           <Dropdown.Item value={2}>Joe Smith</Dropdown.Item>
           <Dropdown.Item value={3}>Alice</Dropdown.Item>
@@ -111,7 +111,7 @@ export default function DropdownPage() {
         label="Multiple items selection"
         code={`<Dropdown multiple>
   <Dropdown.EmptyItem>No options</Dropdown.EmptyItem>
-  <Dropdown.UnselectItem>Select</Dropdown.UnselectItem>
+  <Dropdown.Unselect>Select</Dropdown.Unselect>
   <Dropdown.Item value={1}>John Doe</Dropdown.Item>
   <Dropdown.Item value={2}>Joe Smith</Dropdown.Item>
   <Dropdown.Item value={3}>Alice</Dropdown.Item>
@@ -121,7 +121,7 @@ export default function DropdownPage() {
       >
         <Dropdown multiple>
           <Dropdown.EmptyItem>No options</Dropdown.EmptyItem>
-          <Dropdown.UnselectItem>Select</Dropdown.UnselectItem>
+          <Dropdown.Unselect>Select</Dropdown.Unselect>
           <Dropdown.Item value={1}>John Doe</Dropdown.Item>
           <Dropdown.Item value={2}>Joe Smith</Dropdown.Item>
           <Dropdown.Item value={3}>Alice</Dropdown.Item>
@@ -134,7 +134,7 @@ export default function DropdownPage() {
         code={`<Dropdown multiple>
   <Dropdown.Display>{(selectedValues) => selectedValues.join('+')}</Dropdown.Display>
   <Dropdown.EmptyItem>No options</Dropdown.EmptyItem>
-  <Dropdown.UnselectItem>Select</Dropdown.UnselectItem>
+  <Dropdown.Unselect>Select</Dropdown.Unselect>
   <Dropdown.Item value={1}>John Doe</Dropdown.Item>
   <Dropdown.Item value={2}>Joe Smith</Dropdown.Item>
   <Dropdown.Item value={3}>Alice</Dropdown.Item>
@@ -145,7 +145,29 @@ export default function DropdownPage() {
         <Dropdown multiple>
           <Dropdown.Display>{(selectedValues: number[]) => selectedValues.join('+')}</Dropdown.Display>
           <Dropdown.EmptyItem>No options</Dropdown.EmptyItem>
-          <Dropdown.UnselectItem>Select</Dropdown.UnselectItem>
+          <Dropdown.Unselect>Select</Dropdown.Unselect>
+          <Dropdown.Item value={1}>John Doe</Dropdown.Item>
+          <Dropdown.Item value={2}>Joe Smith</Dropdown.Item>
+          <Dropdown.Item value={3}>Alice</Dropdown.Item>
+          <Dropdown.Item value={4}>Bob</Dropdown.Item>
+        </Dropdown>
+      </Code>
+
+      <Code
+        label="Multiple items select all/unselect all"
+        code={`<Dropdown multiple>
+  <Dropdown.Unselect>Unselect All</Dropdown.Unselect>
+  <Dropdown.SelectAll>Select All</Dropdown.SelectAll>
+  <Dropdown.Item value={1}>John Doe</Dropdown.Item>
+  <Dropdown.Item value={2}>Joe Smith</Dropdown.Item>
+  <Dropdown.Item value={3}>Alice</Dropdown.Item>
+  <Dropdown.Item value={4}>Bob</Dropdown.Item>
+</Dropdown>`}
+        mt={10}
+      >
+        <Dropdown multiple>
+          <Dropdown.Unselect>Unselect All</Dropdown.Unselect>
+          <Dropdown.SelectAll>Select All</Dropdown.SelectAll>
           <Dropdown.Item value={1}>John Doe</Dropdown.Item>
           <Dropdown.Item value={2}>Joe Smith</Dropdown.Item>
           <Dropdown.Item value={3}>Alice</Dropdown.Item>
