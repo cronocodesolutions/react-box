@@ -64,8 +64,12 @@ function DropdownImpl<TVal>(props: Props<TVal>, ref: Ref<HTMLInputElement>): Rea
 
     const selectedKid = selectedKids.at(0);
 
-    return (selectedKid?.props.children as React.ReactElement<DropdownItemProps<TVal>>) ?? selectedKid?.props.value;
-  }, [multiple, filteredItems, selectedValues]);
+    return (
+      (selectedKid?.props.children as React.ReactElement<DropdownItemProps<TVal>>) ??
+      selectedKid?.props.value ??
+      (multiple ? null : unselectItem?.props.children)
+    );
+  }, [multiple, filteredItems, selectedValues, unselectItem]);
 
   const itemMouseDownHandler = useCallback(
     (e: React.MouseEvent, ...kids: React.ReactElement<DropdownItemProps<TVal>>[]) => {

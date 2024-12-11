@@ -18,7 +18,7 @@ export default function InstallationPage() {
         </Box> */}
       </Code>
 
-      <Box fontSize={48} textAlign="center" mt={10}>
+      <Box fontSize={40} textAlign="center" mt={10}>
         That's it!!!
       </Box>
     </Box>
