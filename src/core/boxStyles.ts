@@ -355,7 +355,7 @@ export const cssStyles = {
     {
       styleName: 'font-size',
       values: 0,
-      valueFormat: BoxStylesFormatters.Value.px,
+      valueFormat: (value: number) => BoxStylesFormatters.Value.rem(value, undefined, 16),
     },
     {
       styleName: 'font-size',

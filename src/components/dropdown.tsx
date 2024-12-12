@@ -1,4 +1,4 @@
-import { forwardRef, Ref, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { forwardRef, FunctionComponent, ReactElement, Ref, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import Box, { BoxProps } from '../box';
 import Textbox from './textbox';
 import Flex from './flex';
@@ -34,8 +34,8 @@ function DropdownImpl<TVal>(props: Props<TVal>, ref: Ref<HTMLInputElement>): Rea
     return refToUse.current?.getBoundingClientRect().height ?? 0;
   }, [openUp, refToUse]);
 
-  const allKids = useMemo<DropdownKidType[]>(() => (Array.isArray(children) ? children : [children]), [children]);
-  const items = useMemo(() => allKids.filter((x) => x.type?.componentName === 'DropdownItem'), [allKids]);
+  const allKids = useMemo<ReactElement<any, FunctionComponent>[]>(() => (Array.isArray(children) ? children : [children]), [children]);
+  const items = useMemo(() => allKids.filter((x) => x.type?.displayName === 'DropdownItem'), [allKids]);
   const filteredItems = useMemo<React.ReactElement<DropdownItemProps<TVal>>[]>(() => {
     return items.filter((x) => {
       if (isSearchable && search) {
@@ -48,10 +48,10 @@ function DropdownImpl<TVal>(props: Props<TVal>, ref: Ref<HTMLInputElement>): Rea
     });
   }, [isSearchable, search, allKids]);
 
-  const unselectItem = useMemo(() => allKids.find((x) => x.type?.componentName === 'DropdownUnselect'), [allKids]);
-  const selectAllItem = useMemo(() => allKids.find((x) => x.type?.componentName === 'DropdownSelectAll'), [allKids]);
-  const emptyItem = useMemo(() => allKids.find((x) => x.type?.componentName === 'DropdownEmptyItem'), [allKids]);
-  const displayItem = useMemo(() => allKids.find((x) => x.type?.componentName === 'DropdownDisplay'), [allKids]);
+  const unselectItem = useMemo(() => allKids.find((x) => (x.type as FunctionComponent)?.displayName === 'DropdownUnselect'), [allKids]);
+  const selectAllItem = useMemo(() => allKids.find((x) => (x.type as FunctionComponent)?.displayName === 'DropdownSelectAll'), [allKids]);
+  const emptyItem = useMemo(() => allKids.find((x) => (x.type as FunctionComponent)?.displayName === 'DropdownEmptyItem'), [allKids]);
+  const displayItem = useMemo(() => allKids.find((x) => (x.type as FunctionComponent)?.displayName === 'DropdownDisplay'), [allKids]);
 
   const display = useMemo(() => {
     if (displayItem) return displayItem.props.children(selectedValues);
@@ -225,8 +225,6 @@ interface DropdownDisplayProps<TVal> extends Omit<BoxProps, 'children'> {
   children: (selectedValues: TVal[]) => React.ReactNode;
 }
 
-type DropdownKidType = React.ReactElement<any, ((props: any) => React.ReactNode) & { componentName: ChildrenName }>;
-
 interface DropdownType {
   <TVal>(props: Props<TVal>, ref: Ref<HTMLInputElement>): React.ReactNode;
   Item: <TVal>(props: DropdownItemProps<TVal>) => React.ReactNode;
@@ -237,8 +235,8 @@ interface DropdownType {
 }
 
 function withName<TProps>(name: ChildrenName) {
-  const fn = (_props: TProps) => null;
-  fn.componentName = name;
+  const fn: FunctionComponent<TProps> = (_props: TProps) => null;
+  fn.displayName = name;
   return fn;
 }
 

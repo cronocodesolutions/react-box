@@ -10,8 +10,8 @@ export namespace BoxStylesFormatters {
   }
 
   export namespace Value {
-    export function rem(value: number) {
-      return `${value / 4}rem`;
+    export function rem(value: number, _fn?: Function, divider = 4) {
+      return `${value / divider}rem`;
     }
     export function px(value: number) {
       return `${value}px`;
