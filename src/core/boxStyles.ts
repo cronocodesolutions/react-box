@@ -1231,10 +1231,10 @@ export const pseudoClassesByWeight = Object.entries(pseudoClasses).reduce(
 );
 
 export const pseudoGroupClasses = {
-  hoverGroup: 'hover',
-  focusGroup: 'focus',
-  activeGroup: 'active',
-  disabledGroup: 'disabled',
+  hoverParent: 'hover',
+  focusParent: 'focus',
+  activeParent: 'active',
+  disabledParent: 'disabled',
 } satisfies { [key: string]: keyof typeof pseudoClasses };
 
 export const breakpoints = {

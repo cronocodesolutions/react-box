@@ -7,21 +7,19 @@ export interface GridDef<TRow> {
   columns: GridColumn<TRow>[];
 }
 
-export interface GridCell<TRow> {
-  key: keyof TRow;
-  value: React.ReactNode;
-}
-
 export interface GridColumn<TRow> {
-  key: keyof TRow;
+  key: KeysMatching<TRow, Key>;
 }
 
-export interface GridRow<TRow> {
-  dataRow: TRow;
-  cells: GridCell<TRow>[];
+export interface GridRow {
+  key: Key;
+  cells: GridCell[];
 }
 
-export interface GridData<TRow> {
-  columns: GridColumn<TRow>[];
-  rows: GridRow<TRow>[];
+export interface GridCell {
+  key: Key;
+  value?: string;
+  // top?: number;
+  width?: number;
+  isHeader?: boolean;
 }

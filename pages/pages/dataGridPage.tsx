@@ -1,5 +1,6 @@
 import Box from '../../src/box';
 import DataGrid from '../../src/components/dataGrid';
+import { GridDef } from '../../src/components/dataGrid/dataGridContract';
 import Grid from '../../src/components/grid';
 
 interface Person {
@@ -36,23 +37,86 @@ const data: Person[] = [
     status: 'Complicated',
     progress: 10,
   },
+  {
+    firstName: 'joe',
+    lastName: 'dirte',
+    age: 45,
+    visits: 20,
+    status: 'Complicated',
+    progress: 10,
+  },
+  {
+    firstName: 'joe',
+    lastName: 'dirte',
+    age: 45,
+    visits: 20,
+    status: 'Complicated',
+    progress: 10,
+  },
+  {
+    firstName: 'joe',
+    lastName: 'dirte',
+    age: 45,
+    visits: 20,
+    status: 'Complicated',
+    progress: 10,
+  },
+  {
+    firstName: 'joe',
+    lastName: 'dirte',
+    age: 45,
+    visits: 20,
+    status: 'Complicated',
+    progress: 10,
+  },
+  {
+    firstName: 'joe',
+    lastName: 'dirte',
+    age: 45,
+    visits: 20,
+    status: 'Complicated',
+    progress: 10,
+  },
+  {
+    firstName: 'tanner',
+    lastName: 'linsley',
+    age: 24,
+    visits: 100,
+    status: 'In Relationship',
+    progress: 50,
+  },
+  {
+    firstName: 'tandy',
+    lastName: 'miller',
+    age: 40,
+    visits: 40,
+    status: 'Single',
+    progress: 80,
+  },
+  {
+    firstName: 'joe',
+    lastName: 'dirte',
+    age: 45,
+    visits: 20,
+    status: 'Complicated',
+    progress: 10,
+  },
 ];
 
 export default function DataGridPage() {
+  var def: GridDef<Person> = {
+    columns: [{ key: 'firstName' }, { key: 'lastName' }, { key: 'age' }, { key: 'visits' }, { key: 'status' }, { key: 'progress' }],
+  };
+
   return (
     <Box>
       <Box tag="h1" mb={3} fontSize={24}>
         DataGrid
       </Box>
-      <DataGrid
-        data={data}
-        def={{
-          rowKey: (rowData) => rowData.firstName + rowData.lastName,
-          columns: [{ key: 'firstName' }, { key: 'firstName' }],
-        }}
-      />
+      <DataGrid data={data} def={def} />
     </Box>
   );
+
   return (
     <Box p={10} overflow="hidden" width={200} height={60}>
       {/* <Box height="fit" overflow="scroll"> */}
@@ -96,19 +160,19 @@ export default function DataGridPage() {
             Header
           </Box>
         </Box>
-        <Box display="contents" hoverGroup="parent">
-          <Box position="sticky" left={0} zIndex={1} hoverGroup={{ parent: { bgColor: 'gray-300' } }}>
+        <Box display="contents" className="parent">
+          <Box position="sticky" left={0} zIndex={1} hoverParent={{ parent: { bgColor: 'gray-300' } }}>
             this is cell with data
           </Box>
-          <Box hoverGroup={{ parent: { bgColor: 'gray-300' } }}>this is cell with data</Box>
-          <Box hoverGroup={{ parent: { bgColor: 'gray-300' } }}>this is cell with data</Box>
-          <Box hoverGroup={{ parent: { bgColor: 'gray-300' } }}>this is cell with data</Box>
-          <Box hoverGroup={{ parent: { bgColor: 'gray-300' } }}>this is cell with data</Box>
-          <Box hoverGroup={{ parent: { bgColor: 'gray-300' } }}>this is cell with data</Box>
-          <Box hoverGroup={{ parent: { bgColor: 'gray-300' } }}>this is cell with data</Box>
-          <Box hoverGroup={{ parent: { bgColor: 'gray-300' } }}>this is cell with data</Box>
-          <Box hoverGroup={{ parent: { bgColor: 'gray-300' } }}>this is cell with data</Box>
-          <Box position="sticky" right={0} hoverGroup={{ parent: { bgColor: 'gray-300' } }}>
+          <Box hoverParent={{ parent: { bgColor: 'gray-300' } }}>this is cell with data</Box>
+          <Box hoverParent={{ parent: { bgColor: 'gray-300' } }}>this is cell with data</Box>
+          <Box hoverParent={{ parent: { bgColor: 'gray-300' } }}>this is cell with data</Box>
+          <Box hoverParent={{ parent: { bgColor: 'gray-300' } }}>this is cell with data</Box>
+          <Box hoverParent={{ parent: { bgColor: 'gray-300' } }}>this is cell with data</Box>
+          <Box hoverParent={{ parent: { bgColor: 'gray-300' } }}>this is cell with data</Box>
+          <Box hoverParent={{ parent: { bgColor: 'gray-300' } }}>this is cell with data</Box>
+          <Box hoverParent={{ parent: { bgColor: 'gray-300' } }}>this is cell with data</Box>
+          <Box position="sticky" right={0} hoverParent={{ parent: { bgColor: 'gray-300' } }}>
             this is cell with data
           </Box>
         </Box>
