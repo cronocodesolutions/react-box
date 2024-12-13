@@ -2,33 +2,38 @@
 // ✅ hover row styles
 // ✅ horizontal scroll for headers + rows
 // ✅ vertical scroll rows only
-// ❌ column sorting
+// ✅ column sorting
+// ✅ pagination
 // ❌ select row checkbox
-// ❌ pagination
 // ❌ filters
 // ❌ pin (left/right)
 // ❌ empty table
 
 // datagrid container
 
-import Box from '../box';
+import Box, { BoxProps } from '../box';
 import { GridCell, GridDef } from './dataGrid/dataGridContract';
 import Grid from './grid';
 import useGridData, { EMPTY_CELL_KEY } from './dataGrid/useGridData';
 import Flex from './flex';
+import Button from './button';
 
-interface Props<TRow> {
+interface Props<TRow> extends BoxProps {
   data?: TRow[];
   def: GridDef<TRow>;
+  pagination?: boolean | { pageSize: number };
 }
 
 export default function DataGrid<TRow extends {}>(props: Props<TRow>) {
+  const { pagination } = props;
   const grid = useGridData(props);
 
   return (
-    <Box component="dataGrid" b={1} borderRadius={1} overflow="hidden">
-      <Box p={3}>top bar</Box>
-      <Box overflow="auto">
+    <Box component="dataGrid" b={1} borderRadius={1} overflow="hidden" {...props}>
+      <Box p={3} bb={1}>
+        top bar
+      </Box>
+      <Box overflow="auto" minHeight={80}>
         <Grid style={{ gridTemplateColumns: grid.gridTemplateColumns }} maxHeight={80}>
           {grid.rows.map((row) => {
             return (
@@ -41,7 +46,26 @@ export default function DataGrid<TRow extends {}>(props: Props<TRow>) {
           })}
         </Grid>
       </Box>
-      <Box p={3}>footer</Box>
+      <Flex p={3} jc="space-between">
+        <Box>footer</Box>
+        {pagination && (
+          <Box>
+            <Button clean inline onClick={() => grid.pagination.changePage(0)}>
+              {'<<'}
+            </Button>{' '}
+            <Button clean inline onClick={() => grid.pagination.changePage(grid.pagination.page - 1)}>
+              {'<'}
+            </Button>{' '}
+            {grid.pagination.page + 1} of {grid.pagination.totalPages}{' '}
+            <Button clean inline onClick={() => grid.pagination.changePage(grid.pagination.page + 1)}>
+              {'>'}
+            </Button>{' '}
+            <Button clean inline onClick={() => grid.pagination.changePage(grid.pagination.totalPages - 1)}>
+              {'>>'}
+            </Button>
+          </Box>
+        )}
+      </Flex>
     </Box>
   );
 }
@@ -55,16 +79,17 @@ function GridCellIml(props: GridCellProps) {
   const isEmptyCell = data.key === EMPTY_CELL_KEY;
 
   return (
-    <Box
+    <Flex
       position={data.isHeader ? 'sticky' : undefined}
       top={data.isHeader ? 0 : undefined}
-      bgColor="white"
+      bgColor={data.isHeader ? 'slate-300' : 'white'}
       height={10}
       width={data.width}
       bb={1}
       hoverParent={{ 'grid-row': { bgColor: data.isHeader ? undefined : 'gray-200' } }}
+      props={{ onClick: data.sortColumn }}
     >
-      <Flex
+      {/* <Flex
         overflow="hidden"
         textOverflow="ellipsis"
         height="fit"
@@ -75,9 +100,9 @@ function GridCellIml(props: GridCellProps) {
         transition="none"
         ai="center"
         px={isEmptyCell ? undefined : 3}
-      >
-        {data.value}
-      </Flex>
-    </Box>
+      > */}
+      {data.value} {data.sortDirection}
+      {/* </Flex> */}
+    </Flex>
   );
 }

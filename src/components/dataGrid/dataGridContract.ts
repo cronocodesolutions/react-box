@@ -1,5 +1,7 @@
 import { Key } from 'react';
 
+export type SortDirection = 'ASC' | 'DESC';
+
 type KeysMatching<T, V> = { [K in keyof T]-?: T[K] extends V ? K : never }[keyof T];
 
 export interface GridDef<TRow> {
@@ -19,7 +21,8 @@ export interface GridRow {
 export interface GridCell {
   key: Key;
   value?: string;
-  // top?: number;
   width?: number;
   isHeader?: boolean;
+  sortDirection?: SortDirection;
+  sortColumn?(): void;
 }

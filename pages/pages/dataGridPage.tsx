@@ -114,6 +114,8 @@ export default function DataGridPage() {
         DataGrid
       </Box>
       <DataGrid data={data} def={def} />
+
+      <DataGrid data={data} def={def} mt={10} pagination />
     </Box>
   );
 
