@@ -266,7 +266,6 @@ a,ul{all: unset;}
 
     const className = `${breakpoint === 'normal' ? '' : `${breakpoint}-`}${pseudoClasses.map((p) => `${p}-`).join('')}${pseudoClassParentName ? `${pseudoClassParentName}-` : ''}${key}-${value}`;
 
-    return className;
     return isTestEnv ? className : identity.getIdentity(className);
   }
 

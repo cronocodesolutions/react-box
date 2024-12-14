@@ -1,7 +1,9 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { GridCell, GridDef, GridRow, SortDirection } from './dataGridContract';
+import FnUtils from '../../utils/fn/fnUtils';
 
 const DEFAULT_WIDTH = 40;
+const DEFAULT_WIDTH_PX = DEFAULT_WIDTH * 4;
 export const EMPTY_CELL_KEY = 'empty-cell';
 const SORT_DIRECTION: SortDirection = 'ASC';
 const DEFAULT_PAGE_SIZE = 10;
@@ -9,15 +11,12 @@ const DEFAULT_PAGE_SIZE = 10;
 interface Props<TRow> {
   data?: TRow[];
   def: GridDef<TRow>;
-  pagination?: boolean | { pageSize: number };
 }
 
 export default function useGridData<TRow>(props: Props<TRow>) {
-  const { data, def, pagination } = props;
+  const { data, def } = props;
 
   let dataToUse = data ? [...data] : [];
-
-  console.count('useGridData');
 
   const [sortColumn, setSortColumn] = useState<{ key: keyof TRow; dir: typeof SORT_DIRECTION }>();
   const sortColumnHandler = useCallback((key: keyof TRow) => {
@@ -39,7 +38,7 @@ export default function useGridData<TRow>(props: Props<TRow>) {
   }, []);
 
   const [pag, setPag] = useState(() => {
-    const pageSize = !pagination || typeof pagination === 'boolean' ? DEFAULT_PAGE_SIZE : pagination.pageSize;
+    const pageSize = !def.pagination || typeof def.pagination === 'boolean' ? DEFAULT_PAGE_SIZE : def.pagination.pageSize;
 
     return { pageSize, page: 0, totalPages: Math.ceil(dataToUse.length / pageSize) };
   });
@@ -51,49 +50,87 @@ export default function useGridData<TRow>(props: Props<TRow>) {
     });
   }, []);
 
-  const headerRow: GridRow = { cells: [], key: 'header' };
-  const rows: GridRow[] = [headerRow];
+  const [columnSize, setColumnSize] = useState<{ [key: string]: number }>({});
 
-  def.columns.forEach((c, index) => {
-    const cell: GridCell = {
-      key: (c.key as string) ?? index,
-      value: c.key as string,
-      width: DEFAULT_WIDTH,
-      isHeader: true,
-      sortColumn: () => sortColumnHandler(c.key),
-    };
+  const resizeColumnHandler = useCallback((e: React.MouseEvent, headerCell: GridCell) => {
+    const startPageX = e.pageX;
+    const prevWidth = headerCell.inlineWidth ?? DEFAULT_WIDTH_PX;
 
-    if (sortColumn?.key === c.key) cell.sortDirection = sortColumn.dir;
+    const resize = FnUtils.throttle((e: MouseEvent) => {
+      setColumnSize((prev) => {
+        const diffPageX = e.pageX - startPageX;
+        const newWidth = prevWidth + diffPageX;
 
-    headerRow.cells.push(cell);
-  });
-  headerRow.cells.push({ key: EMPTY_CELL_KEY, isHeader: true });
+        return { ...prev, [headerCell.key as string]: newWidth < 36 ? 36 : newWidth };
+      });
+    }, 20);
 
-  if (sortColumn) {
-    dataToUse = dataToUse.sort((a, b) => {
-      if (a[sortColumn.key] < b[sortColumn.key]) return sortColumn.dir === 'ASC' ? -1 : 1;
-      if (a[sortColumn.key] > b[sortColumn.key]) return sortColumn.dir === 'ASC' ? 1 : -1;
-      return 0;
+    function stopResize(e: MouseEvent) {
+      window.removeEventListener('mousemove', resize);
+    }
+
+    window.addEventListener('mousemove', resize);
+    window.addEventListener('mouseup', stopResize, { once: true });
+  }, []);
+
+  const rows = useMemo(() => {
+    const headerRow: GridRow = { cells: [], key: 'header' };
+    const rows: GridRow[] = [headerRow];
+
+    def.columns.forEach((c, index) => {
+      const headerCell: GridCell = {
+        key: (c.key as string) ?? index,
+        value: c.key as string,
+        width: DEFAULT_WIDTH,
+        inlineWidth: columnSize[c.key as string],
+        isHeader: true,
+        sortColumn: () => sortColumnHandler(c.key),
+      };
+
+      headerCell.resizeColumn = (e) => resizeColumnHandler(e, headerCell);
+
+      if (sortColumn?.key === c.key) {
+        headerCell.sortDirection = sortColumn.dir;
+      }
+
+      headerRow.cells.push(headerCell);
     });
-  }
+    headerRow.cells.push({ key: EMPTY_CELL_KEY, isHeader: true });
 
-  if (pagination) {
-    dataToUse = dataToUse.take(pag.pageSize, pag.pageSize * pag.page);
-  }
+    if (sortColumn) {
+      dataToUse = dataToUse.sort((a, b) => {
+        if (a[sortColumn.key] < b[sortColumn.key]) return sortColumn.dir === 'ASC' ? -1 : 1;
+        if (a[sortColumn.key] > b[sortColumn.key]) return sortColumn.dir === 'ASC' ? 1 : -1;
+        return 0;
+      });
+    }
 
-  dataToUse.forEach((item, rowIndex) => {
-    const key = def.rowKey ? (typeof def.rowKey === 'function' ? def.rowKey(item) : (item[def.rowKey] as string)) : rowIndex;
+    if (def.pagination) {
+      dataToUse = dataToUse.take(pag.pageSize, pag.pageSize * pag.page);
+    }
 
-    const row: GridRow = { cells: [], key };
+    dataToUse.forEach((item, rowIndex) => {
+      const key = def.rowKey ? (typeof def.rowKey === 'function' ? def.rowKey(item) : (item[def.rowKey] as string)) : rowIndex;
 
-    def.columns.forEach((c) => {
-      row.cells.push({ key: c.key as string, value: item[c.key] as string, width: DEFAULT_WIDTH });
+      const row: GridRow = { cells: [], key };
+
+      def.columns.forEach((c) => {
+        row.cells.push({
+          key: c.key as string,
+          value: item[c.key] as string,
+          width: DEFAULT_WIDTH,
+          inlineWidth: columnSize[c.key as string],
+        });
+      });
+
+      row.cells.push({ key: EMPTY_CELL_KEY });
+
+      rows.push(row);
     });
 
-    row.cells.push({ key: EMPTY_CELL_KEY });
-
-    rows.push(row);
-  });
+    return rows;
+    // TODO: remove columnSize dependency
+  }, [def, sortColumn, pag, columnSize]);
 
   return {
     rows,
@@ -106,3 +143,5 @@ export default function useGridData<TRow>(props: Props<TRow>) {
     },
   };
 }
+
+export type GridData = ReturnType<typeof useGridData>;

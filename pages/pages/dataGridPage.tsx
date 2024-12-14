@@ -108,6 +108,11 @@ export default function DataGridPage() {
     columns: [{ key: 'firstName' }, { key: 'lastName' }, { key: 'age' }, { key: 'visits' }, { key: 'status' }, { key: 'progress' }],
   };
 
+  var def2: GridDef<Person> = {
+    columns: [{ key: 'firstName' }, { key: 'lastName' }, { key: 'age' }, { key: 'visits' }, { key: 'status' }, { key: 'progress' }],
+    pagination: true,
+  };
+
   return (
     <Box>
       <Box tag="h1" mb={3} fontSize={24}>
@@ -115,7 +120,7 @@ export default function DataGridPage() {
       </Box>
       <DataGrid data={data} def={def} />
 
-      <DataGrid data={data} def={def} mt={10} pagination />
+      <DataGrid data={data} def={def2} mt={10} />
     </Box>
   );
 
