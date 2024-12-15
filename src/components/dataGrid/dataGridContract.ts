@@ -34,5 +34,5 @@ export interface GridCell {
   sortColumn?(): void;
   resizeColumn?(e: React.MouseEvent): void;
   // TODO: split GridCell to simple cell and header cell to make pinColumn not undefined-able
-  pinColumn?(pin: PinPosition): void;
+  pinColumn?(pin?: PinPosition): void;
 }

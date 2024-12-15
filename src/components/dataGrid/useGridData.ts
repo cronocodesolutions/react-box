@@ -148,7 +148,7 @@ export default function useGridData<TRow>(props: Props<TRow>) {
         pinLeft: pinLeftSizes[c.key as string],
         isHeader: true,
         sortColumn: () => sortColumnHandler(c.key),
-        pinColumn: (pin: PinPosition) => pinColumnHandler(pin, c.key),
+        pinColumn: (pin?: PinPosition) => pinColumnHandler(pin, c.key),
       };
 
       headerCell.resizeColumn = (e) => resizeColumnHandler(e, headerCell);
