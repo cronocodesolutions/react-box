@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 
 export default function useVisibility<T extends HTMLElement = HTMLDivElement>(
   node: Nullable<T> = null,
+  event: 'mousedown' | 'click' = 'click',
 ): [boolean, React.Dispatch<React.SetStateAction<boolean>>, React.RefObject<T>] {
   const [isVisible, setVisibility] = useState(false);
 
@@ -26,13 +27,13 @@ export default function useVisibility<T extends HTMLElement = HTMLDivElement>(
     }
 
     if (isVisible) {
-      window.addEventListener('mousedown', clickHandler);
+      window.addEventListener(event, clickHandler);
       // window.addEventListener('resize', resizeHandler);
       window.addEventListener('keydown', hideVisibilityKeyboardHandler);
     }
 
     return () => {
-      window.removeEventListener('mousedown', clickHandler);
+      window.removeEventListener(event, clickHandler);
       // window.removeEventListener('resize', resizeHandler);
       window.removeEventListener('keydown', hideVisibilityKeyboardHandler);
     };

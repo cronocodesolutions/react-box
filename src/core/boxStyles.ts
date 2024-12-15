@@ -1,3 +1,4 @@
+import { DEFAULT_REM_DIVIDER } from './boxConstants';
 import { BoxStylesFormatters } from './boxStylesFormatters';
 import { BoxStyle } from './coreTypes';
 import Variables from './variables';
@@ -408,7 +409,7 @@ export const cssStyles = {
   ],
   /** The height CSS property specifies the height of an element. By default, the property defines the height of the content area. If box-sizing is set to border-box, however, it instead determines the height of the border area. */
   height: [
-    { values: 0, valueFormat: (value: number) => `${value / 4}rem` },
+    { values: 0, valueFormat: BoxStylesFormatters.Value.rem },
     {
       values: ['fit'] as const,
       valueFormat: () => '100%',
@@ -457,7 +458,7 @@ export const cssStyles = {
   ],
   /** The min-height CSS property sets the minimum height of an element. It prevents the used value of the height property from becoming smaller than the value specified for min-height. */
   minHeight: [
-    { styleName: 'min-height', values: 0, valueFormat: (value: number) => `${value / 4}rem` },
+    { styleName: 'min-height', values: 0, valueFormat: BoxStylesFormatters.Value.rem },
     {
       styleName: 'min-height',
       values: ['fit'] as const,
@@ -510,7 +511,7 @@ export const cssStyles = {
   ],
   /** The max-height CSS property sets the maximum height of an element. It prevents the used value of the height property from becoming larger than the value specified for max-height. */
   maxHeight: [
-    { styleName: 'max-height', values: 0, valueFormat: (value: number) => `${value / 4}rem` },
+    { styleName: 'max-height', values: 0, valueFormat: BoxStylesFormatters.Value.rem },
     {
       styleName: 'max-height',
       values: ['fit'] as const,
@@ -563,7 +564,7 @@ export const cssStyles = {
   ],
   /** The width CSS property sets an element's width. By default, it sets the width of the content area, but if box-sizing is set to border-box, it sets the width of the border area. */
   width: [
-    { values: 0, valueFormat: (value: number) => `${value / 4}rem` },
+    { values: 0, valueFormat: BoxStylesFormatters.Value.rem },
     {
       values: ['fit'] as const,
       valueFormat: () => '100%',
@@ -612,7 +613,7 @@ export const cssStyles = {
   ],
   /** The min-width CSS property sets the minimum width of an element. It prevents the used value of the width property from becoming smaller than the value specified for min-width. */
   minWidth: [
-    { styleName: 'min-width', values: 0, valueFormat: (value: number) => `${value / 4}rem` },
+    { styleName: 'min-width', values: 0, valueFormat: BoxStylesFormatters.Value.rem },
     {
       styleName: 'min-width',
       values: ['fit'] as const,
@@ -665,7 +666,7 @@ export const cssStyles = {
   ],
   /** The max-width CSS property sets the maximum width of an element. It prevents the used value of the width property from becoming larger than the value specified by max-width. */
   maxWidth: [
-    { styleName: 'max-width', values: 0, valueFormat: (value: number) => `${value / 4}rem` },
+    { styleName: 'max-width', values: 0, valueFormat: BoxStylesFormatters.Value.rem },
     {
       styleName: 'max-width',
       values: ['fit'] as const,
@@ -1179,7 +1180,7 @@ export const cssStyles = {
   translateX: [
     {
       values: 0,
-      valueFormat: (value: number) => `translateX(${value / 4}rem)`,
+      valueFormat: (value: number) => `translateX(${value / DEFAULT_REM_DIVIDER}rem)`,
       styleName: 'transform',
     },
   ],

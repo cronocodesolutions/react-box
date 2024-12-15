@@ -101,6 +101,22 @@ const data: Person[] = [
     status: 'Complicated',
     progress: 10,
   },
+  {
+    firstName: 'super',
+    lastName: 'user',
+    age: 38,
+    visits: 76,
+    status: 'In Relationship',
+    progress: 59,
+  },
+  {
+    firstName: 'Jackie',
+    lastName: 'Chan',
+    age: 62,
+    visits: 3002,
+    status: 'In Relationship',
+    progress: 43,
+  },
 ];
 
 export default function DataGridPage() {

@@ -12,12 +12,15 @@ interface Props {
 export default function DataGridCell(props: Props) {
   const { cell } = props;
   const isEmptyCell = cell.key === EMPTY_CELL_KEY;
+  const isPinned = typeof cell.pinLeft === 'number' || typeof cell.pinRight === 'number';
+  const isSticky = cell.isHeader || isPinned;
 
   const [isOpen, setOpen, refToUse] = useVisibility<HTMLButtonElement>();
 
   return (
     <Flex
-      position={cell.isHeader ? 'sticky' : undefined}
+      zIndex={cell.isHeader && isPinned ? 2 : isSticky ? 1 : undefined}
+      position={isSticky ? 'sticky' : undefined}
       top={cell.isHeader ? 0 : undefined}
       bgColor={cell.isHeader ? 'slate-300' : 'white'}
       height={10}
@@ -28,7 +31,7 @@ export default function DataGridCell(props: Props) {
       ai="center"
       gap={3}
       transition="none"
-      style={{ width: cell.inlineWidth }}
+      style={{ width: cell.inlineWidth, left: cell.pinLeft, right: cell.pinRight }}
     >
       {!isEmptyCell && (
         <>
@@ -41,10 +44,10 @@ export default function DataGridCell(props: Props) {
                 ⠿
                 {isOpen && (
                   <Tooltip bgColor="white" width={30} b={1} borderRadius={1} display="flex" d="column" mt={3} overflow="hidden">
-                    <Button clean height={10} hover={{ bgColor: 'gray-200' }}>
+                    <Button clean height={10} hover={{ bgColor: 'gray-200' }} onClick={() => cell.pinColumn?.('LEFT')}>
                       Pin Left
                     </Button>
-                    <Button clean height={10} hover={{ bgColor: 'gray-200' }}>
+                    <Button clean height={10} hover={{ bgColor: 'gray-200' }} onClick={() => cell.pinColumn?.('RIGHT')}>
                       Pin Right
                     </Button>
                   </Tooltip>

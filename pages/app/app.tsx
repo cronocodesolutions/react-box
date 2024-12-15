@@ -9,12 +9,12 @@ import TextboxPage from '../pages/textboxPage';
 import TooltipPage from '../pages/tooltipPage';
 import Box from '../../src/box';
 import Flex from '../../src/components/flex';
-import { Routes, Route, NavLink } from 'react-router-dom';
+import { Routes, Route, NavLink, useLocation } from 'react-router-dom';
 import TextareaPage from '../pages/textareaPage';
 import ColorPage from '../pages/colorPage';
 import DropdownPage from '../pages/dropdownPage';
 import Button from '../../src/components/button';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import MenuSvg from '../svgs/menuSvg';
 import Sidebar from './sidebar';
 import BoxSvg from '../svgs/boxSvg';
@@ -26,7 +26,8 @@ export default function App() {
 
   return (
     <Box color="violet-950" bgImage="body-bg" minHeight="fit-screen" position="relative">
-      <Box position="sticky" top={0} lg={{ display: 'none' }} bgImage="body-bg" bgColor="white" zIndex={1}>
+      <ScrollToTop />
+      <Box position="sticky" top={0} lg={{ display: 'none' }} bgImage="body-bg" bgColor="white" zIndex={10}>
         <Flex gap={3} pl={2} sm={{ pl: 8 }} py={5}>
           <Button clean onClick={() => setOpen(!open)} borderRadius={1} shadow="small-shadow" px={1} borderColor="violet-950">
             <MenuSvg color="violet-950" />
@@ -43,7 +44,7 @@ export default function App() {
           inset={open ? 0 : undefined}
           lg={{ position: 'static' }}
           props={{ onClick: () => setOpen(!open) }}
-          zIndex={1}
+          zIndex={10}
         >
           <Sidebar width={70} position="sticky" top={0} ml={open ? 0 : -70} lg={{ ml: 0 }} />
         </Box>
@@ -70,4 +71,12 @@ export default function App() {
       </Flex>
     </Box>
   );
+}
+
+function ScrollToTop() {
+  const { pathname } = useLocation();
+
+  useEffect(() => window.scrollTo(0, 0), [pathname]);
+
+  return null;
 }
