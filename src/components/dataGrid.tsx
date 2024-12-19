@@ -1,15 +1,17 @@
-// ✅ simple table column definitions + data[]
-// ✅ hover row styles
-// ✅ horizontal scroll for headers + rows
-// ✅ vertical scroll rows only
-// ✅ column sorting
-// ✅ pagination
+// ❌ simple table column definitions + data[]
+// ❌ hover row styles
+// ❌ horizontal scroll for headers + rows
+// ❌ vertical scroll rows only
+// ❌ column sorting
+// ❌ pagination
 // ❌ resize column
 // ❌ pin (left/right)
+// ❌ multi-level headers
 // ❌ grouping
 // ❌ select row checkbox
 // ❌ filters
 // ❌ empty table
+// ❌ column sorting by type
 
 // datagrid container
 
@@ -36,12 +38,12 @@ export default function DataGrid<TRow extends {}>(props: Props<TRow>) {
         top bar
       </Box>
       <Box overflow="auto" height={112} bb={1}>
-        <Grid style={{ gridTemplateColumns: grid.gridTemplateColumns }}>
+        <Grid style={{ gridTemplateColumns: grid.gridTemplateColumns }} userSelect={grid.isResizeMode ? 'none' : undefined}>
           {grid.rows.map((row) => {
             return (
               <Box key={row.key} display="contents" className="grid-row">
                 {row.cells.map((cell) => (
-                  <DataGridCell key={cell.key} cell={cell} />
+                  <DataGridCell key={`${cell.key}${cell.pinned}`} cell={cell} />
                 ))}
               </Box>
             );

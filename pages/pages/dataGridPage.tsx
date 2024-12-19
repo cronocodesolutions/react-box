@@ -7,6 +7,9 @@ interface Person {
   firstName: string;
   lastName: string;
   age: number;
+  day: number;
+  month: number;
+  year: number;
   visits: number;
   status: string;
   progress: number;
@@ -121,11 +124,31 @@ const data: Person[] = [
 
 export default function DataGridPage() {
   var def: GridDef<Person> = {
-    columns: [{ key: 'firstName' }, { key: 'lastName' }, { key: 'age' }, { key: 'visits' }, { key: 'status' }, { key: 'progress' }],
+    columns: [
+      { key: 'visits' },
+      { key: 'status' },
+      {
+        key: 'employee',
+        columns: [
+          { key: 'age', columns: [{ key: 'month' }, { key: 'year' }] },
+          { key: 'name', columns: [{ key: 'fullName', columns: [{ key: 'firstName' }, { key: 'lastName' }] }] },
+        ],
+      },
+      { key: 'progress' },
+    ],
   };
 
   var def2: GridDef<Person> = {
-    columns: [{ key: 'firstName' }, { key: 'lastName' }, { key: 'age' }, { key: 'visits' }, { key: 'status' }, { key: 'progress' }],
+    columns: [
+      {
+        key: 'employee',
+        columns: [{ key: 'firstName' }, { key: 'lastName' }],
+      },
+      { key: 'visits' },
+      { key: 'status' },
+
+      { key: 'progress' },
+    ],
     pagination: true,
   };
 
@@ -134,8 +157,8 @@ export default function DataGridPage() {
       <Box tag="h1" mb={3} fontSize={24}>
         DataGrid
       </Box>
-      <DataGrid data={data} def={def} />
 
+      <DataGrid data={data} def={def} />
       <DataGrid data={data} def={def2} mt={10} />
     </Box>
   );
@@ -147,105 +170,50 @@ export default function DataGridPage() {
         gridTemplateColumns={10}
         columnGap={10}
         rowGap={4}
-        style={{ gridTemplateColumns: 'repeat(10 , 1fr)' }}
+        style={{ gridTemplateColumns: 'repeat(4 , 1fr)' }}
         overflow="scroll"
         height="fit"
       >
         <Box display="contents">
-          <Box position="sticky" left={0} zIndex={1} top={0}>
-            Header
+          <Box position="sticky" left={0} colSpan={2}>
+            TOP Header
+          </Box>
+          <Box position="sticky" left={0} gridRow={3}>
+            Header 1
+          </Box>
+          <Box position="sticky" top={0} gridRow={1}>
+            Header 2
           </Box>
           <Box position="sticky" top={0}>
-            Header
+            Header 3
           </Box>
           <Box position="sticky" top={0}>
-            Header
+            Header 4
           </Box>
           <Box position="sticky" top={0}>
-            Header
+            Header 5
           </Box>
           <Box position="sticky" top={0}>
-            Header
+            Header 6
           </Box>
           <Box position="sticky" top={0}>
-            Header
+            Header 7
           </Box>
           <Box position="sticky" top={0}>
-            Header
-          </Box>
-          <Box position="sticky" top={0}>
-            Header
-          </Box>
-          <Box position="sticky" top={0}>
-            Header
-          </Box>
-          <Box position="sticky" right={0} top={0}>
-            Header
-          </Box>
-        </Box>
-        <Box display="contents" className="parent">
-          <Box position="sticky" left={0} zIndex={1} hoverParent={{ parent: { bgColor: 'gray-300' } }}>
-            this is cell with data
-          </Box>
-          <Box hoverParent={{ parent: { bgColor: 'gray-300' } }}>this is cell with data</Box>
-          <Box hoverParent={{ parent: { bgColor: 'gray-300' } }}>this is cell with data</Box>
-          <Box hoverParent={{ parent: { bgColor: 'gray-300' } }}>this is cell with data</Box>
-          <Box hoverParent={{ parent: { bgColor: 'gray-300' } }}>this is cell with data</Box>
-          <Box hoverParent={{ parent: { bgColor: 'gray-300' } }}>this is cell with data</Box>
-          <Box hoverParent={{ parent: { bgColor: 'gray-300' } }}>this is cell with data</Box>
-          <Box hoverParent={{ parent: { bgColor: 'gray-300' } }}>this is cell with data</Box>
-          <Box hoverParent={{ parent: { bgColor: 'gray-300' } }}>this is cell with data</Box>
-          <Box position="sticky" right={0} hoverParent={{ parent: { bgColor: 'gray-300' } }}>
-            this is cell with data
+            Header 8
           </Box>
         </Box>
         <Box display="contents">
-          <Box position="sticky" left={0} zIndex={1}>
-            this is cell with data
-          </Box>
           <Box>this is cell with data</Box>
           <Box>this is cell with data</Box>
           <Box>this is cell with data</Box>
           <Box>this is cell with data</Box>
-          <Box>this is cell with data</Box>
-          <Box>this is cell with data</Box>
-          <Box>this is cell with data</Box>
-          <Box>this is cell with data</Box>
-          <Box position="sticky" right={0}>
-            this is cell with data
-          </Box>
         </Box>
         <Box display="contents">
-          <Box position="sticky" left={0} zIndex={1}>
-            this is cell with data
-          </Box>
           <Box>this is cell with data</Box>
           <Box>this is cell with data</Box>
           <Box>this is cell with data</Box>
           <Box>this is cell with data</Box>
-          <Box>this is cell with data</Box>
-          <Box>this is cell with data</Box>
-          <Box>this is cell with data</Box>
-          <Box>this is cell with data</Box>
-          <Box position="sticky" right={0}>
-            this is cell with data
-          </Box>
-        </Box>
-        <Box display="contents">
-          <Box position="sticky" left={0} zIndex={1}>
-            this is cell with data
-          </Box>
-          <Box>this is cell with data</Box>
-          <Box>this is cell with data</Box>
-          <Box>this is cell with data</Box>
-          <Box>this is cell with data</Box>
-          <Box>this is cell with data</Box>
-          <Box>this is cell with data</Box>
-          <Box>this is cell with data</Box>
-          <Box>this is cell with data</Box>
-          <Box position="sticky" right={0}>
-            this is cell with data
-          </Box>
         </Box>
       </Grid>
       {/* </Box> */}

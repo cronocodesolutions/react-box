@@ -4,16 +4,17 @@ import useVisibility from '../../hooks/useVisibility';
 import Button from '../button';
 import Flex from '../flex';
 import Tooltip from '../tooltip';
-import { EMPTY_CELL_KEY, GridData } from './useGridData';
+import { EMPTY_CELL_KEY } from './useGridData';
+import { GridCell } from './dataGridContract';
 
 interface Props {
-  cell: ArrayType<ArrayType<GridData['rows']>['cells']>;
+  cell: GridCell;
 }
 
 export default function DataGridCell(props: Props) {
   const { cell } = props;
   const isEmptyCell = cell.key === EMPTY_CELL_KEY;
-  const isPinned = typeof cell.pinLeft === 'number' || typeof cell.pinRight === 'number';
+  const isPinned = !!cell.pinned;
   const isSticky = cell.isHeader || isPinned;
 
   const [isOpen, setOpen, refToUse] = useVisibility<HTMLButtonElement>();
@@ -24,9 +25,9 @@ export default function DataGridCell(props: Props) {
     <Flex
       zIndex={cell.isHeader && isPinned ? 2 : isSticky ? 1 : undefined}
       position={isSticky ? 'sticky' : undefined}
-      top={cell.isHeader ? 0 : undefined}
+      top={cell.isHeader ? cell.top : undefined}
       bgColor={cell.isHeader ? 'slate-300' : 'white'}
-      height={10}
+      height={cell.height}
       width={cell.width}
       bb={1}
       hoverParent={{ 'grid-row': { bgColor: cell.isHeader ? undefined : 'gray-200' } }}
@@ -34,12 +35,14 @@ export default function DataGridCell(props: Props) {
       ai="center"
       gap={3}
       transition="none"
-      style={{ width: cell.inlineWidth, left: cell.pinLeft, right: cell.pinRight }}
+      colSpan={cell.colSpan}
+      gridRow={cell.rowSpan}
+      style={{ left: cell.left, right: cell.right, width: cell.inlineWidth }}
     >
       {!isEmptyCell && (
         <>
           <Flex flex1 pl={3} height="fit" ai="center" jc="space-between" overflow="hidden">
-            <Box props={{ onClick: cell.sortColumn }} overflow="hidden" textOverflow="ellipsis" textWrap="nowrap">
+            <Box flex1 overflow="hidden" textOverflow="ellipsis" textWrap="nowrap" props={{ onClick: cell.sortColumn }}>
               {cell.value} {cell.sortDirection}
             </Box>
             {cell.isHeader && (
