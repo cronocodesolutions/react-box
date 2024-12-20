@@ -1,5 +1,5 @@
 import { DEFAULT_REM_DIVIDER } from '../../core/boxConstants';
-import { GridColumnType, GridDef, PinPosition, SortColumnType, SortDirection } from './dataGridContract';
+import { GridColumnType, GridDef, PinPosition } from './dataGridContract';
 
 interface Column<TRow> {
   key: string;
@@ -20,9 +20,7 @@ interface Column<TRow> {
 }
 
 const DEFAULT_WIDTH = 40;
-const DEFAULT_WIDTH_PX = DEFAULT_WIDTH * DEFAULT_REM_DIVIDER;
 export const DEFAULT_ROW_HEIGHT = 10;
-const SORT_DIRECTION: SortDirection = 'ASC';
 export const EMPTY_CELL_KEY = 'empty-cell';
 
 interface Props<TRow> {
@@ -38,6 +36,8 @@ export class DataGridHelper<TRow> {
     private _columnSize: Record<string, number>,
   ) {
     this.buildColumns();
+
+    this.setDataColumns();
   }
 
   public get gridWidth() {
@@ -46,6 +46,10 @@ export class DataGridHelper<TRow> {
 
   public get headerColumns() {
     return this._columns;
+  }
+
+  public get dataColumns() {
+    return this._dataColumns;
   }
 
   public get gridTemplateColumns() {
@@ -63,8 +67,16 @@ export class DataGridHelper<TRow> {
   }
 
   private _columns: Column<TRow>[] = [];
+  private _dataColumns: Column<TRow>[] = [];
   private _headerRowLevels: number = 0;
   private _gridWidth: number = 0;
+
+  private setDataColumns() {
+    const leafs = this._columns.filter((c) => c.headerRow === 0).flatMap((c) => c.leafs);
+    console.log(leafs, this._columns);
+
+    this._dataColumns = leafs.map((l) => this._columns.findOrThrow((c) => c.key === l));
+  }
 
   private buildColumns() {
     this.read(this._props.def.columns);
@@ -109,7 +121,7 @@ export class DataGridHelper<TRow> {
       isParent: false,
       rowSpan: this._headerRowLevels,
       colSpan: 1,
-      leafs: ['EMPTY_CELL_KEY'],
+      leafs: [EMPTY_CELL_KEY],
       top: 0,
     });
 
@@ -118,13 +130,16 @@ export class DataGridHelper<TRow> {
     this._columns.forEach((c) => {
       if (!c.isParent) {
         c.rowSpan = this._headerRowLevels - c.headerRow;
-        if (typeof c.height === 'number') {
-          c.height = c.height * c.rowSpan;
-        }
       }
+
       c.colSpan = c.leafs.length;
+
       if (typeof c.width === 'number') {
         c.width = c.width * c.colSpan;
+      }
+
+      if (c.rowSpan === 1) {
+        c.height = DEFAULT_ROW_HEIGHT;
       }
     });
   }
@@ -160,7 +175,6 @@ export class DataGridHelper<TRow> {
         rowSpan: 1,
         colSpan: 1,
         leafs: [],
-        height: DEFAULT_ROW_HEIGHT,
         width: isParent ? undefined : DEFAULT_WIDTH,
         inlineWidth: this._columnSize[col.key as string],
         top: DEFAULT_ROW_HEIGHT * headerRow,

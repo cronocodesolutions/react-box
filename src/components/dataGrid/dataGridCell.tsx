@@ -43,7 +43,7 @@ export default function DataGridCell(props: Props) {
         <>
           <Flex flex1 pl={3} height="fit" ai="center" jc="space-between" overflow="hidden">
             <Box flex1 overflow="hidden" textOverflow="ellipsis" textWrap="nowrap" props={{ onClick: cell.sortColumn }}>
-              {cell.value} {cell.sortDirection}
+              {cell.value as string} {cell.sortDirection}
             </Box>
             {cell.isHeader && (
               <Button clean onClick={() => setOpen(!isOpen)} ref={refToUse} width={2.5} userSelect="none">

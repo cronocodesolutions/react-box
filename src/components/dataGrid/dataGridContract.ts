@@ -1,9 +1,8 @@
 import { Key } from 'react';
 
-export type SortDirection = 'ASC' | 'DESC';
 export type PinPosition = 'LEFT' | 'RIGHT';
 
-export type SortColumnType = { key: string; dir: SortDirection };
+export type SortColumnType<TRow> = { key: keyof TRow; dir: SortDirection };
 
 type KeysMatching<T, V> = { [K in keyof T]-?: T[K] extends V ? K : never }[keyof T];
 
@@ -36,16 +35,15 @@ export interface HeaderCell {
 
 export interface GridCell {
   key: Key;
-  value?: string;
+  value?: unknown;
   height?: number;
   width?: number;
   inlineWidth?: number;
-  isHeader: boolean;
+  isHeader?: boolean;
   colSpan?: number;
   rowSpan?: number;
-  headerRow: number;
   sortDirection?: SortDirection;
-  top: number;
+  top?: number;
   left?: number;
   right?: number;
   pinned?: PinPosition;
