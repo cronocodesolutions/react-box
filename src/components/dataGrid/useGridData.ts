@@ -54,6 +54,8 @@ export default function useGridData<TRow>(props: Props<TRow>) {
     [props, leftPinnedColumns, rightPinnedColumns, columnSize],
   );
 
+  const gridWidth = useMemo(() => helper.gridWidth, [isResizeMode]);
+
   const resizeColumnHandler = useCallback(
     (e: React.MouseEvent, key: string) => {
       setIsResizeMode(true);
@@ -153,6 +155,7 @@ export default function useGridData<TRow>(props: Props<TRow>) {
     rows,
     gridTemplateColumns: helper.gridTemplateColumns,
     isResizeMode,
+    gridWidth,
     pagination: {
       pageSize: pag.pageSize,
       page: pag.page,

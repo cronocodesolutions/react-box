@@ -40,12 +40,16 @@ export class DataGridHelper<TRow> {
     this.buildColumns();
   }
 
+  public get gridWidth() {
+    return this._gridWidth;
+  }
+
   public get headerColumns() {
     return this._columns;
   }
 
   public get gridTemplateColumns() {
-    const rightPinnedColumns = [];
+    const rightPinnedColumns = this._columns.filter((c) => !c.isParent && c.pinned === 'RIGHT');
     const leftColsCount = this._columns.filter((c) => !c.isParent).length - rightPinnedColumns.length - 1;
     const left = leftColsCount > 0 ? `repeat(${leftColsCount}, max-content)` : '';
 
@@ -60,6 +64,7 @@ export class DataGridHelper<TRow> {
 
   private _columns: Column<TRow>[] = [];
   private _headerRowLevels: number = 0;
+  private _gridWidth: number = 0;
 
   private buildColumns() {
     this.read(this._props.def.columns);
@@ -169,6 +174,8 @@ export class DataGridHelper<TRow> {
         column.leafs = col.columns.flatMap((c) => this._columns.find((x) => x.key === c.key)!.leafs);
       } else {
         column.leafs.push(col.key as string);
+
+        this._gridWidth += column.inlineWidth ?? (column.width ?? 0) * DEFAULT_REM_DIVIDER;
       }
     });
   }

@@ -38,7 +38,13 @@ export default function DataGrid<TRow extends {}>(props: Props<TRow>) {
         top bar
       </Box>
       <Box overflow="auto" height={112} bb={1}>
-        <Grid style={{ gridTemplateColumns: grid.gridTemplateColumns }} userSelect={grid.isResizeMode ? 'none' : undefined}>
+        <Grid
+          style={{
+            gridTemplateColumns: grid.gridTemplateColumns,
+            // width: grid.isResizeMode ? grid.gridWidth : undefined,
+          }}
+          userSelect={grid.isResizeMode ? 'none' : undefined}
+        >
           {grid.rows.map((row) => {
             return (
               <Box key={row.key} display="contents" className="grid-row">
