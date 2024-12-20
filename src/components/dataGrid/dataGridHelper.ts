@@ -73,7 +73,6 @@ export class DataGridHelper<TRow> {
 
   private setDataColumns() {
     const leafs = this._columns.filter((c) => c.headerRow === 0).flatMap((c) => c.leafs);
-    console.log(leafs, this._columns);
 
     this._dataColumns = leafs.map((l) => this._columns.findOrThrow((c) => c.key === l));
   }

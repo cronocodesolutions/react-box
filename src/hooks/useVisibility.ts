@@ -22,6 +22,12 @@ export default function useVisibility<T extends HTMLElement = HTMLDivElement>(
     //   setVisibility(false);
     // }
 
+    // function scrollHandler() {
+    //   setVisibility(false);
+
+    //   console.count('scrollHandler');
+    // }
+
     function hideVisibilityKeyboardHandler(e: KeyboardEvent) {
       if (e.key === 'Escape') setVisibility(false);
     }
@@ -29,12 +35,14 @@ export default function useVisibility<T extends HTMLElement = HTMLDivElement>(
     if (isVisible) {
       window.addEventListener(event, clickHandler);
       // window.addEventListener('resize', resizeHandler);
+      // window.addEventListener('scroll', scrollHandler, true);
       window.addEventListener('keydown', hideVisibilityKeyboardHandler);
     }
 
     return () => {
       window.removeEventListener(event, clickHandler);
       // window.removeEventListener('resize', resizeHandler);
+      // window.removeEventListener('scroll', scrollHandler, true);
       window.removeEventListener('keydown', hideVisibilityKeyboardHandler);
     };
   }, [node, isVisible]);

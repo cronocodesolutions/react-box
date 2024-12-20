@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import Box from '../../box';
 import useVisibility from '../../hooks/useVisibility';
 import Button from '../button';
@@ -33,15 +33,21 @@ export default function DataGridCell(props: Props) {
       hoverParent={{ 'grid-row': { bgColor: cell.isHeader ? undefined : 'gray-200' } }}
       jc="space-between"
       ai="center"
-      gap={3}
       transition="none"
       colSpan={cell.colSpan}
       gridRow={cell.rowSpan}
       style={{ left: cell.left, right: cell.right, width: cell.inlineWidth }}
+      br={cell.pinned === 'LEFT' && cell.edge ? 1 : 0}
+      bl={cell.pinned === 'RIGHT' && cell.edge ? 1 : 0}
     >
       {!isEmptyCell && (
         <>
-          <Flex flex1 pl={3} height="fit" ai="center" jc="space-between" overflow="hidden">
+          {cell.isHeader && cell.pinned === 'RIGHT' && (
+            <Box cursor="col-resize" px={0.25} className="resizer" props={{ onMouseDown: cell.resizeColumn }}>
+              <Box width={0.5} height={4} bgColor="gray-400" hoverParent={{ resizer: { bgColor: 'gray-600' } }}></Box>
+            </Box>
+          )}
+          <Flex flex1 pl={3} height="fit" ai="center" jc="space-between" overflow="hidden" width={0}>
             <Box flex1 overflow="hidden" textOverflow="ellipsis" textWrap="nowrap" props={{ onClick: cell.sortColumn }}>
               {cell.value as string} {cell.sortDirection}
             </Box>
@@ -89,7 +95,7 @@ export default function DataGridCell(props: Props) {
               </Button>
             )}
           </Flex>
-          {cell.isHeader && (
+          {cell.isHeader && cell.pinned !== 'RIGHT' && (
             <Box cursor="col-resize" px={0.25} className="resizer" props={{ onMouseDown: cell.resizeColumn }}>
               <Box width={0.5} height={4} bgColor="gray-400" hoverParent={{ resizer: { bgColor: 'gray-600' } }}></Box>
             </Box>

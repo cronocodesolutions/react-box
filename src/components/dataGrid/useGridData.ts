@@ -50,23 +50,29 @@ export default function useGridData<TRow>(props: Props<TRow>) {
   const gridWidth = useMemo(() => helper.gridWidth, [isResizeMode]);
 
   const resizeColumnHandler = useCallback(
-    (e: React.MouseEvent, key: string) => {
+    (e: React.MouseEvent, key: string, pinned?: PinPosition) => {
       setIsResizeMode(true);
       const startPageX = e.pageX;
 
-      let cell = helper.headerColumns.findOrThrow((c) => c.key === key);
-      if (cell.isParent) {
-        cell = helper.headerColumns.findOrThrow((c) => c.key === cell.leafs.at(-1));
-      }
-
-      const width = cell.inlineWidth ?? (cell.width ?? 0) * DEFAULT_REM_DIVIDER;
+      const leafs = helper.headerColumns.findOrThrow((c) => c.key === key && c.pinned === pinned).leafs;
+      const cells = helper.dataColumns.filter((c) => leafs.includes(c.key));
+      const totalWidth = cells.sumBy((c) => c.inlineWidth ?? (c.width ?? 0) * DEFAULT_REM_DIVIDER) - cells.length * MIN_WIDTH_PX;
 
       const resize = FnUtils.throttle((e: MouseEvent) => {
         setColumnSize((prev) => {
-          const diffPageX = e.pageX - startPageX;
-          const newWidth = width + diffPageX;
+          const result = { ...prev };
 
-          return { ...prev, [cell.key as string]: newWidth < MIN_WIDTH_PX ? MIN_WIDTH_PX : newWidth };
+          const dragDistance = (e.pageX - startPageX) * (pinned === 'RIGHT' ? -1 : 1);
+
+          cells.forEach((cell) => {
+            const width = cell.inlineWidth ?? (cell.width ?? 0) * DEFAULT_REM_DIVIDER;
+            const dragDistanceForCell = totalWidth > 0 ? ((width - MIN_WIDTH_PX) / totalWidth) * dragDistance : dragDistance / cells.length;
+            const newWidth = Math.round(width + dragDistanceForCell);
+
+            result[cell.key] = newWidth < MIN_WIDTH_PX ? MIN_WIDTH_PX : newWidth;
+          });
+
+          return result;
         });
       }, 20);
 
@@ -132,6 +138,9 @@ export default function useGridData<TRow>(props: Props<TRow>) {
   //#endregion
 
   const rows = useMemo<GridRow[]>(() => {
+    const leftEdgeColumn = helper.dataColumns.findLast((x) => x.pinned === 'LEFT');
+    const rightEdgeColumn = helper.dataColumns.find((x) => x.pinned === 'RIGHT');
+
     const allRows = [];
 
     //#region header
@@ -154,13 +163,16 @@ export default function useGridData<TRow>(props: Props<TRow>) {
         rowSpan: c.rowSpan,
         colSpan: c.colSpan,
         pinned: c.pinned,
+        edge:
+          (leftEdgeColumn && c.pinned === 'LEFT' && c.leafs.includes(leftEdgeColumn.key)) ||
+          (rightEdgeColumn && c.pinned === 'RIGHT' && c.leafs.includes(rightEdgeColumn.key)),
         top: c.top,
         left: c.left,
         right: c.right,
         sortDirection: sortColumn?.key === c.key ? sortColumn.dir : undefined,
         pinColumn: (pin: PinPosition) => pinColumnHandler(pin, c.leafs),
         sortColumn: c.isParent ? undefined : () => sortColumnHandler(c.key as keyof TRow),
-        resizeColumn: (e) => resizeColumnHandler(e, c.key),
+        resizeColumn: (e) => resizeColumnHandler(e, c.key, c.pinned),
       };
 
       headerRow.cells.push(cell);
@@ -180,6 +192,9 @@ export default function useGridData<TRow>(props: Props<TRow>) {
           height: DEFAULT_ROW_HEIGHT,
           inlineWidth: c.inlineWidth,
           pinned: c.pinned,
+          edge:
+            (leftEdgeColumn && c.pinned === 'LEFT' && c.leafs.includes(leftEdgeColumn.key)) ||
+            (rightEdgeColumn && c.pinned === 'RIGHT' && c.leafs.includes(rightEdgeColumn.key)),
           left: c.left,
           right: c.right,
         };
