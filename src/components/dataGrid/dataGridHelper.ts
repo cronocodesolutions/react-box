@@ -1,5 +1,6 @@
 import { DEFAULT_REM_DIVIDER } from '../../core/boxConstants';
 import { GridColumnType, GridDef, PinPosition } from './dataGridContract';
+import '../../array';
 
 interface Column<TRow> {
   key: string;
@@ -133,10 +134,6 @@ export class DataGridHelper<TRow> {
 
       c.colSpan = c.leafs.length;
 
-      if (typeof c.width === 'number') {
-        c.width = c.width * c.colSpan;
-      }
-
       if (c.rowSpan === 1) {
         c.height = DEFAULT_ROW_HEIGHT;
       }
@@ -157,7 +154,9 @@ export class DataGridHelper<TRow> {
 
       this.setPinData(pin, c.key, prevSize);
 
-      prevSize += c.inlineWidth ?? (c.width ?? 0) * DEFAULT_REM_DIVIDER;
+      const sum = this._columns.filter((x) => c.leafs.includes(x.key)).sumBy((x) => x.inlineWidth ?? (x.width ?? 0) * DEFAULT_REM_DIVIDER);
+
+      prevSize += sum;
     });
   }
 

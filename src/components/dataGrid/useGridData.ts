@@ -4,7 +4,7 @@ import FnUtils from '../../utils/fn/fnUtils';
 import { DEFAULT_REM_DIVIDER } from '../../core/boxConstants';
 import { DataGridHelper, DEFAULT_ROW_HEIGHT } from './dataGridHelper';
 
-const MIN_WIDTH_PX = 36;
+const MIN_WIDTH_PX = 26;
 export const EMPTY_CELL_KEY = 'empty-cell';
 const DEFAULT_PAGE_SIZE = 10;
 
