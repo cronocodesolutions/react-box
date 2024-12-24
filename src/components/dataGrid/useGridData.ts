@@ -1,22 +1,26 @@
 import { useCallback, useMemo, useState } from 'react';
-import { GridCell, GridDef, GridRow, PinPosition, SortColumnType } from './dataGridContract';
+import { GridCell, GridDef, GridNormalRow, GridRow, Key, PinPosition, SortColumnType } from './dataGridContract';
 import FnUtils from '../../utils/fn/fnUtils';
 import { DEFAULT_REM_DIVIDER } from '../../core/boxConstants';
-import { DataGridHelper, DEFAULT_ROW_HEIGHT } from './dataGridHelper';
+import { DataGridHelper } from './dataGridHelper';
 
 const MIN_WIDTH_PX = 26;
 export const EMPTY_CELL_KEY = 'empty-cell';
 const DEFAULT_PAGE_SIZE = 10;
 
 interface Props<TRow> {
-  data?: TRow[];
+  data: TRow[];
   def: GridDef<TRow>;
 }
 
 export default function useGridData<TRow>(props: Props<TRow>) {
-  const { data, def } = props;
+  const [expandedRow, setExpandedRow] = useState<Record<Key, Key[]>>({});
+  const [page, setPage] = useState(0);
 
   //#region Header related
+
+  const [groupColumns, setGroupColumns] = useState<Key[]>([]);
+
   const [sortColumn, setSortColumn] = useState<Maybe<SortColumnType<TRow>>>();
   const sortColumnHandler = useCallback((key: keyof TRow) => {
     setSortColumn((prev) => {
@@ -39,18 +43,42 @@ export default function useGridData<TRow>(props: Props<TRow>) {
   const [columnSize, setColumnSize] = useState<Record<string, number>>({});
   const [isResizeMode, setIsResizeMode] = useState(false);
 
-  const [leftPinnedColumns, setLeftPinnedColumns] = useState<string[]>([]);
-  const [rightPinnedColumns, setRightPinnedColumns] = useState<string[]>([]);
+  const [leftPinnedColumns, setLeftPinnedColumns] = useState<Key[]>([]);
+  const [rightPinnedColumns, setRightPinnedColumns] = useState<Key[]>([]);
+
+  const pinColumnHandler = useCallback((pin: Maybe<PinPosition>, leafs: Key[]) => {
+    if (pin === 'LEFT') {
+      setLeftPinnedColumns((prev) => prev.removeBy((x) => leafs.includes(x)).add(...leafs));
+
+      setRightPinnedColumns((prev) => prev.removeBy((x) => leafs.includes(x)));
+    } else if (pin === 'RIGHT') {
+      setLeftPinnedColumns((prev) => prev.removeBy((x) => leafs.includes(x)));
+      setRightPinnedColumns((prev) => prev.removeBy((x) => leafs.includes(x)).add(...leafs));
+    } else {
+      setLeftPinnedColumns((prev) => prev.removeBy((x) => leafs.includes(x)));
+      setRightPinnedColumns((prev) => prev.removeBy((x) => leafs.includes(x)));
+    }
+  }, []);
+
+  const toggleGroupColumnHandler = useCallback((key: Key) => {
+    setGroupColumns((prev) => {
+      if (prev.includes(key)) {
+        return prev.removeBy((x) => x === key);
+      }
+
+      return prev.add(key);
+    });
+  }, []);
+
+  //#endregion
 
   const helper = useMemo(
-    () => new DataGridHelper(props, leftPinnedColumns, rightPinnedColumns, columnSize),
-    [props, leftPinnedColumns, rightPinnedColumns, columnSize],
+    () => new DataGridHelper(props, leftPinnedColumns, rightPinnedColumns, columnSize, groupColumns, sortColumn, page, expandedRow),
+    [props, leftPinnedColumns, rightPinnedColumns, columnSize, groupColumns, sortColumn, page, expandedRow],
   );
 
-  const gridWidth = useMemo(() => helper.gridWidth, [isResizeMode]);
-
   const resizeColumnHandler = useCallback(
-    (e: React.MouseEvent, key: string, pinned?: PinPosition) => {
+    (e: React.MouseEvent, key: Key, pinned?: PinPosition) => {
       setIsResizeMode(true);
       const startPageX = e.pageX;
 
@@ -87,55 +115,28 @@ export default function useGridData<TRow>(props: Props<TRow>) {
     [helper],
   );
 
-  const pinColumnHandler = useCallback((pin: Maybe<PinPosition>, leafs: string[]) => {
-    if (pin === 'LEFT') {
-      setLeftPinnedColumns((prev) => prev.removeBy((x) => leafs.includes(x)).add(...leafs));
+  const toggleExpandRowHandler = useCallback((rowKey: string | number, cellKey: string | number) => {
+    setExpandedRow((prev) => {
+      const expandedRow = { ...prev };
 
-      setRightPinnedColumns((prev) => prev.removeBy((x) => leafs.includes(x)));
-    } else if (pin === 'RIGHT') {
-      setLeftPinnedColumns((prev) => prev.removeBy((x) => leafs.includes(x)));
-      setRightPinnedColumns((prev) => prev.removeBy((x) => leafs.includes(x)).add(...leafs));
-    } else {
-      setLeftPinnedColumns((prev) => prev.removeBy((x) => leafs.includes(x)));
-      setRightPinnedColumns((prev) => prev.removeBy((x) => leafs.includes(x)));
-    }
-  }, []);
-  //#endregion
+      const cells = expandedRow[rowKey];
+      if (!cells) {
+        expandedRow[rowKey] = [cellKey];
+      } else {
+        if (cells.includes(cellKey)) {
+          expandedRow[rowKey] = cells.removeBy((key) => key === cellKey);
 
-  //#region pagination
-  const [pag, setPag] = useState(() => {
-    const pageSize = !def.pagination || typeof def.pagination === 'boolean' ? DEFAULT_PAGE_SIZE : def.pagination.pageSize;
+          if (expandedRow[rowKey].length === 0) {
+            delete expandedRow[rowKey];
+          }
+        } else {
+          expandedRow[rowKey] = cells.add(cellKey);
+        }
+      }
 
-    const totalItems = data?.length ?? 0;
-    const totalPages = Math.ceil(totalItems / pageSize);
-
-    return { pageSize, page: 0, totalItems, totalPages };
-  });
-
-  const changePageHandler = useCallback((page: number) => {
-    setPag((prev) => {
-      if (page >= prev.totalPages || page < 0) return prev;
-
-      return { ...prev, page };
+      return expandedRow;
     });
   }, []);
-  //#endregion
-
-  //#region data
-  const dataTable = useMemo(() => {
-    let dataToUse = data ? [...data] : [];
-
-    if (sortColumn) {
-      dataToUse = dataToUse.sortBy((x) => x[sortColumn.key], sortColumn.dir);
-    }
-
-    if (def.pagination) {
-      dataToUse = dataToUse.take(pag.pageSize, pag.pageSize * pag.page);
-    }
-
-    return dataToUse;
-  }, [data, sortColumn, def.pagination, pag]);
-  //#endregion
 
   const rows = useMemo<GridRow[]>(() => {
     const leftEdgeColumn = helper.dataColumns.findLast((x) => x.pinned === 'LEFT');
@@ -145,8 +146,9 @@ export default function useGridData<TRow>(props: Props<TRow>) {
 
     //#region header
 
-    const headerRow: GridRow = {
+    const headerRow: GridNormalRow = {
       key: 'header',
+      isGrouped: false,
       cells: [],
     };
 
@@ -173,6 +175,8 @@ export default function useGridData<TRow>(props: Props<TRow>) {
         pinColumn: (pin: PinPosition) => pinColumnHandler(pin, c.leafs),
         sortColumn: c.isParent ? undefined : () => sortColumnHandler(c.key as keyof TRow),
         resizeColumn: (e) => resizeColumnHandler(e, c.key, c.pinned),
+        toggleGroupColumn: () => toggleGroupColumnHandler(c.key),
+        unGroupAllColumns: () => setGroupColumns([]),
       };
 
       headerRow.cells.push(cell);
@@ -180,46 +184,19 @@ export default function useGridData<TRow>(props: Props<TRow>) {
 
     //#endregion
 
-    dataTable.forEach((dataRow, rowIndex) => {
-      const key = def.rowKey ? (typeof def.rowKey === 'function' ? def.rowKey(dataRow) : (dataRow[def.rowKey] as string)) : rowIndex;
-      const row: GridRow = { cells: [], key };
-
-      helper.dataColumns.forEach((c) => {
-        const cell: GridCell = {
-          key: c.key,
-          value: dataRow[c.key as keyof TRow],
-          width: c.width,
-          height: DEFAULT_ROW_HEIGHT,
-          inlineWidth: c.inlineWidth,
-          pinned: c.pinned,
-          edge:
-            (leftEdgeColumn && c.pinned === 'LEFT' && c.leafs.includes(leftEdgeColumn.key)) ||
-            (rightEdgeColumn && c.pinned === 'RIGHT' && c.leafs.includes(rightEdgeColumn.key)),
-          left: c.left,
-          right: c.right,
-        };
-
-        row.cells.push(cell);
-      });
-
-      allRows.push(row);
-    });
+    allRows.push(...helper.rows);
 
     return allRows;
-  }, [helper, sortColumn, dataTable]);
+  }, [helper, sortColumn]);
 
   return {
     rows,
     gridTemplateColumns: helper.gridTemplateColumns,
     isResizeMode,
-    gridWidth,
-    pagination: {
-      pageSize: pag.pageSize,
-      page: pag.page,
-      totalItems: pag.totalItems,
-      totalPages: pag.totalPages,
-      changePage: changePageHandler,
-    },
+    groupColumns,
+    pagination: helper.pagination,
+    changePage: (page: number) => setPage(page),
+    toggleExpandRow: toggleExpandRowHandler,
   };
 }
 

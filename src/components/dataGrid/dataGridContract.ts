@@ -1,10 +1,17 @@
-import { Key } from 'react';
+export type Key = string | number;
 
 export type PinPosition = 'LEFT' | 'RIGHT';
 
 export type SortColumnType<TRow> = { key: keyof TRow; dir: SortDirection };
 
-type KeysMatching<T, V> = { [K in keyof T]-?: T[K] extends V ? K : never }[keyof T];
+export interface GridPaginationState {
+  pageSize: number;
+  page: number;
+  totalItems: number;
+  totalPages: number;
+}
+
+export type KeysMatching<T, V> = { [K in keyof T]-?: T[K] extends V ? K : never }[keyof T];
 
 export type GridColumnType<TRow> = GridColumn<TRow> | GridColumnParent<TRow>;
 export interface GridColumnParent<TRow> {
@@ -24,13 +31,19 @@ export interface GridDef<TRow> {
 
 export type GridPagination = boolean | { pageSize: number };
 
-export interface GridRow {
+export type GridRow = GridNormalRow | GridGroupRow;
+
+export interface GridGroupRow {
   key: Key;
+  isGrouped: true;
+  count: number;
   cells: GridCell[];
 }
 
-export interface HeaderCell {
-  //
+export interface GridNormalRow {
+  key: Key;
+  isGrouped: false;
+  cells: GridCell[];
 }
 
 export interface GridCell {
@@ -48,10 +61,15 @@ export interface GridCell {
   right?: number;
   pinned?: PinPosition;
   edge?: boolean;
+  isExpandableCell?: boolean;
+  expandableCellLevel?: number;
+  isExpanded?: boolean;
   sortColumn?(): void;
   resizeColumn?(e: React.MouseEvent): void;
   // TODO: split GridCell to simple cell and header cell to make pinColumn not undefined-able
   pinColumn?(pin?: PinPosition): void;
+  toggleGroupColumn?(): void;
+  unGroupAllColumns?(): void;
 }
 
 export interface GridHeaderCell extends GridCell {}

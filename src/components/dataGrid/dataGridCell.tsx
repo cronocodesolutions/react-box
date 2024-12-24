@@ -4,15 +4,17 @@ import useVisibility from '../../hooks/useVisibility';
 import Button from '../button';
 import Flex from '../flex';
 import Tooltip from '../tooltip';
-import { EMPTY_CELL_KEY } from './useGridData';
-import { GridCell } from './dataGridContract';
+import { EMPTY_CELL_KEY, GridData } from './useGridData';
+import { GridCell, GridRow } from './dataGridContract';
 
 interface Props {
+  grid: GridData;
+  row: GridRow;
   cell: GridCell;
 }
 
 export default function DataGridCell(props: Props) {
-  const { cell } = props;
+  const { grid, row, cell } = props;
   const isEmptyCell = cell.key === EMPTY_CELL_KEY;
   const isPinned = !!cell.pinned;
   const isSticky = cell.isHeader || isPinned;
@@ -47,9 +49,14 @@ export default function DataGridCell(props: Props) {
               <Box width={0.5} height={4} bgColor="gray-400" hoverParent={{ resizer: { bgColor: 'gray-600' } }}></Box>
             </Box>
           )}
-          <Flex flex1 pl={3} height="fit" ai="center" jc="space-between" overflow="hidden" width={0}>
+          <Flex flex1 pl={3 + (cell.expandableCellLevel ?? 0) * 5} height="fit" ai="center" jc="space-between" overflow="hidden" width={0}>
+            {cell.isExpandableCell && (
+              <Button clean onClick={() => grid.toggleExpandRow(row.key, cell.key)}>
+                <Box rotate={cell.isExpanded ? 90 : 0}>{'>'}</Box>
+              </Button>
+            )}
             <Box flex1 overflow="hidden" textOverflow="ellipsis" textWrap="nowrap" props={{ onClick: cell.sortColumn }}>
-              {cell.value as string} {cell.sortDirection}
+              {cell.value as string} {cell.sortDirection} {row.isGrouped && cell.isExpandableCell ? `(${row.count})` : ''}
             </Box>
             {cell.isHeader && (
               <Button clean onClick={() => setOpen(!isOpen)} ref={refToUse} width={2.5} userSelect="none">
@@ -57,7 +64,7 @@ export default function DataGridCell(props: Props) {
                 {isOpen && (
                   <Tooltip
                     bgColor="white"
-                    width={30}
+                    width={40}
                     b={1}
                     borderRadius={1}
                     display="flex"
@@ -89,6 +96,9 @@ export default function DataGridCell(props: Props) {
                       onClick={() => cell.pinColumn?.('RIGHT')}
                     >
                       Pin Right
+                    </Button>
+                    <Button clean height={10} textAlign="left" px={3} hover={{ bgColor: 'gray-200' }} onClick={cell.toggleGroupColumn}>
+                      Group by: {cell.key}
                     </Button>
                   </Tooltip>
                 )}

@@ -24,7 +24,7 @@ import DataGridCell from './dataGrid/dataGridCell';
 import DataGridPagination from './dataGrid/dataGridPagination';
 
 interface Props<TRow> extends BoxProps {
-  data?: TRow[];
+  data: TRow[];
   def: GridDef<TRow>;
 }
 
@@ -35,30 +35,22 @@ export default function DataGrid<TRow extends {}>(props: Props<TRow>) {
   return (
     <Box component="dataGrid" b={1} borderRadius={1} overflow="hidden" {...props}>
       <Box p={3} bb={1}>
-        top bar
+        {grid.groupColumns.length > 0 ? grid.groupColumns.join(' > ') : 'No grouping'}
       </Box>
       <Box overflow="auto" height={112} bb={1}>
-        <Grid
-          style={{
-            gridTemplateColumns: grid.gridTemplateColumns,
-            // width: grid.isResizeMode ? grid.gridWidth : undefined,
-          }}
-          userSelect={grid.isResizeMode ? 'none' : undefined}
-        >
-          {grid.rows.map((row) => {
-            return (
-              <Box key={row.key} display="contents" className="grid-row">
-                {row.cells.map((cell) => (
-                  <DataGridCell key={`${cell.key}${cell.pinned}`} cell={cell} />
-                ))}
-              </Box>
-            );
-          })}
+        <Grid style={{ gridTemplateColumns: grid.gridTemplateColumns }} userSelect={grid.isResizeMode ? 'none' : undefined}>
+          {grid.rows.map((row) => (
+            <Box key={row.key} display="contents" className="grid-row">
+              {row.cells.map((cell) => (
+                <DataGridCell key={`${cell.key}${cell.pinned}`} row={row} cell={cell} grid={grid} />
+              ))}
+            </Box>
+          ))}
         </Grid>
       </Box>
       <Flex p={3} jc="space-between" height={10}>
         <Box></Box>
-        {def.pagination && <DataGridPagination pagination={grid.pagination} />}
+        {def.pagination && <DataGridPagination grid={grid} />}
       </Flex>
     </Box>
   );
