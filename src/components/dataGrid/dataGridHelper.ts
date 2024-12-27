@@ -25,14 +25,13 @@ interface Column<TRow> {
   leafs: Key[];
   pinned?: PinPosition;
   height?: number;
-  width?: number;
-  inlineWidth?: number;
+  inlineWidth?: number | 'auto';
   top: number;
   left?: number;
   right?: number;
 }
 
-const DEFAULT_WIDTH = 40;
+const DEFAULT_WIDTH = 40 * DEFAULT_REM_DIVIDER;
 export const DEFAULT_ROW_HEIGHT = 10;
 export const EMPTY_CELL_KEY = 'empty-cell';
 export const GROUPING_COLUMN_ROW_KEY = 'grouping-column-row';
@@ -60,10 +59,6 @@ export class DataGridHelper<TRow> {
     this._pagination = this.getPagination();
 
     this.prepareRows();
-  }
-
-  public get gridWidth() {
-    return this._gridWidth;
   }
 
   public get headerColumns() {
@@ -97,7 +92,6 @@ export class DataGridHelper<TRow> {
   private _leftEdgeColumn: Maybe<Column<TRow>>;
   private _rightEdgeColumn: Maybe<Column<TRow>>;
   private _headerRowLevels: number = 0;
-  private _gridWidth: number = 0;
   private _rows: GridRow[] = [];
   private _pagination: GridPaginationState;
 
@@ -156,7 +150,6 @@ export class DataGridHelper<TRow> {
           isExpandableCell: c.key === GROUPING_COLUMN_CELL_KEY,
           expandableCellLevel: groupColumnIndex,
           isExpanded: isRowExpanded,
-          width: c.width,
           height: DEFAULT_ROW_HEIGHT,
           inlineWidth: c.inlineWidth,
           pinned: c.pinned,
@@ -193,7 +186,6 @@ export class DataGridHelper<TRow> {
       const cell: GridCell = {
         key: c.key,
         value: dataRow[c.key as keyof TRow],
-        width: c.width,
         height: DEFAULT_ROW_HEIGHT,
         inlineWidth: c.inlineWidth,
         pinned: c.pinned,
@@ -269,6 +261,7 @@ export class DataGridHelper<TRow> {
       headerRow: 0,
       isParent: false,
       rowSpan: this._headerRowLevels,
+      inlineWidth: 'auto',
       colSpan: 1,
       leafs: [EMPTY_CELL_KEY],
       top: 0,
@@ -282,6 +275,10 @@ export class DataGridHelper<TRow> {
       }
 
       c.colSpan = c.leafs.length;
+
+      if (c.key !== EMPTY_CELL_KEY) {
+        c.inlineWidth = this._columns.filter((x) => c.leafs.includes(x.key)).sumBy((x) => x.inlineWidth as number);
+      }
 
       if (c.rowSpan === 1) {
         c.height = DEFAULT_ROW_HEIGHT;
@@ -303,7 +300,7 @@ export class DataGridHelper<TRow> {
 
       this.setPinData(pin, c.key, prevSize);
 
-      const sum = this._columns.filter((x) => c.leafs.includes(x.key)).sumBy((x) => x.inlineWidth ?? (x.width ?? 0) * DEFAULT_REM_DIVIDER);
+      const sum = this._columns.filter((x) => c.leafs.includes(x.key)).sumBy((x) => x.inlineWidth as number);
 
       prevSize += sum;
     });
@@ -322,8 +319,7 @@ export class DataGridHelper<TRow> {
         rowSpan: 1,
         colSpan: 1,
         leafs: [],
-        width: isParent ? undefined : DEFAULT_WIDTH,
-        inlineWidth: this._columnSize[col.key as string],
+        inlineWidth: this._columnSize[col.key as string] ?? DEFAULT_WIDTH,
         top: DEFAULT_ROW_HEIGHT * headerRow,
       };
 
@@ -335,8 +331,6 @@ export class DataGridHelper<TRow> {
         column.leafs = col.columns.flatMap((c) => this._columns.find((x) => x.key === c.key)!.leafs);
       } else {
         column.leafs.push(col.key as string);
-
-        this._gridWidth += column.inlineWidth ?? (column.width ?? 0) * DEFAULT_REM_DIVIDER;
       }
     });
   }

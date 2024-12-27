@@ -2,11 +2,11 @@ import Button from '../button';
 import Flex from '../flex';
 import { GridData } from './useGridData';
 
-interface Props {
-  grid: GridData;
+interface Props<TRow> {
+  grid: GridData<TRow>;
 }
 
-export default function DataGridPagination(props: Props) {
+export default function DataGridPagination<TRow>(props: Props<TRow>) {
   const { grid } = props;
 
   return (

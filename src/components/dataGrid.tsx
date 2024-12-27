@@ -32,8 +32,14 @@ export default function DataGrid<TRow extends {}>(props: Props<TRow>) {
   const { def } = props;
   const grid = useGridData(props);
 
+  const sizes = grid.headerColumns.reduce<Record<string, string>>((acc, c) => {
+    acc[`--${c.key}-${c.pinned ?? ''}-width`] = typeof c.inlineWidth === 'number' ? `${c.inlineWidth}px` : (c.inlineWidth ?? 'unset');
+
+    return acc;
+  }, {});
+
   return (
-    <Box component="dataGrid" b={1} borderRadius={1} overflow="hidden" {...props}>
+    <Box component="dataGrid" b={1} borderRadius={1} overflow="hidden" {...props} style={sizes}>
       <Box p={3} bb={1}>
         {grid.groupColumns.length > 0 ? grid.groupColumns.join(' > ') : 'No grouping'}
       </Box>

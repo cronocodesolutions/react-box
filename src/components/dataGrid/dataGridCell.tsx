@@ -7,13 +7,13 @@ import Tooltip from '../tooltip';
 import { EMPTY_CELL_KEY, GridData } from './useGridData';
 import { GridCell, GridRow } from './dataGridContract';
 
-interface Props {
-  grid: GridData;
+interface Props<TRow> {
+  grid: GridData<TRow>;
   row: GridRow;
   cell: GridCell;
 }
 
-export default function DataGridCell(props: Props) {
+export default function DataGridCell<TRow>(props: Props<TRow>) {
   const { grid, row, cell } = props;
   const isEmptyCell = cell.key === EMPTY_CELL_KEY;
   const isPinned = !!cell.pinned;
@@ -30,7 +30,6 @@ export default function DataGridCell(props: Props) {
       top={cell.isHeader ? cell.top : undefined}
       bgColor={cell.isHeader ? 'slate-300' : 'white'}
       height={cell.height}
-      width={cell.width}
       bb={1}
       hoverParent={{ 'grid-row': { bgColor: cell.isHeader ? undefined : 'gray-200' } }}
       jc="space-between"
@@ -38,7 +37,7 @@ export default function DataGridCell(props: Props) {
       transition="none"
       colSpan={cell.colSpan}
       gridRow={cell.rowSpan}
-      style={{ left: cell.left, right: cell.right, width: cell.inlineWidth }}
+      style={{ left: cell.left, right: cell.right, width: `var(--${cell.key}-${cell.pinned ?? ''}-width)` }}
       br={cell.pinned === 'LEFT' && cell.edge ? 1 : 0}
       bl={cell.pinned === 'RIGHT' && cell.edge ? 1 : 0}
     >
@@ -49,15 +48,24 @@ export default function DataGridCell(props: Props) {
               <Box width={0.5} height={4} bgColor="gray-400" hoverParent={{ resizer: { bgColor: 'gray-600' } }}></Box>
             </Box>
           )}
-          <Flex flex1 pl={3 + (cell.expandableCellLevel ?? 0) * 5} height="fit" ai="center" jc="space-between" overflow="hidden" width={0}>
+          <Flex inline position="sticky" left={0} overflow="hidden">
             {cell.isExpandableCell && (
               <Button clean onClick={() => grid.toggleExpandRow(row.key, cell.key)}>
                 <Box rotate={cell.isExpanded ? 90 : 0}>{'>'}</Box>
               </Button>
             )}
-            <Box flex1 overflow="hidden" textOverflow="ellipsis" textWrap="nowrap" props={{ onClick: cell.sortColumn }}>
+            <Flex
+              overflow="hidden"
+              textOverflow="ellipsis"
+              textWrap="nowrap"
+              // pl={3 + (cell.expandableCellLevel ?? 0) * 5}
+              // pr={4}
+              props={{ onClick: cell.sortColumn }}
+            >
               {cell.value as string} {cell.sortDirection} {row.isGrouped && cell.isExpandableCell ? `(${row.count})` : ''}
-            </Box>
+            </Flex>
+          </Flex>
+          <Flex>
             {cell.isHeader && (
               <Button clean onClick={() => setOpen(!isOpen)} ref={refToUse} width={2.5} userSelect="none">
                 ⠿
@@ -104,12 +112,12 @@ export default function DataGridCell(props: Props) {
                 )}
               </Button>
             )}
+            {cell.isHeader && cell.pinned !== 'RIGHT' && (
+              <Box cursor="col-resize" px={0.25} className="resizer" props={{ onMouseDown: cell.resizeColumn }}>
+                <Box width={0.5} height={4} bgColor="gray-400" hoverParent={{ resizer: { bgColor: 'gray-600' } }}></Box>
+              </Box>
+            )}
           </Flex>
-          {cell.isHeader && cell.pinned !== 'RIGHT' && (
-            <Box cursor="col-resize" px={0.25} className="resizer" props={{ onMouseDown: cell.resizeColumn }}>
-              <Box width={0.5} height={4} bgColor="gray-400" hoverParent={{ resizer: { bgColor: 'gray-600' } }}></Box>
-            </Box>
-          )}
         </>
       )}
     </Flex>

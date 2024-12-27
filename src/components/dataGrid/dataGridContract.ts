@@ -50,8 +50,7 @@ export interface GridCell {
   key: Key;
   value?: unknown;
   height?: number;
-  width?: number;
-  inlineWidth?: number;
+  inlineWidth?: number | 'auto';
   isHeader?: boolean;
   colSpan?: number;
   rowSpan?: number;

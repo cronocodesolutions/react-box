@@ -6,7 +6,6 @@ import { DataGridHelper } from './dataGridHelper';
 
 const MIN_WIDTH_PX = 26;
 export const EMPTY_CELL_KEY = 'empty-cell';
-const DEFAULT_PAGE_SIZE = 10;
 
 interface Props<TRow> {
   data: TRow[];
@@ -84,7 +83,7 @@ export default function useGridData<TRow>(props: Props<TRow>) {
 
       const leafs = helper.headerColumns.findOrThrow((c) => c.key === key && c.pinned === pinned).leafs;
       const cells = helper.dataColumns.filter((c) => leafs.includes(c.key));
-      const totalWidth = cells.sumBy((c) => c.inlineWidth ?? (c.width ?? 0) * DEFAULT_REM_DIVIDER) - cells.length * MIN_WIDTH_PX;
+      const totalWidth = cells.sumBy((c) => c.inlineWidth as number) - cells.length * MIN_WIDTH_PX;
 
       const resize = FnUtils.throttle((e: MouseEvent) => {
         setColumnSize((prev) => {
@@ -93,7 +92,7 @@ export default function useGridData<TRow>(props: Props<TRow>) {
           const dragDistance = (e.pageX - startPageX) * (pinned === 'RIGHT' ? -1 : 1);
 
           cells.forEach((cell) => {
-            const width = cell.inlineWidth ?? (cell.width ?? 0) * DEFAULT_REM_DIVIDER;
+            const width = cell.inlineWidth as number;
             const dragDistanceForCell = totalWidth > 0 ? ((width - MIN_WIDTH_PX) / totalWidth) * dragDistance : dragDistance / cells.length;
             const newWidth = Math.round(width + dragDistanceForCell);
 
@@ -159,7 +158,6 @@ export default function useGridData<TRow>(props: Props<TRow>) {
         key: c.key,
         value: c.key,
         height: c.height,
-        width: c.width,
         inlineWidth: c.inlineWidth,
         isHeader: true,
         rowSpan: c.rowSpan,
@@ -190,6 +188,7 @@ export default function useGridData<TRow>(props: Props<TRow>) {
   }, [helper, sortColumn]);
 
   return {
+    headerColumns: helper.headerColumns,
     rows,
     gridTemplateColumns: helper.gridTemplateColumns,
     isResizeMode,
@@ -200,4 +199,4 @@ export default function useGridData<TRow>(props: Props<TRow>) {
   };
 }
 
-export type GridData = ReturnType<typeof useGridData>;
+export type GridData<TRow> = ReturnType<typeof useGridData<TRow>>;

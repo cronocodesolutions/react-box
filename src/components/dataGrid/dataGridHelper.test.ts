@@ -1,10 +1,22 @@
 import { describe, expect, it, suite } from 'vitest';
 import { DataGridHelper } from './dataGridHelper';
 
+interface Person {
+  firstName: string;
+  lastName: string;
+  age: number;
+  day: number;
+  month: number;
+  year: number;
+  visits: number;
+  status: string;
+  progress: number;
+}
+
 describe('DataGridHelper', () => {
   //
   it('creates header Columns', () => {
-    const helper = new DataGridHelper(
+    const helper = new DataGridHelper<Person>(
       {
         def: {
           columns: [
@@ -13,9 +25,14 @@ describe('DataGridHelper', () => {
             },
           ],
         },
+        data: [],
       },
       [],
       [],
+      {},
+      [],
+      undefined,
+      0,
       {},
     );
 
@@ -24,7 +41,7 @@ describe('DataGridHelper', () => {
 
   suite('when pin columns', () => {
     it('calculates correct left distance', () => {
-      const helper = new DataGridHelper(
+      const helper = new DataGridHelper<Person>(
         {
           def: {
             columns: [
@@ -40,9 +57,14 @@ describe('DataGridHelper', () => {
               },
             ],
           },
+          data: [],
         },
         ['year', 'firstName'],
         [],
+        {},
+        [],
+        undefined,
+        0,
         {},
       );
 
@@ -54,7 +76,7 @@ describe('DataGridHelper', () => {
     });
 
     it('calculates correct right distance', () => {
-      const helper = new DataGridHelper(
+      const helper = new DataGridHelper<Person>(
         {
           def: {
             columns: [
@@ -70,9 +92,14 @@ describe('DataGridHelper', () => {
               },
             ],
           },
+          data: [],
         },
         [],
         ['month', 'firstName'],
+        {},
+        [],
+        undefined,
+        0,
         {},
       );
 

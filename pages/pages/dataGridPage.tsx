@@ -23,6 +23,9 @@ const data: Person[] = [
     visits: 100,
     status: 'In Relationship',
     progress: 50,
+    day: 0,
+    month: 0,
+    year: 0,
   },
   {
     firstName: 'tandy',
@@ -31,6 +34,9 @@ const data: Person[] = [
     visits: 40,
     status: 'Single',
     progress: 80,
+    day: 0,
+    month: 0,
+    year: 0,
   },
   {
     firstName: 'joe',
@@ -39,6 +45,9 @@ const data: Person[] = [
     visits: 20,
     status: 'Complicated',
     progress: 10,
+    day: 0,
+    month: 0,
+    year: 0,
   },
   {
     firstName: 'joe',
@@ -47,6 +56,9 @@ const data: Person[] = [
     visits: 20,
     status: 'Complicated',
     progress: 10,
+    day: 0,
+    month: 0,
+    year: 0,
   },
   {
     firstName: 'joe',
@@ -55,6 +67,9 @@ const data: Person[] = [
     visits: 20,
     status: 'Complicated',
     progress: 10,
+    day: 0,
+    month: 0,
+    year: 0,
   },
   {
     firstName: 'joe',
@@ -63,6 +78,9 @@ const data: Person[] = [
     visits: 20,
     status: 'Complicated',
     progress: 10,
+    day: 0,
+    month: 0,
+    year: 0,
   },
   {
     firstName: 'joe',
@@ -71,6 +89,9 @@ const data: Person[] = [
     visits: 20,
     status: 'Complicated',
     progress: 10,
+    day: 0,
+    month: 0,
+    year: 0,
   },
   {
     firstName: 'joe',
@@ -79,6 +100,9 @@ const data: Person[] = [
     visits: 20,
     status: 'Complicated',
     progress: 10,
+    day: 0,
+    month: 0,
+    year: 0,
   },
   {
     firstName: 'tanner',
@@ -87,6 +111,9 @@ const data: Person[] = [
     visits: 100,
     status: 'In Relationship',
     progress: 50,
+    day: 0,
+    month: 0,
+    year: 0,
   },
   {
     firstName: 'tandy',
@@ -95,6 +122,9 @@ const data: Person[] = [
     visits: 40,
     status: 'Single',
     progress: 80,
+    day: 0,
+    month: 0,
+    year: 0,
   },
   {
     firstName: 'joe',
@@ -103,6 +133,9 @@ const data: Person[] = [
     visits: 20,
     status: 'Complicated',
     progress: 10,
+    day: 0,
+    month: 0,
+    year: 0,
   },
   {
     firstName: 'super',
@@ -111,6 +144,9 @@ const data: Person[] = [
     visits: 76,
     status: 'In Relationship',
     progress: 59,
+    day: 0,
+    month: 0,
+    year: 0,
   },
   {
     firstName: 'Jackie',
@@ -119,6 +155,9 @@ const data: Person[] = [
     visits: 3002,
     status: 'In Relationship',
     progress: 43,
+    day: 0,
+    month: 0,
+    year: 0,
   },
 ];
 
