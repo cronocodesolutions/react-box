@@ -1,9 +1,15 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 
+interface Props<T extends HTMLElement = HTMLDivElement> {
+  node?: Nullable<T>;
+  event?: 'mousedown' | 'click';
+  hideOnScroll?: boolean;
+}
+
 export default function useVisibility<T extends HTMLElement = HTMLDivElement>(
-  node: Nullable<T> = null,
-  event: 'mousedown' | 'click' = 'click',
+  props?: Props<T>,
 ): [boolean, React.Dispatch<React.SetStateAction<boolean>>, React.RefObject<T>] {
+  const { node = null, event = 'click', hideOnScroll = false } = props ?? {};
   const [isVisible, setVisibility] = useState(false);
 
   const visibilityRef = useRef<T>(null);
@@ -22,11 +28,11 @@ export default function useVisibility<T extends HTMLElement = HTMLDivElement>(
     //   setVisibility(false);
     // }
 
-    // function scrollHandler() {
-    //   setVisibility(false);
+    function scrollHandler() {
+      setVisibility(false);
 
-    //   console.count('scrollHandler');
-    // }
+      console.count('scrollHandler');
+    }
 
     function hideVisibilityKeyboardHandler(e: KeyboardEvent) {
       if (e.key === 'Escape') setVisibility(false);
@@ -35,14 +41,14 @@ export default function useVisibility<T extends HTMLElement = HTMLDivElement>(
     if (isVisible) {
       window.addEventListener(event, clickHandler);
       // window.addEventListener('resize', resizeHandler);
-      // window.addEventListener('scroll', scrollHandler, true);
+      hideOnScroll && window.addEventListener('scroll', scrollHandler, true);
       window.addEventListener('keydown', hideVisibilityKeyboardHandler);
     }
 
     return () => {
       window.removeEventListener(event, clickHandler);
       // window.removeEventListener('resize', resizeHandler);
-      // window.removeEventListener('scroll', scrollHandler, true);
+      hideOnScroll && window.removeEventListener('scroll', scrollHandler, true);
       window.removeEventListener('keydown', hideVisibilityKeyboardHandler);
     };
   }, [node, isVisible]);

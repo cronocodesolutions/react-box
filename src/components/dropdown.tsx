@@ -22,7 +22,7 @@ function DropdownImpl<TVal>(props: Props<TVal>, ref: Ref<HTMLInputElement>): Rea
   const [selectedValues, setSelectedValues] = useState(Array.isArray(defaultValue) ? defaultValue : defaultValue ? [defaultValue] : []);
   const [search, setSearch] = useState<string>('');
 
-  const [isOpen, setOpen, refToUse] = useVisibility<HTMLButtonElement>();
+  const [isOpen, setOpen, refToUse] = useVisibility<HTMLButtonElement>({ event: 'mousedown' });
   const searchBoxRef = useRef<HTMLInputElement>(null);
   const itemsRef = useRef<HTMLDivElement>(null);
 

@@ -1,10 +1,9 @@
 import { useCallback, useMemo, useState } from 'react';
 import { GridCell, GridDef, GridNormalRow, GridRow, Key, PinPosition, SortColumnType } from './dataGridContract';
 import FnUtils from '../../utils/fn/fnUtils';
-import { DEFAULT_REM_DIVIDER } from '../../core/boxConstants';
 import { DataGridHelper } from './dataGridHelper';
 
-const MIN_WIDTH_PX = 26;
+const MIN_WIDTH_PX = 40;
 export const EMPTY_CELL_KEY = 'empty-cell';
 
 interface Props<TRow> {
