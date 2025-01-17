@@ -1,6 +1,6 @@
 import Button from '../button';
 import Flex from '../flex';
-import { GridData } from './useGridData';
+import { GridData } from './useGridData2';
 
 interface Props<TRow> {
   grid: GridData<TRow>;

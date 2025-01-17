@@ -1,5 +1,5 @@
 import { describe, expect, it, suite } from 'vitest';
-import { DataGridHelper } from './dataGridHelper';
+import { DataGridHelper2 } from './dataGridHelper2';
 
 interface Person {
   firstName: string;
@@ -16,7 +16,7 @@ interface Person {
 describe('DataGridHelper', () => {
   //
   it('creates header Columns', () => {
-    const helper = new DataGridHelper<Person>(
+    const helper = new DataGridHelper2<Person>(
       {
         def: {
           columns: [
@@ -41,7 +41,7 @@ describe('DataGridHelper', () => {
 
   suite('when pin columns', () => {
     it('calculates correct left distance', () => {
-      const helper = new DataGridHelper<Person>(
+      const helper = new DataGridHelper2<Person>(
         {
           def: {
             columns: [
@@ -76,7 +76,7 @@ describe('DataGridHelper', () => {
     });
 
     it('calculates correct right distance', () => {
-      const helper = new DataGridHelper<Person>(
+      const helper = new DataGridHelper2<Person>(
         {
           def: {
             columns: [

@@ -4,18 +4,18 @@ import useVisibility from '../../hooks/useVisibility';
 import Button from '../button';
 import Flex from '../flex';
 import Tooltip from '../tooltip';
-import { EMPTY_CELL_KEY, GridData } from './useGridData';
-import { GridCell, GridRow } from './dataGridContract';
+import { EMPTY_CELL_KEY, GridData } from './useGridData2';
+import { GridCell2, GridRow2 } from './dataGridContract';
 import BaseSvg from '../baseSvg';
 import ArrowSvg from '../../../pages/svgs/arrowSvg';
 
 interface Props<TRow> {
   grid: GridData<TRow>;
-  row: GridRow;
-  cell: GridCell;
+  row: GridRow2;
+  cell: GridCell2;
 }
 
-export default function DataGridCell<TRow>(props: Props<TRow>) {
+export default function DataGridCell2<TRow>(props: Props<TRow>) {
   const { grid, row, cell } = props;
   const isEmptyCell = cell.key === EMPTY_CELL_KEY;
   const isPinned = !!cell.pinned;
@@ -47,7 +47,7 @@ export default function DataGridCell<TRow>(props: Props<TRow>) {
         <>
           {cell.isHeader && cell.pinned === 'RIGHT' && (
             <Box cursor="col-resize" px={0.25} className="resizer" props={{ onMouseDown: cell.resizeColumn }}>
-              <Box width={0.5} height={4} bgColor="gray-400" hoverParent={{ resizer: { bgColor: 'gray-600' } }}></Box>
+              <Box width={0.5} height={5} bgColor="gray-400" hoverParent={{ resizer: { bgColor: 'gray-600' } }}></Box>
             </Box>
           )}
           <Flex
@@ -83,7 +83,7 @@ export default function DataGridCell<TRow>(props: Props<TRow>) {
               </Box>
             )}
           </Flex>
-          <Flex pl={2} gap={2}>
+          <Flex pl={2}>
             {cell.isHeader && (
               <Button
                 clean
@@ -98,6 +98,7 @@ export default function DataGridCell<TRow>(props: Props<TRow>) {
                 display="flex"
                 jc="center"
                 ai="center"
+                mr={2}
               >
                 <BaseSvg viewBox="0 0 16 16" width="18">
                   <path
@@ -151,7 +152,7 @@ export default function DataGridCell<TRow>(props: Props<TRow>) {
             )}
             {cell.isHeader && cell.pinned !== 'RIGHT' && (
               <Box cursor="col-resize" px={0.25} className="resizer" props={{ onMouseDown: cell.resizeColumn }}>
-                <Box width={0.5} height="fit" bgColor="gray-400" hoverParent={{ resizer: { bgColor: 'gray-600' } }}></Box>
+                <Box width={0.5} height={5} bgColor="gray-400" hoverParent={{ resizer: { bgColor: 'gray-600' } }}></Box>
               </Box>
             )}
           </Flex>

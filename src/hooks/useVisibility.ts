@@ -4,12 +4,14 @@ interface Props<T extends HTMLElement = HTMLDivElement> {
   node?: Nullable<T>;
   event?: 'mousedown' | 'click';
   hideOnScroll?: boolean;
+  hideOnResize?: boolean;
+  hideOnEscape?: boolean;
 }
 
 export default function useVisibility<T extends HTMLElement = HTMLDivElement>(
   props?: Props<T>,
 ): [boolean, React.Dispatch<React.SetStateAction<boolean>>, React.RefObject<T>] {
-  const { node = null, event = 'click', hideOnScroll = false } = props ?? {};
+  const { node = null, event = 'click', hideOnScroll = false, hideOnResize = false, hideOnEscape = true } = props ?? {};
   const [isVisible, setVisibility] = useState(false);
 
   const visibilityRef = useRef<T>(null);
@@ -24,14 +26,12 @@ export default function useVisibility<T extends HTMLElement = HTMLDivElement>(
       }
     }
 
-    // function resizeHandler() {
-    //   setVisibility(false);
-    // }
+    function resizeHandler() {
+      setVisibility(false);
+    }
 
     function scrollHandler() {
       setVisibility(false);
-
-      console.count('scrollHandler');
     }
 
     function hideVisibilityKeyboardHandler(e: KeyboardEvent) {
@@ -40,16 +40,18 @@ export default function useVisibility<T extends HTMLElement = HTMLDivElement>(
 
     if (isVisible) {
       window.addEventListener(event, clickHandler);
-      // window.addEventListener('resize', resizeHandler);
+
+      hideOnEscape && window.addEventListener('keydown', hideVisibilityKeyboardHandler, true);
+      hideOnResize && window.addEventListener('resize', resizeHandler, true);
       hideOnScroll && window.addEventListener('scroll', scrollHandler, true);
-      window.addEventListener('keydown', hideVisibilityKeyboardHandler);
     }
 
     return () => {
       window.removeEventListener(event, clickHandler);
-      // window.removeEventListener('resize', resizeHandler);
+
+      hideOnEscape && window.removeEventListener('keydown', hideVisibilityKeyboardHandler, true);
+      hideOnResize && window.removeEventListener('resize', resizeHandler, true);
       hideOnScroll && window.removeEventListener('scroll', scrollHandler, true);
-      window.removeEventListener('keydown', hideVisibilityKeyboardHandler);
     };
   }, [node, isVisible]);
 

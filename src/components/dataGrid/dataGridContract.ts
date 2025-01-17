@@ -1,52 +1,58 @@
 export type Key = string | number;
-
 export type PinPosition = 'LEFT' | 'RIGHT';
-
 export type SortColumnType<TRow> = { key: keyof TRow; dir: SortDirection };
-
-export interface GridPaginationState {
+export type KeysMatching<T, V> = { [K in keyof T]-?: T[K] extends V ? K : never }[keyof T];
+export interface PaginationState {
   pageSize: number;
   page: number;
   totalItems: number;
   totalPages: number;
 }
+export type Pagination = boolean | { pageSize: number };
 
-export type KeysMatching<T, V> = { [K in keyof T]-?: T[K] extends V ? K : never }[keyof T];
-
-export type GridColumnType<TRow> = GridColumn<TRow> | GridColumnParent<TRow>;
-export interface GridColumnParent<TRow> {
+export interface ParentColumn<TRow> {
   key: string;
-  columns: GridColumnType<TRow>[];
+  columns: ColumnType<TRow>[];
 }
-
-export interface GridColumn<TRow> {
+export interface Column<TRow> {
   key: KeysMatching<TRow, Key>;
 }
 
-export interface GridDef<TRow> {
+export type ColumnType<TRow> = Column<TRow> | ParentColumn<TRow>;
+
+export interface GridDefinition<TRow> {
   rowKey?: KeysMatching<TRow, Key> | ((rowData: TRow) => Key);
-  columns: GridColumnType<TRow>[];
-  pagination?: GridPagination;
+  columns: ColumnType<TRow>[];
+  pagination?: Pagination;
 }
 
-export type GridPagination = boolean | { pageSize: number };
+export interface DataGridProps<TRow> {
+  data: TRow[];
+  def: GridDefinition<TRow>;
+}
 
-export type GridRow = GridNormalRow | GridGroupRow;
+interface GridRow {
+  key: Key;
+}
 
-export interface GridGroupRow {
+// accepted
+
+export type GridRow2 = GridNormalRow2 | GridGroupRow2;
+
+export interface GridGroupRow2 {
   key: Key;
   isGrouped: true;
   count: number;
-  cells: GridCell[];
+  cells: GridCell2[];
 }
 
-export interface GridNormalRow {
+export interface GridNormalRow2 {
   key: Key;
   isGrouped: false;
-  cells: GridCell[];
+  cells: GridCell2[];
 }
 
-export interface GridCell {
+export interface GridCell2 {
   key: Key;
   value?: unknown;
   height?: number;
@@ -71,6 +77,6 @@ export interface GridCell {
   unGroupAllColumns?(): void;
 }
 
-export interface GridHeaderCell extends GridCell {}
+export interface GridHeaderCell extends GridCell2 {}
 
-export interface GridValueCell extends GridCell {}
+export interface GridValueCell extends GridCell2 {}
