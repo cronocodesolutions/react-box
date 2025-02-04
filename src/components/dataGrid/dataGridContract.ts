@@ -11,11 +11,11 @@ export interface PaginationState {
 export type Pagination = boolean | { pageSize: number };
 
 export interface ParentColumn<TRow> {
-  key: string;
+  key: Key;
   columns: ColumnType<TRow>[];
 }
 export interface Column<TRow> {
-  key: KeysMatching<TRow, Key>;
+  key: Key;
 }
 
 export type ColumnType<TRow> = Column<TRow> | ParentColumn<TRow>;
@@ -29,10 +29,6 @@ export interface GridDefinition<TRow> {
 export interface DataGridProps<TRow> {
   data: TRow[];
   def: GridDefinition<TRow>;
-}
-
-interface GridRow {
-  key: Key;
 }
 
 // accepted

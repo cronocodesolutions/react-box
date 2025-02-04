@@ -1,5 +1,6 @@
 import Box from '../../src/box';
 import DataGrid from '../../src/components/dataGrid';
+import DataGrid2 from '../../src/components/dataGrid2';
 import { GridDefinition } from '../../src/components/dataGrid/dataGridContract';
 import Grid from '../../src/components/grid';
 import Data from '../data/MOCK_DATA.json';
@@ -230,7 +231,8 @@ export default function DataGridPage() {
       </Box>
 
       <DataGrid data={Data} def={def} />
-      {/* <DataGrid data={data} def={def2} mt={10} /> */}
+
+      <DataGrid2 data={Data} def={def} mt={10} />
     </Box>
   );
 
