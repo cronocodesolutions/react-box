@@ -1,11 +1,13 @@
 import { useState } from 'react';
 import Box from '../../src/box';
 import Dropdown from '../../src/components/dropdown';
-import CheckboxSvg from '../svgs/checkboxSvg';
 import Code from '../components/code';
+import Button from '../../src/components/button';
+import Flex from '../../src/components/flex';
 
 export default function DropdownPage() {
   const [selectedValues, setSelectedValues] = useState<number[]>([]);
+  const [selectedValue, setSelectedValue] = useState<number>(2);
 
   return (
     <Box>
@@ -30,7 +32,34 @@ export default function DropdownPage() {
         <Dropdown defaultValue={1}>
           <Dropdown.Item value={1}>Option 1</Dropdown.Item>
           <Dropdown.Item value={2}>Option 2</Dropdown.Item>
+          {[3, 4].map((x) => (
+            <Dropdown.Item value={x} key={x}>
+              Option {x}
+            </Dropdown.Item>
+          ))}
         </Dropdown>
+      </Code>
+
+      <Code
+        label="Basic Dropdown"
+        code={`const [selectedValue, setSelectedValue] = useState<number>(2);
+
+<Dropdown value={1} onChange={(value) => setSelectedValue(value)>
+  <Dropdown.Item value={1}>Option 1</Dropdown.Item>
+  <Dropdown.Item value={2}>Option 2</Dropdown.Item>
+  <Dropdown.Item value={3}>Option 3</Dropdown.Item>
+</Dropdown>`}
+        mt={10}
+      >
+        <Flex gap={4}>
+          <Dropdown value={selectedValue} onChange={(value) => setSelectedValue(value!)}>
+            <Dropdown.Item value={1}>Option 1</Dropdown.Item>
+            <Dropdown.Item value={2}>Option 2</Dropdown.Item>
+            <Dropdown.Item value={3}>Option 3</Dropdown.Item>
+          </Dropdown>
+
+          <Button onClick={() => setSelectedValue(3)}>Select option 3</Button>
+        </Flex>
       </Code>
 
       <Code

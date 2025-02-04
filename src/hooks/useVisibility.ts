@@ -26,13 +26,13 @@ export default function useVisibility<T extends HTMLElement = HTMLDivElement>(
     }
 
     if (isVisible) {
-      window.addEventListener('mousedown', clickHandler);
+      window.addEventListener('click', clickHandler);
       // window.addEventListener('resize', resizeHandler);
       window.addEventListener('keydown', hideVisibilityKeyboardHandler);
     }
 
     return () => {
-      window.removeEventListener('mousedown', clickHandler);
+      window.removeEventListener('click', clickHandler);
       // window.removeEventListener('resize', resizeHandler);
       window.removeEventListener('keydown', hideVisibilityKeyboardHandler);
     };
