@@ -22,18 +22,19 @@ export default function DataGridHeaderCell<TRow>(props: Props<TRow>) {
       colSpan={colSpan}
       ai="center"
       position="sticky"
-      top={column.grid.defaultHeight * column.level}
-      height={column.grid.defaultHeight * rowsCount}
+      height={column.grid.defaultCellHeight * rowsCount}
       bgColor="gray-100"
       bb={1}
       cursor="pointer"
       jc="space-between"
-      width={40 * colSpan}
+      width={isEmptyCell ? 'auto' : column.grid.defaultCellWidth * colSpan}
     >
       {!isEmptyCell && (
         <>
-          <Flex flex1 ai="center" height="fit" props={{ onClick: () => column.grid.setSortColumn(column.key) }}>
-            {column.key}
+          <Flex overflow="hidden" flex1 ai="center" height="fit" props={{ onClick: () => column.grid.setSortColumn(column.key) }}>
+            <Box px={2} overflow="hidden" textOverflow="ellipsis">
+              {column.key}
+            </Box>
           </Flex>
           <Flex>
             <Button

@@ -26,16 +26,15 @@ export default function DataGridCell<TRow>(props: Props<TRow>) {
   return (
     <Flex
       hoverParent={{ 'grid-row': { bgColor: 'gray-200' } }}
-      textOverflow="ellipsis"
       overflow="hidden"
-      textWrap="nowrap"
-      width={40}
-      height={12}
-      px={2}
+      width={isEmptyCell ? 'auto' : row.grid.defaultCellWidth}
+      height={row.grid.defaultCellHeight}
       ai="center"
       bb={1}
     >
-      {value}
+      <Box px={2} textOverflow="ellipsis" overflow="hidden" textWrap="nowrap">
+        {value}
+      </Box>
     </Flex>
   );
 }

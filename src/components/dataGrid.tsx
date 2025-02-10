@@ -15,43 +15,32 @@
 
 // datagrid container
 
-import Box, { BoxProps } from '../box';
-import { DataGridProps, GridDefinition } from './dataGrid/dataGridContract';
+import Box from '../box';
+import { DataGridProps } from './dataGrid/dataGridContract';
 import Grid from './grid';
-import useGridData2 from './dataGrid/useGridData2';
-import Flex from './flex';
-import DataGridCell2 from './dataGrid/dataGridCell2';
-import DataGridPagination from './dataGrid/dataGridPagination';
 import { useCallback, useMemo, useState } from 'react';
 import useGrid from './dataGrid/useGrid';
 import DataGridCell from './dataGrid/dataGridCell';
 import DataGridHeaderCell from './dataGrid/dataGridHeaderCell';
 import { DEFAULT_REM_DIVIDER } from '../core/boxConstants';
 import FnUtils from '../utils/fn/fnUtils';
-import Row from './dataGrid/models/row';
-
-interface Props<TRow> extends DataGridProps<TRow>, BoxProps {
-  data: TRow[];
-  def: GridDefinition<TRow>;
-}
 
 export default function DataGrid<TRow extends {}>(props: DataGridProps<TRow>) {
   const grid = useGrid(props);
-  const rowHeight = DEFAULT_REM_DIVIDER * grid.defaultHeight;
-  const [scrollTop, setScrollTop] = useState(0);
-
-  const skipRows = Math.floor(scrollTop / rowHeight);
-  const take = 10;
 
   const rows = useMemo(() => {
     return grid.rows.value.map((row) => (
-      <Box key={row.rowKey} className="grid-row" display="contents">
+      <Box key={row.rowKey} className={`grid-row ${row.rowKey}`} display="contents">
         {grid.leafs.value.map((c) => (
           <DataGridCell key={c.key} row={row} column={c} />
         ))}
       </Box>
     ));
   }, [grid.rows.value]);
+
+  const rowHeight = DEFAULT_REM_DIVIDER * grid.defaultCellHeight;
+
+  console.log('render');
 
   return (
     <Box
@@ -66,71 +55,66 @@ export default function DataGrid<TRow extends {}>(props: DataGridProps<TRow>) {
         {/* {grid.groupColumns.length > 0 ? grid.groupColumns.join(' > ') : 'No grouping'} */}
         {'No grouping'}
       </Box>
-      <Box overflow="auto" height={112}>
+      <Box overflowX="scroll">
         <Grid style={{ gridTemplateColumns: grid.gridTemplateColumns.value }}>
           {grid.headers.value.map((c) => (
             <DataGridHeaderCell key={c.key} column={c} />
           ))}
-
-          {rows}
         </Grid>
+
+        <DataGridRows
+          rows={rows}
+          rowHeight={rowHeight}
+          containerHeight={rowHeight * 10}
+          gridTemplateColumns={grid.gridTemplateColumns.value}
+        />
+
+        <Box>footer</Box>
       </Box>
     </Box>
   );
 }
 
-function VirtualizedList<TRow>({
-  items,
-  itemHeight,
-  containerHeight,
-}: {
-  items: JSX.Element[];
-  itemHeight: number;
+interface DataGridRowsProps {
+  rows: JSX.Element[];
+  rowHeight: number;
   containerHeight: number;
-}) {
+  gridTemplateColumns: string;
+}
+
+function DataGridRows(props: DataGridRowsProps) {
+  const { rows, rowHeight, containerHeight, gridTemplateColumns } = props;
   const [scrollTop, setScrollTop] = useState(0);
-  const startIndex = Math.floor(scrollTop / itemHeight);
-  const endIndex = Math.min(startIndex + Math.ceil(containerHeight / itemHeight), items.length);
-  const visibleItems = items.slice(startIndex, endIndex);
-  const invisibleItemsHeight = (startIndex + visibleItems.length - endIndex) * itemHeight;
+  const startIndex = Math.max(0, Math.floor(scrollTop / rowHeight) - 5);
+  const endIndex = Math.min(startIndex + Math.ceil(containerHeight / rowHeight) + 10, rows.length);
+  const visibleItems = rows.slice(startIndex, endIndex);
+
   const handleScroll = useCallback(
     FnUtils.throttle((event: React.UIEvent) => {
-      setScrollTop(event.currentTarget.scrollTop);
-    }, 50),
+      setScrollTop((event.target as HTMLDivElement).scrollTop);
+    }, 200),
     [setScrollTop],
   );
 
-  return (
-    <Box style={{ height: `${containerHeight}px`, overflowY: 'scroll' }} props={{ onScroll: handleScroll }}>
-      <Box style={{ height: `${items.length * itemHeight}px` }}>
-        <Box
-          style={{
-            position: 'relative',
-            height: `${visibleItems.length * itemHeight}px`,
-            top: `${startIndex * itemHeight}px`,
-          }}
-        >
-          {visibleItems}
-        </Box>
-        <div style={{ height: `${invisibleItemsHeight}px` }} />
-      </Box>
-    </Box>
-  );
+  console.log('render - DataGridRows');
 
   return (
-    <Box style={{ height: `${containerHeight}px`, overflowY: 'scroll' }} props={{ onScroll: handleScroll }}>
-      <div style={{ height: `${items.length * itemHeight}px` }}>
-        <div
+    <Box height={120} overflowY="scroll" width="fit-content" props={{ onScroll: handleScroll }}>
+      <Box
+        style={{
+          height: `${rows.length * rowHeight}px`,
+        }}
+      >
+        <Grid
+          transition="none"
           style={{
-            position: 'relative',
-            height: `${visibleItems.length * itemHeight}px`,
-            top: `${startIndex * itemHeight}px`,
+            transform: `translateY(${startIndex * rowHeight}px)`,
+            gridTemplateColumns,
           }}
         >
           {visibleItems}
-        </div>
-        <div style={{ height: `${invisibleItemsHeight}px` }} />
-      </div>
+        </Grid>
+      </Box>
     </Box>
   );
 }

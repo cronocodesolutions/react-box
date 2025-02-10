@@ -71,8 +71,8 @@ export default class Grid<TRow> {
     return data.map((row, rowIndex) => new Row(this, row, rowIndex));
   });
 
-  public readonly defaultWidth = 40;
-  public readonly defaultHeight = 12;
+  public readonly defaultCellWidth = 40;
+  public readonly defaultCellHeight = 12;
 
   public setSortColumn(columnKey: Key) {
     if (this._sortColumn !== columnKey) {
