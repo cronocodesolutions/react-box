@@ -141,7 +141,14 @@ function DropdownImpl<TVal>(props: Props<TVal>, ref: Ref<HTMLInputElement>): Rea
       {valueToUse.map((x) => (
         <Textbox key={JSON.stringify(x)} ref={ref} name={name} type="hidden" value={JSON.stringify(x) ?? ''} />
       ))}
-      <Button ref={refToUse} component="dropdown" onClick={() => setOpen((prev) => !prev)} props={{ tabIndex: 0 }} {...restProps}>
+      <Button
+        ref={refToUse}
+        type="button"
+        component="dropdown"
+        onClick={() => setOpen((prev) => !prev)}
+        props={{ tabIndex: 0 }}
+        {...restProps}
+      >
         {isSearchable && (
           <Textbox
             display={isOpen && isSearchable ? 'block' : 'none'}
