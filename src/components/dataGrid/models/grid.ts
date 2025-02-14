@@ -1,5 +1,5 @@
 import memo from '../../../utils/memo';
-import { ColumnType, DataGridProps, Key } from '../dataGridContract';
+import { ColumnType, DataGridProps, Key, PinPosition } from '../dataGridContract';
 import Column from './column';
 import Row from './row';
 
@@ -32,6 +32,7 @@ export default class Grid<TRow> {
 
     // add empty column
     const emptyColumn = new Column<TRow>(this, { key: EMPTY_CELL_KEY });
+    emptyColumn.inlineWidth = undefined;
     columns.push(emptyColumn);
     this._flatColumns.push(emptyColumn);
 
@@ -71,10 +72,11 @@ export default class Grid<TRow> {
     return data.map((row, rowIndex) => new Row(this, row, rowIndex));
   });
 
-  public readonly defaultCellWidth = 40;
-  public readonly defaultCellHeight = 12;
+  public readonly ROW_HEIGHT = 12;
+  public readonly MIN_WIDTH_PX = 40;
+  public isResizeMode = false;
 
-  public setSortColumn(columnKey: Key) {
+  public setSortColumn = (columnKey: Key) => {
     if (this._sortColumn !== columnKey) {
       this._sortDirection = 'ASC';
       this._sortColumn = columnKey;
@@ -89,7 +91,17 @@ export default class Grid<TRow> {
 
     this.rows.clear();
     this.update();
-  }
+  };
+
+  public pinColumn = (columnKey: Key, pin?: PinPosition) => {
+    const column = this._flatColumns.findOrThrow((c) => c.key === columnKey);
+
+    if (column.isLeaf) {
+      column.pin = pin;
+    }
+
+    column.columns.forEach((c) => this.pinColumn(c.key, pin));
+  };
 
   private _sortColumn?: Key;
   private _sortDirection: SortDirection = 'ASC';

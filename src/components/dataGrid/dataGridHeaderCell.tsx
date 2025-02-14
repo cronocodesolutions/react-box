@@ -22,12 +22,13 @@ export default function DataGridHeaderCell<TRow>(props: Props<TRow>) {
       colSpan={colSpan}
       ai="center"
       position="sticky"
-      height={column.grid.defaultCellHeight * rowsCount}
-      bgColor="gray-100"
+      minHeight={column.grid.ROW_HEIGHT * rowsCount}
       bb={1}
       cursor="pointer"
       jc="space-between"
-      width={isEmptyCell ? 'auto' : column.grid.defaultCellWidth * colSpan}
+      boxSizing="content-box"
+      transition="none"
+      style={{ width: `var(${column.widthVarName})` }}
     >
       {!isEmptyCell && (
         <>
@@ -36,13 +37,11 @@ export default function DataGridHeaderCell<TRow>(props: Props<TRow>) {
               {column.key}
             </Box>
           </Flex>
-          <Flex>
+          <Flex height="fit" ai="center" gap={1}>
             <Button
               clean
-              // onClick={() => setOpen(!isOpen)}
-              // ref={refToUse}
-              width={5}
-              height={5}
+              width={6}
+              height={6}
               cursor="pointer"
               userSelect="none"
               borderRadius={1}
@@ -60,8 +59,8 @@ export default function DataGridHeaderCell<TRow>(props: Props<TRow>) {
                 />
               </BaseSvg>
             </Button>
-            <Box cursor="col-resize" px={0.5} className="resizer">
-              <Box width={0.5} height={5} bgColor="gray-400" hoverParent={{ resizer: { bgColor: 'gray-600' } }}></Box>
+            <Box cursor="col-resize" px={0.5} className="resizer" height="2/4" props={{ onMouseDown: column.resizeColumn }}>
+              <Box width={0.5} height="fit" bgColor="gray-400" hoverParent={{ resizer: { bgColor: 'gray-600' } }}></Box>
             </Box>
           </Flex>
         </>

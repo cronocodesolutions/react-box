@@ -11,6 +11,7 @@ declare global {
     sortBy<TVal>(fn: (value: T) => TVal, direction?: 'ASC' | 'DESC'): Array<T>;
     maxBy(fn: (value: T) => number): number;
     findOrThrow(predicate: (value: T) => boolean): T;
+    toRecord<K extends string | number | symbol, V>(fn: (value: T) => [K, V]): Record<K, V>;
   }
 }
 
@@ -75,5 +76,26 @@ if (!Array.prototype.findOrThrow) {
     if (typeof result === 'undefined') throw new Error('No element satisfies the condition in predicate.');
 
     return result;
+  };
+}
+
+if (!Array.prototype.toRecord) {
+  Array.prototype.toRecord = function <T, K extends string | number | symbol, V>(
+    this: T[],
+    fn: (value: T) => [K, V] | undefined,
+  ): Record<K, V> {
+    return this.reduce<Record<K, V>>(
+      (acc, item) => {
+        const result = fn(item);
+
+        if (!result) return acc;
+
+        const [key, value] = result;
+        acc[key] = value;
+
+        return acc;
+      },
+      {} as Record<K, V>,
+    );
   };
 }

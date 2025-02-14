@@ -1,16 +1,8 @@
-import { useEffect, useMemo, useState } from 'react';
 import Box from '../../box';
-import useVisibility from '../../hooks/useVisibility';
-import Button from '../button';
 import Flex from '../flex';
-import Tooltip from '../tooltip';
-import { EMPTY_CELL_KEY, GridData } from './useGridData2';
-import { GridCell2, GridRow2 } from './dataGridContract';
-import BaseSvg from '../baseSvg';
-import ArrowSvg from '../../../pages/svgs/arrowSvg';
 import Column from './models/column';
-import Textbox from '../textbox';
 import Row from './models/row';
+import { EMPTY_CELL_KEY } from './models/grid';
 
 interface Props<TRow> {
   row: Row<TRow>;
@@ -27,10 +19,12 @@ export default function DataGridCell<TRow>(props: Props<TRow>) {
     <Flex
       hoverParent={{ 'grid-row': { bgColor: 'gray-200' } }}
       overflow="hidden"
-      width={isEmptyCell ? 'auto' : row.grid.defaultCellWidth}
-      height={row.grid.defaultCellHeight}
+      minHeight={row.grid.ROW_HEIGHT}
       ai="center"
       bb={1}
+      boxSizing="content-box"
+      transition="none"
+      style={{ width: `var(${column.widthVarName})` }}
     >
       <Box px={2} textOverflow="ellipsis" overflow="hidden" textWrap="nowrap">
         {value}

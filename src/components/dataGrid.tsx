@@ -30,7 +30,7 @@ export default function DataGrid<TRow extends {}>(props: DataGridProps<TRow>) {
 
   const rows = useMemo(() => {
     return grid.rows.value.map((row) => (
-      <Box key={row.rowKey} className={`grid-row ${row.rowKey}`} display="contents">
+      <Box key={row.rowKey} className="grid-row" display="contents">
         {grid.leafs.value.map((c) => (
           <DataGridCell key={c.key} row={row} column={c} />
         ))}
@@ -38,25 +38,29 @@ export default function DataGrid<TRow extends {}>(props: DataGridProps<TRow>) {
     ));
   }, [grid.rows.value]);
 
-  const rowHeight = DEFAULT_REM_DIVIDER * grid.defaultCellHeight;
+  const sizes = grid.headers.value.reduce<Record<string, string>>((acc, c) => {
+    acc[c.widthVarName] = typeof c.inlineWidth === 'number' ? `${c.inlineWidth}px` : (c.inlineWidth ?? 'unset');
 
-  console.log('render');
+    return acc;
+  }, {});
+
+  const rowHeight = DEFAULT_REM_DIVIDER * grid.ROW_HEIGHT;
+
+  // console.log('render');
 
   return (
-    <Box
-      component="dataGrid"
-      b={1}
-      borderRadius={1}
-      bgColor="gray-100"
-      {...props}
-      // style={sizes}
-    >
+    <Box component="dataGrid" b={1} overflow="hidden" borderRadius={1} bgColor="gray-100" style={sizes}>
       <Box p={3} bb={1}>
         {/* {grid.groupColumns.length > 0 ? grid.groupColumns.join(' > ') : 'No grouping'} */}
         {'No grouping'}
       </Box>
       <Box overflowX="scroll">
-        <Grid style={{ gridTemplateColumns: grid.gridTemplateColumns.value }}>
+        <Grid
+          width="min-content"
+          bgColor="gray-200"
+          userSelect={grid.isResizeMode ? 'none' : undefined}
+          style={{ gridTemplateColumns: grid.gridTemplateColumns.value }}
+        >
           {grid.headers.value.map((c) => (
             <DataGridHeaderCell key={c.key} column={c} />
           ))}
@@ -68,8 +72,9 @@ export default function DataGrid<TRow extends {}>(props: DataGridProps<TRow>) {
           containerHeight={rowHeight * 10}
           gridTemplateColumns={grid.gridTemplateColumns.value}
         />
-
-        <Box>footer</Box>
+      </Box>
+      <Box p={3} bgColor="gray-200">
+        Rows: {grid.rows.value.length}
       </Box>
     </Box>
   );
@@ -96,10 +101,8 @@ function DataGridRows(props: DataGridRowsProps) {
     [setScrollTop],
   );
 
-  console.log('render - DataGridRows');
-
   return (
-    <Box height={120} overflowY="scroll" width="fit-content" props={{ onScroll: handleScroll }}>
+    <Box height={120} overflowY="scroll" minWidth="fit" width="min-content" props={{ onScroll: handleScroll }}>
       <Box
         style={{
           height: `${rows.length * rowHeight}px`,
