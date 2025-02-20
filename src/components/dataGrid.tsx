@@ -86,9 +86,9 @@ export default function DataGrid<TRow extends {}>(props: DataGridProps<TRow>) {
       </Box>
       <Box overflowX="scroll" props={{ onScroll: handleScroll }}>
         <Grid
-          width="min-content"
-          userSelect={grid.isResizeMode ? 'none' : undefined}
+          width="max-content"
           minWidth="fit"
+          userSelect={grid.isResizeMode ? 'none' : undefined}
           style={{ gridTemplateColumns: grid.gridTemplateColumns.value }}
           position="sticky"
           top={0}
@@ -137,12 +137,13 @@ function DataGridRows(props: DataGridRowsProps, ref: Ref<DataGridRowsRef>) {
   return (
     <Box height={120}>
       <Box
-        width="max-content"
         style={{
           height: `${rows.length * rowHeight}px`,
         }}
       >
         <Grid
+          width="max-content"
+          minWidth="fit"
           transition="none"
           style={{
             transform: `translateY(${startIndex * rowHeight}px)`,

@@ -9,8 +9,8 @@ export default class Column<TRow> {
     this.key = def.key;
     this._pin = parentPin ?? def.pin ?? 'NO_PIN';
 
-    if (this.isLeaf && this.key !== EMPTY_CELL_KEY) {
-      this.inlineWidth = 200;
+    if (this.isLeaf) {
+      this._inlineWidth = this.key == EMPTY_CELL_KEY ? 'auto' : 200;
     }
 
     this._columns = columns;
@@ -29,7 +29,10 @@ export default class Column<TRow> {
     return this._pin;
   }
 
-  public inlineWidth?: number | 'auto' = 'auto';
+  private _inlineWidth?: number | 'auto';
+  public get inlineWidth() {
+    return this._inlineWidth === 'auto' ? this._inlineWidth : this.getWidth();
+  }
 
   private _left?: number;
   public get left() {
@@ -54,7 +57,7 @@ export default class Column<TRow> {
     this._right = right;
 
     let rightToSet = right;
-    const reverseColumns = [...this._columns];
+    const reverseColumns = [...this._columns].reverse();
     reverseColumns.forEach((c) => {
       rightToSet = c.setRight(rightToSet);
     });
@@ -62,9 +65,13 @@ export default class Column<TRow> {
     return right + this.getWidth();
   }
 
-  public getWidth(): number {
-    if (typeof this.inlineWidth === 'number') {
-      return this.inlineWidth;
+  private getWidth(): number {
+    if (this.key in this.grid.widthOverrides) {
+      return this.grid.widthOverrides[this.key];
+    }
+
+    if (typeof this._inlineWidth === 'number') {
+      return this._inlineWidth;
     }
 
     return this._columns.sumBy((c) => {
@@ -72,6 +79,17 @@ export default class Column<TRow> {
 
       return typeof val === 'number' ? val : 0;
     });
+  }
+
+  private _isEdge = false;
+  public get isEdge() {
+    return this._isEdge;
+  }
+  public setEdge() {
+    this._isEdge = true;
+
+    const kid = this._pin === 'LEFT' ? this._columns.at(-1) : this._pin === 'RIGHT' ? this._columns.at(0) : undefined;
+    kid?.setEdge();
   }
 
   public get level() {
@@ -133,7 +151,8 @@ export default class Column<TRow> {
         const dragDistanceForCell =
           totalWidth > 0 ? ((width - MIN_WIDTH_PX) / totalWidth) * dragDistance : dragDistance / this.leafs.length;
         const newWidth = Math.round(width + dragDistanceForCell);
-        leaf.inlineWidth = newWidth < MIN_WIDTH_PX ? MIN_WIDTH_PX : newWidth;
+
+        this.grid.widthOverrides[leaf.key] = newWidth < MIN_WIDTH_PX ? MIN_WIDTH_PX : newWidth;
       });
 
       this.grid.headerRows.clear();
@@ -150,7 +169,14 @@ export default class Column<TRow> {
   };
 
   public pinColumn = (pin: PinPosition) => {
-    this.grid.pinOverrides[this.key] = pin;
+    const setPin = (col: Column<TRow>, pin: PinPosition) => {
+      if (col.isLeaf) {
+        this.grid.pinOverrides[col.key] = pin;
+      }
+      col._columns.forEach((c) => setPin(c, pin));
+    };
+
+    setPin(this, pin);
 
     this.grid.gridTemplateColumns.clear();
     this.grid.headerRows.clear();

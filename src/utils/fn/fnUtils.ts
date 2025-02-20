@@ -16,7 +16,7 @@ namespace FnUtils {
       setTimeout(() => {
         isWaiting = false;
 
-        callback(...lastArgs);
+        lastArgs && callback(...lastArgs);
       }, wait);
     };
   }

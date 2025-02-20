@@ -33,6 +33,8 @@ export default function DataGridHeaderCell<TRow>(props: Props<TRow>) {
       zIndex={isSticky ? 2 : 1}
       minHeight={column.grid.ROW_HEIGHT * column.gridRows}
       bb={1}
+      br={column.pin === 'LEFT' && column.isEdge ? 1 : undefined}
+      bl={column.pin === 'RIGHT' && column.isEdge ? 1 : undefined}
       cursor="pointer"
       jc="space-between"
       boxSizing="content-box"

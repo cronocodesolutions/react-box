@@ -16,6 +16,7 @@ export default class Grid<TRow> {
     public readonly update: () => void,
   ) {}
 
+  public widthOverrides: Record<Key, number> = {};
   public pinOverrides: Record<Key, PinPosition> = {};
 
   public readonly _columns = memo(() => {
@@ -25,7 +26,7 @@ export default class Grid<TRow> {
       const columns: Column<TRow>[] = [];
 
       columnDefs.flatMap((def) => {
-        const children = create(def.columns ?? [], this.pinOverrides[def.key] ?? def.pin);
+        const children = create(def.columns ?? [], this.pinOverrides[def.key] ?? parentPin ?? def.pin);
         const distinctPin = children.groupBy((c) => c.pin);
 
         distinctPin.forEach(({ key: pin, values }) => {
@@ -55,15 +56,23 @@ export default class Grid<TRow> {
     let prevRight = 0;
 
     for (let index = 0, lastIndex = columns.length - 1; index < columns.length; index++, lastIndex--) {
-      const left = columns[index];
-      const right = columns[lastIndex];
+      const left = columns.at(index);
+      const right = columns.at(lastIndex);
 
-      if (left.pin === 'LEFT') {
+      if (left?.pin === 'LEFT') {
         prevLeft = left.setLeft(prevLeft);
+
+        if (columns.at(index + 1)?.pin !== 'LEFT') {
+          left.setEdge();
+        }
       }
 
-      if (right.pin === 'RIGHT') {
+      if (right?.pin === 'RIGHT') {
         prevRight = right.setRight(prevRight);
+
+        if (columns.at(lastIndex - 1)?.pin !== 'RIGHT') {
+          right.setEdge();
+        }
       }
     }
 

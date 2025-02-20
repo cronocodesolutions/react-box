@@ -24,6 +24,8 @@ export default function DataGridCell<TRow>(props: Props<TRow>) {
       minHeight={row.grid.ROW_HEIGHT}
       ai="center"
       bb={1}
+      br={column.pin === 'LEFT' && column.isEdge ? 1 : undefined}
+      bl={column.pin === 'RIGHT' && column.isEdge ? 1 : undefined}
       boxSizing="content-box"
       transition="none"
       position={isSticky ? 'sticky' : undefined}
