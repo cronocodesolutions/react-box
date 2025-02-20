@@ -1,5 +1,5 @@
 export type Key = string | number;
-export type PinPosition = 'LEFT' | 'RIGHT';
+export type PinPosition = 'LEFT' | 'RIGHT' | 'NO_PIN';
 export type SortColumnType<TRow> = { key: keyof TRow; dir: SortDirection };
 export type KeysMatching<T, V> = { [K in keyof T]-?: T[K] extends V ? K : never }[keyof T];
 export interface PaginationState {
@@ -9,16 +9,12 @@ export interface PaginationState {
   totalPages: number;
 }
 export type Pagination = boolean | { pageSize: number };
-
-export interface ParentColumn<TRow> {
+export interface ColumnType<TRow> {
   key: Key;
-  columns: ColumnType<TRow>[];
+  pin?: PinPosition;
+  width?: number;
+  columns?: ColumnType<TRow>[];
 }
-export interface Column<TRow> {
-  key: Key;
-}
-
-export type ColumnType<TRow> = Column<TRow> | ParentColumn<TRow>;
 
 export interface GridDefinition<TRow> {
   rowKey?: KeysMatching<TRow, Key> | ((rowData: TRow) => Key);

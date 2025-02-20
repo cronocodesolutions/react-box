@@ -1,7 +1,10 @@
+import { useMemo, useState } from 'react';
 import Box from '../../box';
+import useVisibility from '../../hooks/useVisibility';
 import BaseSvg from '../baseSvg';
 import Button from '../button';
 import Flex from '../flex';
+import Tooltip from '../tooltip';
 import Column from './models/column';
 import { EMPTY_CELL_KEY } from './models/grid';
 
@@ -12,27 +15,44 @@ interface Props<TRow> {
 export default function DataGridHeaderCell<TRow>(props: Props<TRow>) {
   const { column } = props;
 
+  const [isOpen, setOpen, refToUse] = useVisibility<HTMLButtonElement>({ hideOnScroll: true });
+  const [tooltipPosition, setTooltipPosition] = useState<{ top: number; left: number }>({ top: 0, left: 0 });
+  const openLeft = useMemo(() => tooltipPosition.left > window.innerWidth / 2, [tooltipPosition.left]);
+
   const isEmptyCell = column.key === EMPTY_CELL_KEY;
-  const rowsCount = column.isLeaf ? column.grid.headerRowsCount.value - column.level : 1;
   const colSpan = column.isLeaf ? 1 : column.leafs.length;
+  const isSticky = column.pin === 'LEFT' || column.pin === 'RIGHT';
 
   return (
     <Flex
-      gridRow={rowsCount}
+      gridRow={column.gridRows}
       colSpan={colSpan}
       ai="center"
-      position="sticky"
-      minHeight={column.grid.ROW_HEIGHT * rowsCount}
+      bgColor="gray-200"
+      position={isSticky ? 'sticky' : undefined}
+      zIndex={isSticky ? 2 : 1}
+      minHeight={column.grid.ROW_HEIGHT * column.gridRows}
       bb={1}
       cursor="pointer"
       jc="space-between"
       boxSizing="content-box"
       transition="none"
-      style={{ width: `var(${column.widthVarName})` }}
+      style={{
+        width: column.isLeaf ? `var(${column.widthVarName})` : undefined,
+        left: column.pin === 'LEFT' ? `var(${column.leftVarName})` : undefined,
+        right: column.pin === 'RIGHT' ? `var(${column.rightVarName})` : undefined,
+      }}
     >
       {!isEmptyCell && (
         <>
-          <Flex overflow="hidden" flex1 ai="center" height="fit" props={{ onClick: () => column.grid.setSortColumn(column.key) }}>
+          <Flex
+            overflow="hidden"
+            position="sticky"
+            left={0}
+            ai="center"
+            height="fit"
+            props={{ onClick: () => column.grid.setSortColumn(column.key) }}
+          >
             <Box px={2} overflow="hidden" textOverflow="ellipsis">
               {column.key}
             </Box>
@@ -40,6 +60,8 @@ export default function DataGridHeaderCell<TRow>(props: Props<TRow>) {
           <Flex height="fit" ai="center" gap={1}>
             <Button
               clean
+              onClick={() => setOpen(!isOpen)}
+              ref={refToUse}
               width={6}
               height={6}
               cursor="pointer"
@@ -58,6 +80,39 @@ export default function DataGridHeaderCell<TRow>(props: Props<TRow>) {
                   d="M7.936 12.128a.936.936 0 1 1 0 1.872.936.936 0 0 1 0-1.872ZM7.936 7.052a.936.936 0 1 1 0 1.873.936.936 0 0 1 0-1.873ZM7.936 1.977a.936.936 0 1 1 0 1.872.936.936 0 0 1 0-1.872Z"
                 />
               </BaseSvg>
+              {isOpen && (
+                <Tooltip
+                  bgColor="white"
+                  width={40}
+                  b={1}
+                  borderRadius={1}
+                  display="flex"
+                  d="column"
+                  mt={4}
+                  overflow="hidden"
+                  translateX={openLeft ? -39 : -5}
+                  onPositionChange={setTooltipPosition}
+                >
+                  <Button clean textAlign="left" p={3} hover={{ bgColor: 'gray-200' }} onClick={() => column.pinColumn('NO_PIN')}>
+                    Unpin
+                  </Button>
+                  <Button clean textAlign="left" p={3} hover={{ bgColor: 'gray-200' }} onClick={() => column.pinColumn('LEFT')}>
+                    Pin Left
+                  </Button>
+                  <Button clean textAlign="left" p={3} hover={{ bgColor: 'gray-200' }} onClick={() => column.pinColumn('RIGHT')}>
+                    Pin Right
+                  </Button>
+                  <Button
+                    clean
+                    textAlign="left"
+                    p={3}
+                    hover={{ bgColor: 'gray-200' }}
+                    // onClick={cell.toggleGroupColumn}
+                  >
+                    Group by: {column.key}
+                  </Button>
+                </Tooltip>
+              )}
             </Button>
             <Box cursor="col-resize" px={0.5} className="resizer" height="2/4" props={{ onMouseDown: column.resizeColumn }}>
               <Box width={0.5} height="fit" bgColor="gray-400" hoverParent={{ resizer: { bgColor: 'gray-600' } }}></Box>

@@ -1,41 +1,122 @@
 import FnUtils from '../../../utils/fn/fnUtils';
 import { ColumnType, Key, PinPosition } from '../dataGridContract';
-import Grid from './grid';
+import Grid, { EMPTY_CELL_KEY } from './grid';
 
 export default class Column<TRow> {
-  constructor(grid: Grid<TRow>, def: ColumnType<TRow>, parent?: Column<TRow>, left?: Column<TRow>) {
-    this.level = parent ? parent.level + 1 : 0;
-    this.key = def.key;
-    this.isLeaf = 'columns' in def === false;
-    this.left = left;
-    this.parent = parent;
+  constructor(def: ColumnType<TRow>, grid: Grid<TRow>, parentPin?: PinPosition, columns: Column<TRow>[] = []) {
     this.grid = grid;
+    this.isLeaf = 'columns' in def === false;
+    this.key = def.key;
+    this._pin = parentPin ?? def.pin ?? 'NO_PIN';
 
-    if (this.left) this.left.right = this;
-    if (this.isLeaf) this.inlineWidth = 200;
+    if (this.isLeaf && this.key !== EMPTY_CELL_KEY) {
+      this.inlineWidth = 200;
+    }
+
+    this._columns = columns;
+    this._columns.forEach((c) => (c.parent = this));
   }
 
-  public readonly level: number;
+  public readonly grid: Grid<TRow>;
+  public parent?: Column<TRow>;
   public readonly key: Key;
   public readonly isLeaf: boolean;
 
-  public grid: Grid<TRow>;
-  public left?: Column<TRow>;
-  public right?: Column<TRow>;
-  public parent?: Column<TRow>;
-  public columns: Column<TRow>[] = [];
+  private readonly _columns: Column<TRow>[];
 
-  public pin?: PinPosition;
-  public inlineWidth?: number;
+  private _pin: PinPosition;
+  public get pin() {
+    return this._pin;
+  }
+
+  public inlineWidth?: number | 'auto' = 'auto';
+
+  private _left?: number;
+  public get left() {
+    return this._left;
+  }
+  public setLeft(left: number) {
+    this._left = left;
+
+    let leftToSet = left;
+    this._columns.forEach((c) => {
+      leftToSet = c.setLeft(leftToSet);
+    });
+
+    return left + this.getWidth();
+  }
+
+  private _right?: number;
+  public get right() {
+    return this._right;
+  }
+  public setRight(right: number) {
+    this._right = right;
+
+    let rightToSet = right;
+    const reverseColumns = [...this._columns];
+    reverseColumns.forEach((c) => {
+      rightToSet = c.setRight(rightToSet);
+    });
+
+    return right + this.getWidth();
+  }
+
+  public getWidth(): number {
+    if (typeof this.inlineWidth === 'number') {
+      return this.inlineWidth;
+    }
+
+    return this._columns.sumBy((c) => {
+      const val = c.getWidth();
+
+      return typeof val === 'number' ? val : 0;
+    });
+  }
+
+  public get level() {
+    let level = 0;
+
+    let parent = this.parent;
+    while (parent) {
+      level++;
+      parent = parent.parent;
+    }
+
+    return level;
+  }
+
+  // Approved
+
+  public get allLevelColumns(): Column<TRow>[] {
+    const cols = [this] as Column<TRow>[];
+
+    cols.push(...this._columns.flatMap((c) => c.allLevelColumns));
+
+    return cols;
+  }
 
   public get leafs(): Column<TRow>[] {
     if (this.isLeaf) return [this];
 
-    return this.columns.flatMap((c) => c.leafs);
+    return this._columns.flatMap((c) => c.leafs);
   }
 
+  public get uniqueKey(): string {
+    return `${this.key}-${this.pin}`;
+  }
   public get widthVarName(): string {
-    return `--${this.key}-${this.pin ?? ''}-width`;
+    return `--${this.uniqueKey}-width`;
+  }
+  public get leftVarName() {
+    return `--${this.uniqueKey}-left`;
+  }
+  public get rightVarName() {
+    return `--${this.uniqueKey}-right`;
+  }
+
+  public get gridRows() {
+    return this.isLeaf ? this.grid.headerRows.value.length - this.level : 1;
   }
 
   public resizeColumn = (e: React.MouseEvent) => {
@@ -55,6 +136,7 @@ export default class Column<TRow> {
         leaf.inlineWidth = newWidth < MIN_WIDTH_PX ? MIN_WIDTH_PX : newWidth;
       });
 
+      this.grid.headerRows.clear();
       update();
     }, 10);
 
@@ -65,5 +147,16 @@ export default class Column<TRow> {
     };
     window.addEventListener('mousemove', resize);
     window.addEventListener('mouseup', stopResize, { once: true });
+  };
+
+  public pinColumn = (pin: PinPosition) => {
+    this.grid.pinOverrides[this.key] = pin;
+
+    this.grid.gridTemplateColumns.clear();
+    this.grid.headerRows.clear();
+    this.grid.leafs.clear();
+    this.grid._columns.clear();
+
+    this.grid.update();
   };
 }

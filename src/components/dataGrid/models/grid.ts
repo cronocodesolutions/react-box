@@ -4,6 +4,11 @@ import Column from './column';
 import Row from './row';
 
 export const EMPTY_CELL_KEY = 'empty-cell';
+const columnsOrder: Record<PinPosition, number> = {
+  LEFT: 0,
+  NO_PIN: 1,
+  RIGHT: 2,
+};
 
 export default class Grid<TRow> {
   constructor(
@@ -11,52 +16,80 @@ export default class Grid<TRow> {
     public readonly update: () => void,
   ) {}
 
-  public readonly columns = memo(() => {
-    const create = (columnDefs: ColumnType<TRow>[], parent?: Column<TRow>): Column<TRow>[] => {
-      let left: Maybe<Column<TRow>>;
-      return columnDefs.map((def) => {
-        const isParent = 'columns' in def;
-        const column = new Column(this, def, parent, left);
-        this._flatColumns.push(column);
+  public pinOverrides: Record<Key, PinPosition> = {};
 
-        if (isParent) {
-          column.columns = create(def.columns, column);
+  public readonly _columns = memo(() => {
+    // console.log(this._columnDefs);
+
+    const create = (columnDefs: ColumnType<TRow>[], parentPin?: PinPosition): Column<TRow>[] => {
+      const columns: Column<TRow>[] = [];
+
+      columnDefs.flatMap((def) => {
+        const children = create(def.columns ?? [], this.pinOverrides[def.key] ?? def.pin);
+        const distinctPin = children.groupBy((c) => c.pin);
+
+        distinctPin.forEach(({ key: pin, values }) => {
+          const column = new Column(def, this, this.pinOverrides[def.key] ?? pin, values);
+          columns.push(column);
+        });
+
+        if (children.length === 0) {
+          const column = new Column(def, this, this.pinOverrides[def.key] ?? parentPin);
+          columns.push(column);
         }
-
-        left = column;
-        return column;
       });
+
+      return columns;
     };
 
-    const columns = create(this.props.def.columns);
+    // user defined columns
+    let columns = create(this.props.def.columns);
 
     // add empty column
-    const emptyColumn = new Column<TRow>(this, { key: EMPTY_CELL_KEY });
-    emptyColumn.inlineWidth = undefined;
+    const emptyColumn = new Column<TRow>({ key: EMPTY_CELL_KEY }, this);
     columns.push(emptyColumn);
-    this._flatColumns.push(emptyColumn);
+
+    columns = columns.sortBy((c) => columnsOrder[c.pin]);
+
+    let prevLeft = 0;
+    let prevRight = 0;
+
+    for (let index = 0, lastIndex = columns.length - 1; index < columns.length; index++, lastIndex--) {
+      const left = columns[index];
+      const right = columns[lastIndex];
+
+      if (left.pin === 'LEFT') {
+        prevLeft = left.setLeft(prevLeft);
+      }
+
+      if (right.pin === 'RIGHT') {
+        prevRight = right.setRight(prevRight);
+      }
+    }
 
     return columns;
   });
 
-  public readonly headers = memo(() => {
-    return this._flatColumns.sortBy((c) => c.level);
+  public readonly headerRows = memo(() => {
+    const groupedByLevel = this._columns.value
+      .flatMap((c) => c.allLevelColumns)
+      .groupBy((c) => c.level)
+      .sortBy((x) => x.key);
+
+    return groupedByLevel.map((x) => {
+      const cols = x.values.groupBy((c) => c.pin).toRecord((c) => [c.key, c.values]);
+
+      return [...(cols.LEFT ?? []), ...(cols.NO_PIN ?? []), ...(cols.RIGHT ?? [])];
+    });
   });
 
-  public readonly headerRowsCount = memo(() => {
-    return this._flatColumns.maxBy((c) => c.level) + 1;
-  });
-
-  public readonly leafs = memo(() => {
-    return this.columns.value.flatMap((c) => c.leafs);
-  });
+  public readonly leafs = memo(() => this._columns.value.flatMap((c) => c.leafs));
 
   public readonly gridTemplateColumns = memo(() => {
-    const rightPinnedColumnsCount = 0; // this.columns.filter((c) => !c.isParent && c.pinned === 'RIGHT');
+    const rightPinnedColumnsCount = this.leafs.value.sumBy((x) => (x.pin === 'RIGHT' ? 1 : 0));
     const leftColsCount = this.leafs.value.length - rightPinnedColumnsCount - 1;
 
     const left = leftColsCount > 0 ? `repeat(${leftColsCount}, max-content)` : '';
-
     const right = rightPinnedColumnsCount > 0 ? `repeat(${rightPinnedColumnsCount}, max-content)` : '';
 
     return `${left} auto ${right}`;
@@ -93,17 +126,6 @@ export default class Grid<TRow> {
     this.update();
   };
 
-  public pinColumn = (columnKey: Key, pin?: PinPosition) => {
-    const column = this._flatColumns.findOrThrow((c) => c.key === columnKey);
-
-    if (column.isLeaf) {
-      column.pin = pin;
-    }
-
-    column.columns.forEach((c) => this.pinColumn(c.key, pin));
-  };
-
   private _sortColumn?: Key;
   private _sortDirection: SortDirection = 'ASC';
-  private readonly _flatColumns: Column<TRow>[] = [];
 }

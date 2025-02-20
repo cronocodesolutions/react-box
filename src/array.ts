@@ -3,6 +3,11 @@ export {};
 declare global {
   type SortDirection = 'ASC' | 'DESC';
 
+  interface GroupItem<TKey, T> {
+    key: TKey;
+    values: T[];
+  }
+
   interface Array<T> {
     take(count: number, skip?: number): Array<T>;
     add(...items: T[]): Array<T>;
@@ -12,6 +17,7 @@ declare global {
     maxBy(fn: (value: T) => number): number;
     findOrThrow(predicate: (value: T) => boolean): T;
     toRecord<K extends string | number | symbol, V>(fn: (value: T) => [K, V]): Record<K, V>;
+    groupBy<TKey extends string | number | symbol>(keySelector: (item: T, index: number) => TKey): GroupItem<TKey, T>[];
   }
 }
 
@@ -97,5 +103,34 @@ if (!Array.prototype.toRecord) {
       },
       {} as Record<K, V>,
     );
+  };
+}
+
+if (!Array.prototype.groupBy) {
+  Array.prototype.groupBy = function <T, TKey extends string | number | symbol>(
+    this: T[],
+    keySelector: (item: T, index: number) => TKey,
+    ignoreEmptyStringNullOrUndefinedKey = false,
+  ): GroupItem<TKey, T>[] {
+    const result = this.reduce(
+      (acc, item, index) => {
+        const key = keySelector(item, index);
+
+        if (ignoreEmptyStringNullOrUndefinedKey && typeof key !== 'number' && !key) {
+          return acc;
+        }
+
+        if (key in acc === false) {
+          acc[key] = [];
+        }
+
+        acc[key].push(item);
+
+        return acc;
+      },
+      {} as Record<TKey, T[]>,
+    );
+
+    return Object.entries(result).map(([key, values]) => ({ key, values: values as T[] })) as GroupItem<TKey, T>[];
   };
 }

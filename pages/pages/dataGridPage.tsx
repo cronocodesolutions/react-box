@@ -8,6 +8,8 @@ import Data2 from '../data/MOCK_DATA_2.json';
 import Data3 from '../data/MOCK_DATA_3.json';
 import Data4 from '../data/MOCK_DATA_4.json';
 import Data5 from '../data/MOCK_DATA_5.json';
+import Data6 from '../data/MOCK_DATA_6.json';
+import Data7 from '../data/MOCK_DATA_7.json';
 
 interface DataType {
   first_name: string;
@@ -31,24 +33,27 @@ interface DataType {
   currency_code: string;
 }
 
-const datata = [...Data, ...Data1, ...Data2, ...Data3, ...Data4, ...Data5];
+const datata = [...Data, ...Data1, ...Data2, ...Data3, ...Data4, ...Data5, ...Data6, ...Data7];
 
 export default function DataGridPage() {
   var def: GridDefinition<DataType> = {
     pagination: true,
     columns: [
-      { key: 'name', columns: [{ key: 'first_name' }, { key: 'last_name' }] },
-      { key: 'age' },
-      { key: 'email' },
+      { key: 'person', columns: [{ key: 'first_name' }, { key: 'last_name' }] },
+      { key: 'person2', columns: [{ key: 'age' }, { key: 'email' }] },
+      {
+        key: 'test',
+        columns: [
+          { key: 'test_single', columns: [{ key: 'job_title' }] },
+          { key: 'test_double', columns: [{ key: 'street_address' }, { key: 'city' }] },
+        ],
+      },
       { key: 'country' },
       { key: 'favorite_color' },
       { key: 'gender' },
-      { key: 'job_title' },
       { key: 'ssn' },
       { key: 'birthdate' },
       { key: 'phone_number' },
-      { key: 'street_address' },
-      { key: 'city' },
       { key: 'username' },
       { key: 'credit_card_number' },
       { key: 'salary' },
