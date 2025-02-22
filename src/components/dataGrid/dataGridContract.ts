@@ -1,5 +1,6 @@
 export type Key = string | number;
-export type PinPosition = 'LEFT' | 'RIGHT' | 'NO_PIN';
+export type PinPosition = 'LEFT' | 'RIGHT';
+export const NO_PIN = 'NO_PIN';
 export type SortColumnType<TRow> = { key: keyof TRow; dir: SortDirection };
 export type KeysMatching<T, V> = { [K in keyof T]-?: T[K] extends V ? K : never }[keyof T];
 export interface PaginationState {

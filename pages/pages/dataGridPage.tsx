@@ -45,7 +45,7 @@ export default function DataGridPage() {
         key: 'test',
         columns: [
           { key: 'test_single', columns: [{ key: 'job_title' }] },
-          { key: 'test_double', columns: [{ key: 'street_address' }, { key: 'city' }] },
+          { key: 'test_double', pin: 'RIGHT', columns: [{ key: 'street_address' }, { key: 'city', pin: 'LEFT' }] },
         ],
       },
       { key: 'country' },

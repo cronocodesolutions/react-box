@@ -24,50 +24,40 @@ import DataGridCell from './dataGrid/dataGridCell';
 import DataGridHeaderCell from './dataGrid/dataGridHeaderCell';
 import { DEFAULT_REM_DIVIDER } from '../core/boxConstants';
 import FnUtils from '../utils/fn/fnUtils';
+import GridModel from './dataGrid/models/grid';
 
 export default function DataGrid<TRow extends {}>(props: DataGridProps<TRow>) {
   const grid = useGrid(props);
 
   const headers = useMemo(() => {
     return grid.headerRows.value.map((row) => {
-      return row.map((cell) => <DataGridHeaderCell key={cell.uniqueKey} column={cell} />);
+      return row.map((cell) => {
+        return <DataGridHeaderCell key={cell.uniqueKey} column={cell} />;
+      });
     });
   }, [grid.headerRows.value]);
-
-  const rows = useMemo(() => {
-    console.log('render - rows');
-    return grid.rows.value.map((row) => (
-      <Box key={row.rowKey} className="grid-row" display="contents">
-        {grid.leafs.value.map((c) => (
-          <DataGridCell key={c.key} row={row} column={c} />
-        ))}
-      </Box>
-    ));
-  }, [grid.rows.value, grid.leafs.value]);
 
   const sizes = useMemo(() => {
     console.log('render - sizes');
 
-    return grid.headerRows.value
-      .flatMap((x) => x)
-      .reduce<Record<string, string>>((acc, c) => {
-        if (c.isLeaf) {
-          acc[c.widthVarName] = `${c.inlineWidth}${typeof c.inlineWidth === 'number' ? 'px' : ''}`;
-        }
+    return grid.flatColumns.value.reduce<Record<string, string>>((acc, c) => {
+      const { inlineWidth } = c;
+      if (typeof inlineWidth === 'number') {
+        acc[c.widthVarName] = `${c.inlineWidth}px`;
+      }
 
-        if (c.pin === 'LEFT') {
-          acc[c.leftVarName] = `${c.left}px`;
-        }
+      if (c.pin === 'LEFT') {
+        acc[c.leftVarName] = `${c.left}px`;
+      }
 
-        if (c.pin === 'RIGHT') {
-          acc[c.rightVarName] = `${c.right}px`;
-        }
+      if (c.pin === 'RIGHT') {
+        acc[c.rightVarName] = `${c.right}px`;
+      }
 
-        return acc;
-      }, {});
-  }, [grid.headerRows.value]);
+      return acc;
+    }, {});
+  }, [grid.flatColumns.value]);
 
-  const rowHeight = DEFAULT_REM_DIVIDER * grid.ROW_HEIGHT;
   const rowsRef = useRef<DataGridRowsRef>(null);
   const handleScroll = useCallback(
     FnUtils.throttle((event: React.UIEvent) => {
@@ -76,7 +66,7 @@ export default function DataGrid<TRow extends {}>(props: DataGridProps<TRow>) {
     [rowsRef.current],
   );
 
-  // console.log('render - datagrid');
+  console.log('render - data grid');
 
   return (
     <Box component="dataGrid" b={1} overflow="hidden" borderRadius={1} style={sizes}>
@@ -97,13 +87,7 @@ export default function DataGrid<TRow extends {}>(props: DataGridProps<TRow>) {
           {headers}
         </Grid>
 
-        <Rows
-          ref={rowsRef}
-          rows={rows}
-          rowHeight={rowHeight}
-          containerHeight={rowHeight * 10}
-          gridTemplateColumns={grid.gridTemplateColumns.value}
-        />
+        <Rows ref={rowsRef} grid={grid} />
       </Box>
       <Box p={3} bgColor="gray-200">
         Rows: {grid.rows.value.length}
@@ -112,23 +96,35 @@ export default function DataGrid<TRow extends {}>(props: DataGridProps<TRow>) {
   );
 }
 
-interface DataGridRowsProps {
-  rows: JSX.Element[];
-  rowHeight: number;
-  containerHeight: number;
-  gridTemplateColumns: string;
+interface DataGridRowsProps<TRow> {
+  grid: GridModel<TRow>;
 }
 
 export interface DataGridRowsRef {
   setScrollTop(value: number): void;
 }
 
-function DataGridRows(props: DataGridRowsProps, ref: Ref<DataGridRowsRef>) {
-  const { rows, rowHeight, containerHeight, gridTemplateColumns } = props;
+function DataGridRows<TRow>(props: DataGridRowsProps<TRow>, ref: Ref<DataGridRowsRef>) {
+  const { grid } = props;
+
+  const rowHeight = DEFAULT_REM_DIVIDER * grid.ROW_HEIGHT;
+  const containerHeight = rowHeight * 10;
+
   const [scrollTop, setScrollTop] = useState(0);
   const startIndex = Math.max(0, Math.floor(scrollTop / rowHeight) - 5);
-  const endIndex = Math.min(startIndex + Math.ceil(containerHeight / rowHeight) + 10, rows.length);
-  const visibleItems = rows.slice(startIndex, endIndex);
+  const endIndex = Math.min(startIndex + Math.ceil(containerHeight / rowHeight) + 10, grid.rows.value.length);
+
+  const rows = useMemo(() => {
+    console.log('render - rows');
+
+    return grid.rows.value.slice(startIndex, endIndex).map((row) => (
+      <Box key={row.rowKey} className="grid-row" display="contents">
+        {grid.leafs.value.map((c) => (
+          <DataGridCell key={c.key} row={row} column={c} />
+        ))}
+      </Box>
+    ));
+  }, [grid.rows.value, grid.leafs.value, startIndex, endIndex]);
 
   useImperativeHandle(ref, () => ({
     setScrollTop,
@@ -138,7 +134,7 @@ function DataGridRows(props: DataGridRowsProps, ref: Ref<DataGridRowsRef>) {
     <Box height={120}>
       <Box
         style={{
-          height: `${rows.length * rowHeight}px`,
+          height: `${grid.rows.value.length * rowHeight}px`,
         }}
       >
         <Grid
@@ -147,14 +143,14 @@ function DataGridRows(props: DataGridRowsProps, ref: Ref<DataGridRowsRef>) {
           transition="none"
           style={{
             transform: `translateY(${startIndex * rowHeight}px)`,
-            gridTemplateColumns,
+            gridTemplateColumns: grid.gridTemplateColumns.value,
           }}
         >
-          {visibleItems}
+          {rows}
         </Grid>
       </Box>
     </Box>
   );
 }
 
-const Rows = forwardRef(DataGridRows);
+const Rows = forwardRef(DataGridRows) as <TRow>(props: DataGridRowsProps<TRow> & React.RefAttributes<DataGridRowsRef>) => React.ReactNode;

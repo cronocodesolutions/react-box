@@ -1,128 +1,147 @@
 import FnUtils from '../../../utils/fn/fnUtils';
-import { ColumnType, Key, PinPosition } from '../dataGridContract';
+import { P } from '../../semantics';
+import { ColumnType, PinPosition } from '../dataGridContract';
 import Grid, { EMPTY_CELL_KEY } from './grid';
 
 export default class Column<TRow> {
-  constructor(def: ColumnType<TRow>, grid: Grid<TRow>, parentPin?: PinPosition, columns: Column<TRow>[] = []) {
-    this.grid = grid;
-    this.isLeaf = 'columns' in def === false;
-    this.key = def.key;
-    this._pin = parentPin ?? def.pin ?? 'NO_PIN';
+  constructor(
+    private readonly def: ColumnType<TRow>,
+    public readonly grid: Grid<TRow>,
+    private parent?: Column<TRow>,
+  ) {
+    // NOTE: is important to set pin before create children columns
+    this._pin = parent?._pin ?? def.pin;
+    this.columns = def.columns?.map((def) => new Column(def, grid, this)) ?? [];
 
     if (this.isLeaf) {
-      this._inlineWidth = this.key == EMPTY_CELL_KEY ? 'auto' : 200;
+      this._inlineWidth = this.key == EMPTY_CELL_KEY ? undefined : 200;
     }
-
-    this._columns = columns;
-    this._columns.forEach((c) => (c.parent = this));
   }
 
-  public readonly grid: Grid<TRow>;
-  public parent?: Column<TRow>;
-  public readonly key: Key;
-  public readonly isLeaf: boolean;
+  private columns: Column<TRow>[];
+  public get key() {
+    return this.def.key;
+  }
+  public get isLeaf() {
+    return this.columns.length === 0;
+  }
 
-  private readonly _columns: Column<TRow>[];
-
-  private _pin: PinPosition;
+  private _pin?: PinPosition;
   public get pin() {
     return this._pin;
   }
 
-  private _inlineWidth?: number | 'auto';
-  public get inlineWidth() {
-    return this._inlineWidth === 'auto' ? this._inlineWidth : this.getWidth();
+  public get uniqueKey(): string {
+    return `${this.key}-${this._pin ?? ''}`;
   }
 
-  private _left?: number;
-  public get left() {
-    return this._left;
-  }
-  public setLeft(left: number) {
-    this._left = left;
+  public getPinned(pin?: PinPosition): Maybe<Column<TRow>> {
+    if (this.isPinned(pin)) {
+      const _this = new Column(this.def, this.grid, this.parent);
+      _this._pin = pin;
 
-    let leftToSet = left;
-    this._columns.forEach((c) => {
-      leftToSet = c.setLeft(leftToSet);
-    });
+      _this.columns = this.columns
+        .filter((c) => c.isPinned(pin))
+        .map((c) => {
+          const pinColumn = c.getPinned(pin);
+          pinColumn!.parent = _this;
+          return pinColumn;
+        })
+        .filter((c) => !!c);
 
-    return left + this.getWidth();
-  }
-
-  private _right?: number;
-  public get right() {
-    return this._right;
-  }
-  public setRight(right: number) {
-    this._right = right;
-
-    let rightToSet = right;
-    const reverseColumns = [...this._columns].reverse();
-    reverseColumns.forEach((c) => {
-      rightToSet = c.setRight(rightToSet);
-    });
-
-    return right + this.getWidth();
-  }
-
-  private getWidth(): number {
-    if (this.key in this.grid.widthOverrides) {
-      return this.grid.widthOverrides[this.key];
+      return _this;
     }
-
-    if (typeof this._inlineWidth === 'number') {
-      return this._inlineWidth;
-    }
-
-    return this._columns.sumBy((c) => {
-      const val = c.getWidth();
-
-      return typeof val === 'number' ? val : 0;
-    });
   }
 
-  private _isEdge = false;
-  public get isEdge() {
-    return this._isEdge;
-  }
-  public setEdge() {
-    this._isEdge = true;
-
-    const kid = this._pin === 'LEFT' ? this._columns.at(-1) : this._pin === 'RIGHT' ? this._columns.at(0) : undefined;
-    kid?.setEdge();
+  private isPinned(pin?: PinPosition): boolean {
+    return this.pin === pin || this.columns.some((c) => c.isPinned(pin));
   }
 
-  public get level() {
-    let level = 0;
+  public get death() {
+    let death = 0;
 
     let parent = this.parent;
     while (parent) {
-      level++;
+      death++;
       parent = parent.parent;
     }
 
-    return level;
+    return death;
   }
 
-  // Approved
-
-  public get allLevelColumns(): Column<TRow>[] {
+  public get flatColumns(): Column<TRow>[] {
     const cols = [this] as Column<TRow>[];
 
-    cols.push(...this._columns.flatMap((c) => c.allLevelColumns));
+    cols.push(...this.columns.flatMap((c) => c.flatColumns));
 
     return cols;
   }
 
+  private _inlineWidth?: number;
+  public get inlineWidth(): Maybe<number> {
+    if (this.isLeaf) return this._inlineWidth;
+
+    const sizes = this.columns.map((c) => c.inlineWidth).filter((width) => typeof width === 'number');
+
+    if (sizes.length === 0) return undefined;
+
+    return sizes.sumBy((s) => s);
+  }
+
+  public get left() {
+    let sum = 0;
+
+    if (this.parent) {
+      const colIndex = this.parent.columns.findIndex((c) => c === this);
+      sum += this.parent.columns.sumBy((c, index) => (index < colIndex ? (c.inlineWidth ?? 0) : 0));
+
+      sum += this.parent.left;
+    } else {
+      const colIndex = this.grid.leftColumns.value.findIndex((c) => c === this);
+      sum += this.grid.leftColumns.value.sumBy((c, index) => (index < colIndex ? (c.inlineWidth ?? 0) : 0));
+    }
+
+    return sum;
+  }
+
+  public get right() {
+    let sum = 0;
+
+    if (this.parent) {
+      const reverse = [...this.parent.columns].reverse();
+      const colIndex = reverse.findIndex((c) => c === this);
+      sum += reverse.sumBy((c, index) => (index < colIndex ? (c.inlineWidth ?? 0) : 0));
+
+      sum += this.parent.right;
+    } else {
+      const reverse = [...this.grid.rightColumns.value].reverse();
+      const colIndex = reverse.findIndex((c) => c === this);
+      sum += reverse.sumBy((c, index) => (index < colIndex ? (c.inlineWidth ?? 0) : 0));
+    }
+
+    return sum;
+  }
+
+  public get isEdge(): boolean {
+    if (!this.pin) return false;
+
+    if (this.parent) {
+      const item = (this.pin === 'LEFT' ? this.parent.columns.at(-1) : this.parent.columns.at(0)) as Column<TRow>;
+      return item === this && this.parent.isEdge;
+    }
+
+    const item = (this.pin === 'LEFT' ? this.grid.leftColumns.value.at(-1) : this.grid.rightColumns.value.at(0)) as Column<TRow>;
+    return item === this;
+  }
+
+  // Approved
+
   public get leafs(): Column<TRow>[] {
     if (this.isLeaf) return [this];
 
-    return this._columns.flatMap((c) => c.leafs);
+    return this.columns.flatMap((c) => c.leafs);
   }
 
-  public get uniqueKey(): string {
-    return `${this.key}-${this.pin}`;
-  }
   public get widthVarName(): string {
     return `--${this.uniqueKey}-width`;
   }
@@ -134,7 +153,7 @@ export default class Column<TRow> {
   }
 
   public get gridRows() {
-    return this.isLeaf ? this.grid.headerRows.value.length - this.level : 1;
+    return this.isLeaf ? this.grid.headerRows.value.length - this.death : 1;
   }
 
   public resizeColumn = (e: React.MouseEvent) => {
@@ -146,16 +165,17 @@ export default class Column<TRow> {
 
     const resize = FnUtils.throttle((e: MouseEvent) => {
       const dragDistance = (e.pageX - startPageX) * (this.pin === 'RIGHT' ? -1 : 1);
+
       this.leafs.forEach((leaf) => {
         const width = sizes[leaf.key];
         const dragDistanceForCell =
           totalWidth > 0 ? ((width - MIN_WIDTH_PX) / totalWidth) * dragDistance : dragDistance / this.leafs.length;
         const newWidth = Math.round(width + dragDistanceForCell);
 
-        this.grid.widthOverrides[leaf.key] = newWidth < MIN_WIDTH_PX ? MIN_WIDTH_PX : newWidth;
+        leaf._inlineWidth = newWidth < MIN_WIDTH_PX ? MIN_WIDTH_PX : newWidth;
       });
 
-      this.grid.headerRows.clear();
+      this.grid.flatColumns.clear();
       update();
     }, 10);
 
@@ -168,20 +188,22 @@ export default class Column<TRow> {
     window.addEventListener('mouseup', stopResize, { once: true });
   };
 
-  public pinColumn = (pin: PinPosition) => {
-    const setPin = (col: Column<TRow>, pin: PinPosition) => {
-      if (col.isLeaf) {
-        this.grid.pinOverrides[col.key] = pin;
-      }
-      col._columns.forEach((c) => setPin(c, pin));
+  public pinColumn = (pin?: PinPosition) => {
+    const setPin = (col: Column<TRow>, pin?: PinPosition) => {
+      col._pin = pin;
+      col.columns.forEach((c) => setPin(c, pin));
     };
 
-    setPin(this, pin);
+    const columnToPin = this.grid.sourceColumns.flatMap((x) => x.flatColumns).findOrThrow((c) => c.key === this.key);
+    setPin(columnToPin, pin);
 
-    this.grid.gridTemplateColumns.clear();
+    this.grid.leftColumns.clear();
+    this.grid.middleColumns.clear();
+    this.grid.rightColumns.clear();
+    this.grid.flatColumns.clear();
     this.grid.headerRows.clear();
     this.grid.leafs.clear();
-    this.grid._columns.clear();
+    this.grid.gridTemplateColumns.clear();
 
     this.grid.update();
   };

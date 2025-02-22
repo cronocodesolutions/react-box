@@ -12,7 +12,7 @@ declare global {
     take(count: number, skip?: number): Array<T>;
     add(...items: T[]): Array<T>;
     removeBy(predicate: (value: T) => boolean): Array<T>;
-    sumBy(fn: (value: T) => number): number;
+    sumBy(fn: (value: T, index: number) => number): number;
     sortBy<TVal>(fn: (value: T) => TVal, direction?: 'ASC' | 'DESC'): Array<T>;
     maxBy(fn: (value: T) => number): number;
     findOrThrow(predicate: (value: T) => boolean): T;
@@ -43,8 +43,8 @@ if (!Array.prototype.add) {
 }
 
 if (!Array.prototype.sumBy) {
-  Array.prototype.sumBy = function <T>(this: T[], fn: (value: T) => number): number {
-    return this.reduce((acc, item) => acc + fn(item), 0);
+  Array.prototype.sumBy = function <T>(this: T[], fn: (value: T, index: number) => number): number {
+    return this.reduce((acc, item, index) => acc + fn(item, index), 0);
   };
 }
 

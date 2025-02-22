@@ -40,7 +40,7 @@ export default function DataGridHeaderCell<TRow>(props: Props<TRow>) {
       boxSizing="content-box"
       transition="none"
       style={{
-        width: column.isLeaf ? `var(${column.widthVarName})` : undefined,
+        width: `var(${column.widthVarName})`,
         left: column.pin === 'LEFT' ? `var(${column.leftVarName})` : undefined,
         right: column.pin === 'RIGHT' ? `var(${column.rightVarName})` : undefined,
       }}
@@ -95,7 +95,7 @@ export default function DataGridHeaderCell<TRow>(props: Props<TRow>) {
                   translateX={openLeft ? -39 : -5}
                   onPositionChange={setTooltipPosition}
                 >
-                  <Button clean textAlign="left" p={3} hover={{ bgColor: 'gray-200' }} onClick={() => column.pinColumn('NO_PIN')}>
+                  <Button clean textAlign="left" p={3} hover={{ bgColor: 'gray-200' }} onClick={() => column.pinColumn()}>
                     Unpin
                   </Button>
                   <Button clean textAlign="left" p={3} hover={{ bgColor: 'gray-200' }} onClick={() => column.pinColumn('LEFT')}>
