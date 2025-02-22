@@ -44,25 +44,24 @@ export default function DataGridHeaderCell<TRow>(props: Props<TRow>) {
         left: column.pin === 'LEFT' ? `var(${column.leftVarName})` : undefined,
         right: column.pin === 'RIGHT' ? `var(${column.rightVarName})` : undefined,
       }}
+      props={{ onClick: () => column.grid.setSortColumn(column.key) }}
+      d={column.pin === 'RIGHT' ? 'row-reverse' : 'row'}
     >
       {!isEmptyCell && (
         <>
-          <Flex
-            overflow="hidden"
-            position="sticky"
-            left={0}
-            ai="center"
-            height="fit"
-            props={{ onClick: () => column.grid.setSortColumn(column.key) }}
-          >
-            <Box px={2} overflow="hidden" textOverflow="ellipsis">
+          <Flex overflow="hidden" position="sticky" left={0} ai="center">
+            <Box px={4} overflow="hidden" textOverflow="ellipsis">
               {column.key}
             </Box>
           </Flex>
-          <Flex height="fit" ai="center" gap={1}>
+
+          <Flex height="fit" ai="center" gap={2} d={column.pin === 'RIGHT' ? 'row-reverse' : 'row'}>
             <Button
               clean
-              onClick={() => setOpen(!isOpen)}
+              onClick={(e) => {
+                e.stopPropagation();
+                setOpen(!isOpen);
+              }}
               ref={refToUse}
               width={6}
               height={6}
@@ -73,7 +72,8 @@ export default function DataGridHeaderCell<TRow>(props: Props<TRow>) {
               display="flex"
               jc="center"
               ai="center"
-              hover={{ bgColor: 'gray-300' }}
+              transition="none"
+              hover={{ bgColor: 'gray-300', outline: 2, outlineColor: 'gray-300' }}
             >
               <BaseSvg viewBox="0 0 16 16" width="18">
                 <path
@@ -116,7 +116,13 @@ export default function DataGridHeaderCell<TRow>(props: Props<TRow>) {
                 </Tooltip>
               )}
             </Button>
-            <Box cursor="col-resize" px={0.5} className="resizer" height="2/4" props={{ onMouseDown: column.resizeColumn }}>
+            <Box
+              cursor="col-resize"
+              px={0.75}
+              className="resizer"
+              height="2/4"
+              props={{ onClick: (e) => e.stopPropagation(), onMouseDown: column.resizeColumn }}
+            >
               <Box width={0.5} height="fit" bgColor="gray-400" hoverParent={{ resizer: { bgColor: 'gray-600' } }}></Box>
             </Box>
           </Flex>

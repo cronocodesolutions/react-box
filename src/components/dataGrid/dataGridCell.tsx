@@ -37,7 +37,7 @@ export default function DataGridCell<TRow>(props: Props<TRow>) {
       }}
     >
       {!isEmptyCell && (
-        <Box px={2} textOverflow="ellipsis" overflow="hidden" textWrap="nowrap">
+        <Box px={4} textOverflow="ellipsis" overflow="hidden" textWrap="nowrap">
           {value}
         </Box>
       )}

@@ -1,5 +1,4 @@
 import FnUtils from '../../../utils/fn/fnUtils';
-import { P } from '../../semantics';
 import { ColumnType, PinPosition } from '../dataGridContract';
 import Grid, { EMPTY_CELL_KEY } from './grid';
 

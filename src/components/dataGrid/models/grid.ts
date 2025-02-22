@@ -52,7 +52,7 @@ export default class Grid<TRow> {
   });
 
   public readonly ROW_HEIGHT = 12;
-  public readonly MIN_WIDTH_PX = 40;
+  public readonly MIN_WIDTH_PX = 48;
   public isResizeMode = false;
 
   public setSortColumn = (columnKey: Key) => {
