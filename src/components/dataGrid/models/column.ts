@@ -189,13 +189,16 @@ export default class Column<TRow> {
   };
 
   public pinColumn = (pin?: PinPosition) => {
+    const flatColumns = this.grid.sourceColumns.flatMap((x) => x.flatColumns);
+
     const setPin = (col: Column<TRow>, pin?: PinPosition) => {
-      col._pin = pin;
+      const columnToPin = flatColumns.findOrThrow((c) => c.key === col.key);
+      columnToPin._pin = pin;
+
       col.columns.forEach((c) => setPin(c, pin));
     };
 
-    const columnToPin = this.grid.sourceColumns.flatMap((x) => x.flatColumns).findOrThrow((c) => c.key === this.key);
-    setPin(columnToPin, pin);
+    setPin(this, pin);
 
     this.grid.leftColumns.clear();
     this.grid.middleColumns.clear();
