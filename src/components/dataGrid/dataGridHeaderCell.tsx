@@ -27,16 +27,14 @@ export default function DataGridHeaderCell<TRow>(props: Props<TRow>) {
     <Flex
       gridRow={column.gridRows}
       colSpan={colSpan}
-      ai="center"
       bgColor="gray-200"
-      position={isSticky ? 'sticky' : undefined}
+      position={isSticky ? 'sticky' : 'relative'}
       zIndex={isSticky ? 2 : 1}
       minHeight={column.grid.ROW_HEIGHT * column.gridRows}
       bb={1}
       br={column.pin === 'LEFT' && column.isEdge ? 1 : undefined}
       bl={column.pin === 'RIGHT' && column.isEdge ? 1 : undefined}
       cursor="pointer"
-      jc="space-between"
       boxSizing="content-box"
       transition="none"
       style={{
@@ -44,24 +42,39 @@ export default function DataGridHeaderCell<TRow>(props: Props<TRow>) {
         left: column.pin === 'LEFT' ? `var(${column.leftVarName})` : undefined,
         right: column.pin === 'RIGHT' ? `var(${column.rightVarName})` : undefined,
       }}
-      props={{ onClick: () => column.grid.setSortColumn(column.key) }}
-      d={column.pin === 'RIGHT' ? 'row-reverse' : 'row'}
     >
       {!isEmptyCell && (
         <>
-          <Flex overflow="hidden" position="sticky" left={0} ai="center">
-            <Box px={4} overflow="hidden" textOverflow="ellipsis">
-              {column.key}
-            </Box>
-          </Flex>
+          <Flex
+            jc={column.pin === 'RIGHT' ? 'flex-end' : 'space-between'}
+            width="fit"
+            height="fit"
+            d={column.pin === 'RIGHT' ? 'row-reverse' : 'row'}
+            props={{ onClick: column.sortColumn }}
+          >
+            <Flex overflow="hidden" position="sticky" left={0} right={0} ai="center">
+              <Box pl={4} overflow="hidden" textOverflow="ellipsis">
+                {column.key}
+              </Box>
+              <Box minWidth={12} />
+            </Flex>
 
-          <Flex height="fit" ai="center" gap={2} d={column.pin === 'RIGHT' ? 'row-reverse' : 'row'}>
+            <Flex height="fit" ai="center">
+              <Box
+                cursor="col-resize"
+                px={0.75}
+                className="resizer"
+                height="2/4"
+                props={{ onClick: (e) => e.stopPropagation(), onMouseDown: column.resizeColumn }}
+              >
+                <Box width={0.5} height="fit" bgColor="gray-400" hoverParent={{ resizer: { bgColor: 'gray-600' } }}></Box>
+              </Box>
+            </Flex>
+          </Flex>
+          <Flex position="absolute" right={column.pin === 'RIGHT' ? 2.5 : 4} top="1/2" translateY={-3} ai="center">
             <Button
               clean
-              onClick={(e) => {
-                e.stopPropagation();
-                setOpen(!isOpen);
-              }}
+              onClick={() => setOpen(!isOpen)}
               ref={refToUse}
               width={6}
               height={6}
@@ -73,6 +86,7 @@ export default function DataGridHeaderCell<TRow>(props: Props<TRow>) {
               jc="center"
               ai="center"
               transition="none"
+              bgColor="gray-200"
               hover={{ bgColor: 'gray-300', outline: 2, outlineColor: 'gray-300' }}
             >
               <BaseSvg viewBox="0 0 16 16" width="18">
@@ -116,15 +130,6 @@ export default function DataGridHeaderCell<TRow>(props: Props<TRow>) {
                 </Tooltip>
               )}
             </Button>
-            <Box
-              cursor="col-resize"
-              px={0.75}
-              className="resizer"
-              height="2/4"
-              props={{ onClick: (e) => e.stopPropagation(), onMouseDown: column.resizeColumn }}
-            >
-              <Box width={0.5} height="fit" bgColor="gray-400" hoverParent={{ resizer: { bgColor: 'gray-600' } }}></Box>
-            </Box>
           </Flex>
         </>
       )}

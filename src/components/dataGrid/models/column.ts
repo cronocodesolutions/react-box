@@ -209,4 +209,8 @@ export default class Column<TRow> {
 
     this.grid.update();
   };
+
+  public sortColumn = () => {
+    this.grid.setSortColumn(this.key);
+  };
 }

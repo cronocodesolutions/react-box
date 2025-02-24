@@ -18,7 +18,7 @@ export namespace BoxStylesFormatters {
     export function px(value: number) {
       return `${value}px`;
     }
-    export function fraction(_key: string, value: string) {
+    export function fraction(value: string) {
       const [a, b] = value.split('/');
       return `${(+a / +b) * 100}%`;
     }

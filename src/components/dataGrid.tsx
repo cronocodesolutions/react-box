@@ -104,34 +104,36 @@ export interface DataGridRowsRef {
   setScrollTop(value: number): void;
 }
 
+const visibleRows = 10;
+const rowsOffset = 15;
+
 function DataGridRows<TRow>(props: DataGridRowsProps<TRow>, ref: Ref<DataGridRowsRef>) {
   const { grid } = props;
 
   const rowHeight = DEFAULT_REM_DIVIDER * grid.ROW_HEIGHT;
-  const containerHeight = rowHeight * 10;
 
   const [scrollTop, setScrollTop] = useState(0);
-  const startIndex = Math.max(0, Math.floor(scrollTop / rowHeight) - 5);
-  const endIndex = Math.min(startIndex + Math.ceil(containerHeight / rowHeight) + 10, grid.rows.value.length);
+  const startIndex = Math.max(0, Math.floor(scrollTop / rowHeight) - rowsOffset);
 
   const rows = useMemo(() => {
     console.log('render - rows');
 
+    const endIndex = startIndex + visibleRows + rowsOffset * 2;
     return grid.rows.value.slice(startIndex, endIndex).map((row) => (
-      <Box key={row.rowKey} className="grid-row" display="contents">
+      <Box key={row.rowKey} className={['grid-row', row.rowKey.toString()]} display="contents">
         {grid.leafs.value.map((c) => (
           <DataGridCell key={c.key} row={row} column={c} />
         ))}
       </Box>
     ));
-  }, [grid.rows.value, grid.leafs.value, startIndex, endIndex]);
+  }, [grid.rows.value, grid.leafs.value, startIndex]);
 
   useImperativeHandle(ref, () => ({
     setScrollTop,
   }));
 
   return (
-    <Box height={120}>
+    <Box height={grid.ROW_HEIGHT * visibleRows}>
       <Box
         style={{
           height: `${grid.rows.value.length * rowHeight}px`,

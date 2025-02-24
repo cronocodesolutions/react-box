@@ -2,7 +2,11 @@ import { Key } from '../dataGridContract';
 import Grid from './grid';
 
 export default class Row<TRow> {
-  constructor(grid: Grid<TRow>, row: TRow, rowIndex: number) {
+  constructor(
+    grid: Grid<TRow>,
+    row: TRow,
+    public readonly rowIndex: number,
+  ) {
     this.grid = grid;
     this.row = row;
 
