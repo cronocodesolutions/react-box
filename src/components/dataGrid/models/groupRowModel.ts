@@ -1,13 +1,13 @@
-import { Key } from '../dataGridContract';
-import Column from './column';
-import Grid from './grid';
-import Row from './row';
+import { Key } from '../contracts/dataGridContract';
+import ColumnModel from './columnModel';
+import GridModel from './gridModel';
+import RowModel from './rowModel';
 
-export default class GroupRow<TRow> {
+export default class GroupRowModel<TRow> {
   constructor(
-    public readonly grid: Grid<TRow>,
-    public readonly groupColumn: Column<TRow>,
-    public readonly rows: Row<TRow>[] | GroupRow<TRow>[],
+    public readonly grid: GridModel<TRow>,
+    public readonly groupColumn: ColumnModel<TRow>,
+    public readonly rows: RowModel<TRow>[] | GroupRowModel<TRow>[],
     public readonly rowIndex: number,
     public readonly groupValue: Key,
   ) {
@@ -17,7 +17,7 @@ export default class GroupRow<TRow> {
   public get rowKey(): Key {
     return `${this.parentRow?.rowKey ?? ''}${this.groupColumn.key}${this.groupValue}`;
   }
-  public parentRow?: GroupRow<TRow>;
+  public parentRow?: GroupRowModel<TRow>;
 
   public get expanded() {
     return this.grid.expandedGroupRow[this.rowKey];
@@ -27,7 +27,7 @@ export default class GroupRow<TRow> {
     return this.rows.sumBy((row) => row.count, 0);
   }
 
-  public get flatRows(): (Row<TRow> | GroupRow<TRow>)[] {
+  public get flatRows(): (RowModel<TRow> | GroupRowModel<TRow>)[] {
     if (this.expanded) {
       return [this, ...this.rows.flatMap((row) => row.flatRows)];
     }

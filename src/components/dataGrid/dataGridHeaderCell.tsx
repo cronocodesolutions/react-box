@@ -5,11 +5,11 @@ import BaseSvg from '../baseSvg';
 import Button from '../button';
 import Flex from '../flex';
 import Tooltip from '../tooltip';
-import Column from './models/column';
-import { EMPTY_CELL_KEY } from './models/grid';
+import ColumnModel from './models/columnModel';
+import { EMPTY_CELL_KEY } from './models/gridModel';
 
 interface Props<TRow> {
-  column: Column<TRow>;
+  column: ColumnModel<TRow>;
 }
 
 export default function DataGridHeaderCell<TRow>(props: Props<TRow>) {

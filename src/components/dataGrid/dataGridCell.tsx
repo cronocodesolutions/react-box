@@ -1,12 +1,12 @@
 import Box from '../../box';
 import Flex from '../flex';
-import Column from './models/column';
-import Row from './models/row';
-import { EMPTY_CELL_KEY } from './models/grid';
+import ColumnModel from './models/columnModel';
+import RowModel from './models/rowModel';
+import { EMPTY_CELL_KEY } from './models/gridModel';
 
 interface Props<TRow> {
-  row: Row<TRow>;
-  column: Column<TRow>;
+  row: RowModel<TRow>;
+  column: ColumnModel<TRow>;
 }
 
 export default function DataGridCell<TRow>(props: Props<TRow>) {

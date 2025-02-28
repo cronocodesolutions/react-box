@@ -1,11 +1,11 @@
-import { Key } from '../dataGridContract';
-import Cell from './cell';
-import Grid from './grid';
-import GroupRow from './groupRow';
+import { Key } from '../contracts/dataGridContract';
+import CellModel from './cellModel';
+import GridModel from './gridModel';
+import GroupRowModel from './groupRowModel';
 
-export default class Row<TRow> {
+export default class RowModel<TRow> {
   constructor(
-    public readonly grid: Grid<TRow>,
+    public readonly grid: GridModel<TRow>,
     public readonly row: TRow,
     public readonly rowIndex: number,
   ) {
@@ -16,17 +16,17 @@ export default class Row<TRow> {
   public get rowKey(): Key {
     return this.getRowKey();
   }
-  public parentRow?: GroupRow<TRow>;
+  public parentRow?: GroupRowModel<TRow>;
 
-  public get cells(): Cell<TRow>[] {
-    return this.grid.leafs.value.map((c) => new Cell<TRow>(this.grid, this, c));
+  public get cells(): CellModel<TRow>[] {
+    return this.grid.leafs.value.map((c) => new CellModel<TRow>(this.grid, this, c));
   }
 
   public get count(): number {
     return 1;
   }
 
-  public get flatRows(): Row<TRow>[] {
+  public get flatRows(): RowModel<TRow>[] {
     return [this];
   }
 

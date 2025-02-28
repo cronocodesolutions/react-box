@@ -1,5 +1,5 @@
 import { describe, expect, it, suite } from 'vitest';
-import { DataGridHelper2 } from './dataGridHelper2';
+import GridModel from './gridModel';
 
 interface Person {
   firstName: string;
@@ -16,7 +16,7 @@ interface Person {
 describe('DataGridHelper', () => {
   //
   it('creates header Columns', () => {
-    const helper = new DataGridHelper2<Person>(
+    const grid = new GridModel<Person>(
       {
         def: {
           columns: [
@@ -27,21 +27,15 @@ describe('DataGridHelper', () => {
         },
         data: [],
       },
-      [],
-      [],
-      {},
-      [],
-      undefined,
-      0,
-      {},
+      () => {},
     );
 
-    expect(helper.headerColumns).to.length(2);
+    expect(grid.flatColumns.value).to.length(2);
   });
 
   suite('when pin columns', () => {
     it('calculates correct left distance', () => {
-      const helper = new DataGridHelper2<Person>(
+      const grid = new GridModel<Person>(
         {
           def: {
             columns: [
@@ -59,24 +53,18 @@ describe('DataGridHelper', () => {
           },
           data: [],
         },
-        ['year', 'firstName'],
-        [],
-        {},
-        [],
-        undefined,
-        0,
-        {},
+        () => {},
       );
 
-      const yearColumn = helper.headerColumns.findOrThrow((c) => c.key === 'year');
-      const firstNameColumn = helper.headerColumns.findOrThrow((c) => c.key === 'firstName');
+      const yearColumn = grid.flatColumns.value.findOrThrow((c) => c.key === 'year');
+      const firstNameColumn = grid.flatColumns.value.findOrThrow((c) => c.key === 'firstName');
 
-      expect(yearColumn.left).to.eq(0);
-      expect(firstNameColumn.left).to.eq(160);
+      expect(yearColumn.left).to.eq(200);
+      expect(firstNameColumn.left).to.eq(400);
     });
 
     it('calculates correct right distance', () => {
-      const helper = new DataGridHelper2<Person>(
+      const grid = new GridModel<Person>(
         {
           def: {
             columns: [
@@ -94,20 +82,14 @@ describe('DataGridHelper', () => {
           },
           data: [],
         },
-        [],
-        ['month', 'firstName'],
-        {},
-        [],
-        undefined,
-        0,
-        {},
+        () => {},
       );
 
-      const firstNameColumn = helper.headerColumns.findOrThrow((c) => c.key === 'firstName');
-      const monthColumn = helper.headerColumns.findOrThrow((c) => c.key === 'month');
+      const firstNameColumn = grid.flatColumns.value.findOrThrow((c) => c.key === 'firstName');
+      const monthColumn = grid.flatColumns.value.findOrThrow((c) => c.key === 'month');
 
-      expect(firstNameColumn.right).to.eq(0);
-      expect(monthColumn.right).to.eq(160);
+      expect(firstNameColumn.right).to.eq(grid.DEFAULT_COLUMN_WIDTH_PX * 1); // lastName
+      expect(monthColumn.right).to.eq(grid.DEFAULT_COLUMN_WIDTH_PX * 3); // year, firstName, lastName
     });
   });
 });

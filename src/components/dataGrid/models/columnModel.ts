@@ -1,23 +1,23 @@
 import FnUtils from '../../../utils/fn/fnUtils';
-import { ColumnType, PinPosition } from '../dataGridContract';
-import Grid, { EMPTY_CELL_KEY } from './grid';
+import { ColumnType, PinPosition } from '../contracts/dataGridContract';
+import GridModel, { EMPTY_CELL_KEY } from './gridModel';
 
-export default class Column<TRow> {
+export default class ColumnModel<TRow> {
   constructor(
     private readonly def: ColumnType<TRow>,
-    public readonly grid: Grid<TRow>,
-    private parent?: Column<TRow>,
+    public readonly grid: GridModel<TRow>,
+    private parent?: ColumnModel<TRow>,
   ) {
     // NOTE: is important to set pin before create children columns
     this.pin = parent?.pin ?? def.pin;
-    this.columns = def.columns?.map((def) => new Column(def, grid, this)) ?? [];
+    this.columns = def.columns?.map((def) => new ColumnModel(def, grid, this)) ?? [];
 
     if (this.isLeaf) {
-      this._inlineWidth = this.key == EMPTY_CELL_KEY ? undefined : 200;
+      this._inlineWidth = this.key == EMPTY_CELL_KEY ? undefined : this.grid.DEFAULT_COLUMN_WIDTH_PX;
     }
   }
 
-  public columns: Column<TRow>[];
+  public columns: ColumnModel<TRow>[];
   public get key() {
     return this.def.key;
   }
@@ -31,9 +31,9 @@ export default class Column<TRow> {
     return `${this.key}-${this.pin ?? ''}`;
   }
 
-  public getPinned(pin?: PinPosition): Maybe<Column<TRow>> {
+  public getPinned(pin?: PinPosition): Maybe<ColumnModel<TRow>> {
     if (this.isPinned(pin)) {
-      const _this = new Column(this.def, this.grid, this.parent);
+      const _this = new ColumnModel(this.def, this.grid, this.parent);
       _this.pin = pin;
 
       _this.columns = this.columns
@@ -65,8 +65,8 @@ export default class Column<TRow> {
     return death;
   }
 
-  public get flatColumns(): Column<TRow>[] {
-    const cols = [this] as Column<TRow>[];
+  public get flatColumns(): ColumnModel<TRow>[] {
+    const cols = [this] as ColumnModel<TRow>[];
 
     cols.push(...this.columns.flatMap((c) => c.flatColumns));
 
@@ -122,17 +122,17 @@ export default class Column<TRow> {
     if (!this.pin) return false;
 
     if (this.parent) {
-      const item = (this.pin === 'LEFT' ? this.parent.columns.at(-1) : this.parent.columns.at(0)) as Column<TRow>;
+      const item = (this.pin === 'LEFT' ? this.parent.columns.at(-1) : this.parent.columns.at(0)) as ColumnModel<TRow>;
       return item === this && this.parent.isEdge;
     }
 
-    const item = (this.pin === 'LEFT' ? this.grid.leftColumns.value.at(-1) : this.grid.rightColumns.value.at(0)) as Column<TRow>;
+    const item = (this.pin === 'LEFT' ? this.grid.leftColumns.value.at(-1) : this.grid.rightColumns.value.at(0)) as ColumnModel<TRow>;
     return item === this;
   }
 
   // Approved
 
-  public get leafs(): Column<TRow>[] {
+  public get leafs(): ColumnModel<TRow>[] {
     if (this.isLeaf) return [this];
 
     return this.columns.flatMap((c) => c.leafs);
@@ -155,7 +155,7 @@ export default class Column<TRow> {
   public resizeColumn = (e: React.MouseEvent) => {
     this.grid.isResizeMode = true;
     const startPageX = e.pageX;
-    const { MIN_WIDTH_PX, update } = this.grid;
+    const { MIN_COLUMN_WIDTH_PX: MIN_WIDTH_PX, update } = this.grid;
     const totalWidth = this.leafs.sumBy((c) => c.inlineWidth as number) - this.leafs.length * MIN_WIDTH_PX;
     const sizes = this.leafs.toRecord((leaf) => [leaf.key, leaf.inlineWidth as number]);
 

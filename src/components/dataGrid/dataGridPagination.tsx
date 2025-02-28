@@ -1,9 +1,9 @@
 import Button from '../button';
 import Flex from '../flex';
-import { GridData } from './useGridData2';
+import GridModel from './models/gridModel';
 
 interface Props<TRow> {
-  grid: GridData<TRow>;
+  grid: GridModel<TRow>;
 }
 
 export default function DataGridPagination<TRow>(props: Props<TRow>) {
@@ -11,7 +11,7 @@ export default function DataGridPagination<TRow>(props: Props<TRow>) {
 
   return (
     <Flex gap={3}>
-      <Button clean onClick={() => grid.changePage(0)}>
+      {/* <Button clean onClick={() => grid.changePage(0)}>
         {'<<'}
       </Button>
       <Button clean onClick={() => grid.changePage(grid.pagination.page - 1)}>
@@ -23,7 +23,7 @@ export default function DataGridPagination<TRow>(props: Props<TRow>) {
       </Button>
       <Button clean onClick={() => grid.changePage(grid.pagination.totalPages - 1)}>
         {'>>'}
-      </Button>
+      </Button> */}
     </Flex>
   );
 }

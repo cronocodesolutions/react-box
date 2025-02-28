@@ -1,7 +1,6 @@
 import Box from '../../src/box';
 import DataGrid from '../../src/components/dataGrid';
-import DataGrid2 from '../../src/components/dataGrid2';
-import { GridDefinition } from '../../src/components/dataGrid/dataGridContract';
+import { GridDefinition } from '../../src/components/dataGrid/contracts/dataGridContract';
 import Data from '../data/MOCK_DATA.json';
 import Data1 from '../data/MOCK_DATA_1.json';
 import Data2 from '../data/MOCK_DATA_2.json';
@@ -70,8 +69,6 @@ export default function DataGridPage() {
       </Box>
 
       <DataGrid data={datata} def={def} />
-
-      <DataGrid2 data={Data} def={def} mt={10} />
     </Box>
   );
 }

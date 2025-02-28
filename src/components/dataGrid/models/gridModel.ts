@@ -1,23 +1,24 @@
 import memo from '../../../utils/memo';
-import { DataGridProps, Key, NO_PIN, PinPosition } from '../dataGridContract';
-import Column from './column';
-import GroupRow from './groupRow';
-import Row from './row';
+import { DataGridProps, Key, NO_PIN, PinPosition } from '../contracts/dataGridContract';
+import ColumnModel from './columnModel';
+import GroupRowModel from './groupRowModel';
+import RowModel from './rowModel';
+import '../../../array';
 
 export const EMPTY_CELL_KEY = 'empty-cell';
 export const GROUPING_CELL_KEY = 'grouping-cell';
-export default class Grid<TRow> {
+export default class GridModel<TRow> {
   constructor(
     public readonly props: DataGridProps<TRow>,
     public readonly update: () => void,
   ) {
-    this._sourceColumns = props.def.columns.map((def) => new Column(def, this));
+    this._sourceColumns = props.def.columns.map((def) => new ColumnModel(def, this));
 
     // add empty column
-    this._sourceColumns.push(new Column({ key: EMPTY_CELL_KEY }, this));
+    this._sourceColumns.push(new ColumnModel({ key: EMPTY_CELL_KEY }, this));
   }
 
-  private _sourceColumns: Column<TRow>[] = [];
+  private _sourceColumns: ColumnModel<TRow>[] = [];
 
   public readonly leftColumns = memo(() => this._sourceColumns.map((c) => c.getPinned('LEFT')).filter((c) => !!c));
   public readonly middleColumns = memo(() => this._sourceColumns.map((c) => c.getPinned()).filter((c) => !!c));
@@ -52,7 +53,7 @@ export default class Grid<TRow> {
     }
 
     if (this.groupColumns.length > 0) {
-      const getRowsGroup = (dataToGroup: TRow[], groupColumns: Key[]): GroupRow<TRow>[] => {
+      const getRowsGroup = (dataToGroup: TRow[], groupColumns: Key[]): GroupRowModel<TRow>[] => {
         const groupKey = groupColumns[0];
         groupColumns = groupColumns.removeBy((c) => c === groupKey);
         const column = this.leafs.value.findOrThrow((c) => c.key === groupKey);
@@ -60,22 +61,22 @@ export default class Grid<TRow> {
         return dataToGroup
           .groupBy((item) => item[groupKey as keyof TRow] as Key)
           .map((group, groupRowIndex) => {
-            let rows: Row<TRow>[] | GroupRow<TRow>[];
+            let rows: RowModel<TRow>[] | GroupRowModel<TRow>[];
 
             if (groupColumns.length > 0) {
               rows = getRowsGroup(group.values, groupColumns);
             } else {
-              rows = group.values.map((dataRow, rowIndex) => new Row(this, dataRow, rowIndex));
+              rows = group.values.map((dataRow, rowIndex) => new RowModel(this, dataRow, rowIndex));
             }
 
-            return new GroupRow(this, column, rows, groupRowIndex, group.key);
+            return new GroupRowModel(this, column, rows, groupRowIndex, group.key);
           });
       };
 
       return getRowsGroup(data, this.groupColumns);
     }
 
-    return data.map((dataRow, rowIndex) => new Row(this, dataRow, rowIndex));
+    return data.map((dataRow, rowIndex) => new RowModel(this, dataRow, rowIndex));
   });
 
   public readonly flatRows = memo(() => {
@@ -85,7 +86,9 @@ export default class Grid<TRow> {
   });
 
   public readonly ROW_HEIGHT = 12;
-  public readonly MIN_WIDTH_PX = 48;
+  public readonly MIN_COLUMN_WIDTH_PX = 48;
+  public readonly DEFAULT_COLUMN_WIDTH_PX = 200;
+
   public isResizeMode = false;
   public expandedGroupRow: Record<Key, boolean> = {};
 
@@ -106,10 +109,10 @@ export default class Grid<TRow> {
     this.update();
   };
 
-  public pinColumn = (column: Column<TRow>, pin?: PinPosition) => {
+  public pinColumn = (column: ColumnModel<TRow>, pin?: PinPosition) => {
     const flatSourceColumns = this._sourceColumns.flatMap((x) => x.flatColumns);
 
-    const setPin = (col: Column<TRow>, pin?: PinPosition) => {
+    const setPin = (col: ColumnModel<TRow>, pin?: PinPosition) => {
       const columnToPin = flatSourceColumns.findOrThrow((c) => c.key === col.key);
       columnToPin.pin = pin;
 
@@ -138,7 +141,7 @@ export default class Grid<TRow> {
 
     const groupingColumn = this._sourceColumns.find((c) => c.key === GROUPING_CELL_KEY);
     if (this.groupColumns.length > 0 && !groupingColumn) {
-      this._sourceColumns.unshift(new Column({ key: GROUPING_CELL_KEY }, this));
+      this._sourceColumns.unshift(new ColumnModel({ key: GROUPING_CELL_KEY }, this));
     } else if (this.groupColumns.length === 0 && groupingColumn) {
       this._sourceColumns = this._sourceColumns.removeBy((c) => c.key === GROUPING_CELL_KEY);
     }

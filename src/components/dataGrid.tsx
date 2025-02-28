@@ -16,15 +16,15 @@
 // datagrid container
 
 import Box from '../box';
-import { DataGridProps } from './dataGrid/dataGridContract';
+import { DataGridProps } from './dataGrid/contracts/dataGridContract';
 import Grid from './grid';
 import { forwardRef, Ref, useCallback, useImperativeHandle, useMemo, useRef, useState } from 'react';
 import useGrid from './dataGrid/useGrid';
 import DataGridHeaderCell from './dataGrid/dataGridHeaderCell';
 import { DEFAULT_REM_DIVIDER } from '../core/boxConstants';
 import FnUtils from '../utils/fn/fnUtils';
-import GridModel from './dataGrid/models/grid';
-import GroupRow from './dataGrid/models/groupRow';
+import GridModel from './dataGrid/models/gridModel';
+import GroupRowModel from './dataGrid/models/groupRowModel';
 import DataGridGroupRow from './dataGrid/dataGridGroupRow';
 import DataGridRow from './dataGrid/dataGridRow';
 
@@ -125,7 +125,7 @@ function DataGridRows<TRow>(props: DataGridRowsProps<TRow>, ref: Ref<DataGridRow
     console.log('render - rows');
 
     const rowsToRender = grid.flatRows.value.take(take, startIndex).map((row) => {
-      if (row instanceof GroupRow) {
+      if (row instanceof GroupRowModel) {
         return <DataGridGroupRow key={row.rowKey} row={row} />;
       } else {
         return <DataGridRow key={row.rowKey} row={row} />;

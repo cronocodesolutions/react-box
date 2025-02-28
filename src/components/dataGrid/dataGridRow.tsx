@@ -1,9 +1,9 @@
 import Flex from '../flex';
 import DataGridCell from './dataGridCell';
-import Row from './models/row';
+import RowModel from './models/rowModel';
 
 interface Props<TRow> {
-  row: Row<TRow>;
+  row: RowModel<TRow>;
 }
 
 export default function DataGridRow<TRow>(props: Props<TRow>) {

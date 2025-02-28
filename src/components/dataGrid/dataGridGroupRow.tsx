@@ -1,9 +1,9 @@
 import Button from '../button';
 import Flex from '../flex';
-import GroupRow from './models/groupRow';
+import GroupRowModel from './models/groupRowModel';
 
 interface Props<TRow> {
-  row: GroupRow<TRow>;
+  row: GroupRowModel<TRow>;
 }
 
 export default function DataGridGroupRow<TRow>(props: Props<TRow>) {
