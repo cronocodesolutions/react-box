@@ -106,6 +106,7 @@ export default class GridModel<TRow> {
     }
 
     this.rows.clear();
+    this.flatRows.clear();
     this.update();
   };
 
