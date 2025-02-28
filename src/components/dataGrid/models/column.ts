@@ -9,7 +9,7 @@ export default class Column<TRow> {
     private parent?: Column<TRow>,
   ) {
     // NOTE: is important to set pin before create children columns
-    this._pin = parent?._pin ?? def.pin;
+    this.pin = parent?.pin ?? def.pin;
     this.columns = def.columns?.map((def) => new Column(def, grid, this)) ?? [];
 
     if (this.isLeaf) {
@@ -17,7 +17,7 @@ export default class Column<TRow> {
     }
   }
 
-  private columns: Column<TRow>[];
+  public columns: Column<TRow>[];
   public get key() {
     return this.def.key;
   }
@@ -25,19 +25,16 @@ export default class Column<TRow> {
     return this.columns.length === 0;
   }
 
-  private _pin?: PinPosition;
-  public get pin() {
-    return this._pin;
-  }
+  public pin?: PinPosition;
 
   public get uniqueKey(): string {
-    return `${this.key}-${this._pin ?? ''}`;
+    return `${this.key}-${this.pin ?? ''}`;
   }
 
   public getPinned(pin?: PinPosition): Maybe<Column<TRow>> {
     if (this.isPinned(pin)) {
       const _this = new Column(this.def, this.grid, this.parent);
-      _this._pin = pin;
+      _this.pin = pin;
 
       _this.columns = this.columns
         .filter((c) => c.isPinned(pin))
@@ -176,7 +173,7 @@ export default class Column<TRow> {
 
       this.grid.flatColumns.clear();
       update();
-    }, 10);
+    }, 20);
 
     const stopResize = (e: MouseEvent) => {
       window.removeEventListener('mousemove', resize);
@@ -188,26 +185,11 @@ export default class Column<TRow> {
   };
 
   public pinColumn = (pin?: PinPosition) => {
-    const flatColumns = this.grid.sourceColumns.flatMap((x) => x.flatColumns);
+    this.grid.pinColumn(this, pin);
+  };
 
-    const setPin = (col: Column<TRow>, pin?: PinPosition) => {
-      const columnToPin = flatColumns.findOrThrow((c) => c.key === col.key);
-      columnToPin._pin = pin;
-
-      col.columns.forEach((c) => setPin(c, pin));
-    };
-
-    setPin(this, pin);
-
-    this.grid.leftColumns.clear();
-    this.grid.middleColumns.clear();
-    this.grid.rightColumns.clear();
-    this.grid.flatColumns.clear();
-    this.grid.headerRows.clear();
-    this.grid.leafs.clear();
-    this.grid.gridTemplateColumns.clear();
-
-    this.grid.update();
+  public toggleGrouping = () => {
+    this.grid.toggleGrouping(this.key);
   };
 
   public sortColumn = () => {

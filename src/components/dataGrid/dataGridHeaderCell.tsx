@@ -118,13 +118,7 @@ export default function DataGridHeaderCell<TRow>(props: Props<TRow>) {
                   <Button clean textAlign="left" p={3} hover={{ bgColor: 'gray-200' }} onClick={() => column.pinColumn('RIGHT')}>
                     Pin Right
                   </Button>
-                  <Button
-                    clean
-                    textAlign="left"
-                    p={3}
-                    hover={{ bgColor: 'gray-200' }}
-                    // onClick={cell.toggleGroupColumn}
-                  >
+                  <Button clean textAlign="left" p={3} hover={{ bgColor: 'gray-200' }} onClick={column.toggleGrouping}>
                     Group by: {column.key}
                   </Button>
                 </Tooltip>

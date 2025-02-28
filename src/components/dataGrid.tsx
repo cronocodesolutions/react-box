@@ -20,11 +20,13 @@ import { DataGridProps } from './dataGrid/dataGridContract';
 import Grid from './grid';
 import { forwardRef, Ref, useCallback, useImperativeHandle, useMemo, useRef, useState } from 'react';
 import useGrid from './dataGrid/useGrid';
-import DataGridCell from './dataGrid/dataGridCell';
 import DataGridHeaderCell from './dataGrid/dataGridHeaderCell';
 import { DEFAULT_REM_DIVIDER } from '../core/boxConstants';
 import FnUtils from '../utils/fn/fnUtils';
 import GridModel from './dataGrid/models/grid';
+import GroupRow from './dataGrid/models/groupRow';
+import DataGridGroupRow from './dataGrid/dataGridGroupRow';
+import DataGridRow from './dataGrid/dataGridRow';
 
 export default function DataGrid<TRow extends {}>(props: DataGridProps<TRow>) {
   const grid = useGrid(props);
@@ -40,7 +42,7 @@ export default function DataGrid<TRow extends {}>(props: DataGridProps<TRow>) {
   const sizes = useMemo(() => {
     console.log('render - sizes');
 
-    return grid.flatColumns.value.reduce<Record<string, string>>((acc, c) => {
+    const size = grid.flatColumns.value.reduce<Record<string, string>>((acc, c) => {
       const { inlineWidth } = c;
       if (typeof inlineWidth === 'number') {
         acc[c.widthVarName] = `${c.inlineWidth}px`;
@@ -56,7 +58,11 @@ export default function DataGrid<TRow extends {}>(props: DataGridProps<TRow>) {
 
       return acc;
     }, {});
-  }, [grid.flatColumns.value]);
+
+    size['--row-width'] = `${grid.leafs.value.sumBy((c) => c.inlineWidth ?? 0)}px`;
+
+    return size;
+  }, [grid.flatColumns.value, grid.leafs.value]);
 
   const rowsRef = useRef<DataGridRowsRef>(null);
   const handleScroll = useCallback(
@@ -71,8 +77,7 @@ export default function DataGrid<TRow extends {}>(props: DataGridProps<TRow>) {
   return (
     <Box component="dataGrid" b={1} overflow="hidden" borderRadius={1} style={sizes}>
       <Box p={3} bb={1}>
-        {/* {grid.groupColumns.length > 0 ? grid.groupColumns.join(' > ') : 'No grouping'} */}
-        {'No grouping'}
+        {grid.groupColumns.length > 0 ? grid.groupColumns.join(' > ') : 'No grouping'}
       </Box>
       <Box overflowX="scroll" props={{ onScroll: handleScroll }}>
         <Grid
@@ -106,6 +111,7 @@ export interface DataGridRowsRef {
 
 const visibleRows = 10;
 const rowsOffset = 15;
+const take = visibleRows + rowsOffset * 2;
 
 function DataGridRows<TRow>(props: DataGridRowsProps<TRow>, ref: Ref<DataGridRowsRef>) {
   const { grid } = props;
@@ -118,38 +124,33 @@ function DataGridRows<TRow>(props: DataGridRowsProps<TRow>, ref: Ref<DataGridRow
   const rows = useMemo(() => {
     console.log('render - rows');
 
-    const endIndex = startIndex + visibleRows + rowsOffset * 2;
-    return grid.rows.value.slice(startIndex, endIndex).map((row) => (
-      <Box key={row.rowKey} className={['grid-row', row.rowKey.toString()]} display="contents">
-        {grid.leafs.value.map((c) => (
-          <DataGridCell key={c.key} row={row} column={c} />
-        ))}
-      </Box>
-    ));
-  }, [grid.rows.value, grid.leafs.value, startIndex]);
+    const rowsToRender = grid.flatRows.value.take(take, startIndex).map((row) => {
+      if (row instanceof GroupRow) {
+        return <DataGridGroupRow key={row.rowKey} row={row} />;
+      } else {
+        return <DataGridRow key={row.rowKey} row={row} />;
+      }
+    });
+
+    return rowsToRender;
+  }, [grid, grid.flatRows.value, grid.rows.value, grid.leafs.value, startIndex]);
 
   useImperativeHandle(ref, () => ({
     setScrollTop,
   }));
 
+  const rowsCount = grid.flatRows.value.length;
+
   return (
     <Box height={grid.ROW_HEIGHT * visibleRows}>
       <Box
         style={{
-          height: `${grid.rows.value.length * rowHeight}px`,
+          height: `${rowsCount * rowHeight}px`,
         }}
       >
-        <Grid
-          width="max-content"
-          minWidth="fit"
-          transition="none"
-          style={{
-            transform: `translateY(${startIndex * rowHeight}px)`,
-            gridTemplateColumns: grid.gridTemplateColumns.value,
-          }}
-        >
+        <Box width="max-content" minWidth="fit" transition="none" style={{ transform: `translateY(${startIndex * rowHeight}px)` }}>
           {rows}
-        </Grid>
+        </Box>
       </Box>
     </Box>
   );
