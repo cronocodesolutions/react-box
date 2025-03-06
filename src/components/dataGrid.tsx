@@ -23,7 +23,7 @@ import useGrid from './dataGrid/useGrid';
 import DataGridHeaderCell from './dataGrid/dataGridHeaderCell';
 import { DEFAULT_REM_DIVIDER } from '../core/boxConstants';
 import FnUtils from '../utils/fn/fnUtils';
-import GridModel from './dataGrid/models/gridModel';
+import GridModel, { GROUPING_CELL_KEY } from './dataGrid/models/gridModel';
 import GroupRowModel from './dataGrid/models/groupRowModel';
 import DataGridGroupRow from './dataGrid/dataGridGroupRow';
 import DataGridRow from './dataGrid/dataGridRow';
@@ -59,10 +59,19 @@ export default function DataGrid<TRow extends {}>(props: DataGridProps<TRow>) {
       return acc;
     }, {});
 
-    size['--row-width'] = `${grid.leafs.value.sumBy((c) => c.inlineWidth ?? 0)}px`;
+    const groupingColumn = grid.leafs.value.find((c) => c.key === GROUPING_CELL_KEY);
+    if (groupingColumn) {
+      size[groupingColumn.groupColumnWidthVarName] =
+        `${grid.leafs.value.sumBy((c) => (c.pin === groupingColumn.pin ? (c.inlineWidth ?? 0) : 0))}px`;
+    }
+
+    grid.groupColumns.forEach((key) => {
+      const col = grid.leafs.value.findOrThrow((c) => c.key === key);
+      size[col.groupColumnWidthVarName] = `${grid.leafs.value.sumBy((c) => (c.pin === col.pin ? (c.inlineWidth ?? 0) : 0))}px`;
+    });
 
     return size;
-  }, [grid.flatColumns.value, grid.leafs.value]);
+  }, [grid]);
 
   const rowsRef = useRef<DataGridRowsRef>(null);
   const handleScroll = useCallback(
@@ -133,7 +142,7 @@ function DataGridRows<TRow>(props: DataGridRowsProps<TRow>, ref: Ref<DataGridRow
     });
 
     return rowsToRender;
-  }, [grid, grid.flatRows.value, grid.rows.value, grid.leafs.value, startIndex]);
+  }, [grid.flatRows.value, startIndex]);
 
   useImperativeHandle(ref, () => ({
     setScrollTop,

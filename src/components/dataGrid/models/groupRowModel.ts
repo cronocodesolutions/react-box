@@ -23,6 +23,10 @@ export default class GroupRowModel<TRow> {
     return this.grid.expandedGroupRow[this.rowKey];
   }
 
+  public get depth(): number {
+    return this.parentRow ? this.parentRow.depth + 1 : 0;
+  }
+
   public get count(): number {
     return this.rows.sumBy((row) => row.count, 0);
   }

@@ -1,5 +1,6 @@
 import Flex from '../flex';
 import DataGridCell from './dataGridCell';
+import { EMPTY_CELL_KEY } from './models/gridModel';
 import RowModel from './models/rowModel';
 
 interface Props<TRow> {
@@ -12,7 +13,9 @@ export default function DataGridRow<TRow>(props: Props<TRow>) {
   return (
     <Flex className={['grid-row', row.rowKey.toString()]}>
       {row.cells.map((cell) => (
-        <DataGridCell key={cell.column.key} row={row} column={cell.column} />
+        <DataGridCell key={cell.column.key} column={cell.column}>
+          {cell.column.key === EMPTY_CELL_KEY ? null : (row.row[cell.column.key as keyof TRow] as string)}
+        </DataGridCell>
       ))}
     </Flex>
   );

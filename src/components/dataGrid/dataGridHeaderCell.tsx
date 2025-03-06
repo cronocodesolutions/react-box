@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import Box from '../../box';
 import useVisibility from '../../hooks/useVisibility';
 import BaseSvg from '../baseSvg';
@@ -22,6 +22,14 @@ export default function DataGridHeaderCell<TRow>(props: Props<TRow>) {
   const isEmptyCell = column.key === EMPTY_CELL_KEY;
   const colSpan = column.isLeaf ? 1 : column.leafs.length;
   const isSticky = column.pin === 'LEFT' || column.pin === 'RIGHT';
+
+  const resizeHandler = useCallback(
+    (e: React.MouseEvent) => {
+      setOpen(false);
+      column.resizeColumn(e as unknown as MouseEvent);
+    },
+    [setOpen, column],
+  );
 
   return (
     <Flex
@@ -50,9 +58,17 @@ export default function DataGridHeaderCell<TRow>(props: Props<TRow>) {
             width="fit"
             height="fit"
             d={column.pin === 'RIGHT' ? 'row-reverse' : 'row'}
+            className="sorting"
             props={{ onClick: column.sortColumn }}
           >
-            <Flex overflow="hidden" position="sticky" left={0} right={0} ai="center">
+            <Flex
+              overflow="hidden"
+              position="sticky"
+              ai="center"
+              style={{
+                left: !column.pin ? column.grid.leftEdge : undefined,
+              }}
+            >
               <Box pl={4} overflow="hidden" textOverflow="ellipsis">
                 {column.key}
               </Box>
@@ -65,7 +81,7 @@ export default function DataGridHeaderCell<TRow>(props: Props<TRow>) {
                 px={0.75}
                 className="resizer"
                 height="2/4"
-                props={{ onClick: (e) => e.stopPropagation(), onMouseDown: column.resizeColumn }}
+                props={{ onClick: (e) => e.stopPropagation(), onMouseDown: resizeHandler }}
               >
                 <Box width={0.5} height="fit" bgColor="gray-400" hoverParent={{ resizer: { bgColor: 'gray-600' } }}></Box>
               </Box>

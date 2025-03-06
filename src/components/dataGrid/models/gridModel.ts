@@ -91,6 +91,12 @@ export default class GridModel<TRow> {
 
   public isResizeMode = false;
   public expandedGroupRow: Record<Key, boolean> = {};
+  public get leftEdge() {
+    return this.leftColumns.value.sumBy((c) => c.inlineWidth ?? 0);
+  }
+  public get rightEdge() {
+    return this.rightColumns.value.sumBy((c) => c.inlineWidth ?? 0);
+  }
 
   public setSortColumn = (columnKey: Key) => {
     if (this._sortColumn !== columnKey) {
@@ -110,7 +116,7 @@ export default class GridModel<TRow> {
     this.update();
   };
 
-  public pinColumn = (column: ColumnModel<TRow>, pin?: PinPosition) => {
+  public pinColumn = (columnKey: Key, pin?: PinPosition) => {
     const flatSourceColumns = this._sourceColumns.flatMap((x) => x.flatColumns);
 
     const setPin = (col: ColumnModel<TRow>, pin?: PinPosition) => {
@@ -120,6 +126,7 @@ export default class GridModel<TRow> {
       col.columns.forEach((c) => setPin(c, pin));
     };
 
+    const column = this.flatColumns.value.findOrThrow((c) => c.key === columnKey);
     setPin(column, pin);
 
     this.leftColumns.clear();
@@ -129,6 +136,8 @@ export default class GridModel<TRow> {
     this.headerRows.clear();
     this.leafs.clear();
     this.gridTemplateColumns.clear();
+    this.rows.clear();
+    this.flatRows.clear();
 
     this.update();
   };
@@ -170,6 +179,19 @@ export default class GridModel<TRow> {
     // this.rows.clear();
     this.flatRows.clear();
     this.update();
+  };
+
+  public setWidth = (columnKey: Key, width: number) => {
+    const leaf = this.leafs.value.find((l) => l.key === columnKey);
+
+    if (!leaf) {
+      throw new Error('Leaf column not found.');
+    }
+
+    leaf.setWidth(width);
+
+    const sourceLeaf = this._sourceColumns.flatMap((x) => x.flatColumns).findOrThrow((l) => l.key === columnKey);
+    sourceLeaf.setWidth(width);
   };
 
   public groupColumns: Key[] = [];

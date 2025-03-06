@@ -1,5 +1,6 @@
-import { describe, expect, it, suite } from 'vitest';
+import { beforeEach, describe, expect, it, suite } from 'vitest';
 import GridModel from './gridModel';
+import { ColumnType, GridDefinition } from '../contracts/dataGridContract';
 
 interface Person {
   firstName: string;
@@ -13,77 +14,84 @@ interface Person {
   progress: number;
 }
 
-describe('DataGridHelper', () => {
-  //
-  it('creates header Columns', () => {
-    const grid = new GridModel<Person>(
+describe('GridModel', () => {
+  let gridDefinition: GridDefinition<Person> = {
+    columns: [
       {
-        def: {
-          columns: [
-            {
-              key: 'firstName',
-            },
-          ],
-        },
-        data: [],
+        key: 'employee',
+        columns: [
+          { key: 'age', columns: [{ key: 'day' }, { key: 'month' }, { key: 'year' }] },
+          { key: 'name', columns: [{ key: 'firstName' }, { key: 'lastName' }] },
+        ],
+      },
+      {
+        key: 'visits',
+      },
+      {
+        key: 'status',
+      },
+      {
+        key: 'progress',
+      },
+    ],
+  };
+
+  function getGridModel(props?: { columns?: ColumnType<Person>[]; data?: Partial<Person>[] }) {
+    const { columns, data } = props ?? {};
+
+    let def = { ...gridDefinition };
+    columns && (def = { ...def, columns });
+
+    return new GridModel<Person>(
+      {
+        def,
+        data: (data ?? []) as Person[],
       },
       () => {},
     );
+  }
 
-    expect(grid.flatColumns.value).to.length(2);
+  suite('simple usage', () => {
+    it('creates header Columns', () => {
+      const grid = getGridModel({ columns: [{ key: 'firstName' }] });
+
+      expect(grid.headerRows.value).to.length(1);
+      expect(grid.headerRows.value.at(0)).to.length(2);
+    });
+
+    it('creates no rows when no data', () => {
+      const grid = getGridModel({ columns: [{ key: 'firstName' }] });
+
+      expect(grid.rows.value).to.length(0);
+    });
+
+    it('creates row model for each data item', () => {
+      const data: Partial<Person>[] = [
+        { firstName: 'John' },
+        { firstName: 'John1' },
+        { firstName: 'John2' },
+        { firstName: 'John3' },
+        { firstName: 'John4' },
+      ];
+      const grid = getGridModel({ columns: [{ key: 'firstName' }], data });
+
+      expect(grid.rows.value).to.length(5);
+    });
   });
 
   suite('when pin columns', () => {
     it('calculates correct left distance', () => {
-      const grid = new GridModel<Person>(
-        {
-          def: {
-            columns: [
-              {
-                key: 'employee',
-                columns: [
-                  { key: 'age', columns: [{ key: 'month' }, { key: 'year' }] },
-                  { key: 'name', columns: [{ key: 'firstName' }, { key: 'lastName' }] },
-                ],
-              },
-              {
-                key: 'status',
-              },
-            ],
-          },
-          data: [],
-        },
-        () => {},
-      );
+      const grid = getGridModel();
 
       const yearColumn = grid.flatColumns.value.findOrThrow((c) => c.key === 'year');
       const firstNameColumn = grid.flatColumns.value.findOrThrow((c) => c.key === 'firstName');
 
-      expect(yearColumn.left).to.eq(200);
-      expect(firstNameColumn.left).to.eq(400);
+      expect(yearColumn.left).to.eq(400);
+      expect(firstNameColumn.left).to.eq(600);
     });
 
     it('calculates correct right distance', () => {
-      const grid = new GridModel<Person>(
-        {
-          def: {
-            columns: [
-              {
-                key: 'employee',
-                columns: [
-                  { key: 'age', columns: [{ key: 'month' }, { key: 'year' }] },
-                  { key: 'name', columns: [{ key: 'firstName' }, { key: 'lastName' }] },
-                ],
-              },
-              {
-                key: 'status',
-              },
-            ],
-          },
-          data: [],
-        },
-        () => {},
-      );
+      const grid = getGridModel();
 
       const firstNameColumn = grid.flatColumns.value.findOrThrow((c) => c.key === 'firstName');
       const monthColumn = grid.flatColumns.value.findOrThrow((c) => c.key === 'month');

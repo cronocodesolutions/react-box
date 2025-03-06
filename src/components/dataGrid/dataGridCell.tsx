@@ -1,19 +1,16 @@
-import Box from '../../box';
+import Box, { BoxProps } from '../../box';
 import Flex from '../flex';
 import ColumnModel from './models/columnModel';
-import RowModel from './models/rowModel';
 import { EMPTY_CELL_KEY } from './models/gridModel';
 
-interface Props<TRow> {
-  row: RowModel<TRow>;
+interface Props<TRow> extends BoxProps {
+  children?: React.ReactNode;
   column: ColumnModel<TRow>;
 }
 
 export default function DataGridCell<TRow>(props: Props<TRow>) {
-  const { column, row } = props;
-
+  const { children, column, style, ...restProps } = props;
   const isEmptyCell = column.key === EMPTY_CELL_KEY;
-  const value = isEmptyCell ? null : (row.row[column.key as keyof TRow] as string);
   const isSticky = column.pin === 'LEFT' || column.pin === 'RIGHT';
 
   return (
@@ -21,7 +18,7 @@ export default function DataGridCell<TRow>(props: Props<TRow>) {
       bgColor="gray-100"
       hoverParent={{ 'grid-row': { bgColor: 'gray-200' } }}
       overflow="hidden"
-      minHeight={row.grid.ROW_HEIGHT}
+      minHeight={column.grid.ROW_HEIGHT}
       ai="center"
       bb={1}
       br={column.pin === 'LEFT' && column.isEdge ? 1 : undefined}
@@ -34,11 +31,13 @@ export default function DataGridCell<TRow>(props: Props<TRow>) {
         width: `var(${column.widthVarName})`,
         left: column.pin === 'LEFT' ? `var(${column.leftVarName})` : undefined,
         right: column.pin === 'RIGHT' ? `var(${column.rightVarName})` : undefined,
+        ...style,
       }}
+      {...restProps}
     >
       {!isEmptyCell && (
         <Box px={4} textOverflow="ellipsis" overflow="hidden" textWrap="nowrap">
-          {value}
+          {children}
         </Box>
       )}
     </Flex>

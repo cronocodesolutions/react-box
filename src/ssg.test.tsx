@@ -49,7 +49,7 @@ describe('SSG', () => {
 
     const result = renderToStaticMarkup(el);
 
-    const expected = `<html><head><style id="crono-styles">:root{--white: #fff;}:root{--borderColor: black;--outlineColor: black;--lineHeight: 1.2;--fontSize: 14px;--transitionTime: 0.25s;--svgTransitionTime: 0.3s;}#crono-box {position: absolute;top: 0;left: 0;height: 0;}
+    const expected = `<html><head><style id="crono-styles">:root{--white: #fff;}:root{--borderColor: black;--outlineColor: black;--lineHeight: 1.2;--fontSize: 14px;--transitionTime: 0.25s;--svgTransitionTime: 0.3s;}#crono-box {position: absolute;top: 0;left: 0;height: 0;z-index:99999;}
 html{font-size: 16px;font-family: Arial, sans-serif;}
 body{margin: 0;line-height: var(--lineHeight);font-size: var(--fontSize);}
 a,ul{all: unset;}

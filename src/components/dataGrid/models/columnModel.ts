@@ -35,6 +35,7 @@ export default class ColumnModel<TRow> {
     if (this.isPinned(pin)) {
       const _this = new ColumnModel(this.def, this.grid, this.parent);
       _this.pin = pin;
+      _this._inlineWidth = this._inlineWidth;
 
       _this.columns = this.columns
         .filter((c) => c.isPinned(pin))
@@ -49,20 +50,12 @@ export default class ColumnModel<TRow> {
     }
   }
 
-  private isPinned(pin?: PinPosition): boolean {
+  public isPinned(pin?: PinPosition): boolean {
     return this.pin === pin || this.columns.some((c) => c.isPinned(pin));
   }
 
-  public get death() {
-    let death = 0;
-
-    let parent = this.parent;
-    while (parent) {
-      death++;
-      parent = parent.parent;
-    }
-
-    return death;
+  public get death(): number {
+    return this.parent ? this.parent.death + 1 : 0;
   }
 
   public get flatColumns(): ColumnModel<TRow>[] {
@@ -138,6 +131,9 @@ export default class ColumnModel<TRow> {
     return this.columns.flatMap((c) => c.leafs);
   }
 
+  public get groupColumnWidthVarName(): string {
+    return `--${this.uniqueKey}-group-width`;
+  }
   public get widthVarName(): string {
     return `--${this.uniqueKey}-width`;
   }
@@ -152,7 +148,7 @@ export default class ColumnModel<TRow> {
     return this.isLeaf ? this.grid.headerRows.value.length - this.death : 1;
   }
 
-  public resizeColumn = (e: React.MouseEvent) => {
+  public resizeColumn = (e: MouseEvent) => {
     this.grid.isResizeMode = true;
     const startPageX = e.pageX;
     const { MIN_COLUMN_WIDTH_PX: MIN_WIDTH_PX, update } = this.grid;
@@ -168,10 +164,9 @@ export default class ColumnModel<TRow> {
           totalWidth > 0 ? ((width - MIN_WIDTH_PX) / totalWidth) * dragDistance : dragDistance / this.leafs.length;
         const newWidth = Math.round(width + dragDistanceForCell);
 
-        leaf._inlineWidth = newWidth < MIN_WIDTH_PX ? MIN_WIDTH_PX : newWidth;
+        leaf.setWidth(newWidth < MIN_WIDTH_PX ? MIN_WIDTH_PX : newWidth);
       });
 
-      this.grid.flatColumns.clear();
       update();
     }, 20);
 
@@ -185,7 +180,7 @@ export default class ColumnModel<TRow> {
   };
 
   public pinColumn = (pin?: PinPosition) => {
-    this.grid.pinColumn(this, pin);
+    this.grid.pinColumn(this.key, pin);
   };
 
   public toggleGrouping = () => {
@@ -194,5 +189,16 @@ export default class ColumnModel<TRow> {
 
   public sortColumn = () => {
     this.grid.setSortColumn(this.key);
+  };
+
+  public setWidth = (width: number) => {
+    if (!this.isLeaf) {
+      throw new Error('Cannot set width for a parent column.');
+    }
+
+    if (this._inlineWidth === width) return;
+
+    this._inlineWidth = width;
+    this.grid.setWidth(this.key, width);
   };
 }
