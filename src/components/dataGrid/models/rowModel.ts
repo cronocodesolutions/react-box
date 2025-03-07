@@ -19,7 +19,7 @@ export default class RowModel<TRow> {
   public parentRow?: GroupRowModel<TRow>;
 
   public get cells(): CellModel<TRow>[] {
-    return this.grid.leafs.value.map((c) => new CellModel<TRow>(this.grid, this, c));
+    return this.grid.columns.value.leafs.map((c) => new CellModel<TRow>(this.grid, this, c));
   }
 
   public get count(): number {

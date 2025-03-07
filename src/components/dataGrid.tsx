@@ -42,7 +42,7 @@ export default function DataGrid<TRow extends {}>(props: DataGridProps<TRow>) {
   const sizes = useMemo(() => {
     console.log('render - sizes');
 
-    const size = grid.flatColumns.value.reduce<Record<string, string>>((acc, c) => {
+    const size = grid.columns.value.flat.reduce<Record<string, string>>((acc, c) => {
       const { inlineWidth } = c;
       if (typeof inlineWidth === 'number') {
         acc[c.widthVarName] = `${c.inlineWidth}px`;
@@ -59,15 +59,15 @@ export default function DataGrid<TRow extends {}>(props: DataGridProps<TRow>) {
       return acc;
     }, {});
 
-    const groupingColumn = grid.leafs.value.find((c) => c.key === GROUPING_CELL_KEY);
+    const groupingColumn = grid.columns.value.leafs.find((c) => c.key === GROUPING_CELL_KEY);
     if (groupingColumn) {
       size[groupingColumn.groupColumnWidthVarName] =
-        `${grid.leafs.value.sumBy((c) => (c.pin === groupingColumn.pin ? (c.inlineWidth ?? 0) : 0))}px`;
+        `${grid.columns.value.leafs.sumBy((c) => (c.pin === groupingColumn.pin ? (c.inlineWidth ?? 0) : 0))}px`;
     }
 
     grid.groupColumns.forEach((key) => {
-      const col = grid.leafs.value.findOrThrow((c) => c.key === key);
-      size[col.groupColumnWidthVarName] = `${grid.leafs.value.sumBy((c) => (c.pin === col.pin ? (c.inlineWidth ?? 0) : 0))}px`;
+      const col = grid.columns.value.leafs.findOrThrow((c) => c.key === key);
+      size[col.groupColumnWidthVarName] = `${grid.columns.value.leafs.sumBy((c) => (c.pin === col.pin ? (c.inlineWidth ?? 0) : 0))}px`;
     });
 
     return size;
@@ -157,9 +157,14 @@ function DataGridRows<TRow>(props: DataGridRowsProps<TRow>, ref: Ref<DataGridRow
           height: `${rowsCount * rowHeight}px`,
         }}
       >
-        <Box width="max-content" minWidth="fit" transition="none" style={{ transform: `translateY(${startIndex * rowHeight}px)` }}>
+        <Grid
+          width="max-content"
+          minWidth="fit"
+          transition="none"
+          style={{ transform: `translateY(${startIndex * rowHeight}px)`, gridTemplateColumns: grid.gridTemplateColumns.value }}
+        >
           {rows}
-        </Box>
+        </Grid>
       </Box>
     </Box>
   );

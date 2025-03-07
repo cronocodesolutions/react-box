@@ -42,7 +42,7 @@ export default function DataGridHeaderCell<TRow>(props: Props<TRow>) {
       bb={1}
       br={column.pin === 'LEFT' && column.isEdge ? 1 : undefined}
       bl={column.pin === 'RIGHT' && column.isEdge ? 1 : undefined}
-      cursor="pointer"
+      cursor={isEmptyCell ? undefined : 'pointer'}
       boxSizing="content-box"
       transition="none"
       style={{
@@ -58,7 +58,6 @@ export default function DataGridHeaderCell<TRow>(props: Props<TRow>) {
             width="fit"
             height="fit"
             d={column.pin === 'RIGHT' ? 'row-reverse' : 'row'}
-            className="sorting"
             props={{ onClick: column.sortColumn }}
           >
             <Flex

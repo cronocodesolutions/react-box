@@ -79,7 +79,7 @@ if (!Array.prototype.findOrThrow) {
   Array.prototype.findOrThrow = function <T>(this: T[], predicate: (value: T) => boolean): T {
     const result = this.find(predicate);
 
-    if (typeof result === 'undefined') throw new Error('No element satisfies the condition in predicate.');
+    if (typeof result === 'undefined') throw new Error('No items satisfy the provided condition.');
 
     return result;
   };

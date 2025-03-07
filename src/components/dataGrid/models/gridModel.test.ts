@@ -83,8 +83,8 @@ describe('GridModel', () => {
     it('calculates correct left distance', () => {
       const grid = getGridModel();
 
-      const yearColumn = grid.flatColumns.value.findOrThrow((c) => c.key === 'year');
-      const firstNameColumn = grid.flatColumns.value.findOrThrow((c) => c.key === 'firstName');
+      const yearColumn = grid.columns.value.flat.findOrThrow((c) => c.key === 'year');
+      const firstNameColumn = grid.columns.value.flat.findOrThrow((c) => c.key === 'firstName');
 
       expect(yearColumn.left).to.eq(400);
       expect(firstNameColumn.left).to.eq(600);
@@ -93,11 +93,32 @@ describe('GridModel', () => {
     it('calculates correct right distance', () => {
       const grid = getGridModel();
 
-      const firstNameColumn = grid.flatColumns.value.findOrThrow((c) => c.key === 'firstName');
-      const monthColumn = grid.flatColumns.value.findOrThrow((c) => c.key === 'month');
+      const firstNameColumn = grid.columns.value.flat.findOrThrow((c) => c.key === 'firstName');
+      const monthColumn = grid.columns.value.flat.findOrThrow((c) => c.key === 'month');
 
       expect(firstNameColumn.right).to.eq(grid.DEFAULT_COLUMN_WIDTH_PX * 1); // lastName
       expect(monthColumn.right).to.eq(grid.DEFAULT_COLUMN_WIDTH_PX * 3); // year, firstName, lastName
+    });
+
+    it('moves parent header to the right pin position', () => {
+      const grid = getGridModel({ columns: [{ key: 'parent', columns: [{ key: 'firstName' }] }] });
+      grid.pinColumn('firstName', 'LEFT');
+
+      const parentColumns = grid.columns.value.flat.filter((c) => c.key === 'parent');
+      expect(parentColumns).to.have.length(1);
+    });
+
+    it('moves parent header to the right pin position', () => {
+      const grid = getGridModel({ columns: [{ key: 'parent', columns: [{ key: 'firstName' }] }] });
+
+      grid.pinColumn('parent', 'LEFT');
+      grid.pinColumn('firstNameLEFT');
+
+      const parentColumn = grid.columns.value.flat.findOrThrow((c) => c.key === 'parent');
+      expect(parentColumn.pin).to.be.undefined;
+
+      const parentColumns = grid.columns.value.flat.filter((c) => c.key === 'parent');
+      expect(parentColumns).to.have.length(1);
     });
   });
 });

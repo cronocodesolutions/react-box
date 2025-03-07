@@ -8,12 +8,11 @@ export default class ColumnModel<TRow> {
     public readonly grid: GridModel<TRow>,
     private parent?: ColumnModel<TRow>,
   ) {
-    // NOTE: is important to set pin before create children columns
-    this.pin = parent?.pin ?? def.pin;
-    this.columns = def.columns?.map((def) => new ColumnModel(def, grid, this)) ?? [];
+    this.columns = def.columns?.map((d) => new ColumnModel(def.pin ? { ...d, pin: def.pin } : d, grid, this)) ?? [];
 
     if (this.isLeaf) {
       this._inlineWidth = this.key == EMPTY_CELL_KEY ? undefined : this.grid.DEFAULT_COLUMN_WIDTH_PX;
+      this._pin = def.pin;
     }
   }
 
@@ -25,33 +24,40 @@ export default class ColumnModel<TRow> {
     return this.columns.length === 0;
   }
 
-  public pin?: PinPosition;
+  private _pin?: PinPosition;
+  public get pin(): Maybe<PinPosition> {
+    if (this.isLeaf) return this._pin;
 
-  public get uniqueKey(): string {
-    return `${this.key}-${this.pin ?? ''}`;
+    const pins = [...new Set(this.columns.flatMap((c) => c.pin))];
+
+    if (pins.length === 1) return pins[0];
   }
 
-  public getPinned(pin?: PinPosition): Maybe<ColumnModel<TRow>> {
-    if (this.isPinned(pin)) {
-      const _this = new ColumnModel(this.def, this.grid, this.parent);
-      _this.pin = pin;
-      _this._inlineWidth = this._inlineWidth;
+  public get uniqueKey(): string {
+    return `${this.key}${this.pin ?? ''}`;
+  }
 
-      _this.columns = this.columns
-        .filter((c) => c.isPinned(pin))
+  public getPinnedColumn(pin?: PinPosition): Maybe<ColumnModel<TRow>> {
+    if (this.hasPin(pin)) {
+      if (this.isLeaf) return this;
+
+      const parent = new ColumnModel({ ...this.def, pin: pin }, this.grid, this.parent);
+
+      parent.columns = this.columns
+        .filter((c) => c.hasPin(pin))
         .map((c) => {
-          const pinColumn = c.getPinned(pin);
-          pinColumn!.parent = _this;
+          const pinColumn = c.getPinnedColumn(pin);
+          pinColumn!.parent = parent;
           return pinColumn;
         })
         .filter((c) => !!c);
 
-      return _this;
+      return parent;
     }
   }
 
-  public isPinned(pin?: PinPosition): boolean {
-    return this.pin === pin || this.columns.some((c) => c.isPinned(pin));
+  private hasPin(pin?: PinPosition): boolean {
+    return this.isLeaf ? this._pin === pin : this.columns.some((c) => c.hasPin(pin));
   }
 
   public get death(): number {
@@ -86,8 +92,8 @@ export default class ColumnModel<TRow> {
 
       sum += this.parent.left;
     } else {
-      const colIndex = this.grid.leftColumns.value.findIndex((c) => c === this);
-      sum += this.grid.leftColumns.value.sumBy((c, index) => (index < colIndex ? (c.inlineWidth ?? 0) : 0));
+      const colIndex = this.grid.columns.value.left.findIndex((c) => c === this);
+      sum += this.grid.columns.value.left.sumBy((c, index) => (index < colIndex ? (c.inlineWidth ?? 0) : 0));
     }
 
     return sum;
@@ -103,7 +109,7 @@ export default class ColumnModel<TRow> {
 
       sum += this.parent.right;
     } else {
-      const reverse = [...this.grid.rightColumns.value].reverse();
+      const reverse = [...this.grid.columns.value.right].reverse();
       const colIndex = reverse.findIndex((c) => c === this);
       sum += reverse.sumBy((c, index) => (index < colIndex ? (c.inlineWidth ?? 0) : 0));
     }
@@ -119,7 +125,7 @@ export default class ColumnModel<TRow> {
       return item === this && this.parent.isEdge;
     }
 
-    const item = (this.pin === 'LEFT' ? this.grid.leftColumns.value.at(-1) : this.grid.rightColumns.value.at(0)) as ColumnModel<TRow>;
+    const item = (this.pin === 'LEFT' ? this.grid.columns.value.left.at(-1) : this.grid.columns.value.right.at(0)) as ColumnModel<TRow>;
     return item === this;
   }
 
@@ -180,7 +186,13 @@ export default class ColumnModel<TRow> {
   };
 
   public pinColumn = (pin?: PinPosition) => {
-    this.grid.pinColumn(this.key, pin);
+    if (this.isLeaf) {
+      this._pin = pin;
+    } else {
+      this.columns.forEach((c) => c.pinColumn(pin));
+    }
+
+    this.grid.pinColumn(this.uniqueKey, pin);
   };
 
   public toggleGrouping = () => {

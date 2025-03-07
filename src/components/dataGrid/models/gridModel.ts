@@ -20,14 +20,24 @@ export default class GridModel<TRow> {
 
   private _sourceColumns: ColumnModel<TRow>[] = [];
 
-  public readonly leftColumns = memo(() => this._sourceColumns.map((c) => c.getPinned('LEFT')).filter((c) => !!c));
-  public readonly middleColumns = memo(() => this._sourceColumns.map((c) => c.getPinned()).filter((c) => !!c));
-  public readonly rightColumns = memo(() => this._sourceColumns.map((c) => c.getPinned('RIGHT')).filter((c) => !!c));
-  public readonly flatColumns = memo(() =>
-    [...this.leftColumns.value, ...this.middleColumns.value, ...this.rightColumns.value].flatMap((c) => c.flatColumns),
-  );
+  public readonly columns = memo(() => {
+    const left = this._sourceColumns.map((c) => c.getPinnedColumn('LEFT')).filter((c) => !!c);
+    const middle = this._sourceColumns.map((c) => c.getPinnedColumn()).filter((c) => !!c);
+    const right = this._sourceColumns.map((c) => c.getPinnedColumn('RIGHT')).filter((c) => !!c);
+    const flat = [...left, ...middle, ...right].flatMap((c) => c.flatColumns);
+    const leafs = flat.filter((x) => x.isLeaf);
+
+    return {
+      left,
+      middle,
+      right,
+      flat,
+      leafs,
+    };
+  });
+
   public readonly headerRows = memo(() => {
-    const groupedByLevel = this.flatColumns.value.groupBy((c) => c.death).sortBy((x) => x.key);
+    const groupedByLevel = this.columns.value.flat.groupBy((c) => c.death).sortBy((x) => x.key);
 
     return groupedByLevel.map((x) => {
       const cols = x.values.groupBy((c) => c.pin ?? NO_PIN).toRecord((c) => [c.key, c.values]);
@@ -35,10 +45,10 @@ export default class GridModel<TRow> {
       return [...(cols.LEFT ?? []), ...(cols.NO_PIN ?? []), ...(cols.RIGHT ?? [])];
     });
   });
-  public readonly leafs = memo(() => this.flatColumns.value.filter((x) => x.isLeaf));
+
   public readonly gridTemplateColumns = memo(() => {
-    const rightPinnedColumnsCount = this.leafs.value.sumBy((x) => (x.pin === 'RIGHT' ? 1 : 0));
-    const leftColsCount = this.leafs.value.length - rightPinnedColumnsCount - 1;
+    const rightPinnedColumnsCount = this.columns.value.leafs.sumBy((x) => (x.pin === 'RIGHT' ? 1 : 0));
+    const leftColsCount = this.columns.value.leafs.length - rightPinnedColumnsCount - 1;
 
     const left = leftColsCount > 0 ? `repeat(${leftColsCount}, max-content)` : '';
     const right = rightPinnedColumnsCount > 0 ? `repeat(${rightPinnedColumnsCount}, max-content)` : '';
@@ -56,7 +66,7 @@ export default class GridModel<TRow> {
       const getRowsGroup = (dataToGroup: TRow[], groupColumns: Key[]): GroupRowModel<TRow>[] => {
         const groupKey = groupColumns[0];
         groupColumns = groupColumns.removeBy((c) => c === groupKey);
-        const column = this.leafs.value.findOrThrow((c) => c.key === groupKey);
+        const column = this.columns.value.leafs.findOrThrow((c) => c.key === groupKey);
 
         return dataToGroup
           .groupBy((item) => item[groupKey as keyof TRow] as Key)
@@ -92,10 +102,10 @@ export default class GridModel<TRow> {
   public isResizeMode = false;
   public expandedGroupRow: Record<Key, boolean> = {};
   public get leftEdge() {
-    return this.leftColumns.value.sumBy((c) => c.inlineWidth ?? 0);
+    return this.columns.value.left.sumBy((c) => c.inlineWidth ?? 0);
   }
   public get rightEdge() {
-    return this.rightColumns.value.sumBy((c) => c.inlineWidth ?? 0);
+    return this.columns.value.right.sumBy((c) => c.inlineWidth ?? 0);
   }
 
   public setSortColumn = (columnKey: Key) => {
@@ -116,25 +126,14 @@ export default class GridModel<TRow> {
     this.update();
   };
 
-  public pinColumn = (columnKey: Key, pin?: PinPosition) => {
-    const flatSourceColumns = this._sourceColumns.flatMap((x) => x.flatColumns);
+  public pinColumn = (uniqueKey: string, pin?: PinPosition) => {
+    const column = this.columns.value.flat.findOrThrow((c) => c.uniqueKey === uniqueKey);
+    if (column.pin !== pin) {
+      column.pinColumn(pin);
+    }
 
-    const setPin = (col: ColumnModel<TRow>, pin?: PinPosition) => {
-      const columnToPin = flatSourceColumns.findOrThrow((c) => c.key === col.key);
-      columnToPin.pin = pin;
-
-      col.columns.forEach((c) => setPin(c, pin));
-    };
-
-    const column = this.flatColumns.value.findOrThrow((c) => c.key === columnKey);
-    setPin(column, pin);
-
-    this.leftColumns.clear();
-    this.middleColumns.clear();
-    this.rightColumns.clear();
-    this.flatColumns.clear();
+    this.columns.clear();
     this.headerRows.clear();
-    this.leafs.clear();
     this.gridTemplateColumns.clear();
     this.rows.clear();
     this.flatRows.clear();
@@ -156,12 +155,8 @@ export default class GridModel<TRow> {
       this._sourceColumns = this._sourceColumns.removeBy((c) => c.key === GROUPING_CELL_KEY);
     }
 
-    this.leftColumns.clear();
-    this.middleColumns.clear();
-    this.rightColumns.clear();
-    this.flatColumns.clear();
+    this.columns.clear();
     this.headerRows.clear();
-    this.leafs.clear();
     this.gridTemplateColumns.clear();
     this.rows.clear();
     this.flatRows.clear();
@@ -182,7 +177,7 @@ export default class GridModel<TRow> {
   };
 
   public setWidth = (columnKey: Key, width: number) => {
-    const leaf = this.leafs.value.find((l) => l.key === columnKey);
+    const leaf = this.columns.value.leafs.find((l) => l.key === columnKey);
 
     if (!leaf) {
       throw new Error('Leaf column not found.');
