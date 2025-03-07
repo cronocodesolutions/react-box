@@ -1,4 +1,4 @@
-interface Memo<T> {
+export interface Memo<T> {
   value: T;
   clear(): void;
 }

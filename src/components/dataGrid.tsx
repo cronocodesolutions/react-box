@@ -116,7 +116,7 @@ interface DataGridRowsProps<TRow> {
   grid: GridModel<TRow>;
 }
 
-export interface DataGridRowsRef {
+interface DataGridRowsRef {
   setScrollTop(value: number): void;
 }
 

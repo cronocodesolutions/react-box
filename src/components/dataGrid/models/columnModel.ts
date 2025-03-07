@@ -11,12 +11,12 @@ export default class ColumnModel<TRow> {
     this.columns = def.columns?.map((d) => new ColumnModel(def.pin ? { ...d, pin: def.pin } : d, grid, this)) ?? [];
 
     if (this.isLeaf) {
-      this._inlineWidth = this.key == EMPTY_CELL_KEY ? undefined : this.grid.DEFAULT_COLUMN_WIDTH_PX;
+      this._inlineWidth = this.key == EMPTY_CELL_KEY ? undefined : (this.def.width ?? this.grid.DEFAULT_COLUMN_WIDTH_PX);
       this._pin = def.pin;
     }
   }
 
-  public columns: ColumnModel<TRow>[];
+  public columns: ColumnModel<TRow>[] = [];
   public get key() {
     return this.def.key;
   }
