@@ -6,8 +6,7 @@ export default function useGrid<TRow>(props: DataGridProps<TRow>): GridModel<TRo
   const grid = useMemo(() => new GridModel(props, () => setUpdate((prev) => prev + 1)), [props]);
 
   const [update, setUpdate] = useState(0);
-  // TODO: find a way to clone correct
-  const gridToUse = useMemo(() => ({ ...grid }), [grid, update]);
+  const gridToUse = useMemo(() => Object.create(Object.getPrototypeOf(grid), Object.getOwnPropertyDescriptors(grid)), [grid, update]);
 
   return gridToUse as GridModel<TRow>;
 }

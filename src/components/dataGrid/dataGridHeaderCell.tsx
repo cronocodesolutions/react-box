@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import Box from '../../box';
 import useVisibility from '../../hooks/useVisibility';
 import BaseSvg from '../baseSvg';
@@ -15,21 +15,9 @@ interface Props<TRow> {
 export default function DataGridHeaderCell<TRow>(props: Props<TRow>) {
   const { column } = props;
 
-  const [isOpen, setOpen, refToUse] = useVisibility<HTMLButtonElement>({ hideOnScroll: true });
-  const [tooltipPosition, setTooltipPosition] = useState<{ top: number; left: number }>({ top: 0, left: 0 });
-  const openLeft = useMemo(() => tooltipPosition.left > window.innerWidth / 2, [tooltipPosition.left]);
-
   const isEmptyCell = column.key === EMPTY_CELL_KEY;
   const colSpan = column.isLeaf ? 1 : column.leafs.length;
   const isSticky = column.pin === 'LEFT' || column.pin === 'RIGHT';
-
-  const resizeHandler = useCallback(
-    (e: React.MouseEvent) => {
-      setOpen(false);
-      column.resizeColumn(e as unknown as MouseEvent);
-    },
-    [setOpen, column],
-  );
 
   return (
     <Flex
@@ -43,7 +31,6 @@ export default function DataGridHeaderCell<TRow>(props: Props<TRow>) {
       br={column.pin === 'LEFT' && column.isEdge ? 1 : undefined}
       bl={column.pin === 'RIGHT' && column.isEdge ? 1 : undefined}
       cursor={isEmptyCell ? undefined : 'pointer'}
-      boxSizing="content-box"
       transition="none"
       style={{
         width: `var(${column.widthVarName})`,
@@ -53,19 +40,14 @@ export default function DataGridHeaderCell<TRow>(props: Props<TRow>) {
     >
       {!isEmptyCell && (
         <>
-          <Flex
-            jc={column.pin === 'RIGHT' ? 'flex-end' : 'space-between'}
-            width="fit"
-            height="fit"
-            d={column.pin === 'RIGHT' ? 'row-reverse' : 'row'}
-            props={{ onClick: column.sortColumn }}
-          >
+          <Flex width="fit" height="fit" props={{ onClick: column.sortColumn }}>
             <Flex
               overflow="hidden"
               position="sticky"
               ai="center"
+              transition="none"
               style={{
-                left: !column.pin ? column.grid.leftEdge : undefined,
+                left: !column.pin ? `var(${column.grid.leftEdgeVarName})` : undefined,
               }}
             >
               <Box pl={4} overflow="hidden" textOverflow="ellipsis">
@@ -73,75 +55,107 @@ export default function DataGridHeaderCell<TRow>(props: Props<TRow>) {
               </Box>
               <Box minWidth={12} />
             </Flex>
+          </Flex>
 
-            <Flex height="fit" ai="center">
-              <Box
-                cursor="col-resize"
-                px={0.75}
-                className="resizer"
-                height="2/4"
-                props={{ onClick: (e) => e.stopPropagation(), onMouseDown: resizeHandler }}
-              >
-                <Box width={0.5} height="fit" bgColor="gray-400" hoverParent={{ resizer: { bgColor: 'gray-600' } }}></Box>
-              </Box>
-            </Flex>
-          </Flex>
-          <Flex position="absolute" right={column.pin === 'RIGHT' ? 2.5 : 4} top="1/2" translateY={-3} ai="center">
-            <Button
-              clean
-              onClick={() => setOpen(!isOpen)}
-              ref={refToUse}
-              width={6}
-              height={6}
-              cursor="pointer"
-              userSelect="none"
-              borderRadius={1}
-              borderColor="gray-200"
-              display="flex"
-              jc="center"
-              ai="center"
-              transition="none"
-              bgColor="gray-200"
-              hover={{ bgColor: 'gray-300', outline: 2, outlineColor: 'gray-300' }}
-            >
-              <BaseSvg viewBox="0 0 16 16" width="18">
-                <path
-                  fill="#1D1D1D"
-                  strokeWidth={4}
-                  d="M7.936 12.128a.936.936 0 1 1 0 1.872.936.936 0 0 1 0-1.872ZM7.936 7.052a.936.936 0 1 1 0 1.873.936.936 0 0 1 0-1.873ZM7.936 1.977a.936.936 0 1 1 0 1.872.936.936 0 0 1 0-1.872Z"
-                />
-              </BaseSvg>
-              {isOpen && (
-                <Tooltip
-                  bgColor="white"
-                  width={40}
-                  b={1}
-                  borderRadius={1}
-                  display="flex"
-                  d="column"
-                  mt={4}
-                  overflow="hidden"
-                  translateX={openLeft ? -39 : -5}
-                  onPositionChange={setTooltipPosition}
-                >
-                  <Button clean textAlign="left" p={3} hover={{ bgColor: 'gray-200' }} onClick={() => column.pinColumn()}>
-                    Unpin
-                  </Button>
-                  <Button clean textAlign="left" p={3} hover={{ bgColor: 'gray-200' }} onClick={() => column.pinColumn('LEFT')}>
-                    Pin Left
-                  </Button>
-                  <Button clean textAlign="left" p={3} hover={{ bgColor: 'gray-200' }} onClick={() => column.pinColumn('RIGHT')}>
-                    Pin Right
-                  </Button>
-                  <Button clean textAlign="left" p={3} hover={{ bgColor: 'gray-200' }} onClick={column.toggleGrouping}>
-                    Group by: {column.key}
-                  </Button>
-                </Tooltip>
-              )}
-            </Button>
-          </Flex>
+          <Resizer column={column} />
+          <ContextMenu column={column} />
         </>
       )}
+    </Flex>
+  );
+}
+
+interface ResizerProps<TRow> {
+  column: ColumnModel<TRow>;
+}
+
+function Resizer<TRow>(props: ResizerProps<TRow>) {
+  const { column } = props;
+
+  return (
+    <Flex
+      height="fit"
+      ai="center"
+      position="absolute"
+      right={column.pin === 'RIGHT' ? undefined : 0}
+      left={column.pin !== 'RIGHT' ? undefined : 0}
+    >
+      <Box
+        cursor="col-resize"
+        px={0.75}
+        className="resizer"
+        height="2/4"
+        props={{ onMouseDown: column.resizeColumn, onTouchStart: column.resizeColumn }}
+      >
+        <Box width={0.5} height="fit" bgColor="gray-400" hoverParent={{ resizer: { bgColor: 'gray-600' } }}></Box>
+      </Box>
+    </Flex>
+  );
+}
+
+interface ContextMenuProps<TRow> {
+  column: ColumnModel<TRow>;
+}
+function ContextMenu<TRow>(props: ContextMenuProps<TRow>) {
+  const { column } = props;
+  const [isOpen, setOpen, refToUse] = useVisibility({ hideOnScroll: true, event: 'mousedown' });
+  const [tooltipPosition, setTooltipPosition] = useState<{ top: number; left: number }>({ top: 0, left: 0 });
+  const openLeft = useMemo(() => tooltipPosition.left > window.innerWidth / 2, [tooltipPosition.left]);
+
+  return (
+    <Flex position="absolute" right={column.pin === 'RIGHT' ? 2.5 : 4} top="1/2" translateY={-3} ai="center">
+      <Button
+        clean
+        onClick={() => setOpen(!isOpen)}
+        width={6}
+        height={6}
+        cursor="pointer"
+        userSelect="none"
+        borderRadius={1}
+        borderColor="gray-200"
+        display="flex"
+        jc="center"
+        ai="center"
+        transition="none"
+        bgColor="gray-200"
+        hover={{ bgColor: 'gray-300', outline: 2, outlineColor: 'gray-300' }}
+      >
+        <BaseSvg viewBox="0 0 16 16" width="18">
+          <path
+            fill="#1D1D1D"
+            strokeWidth={4}
+            d="M7.936 12.128a.936.936 0 1 1 0 1.872.936.936 0 0 1 0-1.872ZM7.936 7.052a.936.936 0 1 1 0 1.873.936.936 0 0 1 0-1.873ZM7.936 1.977a.936.936 0 1 1 0 1.872.936.936 0 0 1 0-1.872Z"
+          />
+        </BaseSvg>
+        {isOpen && (
+          <Tooltip
+            bgColor="white"
+            width={40}
+            b={1}
+            borderRadius={1}
+            display="flex"
+            d="column"
+            mt={4}
+            overflow="hidden"
+            translateX={openLeft ? -39 : -5}
+            onPositionChange={setTooltipPosition}
+            ref={refToUse}
+          >
+            <Button clean textAlign="left" p={3} hover={{ bgColor: 'gray-200' }} onClick={() => column.pinColumn()}>
+              Unpin
+            </Button>
+            <Button clean textAlign="left" p={3} hover={{ bgColor: 'gray-200' }} onClick={() => column.pinColumn('LEFT')}>
+              Pin Left
+            </Button>
+            <Button clean textAlign="left" p={3} hover={{ bgColor: 'gray-200' }} onClick={() => column.pinColumn('RIGHT')}>
+              Pin Right
+            </Button>
+            <Button clean textAlign="left" p={3} hover={{ bgColor: 'gray-200' }} onClick={column.toggleGrouping}>
+              Group by: {column.key}
+            </Button>
+          </Tooltip>
+        )}
+      </Button>
     </Flex>
   );
 }

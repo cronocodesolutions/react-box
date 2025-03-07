@@ -107,6 +107,7 @@ export default class GridModel<TRow> {
   public get rightEdge() {
     return this.columns.value.right.sumBy((c) => c.inlineWidth ?? 0);
   }
+  public readonly leftEdgeVarName = '--left-edge';
 
   public setSortColumn = (columnKey: Key) => {
     if (this._sortColumn !== columnKey) {

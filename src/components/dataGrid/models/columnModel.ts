@@ -154,9 +154,9 @@ export default class ColumnModel<TRow> {
     return this.isLeaf ? this.grid.headerRows.value.length - this.death : 1;
   }
 
-  public resizeColumn = (e: MouseEvent) => {
+  public resizeColumn = (e: unknown) => {
     this.grid.isResizeMode = true;
-    const startPageX = e.pageX;
+    const startPageX = (e as MouseEvent).pageX;
     const { MIN_COLUMN_WIDTH_PX: MIN_WIDTH_PX, update } = this.grid;
     const totalWidth = this.leafs.sumBy((c) => c.inlineWidth as number) - this.leafs.length * MIN_WIDTH_PX;
     const sizes = this.leafs.toRecord((leaf) => [leaf.key, leaf.inlineWidth as number]);

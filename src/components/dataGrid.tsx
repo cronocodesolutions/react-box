@@ -59,6 +59,8 @@ export default function DataGrid<TRow extends {}>(props: DataGridProps<TRow>) {
       return acc;
     }, {});
 
+    size[grid.leftEdgeVarName] = `${grid.leftEdge}px`;
+
     const groupingColumn = grid.columns.value.leafs.find((c) => c.key === GROUPING_CELL_KEY);
     if (groupingColumn) {
       size[groupingColumn.groupColumnWidthVarName] =
@@ -77,7 +79,7 @@ export default function DataGrid<TRow extends {}>(props: DataGridProps<TRow>) {
   const handleScroll = useCallback(
     FnUtils.throttle((event: React.UIEvent) => {
       rowsRef.current?.setScrollTop((event.target as HTMLDivElement).scrollTop);
-    }, 200),
+    }, 100),
     [rowsRef.current],
   );
 
@@ -119,7 +121,7 @@ export interface DataGridRowsRef {
 }
 
 const visibleRows = 10;
-const rowsOffset = 15;
+const rowsOffset = 25;
 const take = visibleRows + rowsOffset * 2;
 
 function DataGridRows<TRow>(props: DataGridRowsProps<TRow>, ref: Ref<DataGridRowsRef>) {
@@ -161,7 +163,10 @@ function DataGridRows<TRow>(props: DataGridRowsProps<TRow>, ref: Ref<DataGridRow
           width="max-content"
           minWidth="fit"
           transition="none"
-          style={{ transform: `translateY(${startIndex * rowHeight}px)`, gridTemplateColumns: grid.gridTemplateColumns.value }}
+          style={{
+            transform: `translateY(${startIndex * rowHeight}px)`,
+            gridTemplateColumns: grid.gridTemplateColumns.value,
+          }}
         >
           {rows}
         </Grid>
