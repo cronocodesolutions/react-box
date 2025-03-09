@@ -68,6 +68,10 @@ export default class GridModel<TRow> {
         groupColumns = groupColumns.removeBy((c) => c === groupKey);
         const column = this.columns.value.leafs.findOrThrow((c) => c.key === groupKey);
 
+        if (this._sortColumn === GROUPING_CELL_KEY) {
+          dataToGroup = dataToGroup.sortBy((x) => x[groupKey as keyof TRow], this._sortDirection);
+        }
+
         return dataToGroup
           .groupBy((item) => item[groupKey as keyof TRow] as Key)
           .map((group, groupRowIndex) => {
@@ -122,6 +126,7 @@ export default class GridModel<TRow> {
       }
     }
 
+    this.headerRows.clear();
     this.rows.clear();
     this.flatRows.clear();
     this.update();
@@ -191,6 +196,13 @@ export default class GridModel<TRow> {
   };
 
   public groupColumns: Key[] = [];
+
   private _sortColumn?: Key;
+  public get sortColumn() {
+    return this._sortColumn;
+  }
   private _sortDirection: SortDirection = 'ASC';
+  public get sortDirection() {
+    return this._sortDirection;
+  }
 }

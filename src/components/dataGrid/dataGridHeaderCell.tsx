@@ -6,7 +6,9 @@ import Button from '../button';
 import Flex from '../flex';
 import Tooltip from '../tooltip';
 import ColumnModel from './models/columnModel';
-import { EMPTY_CELL_KEY } from './models/gridModel';
+import { EMPTY_CELL_KEY, GROUPING_CELL_KEY } from './models/gridModel';
+import ArrowIcon from '../../icons/arrowIcon';
+import DotsIcon from '../../icons/dotsIcon';
 
 interface Props<TRow> {
   column: ColumnModel<TRow>;
@@ -18,6 +20,7 @@ export default function DataGridHeaderCell<TRow>(props: Props<TRow>) {
   const isEmptyCell = column.key === EMPTY_CELL_KEY;
   const colSpan = column.isLeaf ? 1 : column.leafs.length;
   const isSticky = column.pin === 'LEFT' || column.pin === 'RIGHT';
+  const isSortable = column.isLeaf && !isEmptyCell;
 
   return (
     <Flex
@@ -30,7 +33,7 @@ export default function DataGridHeaderCell<TRow>(props: Props<TRow>) {
       bb={1}
       br={column.pin === 'LEFT' && column.isEdge ? 1 : undefined}
       bl={column.pin === 'RIGHT' && column.isEdge ? 1 : undefined}
-      cursor={isEmptyCell ? undefined : 'pointer'}
+      cursor={isSortable ? 'pointer' : undefined}
       transition="none"
       style={{
         width: `var(${column.widthVarName})`,
@@ -40,19 +43,25 @@ export default function DataGridHeaderCell<TRow>(props: Props<TRow>) {
     >
       {!isEmptyCell && (
         <>
-          <Flex width="fit" height="fit" props={{ onClick: column.sortColumn }}>
+          <Flex width="fit" height="fit" props={{ onClick: isSortable ? column.sortColumn : undefined }}>
             <Flex
               overflow="hidden"
               position="sticky"
               ai="center"
               transition="none"
+              pl={4}
               style={{
                 left: !column.pin ? `var(${column.grid.leftEdgeVarName})` : undefined,
               }}
             >
-              <Box pl={4} overflow="hidden" textOverflow="ellipsis">
+              <Box overflow="hidden" textOverflow="ellipsis">
                 {column.key}
               </Box>
+              {column.key === column.grid.sortColumn && (
+                <Box pl={(column.inlineWidth ?? 0) < 58 ? 0 : 2}>
+                  <ArrowIcon width="16px" rotate={column.grid.sortDirection === 'ASC' ? 180 : 0} fill="violet-950" />
+                </Box>
+              )}
               <Box minWidth={12} />
             </Flex>
           </Flex>
@@ -103,7 +112,7 @@ function ContextMenu<TRow>(props: ContextMenuProps<TRow>) {
   const openLeft = useMemo(() => tooltipPosition.left > window.innerWidth / 2, [tooltipPosition.left]);
 
   return (
-    <Flex position="absolute" right={column.pin === 'RIGHT' ? 2.5 : 4} top="1/2" translateY={-3} ai="center">
+    <Flex position="absolute" right={column.pin === 'RIGHT' ? 2.5 : 4} top="1/2" translateY={-3.5} ai="center">
       <Button
         clean
         onClick={() => setOpen(!isOpen)}
@@ -118,15 +127,9 @@ function ContextMenu<TRow>(props: ContextMenuProps<TRow>) {
         ai="center"
         transition="none"
         bgColor="gray-200"
-        hover={{ bgColor: 'gray-300', outline: 2, outlineColor: 'gray-300' }}
+        hover={{ bgColor: 'gray-300' }}
       >
-        <BaseSvg viewBox="0 0 16 16" width="18">
-          <path
-            fill="#1D1D1D"
-            strokeWidth={4}
-            d="M7.936 12.128a.936.936 0 1 1 0 1.872.936.936 0 0 1 0-1.872ZM7.936 7.052a.936.936 0 1 1 0 1.873.936.936 0 0 1 0-1.873ZM7.936 1.977a.936.936 0 1 1 0 1.872.936.936 0 0 1 0-1.872Z"
-          />
-        </BaseSvg>
+        <DotsIcon fill="violet-950" />
         {isOpen && (
           <Tooltip
             bgColor="white"

@@ -112,25 +112,25 @@ if (!Array.prototype.groupBy) {
     keySelector: (item: T, index: number) => TKey,
     ignoreEmptyStringNullOrUndefinedKey = false,
   ): GroupItem<TKey, T>[] {
-    const result = this.reduce(
-      (acc, item, index) => {
-        const key = keySelector(item, index);
+    const result = this.reduce((acc, item, index) => {
+      const key = keySelector(item, index);
 
-        if (ignoreEmptyStringNullOrUndefinedKey && typeof key !== 'number' && !key) {
-          return acc;
-        }
-
-        if (key in acc === false) {
-          acc[key] = [];
-        }
-
-        acc[key].push(item);
-
+      if (ignoreEmptyStringNullOrUndefinedKey && typeof key !== 'number' && !key) {
         return acc;
-      },
-      {} as Record<TKey, T[]>,
-    );
+      }
 
-    return Object.entries(result).map(([key, values]) => ({ key, values: values as T[] })) as GroupItem<TKey, T>[];
+      if (acc.has(key) === false) {
+        acc.set(key, []);
+      }
+
+      acc.get(key)?.push(item);
+
+      return acc;
+    }, new Map<TKey, T[]>());
+
+    return result
+      .entries()
+      .map(([key, values]) => ({ key, values }))
+      .toArray() as GroupItem<TKey, T>[];
   };
 }
