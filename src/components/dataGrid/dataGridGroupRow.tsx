@@ -23,19 +23,16 @@ export default function DataGridGroupRow<TRow>(props: Props<TRow>) {
         }
 
         if (leaf.key === GROUPING_CELL_KEY) {
-          const style: Record<string, string> = { width: `var(${leaf.groupColumnWidthVarName})` };
-          if (leaf.pin === 'LEFT') style.left = '0';
-          else if (leaf.pin === 'RIGHT') style.right = '0';
-
           return (
             <DataGridCell
               key={leaf.key}
               column={leaf}
-              style={style}
+              style={{ width: `var(${leaf.groupColumnWidthVarName})`, left: leaf.pin === 'LEFT' ? 0 : undefined }}
               br={groupingColumn.pin === 'LEFT' ? 1 : undefined}
-              colSpan={gridColumns}
+              gridColumn={gridColumns}
+              pl={4 * row.depth}
             >
-              <Button clean onClick={() => row.toggleRow()} cursor="pointer" pl={4 * row.depth}>
+              <Button display="contents" clean onClick={() => row.toggleRow()} cursor="pointer">
                 {'>'} {row.groupValue} ({row.count})
               </Button>
             </DataGridCell>

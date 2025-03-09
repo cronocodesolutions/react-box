@@ -18,14 +18,14 @@ export default function DataGridHeaderCell<TRow>(props: Props<TRow>) {
   const { column } = props;
 
   const isEmptyCell = column.key === EMPTY_CELL_KEY;
-  const colSpan = column.isLeaf ? 1 : column.leafs.length;
+  const gridColumn = column.isLeaf ? 1 : column.leafs.length;
   const isSticky = column.pin === 'LEFT' || column.pin === 'RIGHT';
   const isSortable = column.isLeaf && !isEmptyCell;
 
   return (
     <Flex
       gridRow={column.gridRows}
-      colSpan={colSpan}
+      gridColumn={gridColumn}
       bgColor="gray-200"
       position={isSticky ? 'sticky' : 'relative'}
       zIndex={isSticky ? 2 : 1}
@@ -33,6 +33,7 @@ export default function DataGridHeaderCell<TRow>(props: Props<TRow>) {
       bb={1}
       br={column.pin === 'LEFT' && column.isEdge ? 1 : undefined}
       bl={column.pin === 'RIGHT' && column.isEdge ? 1 : undefined}
+      borderColor="gray-400"
       cursor={isSortable ? 'pointer' : undefined}
       transition="none"
       style={{
@@ -112,7 +113,7 @@ function ContextMenu<TRow>(props: ContextMenuProps<TRow>) {
   const openLeft = useMemo(() => tooltipPosition.left > window.innerWidth / 2, [tooltipPosition.left]);
 
   return (
-    <Flex position="absolute" right={column.pin === 'RIGHT' ? 2.5 : 4} top="1/2" translateY={-3.5} ai="center">
+    <Flex position="absolute" right={column.pin === 'RIGHT' ? 2.5 : 4} top="1/2" translateY={-3} ai="center">
       <Button
         clean
         onClick={() => setOpen(!isOpen)}

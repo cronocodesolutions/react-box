@@ -963,7 +963,7 @@ export const cssStyles = {
     },
   ],
   /** The grid-column CSS shorthand property specifies a grid item's size and location within a grid column by contributing a line, a span, or nothing (automatic) to its grid placement, thereby specifying the inline-start and inline-end edge of its grid area. */
-  colSpan: [
+  gridColumn: [
     {
       styleName: 'grid-column',
       values: 0,

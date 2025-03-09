@@ -86,8 +86,8 @@ export default function DataGrid<TRow extends {}>(props: DataGridProps<TRow>) {
   console.log('render - data grid');
 
   return (
-    <Box component="dataGrid" b={1} overflow="hidden" borderRadius={1} style={sizes}>
-      <Box p={3} bb={1}>
+    <Box component="dataGrid" b={1} borderColor="gray-400" overflow="hidden" borderRadius={1} style={sizes}>
+      <Box p={3} bb={1} borderColor="gray-400">
         {grid.groupColumns.length > 0 ? grid.groupColumns.join(' > ') : 'No grouping'}
       </Box>
       <Box overflowX="scroll" props={{ onScroll: handleScroll }}>

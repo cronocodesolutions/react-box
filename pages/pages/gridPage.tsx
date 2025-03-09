@@ -68,10 +68,10 @@ export default function GridPage() {
           <Box bgColor="violet-400" borderRadius={1} p={6} px={4}>
             Cell
           </Box>
-          <Box bgColor="violet-400" borderRadius={1} p={6} px={4} colSpan={2}>
+          <Box bgColor="violet-400" borderRadius={1} p={6} px={4} gridColumn={2}>
             colspan 2
           </Box>
-          <Box bgColor="violet-400" borderRadius={1} p={6} px={4} colSpan="full-row">
+          <Box bgColor="violet-400" borderRadius={1} p={6} px={4} gridColumn="full-row">
             colspan full row
           </Box>
           <Box bgColor="violet-400" borderRadius={1} p={6} px={4}>
@@ -83,7 +83,7 @@ export default function GridPage() {
           <Box bgColor="violet-400" borderRadius={1} p={6} px={4} gridColumnStart={2}>
             colstart 2
           </Box>
-          <Box bgColor="violet-400" borderRadius={1} p={6} px={4} colSpan={3} gridColumnStart={1}>
+          <Box bgColor="violet-400" borderRadius={1} p={6} px={4} gridColumn={3} gridColumnStart={1}>
             colstart 2 / colspan 2
           </Box>
           <Box bgColor="violet-400" borderRadius={1} p={6} px={4} gridColumnStart={2} gridColumnEnd={4} hover={{ gridColumnEnd: 5 }}>

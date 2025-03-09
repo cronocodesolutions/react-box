@@ -23,6 +23,7 @@ export default function DataGridCell<TRow>(props: Props<TRow>) {
       bb={1}
       br={column.pin === 'LEFT' && column.isEdge ? 1 : undefined}
       bl={column.pin === 'RIGHT' && column.isEdge ? 1 : undefined}
+      borderColor="gray-400"
       transition="none"
       position={isSticky ? 'sticky' : undefined}
       zIndex={isSticky ? 1 : undefined}
