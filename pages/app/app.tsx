@@ -20,9 +20,11 @@ import Sidebar from './sidebar';
 import BoxSvg from '../svgs/boxSvg';
 import InstallationPage from '../pages/installationPage';
 import ThemeSetupPage from '../pages/themeSetupPage';
+import PageContext from '../pageContext';
 
 export default function App() {
   const [open, setOpen] = useState(false);
+  const [rightSidebar, setRightSidebar] = useState<Maybe<React.ReactNode>>();
 
   return (
     <Box color="violet-950" bgImage="body-bg" minHeight="fit-screen" position="relative">
@@ -50,24 +52,28 @@ export default function App() {
         </Box>
 
         <Box flex1 overflow="auto" px={2} sm={{ px: 8 }} pt={6} pb={16} maxWidth={270}>
-          <Routes>
-            <Route index element={<HomePage />} />
-            <Route path="/installation" element={<InstallationPage />} />
-            <Route path="/theme-setup" element={<ThemeSetupPage />} />
-            <Route path="/flex" element={<FlexPage />} />
-            <Route path="/grid" element={<GridPage />} />
-            <Route path="/textbox" element={<TextboxPage />} />
-            <Route path="/textarea" element={<TextareaPage />} />
-            <Route path="/datagrid" element={<DataGridPage />} />
-            <Route path="/button" element={<ButtonPage />} />
-            <Route path="/checkbox" element={<CheckboxPage />} />
-            <Route path="/radiobutton" element={<RadioButtonPage />} />
-            <Route path="/tooltip" element={<TooltipPage />} />
-            <Route path="/dropdown" element={<DropdownPage />} />
-            <Route path="/colors" element={<ColorPage />} />
-          </Routes>
+          <PageContext.Provider value={{ rightSidebar, setRightSidebar }}>
+            <Routes>
+              <Route index element={<HomePage />} />
+              <Route path="/installation" element={<InstallationPage />} />
+              <Route path="/theme-setup" element={<ThemeSetupPage />} />
+              <Route path="/flex" element={<FlexPage />} />
+              <Route path="/grid" element={<GridPage />} />
+              <Route path="/textbox" element={<TextboxPage />} />
+              <Route path="/textarea" element={<TextareaPage />} />
+              <Route path="/datagrid" element={<DataGridPage />} />
+              <Route path="/button" element={<ButtonPage />} />
+              <Route path="/checkbox" element={<CheckboxPage />} />
+              <Route path="/radiobutton" element={<RadioButtonPage />} />
+              <Route path="/tooltip" element={<TooltipPage />} />
+              <Route path="/dropdown" element={<DropdownPage />} />
+              <Route path="/colors" element={<ColorPage />} />
+            </Routes>
+          </PageContext.Provider>
         </Box>
-        <Box width={0} xl={{ width: 70 }} />
+        <Box width={0} overflow="hidden" xl={{ width: 70 }}>
+          {rightSidebar}
+        </Box>
       </Flex>
     </Box>
   );

@@ -6,7 +6,10 @@ import RowModel from './rowModel';
 import '../../../array';
 
 export const EMPTY_CELL_KEY = 'empty-cell';
+export const ROW_NUMBER_CELL_KEY = 'row-number-cell';
+export const ROW_SELECTION_CELL_KEY = 'row-selection-cell';
 export const GROUPING_CELL_KEY = 'grouping-cell';
+
 export default class GridModel<TRow> {
   constructor(
     public readonly props: DataGridProps<TRow>,
@@ -16,6 +19,12 @@ export default class GridModel<TRow> {
 
     // add empty column
     this._sourceColumns.push(new ColumnModel({ key: EMPTY_CELL_KEY }, this));
+
+    // add row selection column
+    this._sourceColumns.unshift(new ColumnModel({ key: ROW_SELECTION_CELL_KEY, width: 50, align: 'center' }, this));
+
+    // add row number column
+    this._sourceColumns.unshift(new ColumnModel({ key: ROW_NUMBER_CELL_KEY, pin: 'LEFT', width: 70, align: 'right' }, this));
   }
 
   private _sourceColumns: ColumnModel<TRow>[] = [];
@@ -63,7 +72,7 @@ export default class GridModel<TRow> {
     }
 
     if (this.groupColumns.length > 0) {
-      const getRowsGroup = (dataToGroup: TRow[], groupColumns: Key[]): GroupRowModel<TRow>[] => {
+      const getRowsGroup = (dataToGroup: TRow[], groupColumns: Key[], rowIndex: number): GroupRowModel<TRow>[] => {
         const groupKey = groupColumns[0];
         groupColumns = groupColumns.removeBy((c) => c === groupKey);
         const column = this.columns.value.leafs.findOrThrow((c) => c.key === groupKey);
@@ -74,20 +83,27 @@ export default class GridModel<TRow> {
 
         return dataToGroup
           .groupBy((item) => item[groupKey as keyof TRow] as Key)
-          .map((group, groupRowIndex) => {
+          .map((group) => {
             let rows: RowModel<TRow>[] | GroupRowModel<TRow>[];
 
             if (groupColumns.length > 0) {
-              rows = getRowsGroup(group.values, groupColumns);
+              rows = getRowsGroup(group.values, groupColumns, rowIndex + 1);
             } else {
-              rows = group.values.map((dataRow, rowIndex) => new RowModel(this, dataRow, rowIndex));
+              rows = group.values.map((dataRow, index) => new RowModel(this, dataRow, rowIndex + 1 + index));
             }
 
-            return new GroupRowModel(this, column, rows, groupRowIndex, group.key);
+            const groupRow = new GroupRowModel(this, column, rows, rowIndex, group.key);
+            rowIndex += 1;
+
+            if (groupRow.expanded) {
+              rowIndex += rows.length;
+            }
+
+            return groupRow;
           });
       };
 
-      return getRowsGroup(data, this.groupColumns);
+      return getRowsGroup(data, this.groupColumns, 0);
     }
 
     return data.map((dataRow, rowIndex) => new RowModel(this, dataRow, rowIndex));
@@ -97,6 +113,42 @@ export default class GridModel<TRow> {
     return this.rows.value.flatMap((row) => {
       return row.flatRows;
     });
+  });
+
+  public readonly sizes = memo(() => {
+    console.log('sizes');
+
+    const size = this.columns.value.flat.reduce<Record<string, string>>((acc, c) => {
+      const { inlineWidth } = c;
+      if (typeof inlineWidth === 'number') {
+        acc[c.widthVarName] = `${c.inlineWidth}px`;
+      }
+
+      if (c.pin === 'LEFT') {
+        acc[c.leftVarName] = `${c.left}px`;
+      }
+
+      if (c.pin === 'RIGHT') {
+        acc[c.rightVarName] = `${c.right}px`;
+      }
+
+      return acc;
+    }, {});
+
+    size[this.leftEdgeVarName] = `${this.leftEdge}px`;
+
+    const groupingColumn = this.columns.value.leafs.find((c) => c.key === GROUPING_CELL_KEY);
+    if (groupingColumn) {
+      size[groupingColumn.groupColumnWidthVarName] =
+        `${this.columns.value.leafs.sumBy((c) => (c.pin === groupingColumn.pin && c.key !== ROW_NUMBER_CELL_KEY && c.key !== ROW_SELECTION_CELL_KEY ? (c.inlineWidth ?? 0) : 0))}px`;
+    }
+
+    this.groupColumns.forEach((key) => {
+      const col = this.columns.value.leafs.findOrThrow((c) => c.key === key);
+      size[col.groupColumnWidthVarName] = `${this.columns.value.leafs.sumBy((c) => (c.pin === col.pin ? (c.inlineWidth ?? 0) : 0))}px`;
+    });
+
+    return size;
   });
 
   public readonly ROW_HEIGHT = 12;
@@ -141,6 +193,7 @@ export default class GridModel<TRow> {
     this.gridTemplateColumns.clear();
     this.rows.clear();
     this.flatRows.clear();
+    this.sizes.clear();
 
     this.update();
   };
@@ -154,7 +207,8 @@ export default class GridModel<TRow> {
 
     const groupingColumn = this._sourceColumns.find((c) => c.key === GROUPING_CELL_KEY);
     if (this.groupColumns.length > 0 && !groupingColumn) {
-      this._sourceColumns.unshift(new ColumnModel({ key: GROUPING_CELL_KEY }, this));
+      const position = this._sourceColumns.sumBy((c) => (c.key === ROW_NUMBER_CELL_KEY || c.key === ROW_SELECTION_CELL_KEY ? 1 : 0));
+      this._sourceColumns.splice(position, 0, new ColumnModel({ key: GROUPING_CELL_KEY }, this));
     } else if (this.groupColumns.length === 0 && groupingColumn) {
       this._sourceColumns = this._sourceColumns.removeBy((c) => c.key === GROUPING_CELL_KEY);
     }
@@ -164,6 +218,7 @@ export default class GridModel<TRow> {
     this.gridTemplateColumns.clear();
     this.rows.clear();
     this.flatRows.clear();
+    this.sizes.clear();
 
     this.update();
   };
@@ -175,7 +230,7 @@ export default class GridModel<TRow> {
       this.expandedGroupRow[groupRowKey] = true;
     }
 
-    // this.rows.clear();
+    this.rows.clear();
     this.flatRows.clear();
     this.update();
   };

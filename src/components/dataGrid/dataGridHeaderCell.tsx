@@ -5,11 +5,12 @@ import Button from '../button';
 import Flex from '../flex';
 import Tooltip from '../tooltip';
 import ColumnModel from './models/columnModel';
-import { EMPTY_CELL_KEY, GROUPING_CELL_KEY } from './models/gridModel';
+import { EMPTY_CELL_KEY, GROUPING_CELL_KEY, ROW_NUMBER_CELL_KEY, ROW_SELECTION_CELL_KEY } from './models/gridModel';
 import ArrowIcon from '../../icons/arrowIcon';
 import DotsIcon from '../../icons/dotsIcon';
 import PinIcon from '../../icons/pinIcon';
 import GroupingIcon from '../../icons/groupingIcon';
+import Checkbox from '../checkbox';
 
 interface Props<TRow> {
   column: ColumnModel<TRow>;
@@ -19,11 +20,21 @@ export default function DataGridHeaderCell<TRow>(props: Props<TRow>) {
   const { column } = props;
 
   const isEmptyCell = column.key === EMPTY_CELL_KEY;
+  const isRowNumber = column.key === ROW_NUMBER_CELL_KEY;
+  const isRowSelection = column.key === ROW_SELECTION_CELL_KEY;
+
   const gridColumn = column.isLeaf ? 1 : column.leafs.length;
   const isSticky = column.pin === 'LEFT' || column.pin === 'RIGHT';
-  const isSortable = column.isLeaf && !isEmptyCell;
+  const isSortable = column.isLeaf && !isEmptyCell && !isRowNumber && !isRowSelection;
+
+  const showResizer = !isRowNumber && !isRowSelection;
+  const showContextMenu = !isRowNumber && !isRowSelection;
+
+  const showBorderRight = column.pin === 'LEFT' && column.isEdge;
 
   const value = useMemo(() => {
+    if (column.key === ROW_NUMBER_CELL_KEY) return null;
+    if (column.key === ROW_SELECTION_CELL_KEY) return <Checkbox m={1} />;
     if (column.key === GROUPING_CELL_KEY) {
       if (column.grid.groupColumns.length === 1) {
         const col = column.grid.columns.value.leafs.findOrThrow((l) => l.key === column.grid.groupColumns[0]);
@@ -46,7 +57,7 @@ export default function DataGridHeaderCell<TRow>(props: Props<TRow>) {
       zIndex={isSticky ? 2 : 1}
       minHeight={column.grid.ROW_HEIGHT * column.gridRows}
       bb={1}
-      br={column.pin === 'LEFT' && column.isEdge ? 1 : undefined}
+      br={showBorderRight ? 1 : undefined}
       bl={column.pin === 'RIGHT' && column.isEdge ? 1 : undefined}
       borderColor="gray-400"
       cursor={isSortable ? 'pointer' : undefined}
@@ -59,13 +70,13 @@ export default function DataGridHeaderCell<TRow>(props: Props<TRow>) {
     >
       {!isEmptyCell && (
         <>
-          <Flex width="fit" height="fit" props={{ onClick: isSortable ? () => column.sortColumn() : undefined }}>
+          <Flex width="fit" height="fit" jc={column.align} props={{ onClick: isSortable ? () => column.sortColumn() : undefined }}>
             <Flex
               overflow="hidden"
-              position="sticky"
+              position={column.isLeaf ? undefined : 'sticky'}
               ai="center"
               transition="none"
-              pl={4}
+              pl={column.align ? undefined : 4}
               style={{
                 left: !column.pin ? `var(${column.grid.leftEdgeVarName})` : undefined,
               }}
@@ -78,12 +89,13 @@ export default function DataGridHeaderCell<TRow>(props: Props<TRow>) {
                   <ArrowIcon width="16px" rotate={column.grid.sortDirection === 'ASC' ? 0 : 180} fill="violet-950" />
                 </Box>
               )}
-              <Box minWidth={12} />
+              {showContextMenu && <Box minWidth={12} />}
             </Flex>
           </Flex>
 
-          <Resizer column={column} />
-          <ContextMenu column={column} />
+          {showResizer && <Resizer column={column} />}
+
+          {showContextMenu && <ContextMenu column={column} />}
         </>
       )}
     </Flex>
@@ -104,12 +116,13 @@ function Resizer<TRow>(props: ResizerProps<TRow>) {
       position="absolute"
       right={column.pin === 'RIGHT' ? undefined : 0}
       left={column.pin !== 'RIGHT' ? undefined : 0}
+      py={3}
     >
       <Box
         cursor="col-resize"
         px={0.75}
         className="resizer"
-        height="2/4"
+        height="fit"
         props={{ onMouseDown: column.resizeColumn, onTouchStart: column.resizeColumn }}
       >
         <Box width={0.5} height="fit" bgColor="gray-400" hoverParent={{ resizer: { bgColor: 'gray-600' } }}></Box>
@@ -135,6 +148,9 @@ function ContextMenu<TRow>(props: ContextMenuProps<TRow>) {
   const isUnpinAvailable = !!column.pin;
   const isGroupByAvailable = column.isLeaf && column.key !== GROUPING_CELL_KEY;
 
+  const isSortingAvailable = isSortAscAvailable || isSortDescAvailable || isClearSortAvailable;
+  const isPiningAvailable = isPinLeftAvailable || isPinRightAvailable || isUnpinAvailable;
+
   return (
     <Flex position="absolute" right={column.pin === 'RIGHT' ? 2.5 : 4} top="1/2" translateY={-3} ai="center">
       <Button
@@ -159,15 +175,17 @@ function ContextMenu<TRow>(props: ContextMenuProps<TRow>) {
             bgColor="white"
             width={56}
             b={1}
-            borderColor="gray-400"
+            borderColor="gray-300"
             borderRadius={1}
             display="flex"
             d="column"
             mt={4}
+            py={2}
             overflow="hidden"
             translateX={openLeft ? -55 : -5}
             onPositionChange={setTooltipPosition}
             ref={refToUse}
+            shadow="medium-shadow"
           >
             {isSortAscAvailable && (
               <Button
@@ -211,6 +229,7 @@ function ContextMenu<TRow>(props: ContextMenuProps<TRow>) {
                 Clear Sort
               </Button>
             )}
+            {isSortingAvailable && (isPiningAvailable || isGroupByAvailable) && <Box bb={1} my={2} borderColor="gray-300" />}
             {isPinLeftAvailable && (
               <Button
                 clean
@@ -253,6 +272,7 @@ function ContextMenu<TRow>(props: ContextMenuProps<TRow>) {
                 Unpin
               </Button>
             )}
+            {isSortingAvailable && isPiningAvailable && isGroupByAvailable && <Box bb={1} my={2} borderColor="gray-300" />}
             {isGroupByAvailable && (
               <Button clean display="flex" gap={2} p={3} cursor="pointer" hover={{ bgColor: 'gray-200' }} onClick={column.toggleGrouping}>
                 <Box>

@@ -1,6 +1,7 @@
+import Checkbox from '../checkbox';
 import Flex from '../flex';
 import DataGridCell from './dataGridCell';
-import { EMPTY_CELL_KEY } from './models/gridModel';
+import { ROW_SELECTION_CELL_KEY } from './models/gridModel';
 import RowModel from './models/rowModel';
 
 interface Props<TRow> {
@@ -14,7 +15,7 @@ export default function DataGridRow<TRow>(props: Props<TRow>) {
     <Flex className="grid-row" display="contents">
       {row.cells.map((cell) => (
         <DataGridCell key={cell.column.key} column={cell.column}>
-          {cell.column.key === EMPTY_CELL_KEY ? null : (row.row[cell.column.key as keyof TRow] as string)}
+          {cell.column.key === ROW_SELECTION_CELL_KEY ? <Checkbox /> : cell.value}
         </DataGridCell>
       ))}
     </Flex>

@@ -9,6 +9,8 @@ import Data4 from '../data/MOCK_DATA_4.json';
 import Data5 from '../data/MOCK_DATA_5.json';
 import Data6 from '../data/MOCK_DATA_6.json';
 import Data7 from '../data/MOCK_DATA_7.json';
+import usePageContext from '../hooks/usePageContext';
+import { H3 } from '../../src/components/semantics';
 
 interface DataType {
   first_name: string;
@@ -35,6 +37,8 @@ interface DataType {
 const datata = [...Data, ...Data1, ...Data2, ...Data3, ...Data4, ...Data5, ...Data6, ...Data7];
 
 export default function DataGridPage() {
+  usePageContext(<RightSidebar />);
+
   var def: GridDefinition<DataType> = {
     pagination: true,
     columns: [
@@ -59,7 +63,7 @@ export default function DataGridPage() {
         header: 'Test',
         columns: [
           { key: 'test_single', columns: [{ key: 'job_title' }] },
-          { key: 'test_double', header: 'Test double', columns: [{ key: 'street_address' }, { key: 'city', pin: 'LEFT' }] },
+          { key: 'test_double', header: 'Test double', columns: [{ key: 'street_address' }, { key: 'city', pin: 'RIGHT' }] },
         ],
       },
       { key: 'country' },
@@ -84,6 +88,19 @@ export default function DataGridPage() {
       </Box>
 
       <DataGrid data={datata} def={def} />
+    </Box>
+  );
+}
+
+function RightSidebar() {
+  return (
+    <Box pt={10}>
+      <H3 mb={2}>Columns</H3>
+      <Box pl={4}>
+        <Box>Column definition</Box>
+        <Box>Column definition</Box>
+        <Box>Column definition</Box>
+      </Box>
     </Box>
   );
 }

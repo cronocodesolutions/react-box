@@ -23,7 +23,7 @@ import useGrid from './dataGrid/useGrid';
 import DataGridHeaderCell from './dataGrid/dataGridHeaderCell';
 import { DEFAULT_REM_DIVIDER } from '../core/boxConstants';
 import FnUtils from '../utils/fn/fnUtils';
-import GridModel, { GROUPING_CELL_KEY } from './dataGrid/models/gridModel';
+import GridModel from './dataGrid/models/gridModel';
 import GroupRowModel from './dataGrid/models/groupRowModel';
 import DataGridGroupRow from './dataGrid/dataGridGroupRow';
 import DataGridRow from './dataGrid/dataGridRow';
@@ -40,42 +40,6 @@ export default function DataGrid<TRow extends {}>(props: DataGridProps<TRow>) {
     });
   }, [grid.headerRows.value]);
 
-  const sizes = useMemo(() => {
-    console.log('render - sizes');
-
-    const size = grid.columns.value.flat.reduce<Record<string, string>>((acc, c) => {
-      const { inlineWidth } = c;
-      if (typeof inlineWidth === 'number') {
-        acc[c.widthVarName] = `${c.inlineWidth}px`;
-      }
-
-      if (c.pin === 'LEFT') {
-        acc[c.leftVarName] = `${c.left}px`;
-      }
-
-      if (c.pin === 'RIGHT') {
-        acc[c.rightVarName] = `${c.right}px`;
-      }
-
-      return acc;
-    }, {});
-
-    size[grid.leftEdgeVarName] = `${grid.leftEdge}px`;
-
-    const groupingColumn = grid.columns.value.leafs.find((c) => c.key === GROUPING_CELL_KEY);
-    if (groupingColumn) {
-      size[groupingColumn.groupColumnWidthVarName] =
-        `${grid.columns.value.leafs.sumBy((c) => (c.pin === groupingColumn.pin ? (c.inlineWidth ?? 0) : 0))}px`;
-    }
-
-    grid.groupColumns.forEach((key) => {
-      const col = grid.columns.value.leafs.findOrThrow((c) => c.key === key);
-      size[col.groupColumnWidthVarName] = `${grid.columns.value.leafs.sumBy((c) => (c.pin === col.pin ? (c.inlineWidth ?? 0) : 0))}px`;
-    });
-
-    return size;
-  }, [grid]);
-
   const rowsRef = useRef<DataGridRowsRef>(null);
   const handleScroll = useCallback(
     FnUtils.throttle((event: React.UIEvent) => {
@@ -87,7 +51,7 @@ export default function DataGrid<TRow extends {}>(props: DataGridProps<TRow>) {
   console.log('render - data grid');
 
   return (
-    <Box component="dataGrid" b={1} borderColor="gray-400" overflow="hidden" borderRadius={1} style={sizes}>
+    <Box component="dataGrid" b={1} borderColor="gray-400" overflow="hidden" borderRadius={1} style={grid.sizes.value}>
       <Box p={3} bb={1} borderColor="gray-400">
         {grid.groupColumns.length > 0 ? grid.groupColumns.join(' > ') : 'No grouping'}
       </Box>

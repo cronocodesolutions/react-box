@@ -1,6 +1,7 @@
 import { Key } from '../contracts/dataGridContract';
 import ColumnModel from './columnModel';
-import GridModel from './gridModel';
+import GridModel, { EMPTY_CELL_KEY, GROUPING_CELL_KEY, ROW_NUMBER_CELL_KEY, ROW_SELECTION_CELL_KEY } from './gridModel';
+import GroupRowCellModel from './groupRowCellModel';
 import RowModel from './rowModel';
 
 export default class GroupRowModel<TRow> {
@@ -18,6 +19,10 @@ export default class GroupRowModel<TRow> {
     return `${this.parentRow?.rowKey ?? ''}${this.groupColumn.key}${this.groupValue}`;
   }
   public parentRow?: GroupRowModel<TRow>;
+
+  public get cells(): GroupRowCellModel<TRow>[] {
+    return this.grid.columns.value.leafs.map((c) => new GroupRowCellModel<TRow>(this.grid, this, c));
+  }
 
   public get expanded() {
     return this.grid.expandedGroupRow[this.rowKey];
@@ -37,6 +42,21 @@ export default class GroupRowModel<TRow> {
     }
 
     return [this];
+  }
+
+  public get groupingColumn() {
+    return this.grid.columns.value.leafs.findOrThrow((c) => c.key === GROUPING_CELL_KEY);
+  }
+
+  public get groupingColumnGridColumn() {
+    const { leafs } = this.grid.columns.value;
+    const { groupingColumn } = this;
+
+    const gridColumn = leafs.sumBy((c) =>
+      c.pin === groupingColumn.pin && c.key !== EMPTY_CELL_KEY && c.key !== ROW_SELECTION_CELL_KEY && c.key !== ROW_NUMBER_CELL_KEY ? 1 : 0,
+    );
+
+    return gridColumn;
   }
 
   public toggleRow() {

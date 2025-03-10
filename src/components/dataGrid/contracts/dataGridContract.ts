@@ -16,6 +16,7 @@ export interface ColumnType<TRow> {
   pin?: PinPosition;
   width?: number;
   columns?: ColumnType<TRow>[];
+  align?: 'right' | 'center';
 }
 
 export interface GridDefinition<TRow> {

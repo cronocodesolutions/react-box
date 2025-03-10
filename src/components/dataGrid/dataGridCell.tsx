@@ -1,7 +1,7 @@
 import Box, { BoxProps } from '../../box';
 import Flex from '../flex';
 import ColumnModel from './models/columnModel';
-import { EMPTY_CELL_KEY } from './models/gridModel';
+import { EMPTY_CELL_KEY, ROW_NUMBER_CELL_KEY, ROW_SELECTION_CELL_KEY } from './models/gridModel';
 
 interface Props<TRow> extends BoxProps {
   children?: React.ReactNode;
@@ -11,17 +11,24 @@ interface Props<TRow> extends BoxProps {
 export default function DataGridCell<TRow>(props: Props<TRow>) {
   const { children, column, style, ...restProps } = props;
   const isEmptyCell = column.key === EMPTY_CELL_KEY;
+  const isRowNumber = column.key === ROW_NUMBER_CELL_KEY;
+  const isRowSelection = column.key === ROW_SELECTION_CELL_KEY;
+
   const isSticky = column.pin === 'LEFT' || column.pin === 'RIGHT';
+  const showBorderRight = column.pin === 'LEFT' && column.isEdge;
+
+  const isText = !isRowSelection && !isEmptyCell;
 
   return (
     <Flex
-      bgColor="gray-100"
+      bgColor={isRowNumber ? 'gray-200' : 'gray-100'}
       hoverParent={{ 'grid-row': { bgColor: 'gray-200' } }}
       overflow="hidden"
       minHeight={column.grid.ROW_HEIGHT}
       ai="center"
+      jc={column.align}
       bb={1}
-      br={column.pin === 'LEFT' && column.isEdge ? 1 : undefined}
+      br={showBorderRight ? 1 : undefined}
       bl={column.pin === 'RIGHT' && column.isEdge ? 1 : undefined}
       borderColor="gray-400"
       transition="none"
@@ -35,11 +42,12 @@ export default function DataGridCell<TRow>(props: Props<TRow>) {
       }}
       {...restProps}
     >
-      {!isEmptyCell && (
+      {isText && (
         <Box px={4} textOverflow="ellipsis" overflow="hidden" textWrap="nowrap">
           {children}
         </Box>
       )}
+      {isRowSelection && children}
     </Flex>
   );
 }

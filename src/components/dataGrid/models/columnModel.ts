@@ -23,6 +23,9 @@ export default class ColumnModel<TRow> {
   public get header() {
     return this.def.header;
   }
+  public get align() {
+    return this.def.align;
+  }
   public get isLeaf() {
     return this.columns.length === 0;
   }
@@ -177,6 +180,7 @@ export default class ColumnModel<TRow> {
       });
 
       this.grid.headerRows.clear();
+      this.grid.sizes.clear();
       update();
     }, 20);
 
