@@ -113,17 +113,15 @@ export default class GridModel<TRow> {
   }
   public readonly leftEdgeVarName = '--left-edge';
 
-  public setSortColumn = (columnKey: Key) => {
-    if (this._sortColumn !== columnKey) {
-      this._sortDirection = 'ASC';
-      this._sortColumn = columnKey;
+  public setSortColumn: (columnKey: Key, sortDirection?: SortDirection) => void = (columnKey: Key, ...sortDirection: any[]) => {
+    if (sortDirection.length > 0) {
+      [this._sortDirection] = sortDirection;
+      this._sortColumn = this._sortDirection ? columnKey : undefined;
     } else {
-      if (this._sortDirection === 'ASC') {
-        this._sortDirection = 'DESC';
-      } else {
-        this._sortDirection = 'ASC';
-        this._sortColumn = undefined;
-      }
+      const { _sortColumn, _sortDirection } = this;
+
+      this._sortColumn = _sortColumn === columnKey && _sortDirection === 'DESC' ? undefined : columnKey;
+      this._sortDirection = _sortColumn === columnKey && _sortDirection === 'ASC' ? 'DESC' : 'ASC';
     }
 
     this.headerRows.clear();

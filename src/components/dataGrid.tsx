@@ -32,6 +32,7 @@ export default function DataGrid<TRow extends {}>(props: DataGridProps<TRow>) {
   const grid = useGrid(props);
 
   const headers = useMemo(() => {
+    console.log('render - headers');
     return grid.headerRows.value.map((row) => {
       return row.map((cell) => {
         return <DataGridHeaderCell key={cell.uniqueKey} column={cell} />;

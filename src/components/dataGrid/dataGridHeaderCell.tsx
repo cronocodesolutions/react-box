@@ -1,7 +1,6 @@
 import { useMemo, useState } from 'react';
 import Box from '../../box';
 import useVisibility from '../../hooks/useVisibility';
-import BaseSvg from '../baseSvg';
 import Button from '../button';
 import Flex from '../flex';
 import Tooltip from '../tooltip';
@@ -9,6 +8,8 @@ import ColumnModel from './models/columnModel';
 import { EMPTY_CELL_KEY, GROUPING_CELL_KEY } from './models/gridModel';
 import ArrowIcon from '../../icons/arrowIcon';
 import DotsIcon from '../../icons/dotsIcon';
+import PinIcon from '../../icons/pinIcon';
+import GroupingIcon from '../../icons/groupingIcon';
 
 interface Props<TRow> {
   column: ColumnModel<TRow>;
@@ -21,6 +22,20 @@ export default function DataGridHeaderCell<TRow>(props: Props<TRow>) {
   const gridColumn = column.isLeaf ? 1 : column.leafs.length;
   const isSticky = column.pin === 'LEFT' || column.pin === 'RIGHT';
   const isSortable = column.isLeaf && !isEmptyCell;
+
+  const value = useMemo(() => {
+    if (column.key === GROUPING_CELL_KEY) {
+      if (column.grid.groupColumns.length === 1) {
+        const col = column.grid.columns.value.leafs.findOrThrow((l) => l.key === column.grid.groupColumns[0]);
+
+        return col.header ?? col.key;
+      }
+
+      return 'Group';
+    }
+
+    return column.header ?? column.key;
+  }, [column.grid.groupColumns]);
 
   return (
     <Flex
@@ -44,7 +59,7 @@ export default function DataGridHeaderCell<TRow>(props: Props<TRow>) {
     >
       {!isEmptyCell && (
         <>
-          <Flex width="fit" height="fit" props={{ onClick: isSortable ? column.sortColumn : undefined }}>
+          <Flex width="fit" height="fit" props={{ onClick: isSortable ? () => column.sortColumn() : undefined }}>
             <Flex
               overflow="hidden"
               position="sticky"
@@ -55,12 +70,12 @@ export default function DataGridHeaderCell<TRow>(props: Props<TRow>) {
                 left: !column.pin ? `var(${column.grid.leftEdgeVarName})` : undefined,
               }}
             >
-              <Box overflow="hidden" textOverflow="ellipsis">
-                {column.key}
+              <Box overflow="hidden" textOverflow="ellipsis" textWrap="nowrap">
+                {value}
               </Box>
               {column.key === column.grid.sortColumn && (
                 <Box pl={(column.inlineWidth ?? 0) < 58 ? 0 : 2}>
-                  <ArrowIcon width="16px" rotate={column.grid.sortDirection === 'ASC' ? 180 : 0} fill="violet-950" />
+                  <ArrowIcon width="16px" rotate={column.grid.sortDirection === 'ASC' ? 0 : 180} fill="violet-950" />
                 </Box>
               )}
               <Box minWidth={12} />
@@ -112,6 +127,14 @@ function ContextMenu<TRow>(props: ContextMenuProps<TRow>) {
   const [tooltipPosition, setTooltipPosition] = useState<{ top: number; left: number }>({ top: 0, left: 0 });
   const openLeft = useMemo(() => tooltipPosition.left > window.innerWidth / 2, [tooltipPosition.left]);
 
+  const isSortAscAvailable = column.isLeaf && (column.grid.sortColumn !== column.key || column.grid.sortDirection === 'DESC');
+  const isSortDescAvailable = column.isLeaf && (column.grid.sortColumn !== column.key || column.grid.sortDirection === 'ASC');
+  const isClearSortAvailable = column.isLeaf && column.grid.sortColumn === column.key;
+  const isPinLeftAvailable = column.pin !== 'LEFT';
+  const isPinRightAvailable = column.pin !== 'RIGHT';
+  const isUnpinAvailable = !!column.pin;
+  const isGroupByAvailable = column.isLeaf && column.key !== GROUPING_CELL_KEY;
+
   return (
     <Flex position="absolute" right={column.pin === 'RIGHT' ? 2.5 : 4} top="1/2" translateY={-3} ai="center">
       <Button
@@ -134,29 +157,110 @@ function ContextMenu<TRow>(props: ContextMenuProps<TRow>) {
         {isOpen && (
           <Tooltip
             bgColor="white"
-            width={40}
+            width={56}
             b={1}
+            borderColor="gray-400"
             borderRadius={1}
             display="flex"
             d="column"
             mt={4}
             overflow="hidden"
-            translateX={openLeft ? -39 : -5}
+            translateX={openLeft ? -55 : -5}
             onPositionChange={setTooltipPosition}
             ref={refToUse}
           >
-            <Button clean textAlign="left" p={3} hover={{ bgColor: 'gray-200' }} onClick={() => column.pinColumn()}>
-              Unpin
-            </Button>
-            <Button clean textAlign="left" p={3} hover={{ bgColor: 'gray-200' }} onClick={() => column.pinColumn('LEFT')}>
-              Pin Left
-            </Button>
-            <Button clean textAlign="left" p={3} hover={{ bgColor: 'gray-200' }} onClick={() => column.pinColumn('RIGHT')}>
-              Pin Right
-            </Button>
-            <Button clean textAlign="left" p={3} hover={{ bgColor: 'gray-200' }} onClick={column.toggleGrouping}>
-              Group by: {column.key}
-            </Button>
+            {isSortAscAvailable && (
+              <Button
+                clean
+                display="flex"
+                gap={2}
+                p={3}
+                cursor="pointer"
+                hover={{ bgColor: 'gray-200' }}
+                onClick={() => column.sortColumn('ASC')}
+              >
+                <ArrowIcon width="1rem" fill="violet-950" />
+                Sort Ascending
+              </Button>
+            )}
+            {isSortDescAvailable && (
+              <Button
+                clean
+                display="flex"
+                gap={2}
+                p={3}
+                cursor="pointer"
+                hover={{ bgColor: 'gray-200' }}
+                onClick={() => column.sortColumn('DESC')}
+              >
+                <ArrowIcon width="1rem" fill="violet-950" rotate={180} />
+                Sort Descending
+              </Button>
+            )}
+            {isClearSortAvailable && (
+              <Button
+                clean
+                display="flex"
+                gap={2}
+                p={3}
+                cursor="pointer"
+                hover={{ bgColor: 'gray-200' }}
+                onClick={() => column.sortColumn(undefined)}
+              >
+                <Box width={4} />
+                Clear Sort
+              </Button>
+            )}
+            {isPinLeftAvailable && (
+              <Button
+                clean
+                display="flex"
+                gap={2}
+                p={3}
+                cursor="pointer"
+                hover={{ bgColor: 'gray-200' }}
+                onClick={() => column.pinColumn('LEFT')}
+              >
+                <PinIcon width="1rem" fill="violet-950" />
+                Pin Left
+              </Button>
+            )}
+            {isPinRightAvailable && (
+              <Button
+                clean
+                display="flex"
+                gap={2}
+                p={3}
+                cursor="pointer"
+                hover={{ bgColor: 'gray-200' }}
+                onClick={() => column.pinColumn('RIGHT')}
+              >
+                <PinIcon width="1rem" fill="violet-950" rotate={-90} />
+                Pin Right
+              </Button>
+            )}
+            {isUnpinAvailable && (
+              <Button
+                clean
+                display="flex"
+                gap={2}
+                p={3}
+                cursor="pointer"
+                hover={{ bgColor: 'gray-200' }}
+                onClick={() => column.pinColumn()}
+              >
+                <Box width={4} />
+                Unpin
+              </Button>
+            )}
+            {isGroupByAvailable && (
+              <Button clean display="flex" gap={2} p={3} cursor="pointer" hover={{ bgColor: 'gray-200' }} onClick={column.toggleGrouping}>
+                <Box>
+                  <GroupingIcon width="1rem" fill="violet-950" />
+                </Box>
+                <Box textWrap="nowrap"> Group by {column.header ?? column.key}</Box>
+              </Button>
+            )}
           </Tooltip>
         )}
       </Button>

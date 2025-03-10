@@ -12,6 +12,7 @@ export interface PaginationState {
 export type Pagination = boolean | { pageSize: number };
 export interface ColumnType<TRow> {
   key: Key;
+  header?: string;
   pin?: PinPosition;
   width?: number;
   columns?: ColumnType<TRow>[];

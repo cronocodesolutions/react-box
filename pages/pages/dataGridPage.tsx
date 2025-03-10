@@ -38,13 +38,28 @@ export default function DataGridPage() {
   var def: GridDefinition<DataType> = {
     pagination: true,
     columns: [
-      { key: 'person', columns: [{ key: 'first_name' }, { key: 'last_name' }] },
-      { key: 'person2', columns: [{ key: 'age' }, { key: 'email' }] },
+      {
+        key: 'person',
+        header: 'Person',
+        columns: [
+          { key: 'first_name', header: 'First name' },
+          { key: 'last_name', header: 'Last name' },
+        ],
+      },
+      {
+        key: 'person2',
+        header: 'Person 2',
+        columns: [
+          { key: 'age', header: 'Age' },
+          { key: 'email', header: 'Email', width: 300 },
+        ],
+      },
       {
         key: 'test',
+        header: 'Test',
         columns: [
           { key: 'test_single', columns: [{ key: 'job_title' }] },
-          { key: 'test_double', columns: [{ key: 'street_address' }, { key: 'city', pin: 'LEFT' }] },
+          { key: 'test_double', header: 'Test double', columns: [{ key: 'street_address' }, { key: 'city', pin: 'LEFT' }] },
         ],
       },
       { key: 'country' },

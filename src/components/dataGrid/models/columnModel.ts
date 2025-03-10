@@ -20,6 +20,9 @@ export default class ColumnModel<TRow> {
   public get key() {
     return this.def.key;
   }
+  public get header() {
+    return this.def.header;
+  }
   public get isLeaf() {
     return this.columns.length === 0;
   }
@@ -200,8 +203,8 @@ export default class ColumnModel<TRow> {
     this.grid.toggleGrouping(this.key);
   };
 
-  public sortColumn = () => {
-    this.grid.setSortColumn(this.key);
+  public sortColumn: (sortDirection?: SortDirection) => void = (...args: any[]) => {
+    this.grid.setSortColumn(this.key, ...args);
   };
 
   public setWidth = (width: number) => {
