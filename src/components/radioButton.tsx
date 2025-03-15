@@ -1,16 +1,15 @@
-import { forwardRef, Ref } from 'react';
-import Box, { BoxProps } from '../box';
+import { forwardRef, Ref, RefAttributes } from 'react';
+import Box, { BoxProps, BoxTagProps } from '../box';
 import ObjectUtils from '../utils/object/objectUtils';
-
-type RadioButtonProps = Omit<BoxProps<'input'>, 'ref' | 'tag'>;
-type BoxTagProps = Required<RadioButtonProps>['props'];
+import { ComponentsAndVariants } from '../types';
 
 const tagProps = ['name', 'onInput', 'onChange', 'value', 'autoFocus', 'readOnly', 'defaultChecked'] as const;
 type TagPropsType = (typeof tagProps)[number];
 
-type RadioButtonTagProps = Omit<BoxTagProps, TagPropsType | 'type'>;
+type RadioButtonProps<TKey extends keyof ComponentsAndVariants> = Omit<BoxProps<'input', TKey>, 'tag' | 'props'>;
+type RadioButtonTagProps = Omit<BoxTagProps<'input'>, TagPropsType | 'type'>;
 
-interface Props extends Omit<RadioButtonProps, 'props'> {
+interface Props<TKey extends keyof ComponentsAndVariants> extends RadioButtonProps<TKey> {
   name?: string;
   props?: RadioButtonTagProps;
   onInput?: (e: React.ChangeEvent<HTMLInputElement>) => void;
@@ -21,10 +20,12 @@ interface Props extends Omit<RadioButtonProps, 'props'> {
   defaultChecked?: boolean;
 }
 
-function RadioButton(props: Props, ref: Ref<HTMLInputElement>) {
+function RadioButton<TKey extends keyof ComponentsAndVariants>(props: Props<TKey>, ref: Ref<HTMLInputElement>) {
   const newProps = ObjectUtils.buildProps(props, tagProps, { type: 'radio' });
 
-  return <Box ref={ref} tag="input" component="radioButton" {...newProps} />;
+  return <Box tag="input" component={'radioButton' as TKey} {...newProps} />;
 }
 
-export default forwardRef(RadioButton);
+export default forwardRef(RadioButton) as <TKey extends keyof ComponentsAndVariants = never>(
+  props: Props<TKey> & RefAttributes<HTMLInputElement>,
+) => React.ReactNode;

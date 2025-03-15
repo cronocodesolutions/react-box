@@ -1,7 +1,4 @@
-import React, { useContext, useMemo, useState } from 'react';
-import ObjectUtils from '../../utils/object/objectUtils';
-import { ThemeType, Themes, ThemeSetup } from './themeContract';
-import defaultTheme from './defaultTheme';
+import React, { useContext, useLayoutEffect, useState } from 'react';
 import ThemeContext from './themeContext';
 
 interface ThemeProps {
@@ -11,39 +8,21 @@ interface ThemeProps {
 
 function Theme(props: ThemeProps) {
   const { children, theme } = props;
-
   const [themeName, setThemeName] = useState(theme);
 
-  const themeStyles = useMemo(() => {
-    const themeStylesByName = Theme.userThemes?.[themeName];
-    if (!themeStylesByName) return defaultTheme as ThemeType;
+  useLayoutEffect(() => {
+    const root = document.documentElement;
+    root.classList.add(themeName);
 
-    const { components, ...restStyles } = themeStylesByName;
-    const com = components ?? {};
-
-    Object.entries(restStyles).forEach(([name, componentStructure]) => {
-      com[name] = componentStructure;
-    });
-
-    Object.keys(com).forEach((name) => {
-      if (com[name].clean && name in defaultTheme) {
-        delete defaultTheme[name as keyof ThemeSetup];
-      }
-    });
-
-    return ObjectUtils.mergeDeep<ThemeType>(defaultTheme, com);
+    return () => {
+      root.classList.remove(themeName);
+    };
   }, [themeName]);
 
-  return <ThemeContext.Provider value={{ themeStyles, theme: themeName, setTheme: setThemeName }}>{children}</ThemeContext.Provider>;
+  return <ThemeContext.Provider value={{ theme: themeName, setTheme: setThemeName }}>{children}</ThemeContext.Provider>;
 }
 
 namespace Theme {
-  export let userThemes: Maybe<Themes> = undefined;
-
-  export function setup(themes: Themes) {
-    userThemes = themes;
-  }
-
   export function useTheme(): [string, (theme: string) => void] {
     const { theme, setTheme } = useContext(ThemeContext);
 

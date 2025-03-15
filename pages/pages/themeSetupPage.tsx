@@ -55,8 +55,8 @@ function App() {
     <Box.Theme theme="demoTheme">
       <Flex gap={3}>
         <Button>Default</Button>
-        <Button theme="primary">Primary</Button>
-        <Button theme="secondary">Secondary</Button>
+        <Button >Primary</Button>
+        <Button >Secondary</Button>
       </Flex>
     </Box.Theme>
   );
@@ -67,8 +67,8 @@ function App() {
         <Box.Theme theme="demoTheme">
           <Flex gap={3}>
             <Button>Default</Button>
-            <Button theme="primary">Primary</Button>
-            <Button theme="secondary">Secondary</Button>
+            <Button>Primary</Button>
+            <Button>Secondary</Button>
           </Flex>
         </Box.Theme>
       </Code>
@@ -152,13 +152,13 @@ function Sample() {
   const [theme, setTheme] = Box.useTheme();
 
   return (
-    <Box component="bg" p={3} borderRadius={2} b={1}>
+    <Box p={3} borderRadius={2} b={1}>
       <Flex gap={3} ai="center">
         <Button bgColor="transparent" onClick={() => setTheme('light')}>
-          <LightSvg component="icon" />
+          <LightSvg />
         </Button>
         <Button bgColor="transparent" onClick={() => setTheme('dark')}>
-          <DarkSvg component="icon" />
+          <DarkSvg />
         </Button>
         <Box textTransform="capitalize" p={3}>
           This is {theme} theme

@@ -1,14 +1,15 @@
-import { forwardRef, Ref, useEffect, useRef, useImperativeHandle } from 'react';
+import { forwardRef, Ref, useEffect, useRef, useImperativeHandle, RefAttributes } from 'react';
 import Box, { BoxTagProps, BoxProps } from '../box';
 import ObjectUtils from '../utils/object/objectUtils';
+import { ComponentsAndVariants } from '../types';
 
 const tagProps = ['name', 'onInput', 'onChange', 'autoFocus', 'readOnly', 'value', 'defaultChecked'] as const;
 type TagPropsType = (typeof tagProps)[number];
 
-type CheckboxProps = Omit<BoxProps<'input'>, 'tag' | 'props'>;
+type CheckboxProps<TKey extends keyof ComponentsAndVariants> = Omit<BoxProps<'input', TKey>, 'tag' | 'props'>;
 type CheckboxTagProps = Omit<BoxTagProps<'input'>, TagPropsType | 'type'>;
 
-interface Props extends CheckboxProps {
+interface Props<TKey extends keyof ComponentsAndVariants> extends CheckboxProps<TKey> {
   name?: string;
   props?: CheckboxTagProps;
   onInput?: (e: React.ChangeEvent<HTMLInputElement>) => void;
@@ -19,7 +20,7 @@ interface Props extends CheckboxProps {
   defaultChecked?: boolean;
 }
 
-function Checkbox(props: Props, ref: Ref<HTMLInputElement>) {
+function Checkbox<TKey extends keyof ComponentsAndVariants>(props: Props<TKey>, ref: Ref<HTMLInputElement>) {
   const newProps = ObjectUtils.buildProps(props, tagProps, { type: 'checkbox' });
   const indeterminate = Array.isArray(props.indeterminate) ? props.indeterminate[0] : props.indeterminate;
 
@@ -32,7 +33,9 @@ function Checkbox(props: Props, ref: Ref<HTMLInputElement>) {
     }
   }, [checkboxRef, indeterminate]);
 
-  return <Box tag="input" ref={checkboxRef} component="checkbox" {...newProps} />;
+  return <Box tag="input" ref={checkboxRef} component={'checkbox' as TKey} {...newProps} />;
 }
 
-export default forwardRef(Checkbox);
+export default forwardRef(Checkbox) as <TKey extends keyof ComponentsAndVariants = never>(
+  props: Props<TKey> & RefAttributes<HTMLInputElement>,
+) => React.ReactNode;

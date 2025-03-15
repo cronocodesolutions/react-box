@@ -1,6 +1,7 @@
-import { cssStyles } from './boxStyles';
-import { BoxStyle } from './coreTypes';
-import Variables from './variables';
+import { cssStyles } from '../boxStyles';
+import { BoxStyle } from '../coreTypes';
+import Variables from '../variables';
+import { Components } from './boxComponents';
 
 namespace BoxExtends {
   export function extend<TProps extends Record<string, BoxStyle[]>, TPropTypes extends Record<string, BoxStyle[]>>(
@@ -20,6 +21,14 @@ namespace BoxExtends {
     });
 
     return { extendedProps, extendedPropTypes };
+  }
+
+  export let userComponents: Components = {};
+
+  export function components<T extends Components>(components: T) {
+    userComponents = components;
+
+    return components;
   }
 }
 

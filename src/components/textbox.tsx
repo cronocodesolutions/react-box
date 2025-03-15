@@ -1,9 +1,7 @@
-import { forwardRef, Ref } from 'react';
-import Box, { BoxProps } from '../box';
+import { forwardRef, Ref, RefAttributes } from 'react';
+import Box, { BoxProps, BoxTagProps } from '../box';
 import ObjectUtils from '../utils/object/objectUtils';
-
-type TextareaProps = Omit<BoxProps<'input'>, 'ref' | 'tag'>;
-type BoxTagProps = Required<TextareaProps>['props'];
+import { ComponentsAndVariants } from '../types';
 
 const tagProps = [
   'name',
@@ -20,7 +18,9 @@ const tagProps = [
 ] as const;
 type TagPropsType = (typeof tagProps)[number];
 
-type TextboxTagProps = Omit<BoxTagProps, TagPropsType>;
+type TextareaProps<TKey extends keyof ComponentsAndVariants> = Omit<BoxProps<'input', TKey>, 'tag' | 'props'>;
+type TextboxTagProps = Omit<BoxTagProps<'input'>, TagPropsType | 'type'>;
+
 type TextboxType =
   | 'date'
   | 'datetime-local'
@@ -36,7 +36,7 @@ type TextboxType =
   | 'url'
   | 'week';
 
-interface Props extends Omit<TextareaProps, 'props'> {
+interface Props<TKey extends keyof ComponentsAndVariants> extends TextareaProps<TKey> {
   name?: string;
   props?: TextboxTagProps;
   onInput?: (e: React.ChangeEvent<HTMLInputElement>) => void;
@@ -51,10 +51,12 @@ interface Props extends Omit<TextareaProps, 'props'> {
   step?: number | string;
 }
 
-function Textbox(props: Props, ref: Ref<HTMLInputElement>) {
+function Textbox<TKey extends keyof ComponentsAndVariants>(props: Props<TKey>, ref: Ref<HTMLInputElement>) {
   const newProps = ObjectUtils.buildProps(props, tagProps);
 
-  return <Box ref={ref} tag="input" component="textbox" {...newProps} />;
+  return <Box ref={ref} tag="input" component={'textbox' as TKey} {...newProps} />;
 }
 
-export default forwardRef(Textbox);
+export default forwardRef(Textbox) as <TKey extends keyof ComponentsAndVariants = never>(
+  props: Props<TKey> & RefAttributes<HTMLInputElement>,
+) => React.ReactNode;
