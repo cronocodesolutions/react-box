@@ -48,61 +48,44 @@ export const components = Box.components({
   },
 });
 
+// Add in .d.ts file
+import '@cronocode/react-box';
+import { ExtractBoxStyles, ExtractComponentsAndVariants } from '@cronocode/react-box/types';
+import { components } from './path-to-your-b0x-extends-declaration';
+
+declare module '@cronocode/react-box/types' {
+  namespace Augmented {
+    interface ComponentsTypes extends ExtractComponentsAndVariants<typeof components> {}
+  }
+}
+
 function App() {
   return (
     <Flex gap={3}>
       <Button>Default</Button>
-      <Button >Primary</Button>
-      <Button >Secondary</Button>
+      <Button variant="primary">Primary</Button>
+      <Button variant="secondary">Secondary</Button>
     </Flex>
   );
 }
+
 `}
         mt={10}
       >
         <Flex gap={3}>
           <Button>Default</Button>
-          <Button variant="primary">Primary</Button>
-          <Button variant="secondary">Secondary</Button>
+          <Button component="button.demo" variant="primary">
+            Primary
+          </Button>
+          <Button component="button.demo" variant="secondary">
+            Secondary
+          </Button>
         </Flex>
       </Code>
 
       <Code
         label="Change theme from the child component"
         code={`import Box from '@cronocode/react-box';
-        
-Box.themeSetup({
-  light: {
-    components: {
-      bg: {
-        styles: {
-          color: 'indigo-950',
-          bgColor: 'white',
-        },
-      },
-      icon: {
-        styles: {
-          fill: 'indigo-950',
-        },
-      },
-    },
-  },
-  dark: {
-    components: {
-      bg: {
-        styles: {
-          color: 'white',
-          bgColor: 'indigo-950',
-        },
-      },
-      icon: {
-        styles: {
-          fill: 'white',
-        },
-      },
-    },
-  },
-});
 
 function App() {
   return (
@@ -116,18 +99,26 @@ function Sample() {
   const [theme, setTheme] = Box.useTheme();
 
   return (
-    <Box component="bg" p={3} borderRadius={2} b={1}>
-      <Flex gap={3}>
+    <Box
+      p={3}
+      borderRadius={2}
+      b={1}
+      theme={{
+        light: { color: 'indigo-950', bgColor: 'white' },
+        dark: { color: 'white', bgColor: 'indigo-950' },
+      }}
+    >
+      <Flex gap={3} ai="center">
         <Button bgColor="transparent" onClick={() => setTheme('light')}>
-          <LightSvg component="icon" />
+          <LightSvg theme={{ light: { fill: 'indigo-950' }, dark: { fill: 'white' } }} />
         </Button>
         <Button bgColor="transparent" onClick={() => setTheme('dark')}>
-          <DarkSvg component="icon" />
+          <DarkSvg theme={{ light: { fill: 'indigo-950' }, dark: { fill: 'white' } }} />
         </Button>
+        <Box textTransform="capitalize" p={3}>
+          This is {theme} theme
+        </Box>
       </Flex>
-      <Box p={3} textTransform="capitalize">
-        {theme}
-      </Box>
     </Box>
   );
 }

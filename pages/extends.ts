@@ -22,24 +22,33 @@ export const { extendedProps, extendedPropTypes } = Box.extend(
 
 export const components = Box.components({
   button: {
-    styles: {
-      bgColor: 'blue-500',
-      b: 0,
-      hover: {
-        bgColor: 'blue-400',
-      },
-    },
-    variants: {
-      primary: {
-        bgColor: 'sky-400',
-        hover: {
-          bgColor: 'sky-500',
+    styles: {},
+    children: {
+      demo: {
+        styles: {
+          bgColor: 'blue-500',
+          p: 3,
+          b: 0,
+          borderRadius: 1,
+          color: 'white',
+          cursor: 'pointer',
+          hover: {
+            bgColor: 'blue-400',
+          },
         },
-      },
-      secondary: {
-        bgColor: 'indigo-400',
-        hover: {
-          bgColor: 'indigo-500',
+        variants: {
+          primary: {
+            bgColor: 'sky-400',
+            hover: {
+              bgColor: 'sky-500',
+            },
+          },
+          secondary: {
+            bgColor: 'indigo-400',
+            hover: {
+              bgColor: 'indigo-500',
+            },
+          },
         },
       },
     },
