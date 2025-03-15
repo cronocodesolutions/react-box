@@ -21,6 +21,29 @@ export const { extendedProps, extendedPropTypes } = Box.extend(
 );
 
 export const components = Box.components({
+  button: {
+    styles: {
+      bgColor: 'blue-500',
+      b: 0,
+      hover: {
+        bgColor: 'blue-400',
+      },
+    },
+    variants: {
+      primary: {
+        bgColor: 'sky-400',
+        hover: {
+          bgColor: 'sky-500',
+        },
+      },
+      secondary: {
+        bgColor: 'indigo-400',
+        hover: {
+          bgColor: 'indigo-500',
+        },
+      },
+    },
+  },
   colorBox: {
     styles: {
       width: 15,

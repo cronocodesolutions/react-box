@@ -26,6 +26,6 @@ function RadioButton<TKey extends keyof ComponentsAndVariants>(props: Props<TKey
   return <Box tag="input" component={'radioButton' as TKey} {...newProps} />;
 }
 
-export default forwardRef(RadioButton) as <TKey extends keyof ComponentsAndVariants = never>(
+export default forwardRef(RadioButton) as <TKey extends keyof ComponentsAndVariants = 'radioButton'>(
   props: Props<TKey> & RefAttributes<HTMLInputElement>,
 ) => React.ReactNode;

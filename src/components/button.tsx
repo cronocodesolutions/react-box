@@ -23,6 +23,6 @@ function Button<TKey extends keyof ComponentsAndVariants>(props: Props<TKey>, re
   return <Box ref={ref} tag="button" component={'button' as TKey} {...newProps} />;
 }
 
-export default forwardRef(Button) as <TKey extends keyof ComponentsAndVariants = never>(
+export default forwardRef(Button) as <TKey extends keyof ComponentsAndVariants = 'button'>(
   props: Props<TKey> & RefAttributes<HTMLButtonElement>,
 ) => React.ReactNode;

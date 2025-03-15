@@ -22,28 +22,26 @@ export default function ThemeSetupPage() {
 import Flex from '@cronocode/react-box/components/flex';
 import Button from '@cronocode/react-box/components/button';
         
-Box.themeSetup({
-  demoTheme: {
-    button: {
-      styles: {
-        bgColor: 'blue-500',
-        b: 0,
+export const components = Box.components({
+  button: {
+    styles: {
+      bgColor: 'blue-500',
+      b: 0,
+      hover: {
+        bgColor: 'blue-400',
+      },
+    },
+    variants: {
+      primary: {
+        bgColor: 'sky-400',
         hover: {
-          bgColor: 'blue-400',
+          bgColor: 'sky-500',
         },
       },
-      themes: {
-        primary: {
-          bgColor: 'sky-400',
-          hover: {
-            bgColor: 'sky-500',
-          },
-        },
-        secondary: {
-          bgColor: 'indigo-400',
-          hover: {
-            bgColor: 'indigo-500',
-          },
+      secondary: {
+        bgColor: 'indigo-400',
+        hover: {
+          bgColor: 'indigo-500',
         },
       },
     },
@@ -52,25 +50,21 @@ Box.themeSetup({
 
 function App() {
   return (
-    <Box.Theme theme="demoTheme">
-      <Flex gap={3}>
-        <Button>Default</Button>
-        <Button >Primary</Button>
-        <Button >Secondary</Button>
-      </Flex>
-    </Box.Theme>
+    <Flex gap={3}>
+      <Button>Default</Button>
+      <Button >Primary</Button>
+      <Button >Secondary</Button>
+    </Flex>
   );
 }
 `}
         mt={10}
       >
-        <Box.Theme theme="demoTheme">
-          <Flex gap={3}>
-            <Button>Default</Button>
-            <Button>Primary</Button>
-            <Button>Secondary</Button>
-          </Flex>
-        </Box.Theme>
+        <Flex gap={3}>
+          <Button>Default</Button>
+          <Button variant="primary">Primary</Button>
+          <Button variant="secondary">Secondary</Button>
+        </Flex>
       </Code>
 
       <Code
@@ -152,13 +146,21 @@ function Sample() {
   const [theme, setTheme] = Box.useTheme();
 
   return (
-    <Box p={3} borderRadius={2} b={1}>
+    <Box
+      p={3}
+      borderRadius={2}
+      b={1}
+      theme={{
+        light: { color: 'indigo-950', bgColor: 'white' },
+        dark: { color: 'white', bgColor: 'indigo-950' },
+      }}
+    >
       <Flex gap={3} ai="center">
         <Button bgColor="transparent" onClick={() => setTheme('light')}>
-          <LightSvg />
+          <LightSvg theme={{ light: { fill: 'indigo-950' }, dark: { fill: 'white' } }} />
         </Button>
         <Button bgColor="transparent" onClick={() => setTheme('dark')}>
-          <DarkSvg />
+          <DarkSvg theme={{ light: { fill: 'indigo-950' }, dark: { fill: 'white' } }} />
         </Button>
         <Box textTransform="capitalize" p={3}>
           This is {theme} theme

@@ -30,7 +30,7 @@ export default function FlexPage() {
         This is Flex page
       </Box>
 
-      <Box mt={4} hover={{ bgColor: 'violet-500' }} hoverGroup="group">
+      <Box mt={4} hover={{ bgColor: 'violet-500' }} className="group">
         <Box hoverGroup={{ group: { color: 'red' } }}>this is item 1</Box>
         <Box>this is item 2</Box>
       </Box>

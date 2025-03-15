@@ -114,13 +114,14 @@ export const { extendedProps, extendedPropTypes } = Box.extend(
 
 ```JS
 import '@cronocode/react-box';
-import { ExtractBoxStyles } from '@cronocode/react-box/types';
-import { extendedProps, extendedPropTypes } from './path-to-your-b0x-extends-declaration';
+import { ExtractBoxStyles, ExtractComponentsAndVariants } from '@cronocode/react-box/types';
+import { extendedProps, extendedPropTypes, components } from './path-to-your-b0x-extends-declaration';
 
 declare module '@cronocode/react-box/types' {
   namespace Augmented {
     interface BoxProps extends ExtractBoxStyles<typeof extendedProps> {}
     interface BoxPropTypes extends ExtractBoxStyles<typeof extendedPropTypes> {}
+    interface ComponentsTypes extends ExtractComponentsAndVariants<typeof components> {}
   }
 }
 ```
@@ -130,14 +131,14 @@ declare module '@cronocode/react-box/types' {
 In the project root file (main.tsx) use `Theme.setup`
 
 ```JS
-import Theme from '@cronocode/react-box/theme';
+import Box from '@cronocode/react-box';
 
-Theme.setup({
+Box.components({
   button: {
     styles: {
       px: 4
     },
-    themes: {
+    variants: {
       mytheme: {
         px: 8
       }
@@ -157,13 +158,13 @@ function MyComponent() {
 }
 ```
 
-or is possible to use Button with specific theme
+or is possible to use Button with specific variant
 
 ```JS
 import Button from '@cronocode/react-box/components/button';
 
 function MyComponent() {
-  return <Button theme="mytheme">Click me</Button>
+  return <Button variant="mytheme">Click me</Button>
 }
 ```
 

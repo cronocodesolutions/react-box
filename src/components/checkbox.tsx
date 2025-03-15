@@ -36,6 +36,6 @@ function Checkbox<TKey extends keyof ComponentsAndVariants>(props: Props<TKey>, 
   return <Box tag="input" ref={checkboxRef} component={'checkbox' as TKey} {...newProps} />;
 }
 
-export default forwardRef(Checkbox) as <TKey extends keyof ComponentsAndVariants = never>(
+export default forwardRef(Checkbox) as <TKey extends keyof ComponentsAndVariants = 'checkbox'>(
   props: Props<TKey> & RefAttributes<HTMLInputElement>,
 ) => React.ReactNode;

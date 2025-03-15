@@ -25,7 +25,7 @@ type BoxPseudoClassesStyles2Nested = ExtractKeys<typeof pseudo2, BoxStylesWithPs
 type BoxPseudoClassesStyles2TopLevel = ExtractKeys<typeof pseudo2, boolean | [boolean, BoxStylesWithPseudoClasses]>;
 export interface BoxStylesWithPseudoClasses extends BoxStyles, BoxPseudoClassesStyles1, BoxPseudoClassesStyles2Nested {}
 
-type BoxPseudoGroupClassesStyles = ExtractKeys<typeof pseudoGroupClasses, string | Record<string, BoxStyles>>;
+type BoxPseudoGroupClassesStyles = ExtractKeys<typeof pseudoGroupClasses, Record<string, BoxStyles>>;
 type BoxBreakpointsStyles = ExtractKeys<typeof breakpoints, BoxStylesWithPseudoClasses & BoxPseudoGroupClassesStyles>;
 
 type ExtractVariants<T> = T extends { variants?: infer Variants }
@@ -95,4 +95,4 @@ export type BoxStyleProps<TKey extends keyof ComponentsAndVariants = never> = Si
     BoxBreakpointsStyles &
     ComponentProps<TKey>
 >;
-export type BoxComponentStyles = BoxStylesWithPseudoClasses & BoxBreakpointsStyles;
+export type BoxComponentStyles = Simplify<BoxStylesWithPseudoClasses & BoxBreakpointsStyles & BoxPseudoGroupClassesStyles>;

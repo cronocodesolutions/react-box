@@ -57,6 +57,6 @@ function Textbox<TKey extends keyof ComponentsAndVariants>(props: Props<TKey>, r
   return <Box ref={ref} tag="input" component={'textbox' as TKey} {...newProps} />;
 }
 
-export default forwardRef(Textbox) as <TKey extends keyof ComponentsAndVariants = never>(
+export default forwardRef(Textbox) as <TKey extends keyof ComponentsAndVariants = 'textbox'>(
   props: Props<TKey> & RefAttributes<HTMLInputElement>,
 ) => React.ReactNode;
