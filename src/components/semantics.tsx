@@ -1,18 +1,23 @@
 import { forwardRef, Ref, RefAttributes } from 'react';
 import Box, { BoxProps } from '../box';
 import { ExtractElementFromTag } from '../core/coreTypes';
+import { ComponentsAndVariants } from '../types';
 
-type SemanticComponentType<TTag extends keyof React.JSX.IntrinsicElements> = (
-  props: Omit<BoxProps<TTag>, 'ref' | 'tag'> & RefAttributes<ExtractElementFromTag<TTag>>,
+type SemanticComponentType<TTag extends keyof React.JSX.IntrinsicElements, TKey extends keyof ComponentsAndVariants = never> = (
+  props: Omit<BoxProps<TTag, TKey>, 'tag'> & RefAttributes<ExtractElementFromTag<TTag>>,
 ) => React.ReactNode;
 
-function semantic<TTag extends keyof React.JSX.IntrinsicElements>(tagName: TTag, p?: BoxProps<TTag>): SemanticComponentType<TTag> {
-  return forwardRef((props: Omit<BoxProps<TTag>, 'ref' | 'tag'>, ref: Ref<ExtractElementFromTag<TTag>>) => (
-    <Box tag={tagName} ref={ref} component={tagName} {...p} {...props} />
+function semantic<TTag extends keyof React.JSX.IntrinsicElements, TKey extends keyof ComponentsAndVariants>(
+  tagName: TTag,
+  p?: BoxProps<TTag>,
+): SemanticComponentType<TTag, TKey> {
+  return forwardRef((props: Omit<BoxProps<TTag, TKey>, 'tag'>, ref: Ref<ExtractElementFromTag<TTag>>) => (
+    <Box tag={tagName} ref={ref} component={tagName as unknown as TKey} {...p} {...props} />
   ));
 }
 
 export const Label = semantic('label');
+export const Span = semantic('span', { inline: true });
 export const Article = semantic('article');
 export const Aside = semantic('aside');
 export const Details = semantic('details');

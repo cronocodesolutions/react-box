@@ -15,13 +15,16 @@ export default function Form<T>(props: Props<T>) {
   const { onSubmit, props: tagProps } = props;
   const formRef = useRef(null);
 
-  const formSubmitHandler = useCallback((e: React.ChangeEvent<HTMLFormElement>) => {
-    e.preventDefault();
+  const formSubmitHandler = useCallback(
+    (e: React.ChangeEvent<HTMLFormElement>) => {
+      e.preventDefault();
 
-    const obj = FormUtils.getFormEntries(formRef.current!);
+      const obj = FormUtils.getFormEntries(formRef.current!);
 
-    onSubmit(obj as T, e);
-  }, []);
+      onSubmit(obj as T, e);
+    },
+    [onSubmit],
+  );
 
   const newTagProps = { ...tagProps, onSubmit: formSubmitHandler, ref: formRef } as BoxTagProps;
 

@@ -51,7 +51,7 @@ export default function DataGrid<TRow extends {}>(props: DataGridProps<TRow>) {
   console.log('render - data grid');
 
   return (
-    <Box component="dataGrid" b={1} borderColor="gray-400" overflow="hidden" borderRadius={1} style={grid.sizes.value}>
+    <Box component="datagrid" b={1} borderColor="gray-400" overflow="hidden" borderRadius={1} style={grid.sizes.value}>
       <Box p={3} bb={1} borderColor="gray-400">
         {grid.groupColumns.length > 0 ? grid.groupColumns.join(' > ') : 'No grouping'}
       </Box>

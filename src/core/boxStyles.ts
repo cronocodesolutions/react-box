@@ -1108,7 +1108,11 @@ export const pseudo2 = {
   selected: '[aria-selected="true"]',
 };
 
-export const pseudoClasses = { ...pseudo1, ...pseudo2 };
+const theme = {
+  theme: '',
+};
+
+export const pseudoClasses = { ...pseudo1, ...pseudo2, ...theme };
 export const pseudoClassesWeight = Object.entries(pseudoClasses).reduce(
   (acc, [key], index) => {
     acc[key as keyof typeof pseudoClasses] = Math.pow(2, index);
@@ -1131,10 +1135,11 @@ export const pseudoClassesByWeight = Object.entries(pseudoClasses).reduce(
 );
 
 export const pseudoGroupClasses = {
-  hoverParent: 'hover',
-  focusParent: 'focus',
-  activeParent: 'active',
-  disabledParent: 'disabled',
+  hoverGroup: 'hover',
+  focusGroup: 'focus',
+  activeGroup: 'active',
+  disabledGroup: 'disabled',
+  theme: 'theme',
 } satisfies { [key: string]: keyof typeof pseudoClasses };
 
 export const breakpoints = {

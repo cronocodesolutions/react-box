@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import Box from '../../src/box';
 import Button from '../../src/components/button';
 import Flex from '../../src/components/flex';
@@ -6,6 +6,13 @@ import Code from '../components/code';
 
 export default function ButtonPage() {
   const [counter, setCounter] = useState(0);
+
+  const ref = useRef<HTMLButtonElement>(null);
+  const counterHandler = () => {
+    console.log(ref.current?.getClientRects());
+
+    setCounter((prev) => prev + 1);
+  };
 
   return (
     <Box>
@@ -44,7 +51,9 @@ export default function ButtonPage() {
         mt={10}
       >
         <Flex gap={3} ai="center">
-          <Button onClick={() => setCounter((prev) => prev + 1)}>Increase count!</Button>
+          <Button ref={ref} onClick={counterHandler}>
+            Increase count!
+          </Button>
           <Box fontSize={18}>{counter}</Box>
         </Flex>
       </Code>

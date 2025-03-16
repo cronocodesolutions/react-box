@@ -25,7 +25,7 @@ import 'prismjs/themes/prism-okaidia.css';
 import Button from '../../src/components/button';
 import Box, { BoxProps } from '../../src/box';
 import CopySvg from '../svgs/copySvg';
-import Label from '../../src/components/label';
+import { Label } from '../../src/components/semantics';
 import CheckboxSvg from '../svgs/checkboxSvg';
 import Flex from '../../src/components/flex';
 

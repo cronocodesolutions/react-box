@@ -4,7 +4,6 @@ import App from './app/app';
 import './index.css';
 import { HashRouter } from 'react-router-dom';
 import Box from '../src/box';
-import './theme';
 import './extends';
 
 const root = ReactDOM.createRoot(document.getElementById('root')!);
@@ -12,7 +11,7 @@ const root = ReactDOM.createRoot(document.getElementById('root')!);
 root.render(
   <React.StrictMode>
     <HashRouter>
-      <Box.Theme theme="mainTheme">
+      <Box.Theme theme="mainTheme" use="global">
         <App />
       </Box.Theme>
     </HashRouter>

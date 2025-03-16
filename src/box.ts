@@ -1,9 +1,9 @@
 import React, { forwardRef, memo, Ref, RefAttributes, useMemo, useState } from 'react';
 import { classNames, ClassNameType } from './core/classNames';
 import { ExtractElementFromTag } from './core/coreTypes';
-import { BoxStyleProps } from './types';
+import { BoxStyleProps, ComponentsAndVariants } from './types';
 import useStyles from './core/useStyles';
-import BoxExtends from './core/boxExtends';
+import BoxExtends from './core/extends/boxExtends';
 import Theme from './core/theme/theme';
 import Variables from './core/variables';
 import BoxUtils from './utils/box/boxUtils';
@@ -15,7 +15,7 @@ type TagPropsType<TTag extends keyof React.JSX.IntrinsicElements> = Omit<
   'className' | 'style' | 'ref' | 'disabled' | 'required' | 'checked'
 >;
 
-interface Props<TTag extends keyof React.JSX.IntrinsicElements> extends BoxStyleProps {
+interface Props<TTag extends keyof React.JSX.IntrinsicElements, TKey extends keyof ComponentsAndVariants> extends BoxStyleProps<TKey> {
   children?: React.ReactNode | ((props: { isHover: boolean }) => React.ReactNode);
   tag?: TTag;
   props?: TagPropsType<TTag>;
@@ -23,10 +23,13 @@ interface Props<TTag extends keyof React.JSX.IntrinsicElements> extends BoxStyle
   style?: React.ComponentProps<TTag>['style'];
 }
 
-function BoxComponent<TTag extends keyof React.JSX.IntrinsicElements = 'div'>(props: Props<TTag>, ref: Ref<ExtractElementFromTag<TTag>>) {
+function BoxComponent<TTag extends keyof React.JSX.IntrinsicElements = 'div', TKey extends keyof ComponentsAndVariants = never>(
+  props: Props<TTag, TKey>,
+  ref: Ref<ExtractElementFromTag<TTag>>,
+) {
   const { tag = 'div', children, props: tagProps, className: userClassName, style, disabled, required, checked, selected } = props;
 
-  const styleClasses = useStyles(props, tag === 'svg');
+  const styleClasses = useStyles(props as BoxStyleProps, tag === 'svg');
 
   const finalTagProps = useMemo(() => {
     const className = classNames(styleClasses, userClassName).join(' ');
@@ -55,11 +58,11 @@ function BoxComponent<TTag extends keyof React.JSX.IntrinsicElements = 'div'>(pr
 }
 
 interface BoxType {
-  <TTag extends keyof React.JSX.IntrinsicElements = 'div'>(
-    props: Props<TTag> & RefAttributes<ExtractElementFromTag<TTag>>,
+  <TTag extends keyof React.JSX.IntrinsicElements = 'div', TKey extends keyof ComponentsAndVariants = never>(
+    props: Props<TTag, TKey> & RefAttributes<ExtractElementFromTag<TTag>>,
   ): React.ReactNode;
   extend: typeof BoxExtends.extend;
-  themeSetup: typeof Theme.setup;
+  components: typeof BoxExtends.components;
   Theme: typeof Theme;
   useTheme: typeof Theme.useTheme;
   getVariableValue: typeof Variables.getVariableValue;
@@ -69,12 +72,18 @@ const Box = memo(forwardRef(BoxComponent)) as unknown as BoxType;
 // const Box = forwardRef(BoxComponent) as unknown as BoxType;
 
 Box.extend = BoxExtends.extend;
-Box.themeSetup = Theme.setup;
+Box.components = BoxExtends.components;
 Box.Theme = Theme;
 Box.useTheme = Theme.useTheme;
 Box.getVariableValue = Variables.getVariableValue;
 
 export default Box;
 
-export type BoxProps<TTag extends keyof React.JSX.IntrinsicElements = 'div'> = React.ComponentProps<typeof BoxComponent<TTag>>;
-export type BoxTagProps<TTag extends keyof React.JSX.IntrinsicElements = 'div'> = Required<BoxProps<TTag>>['props'];
+export type BoxProps<
+  TTag extends keyof React.JSX.IntrinsicElements = 'div',
+  TKey extends keyof ComponentsAndVariants = never,
+> = React.ComponentProps<typeof Box<TTag, TKey>>;
+export type BoxTagProps<
+  TTag extends keyof React.JSX.IntrinsicElements = 'div',
+  TKey extends keyof ComponentsAndVariants = never,
+> = Required<BoxProps<TTag, TKey>>['props'];

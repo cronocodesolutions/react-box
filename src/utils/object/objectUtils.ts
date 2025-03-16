@@ -34,7 +34,9 @@ namespace ObjectUtils {
         const pVal = (prev as any)[key];
         const oVal = (obj as any)[key];
 
-        if (key in pseudo2 && typeof oVal === 'boolean') {
+        if (isObject(oVal) && 'clean' in oVal && oVal.clean) {
+          (prev as any)[key] = oVal;
+        } else if (key in pseudo2 && typeof oVal === 'boolean') {
           // skip overriding object of styles with a boolean
         } else if (key in pseudo2 && Array.isArray(oVal)) {
           (prev as any)[key] = mergeDeep(pVal, oVal[1] ?? {});

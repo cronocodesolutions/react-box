@@ -15,7 +15,7 @@ describe('SSG', () => {
   it('generates static html with hoverGroup', () => {
     const el = (
       <Box className="parent">
-        <Box hoverParent={{ parent: { display: 'grid' } }}>test</Box>
+        <Box hoverGroup={{ parent: { display: 'grid' } }}>test</Box>
       </Box>
     );
 
@@ -63,7 +63,7 @@ a,ul{all: unset;}
   it('multiple generations of static html', () => {
     const el = (
       <Box className="parent">
-        <Box hoverParent={{ parent: { display: 'grid' } }}>test</Box>
+        <Box hoverGroup={{ parent: { display: 'grid' } }}>test</Box>
       </Box>
     );
     const el2 = (
