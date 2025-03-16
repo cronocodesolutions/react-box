@@ -1,4 +1,5 @@
 import { breakpoints, cssStyles, pseudo1, pseudo2, pseudoClasses, pseudoGroupClasses } from './core/boxStyles';
+import { ClassNameType } from './core/classNames';
 import { BoxStyle, BoxStylesType, ExtractKeys } from './core/coreTypes';
 import boxComponents from './core/extends/boxComponents';
 
@@ -34,35 +35,24 @@ type ExtractVariants<T> = T extends { variants?: infer Variants }
     : Extract<keyof Variants, string>
   : never;
 
-type ExtractChildrenVariants<T> = T extends { children?: infer Children } ? ExtractVariants<Children[keyof Children]> : never;
-type ExtractChildrenNames<T, Prefix extends string> = T extends { children?: infer Children }
-  ? `${Prefix}.${keyof Children & string}`
+type ExtractChildrenVariants<T> = T extends { children?: infer Children }
+  ? {
+      [K in keyof Children & string]: ExtractVariants<Children[K]> | ExtractChildrenVariants<Children[K]>;
+    }[keyof Children & string]
+  : never;
+
+type ExtractChildrenNames<T, Prefix extends string = ''> = T extends { children?: infer Children }
+  ? {
+      [K in keyof Children & string]:
+        | `${Prefix}${Prefix extends '' ? '' : '.'}${K}`
+        | ExtractChildrenNames<Children[K], `${Prefix}${Prefix extends '' ? '' : '.'}${K}`>;
+    }[keyof Children & string]
   : never;
 
 export type ExtractComponentsAndVariants<T> = {
-  [K in keyof T as K extends string ? K : never]: ExtractVariants<T[K]>;
+  [K in keyof T & string]: ExtractVariants<T[K]> | ExtractChildrenVariants<T[K]>;
 } & {
-  [K in keyof T as ExtractChildrenNames<T[K], `${K & string}`>]: ExtractChildrenVariants<T[K]>;
-} & {
-  [K in keyof T as T[K] extends { children?: infer Children }
-    ? ExtractChildrenNames<Children[keyof Children], `${K & string}.${keyof Children & string}`>
-    : never]: T[K] extends {
-    children?: infer Children;
-  }
-    ? ExtractChildrenVariants<Children[keyof Children]>
-    : never;
-} & {
-  [K in keyof T as T[K] extends { children?: infer Children }
-    ? Children[keyof Children] extends { children?: infer Children2 }
-      ? ExtractChildrenNames<Children2[keyof Children2], `${K & string}.${keyof Children & string}.${keyof Children2 & string}`>
-      : never
-    : never]: T[K] extends {
-    children?: infer Children;
-  }
-    ? Children[keyof Children] extends { children?: infer Children2 }
-      ? ExtractChildrenVariants<Children2[keyof Children2]>
-      : never
-    : never;
+  [K in keyof T & string as ExtractChildrenNames<T[K], K>]: ExtractChildrenVariants<T[K]>;
 };
 
 type MergeUnion<T, U> = {
@@ -76,15 +66,12 @@ type MergeUnion<T, U> = {
 };
 type Simplify<T> = T extends infer U ? { [K in keyof U]: U[K] } : never;
 
-export type ComponentsAndVariants = MergeUnion<
-  Simplify<ExtractComponentsAndVariants<typeof boxComponents>>,
-  Simplify<Augmented.ComponentsTypes>
->;
+export type ComponentsAndVariants = Simplify<MergeUnion<ExtractComponentsAndVariants<typeof boxComponents>, Augmented.ComponentsTypes>>;
 
 export interface ComponentProps<TKey extends keyof ComponentsAndVariants = never> {
   clean?: boolean;
   component?: TKey;
-  variant?: ComponentsAndVariants[TKey];
+  variant?: ClassNameType<ComponentsAndVariants[TKey]>;
 }
 
 export type BoxStyleProps<TKey extends keyof ComponentsAndVariants = never> = Simplify<

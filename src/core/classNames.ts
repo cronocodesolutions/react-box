@@ -1,4 +1,6 @@
-export type ClassNameType = undefined | string | string[] | Record<string, boolean> | ClassNameType[];
+export type ClassNameType<T extends string = string> = T extends never
+  ? undefined // Prevents ClassNameType<never>
+  : undefined | T | T[] | Record<T, boolean> | ClassNameType<T>[];
 
 export function classNames(...classNameRules: ClassNameType[]): string[] {
   return classNameRules.reduce<string[]>((names, classNameRule) => {

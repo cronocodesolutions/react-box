@@ -1,5 +1,5 @@
 import { useEffect, useLayoutEffect, useMemo } from 'react';
-import { BoxStyleProps, BoxStyles, ComponentsAndVariants, PseudoClassesType } from '../types';
+import { BoxStyleProps, BoxStyles, PseudoClassesType } from '../types';
 import ObjectUtils from '../utils/object/objectUtils';
 import {
   breakpoints,
@@ -26,14 +26,14 @@ const useEff = isBrowser && !isTestEnv ? useLayoutEffect : useEffect;
 const boxClassName = '_b';
 const svgClassName = '_s';
 
-export default function useStyles<TKey extends keyof ComponentsAndVariants = never>(props: BoxStyleProps<TKey>, isSvg: boolean) {
+export default function useStyles(props: BoxStyleProps<any>, isSvg: boolean) {
   useEff(StylesContextImpl.flush, [props]);
 
-  const componentsStyles = useComponents(props);
+  const componentsStyles = useComponents(props) as BoxStyleProps;
 
   return useMemo(() => {
     const classNames: string[] = [isSvg ? svgClassName : boxClassName];
-    const propsToUse = componentsStyles ? ObjectUtils.mergeDeep<BoxStyleProps<TKey>>(componentsStyles, props) : props;
+    const propsToUse = componentsStyles ? ObjectUtils.mergeDeep(componentsStyles, props) : props;
 
     StylesContextImpl.addClassNames(propsToUse, classNames, []);
 

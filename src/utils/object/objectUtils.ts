@@ -28,7 +28,7 @@ namespace ObjectUtils {
     return !!value && typeof value === 'object';
   }
 
-  export function mergeDeep<T>(...objects: object[]) {
+  export function mergeDeep<T>(...objects: T[]) {
     return objects.reduce((prev, obj) => {
       Object.keys(obj ?? {}).forEach((key) => {
         const pVal = (prev as any)[key];

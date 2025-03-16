@@ -1,8 +1,9 @@
 import { useMemo } from 'react';
 import { BoxStyleProps, BoxComponentStyles, ComponentsAndVariants } from '../../types';
 import ObjectUtils from '../../utils/object/objectUtils';
-import boxComponents, { BoxComponent } from './boxComponents';
+import { BoxComponent } from './boxComponents';
 import BoxExtends from './boxExtends';
+import { classNames } from '../classNames';
 
 export default function useComponents<TKey extends keyof ComponentsAndVariants = never>(
   props: BoxStyleProps<TKey>,
@@ -24,11 +25,12 @@ export default function useComponents<TKey extends keyof ComponentsAndVariants =
     }, undefined);
 
     if (!componentStyles) return undefined;
+    if (!variant) return componentStyles.styles;
 
-    const variantStyles = componentStyles.variants?.[variant as any];
+    const variantNames = classNames(variant);
+    if (variantNames.length === 0) return componentStyles.styles;
 
-    if (!variantStyles) return componentStyles.styles;
-
+    const variantStyles = ObjectUtils.mergeDeep(...variantNames.map((v) => componentStyles.variants?.[v] as BoxComponentStyles));
     return ObjectUtils.mergeDeep<BoxComponentStyles>(componentStyles.styles, variantStyles);
   }, [clean, component, variant]);
 }

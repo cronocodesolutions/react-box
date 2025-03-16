@@ -18,26 +18,34 @@ interface Props<TRow> {
 
 export default function DataGridHeaderCell<TRow>(props: Props<TRow>) {
   const { column } = props;
+  const { key, pin, left, right, isEdge, isLeaf, leafs, grid, header, gridRows, widthVarName, leftVarName, rightVarName, inlineWidth } =
+    column;
 
-  const isEmptyCell = column.key === EMPTY_CELL_KEY;
-  const isRowNumber = column.key === ROW_NUMBER_CELL_KEY;
-  const isRowSelection = column.key === ROW_SELECTION_CELL_KEY;
+  const isEmptyCell = key === EMPTY_CELL_KEY;
+  const isGroupingCell = key === GROUPING_CELL_KEY;
+  const isRowNumber = key === ROW_NUMBER_CELL_KEY;
+  const isRowSelection = key === ROW_SELECTION_CELL_KEY;
 
-  const gridColumn = column.isLeaf ? 1 : column.leafs.length;
-  const isSticky = column.pin === 'LEFT' || column.pin === 'RIGHT';
-  const isSortable = column.isLeaf && !isEmptyCell && !isRowNumber && !isRowSelection;
+  const isLeftPinned = pin === 'LEFT';
+  const isRightPinned = pin === 'RIGHT';
+  const isPinned = isLeftPinned || pin === 'RIGHT';
+  const isFirstLeftPinned = isLeftPinned && left === 0;
+  const isLastLeftPinned = isLeftPinned && isEdge;
+  const isFirstRightPinned = isRightPinned && isEdge;
+  const isLastRightPinned = isRightPinned && right === 0;
+  const isSortable = isLeaf && !isEmptyCell && !isRowNumber && !isRowSelection;
+
+  const gridColumn = isLeaf ? 1 : leafs.length;
 
   const showResizer = !isRowNumber && !isRowSelection;
   const showContextMenu = !isRowNumber && !isRowSelection;
 
-  const showBorderRight = column.pin === 'LEFT' && column.isEdge;
-
   const value = useMemo(() => {
-    if (column.key === ROW_NUMBER_CELL_KEY) return null;
-    if (column.key === ROW_SELECTION_CELL_KEY) return <Checkbox m={1} />;
-    if (column.key === GROUPING_CELL_KEY) {
-      if (column.grid.groupColumns.length === 1) {
-        const col = column.grid.columns.value.leafs.findOrThrow((l) => l.key === column.grid.groupColumns[0]);
+    if (isRowNumber) return null;
+    if (isRowSelection) return <Checkbox m={1} />;
+    if (isGroupingCell) {
+      if (grid.groupColumns.length === 1) {
+        const col = grid.columns.value.leafs.findOrThrow((l) => l.key === grid.groupColumns[0]);
 
         return col.header ?? col.key;
       }
@@ -45,27 +53,19 @@ export default function DataGridHeaderCell<TRow>(props: Props<TRow>) {
       return 'Group';
     }
 
-    return column.header ?? column.key;
-  }, [column.grid.groupColumns]);
+    return header ?? key;
+  }, [grid.groupColumns]);
 
   return (
     <Flex
-      gridRow={column.gridRows}
+      component="datagrid.header.cell"
+      variant={{ isRowNumber, isPinned, isFirstLeftPinned, isLastLeftPinned, isFirstRightPinned, isLastRightPinned, isSortable }}
+      gridRow={gridRows}
       gridColumn={gridColumn}
-      bgColor="gray-200"
-      position={isSticky ? 'sticky' : 'relative'}
-      zIndex={isSticky ? 2 : 1}
-      minHeight={column.grid.ROW_HEIGHT * column.gridRows}
-      bb={1}
-      br={showBorderRight ? 1 : undefined}
-      bl={column.pin === 'RIGHT' && column.isEdge ? 1 : undefined}
-      borderColor="gray-400"
-      cursor={isSortable ? 'pointer' : undefined}
-      transition="none"
       style={{
-        width: `var(${column.widthVarName})`,
-        left: column.pin === 'LEFT' ? `var(${column.leftVarName})` : undefined,
-        right: column.pin === 'RIGHT' ? `var(${column.rightVarName})` : undefined,
+        width: `var(${widthVarName})`,
+        left: isLeftPinned ? `var(${leftVarName})` : undefined,
+        right: isRightPinned ? `var(${rightVarName})` : undefined,
       }}
     >
       {!isEmptyCell && (
@@ -73,20 +73,20 @@ export default function DataGridHeaderCell<TRow>(props: Props<TRow>) {
           <Flex width="fit" height="fit" jc={column.align} props={{ onClick: isSortable ? () => column.sortColumn() : undefined }}>
             <Flex
               overflow="hidden"
-              position={column.isLeaf ? undefined : 'sticky'}
+              position={isLeaf ? undefined : 'sticky'}
               ai="center"
               transition="none"
               pl={column.align ? undefined : 4}
               style={{
-                left: !column.pin ? `var(${column.grid.leftEdgeVarName})` : undefined,
+                left: !pin ? `var(${grid.leftEdgeVarName})` : undefined,
               }}
             >
               <Box overflow="hidden" textOverflow="ellipsis" textWrap="nowrap">
                 {value}
               </Box>
-              {column.key === column.grid.sortColumn && (
-                <Box pl={(column.inlineWidth ?? 0) < 58 ? 0 : 2}>
-                  <ArrowIcon width="16px" rotate={column.grid.sortDirection === 'ASC' ? 0 : 180} fill="violet-950" />
+              {key === grid.sortColumn && (
+                <Box pl={(inlineWidth ?? 0) < 58 ? 0 : 2}>
+                  <ArrowIcon width="16px" rotate={grid.sortDirection === 'ASC' ? 0 : 180} fill="violet-950" />
                 </Box>
               )}
               {showContextMenu && <Box minWidth={12} />}

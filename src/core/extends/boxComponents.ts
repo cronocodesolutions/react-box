@@ -300,7 +300,73 @@ const boxComponents = {
     },
   },
   label: { styles: {} },
-  datagrid: { styles: {} },
+  datagrid: {
+    styles: {
+      b: 1,
+      borderColor: 'gray-400',
+      overflow: 'hidden',
+      borderRadius: 1,
+    },
+    children: {
+      header: {
+        styles: {
+          position: 'sticky',
+          top: 0,
+          width: 'max-content',
+          minWidth: 'fit',
+          zIndex: 1,
+        },
+        variants: {
+          isResizeMode: { userSelect: 'none' },
+        },
+        children: {
+          cell: {
+            styles: {
+              bgColor: 'gray-200',
+              borderColor: 'gray-400',
+              bb: 1,
+              minHeight: 12,
+              position: 'relative',
+              transition: 'none',
+            },
+            variants: {
+              isRowNumber: {},
+              isRowSelection: {},
+              isPinned: { position: 'sticky', zIndex: 2 },
+              isFirstLeftPinned: {},
+              isLastLeftPinned: { br: 1 },
+              isFirstRightPinned: { bl: 1 },
+              isLastRightPinned: {},
+              isSortable: { cursor: 'pointer' },
+            },
+          },
+        },
+      },
+      cell: {
+        styles: {
+          bgColor: 'gray-100',
+          bb: 1,
+          borderColor: 'gray-400',
+          transition: 'none',
+          ai: 'center',
+          overflow: 'hidden',
+          minHeight: 12,
+          hoverGroup: { 'grid-row': { bgColor: 'gray-200' } },
+        },
+        variants: {
+          isRowNumber: {
+            bgColor: 'gray-200',
+          },
+          isRowSelection: {},
+          isPinned: { position: 'sticky' },
+          isFirstLeftPinned: {},
+          isLastLeftPinned: { br: 1 },
+          isFirstRightPinned: { bl: 1 },
+          isLastRightPinned: {},
+        },
+      },
+    },
+  },
 } satisfies Components;
 
 export default boxComponents;

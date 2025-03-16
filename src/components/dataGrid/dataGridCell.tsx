@@ -10,34 +10,31 @@ interface Props<TRow> extends BoxProps {
 
 export default function DataGridCell<TRow>(props: Props<TRow>) {
   const { children, column, style, ...restProps } = props;
-  const isEmptyCell = column.key === EMPTY_CELL_KEY;
-  const isRowNumber = column.key === ROW_NUMBER_CELL_KEY;
-  const isRowSelection = column.key === ROW_SELECTION_CELL_KEY;
+  const { key, pin, left, right, isEdge, align, widthVarName, leftVarName, rightVarName } = column;
 
-  const isSticky = column.pin === 'LEFT' || column.pin === 'RIGHT';
-  const showBorderRight = column.pin === 'LEFT' && column.isEdge;
+  const isEmptyCell = key === EMPTY_CELL_KEY;
+  const isRowNumber = key === ROW_NUMBER_CELL_KEY;
+  const isRowSelection = key === ROW_SELECTION_CELL_KEY;
+
+  const isLeftPinned = pin === 'LEFT';
+  const isRightPinned = pin === 'RIGHT';
+  const isPinned = isLeftPinned || isRightPinned;
+  const isFirstLeftPinned = isLeftPinned && left === 0;
+  const isLastLeftPinned = isLeftPinned && isEdge;
+  const isFirstRightPinned = isRightPinned && isEdge;
+  const isLastRightPinned = isRightPinned && right === 0;
 
   const isText = !isRowSelection && !isEmptyCell;
 
   return (
     <Flex
-      bgColor={isRowNumber ? 'gray-200' : 'gray-100'}
-      hoverGroup={{ 'grid-row': { bgColor: 'gray-200' } }}
-      overflow="hidden"
-      minHeight={column.grid.ROW_HEIGHT}
-      ai="center"
-      jc={column.align}
-      bb={1}
-      br={showBorderRight ? 1 : undefined}
-      bl={column.pin === 'RIGHT' && column.isEdge ? 1 : undefined}
-      borderColor="gray-400"
-      transition="none"
-      position={isSticky ? 'sticky' : undefined}
-      zIndex={isSticky ? 1 : undefined}
+      component="datagrid.cell"
+      variant={{ isRowNumber, isRowSelection, isPinned, isFirstLeftPinned, isLastLeftPinned, isFirstRightPinned, isLastRightPinned }}
+      jc={align}
       style={{
-        width: `var(${column.widthVarName})`,
-        left: column.pin === 'LEFT' ? `var(${column.leftVarName})` : undefined,
-        right: column.pin === 'RIGHT' ? `var(${column.rightVarName})` : undefined,
+        width: `var(${widthVarName})`,
+        left: isLeftPinned ? `var(${leftVarName})` : undefined,
+        right: isRightPinned ? `var(${rightVarName})` : undefined,
         ...style,
       }}
       {...restProps}
