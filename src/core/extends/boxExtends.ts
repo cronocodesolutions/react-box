@@ -1,7 +1,8 @@
+import ObjectUtils from '../../utils/object/objectUtils';
 import { cssStyles } from '../boxStyles';
 import { BoxStyle } from '../coreTypes';
 import Variables from '../variables';
-import { Components } from './boxComponents';
+import boxComponents, { Components } from './boxComponents';
 
 namespace BoxExtends {
   export function extend<TProps extends Record<string, BoxStyle[]>, TPropTypes extends Record<string, BoxStyle[]>>(
@@ -23,10 +24,10 @@ namespace BoxExtends {
     return { extendedProps, extendedPropTypes };
   }
 
-  export let userComponents: Components = {};
+  export let componentsStyles: Components = boxComponents;
 
   export function components<T extends Components>(components: T) {
-    userComponents = components;
+    componentsStyles = ObjectUtils.mergeDeep(boxComponents, components);
 
     return components;
   }

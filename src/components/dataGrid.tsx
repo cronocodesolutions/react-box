@@ -20,7 +20,7 @@ export default function DataGrid<TRow extends {}>(props: Props<TRow>) {
   }
 
   return (
-    <Box>
+    <Box component="datagrid">
       <Grid b={1} borderRadius={1}>
         {columns.map((column, index) => (
           <Box key={index} style={{ gridColumn: index + 1 }}>

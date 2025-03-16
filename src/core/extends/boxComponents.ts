@@ -300,6 +300,7 @@ const boxComponents = {
     },
   },
   label: { styles: {} },
+  datagrid: { styles: {} },
 } satisfies Components;
 
 export default boxComponents;

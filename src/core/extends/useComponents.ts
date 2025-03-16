@@ -15,38 +15,20 @@ export default function useComponents<TKey extends keyof ComponentsAndVariants =
     const names = component?.split('.');
     if (!names) return undefined;
 
-    const [userComponent, internalComponent] = names.reduce<[Maybe<BoxComponent>, Maybe<BoxComponent>]>(
-      (acc, item, index) => {
-        if (index === 0) {
-          return [BoxExtends.userComponents[item], boxComponents[item as keyof typeof boxComponents]];
-        }
+    const componentStyles = names.reduce<Maybe<BoxComponent>>((acc, item, index) => {
+      if (index === 0) {
+        return BoxExtends.componentsStyles[item];
+      }
 
-        const [user, internal] = acc;
+      return acc?.children?.[item];
+    }, undefined);
 
-        return [user?.children?.[item], internal?.children?.[item]];
-      },
-      [undefined, undefined],
-    );
+    if (!componentStyles) return undefined;
 
-    if (!userComponent) {
-      if (!internalComponent) return undefined;
+    const variantStyles = componentStyles.variants?.[variant as any];
 
-      const internalVariant = internalComponent.variants?.[variant as any];
+    if (!variantStyles) return componentStyles.styles;
 
-      return internalVariant ? ObjectUtils.mergeDeep(internalComponent.styles, internalVariant) : internalComponent.styles;
-    }
-
-    const userVariant = userComponent.variants?.[variant as any];
-    const userStyles = userVariant ? ObjectUtils.mergeDeep<BoxComponentStyles>(userComponent.styles, userVariant) : userComponent.styles;
-    if (userComponent.clean || !internalComponent) {
-      return userStyles;
-    }
-
-    const internalVariant = internalComponent.variants?.[variant as any];
-    const internalStyles = internalVariant
-      ? ObjectUtils.mergeDeep<BoxComponentStyles>(internalComponent.styles, internalVariant)
-      : internalComponent.styles;
-
-    return ObjectUtils.mergeDeep(internalStyles, userStyles);
+    return ObjectUtils.mergeDeep<BoxComponentStyles>(componentStyles.styles, variantStyles);
   }, [clean, component, variant]);
 }
