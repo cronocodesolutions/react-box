@@ -48,7 +48,7 @@ export const components = Box.components({
   },
 });
 
-// Add in .d.ts file
+// Add in .d.ts file ===============================================================================================
 import '@cronocode/react-box';
 import { ExtractBoxStyles, ExtractComponentsAndVariants } from '@cronocode/react-box/types';
 import { components } from './path-to-your-b0x-extends-declaration';
@@ -58,6 +58,7 @@ declare module '@cronocode/react-box/types' {
     interface ComponentsTypes extends ExtractComponentsAndVariants<typeof components> {}
   }
 }
+// ==================================================================================================================
 
 function App() {
   return (
