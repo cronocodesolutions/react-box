@@ -1,7 +1,15 @@
-import { ThemeSetup } from './themeContract';
+import { BoxComponentStyles } from '../../types';
 
-// IMPORTANT!!!  DO NOT USE INLINE PROP IN THESE DEFAULT VALUES
-const defaultTheme: ThemeSetup = {
+export interface BoxComponent {
+  clean?: boolean;
+  styles: BoxComponentStyles;
+  variants?: Record<string, BoxComponentStyles>;
+  children?: Record<string, BoxComponent>;
+}
+
+export type Components = Record<string, BoxComponent>;
+
+const boxComponents = {
   button: {
     styles: {
       display: 'inline-flex',
@@ -24,6 +32,10 @@ const defaultTheme: ThemeSetup = {
         color: 'gray-400',
         borderColor: 'gray-300',
       },
+    },
+    variants: {
+      test: {},
+      test2: {},
     },
   },
   textbox: {
@@ -224,7 +236,7 @@ const defaultTheme: ThemeSetup = {
             },
           },
         },
-        themes: {
+        variants: {
           multiple: {
             selected: {
               cursor: 'pointer',
@@ -287,6 +299,8 @@ const defaultTheme: ThemeSetup = {
       },
     },
   },
-};
+  label: { styles: {} },
+  datagrid: { styles: {} },
+} satisfies Components;
 
-export default defaultTheme;
+export default boxComponents;

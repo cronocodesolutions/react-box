@@ -96,7 +96,7 @@ export default function DataGridPage() {
             Header
           </Box>
         </Box>
-        <Box display="contents" hoverGroup="parent">
+        <Box display="contents" className="parent">
           <Box position="sticky" left={0} zIndex={1} hoverGroup={{ parent: { bgColor: 'gray-300' } }}>
             this is cell with data
           </Box>

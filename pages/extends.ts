@@ -1,5 +1,6 @@
 import Box from '../src/box';
 
+// preload variable
 Box.getVariableValue('violet-300');
 
 export const { extendedProps, extendedPropTypes } = Box.extend(
@@ -18,3 +19,59 @@ export const { extendedProps, extendedPropTypes } = Box.extend(
     ],
   },
 );
+
+export const components = Box.components({
+  button: {
+    styles: {},
+    children: {
+      demo: {
+        styles: {
+          bgColor: 'blue-500',
+          p: 3,
+          b: 0,
+          borderRadius: 1,
+          color: 'white',
+          cursor: 'pointer',
+          hover: {
+            bgColor: 'blue-400',
+          },
+        },
+        variants: {
+          primary: {
+            bgColor: 'sky-400',
+            hover: {
+              bgColor: 'sky-500',
+            },
+          },
+          secondary: {
+            bgColor: 'indigo-400',
+            hover: {
+              bgColor: 'indigo-500',
+            },
+          },
+        },
+      },
+    },
+  },
+  colorBox: {
+    styles: {
+      width: 15,
+      height: 15,
+      b: 1,
+      borderRadius: 1,
+      hover: { outline: 1, outlineOffset: 1 },
+      transition: 'none',
+    },
+  },
+  number: {
+    styles: {
+      borderRadius: 10,
+      bgColor: 'violet-50',
+      p: 3,
+      lineHeight: 8,
+      b: 1,
+      borderColor: 'violet-600',
+      color: 'violet-600',
+    },
+  },
+});

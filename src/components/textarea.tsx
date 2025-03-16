@@ -1,9 +1,7 @@
-import { forwardRef, Ref } from 'react';
-import Box, { BoxProps } from '../box';
+import { forwardRef, Ref, RefAttributes } from 'react';
+import Box, { BoxProps, BoxTagProps } from '../box';
 import ObjectUtils from '../utils/object/objectUtils';
-
-type TextareaProps = Omit<BoxProps<'textarea'>, 'ref' | 'tag'>;
-type BoxTagProps = Required<TextareaProps>['props'];
+import { ComponentsAndVariants } from '../types';
 
 const tagProps = [
   'name',
@@ -20,9 +18,11 @@ const tagProps = [
   'readOnly',
 ] as const;
 type TagPropsType = (typeof tagProps)[number];
-type TextareaTagProps = Omit<BoxTagProps, TagPropsType>;
 
-interface Props extends Omit<TextareaProps, 'props'> {
+type TextareaProps<TKey extends keyof ComponentsAndVariants> = Omit<BoxProps<'textarea', TKey>, 'tag' | 'props'>;
+type TextareaTagProps = Omit<BoxTagProps<'textarea'>, TagPropsType | 'type'>;
+
+interface Props<TKey extends keyof ComponentsAndVariants> extends TextareaProps<TKey> {
   name?: string;
   props?: TextareaTagProps;
   onInput?: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
@@ -39,10 +39,12 @@ interface Props extends Omit<TextareaProps, 'props'> {
   required?: boolean;
 }
 
-function Textarea(props: Props, ref: Ref<HTMLTextAreaElement>) {
+function Textarea<TKey extends keyof ComponentsAndVariants>(props: Props<TKey>, ref: Ref<HTMLTextAreaElement>) {
   const newProps = ObjectUtils.buildProps(props, tagProps);
 
-  return <Box ref={ref} tag="textarea" component="textarea" {...newProps} />;
+  return <Box ref={ref} tag="textarea" component={'textarea' as TKey} {...newProps} />;
 }
 
-export default forwardRef(Textarea);
+export default forwardRef(Textarea) as <TKey extends keyof ComponentsAndVariants = 'textarea'>(
+  props: Props<TKey> & RefAttributes<HTMLTextAreaElement>,
+) => React.ReactNode;

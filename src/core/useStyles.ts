@@ -1,5 +1,5 @@
 import { useEffect, useLayoutEffect, useMemo } from 'react';
-import { BoxStyleProps, BoxStyles, PseudoClassesType } from '../types';
+import { BoxStyleProps, BoxStyles, ComponentsAndVariants, PseudoClassesType } from '../types';
 import ObjectUtils from '../utils/object/objectUtils';
 import {
   breakpoints,
@@ -13,8 +13,8 @@ import {
 } from './boxStyles';
 import IdentityFactory from '@cronocode/identity-factory';
 import { BoxStyle } from './coreTypes';
-import useTheme from './theme/useTheme';
 import Variables from './variables';
+import useComponents from './extends/useComponents';
 
 const identity = new IdentityFactory();
 
@@ -26,19 +26,19 @@ const useEff = isBrowser && !isTestEnv ? useLayoutEffect : useEffect;
 const boxClassName = '_b';
 const svgClassName = '_s';
 
-export default function useStyles(props: BoxStyleProps, isSvg: boolean) {
+export default function useStyles<TKey extends keyof ComponentsAndVariants = never>(props: BoxStyleProps<TKey>, isSvg: boolean) {
   useEff(StylesContextImpl.flush, [props]);
 
-  const theme = useTheme(props);
+  const componentsStyles = useComponents(props);
 
   return useMemo(() => {
     const classNames: string[] = [isSvg ? svgClassName : boxClassName];
-    const propsToUse = theme ? ObjectUtils.mergeDeep<BoxStyleProps>(theme, props) : props;
+    const propsToUse = componentsStyles ? ObjectUtils.mergeDeep<BoxStyleProps<TKey>>(componentsStyles, props) : props;
 
     StylesContextImpl.addClassNames(propsToUse, classNames, []);
 
     return classNames;
-  }, [props, isSvg, theme]);
+  }, [props, isSvg, componentsStyles]);
 }
 
 namespace StylesContextImpl {
@@ -64,7 +64,7 @@ namespace StylesContextImpl {
   } = {};
 
   export function addClassNames(
-    props: BoxStyleProps,
+    props: BoxStyleProps<any>,
     classNames: string[],
     currentPseudoClasses: PseudoClassesType[],
     breakpoint?: string,
@@ -86,13 +86,9 @@ namespace StylesContextImpl {
       } else if (ObjectUtils.isKeyOf(key, breakpoints)) {
         addClassNames(value as BoxStyleProps, classNames, currentPseudoClasses, key, pseudoClassParentName);
       } else if (ObjectUtils.isKeyOf(key, pseudoGroupClasses)) {
-        if (typeof value === 'string') {
-          classNames.push(`${pseudoGroupClasses[key]}-${value}`);
-        } else {
-          Object.entries(value).forEach(([name, pseudoClassProps]) => {
-            addClassNames(pseudoClassProps as BoxStyles, classNames, [...currentPseudoClasses, pseudoGroupClasses[key]], breakpoint, name);
-          });
-        }
+        Object.entries(value).forEach(([name, pseudoClassProps]) => {
+          addClassNames(pseudoClassProps as BoxStyles, classNames, [...currentPseudoClasses, pseudoGroupClasses[key]], breakpoint, name);
+        });
       }
     });
   }
@@ -179,9 +175,8 @@ a,ul{all: unset;}
                   const className = createClassName(key as keyof BoxStyles, value as BoxStyles[keyof BoxStyles], +weight, breakpoint, name);
                   const [pseudoClass] = pseudoClassesByWeight[+weight];
 
-                  const selector =
-                    itemValue.selector?.(`.${pseudoClass}-${name}:${pseudoClass} .${className}`, '') ??
-                    `.${pseudoClass}-${name}:${pseudoClass} .${className}`;
+                  const defaultSelector = pseudoClass === 'theme' ? `.${name} .${className}` : `.${name}:${pseudoClass} .${className}`;
+                  const selector = itemValue.selector?.(defaultSelector, '') ?? defaultSelector;
 
                   const styleName = Array.isArray(itemValue.styleName) ? itemValue.styleName : [itemValue.styleName ?? key];
                   const styleValue = itemValue.valueFormat?.(value as never, Variables.getVariableValue) ?? value;

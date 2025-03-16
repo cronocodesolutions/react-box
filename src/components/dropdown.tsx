@@ -209,7 +209,7 @@ function DropdownImpl<TVal>(props: Props<TVal>, ref: Ref<HTMLInputElement>): Rea
                   <Box
                     key={value as React.Key}
                     component="dropdown.item"
-                    theme={multiple ? 'multiple' : 'single'}
+                    variant={multiple ? 'multiple' : undefined}
                     selected={valueToUse.includes(value)}
                     {...itemProps}
                     props={{
