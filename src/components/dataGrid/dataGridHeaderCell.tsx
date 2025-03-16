@@ -125,7 +125,7 @@ function Resizer<TRow>(props: ResizerProps<TRow>) {
         height="fit"
         props={{ onMouseDown: column.resizeColumn, onTouchStart: column.resizeColumn }}
       >
-        <Box width={0.5} height="fit" bgColor="gray-400" hoverParent={{ resizer: { bgColor: 'gray-600' } }}></Box>
+        <Box width={0.5} height="fit" bgColor="gray-400" hoverGroup={{ resizer: { bgColor: 'gray-600' } }}></Box>
       </Box>
     </Flex>
   );

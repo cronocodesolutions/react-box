@@ -39,7 +39,7 @@ describe('SSG', () => {
             borderRadius={2}
             d="column"
             display="none"
-            hoverParent={{ parent: { display: 'block' } }}
+            hoverGroup={{ parent: { display: 'block' } }}
           >
             <Box>test</Box>
           </Flex>

@@ -22,7 +22,7 @@ export default function DataGridCell<TRow>(props: Props<TRow>) {
   return (
     <Flex
       bgColor={isRowNumber ? 'gray-200' : 'gray-100'}
-      hoverParent={{ 'grid-row': { bgColor: 'gray-200' } }}
+      hoverGroup={{ 'grid-row': { bgColor: 'gray-200' } }}
       overflow="hidden"
       minHeight={column.grid.ROW_HEIGHT}
       ai="center"
