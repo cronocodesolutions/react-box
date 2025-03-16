@@ -56,7 +56,7 @@ describe('GridModel', () => {
       const grid = getGridModel({ columns: [{ key: 'firstName' }] });
 
       expect(grid.headerRows.value).to.length(1);
-      expect(grid.headerRows.value.at(0)).to.length(2);
+      expect(grid.headerRows.value.at(0)).to.length(4);
     });
 
     it('creates no rows when no data', () => {
