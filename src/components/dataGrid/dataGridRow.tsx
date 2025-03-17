@@ -12,7 +12,7 @@ export default function DataGridRow<TRow>(props: Props<TRow>) {
   const { row } = props;
 
   return (
-    <Flex className="grid-row" display="contents">
+    <Flex className="grid-row" display="contents" props={{ role: 'row' }}>
       {row.cells.map((cell) => (
         <DataGridCell key={cell.column.key} column={cell.column}>
           {cell.column.key === ROW_SELECTION_CELL_KEY ? <Checkbox /> : cell.value}

@@ -52,7 +52,7 @@ export default function DataGrid<TRow extends {}>(props: DataGridProps<TRow>) {
   console.log('render - data grid');
 
   return (
-    <Box component="datagrid" style={grid.sizes.value}>
+    <Box component="datagrid" style={grid.sizes.value} props={{ role: 'presentation' }}>
       <Box p={3} bb={1} borderColor="gray-400">
         {grid.groupColumns.length > 0 ? grid.groupColumns.join(' > ') : 'No grouping'}
       </Box>
@@ -118,6 +118,7 @@ function DataGridRows<TRow>(props: DataGridRowsProps<TRow>, ref: Ref<DataGridRow
         }}
       >
         <Grid
+          props={{ role: 'presentation' }}
           width="max-content"
           minWidth="fit"
           transition="none"

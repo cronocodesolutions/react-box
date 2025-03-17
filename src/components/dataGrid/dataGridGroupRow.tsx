@@ -13,7 +13,7 @@ export default function DataGridGroupRow<TRow>(props: Props<TRow>) {
   const { row } = props;
 
   return (
-    <Flex className="grid-row" display="contents">
+    <Flex className="grid-row" display="contents" props={{ role: 'rowgroup' }}>
       {row.cells.map((cell) => {
         if (cell.column.key === GROUPING_CELL_KEY) {
           return (

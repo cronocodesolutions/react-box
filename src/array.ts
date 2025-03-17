@@ -128,6 +128,6 @@ if (!Array.prototype.groupBy) {
       return acc;
     }, new Map<TKey, T[]>());
 
-    return Array.from(result).map(([key, values]) => ({ key, values })) as GroupItem<TKey, T>[];
+    return Array.from(result, ([key, values]) => ({ key, values })) as GroupItem<TKey, T>[];
   };
 }

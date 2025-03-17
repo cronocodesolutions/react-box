@@ -29,6 +29,7 @@ export default function DataGridCell<TRow>(props: Props<TRow>) {
   return (
     <Flex
       component="datagrid.cell"
+      props={{ role: 'cell' }}
       variant={{ isRowNumber, isRowSelection, isPinned, isFirstLeftPinned, isLastLeftPinned, isFirstRightPinned, isLastRightPinned }}
       jc={align}
       style={{
