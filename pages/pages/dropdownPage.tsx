@@ -172,7 +172,7 @@ export default function DropdownPage() {
         mt={10}
       >
         <Dropdown multiple>
-          <Dropdown.Display>{(selectedValues: number[]) => selectedValues.join('+')}</Dropdown.Display>
+          <Dropdown.Display>test</Dropdown.Display>
           <Dropdown.EmptyItem>No options</Dropdown.EmptyItem>
           <Dropdown.Unselect>Select</Dropdown.Unselect>
           <Dropdown.Item value={1}>John Doe</Dropdown.Item>

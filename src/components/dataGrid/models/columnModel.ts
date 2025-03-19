@@ -184,13 +184,16 @@ export default class ColumnModel<TRow> {
       update();
     }, 20);
 
+    const controller = new AbortController();
+
     const stopResize = (e: MouseEvent) => {
-      window.removeEventListener('mousemove', resize);
+      controller.abort();
       this.grid.isResizeMode = false;
       update();
     };
-    window.addEventListener('mousemove', resize);
-    window.addEventListener('mouseup', stopResize, { once: true });
+
+    window.addEventListener('mousemove', resize, controller);
+    window.addEventListener('mouseup', stopResize, controller);
   };
 
   public pinColumn = (pin?: PinPosition) => {

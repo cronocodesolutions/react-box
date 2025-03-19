@@ -38,20 +38,18 @@ export default function useVisibility<T extends HTMLElement = HTMLDivElement>(
       if (e.key === 'Escape') setVisibility(false);
     }
 
-    if (isVisible) {
-      window.addEventListener(event, clickHandler);
+    const controller = new AbortController();
 
-      hideOnEscape && window.addEventListener('keydown', hideVisibilityKeyboardHandler, true);
-      hideOnResize && window.addEventListener('resize', resizeHandler, true);
-      hideOnScroll && window.addEventListener('scroll', scrollHandler, true);
+    if (isVisible) {
+      window.addEventListener(event, clickHandler, controller);
+
+      hideOnEscape && window.addEventListener('keydown', hideVisibilityKeyboardHandler, controller);
+      hideOnResize && window.addEventListener('resize', resizeHandler, controller);
+      hideOnScroll && window.addEventListener('scroll', scrollHandler, controller);
     }
 
     return () => {
-      window.removeEventListener(event, clickHandler);
-
-      hideOnEscape && window.removeEventListener('keydown', hideVisibilityKeyboardHandler, true);
-      hideOnResize && window.removeEventListener('resize', resizeHandler, true);
-      hideOnScroll && window.removeEventListener('scroll', scrollHandler, true);
+      controller.abort();
     };
   }, [node, isVisible]);
 
