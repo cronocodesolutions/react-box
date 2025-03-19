@@ -39,9 +39,6 @@ export default function FlexPage() {
         onSubmit={(obj, e) => {
           // e.preventDefault();
           // var formData = new FormData(e.currentTarget);
-
-          // console.log(Object.fromEntries(formData));
-          console.log(obj);
         }}
       >
         <input name="test" type="hidden" value="2" />

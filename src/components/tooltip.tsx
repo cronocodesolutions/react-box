@@ -23,10 +23,10 @@ function Tooltip(props: Props, ref: Ref<HTMLDivElement>) {
         }
       };
 
-      document.addEventListener('scroll', listener, { capture: true });
-      return () => {
-        document.removeEventListener('scroll', listener, { capture: true });
-      };
+      const controller = new AbortController();
+      document.addEventListener('scroll', listener, controller);
+
+      return () => controller.abort();
     },
     [position],
   );

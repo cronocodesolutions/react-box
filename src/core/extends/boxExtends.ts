@@ -27,7 +27,7 @@ namespace BoxExtends {
   export let componentsStyles: Components = boxComponents;
 
   export function components<T extends Components>(components: T) {
-    componentsStyles = ObjectUtils.mergeDeep(boxComponents, components);
+    componentsStyles = ObjectUtils.mergeDeep<Components>(boxComponents, components);
 
     return components;
   }

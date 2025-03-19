@@ -14,12 +14,12 @@ interface Props<TVal> extends BoxProps<'button'> {
   multiple?: boolean;
   isSearchable?: boolean;
   searchPlaceholder?: string;
-  hideArrow?: boolean;
+  hideIcon?: boolean;
   onChange?: (value: Maybe<TVal>, values: TVal[]) => void;
 }
 
 function DropdownImpl<TVal>(props: Props<TVal>, ref: Ref<HTMLInputElement>): React.ReactNode {
-  const { name, defaultValue, value, multiple, isSearchable, searchPlaceholder, children, hideArrow, onChange, ...restProps } = props;
+  const { name, defaultValue, value, multiple, isSearchable, searchPlaceholder, children, hideIcon, onChange, ...restProps } = props;
 
   const [selectedValues, setSelectedValues] = useState(Array.isArray(defaultValue) ? defaultValue : defaultValue ? [defaultValue] : []);
   const valueToUse = 'value' in props ? (Array.isArray(value) ? value : value ? [value] : []) : selectedValues;
@@ -60,7 +60,8 @@ function DropdownImpl<TVal>(props: Props<TVal>, ref: Ref<HTMLInputElement>): Rea
   const displayItem = useMemo(() => allKids.find((x) => (x.type as FunctionComponent)?.displayName === 'DropdownDisplay'), [allKids]);
 
   const display = useMemo(() => {
-    if (displayItem) return displayItem.props.children(valueToUse, isOpen);
+    if (displayItem)
+      return typeof displayItem.props.children === 'function' ? displayItem.props.children(valueToUse, isOpen) : displayItem.props.children;
 
     const selectedKids = filteredItems.filter((k) => valueToUse.includes(k.props.value));
 
@@ -170,9 +171,9 @@ function DropdownImpl<TVal>(props: Props<TVal>, ref: Ref<HTMLInputElement>): Rea
           />
         )}
         <Flex component="dropdown.display" display={isOpen && isSearchable ? 'none' : 'flex'}>
-          {display}
+          {display ?? <>&nbsp;</>}
         </Flex>
-        {!hideArrow && (
+        {!hideIcon && (
           <Box>
             <BaseSvg viewBox="0 0 10 6" width="0.6rem" rotate={isOpen ? 180 : 0}>
               <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 1 4 4 4-4" />
@@ -240,7 +241,7 @@ interface DropdownItemProps<TVal> extends BoxProps {
 }
 
 interface DropdownDisplayProps<TVal> extends Omit<BoxProps, 'children'> {
-  children: (selectedValues: TVal[], isOpen: boolean) => React.ReactNode;
+  children: ((selectedValues: TVal[], isOpen: boolean) => React.ReactNode) | React.ReactNode;
 }
 
 interface DropdownType {

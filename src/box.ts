@@ -29,7 +29,7 @@ function BoxComponent<TTag extends keyof React.JSX.IntrinsicElements = 'div', TK
 ) {
   const { tag = 'div', children, props: tagProps, className: userClassName, style, disabled, required, checked, selected } = props;
 
-  const styleClasses = useStyles(props as BoxStyleProps, tag === 'svg');
+  const styleClasses = useStyles(props, tag === 'svg');
 
   const finalTagProps = useMemo(() => {
     const className = classNames(styleClasses, userClassName).join(' ');

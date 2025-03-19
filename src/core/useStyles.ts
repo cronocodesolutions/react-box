@@ -1,5 +1,5 @@
 import { useEffect, useLayoutEffect, useMemo } from 'react';
-import { BoxStyleProps, BoxStyles, ComponentsAndVariants, PseudoClassesType } from '../types';
+import { BoxStyleProps, BoxStyles, PseudoClassesType } from '../types';
 import ObjectUtils from '../utils/object/objectUtils';
 import {
   breakpoints,
@@ -26,14 +26,14 @@ const useEff = isBrowser && !isTestEnv ? useLayoutEffect : useEffect;
 const boxClassName = '_b';
 const svgClassName = '_s';
 
-export default function useStyles<TKey extends keyof ComponentsAndVariants = never>(props: BoxStyleProps<TKey>, isSvg: boolean) {
+export default function useStyles(props: BoxStyleProps<any>, isSvg: boolean) {
   useEff(StylesContextImpl.flush, [props]);
 
-  const componentsStyles = useComponents(props);
+  const componentsStyles = useComponents(props) as BoxStyleProps;
 
   return useMemo(() => {
     const classNames: string[] = [isSvg ? svgClassName : boxClassName];
-    const propsToUse = componentsStyles ? ObjectUtils.mergeDeep<BoxStyleProps<TKey>>(componentsStyles, props) : props;
+    const propsToUse = componentsStyles ? ObjectUtils.mergeDeep(componentsStyles, props) : props;
 
     StylesContextImpl.addClassNames(propsToUse, classNames, []);
 
@@ -103,7 +103,7 @@ namespace StylesContextImpl {
       return acc;
     }, {});
 
-    const defaultStyles = `:root{--borderColor: black;--outlineColor: black;--lineHeight: 1.2;--fontSize: 14px;--transitionTime: 0.25s;--svgTransitionTime: 0.3s;}#crono-box {position: absolute;top: 0;left: 0;height: 0;}
+    const defaultStyles = `:root{--borderColor: black;--outlineColor: black;--lineHeight: 1.2;--fontSize: 14px;--transitionTime: 0.25s;--svgTransitionTime: 0.3s;}#crono-box {position: absolute;top: 0;left: 0;height: 0;z-index:99999;}
 html{font-size: 16px;font-family: Arial, sans-serif;}
 body{margin: 0;line-height: var(--lineHeight);font-size: var(--fontSize);}
 a,ul{all: unset;}
