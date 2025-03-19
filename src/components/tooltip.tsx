@@ -24,8 +24,7 @@ function Tooltip(props: Props, ref: Ref<HTMLDivElement>) {
       };
 
       const controller = new AbortController();
-      document.addEventListener('scroll', listener, controller);
-
+      document.addEventListener('scroll', listener, { signal: controller.signal, capture: true });
       return () => controller.abort();
     },
     [position],
@@ -37,10 +36,9 @@ function Tooltip(props: Props, ref: Ref<HTMLDivElement>) {
         callback(element);
       };
 
-      window.addEventListener('resize', listener, { capture: true });
-      return () => {
-        window.removeEventListener('resize', listener, { capture: true });
-      };
+      const controller = new AbortController();
+      window.addEventListener('resize', listener, { signal: controller.signal, capture: true });
+      return () => controller.abort();
     },
     [position],
   );
