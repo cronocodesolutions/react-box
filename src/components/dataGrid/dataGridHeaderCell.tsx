@@ -147,6 +147,7 @@ function ContextMenu<TRow>(props: ContextMenuProps<TRow>) {
   const isPinRightAvailable = column.pin !== 'RIGHT';
   const isUnpinAvailable = !!column.pin;
   const isGroupByAvailable = column.isLeaf && column.key !== GROUPING_CELL_KEY;
+  const isUnGroupByAvailable = column.isLeaf && column.key === GROUPING_CELL_KEY;
 
   const isSortingAvailable = isSortAscAvailable || isSortDescAvailable || isClearSortAvailable;
   const isPiningAvailable = isPinLeftAvailable || isPinRightAvailable || isUnpinAvailable;
@@ -229,7 +230,9 @@ function ContextMenu<TRow>(props: ContextMenuProps<TRow>) {
                 Clear Sort
               </Button>
             )}
-            {isSortingAvailable && (isPiningAvailable || isGroupByAvailable) && <Box bb={1} my={2} borderColor="gray-300" />}
+            {isSortingAvailable && (isPiningAvailable || isGroupByAvailable || isUnGroupByAvailable) && (
+              <Box bb={1} my={2} borderColor="gray-300" />
+            )}
             {isPinLeftAvailable && (
               <Button
                 clean
@@ -272,13 +275,23 @@ function ContextMenu<TRow>(props: ContextMenuProps<TRow>) {
                 Unpin
               </Button>
             )}
-            {isSortingAvailable && isPiningAvailable && isGroupByAvailable && <Box bb={1} my={2} borderColor="gray-300" />}
+            {isSortingAvailable && isPiningAvailable && (isGroupByAvailable || isUnGroupByAvailable) && (
+              <Box bb={1} my={2} borderColor="gray-300" />
+            )}
             {isGroupByAvailable && (
               <Button clean display="flex" gap={2} p={3} cursor="pointer" hover={{ bgColor: 'gray-200' }} onClick={column.toggleGrouping}>
                 <Box>
                   <GroupingIcon width="1rem" fill="violet-950" />
                 </Box>
                 <Box textWrap="nowrap"> Group by {column.header ?? column.key}</Box>
+              </Button>
+            )}
+            {isUnGroupByAvailable && (
+              <Button clean display="flex" gap={2} p={3} cursor="pointer" hover={{ bgColor: 'gray-200' }} onClick={column.grid.unGroupAll}>
+                <Box>
+                  <GroupingIcon width="1rem" fill="violet-950" />
+                </Box>
+                <Box textWrap="nowrap"> Un-Group All</Box>
               </Button>
             )}
           </Tooltip>
