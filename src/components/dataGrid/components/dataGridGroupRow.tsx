@@ -1,9 +1,9 @@
-import Button from '../button';
-import Checkbox from '../checkbox';
-import Flex from '../flex';
+import Button from '../../button';
+import Checkbox from '../../checkbox';
+import Flex from '../../flex';
 import DataGridCell from './dataGridCell';
-import { EMPTY_CELL_KEY, GROUPING_CELL_KEY, ROW_NUMBER_CELL_KEY, ROW_SELECTION_CELL_KEY } from './models/gridModel';
-import GroupRowModel from './models/groupRowModel';
+import { EMPTY_CELL_KEY, GROUPING_CELL_KEY, ROW_NUMBER_CELL_KEY, ROW_SELECTION_CELL_KEY } from '../models/gridModel';
+import GroupRowModel from '../models/groupRowModel';
 
 interface Props<TRow> {
   row: GroupRowModel<TRow>;

@@ -5,10 +5,10 @@ import GroupRowModel from './groupRowModel';
 import RowModel from './rowModel';
 import '../../../array';
 
-export const EMPTY_CELL_KEY = 'empty-cell';
-export const ROW_NUMBER_CELL_KEY = 'row-number-cell';
-export const ROW_SELECTION_CELL_KEY = 'row-selection-cell';
-export const GROUPING_CELL_KEY = 'grouping-cell';
+export const EMPTY_CELL_KEY: Key = 'empty-cell';
+export const ROW_NUMBER_CELL_KEY: Key = 'row-number-cell';
+export const ROW_SELECTION_CELL_KEY: Key = 'row-selection-cell';
+export const GROUPING_CELL_KEY: Key = 'grouping-cell';
 
 export default class GridModel<TRow> {
   constructor(
@@ -36,6 +36,7 @@ export default class GridModel<TRow> {
     const flat = [...left, ...middle, ...right].flatMap((c) => c.flatColumns);
     const leafs = flat.filter((x) => x.isLeaf);
     const visibleLeafs = flat.filter((x) => x.isLeaf && x.isVisible);
+    const maxDeath = flat.maxBy((x) => x.death) + 1;
 
     return {
       left,
@@ -44,6 +45,7 @@ export default class GridModel<TRow> {
       flat,
       leafs,
       visibleLeafs,
+      maxDeath,
     };
   });
 
@@ -212,8 +214,10 @@ export default class GridModel<TRow> {
   public toggleGrouping = (columnKey: Key) => {
     if (this.groupColumns.includes(columnKey)) {
       this.groupColumns = this.groupColumns.removeBy((key) => key === columnKey);
+      this.hiddenColumns = this.hiddenColumns.removeBy((key) => key === columnKey);
     } else {
       this.groupColumns = this.groupColumns.add(columnKey);
+      this.hiddenColumns = this.hiddenColumns.add(columnKey);
     }
 
     const groupingColumn = this._sourceColumns.find((c) => c.key === GROUPING_CELL_KEY);
@@ -256,6 +260,23 @@ export default class GridModel<TRow> {
 
     this.rows.clear();
     this.flatRows.clear();
+    this.update();
+  };
+
+  public toggleColumnVisibility = (columnKey: Key) => {
+    if (this.hiddenColumns.includes(columnKey)) {
+      this.hiddenColumns = this.hiddenColumns.removeBy((key) => key === columnKey);
+    } else {
+      this.hiddenColumns = this.hiddenColumns.add(columnKey);
+    }
+
+    this.columns.clear();
+    this.headerRows.clear();
+    this.gridTemplateColumns.clear();
+    this.rows.clear();
+    this.flatRows.clear();
+    this.sizes.clear();
+
     this.update();
   };
 

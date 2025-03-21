@@ -20,13 +20,14 @@ import { DataGridProps } from './dataGrid/contracts/dataGridContract';
 import Grid from './grid';
 import { forwardRef, Ref, useCallback, useImperativeHandle, useMemo, useRef, useState } from 'react';
 import useGrid from './dataGrid/useGrid';
-import DataGridHeaderCell from './dataGrid/dataGridHeaderCell';
+import DataGridHeaderCell from './dataGrid/components/dataGridHeaderCell';
 import { DEFAULT_REM_DIVIDER } from '../core/boxConstants';
 import FnUtils from '../utils/fn/fnUtils';
 import GridModel from './dataGrid/models/gridModel';
 import GroupRowModel from './dataGrid/models/groupRowModel';
-import DataGridGroupRow from './dataGrid/dataGridGroupRow';
-import DataGridRow from './dataGrid/dataGridRow';
+import DataGridGroupRow from './dataGrid/components/dataGridGroupRow';
+import DataGridRow from './dataGrid/components/dataGridRow';
+import DataGridColumnGroups from './dataGrid/components/dataGridColumnGroups';
 
 export default function DataGrid<TRow extends {}>(props: DataGridProps<TRow>) {
   const grid = useGrid(props);
@@ -53,9 +54,8 @@ export default function DataGrid<TRow extends {}>(props: DataGridProps<TRow>) {
 
   return (
     <Box component="datagrid" style={grid.sizes.value} props={{ role: 'presentation' }}>
-      <Box p={3} bb={1} borderColor="gray-400">
-        {grid.groupColumns.length > 0 ? grid.groupColumns.join(' > ') : 'No grouping'}
-      </Box>
+      <DataGridColumnGroups grid={grid} />
+
       <Box overflowX="scroll" props={{ onScroll: handleScroll }}>
         <Grid component="datagrid.header" variant={{ isResizeMode }} style={{ gridTemplateColumns: grid.gridTemplateColumns.value }}>
           {headers}
@@ -63,8 +63,8 @@ export default function DataGrid<TRow extends {}>(props: DataGridProps<TRow>) {
 
         <Rows ref={rowsRef} grid={grid} />
       </Box>
-      <Box p={3} bgColor="gray-200">
-        Rows: {grid.rows.value.length}
+      <Box p={3} bgColor="gray-200" bt={1} borderColor="gray-400">
+        Rows: {props.data.length}
       </Box>
     </Box>
   );
@@ -111,7 +111,7 @@ function DataGridRows<TRow>(props: DataGridRowsProps<TRow>, ref: Ref<DataGridRow
   const rowsCount = grid.flatRows.value.length;
 
   return (
-    <Box height={grid.ROW_HEIGHT * visibleRows}>
+    <Box height={grid.ROW_HEIGHT * visibleRows + 4}>
       <Box
         style={{
           height: `${rowsCount * rowHeight}px`,

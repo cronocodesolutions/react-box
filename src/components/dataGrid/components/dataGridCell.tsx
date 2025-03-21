@@ -1,7 +1,7 @@
-import Box, { BoxProps } from '../../box';
-import Flex from '../flex';
-import ColumnModel from './models/columnModel';
-import { EMPTY_CELL_KEY, ROW_NUMBER_CELL_KEY, ROW_SELECTION_CELL_KEY } from './models/gridModel';
+import Box, { BoxProps } from '../../../box';
+import Flex from '../../flex';
+import ColumnModel from '../models/columnModel';
+import { EMPTY_CELL_KEY, ROW_NUMBER_CELL_KEY, ROW_SELECTION_CELL_KEY } from '../models/gridModel';
 
 interface Props<TRow> extends BoxProps {
   children?: React.ReactNode;
@@ -30,7 +30,7 @@ export default function DataGridCell<TRow>(props: Props<TRow>) {
     <Flex
       component="datagrid.cell"
       props={{ role: 'cell' }}
-      variant={{ isRowNumber, isRowSelection, isPinned, isFirstLeftPinned, isLastLeftPinned, isFirstRightPinned, isLastRightPinned }}
+      variant={{ isPinned, isFirstLeftPinned, isLastLeftPinned, isFirstRightPinned, isLastRightPinned, isRowNumber, isRowSelection }}
       jc={align}
       style={{
         width: `var(${widthVarName})`,

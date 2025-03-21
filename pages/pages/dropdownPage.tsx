@@ -29,11 +29,15 @@ export default function DropdownPage() {
 </Dropdown>`}
         mt={10}
       >
-        <Dropdown defaultValue={1}>
-          <Dropdown.Item value={1}>Option 1</Dropdown.Item>
-          <Dropdown.Item value={2}>Option 2</Dropdown.Item>
+        <Dropdown defaultValue={1} props={{ role: 'combobox' }}>
+          <Dropdown.Item value={1} props={{ role: 'option' }}>
+            Option 1
+          </Dropdown.Item>
+          <Dropdown.Item value={2} props={{ role: 'option' }}>
+            Option 2
+          </Dropdown.Item>
           {[3, 4].map((x) => (
-            <Dropdown.Item value={x} key={x}>
+            <Dropdown.Item value={x} key={x} props={{ role: 'option' }}>
               Option {x}
             </Dropdown.Item>
           ))}

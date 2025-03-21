@@ -40,7 +40,6 @@ export default function DataGridPage() {
   usePageContext(<RightSidebar />);
 
   var def: GridDefinition<DataType> = {
-    pagination: true,
     columns: [
       {
         key: 'person',
@@ -54,7 +53,7 @@ export default function DataGridPage() {
         key: 'person2',
         header: 'Person 2',
         columns: [
-          { key: 'age', header: 'Age' },
+          { key: 'age', header: 'Age', width: 120 },
           { key: 'email', header: 'Email', width: 300 },
         ],
       },
@@ -63,7 +62,7 @@ export default function DataGridPage() {
         header: 'Test',
         columns: [
           { key: 'test_single', columns: [{ key: 'job_title' }] },
-          { key: 'test_double', header: 'Test double', columns: [{ key: 'street_address' }, { key: 'city', pin: 'RIGHT' }] },
+          { key: 'test_double', header: 'Test double', columns: [{ key: 'street_address' }, { key: 'city' }] },
         ],
       },
       { key: 'country' },

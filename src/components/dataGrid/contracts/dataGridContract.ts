@@ -22,7 +22,7 @@ export interface ColumnType<TRow> {
 export interface GridDefinition<TRow> {
   rowKey?: KeysMatching<TRow, Key> | ((rowData: TRow) => Key);
   columns: ColumnType<TRow>[];
-  pagination?: Pagination;
+  // pagination?: Pagination;
 }
 
 export interface DataGridProps<TRow> {

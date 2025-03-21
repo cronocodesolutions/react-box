@@ -19,7 +19,19 @@ interface Props<TVal> extends BoxProps<'button'> {
 }
 
 function DropdownImpl<TVal>(props: Props<TVal>, ref: Ref<HTMLInputElement>): React.ReactNode {
-  const { name, defaultValue, value, multiple, isSearchable, searchPlaceholder, children, hideIcon, onChange, ...restProps } = props;
+  const {
+    name,
+    defaultValue,
+    value,
+    multiple,
+    isSearchable,
+    searchPlaceholder,
+    children,
+    hideIcon,
+    onChange,
+    props: tagProps,
+    ...restProps
+  } = props;
 
   const [selectedValues, setSelectedValues] = useState(Array.isArray(defaultValue) ? defaultValue : defaultValue ? [defaultValue] : []);
   const valueToUse = 'value' in props ? (Array.isArray(value) ? value : value ? [value] : []) : selectedValues;
@@ -147,7 +159,7 @@ function DropdownImpl<TVal>(props: Props<TVal>, ref: Ref<HTMLInputElement>): Rea
         type="button"
         component="dropdown"
         onClick={() => setOpen((prev) => !prev)}
-        props={{ tabIndex: 0 }}
+        props={{ tabIndex: 0, ...tagProps }}
         {...restProps}
       >
         {isSearchable && (
@@ -196,12 +208,14 @@ function DropdownImpl<TVal>(props: Props<TVal>, ref: Ref<HTMLInputElement>): Rea
                 <Box
                   component="dropdown.unselect"
                   selected={valueToUse.length === 0}
-                  {...unselectItem.props}
-                  props={{ onClick: (e) => itemSelectHandler(e) }}
+                  {...{ ...unselectItem.props, props: { ...unselectItem.props.props, onClick: (e) => itemSelectHandler(e) } }}
                 />
               )}
               {showSelectAll && (
-                <Box component="dropdown.selectAll" {...selectAllItem.props} props={{ onClick: (e) => itemSelectHandler(e, ...items) }} />
+                <Box
+                  component="dropdown.selectAll"
+                  {...{ ...selectAllItem.props, props: { ...selectAllItem.props.props, onClick: (e) => itemSelectHandler(e, ...items) } }}
+                />
               )}
               {filteredItems.map((item) => {
                 const { value, onClick, ...itemProps } = item.props;
@@ -212,12 +226,15 @@ function DropdownImpl<TVal>(props: Props<TVal>, ref: Ref<HTMLInputElement>): Rea
                     component="dropdown.item"
                     variant={multiple ? 'multiple' : undefined}
                     selected={valueToUse.includes(value)}
-                    {...itemProps}
-                    props={{
-                      onClick: (e) => {
-                        onClick?.(e);
+                    {...{
+                      ...itemProps,
+                      props: {
+                        ...itemProps.props,
+                        onClick: (e) => {
+                          onClick?.(e);
 
-                        itemSelectHandler(e, item);
+                          itemSelectHandler(e, item);
+                        },
                       },
                     }}
                   />

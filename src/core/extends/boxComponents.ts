@@ -33,10 +33,6 @@ const boxComponents = {
         borderColor: 'gray-300',
       },
     },
-    variants: {
-      test: {},
-      test2: {},
-    },
   },
   textbox: {
     styles: {
@@ -308,6 +304,42 @@ const boxComponents = {
       borderRadius: 1,
     },
     children: {
+      columnGroups: {
+        styles: {
+          p: 3,
+          bb: 1,
+          borderColor: 'gray-400',
+          color: 'gray-400',
+          gap: 2,
+          ai: 'center',
+          height: 12,
+        },
+        children: {
+          item: {
+            styles: {
+              gap: 2,
+              ai: 'center',
+              b: 1,
+              borderColor: 'gray-400',
+              bgColor: 'gray-100',
+              borderRadius: 1,
+              py: 1,
+              pl: 2,
+              pr: 1,
+              color: 'violet-950',
+            },
+            children: {
+              icon: {
+                styles: {
+                  width: 3,
+                  color: 'gray-400',
+                  cursor: 'pointer',
+                },
+              },
+            },
+          },
+        },
+      },
       header: {
         styles: {
           position: 'sticky',

@@ -151,9 +151,8 @@ export default class ColumnModel<TRow> {
     return item === this;
   }
 
-  private _isVisible = true;
   public get isVisible(): boolean {
-    if (this.isLeaf) return this._isVisible && !this.grid.groupColumns.includes(this.key);
+    if (this.isLeaf) return !this.grid.hiddenColumns.includes(this.key);
 
     return this.leafs.some((l) => l.isVisible);
   }
@@ -180,7 +179,7 @@ export default class ColumnModel<TRow> {
   }
 
   public get gridRows() {
-    return this.isLeaf ? this.grid.headerRows.value.length - this.death : 1;
+    return this.isLeaf ? this.grid.columns.value.maxDeath - this.death : 1;
   }
 
   public resizeColumn = (e: unknown) => {
@@ -246,5 +245,9 @@ export default class ColumnModel<TRow> {
 
     this._inlineWidth = width;
     this.grid.setWidth(this.key, width);
+  };
+
+  public toggleVisibility = () => {
+    this.grid.toggleColumnVisibility(this.key);
   };
 }
