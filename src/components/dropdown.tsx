@@ -1,4 +1,4 @@
-import { forwardRef, FunctionComponent, ReactElement, Ref, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { forwardRef, FunctionComponent, ReactElement, Ref, RefAttributes, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import Box, { BoxProps } from '../box';
 import Textbox from './textbox';
 import Flex from './flex';
@@ -7,7 +7,7 @@ import BaseSvg from './baseSvg';
 import Tooltip from './tooltip';
 import Button from './button';
 
-interface Props<TVal> extends BoxProps<'button'> {
+interface Props<TVal> extends Omit<BoxProps<'button'>, 'ref'> {
   name?: string;
   defaultValue?: TVal | TVal[];
   value?: TVal | TVal[];
@@ -262,7 +262,7 @@ interface DropdownDisplayProps<TVal> extends Omit<BoxProps, 'children'> {
 }
 
 interface DropdownType {
-  <TVal>(props: Props<TVal>, ref: Ref<HTMLInputElement>): React.ReactNode;
+  <TVal>(props: Props<TVal> & RefAttributes<HTMLInputElement>): React.ReactNode;
   Item: <TVal>(props: DropdownItemProps<TVal>) => React.ReactNode;
   Unselect: (props: BoxProps) => React.ReactNode;
   SelectAll: (props: BoxProps) => React.ReactNode;
