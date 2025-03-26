@@ -1,6 +1,5 @@
-import Button from '../button';
-import Flex from '../flex';
-import GridModel from './models/gridModel';
+import Flex from '../../flex';
+import GridModel from '../models/gridModel';
 
 interface Props<TRow> {
   grid: GridModel<TRow>;

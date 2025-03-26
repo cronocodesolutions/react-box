@@ -30,8 +30,13 @@ export default function useVisibility<T extends HTMLElement = HTMLDivElement>(
       setVisibility(false);
     }
 
-    function scrollHandler() {
-      setVisibility(false);
+    function scrollHandler(e: Event) {
+      const el = node ?? visibilityRef.current;
+      const shouldHide = el?.contains(e.target as Node) === false;
+
+      if (shouldHide) {
+        setVisibility(false);
+      }
     }
 
     function hideVisibilityKeyboardHandler(e: KeyboardEvent) {
@@ -45,7 +50,7 @@ export default function useVisibility<T extends HTMLElement = HTMLDivElement>(
 
       hideOnEscape && window.addEventListener('keydown', hideVisibilityKeyboardHandler, controller);
       hideOnResize && window.addEventListener('resize', resizeHandler, controller);
-      hideOnScroll && window.addEventListener('scroll', scrollHandler, controller);
+      hideOnScroll && window.addEventListener('scroll', scrollHandler, { signal: controller.signal, capture: true });
     }
 
     return () => {

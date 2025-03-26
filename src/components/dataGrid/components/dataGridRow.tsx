@@ -1,8 +1,8 @@
-import Checkbox from '../checkbox';
-import Flex from '../flex';
+import Checkbox from '../../checkbox';
+import Flex from '../../flex';
+import { ROW_SELECTION_CELL_KEY } from '../models/gridModel';
+import RowModel from '../models/rowModel';
 import DataGridCell from './dataGridCell';
-import { ROW_SELECTION_CELL_KEY } from './models/gridModel';
-import RowModel from './models/rowModel';
 
 interface Props<TRow> {
   row: RowModel<TRow>;

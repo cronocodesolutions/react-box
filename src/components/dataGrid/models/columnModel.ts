@@ -17,6 +17,10 @@ export default class ColumnModel<TRow> {
   }
 
   public columns: ColumnModel<TRow>[] = [];
+  public get visibleColumns() {
+    return this.columns.filter((c) => c.isVisible);
+  }
+
   public get key() {
     return this.def.key;
   }
@@ -82,7 +86,7 @@ export default class ColumnModel<TRow> {
   public get inlineWidth(): Maybe<number> {
     if (this.isLeaf) return this._inlineWidth;
 
-    const sizes = this.columns.map((c) => c.inlineWidth).filter((width) => typeof width === 'number');
+    const sizes = this.visibleColumns.map((c) => c.inlineWidth).filter((width) => typeof width === 'number');
 
     if (sizes.length === 0) return undefined;
 
@@ -93,13 +97,17 @@ export default class ColumnModel<TRow> {
     let sum = 0;
 
     if (this.parent) {
-      const colIndex = this.parent.columns.findIndex((c) => c === this);
-      sum += this.parent.columns.sumBy((c, index) => (index < colIndex ? (c.inlineWidth ?? 0) : 0));
+      const { visibleColumns, left: parentLeft } = this.parent;
 
-      sum += this.parent.left;
+      const colIndex = visibleColumns.findIndex((c) => c === this);
+      sum += visibleColumns.sumBy((c, index) => (index < colIndex ? (c.inlineWidth ?? 0) : 0));
+
+      sum += parentLeft;
     } else {
-      const colIndex = this.grid.columns.value.left.findIndex((c) => c === this);
-      sum += this.grid.columns.value.left.sumBy((c, index) => (index < colIndex ? (c.inlineWidth ?? 0) : 0));
+      const leftVisibleColumns = this.grid.columns.value.left.filter((c) => c.isVisible);
+
+      const colIndex = leftVisibleColumns.findIndex((c) => c === this);
+      sum += leftVisibleColumns.sumBy((c, index) => (index < colIndex ? (c.inlineWidth ?? 0) : 0));
     }
 
     return sum;
@@ -109,13 +117,16 @@ export default class ColumnModel<TRow> {
     let sum = 0;
 
     if (this.parent) {
-      const reverse = [...this.parent.columns].reverse();
+      const { visibleColumns } = this.parent;
+      const reverse = visibleColumns.reverse();
       const colIndex = reverse.findIndex((c) => c === this);
       sum += reverse.sumBy((c, index) => (index < colIndex ? (c.inlineWidth ?? 0) : 0));
 
       sum += this.parent.right;
     } else {
-      const reverse = [...this.grid.columns.value.right].reverse();
+      const rightVisibleColumns = this.grid.columns.value.right.filter((c) => c.isVisible);
+
+      const reverse = rightVisibleColumns.reverse();
       const colIndex = reverse.findIndex((c) => c === this);
       sum += reverse.sumBy((c, index) => (index < colIndex ? (c.inlineWidth ?? 0) : 0));
     }
@@ -127,12 +138,23 @@ export default class ColumnModel<TRow> {
     if (!this.pin) return false;
 
     if (this.parent) {
-      const item = (this.pin === 'LEFT' ? this.parent.columns.at(-1) : this.parent.columns.at(0)) as ColumnModel<TRow>;
+      const { visibleColumns } = this.parent;
+      const item = (this.pin === 'LEFT' ? visibleColumns.at(-1) : visibleColumns.at(0)) as ColumnModel<TRow>;
       return item === this && this.parent.isEdge;
     }
 
-    const item = (this.pin === 'LEFT' ? this.grid.columns.value.left.at(-1) : this.grid.columns.value.right.at(0)) as ColumnModel<TRow>;
+    const item = (
+      this.pin === 'LEFT'
+        ? this.grid.columns.value.left.filter((x) => x.isVisible).at(-1)
+        : this.grid.columns.value.right.filter((x) => x.isVisible).at(0)
+    ) as ColumnModel<TRow>;
     return item === this;
+  }
+
+  public get isVisible(): boolean {
+    if (this.isLeaf) return !this.grid.hiddenColumns.includes(this.key);
+
+    return this.leafs.some((l) => l.isVisible);
   }
 
   // Approved
@@ -140,7 +162,7 @@ export default class ColumnModel<TRow> {
   public get leafs(): ColumnModel<TRow>[] {
     if (this.isLeaf) return [this];
 
-    return this.columns.flatMap((c) => c.leafs);
+    return this.visibleColumns.flatMap((c) => c.leafs);
   }
 
   public get groupColumnWidthVarName(): string {
@@ -157,7 +179,7 @@ export default class ColumnModel<TRow> {
   }
 
   public get gridRows() {
-    return this.isLeaf ? this.grid.headerRows.value.length - this.death : 1;
+    return this.isLeaf ? this.grid.columns.value.maxDeath - this.death : 1;
   }
 
   public resizeColumn = (e: unknown) => {
@@ -223,5 +245,9 @@ export default class ColumnModel<TRow> {
 
     this._inlineWidth = width;
     this.grid.setWidth(this.key, width);
+  };
+
+  public toggleVisibility = () => {
+    this.grid.toggleColumnVisibility(this.key);
   };
 }

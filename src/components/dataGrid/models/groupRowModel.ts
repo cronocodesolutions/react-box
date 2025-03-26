@@ -21,7 +21,7 @@ export default class GroupRowModel<TRow> {
   public parentRow?: GroupRowModel<TRow>;
 
   public get cells(): GroupRowCellModel<TRow>[] {
-    return this.grid.columns.value.leafs.map((c) => new GroupRowCellModel<TRow>(this.grid, this, c));
+    return this.grid.columns.value.visibleLeafs.map((c) => new GroupRowCellModel<TRow>(this.grid, this, c));
   }
 
   public get expanded() {
@@ -49,10 +49,10 @@ export default class GroupRowModel<TRow> {
   }
 
   public get groupingColumnGridColumn() {
-    const { leafs } = this.grid.columns.value;
+    const { visibleLeafs } = this.grid.columns.value;
     const { groupingColumn } = this;
 
-    const gridColumn = leafs.sumBy((c) =>
+    const gridColumn = visibleLeafs.sumBy((c) =>
       c.pin === groupingColumn.pin && c.key !== EMPTY_CELL_KEY && c.key !== ROW_SELECTION_CELL_KEY && c.key !== ROW_NUMBER_CELL_KEY ? 1 : 0,
     );
 
