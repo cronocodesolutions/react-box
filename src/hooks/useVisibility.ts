@@ -34,8 +34,6 @@ export default function useVisibility<T extends HTMLElement = HTMLDivElement>(
       const el = node ?? visibilityRef.current;
       const shouldHide = el?.contains(e.target as Node) === false;
 
-      console.log({ shouldHide, cont: el?.contains(e.target as Node) });
-
       if (shouldHide) {
         setVisibility(false);
       }
