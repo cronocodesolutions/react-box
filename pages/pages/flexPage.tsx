@@ -2,7 +2,7 @@ import Box from '../../src/box';
 import Checkbox from '../../src/components/checkbox';
 import Flex from '../../src/components/flex';
 import Form from '../../src/components/form';
-import { H1, H2, H3, H4, H5, H6, Label, Nav } from '../../src/components/semantics';
+import { H1, H2, H3, H4, H5, H6, Label, Nav, Span } from '../../src/components/semantics';
 
 export default function FlexPage() {
   return (
@@ -18,6 +18,9 @@ export default function FlexPage() {
       <H5>H5</H5>
       <H6>H6</H6>
       <Nav>nav</Nav>
+      <Box>
+        <Span>super span</Span>
+      </Box>
 
       <Box
         fontSize={50}

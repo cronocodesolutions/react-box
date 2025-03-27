@@ -10,6 +10,27 @@ export interface BoxComponent {
 export type Components = Record<string, BoxComponent>;
 
 const boxComponents = {
+  h1: {
+    styles: { fontSize: 14 * 2.5 },
+  },
+  h2: {
+    styles: { fontSize: 14 * 2 },
+  },
+  h3: {
+    styles: { fontSize: 14 * 1.75 },
+  },
+  h4: {
+    styles: { fontSize: 14 * 1.5 },
+  },
+  h5: {
+    styles: { fontSize: 14 * 1.25 },
+  },
+  h6: {
+    styles: { fontSize: 14 * 1 },
+  },
+  span: {
+    styles: { inline: true },
+  },
   button: {
     styles: {
       display: 'inline-flex',
