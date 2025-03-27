@@ -11,7 +11,7 @@ function semantic<TTag extends keyof React.JSX.IntrinsicElements, TKey extends k
   tagName: TTag,
 ): SemanticComponentType<TTag, TKey> {
   return forwardRef((props: Omit<BoxProps<TTag, TKey>, 'tag'>, ref: Ref<ExtractElementFromTag<TTag>>) => (
-    <Box tag={tagName} ref={ref} component={tagName as unknown as TKey} {...p} {...props} />
+    <Box tag={tagName} ref={ref} component={tagName as unknown as TKey} {...props} />
   ));
 }
 
