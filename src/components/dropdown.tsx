@@ -15,7 +15,7 @@ interface Props<TVal> extends Omit<BoxProps<'button'>, 'ref'> {
   isSearchable?: boolean;
   searchPlaceholder?: string;
   hideIcon?: boolean;
-  onChange?: (value: Maybe<TVal>, values: TVal[]) => void;
+  onChange?: (value: TVal | undefined, values: TVal[]) => void;
 }
 
 function DropdownImpl<TVal>(props: Props<TVal>, ref: Ref<HTMLInputElement>): React.ReactNode {

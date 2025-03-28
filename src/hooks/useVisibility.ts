@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 interface Props<T extends HTMLElement = HTMLDivElement> {
-  node?: Nullable<T>;
+  node?: T | null;
   event?: 'mousedown' | 'click';
   hideOnScroll?: boolean;
   hideOnResize?: boolean;

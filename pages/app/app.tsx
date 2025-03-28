@@ -24,7 +24,7 @@ import PageContext from '../pageContext';
 
 export default function App() {
   const [open, setOpen] = useState(false);
-  const [rightSidebar, setRightSidebar] = useState<Maybe<React.ReactNode>>();
+  const [rightSidebar, setRightSidebar] = useState<React.ReactNode | undefined>();
 
   return (
     <Box color="violet-950" bgImage="body-bg" minHeight="fit-screen" position="relative">

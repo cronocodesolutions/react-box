@@ -7,7 +7,7 @@ import { classNames } from '../classNames';
 
 export default function useComponents<TKey extends keyof ComponentsAndVariants = never>(
   props: BoxStyleProps<TKey>,
-): Maybe<BoxComponentStyles> {
+): BoxComponentStyles | undefined {
   const { clean, component, variant } = props;
 
   return useMemo(() => {
@@ -16,7 +16,7 @@ export default function useComponents<TKey extends keyof ComponentsAndVariants =
     const names = component?.split('.');
     if (!names) return undefined;
 
-    const componentStyles = names.reduce<Maybe<BoxComponent>>((acc, item, index) => {
+    const componentStyles = names.reduce<BoxComponent | undefined>((acc, item, index) => {
       if (index === 0) {
         return BoxExtends.componentsStyles[item];
       }

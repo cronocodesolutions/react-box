@@ -5,7 +5,11 @@ const pseudoAliases = {
 };
 
 namespace BoxUtils {
-  export function assignBooleanProp<TProps>(prop: Maybe<boolean | [boolean, BoxStylesWithPseudoClasses]>, name: string, props: TProps) {
+  export function assignBooleanProp<TProps>(
+    prop: boolean | [boolean, BoxStylesWithPseudoClasses] | undefined,
+    name: string,
+    props: TProps,
+  ) {
     if (prop !== undefined && prop != null) {
       (props as any)[(pseudoAliases as any)[name] ?? name] = Array.isArray(prop) ? prop[0] : prop;
     }

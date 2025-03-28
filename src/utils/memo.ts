@@ -4,7 +4,7 @@ export interface Memo<T> {
 }
 
 export default function memo<T>(action: () => T): Memo<T> {
-  let cache: Maybe<T>;
+  let cache: T | undefined;
 
   const obj = {
     clear() {

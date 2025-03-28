@@ -3,6 +3,8 @@ import { ClassNameType } from './core/classNames';
 import { BoxStyle, BoxStylesType, ExtractKeys } from './core/coreTypes';
 import boxComponents from './core/extends/boxComponents';
 
+export type ArrayType<T> = T extends (infer U)[] ? U : T;
+
 export namespace Augmented {
   export interface BoxProps {}
   export interface BoxPropTypes {}

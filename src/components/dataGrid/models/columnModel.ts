@@ -35,7 +35,7 @@ export default class ColumnModel<TRow> {
   }
 
   private _pin?: PinPosition;
-  public get pin(): Maybe<PinPosition> {
+  public get pin(): PinPosition | undefined {
     if (this.isLeaf) return this._pin;
 
     const pins = [...new Set(this.columns.flatMap((c) => c.pin))];
@@ -47,7 +47,7 @@ export default class ColumnModel<TRow> {
     return `${this.key}${this.pin ?? ''}`;
   }
 
-  public getPinnedColumn(pin?: PinPosition): Maybe<ColumnModel<TRow>> {
+  public getPinnedColumn(pin?: PinPosition): ColumnModel<TRow> | undefined {
     if (this.hasPin(pin)) {
       if (this.isLeaf) return this;
 
@@ -83,7 +83,7 @@ export default class ColumnModel<TRow> {
   }
 
   private _inlineWidth?: number;
-  public get inlineWidth(): Maybe<number> {
+  public get inlineWidth(): number | undefined {
     if (this.isLeaf) return this._inlineWidth;
 
     const sizes = this.visibleColumns.map((c) => c.inlineWidth).filter((width) => typeof width === 'number');
