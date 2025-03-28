@@ -1,3 +1,5 @@
+export * from './array';
+
 import { breakpoints, cssStyles, pseudo1, pseudo2, pseudoClasses, pseudoGroupClasses } from './core/boxStyles';
 import { ClassNameType } from './core/classNames';
 import { BoxStyle, BoxStylesType, ExtractKeys } from './core/coreTypes';
