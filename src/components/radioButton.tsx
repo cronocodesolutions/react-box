@@ -20,12 +20,15 @@ interface Props<TKey extends keyof ComponentsAndVariants> extends RadioButtonPro
   defaultChecked?: boolean;
 }
 
-function RadioButton<TKey extends keyof ComponentsAndVariants>(props: Props<TKey>, ref: Ref<HTMLInputElement>) {
+function RadioButtonImpl<TKey extends keyof ComponentsAndVariants>(props: Props<TKey>, ref: Ref<HTMLInputElement>) {
   const newProps = ObjectUtils.buildProps(props, tagProps, { type: 'radio' });
 
   return <Box tag="input" component={'radioButton' as TKey} {...newProps} />;
 }
 
-export default forwardRef(RadioButton) as <TKey extends keyof ComponentsAndVariants = 'radioButton'>(
+const RadioButton = forwardRef(RadioButtonImpl);
+RadioButton.displayName = 'RadioButton';
+
+export default RadioButton as <TKey extends keyof ComponentsAndVariants = 'radioButton'>(
   props: Props<TKey> & RefAttributes<HTMLInputElement>,
 ) => React.ReactNode;

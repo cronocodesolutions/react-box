@@ -34,7 +34,7 @@ export default function DataGrid<TRow extends {}>(props: DataGridProps<TRow>) {
   const { isResizeMode } = grid;
 
   const headers = useMemo(() => {
-    console.log('render - headers');
+    console.debug('\x1b[36m%s\x1b[0m', '[react-box]: DataGrid render headers');
     return grid.headerRows.value.map((row) => {
       return row.map((cell) => {
         return <DataGridHeaderCell key={cell.uniqueKey} column={cell} />;
@@ -50,7 +50,7 @@ export default function DataGrid<TRow extends {}>(props: DataGridProps<TRow>) {
     [rowsRef.current],
   );
 
-  console.log('render - data grid');
+  console.debug('\x1b[36m%s\x1b[0m', '[react-box]: DataGrid render');
 
   return (
     <Box component="datagrid" style={grid.sizes.value} props={{ role: 'presentation' }}>
@@ -69,6 +69,8 @@ export default function DataGrid<TRow extends {}>(props: DataGridProps<TRow>) {
     </Box>
   );
 }
+
+(DataGrid as React.FunctionComponent).displayName = 'DataGrid';
 
 interface DataGridRowsProps<TRow> {
   grid: GridModel<TRow>;
@@ -91,7 +93,7 @@ function DataGridRows<TRow>(props: DataGridRowsProps<TRow>, ref: Ref<DataGridRow
   const startIndex = Math.max(0, Math.floor(scrollTop / rowHeight) - rowsOffset);
 
   const rows = useMemo(() => {
-    console.log('render - rows');
+    console.debug('\x1b[36m%s\x1b[0m', '[react-box]: DataGrid render rows');
 
     const rowsToRender = grid.flatRows.value.take(take, startIndex).map((row) => {
       if (row instanceof GroupRowModel) {
@@ -118,7 +120,6 @@ function DataGridRows<TRow>(props: DataGridRowsProps<TRow>, ref: Ref<DataGridRow
         }}
       >
         <Grid
-          props={{ role: 'presentation' }}
           width="max-content"
           minWidth="fit"
           transition="none"
@@ -135,3 +136,4 @@ function DataGridRows<TRow>(props: DataGridRowsProps<TRow>, ref: Ref<DataGridRow
 }
 
 const Rows = forwardRef(DataGridRows) as <TRow>(props: DataGridRowsProps<TRow> & React.RefAttributes<DataGridRowsRef>) => React.ReactNode;
+(Rows as React.FunctionComponent).displayName = 'Rows';

@@ -261,7 +261,7 @@ interface DropdownDisplayProps<TVal> extends Omit<BoxProps, 'children'> {
   children: ((selectedValues: TVal[], isOpen: boolean) => React.ReactNode) | React.ReactNode;
 }
 
-interface DropdownType {
+interface DropdownType extends React.FunctionComponent {
   <TVal>(props: Props<TVal> & RefAttributes<HTMLInputElement>): React.ReactNode;
   Item: <TVal>(props: DropdownItemProps<TVal>) => React.ReactNode;
   Unselect: (props: BoxProps) => React.ReactNode;
@@ -282,6 +282,7 @@ Dropdown.Unselect = withName('DropdownUnselect');
 Dropdown.SelectAll = withName('DropdownSelectAll');
 Dropdown.EmptyItem = withName('DropdownEmptyItem');
 Dropdown.Display = withName('DropdownDisplay');
+Dropdown.displayName = 'Dropdown';
 
 export default Dropdown;
 

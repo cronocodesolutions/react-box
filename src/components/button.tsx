@@ -17,12 +17,15 @@ interface Props<TKey extends keyof ComponentsAndVariants> extends ButtonProps<TK
   onClick?: (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void;
 }
 
-function Button<TKey extends keyof ComponentsAndVariants>(props: Props<TKey>, ref: Ref<HTMLButtonElement>) {
+function ButtonImpl<TKey extends keyof ComponentsAndVariants>(props: Props<TKey>, ref: Ref<HTMLButtonElement>) {
   const newProps = ObjectUtils.buildProps(props, tagProps);
 
   return <Box ref={ref} tag="button" component={'button' as TKey} {...newProps} />;
 }
 
-export default forwardRef(Button) as <TKey extends keyof ComponentsAndVariants = 'button'>(
+const Button = forwardRef(ButtonImpl);
+Button.displayName = 'Button';
+
+export default Button as <TKey extends keyof ComponentsAndVariants = 'button'>(
   props: Props<TKey> & RefAttributes<HTMLButtonElement>,
 ) => React.ReactNode;

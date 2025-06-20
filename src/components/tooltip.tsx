@@ -9,7 +9,7 @@ interface Props extends BoxProps {
   onPositionChange?(position: { top: number; left: number }): void;
 }
 
-function Tooltip(props: Props, ref: Ref<HTMLDivElement>) {
+function TooltipImpl(props: Props, ref: Ref<HTMLDivElement>) {
   const { onPositionChange } = props;
   const positionRef = useRef<HTMLDivElement>(null);
   const [position, setPosition] = useState<{ top: number; left: number; width?: number } | undefined>();
@@ -92,4 +92,7 @@ function Tooltip(props: Props, ref: Ref<HTMLDivElement>) {
   );
 }
 
-export default forwardRef(Tooltip);
+const Tooltip = forwardRef(TooltipImpl);
+Tooltip.displayName = 'Tooltip';
+
+export default Tooltip;

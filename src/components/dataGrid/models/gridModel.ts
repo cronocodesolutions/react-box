@@ -126,7 +126,7 @@ export default class GridModel<TRow> {
   });
 
   public readonly sizes = memo(() => {
-    console.log('sizes');
+    console.debug('\x1b[36m%s\x1b[0m', '[react-box]: DataGrid sizes memo');
 
     const size = this.columns.value.flat.reduce<Record<string, string>>((acc, c) => {
       const { inlineWidth } = c;

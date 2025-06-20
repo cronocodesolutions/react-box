@@ -15,7 +15,7 @@ interface Props extends Omit<BoxStyleProps, 'width' | 'height'> {
   height?: string;
 }
 
-function BaseSvg(props: Props, ref: Ref<SVGSVGElement>) {
+function BaseSvgImpl(props: Props, ref: Ref<SVGSVGElement>) {
   const { viewBox = '0 0 24 24', width = '1.5rem', height, props: tagProps, ...restProps } = props;
 
   return (
@@ -28,6 +28,9 @@ function BaseSvg(props: Props, ref: Ref<SVGSVGElement>) {
   );
 }
 
-export default forwardRef(BaseSvg);
+const BaseSvg = forwardRef(BaseSvgImpl);
+BaseSvg.displayName = 'BaseSvg';
 
-export type BaseSvgProps = React.ComponentProps<typeof BaseSvg>;
+export default BaseSvg;
+
+export type BaseSvgProps = React.ComponentProps<typeof BaseSvgImpl>;
