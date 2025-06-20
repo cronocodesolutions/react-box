@@ -13,7 +13,7 @@ import useVisibility from './hooks/useVisibility';
 type AllProps<TTag extends keyof React.JSX.IntrinsicElements> = React.ComponentProps<TTag>;
 type TagPropsType<TTag extends keyof React.JSX.IntrinsicElements> = Omit<
   AllProps<TTag>,
-  'className' | 'style' | 'ref' | 'disabled' | 'required' | 'checked'
+  'className' | 'style' | 'ref' | 'disabled' | 'required' | 'checked' | 'id'
 >;
 
 interface Props<TTag extends keyof React.JSX.IntrinsicElements, TKey extends keyof ComponentsAndVariants> extends BoxStyleProps<TKey> {
@@ -22,30 +22,32 @@ interface Props<TTag extends keyof React.JSX.IntrinsicElements, TKey extends key
   props?: TagPropsType<TTag>;
   className?: ClassNameType;
   style?: React.ComponentProps<TTag>['style'];
+  id?: string;
 }
 
 function BoxComponent<TTag extends keyof React.JSX.IntrinsicElements = 'div', TKey extends keyof ComponentsAndVariants = never>(
   props: Props<TTag, TKey>,
   ref: Ref<ExtractElementFromTag<TTag>>,
 ) {
-  const { tag = 'div', children, props: tagProps, className: userClassName, style, disabled, required, checked, selected } = props;
+  const { tag = 'div', children, props: tagProps, className: userClassName, disabled, required, checked, selected } = props;
 
   const styleClasses = useStyles(props, tag === 'svg');
 
   const finalTagProps = useMemo(() => {
     const className = classNames(styleClasses, userClassName).join(' ');
-    const props = {
+    const propsToUse = {
       ...tagProps,
       className,
     } as AllProps<TTag>;
-    BoxUtils.assignBooleanProp(disabled, 'disabled', props);
-    BoxUtils.assignBooleanProp(required, 'required', props);
-    BoxUtils.assignBooleanProp(checked, 'checked', props);
-    BoxUtils.assignBooleanProp(selected, 'selected', props);
-    style && (props.style = style);
-    ref && (props.ref = ref as React.RefObject<HTMLElement>);
+    BoxUtils.assignBooleanProp(disabled, 'disabled', propsToUse);
+    BoxUtils.assignBooleanProp(required, 'required', propsToUse);
+    BoxUtils.assignBooleanProp(checked, 'checked', propsToUse);
+    BoxUtils.assignBooleanProp(selected, 'selected', propsToUse);
+    'style' in props && (propsToUse.style = props.style);
+    'id' in props && (propsToUse.id = props.id);
+    ref && (propsToUse.ref = ref as React.RefObject<HTMLElement>);
 
-    return props;
+    return propsToUse;
   }, [props]);
 
   const [isHover, setIsHover] = useState(false);
