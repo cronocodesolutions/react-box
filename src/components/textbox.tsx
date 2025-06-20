@@ -51,12 +51,15 @@ interface Props<TKey extends keyof ComponentsAndVariants> extends TextareaProps<
   step?: number | string;
 }
 
-function Textbox<TKey extends keyof ComponentsAndVariants>(props: Props<TKey>, ref: Ref<HTMLInputElement>) {
+function TextboxImpl<TKey extends keyof ComponentsAndVariants>(props: Props<TKey>, ref: Ref<HTMLInputElement>) {
   const newProps = ObjectUtils.buildProps(props, tagProps);
 
   return <Box ref={ref} tag="input" component={'textbox' as TKey} {...newProps} />;
 }
 
-export default forwardRef(Textbox) as <TKey extends keyof ComponentsAndVariants = 'textbox'>(
+const Textbox = forwardRef(TextboxImpl);
+Textbox.displayName = 'Textbox';
+
+export default Textbox as <TKey extends keyof ComponentsAndVariants = 'textbox'>(
   props: Props<TKey> & RefAttributes<HTMLInputElement>,
 ) => React.ReactNode;

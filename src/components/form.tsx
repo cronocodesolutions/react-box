@@ -30,3 +30,5 @@ export default function Form<T>(props: Props<T>) {
 
   return <Box tag="form" {...props} props={newTagProps} />;
 }
+
+(Form as React.FunctionComponent).displayName = 'Form';

@@ -8,6 +8,7 @@ import Theme from './core/theme/theme';
 import Variables from './core/variables';
 import BoxUtils from './utils/box/boxUtils';
 import './array';
+import useVisibility from './hooks/useVisibility';
 
 type AllProps<TTag extends keyof React.JSX.IntrinsicElements> = React.ComponentProps<TTag>;
 type TagPropsType<TTag extends keyof React.JSX.IntrinsicElements> = Omit<
@@ -57,7 +58,7 @@ function BoxComponent<TTag extends keyof React.JSX.IntrinsicElements = 'div', TK
   return React.createElement(tag, finalTagProps, needsHoverState ? children({ isHover }) : children);
 }
 
-interface BoxType {
+interface BoxType extends React.FunctionComponent {
   <TTag extends keyof React.JSX.IntrinsicElements = 'div', TKey extends keyof ComponentsAndVariants = never>(
     props: Props<TTag, TKey> & RefAttributes<ExtractElementFromTag<TTag>>,
   ): React.ReactNode;
@@ -69,8 +70,8 @@ interface BoxType {
 }
 
 const Box = memo(forwardRef(BoxComponent)) as unknown as BoxType;
-// const Box = forwardRef(BoxComponent) as unknown as BoxType;
 
+Box.displayName = 'Box';
 Box.extend = BoxExtends.extend;
 Box.components = BoxExtends.components;
 Box.Theme = Theme;
@@ -87,3 +88,5 @@ export type BoxTagProps<
   TTag extends keyof React.JSX.IntrinsicElements = 'div',
   TKey extends keyof ComponentsAndVariants = never,
 > = Required<BoxProps<TTag, TKey>>['props'];
+
+export { useVisibility };

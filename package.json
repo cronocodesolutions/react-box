@@ -57,6 +57,7 @@
   "devDependencies": {
     "@rollup/pluginutils": "^5.1.0",
     "@testing-library/dom": "^10.4.0",
+    "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/react": "^16.0.1",
     "@types/node": "^22.5.5",
     "@types/postcss-mixins": "^9.0.5",

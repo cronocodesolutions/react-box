@@ -39,12 +39,15 @@ interface Props<TKey extends keyof ComponentsAndVariants> extends TextareaProps<
   required?: boolean;
 }
 
-function Textarea<TKey extends keyof ComponentsAndVariants>(props: Props<TKey>, ref: Ref<HTMLTextAreaElement>) {
+function TextareaImpl<TKey extends keyof ComponentsAndVariants>(props: Props<TKey>, ref: Ref<HTMLTextAreaElement>) {
   const newProps = ObjectUtils.buildProps(props, tagProps);
 
   return <Box ref={ref} tag="textarea" component={'textarea' as TKey} {...newProps} />;
 }
 
-export default forwardRef(Textarea) as <TKey extends keyof ComponentsAndVariants = 'textarea'>(
+const Textarea = forwardRef(TextareaImpl);
+Textarea.displayName = 'Textarea';
+
+export default Textarea as <TKey extends keyof ComponentsAndVariants = 'textarea'>(
   props: Props<TKey> & RefAttributes<HTMLTextAreaElement>,
 ) => React.ReactNode;

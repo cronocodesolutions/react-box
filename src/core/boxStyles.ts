@@ -299,6 +299,12 @@ export const cssStyles = {
       values: ['stretch', 'flex-start', 'flex-end', 'center', 'baseline', 'start', 'end', 'self-start', 'self-end'] as const,
     },
   ],
+  placeContent: [
+    {
+      styleName: 'place-content',
+      values: ['start', 'end', 'flex-start', 'flex-end', 'center', 'space-between', 'space-around', 'space-evenly', 'stretch'] as const,
+    },
+  ],
   /** The CSS align-content property sets the distribution of space between and around content items along a flexbox's cross axis, or a grid or block-level element's block axis. */
   alignContent: [
     {

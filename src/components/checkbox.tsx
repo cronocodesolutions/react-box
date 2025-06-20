@@ -20,7 +20,7 @@ interface Props<TKey extends keyof ComponentsAndVariants> extends CheckboxProps<
   defaultChecked?: boolean;
 }
 
-function Checkbox<TKey extends keyof ComponentsAndVariants>(props: Props<TKey>, ref: Ref<HTMLInputElement>) {
+function CheckboxImpl<TKey extends keyof ComponentsAndVariants>(props: Props<TKey>, ref: Ref<HTMLInputElement>) {
   const newProps = ObjectUtils.buildProps(props, tagProps, { type: 'checkbox' });
   const indeterminate = Array.isArray(props.indeterminate) ? props.indeterminate[0] : props.indeterminate;
 
@@ -36,6 +36,9 @@ function Checkbox<TKey extends keyof ComponentsAndVariants>(props: Props<TKey>, 
   return <Box tag="input" ref={checkboxRef} component={'checkbox' as TKey} {...newProps} />;
 }
 
-export default forwardRef(Checkbox) as <TKey extends keyof ComponentsAndVariants = 'checkbox'>(
+const Checkbox = forwardRef(CheckboxImpl);
+Checkbox.displayName = 'Checkbox';
+
+export default Checkbox as <TKey extends keyof ComponentsAndVariants = 'checkbox'>(
   props: Props<TKey> & RefAttributes<HTMLInputElement>,
 ) => React.ReactNode;
