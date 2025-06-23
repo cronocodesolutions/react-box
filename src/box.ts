@@ -60,7 +60,7 @@ function BoxComponent<TTag extends keyof React.JSX.IntrinsicElements = 'div', TK
   return React.createElement(tag, finalTagProps, needsHoverState ? children({ isHover }) : children);
 }
 
-interface BoxType extends React.FunctionComponent {
+interface BoxType {
   <TTag extends keyof React.JSX.IntrinsicElements = 'div', TKey extends keyof ComponentsAndVariants = never>(
     props: Props<TTag, TKey> & RefAttributes<ExtractElementFromTag<TTag>>,
   ): React.ReactNode;
@@ -73,7 +73,7 @@ interface BoxType extends React.FunctionComponent {
 
 const Box = memo(forwardRef(BoxComponent)) as unknown as BoxType;
 
-Box.displayName = 'Box';
+(Box as React.FunctionComponent).displayName = 'Box';
 Box.extend = BoxExtends.extend;
 Box.components = BoxExtends.components;
 Box.Theme = Theme;
