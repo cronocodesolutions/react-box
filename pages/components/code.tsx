@@ -59,7 +59,7 @@ export default function Code(props: Props) {
       <Label fontSize={22} mb={2}>
         {label}
       </Label>
-      <Box shadow="small-shadow" b={1} borderColor="gray-300" borderRadius={3} overflow="hidden">
+      <Box shadow="medium-shadow" borderRadius={3} overflow="hidden">
         <Box position="relative">
           {children && (
             <Box px={3} py={6}>

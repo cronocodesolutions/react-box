@@ -916,6 +916,13 @@ export const cssStyles = {
       valueFormat: (value: number) => `${value}ms`,
     },
   ],
+  /** The transition-timing-function CSS property sets how intermediate values are calculated for CSS properties being affected by a transition effect. */
+  transitionTimingFunction: [
+    {
+      styleName: 'transition-timing-function',
+      values: ['linear', 'ease', 'ease-in', 'ease-in-out', 'ease-out'] as const,
+    },
+  ],
   /** The user-select CSS property controls whether the user can select text. This doesn't have any effect on content loaded as part of a browser's user interface (its chrome), except in textboxes. */
   userSelect: [
     {
@@ -1022,12 +1029,14 @@ export const cssStyles = {
       values: 0,
     },
   ],
+  /** The color CSS property sets the foreground color value of an element's text and text decorations, and sets the currentcolor value.  */
   color: [
     {
       values: Object.keys(Variables.colors) as Variables.ColorType[],
       valueFormat: (value, getVariableValue) => getVariableValue(value),
     },
   ],
+  /** The background-color CSS property sets the background color of an element. */
   bgColor: [
     {
       values: Object.keys(Variables.colors) as Variables.ColorType[],
@@ -1035,6 +1044,7 @@ export const cssStyles = {
       styleName: 'background-color',
     },
   ],
+  /** The border-color shorthand CSS property sets the color of an element's border. */
   borderColor: [
     {
       values: Object.keys(Variables.colors) as Variables.ColorType[],
@@ -1042,6 +1052,7 @@ export const cssStyles = {
       styleName: 'border-color',
     },
   ],
+  /** The outline-color CSS property sets the color of an element's outline. */
   outlineColor: [
     {
       values: Object.keys(Variables.colors) as Variables.ColorType[],
@@ -1049,18 +1060,21 @@ export const cssStyles = {
       styleName: 'outline-color',
     },
   ],
+  /** The fill CSS property defines how SVG text content and the interior canvas of SVG shapes are filled or painted. If present, it overrides the element's fill attribute. */
   fill: [
     {
       values: Object.keys(Variables.colors) as Variables.ColorType[],
       valueFormat: (value, getVariableValue) => getVariableValue(value),
     },
   ],
+  /** The stroke CSS property defines the color or SVG paint server used to draw an element's stroke. */
   stroke: [
     {
       values: Object.keys(Variables.colors) as Variables.ColorType[],
       valueFormat: (value, getVariableValue) => getVariableValue(value),
     },
   ],
+  /** The background-image CSS property sets one or more background images on an element. */
   bgImage: [
     {
       values: ['none', 'bg-img-checked', 'bg-img-indeterminate', 'bg-img-radio'] as const,
@@ -1068,6 +1082,7 @@ export const cssStyles = {
       styleName: 'background-image',
     },
   ],
+  /** The box-shadow CSS property adds shadow effects around an element's frame */
   shadow: [
     {
       values: ['small-shadow', 'medium-shadow', 'large-shadow'] as const,
@@ -1075,6 +1090,7 @@ export const cssStyles = {
       styleName: 'box-shadow',
     },
   ],
+  /** The translateY() CSS function repositions an element vertically on the 2D plane. */
   translateX: [
     {
       values: 0,
@@ -1082,11 +1098,21 @@ export const cssStyles = {
       styleName: 'transform',
     },
   ],
+  /** The translateY() CSS function repositions an element vertically on the 2D plane. */
   translateY: [
     {
       values: 0,
       valueFormat: (value: number) => `translateY(${value / DEFAULT_REM_DIVIDER}rem)`,
       styleName: 'transform',
+    },
+  ],
+  /** The content CSS property replaces content with a generated value. It can be used to define what is rendered inside an element or pseudo-element. */
+  content: [
+    {
+      values: ['empty'] as const,
+      valueFormat: () => {
+        return "''";
+      },
     },
   ],
 } satisfies Record<string, BoxStyle[]>;
@@ -1104,6 +1130,8 @@ export const pseudo1 = {
   hasChecked: ':has(:checked)',
   hasRequired: ':has(:required)',
   hasDisabled: ':has([disabled])',
+  before: '::before',
+  after: '::after',
 };
 
 export const pseudo2 = {

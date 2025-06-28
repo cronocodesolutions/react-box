@@ -12,7 +12,7 @@ export default function InstallationPage() {
         Install React Box.
       </Box>
 
-      <Code language="shell" label="Default installation" code={`npm install @cronocode/react-box`}>
+      <Code language="shell" label="Default installation" code={`npm install @cronocode/react-box -S`}>
         {/* <Box fontSize={48} textAlign="center">
           DONE!
         </Box> */}

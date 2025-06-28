@@ -30,6 +30,8 @@ export default class GridModel<TRow> {
   private _sourceColumns: ColumnModel<TRow>[] = [];
 
   public readonly columns = memo(() => {
+    console.debug('\x1b[36m%s\x1b[0m', '[react-box]: DataGrid columns memo');
+
     const left = this._sourceColumns.map((c) => c.getPinnedColumn('LEFT')).filter((c) => !!c);
     const middle = this._sourceColumns.map((c) => c.getPinnedColumn()).filter((c) => !!c);
     const right = this._sourceColumns.map((c) => c.getPinnedColumn('RIGHT')).filter((c) => !!c);
@@ -50,6 +52,7 @@ export default class GridModel<TRow> {
   });
 
   public readonly headerRows = memo(() => {
+    console.debug('\x1b[36m%s\x1b[0m', '[react-box]: DataGrid headerRows memo');
     const groupedByLevel = this.columns.value.flat.groupBy((c) => c.death).sortBy((x) => x.key);
 
     return groupedByLevel.map((x) => {
@@ -64,6 +67,7 @@ export default class GridModel<TRow> {
   });
 
   public readonly gridTemplateColumns = memo(() => {
+    console.debug('\x1b[36m%s\x1b[0m', '[react-box]: DataGrid gridTemplateColumns memo');
     const { visibleLeafs } = this.columns.value;
 
     const rightPinnedColumnsCount = visibleLeafs.sumBy((x) => (x.pin === 'RIGHT' ? 1 : 0));
@@ -75,6 +79,7 @@ export default class GridModel<TRow> {
     return `${left} auto ${right}`;
   });
   public readonly rows = memo(() => {
+    console.debug('\x1b[36m%s\x1b[0m', '[react-box]: DataGrid rows memo');
     let data = this.props.data;
 
     if (this._sortColumn) {
@@ -120,6 +125,8 @@ export default class GridModel<TRow> {
   });
 
   public readonly flatRows = memo(() => {
+    console.debug('\x1b[36m%s\x1b[0m', '[react-box]: DataGrid flatRows memo');
+
     return this.rows.value.flatMap((row) => {
       return row.flatRows;
     });
@@ -258,7 +265,7 @@ export default class GridModel<TRow> {
       this.expandedGroupRow[groupRowKey] = true;
     }
 
-    this.rows.clear();
+    // this.rows.clear();
     this.flatRows.clear();
     this.update();
   };

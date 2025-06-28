@@ -201,7 +201,6 @@ export default class ColumnModel<TRow> {
         leaf.setWidth(newWidth < MIN_WIDTH_PX ? MIN_WIDTH_PX : newWidth);
       });
 
-      this.grid.headerRows.clear();
       this.grid.sizes.clear();
       update();
     }, 20);

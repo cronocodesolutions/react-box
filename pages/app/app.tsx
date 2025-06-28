@@ -27,7 +27,7 @@ export default function App() {
   const [rightSidebar, setRightSidebar] = useState<React.ReactNode | undefined>();
 
   return (
-    <Box color="violet-950" bgImage="body-bg" minHeight="fit-screen" position="relative">
+    <Box color="violet-950" minHeight="fit-screen" position="relative">
       <ScrollToTop />
       <Box position="sticky" top={0} lg={{ display: 'none' }} bgImage="body-bg" bgColor="white" zIndex={10}>
         <Flex gap={3} pl={2} sm={{ pl: 8 }} py={5}>

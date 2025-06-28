@@ -57,6 +57,28 @@ export default function ButtonPage() {
           <Box fontSize={18}>{counter}</Box>
         </Flex>
       </Code>
+
+      <Code
+        label="Hover variant"
+        code={`<Button variant="hover">
+  <Box position="relative">Basic</Box>
+</Button>
+
+<Button variant="hover" before={{ bgColor: 'indigo-900' }}>
+  <Box position="relative">Hover 2</Box>
+</Button>`}
+        mt={10}
+      >
+        <Flex gap={4}>
+          <Button variant="hover">
+            <Box position="relative">Hover</Box>
+          </Button>
+
+          <Button variant="hover" before={{ bgColor: 'indigo-900' }}>
+            <Box position="relative">Hover 2</Box>
+          </Button>
+        </Flex>
+      </Code>
     </Box>
   );
 }

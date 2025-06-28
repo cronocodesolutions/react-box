@@ -83,7 +83,7 @@ export default function DataGridPage() {
   return (
     <Box>
       <Box tag="h1" mb={3} fontSize={24}>
-        DataGrid
+        DataGrid (⚠️ WIP)
       </Box>
 
       <DataGrid data={datata} def={def} />

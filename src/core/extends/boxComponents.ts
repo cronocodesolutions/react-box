@@ -54,6 +54,24 @@ const boxComponents = {
         borderColor: 'gray-300',
       },
     },
+    variants: {
+      hover: {
+        position: 'relative',
+        overflow: 'hidden',
+        b: 0,
+        before: {
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          width: 0,
+          height: 'fit',
+          bgColor: 'violet-700',
+          content: 'empty',
+          transitionDuration: 300,
+        },
+        hover: { before: { width: 'fit' } },
+      },
+    },
   },
   textbox: {
     styles: {

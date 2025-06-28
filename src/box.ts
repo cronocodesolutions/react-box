@@ -18,10 +18,15 @@ type TagPropsType<TTag extends keyof React.JSX.IntrinsicElements> = Omit<
 
 interface Props<TTag extends keyof React.JSX.IntrinsicElements, TKey extends keyof ComponentsAndVariants> extends BoxStyleProps<TKey> {
   children?: React.ReactNode | ((props: { isHover: boolean }) => React.ReactNode);
+  /** html tag element */
   tag?: TTag;
+  /** props (attributes) related to html tag */
   props?: TagPropsType<TTag>;
+  /** classNames. supports conditional classNames. */
   className?: ClassNameType;
+  /** CSSProperties */
   style?: React.ComponentProps<TTag>['style'];
+  /** The HTML id attribute is used to specify a unique id for an HTML element. */
   id?: string;
 }
 

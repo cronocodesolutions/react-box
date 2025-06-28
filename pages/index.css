@@ -1,5 +1,6 @@
 html {
-  font-family: 'Source Code Pro', Roboto, Arial, Helvetica, sans-serif;
+  font-family: InterVariable, Roboto, Arial, Helvetica, sans-serif;
+  /* font-family: 'Source Code Pro', Roboto, Arial, Helvetica, sans-serif; */
   font-weight: 400;
   color: var(--colorblack);
 }
@@ -35,5 +36,25 @@ html {
 pre[class*='language-'] {
   margin-block: 0;
   border-radius: 0;
-  background-color: rgb(35, 39, 47);
+  background-color: #1e1b4b;
+}
+
+.token.string {
+  color: #93c5fd;
+}
+
+.token.class-name {
+  color: #93c5fd;
+}
+
+.token.function {
+  color: #93c5fd;
+}
+
+.token.keyword {
+  color: #2dd4bf;
+}
+
+.token.attr-name {
+  color: #f92672;
 }
