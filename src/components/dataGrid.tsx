@@ -20,6 +20,7 @@ import { DataGridProps } from './dataGrid/contracts/dataGridContract';
 import useGrid from './dataGrid/useGrid';
 import DataGridTopBar from './dataGrid/components/dataGridTopBar';
 import DataGridContent from './dataGrid/components/dataGridContent';
+import DataGridBottomBar from './dataGrid/components/dataGridBottomBar';
 
 export default function DataGrid<TRow extends {}>(props: DataGridProps<TRow>) {
   const grid = useGrid(props);
@@ -32,9 +33,7 @@ export default function DataGrid<TRow extends {}>(props: DataGridProps<TRow>) {
 
       <DataGridContent grid={grid} />
 
-      <Box p={3} bgColor="gray-200" bt={1} borderColor="gray-400">
-        Rows: {props.data.length}
-      </Box>
+      <DataGridBottomBar grid={grid} />
     </Box>
   );
 }
