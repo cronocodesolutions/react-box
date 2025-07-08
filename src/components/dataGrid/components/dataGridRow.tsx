@@ -21,3 +21,5 @@ export default function DataGridRow<TRow>(props: Props<TRow>) {
     </Flex>
   );
 }
+
+(DataGridRow as React.FunctionComponent).displayName = 'DataGridRow';

@@ -3,6 +3,9 @@ html {
   /* font-family: 'Source Code Pro', Roboto, Arial, Helvetica, sans-serif; */
   font-weight: 400;
   color: var(--colorblack);
+  /* color-scheme: dark; */
+  /* color-scheme: light dark; */
+  background-color: white;
 }
 
 .hljs-keyword {

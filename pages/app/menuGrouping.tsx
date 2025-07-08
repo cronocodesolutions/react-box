@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
-import Flex from '../../src/components/flex';
 import Box, { BoxProps } from '../../src/box';
-import ArrowSvg from '../svgs/arrowSvg';
 import { BaseSvgProps } from '../../src/components/baseSvg';
+import Flex from '../../src/components/flex';
+import ExpandIcon from '../../src/icons/expandIcon';
 
 interface Props extends BoxProps {
   label: string;
@@ -38,7 +38,7 @@ export default function MenuGrouping(props: Props) {
           <Icon />
           <Box>{label}</Box>
         </Flex>
-        <ArrowSvg width="14px" rotate={open === 'open' ? 0 : -90} />
+        <ExpandIcon width="14px" rotate={open === 'open' ? 0 : -90} />
       </Flex>
       {open === 'open' && <Box>{children}</Box>}
     </Box>

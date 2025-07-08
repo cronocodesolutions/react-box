@@ -2,7 +2,7 @@ import { BoxComponentStyles } from '../../types';
 
 export interface BoxComponent {
   clean?: boolean;
-  styles: BoxComponentStyles;
+  styles?: BoxComponentStyles;
   variants?: Record<string, BoxComponentStyles>;
   children?: Record<string, BoxComponent>;
 }
@@ -343,36 +343,91 @@ const boxComponents = {
       borderRadius: 1,
     },
     children: {
-      columnGroups: {
+      topBar: {
         styles: {
-          p: 3,
+          p: 2,
           bb: 1,
           borderColor: 'gray-400',
           color: 'gray-400',
           gap: 2,
           ai: 'center',
-          height: 12,
         },
         children: {
-          item: {
+          contextMenu: {
+            clean: true,
+            styles: {
+              cursor: 'pointer',
+              p: 1,
+              hover: { bgColor: 'gray-200', borderRadius: 1 },
+            },
+            children: {
+              tooltip: {
+                styles: {
+                  bgColor: 'white',
+                  width: 56,
+                  b: 1,
+                  borderColor: 'gray-300',
+                  borderRadius: 1,
+                  display: 'flex',
+                  d: 'column',
+                  mt: 4,
+                  py: 2,
+                  translateX: -1,
+                  shadow: 'medium-shadow',
+                  overflow: 'auto',
+                  maxHeight: 100,
+                },
+                children: {
+                  item: {
+                    clean: true,
+                    styles: {
+                      display: 'flex',
+                      gap: 2,
+                      p: 3,
+                      cursor: 'pointer',
+                      hover: { bgColor: 'gray-200' },
+                    },
+                  },
+                },
+              },
+            },
+          },
+          columnGroups: {
             styles: {
               gap: 2,
               ai: 'center',
-              b: 1,
-              borderColor: 'gray-400',
-              bgColor: 'gray-100',
-              borderRadius: 1,
-              py: 1,
-              pl: 2,
-              pr: 1,
-              color: 'violet-950',
             },
             children: {
               icon: {
                 styles: {
-                  width: 3,
-                  color: 'gray-400',
-                  cursor: 'pointer',
+                  color: 'violet-950',
+                  width: 4,
+                },
+              },
+              separator: {
+                styles: {},
+              },
+              item: {
+                styles: {
+                  gap: 2,
+                  ai: 'center',
+                  b: 1,
+                  borderColor: 'gray-400',
+                  bgColor: 'gray-100',
+                  borderRadius: 1,
+                  py: 1,
+                  pl: 2,
+                  pr: 1,
+                  color: 'violet-950',
+                },
+                children: {
+                  icon: {
+                    styles: {
+                      width: 3,
+                      color: 'gray-400',
+                      cursor: 'pointer',
+                    },
+                  },
                 },
               },
             },
@@ -386,6 +441,7 @@ const boxComponents = {
           width: 'max-content',
           minWidth: 'fit',
           zIndex: 1,
+          bgColor: 'gray-200',
         },
         variants: {
           isResizeMode: { userSelect: 'none' },
@@ -393,7 +449,6 @@ const boxComponents = {
         children: {
           cell: {
             styles: {
-              bgColor: 'gray-200',
               borderColor: 'gray-400',
               bb: 1,
               minHeight: 12,
@@ -403,19 +458,89 @@ const boxComponents = {
             variants: {
               isRowNumber: {},
               isRowSelection: {},
-              isPinned: { position: 'sticky', zIndex: 2 },
+              isPinned: { position: 'sticky', zIndex: 2, bgColor: 'gray-200' },
               isFirstLeftPinned: {},
               isLastLeftPinned: { br: 1 },
               isFirstRightPinned: { bl: 1 },
               isLastRightPinned: {},
               isSortable: { cursor: 'pointer' },
             },
+            children: {
+              contextMenu: {
+                clean: true,
+                styles: {
+                  width: 6,
+                  height: 6,
+                  cursor: 'pointer',
+                  userSelect: 'none',
+                  borderRadius: 1,
+                  borderColor: 'gray-200',
+                  display: 'flex',
+                  jc: 'center',
+                  ai: 'center',
+                  transition: 'none',
+                  bgColor: 'gray-200',
+                  hover: { bgColor: 'gray-300' },
+                },
+                children: {
+                  icon: {
+                    styles: {},
+                  },
+                  tooltip: {
+                    styles: {
+                      bgColor: 'white',
+                      width: 56,
+                      b: 1,
+                      borderColor: 'gray-300',
+                      borderRadius: 1,
+                      display: 'flex',
+                      d: 'column',
+                      mt: 4,
+                      py: 2,
+                      overflow: 'hidden',
+                      translateX: -5,
+                      shadow: 'medium-shadow',
+                    },
+                    variants: {
+                      openLeft: { translateX: -55 },
+                    },
+                    children: {
+                      item: {
+                        clean: true,
+                        styles: {
+                          display: 'flex',
+                          gap: 2,
+                          p: 3,
+                          cursor: 'pointer',
+                          hover: { bgColor: 'gray-200' },
+                        },
+                        children: {
+                          icon: {
+                            styles: {
+                              width: 4,
+                              color: 'violet-950',
+                            },
+                          },
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+              resizer: {
+                styles: {
+                  width: 0.5,
+                  height: 'fit',
+                  bgColor: 'gray-400',
+                  hoverGroup: { resizer: { bgColor: 'gray-600' } },
+                },
+              },
+            },
           },
         },
       },
       cell: {
         styles: {
-          bgColor: 'gray-100',
           bb: 1,
           borderColor: 'gray-400',
           transition: 'none',
@@ -429,7 +554,7 @@ const boxComponents = {
             bgColor: 'gray-200',
           },
           isRowSelection: {},
-          isPinned: { position: 'sticky' },
+          isPinned: { position: 'sticky', bgColor: 'gray-100' },
           isFirstLeftPinned: {},
           isLastLeftPinned: { br: 1 },
           isFirstRightPinned: { bl: 1 },

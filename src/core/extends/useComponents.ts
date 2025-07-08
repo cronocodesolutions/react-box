@@ -31,6 +31,9 @@ export default function useComponents<TKey extends keyof ComponentsAndVariants =
     if (variantNames.length === 0) return componentStyles.styles;
 
     const variantStyles = ObjectUtils.mergeDeep(...variantNames.map((v) => componentStyles.variants?.[v] as BoxComponentStyles));
+
+    if (!componentStyles.styles) return variantStyles;
+
     return ObjectUtils.mergeDeep<BoxComponentStyles>(componentStyles.styles, variantStyles);
   }, [clean, component, variant]);
 }

@@ -1,13 +1,13 @@
-// ❌ simple table column definitions + data[]
-// ❌ hover row styles
-// ❌ horizontal scroll for headers + rows
-// ❌ vertical scroll rows only
-// ❌ column sorting
+// ✅ simple table column definitions + data[]
+// ✅ hover row styles
+// ✅ horizontal scroll for headers + rows
+// ✅ vertical scroll rows only
+// ✅ column sorting
 // ❌ pagination
-// ❌ resize column
-// ❌ pin (left/right)
-// ❌ multi-level headers
-// ❌ grouping
+// ✅ resize column
+// ✅ pin (left/right)
+// ✅ multi-level headers
+// ✅ grouping
 // ❌ select row checkbox
 // ❌ filters
 // ❌ empty table
@@ -18,8 +18,8 @@
 import Box from '../box';
 import { DataGridProps } from './dataGrid/contracts/dataGridContract';
 import useGrid from './dataGrid/useGrid';
-import DataGridColumnGroups from './dataGrid/components/dataGridColumnGroups';
-import DataGridBody from './dataGrid/components/dataGridBody';
+import DataGridTopBar from './dataGrid/components/dataGridTopBar';
+import DataGridContent from './dataGrid/components/dataGridContent';
 
 export default function DataGrid<TRow extends {}>(props: DataGridProps<TRow>) {
   const grid = useGrid(props);
@@ -28,9 +28,9 @@ export default function DataGrid<TRow extends {}>(props: DataGridProps<TRow>) {
 
   return (
     <Box component="datagrid" style={grid.sizes.value} props={{ role: 'presentation' }}>
-      <DataGridColumnGroups grid={grid} />
+      <DataGridTopBar grid={grid} />
 
-      <DataGridBody grid={grid} />
+      <DataGridContent grid={grid} />
 
       <Box p={3} bgColor="gray-200" bt={1} borderColor="gray-400">
         Rows: {props.data.length}

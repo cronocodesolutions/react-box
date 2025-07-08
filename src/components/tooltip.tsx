@@ -1,16 +1,20 @@
 import { createPortal } from 'react-dom';
 import Box, { BoxProps } from '../box';
-import { forwardRef, Ref, useCallback, useLayoutEffect, useRef, useState } from 'react';
+import { forwardRef, Ref, RefAttributes, useCallback, useLayoutEffect, useRef, useState } from 'react';
 import usePortalContainer from '../hooks/usePortalContainer';
+import { ExtractElementFromTag } from '../core/coreTypes';
+import { ComponentsAndVariants } from '../types';
 
 const positionDigitsAfterComma = 2;
 
-interface Props extends BoxProps {
+interface TooltipProps {
   onPositionChange?(position: { top: number; left: number }): void;
 }
 
+type Props = TooltipProps & BoxProps;
+
 function TooltipImpl(props: Props, ref: Ref<HTMLDivElement>) {
-  const { onPositionChange } = props;
+  const { onPositionChange, ...restProps } = props;
   const positionRef = useRef<HTMLDivElement>(null);
   const [position, setPosition] = useState<{ top: number; left: number; width?: number } | undefined>();
   const portalContainer = usePortalContainer();
@@ -84,7 +88,7 @@ function TooltipImpl(props: Props, ref: Ref<HTMLDivElement>) {
             transition="none"
             style={{ transform: `translate(${position.left}px,${position.top}px)`, width: position.width }}
           >
-            <Box position="absolute" width="fit" {...props} />
+            <Box {...restProps} />
           </Box>,
           portalContainer,
         )}
@@ -95,4 +99,6 @@ function TooltipImpl(props: Props, ref: Ref<HTMLDivElement>) {
 const Tooltip = forwardRef(TooltipImpl);
 Tooltip.displayName = 'Tooltip';
 
-export default Tooltip;
+export default Tooltip as <TTag extends keyof React.JSX.IntrinsicElements = 'div', TKey extends keyof ComponentsAndVariants = never>(
+  props: BoxProps<TTag, TKey> & RefAttributes<ExtractElementFromTag<TTag>> & TooltipProps,
+) => React.ReactNode;

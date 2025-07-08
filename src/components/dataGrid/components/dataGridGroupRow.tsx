@@ -1,9 +1,10 @@
+import ExpandIcon from '../../../icons/expandIcon';
 import Button from '../../button';
 import Checkbox from '../../checkbox';
 import Flex from '../../flex';
-import DataGridCell from './dataGridCell';
 import { EMPTY_CELL_KEY, GROUPING_CELL_KEY, ROW_NUMBER_CELL_KEY, ROW_SELECTION_CELL_KEY } from '../models/gridModel';
 import GroupRowModel from '../models/groupRowModel';
+import DataGridCell from './dataGridCell';
 
 interface Props<TRow> {
   row: GroupRowModel<TRow>;
@@ -31,7 +32,8 @@ export default function DataGridGroupRow<TRow>(props: Props<TRow>) {
               gridColumn={row.groupingColumnGridColumn}
               pl={4 * row.depth}
             >
-              <Button display="contents" clean onClick={() => row.toggleRow()} cursor="pointer">
+              <Button clean onClick={() => row.toggleRow()} cursor="pointer" display="flex" gap={1} ai="center">
+                <ExpandIcon fill="currentColor" width="14px" height="14px" rotate={row.expanded ? 0 : -90} />
                 {cell.value}
               </Button>
             </DataGridCell>
@@ -57,3 +59,5 @@ export default function DataGridGroupRow<TRow>(props: Props<TRow>) {
     </Flex>
   );
 }
+
+(DataGridGroupRow as React.FunctionComponent).displayName = 'DataGridGroupRow';

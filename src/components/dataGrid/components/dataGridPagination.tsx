@@ -26,3 +26,5 @@ export default function DataGridPagination<TRow>(props: Props<TRow>) {
     </Flex>
   );
 }
+
+(DataGridPagination as React.FunctionComponent).displayName = 'DataGridPagination';

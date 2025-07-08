@@ -11,7 +11,7 @@ export default function HomePage() {
         </Box>
         <Box fontSize={18} fontWeight={300} mt={6}>
           <Box>Utility framework with multiple props which cover all CSS styles.</Box>
-          <Box> Never DRY with your CSS styles. Keep typescript compilation power.</Box>
+          <Box>Never DRY with your CSS styles. Keep typescript compilation power.</Box>
         </Box>
       </Flex>
       <Flex mt={20} jc="center" fontSize={30}>

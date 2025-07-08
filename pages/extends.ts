@@ -7,6 +7,8 @@ export const { extendedProps, extendedPropTypes } = Box.extend(
   {
     'bg-stripes': 'linear-gradient(135deg,var(--violet-300) 10%,#0000 0,#0000 50%,var(--violet-300) 0,var(--violet-300) 60%,#0000 0,#0000)',
     'body-bg': 'linear-gradient(19deg, white 40%, rgba(183, 33, 255, 0.05) 94%)',
+    'theme-bg': 'light-dark(#fff, #082f49)',
+    'theme-color': 'light-dark(#fff, #082f49)',
   },
   {},
   {
@@ -15,6 +17,20 @@ export const { extendedProps, extendedPropTypes } = Box.extend(
         values: ['body-bg', 'bg-stripes'] as const,
         valueFormat: (value, getVariableValue) => getVariableValue(`${value}`),
         styleName: 'background-image',
+      },
+    ],
+    bgColor: [
+      {
+        values: ['theme-bg'] as const,
+        valueFormat: (value, getVariable) => getVariable(value),
+        styleName: 'background-color',
+      },
+    ],
+    color: [
+      {
+        values: ['theme-color'] as const,
+        valueFormat: (value, getVariable) => getVariable(value),
+        styleName: 'color',
       },
     ],
   },
