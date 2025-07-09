@@ -86,7 +86,45 @@ export default function DataGridPage() {
       <Code
         mt={10}
         label="Data grid default styles"
-        code={`export const components = Box.components({
+        code={`
+export const { extendedProps, extendedPropTypes } = Box.extend(
+  {
+    'bg-img-indeterminate-green': \`url("data:image/svg+xml,\${encodeURIComponent(\`<svg xmlns='http://www.w3.org/2000/svg' width='100%' viewBox='0 0 20 20'><line stroke='green' x1='4' y1='10' x2='16' y2='10' stroke-width='1' /></svg>\`)}")\`,
+  },
+  {},
+  {
+    bgImage: [
+      {
+        values: ['bg-img-indeterminate-green'] as const,
+        valueFormat: (value, getVariableValue) => getVariableValue(value),
+        styleName: 'background-image',
+      },
+    ],
+  },
+);
+
+export const components = Box.components({
+  checkbox: {
+    variants: {
+      datagrid: {
+        borderColor: 'green',
+        hover: {
+          borderColor: 'green',
+        },
+        checked: {
+          bgColor: 'green',
+          borderColor: 'green',
+        },
+        focus: {
+          outlineColor: 'green',
+        },
+        indeterminate: {
+          color: 'green',
+          bgImage: 'bg-img-indeterminate-green',
+        },
+      },
+    },
+  },
   datagrid: {
     styles: {
       b: 1,

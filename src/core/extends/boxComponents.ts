@@ -250,7 +250,7 @@ const boxComponents = {
           maxHeight: 62,
           borderColor: 'violet-300',
           color: 'violet-950',
-          shadow: 'medium-shadow',
+          shadow: 'medium',
         },
       },
       item: {
@@ -376,7 +376,7 @@ const boxComponents = {
                   mt: 4,
                   py: 2,
                   translateX: -1,
-                  shadow: 'medium-shadow',
+                  shadow: 'medium',
                   overflow: 'auto',
                   maxHeight: 100,
                 },
@@ -502,7 +502,7 @@ const boxComponents = {
                       py: 2,
                       overflow: 'hidden',
                       translateX: -5,
-                      shadow: 'medium-shadow',
+                      shadow: 'medium',
                     },
                     variants: {
                       openLeft: { translateX: -55 },

@@ -31,7 +31,7 @@ export default function App() {
       <ScrollToTop />
       <Box position="sticky" top={0} lg={{ display: 'none' }} bgImage="body-bg" bgColor="white" zIndex={10}>
         <Flex gap={3} pl={2} sm={{ pl: 8 }} py={5}>
-          <Button clean onClick={() => setOpen(!open)} borderRadius={1} shadow="small-shadow" px={1} borderColor="violet-950">
+          <Button clean onClick={() => setOpen(!open)} borderRadius={1} shadow="small" px={1} borderColor="violet-950">
             <MenuSvg color="violet-950" />
           </Button>
           <NavLink to="/">

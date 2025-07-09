@@ -1,4 +1,5 @@
 import Box from '../src/box';
+import Variables from '../src/core/variables';
 
 // preload variable
 Box.getVariableValue('violet-300');
@@ -9,13 +10,14 @@ export const { extendedProps, extendedPropTypes } = Box.extend(
     'body-bg': 'linear-gradient(19deg, white 40%, rgba(183, 33, 255, 0.05) 94%)',
     'theme-bg': 'light-dark(#fff, #082f49)',
     'theme-color': 'light-dark(#fff, #082f49)',
+    'bg-img-indeterminate-green': `url("data:image/svg+xml,${encodeURIComponent(`<svg xmlns='http://www.w3.org/2000/svg' width='100%' viewBox='0 0 20 20'><line stroke='${Variables.colors['green']}' x1='4' y1='10' x2='16' y2='10' stroke-width='1' /></svg>`)}")`,
   },
   {},
   {
     bgImage: [
       {
-        values: ['body-bg', 'bg-stripes'] as const,
-        valueFormat: (value, getVariableValue) => getVariableValue(`${value}`),
+        values: ['body-bg', 'bg-stripes', 'bg-img-indeterminate-green'] as const,
+        valueFormat: (value, getVariableValue) => getVariableValue(value),
         styleName: 'background-image',
       },
     ],
@@ -88,26 +90,6 @@ export const components = Box.components({
       b: 1,
       borderColor: 'violet-600',
       color: 'violet-600',
-    },
-  },
-  checkbox: {
-    variants: {
-      datagrid: {
-        borderColor: 'green',
-        hover: {
-          borderColor: 'green',
-        },
-        checked: {
-          bgColor: 'green',
-          borderColor: 'green',
-        },
-        focus: {
-          outlineColor: 'green',
-        },
-        indeterminate: {
-          color: 'green',
-        },
-      },
     },
   },
 });
