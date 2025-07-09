@@ -24,6 +24,8 @@ export interface GridDefinition<TRow> {
   columns: ColumnType<TRow>[];
   showRowNumber?: boolean | { pinned?: boolean };
   rowSelection?: boolean | { pinned?: boolean };
+  rowHeight?: number;
+  visibleRows?: number;
   // pagination?: Pagination;
 }
 

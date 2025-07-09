@@ -90,4 +90,24 @@ export const components = Box.components({
       color: 'violet-600',
     },
   },
+  checkbox: {
+    variants: {
+      datagrid: {
+        borderColor: 'green',
+        hover: {
+          borderColor: 'green',
+        },
+        checked: {
+          bgColor: 'green',
+          borderColor: 'green',
+        },
+        focus: {
+          outlineColor: 'green',
+        },
+        indeterminate: {
+          color: 'green',
+        },
+      },
+    },
+  },
 });

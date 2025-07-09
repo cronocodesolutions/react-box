@@ -29,6 +29,8 @@ export default function DataGridPage() {
         code={`<DataGrid
   data={data}
   def={{
+    rowHeight: 40,
+    visibleRows: 5,
     columns: [
       { key: 'first_name', header: 'First name' },
       { key: 'last_name', header: 'Last name' },
@@ -75,13 +77,15 @@ export default function DataGridPage() {
               { key: 'language' },
               { key: 'currency_code' },
             ],
+            rowHeight: 40,
+            visibleRows: 5,
           }}
         />
       </Code>
 
       <Code
         mt={10}
-        label="Data grid components structure"
+        label="Data grid default styles"
         code={`export const components = Box.components({
   datagrid: {
     styles: {
@@ -199,7 +203,6 @@ export default function DataGridPage() {
             styles: {
               borderColor: 'gray-400',
               bb: 1,
-              minHeight: 12,
               position: 'relative',
               transition: 'none',
             },

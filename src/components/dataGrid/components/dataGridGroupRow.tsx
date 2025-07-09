@@ -52,7 +52,7 @@ export default function DataGridGroupRow<TRow>(props: Props<TRow>) {
 
           return (
             <DataGridCell key={key} column={cell.column}>
-              <Checkbox m={1} checked={checked} indeterminate={indeterminate} onChange={selectAllHandler} />
+              <Checkbox variant="datagrid" m={1} checked={checked} indeterminate={indeterminate} onChange={selectAllHandler} />
             </DataGridCell>
           );
         }

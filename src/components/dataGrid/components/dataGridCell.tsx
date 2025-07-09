@@ -34,6 +34,7 @@ export default function DataGridCell<TRow>(props: Props<TRow>) {
       jc={align}
       style={{
         width: `var(${widthVarName})`,
+        height: `var(${column.grid.rowHeightVarName})`,
         left: isLeftPinned ? `var(${leftVarName})` : undefined,
         right: isRightPinned ? `var(${rightVarName})` : undefined,
         ...style,

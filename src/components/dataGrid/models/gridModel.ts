@@ -144,6 +144,10 @@ export default class GridModel<TRow> {
     });
   });
 
+  public get rowHeight() {
+    return this.props.def.rowHeight ?? this.DEFAULT_ROW_HEIGHT_PX;
+  }
+
   public readonly sizes = memo(() => {
     console.debug('\x1b[36m%s\x1b[0m', '[react-box]: DataGrid sizes memo');
 
@@ -164,6 +168,7 @@ export default class GridModel<TRow> {
       return acc;
     }, {});
 
+    size[this.rowHeightVarName] = `${this.rowHeight}px`;
     size[this.leftEdgeVarName] = `${this.leftEdge}px`;
 
     const { visibleLeafs } = this.columns.value;
@@ -183,7 +188,7 @@ export default class GridModel<TRow> {
     return size;
   });
 
-  public readonly ROW_HEIGHT = 12;
+  public readonly DEFAULT_ROW_HEIGHT_PX = 48;
   public readonly MIN_COLUMN_WIDTH_PX = 48;
   public readonly DEFAULT_COLUMN_WIDTH_PX = 200;
 
@@ -197,6 +202,7 @@ export default class GridModel<TRow> {
     return this.columns.value.right.sumBy((c) => c.inlineWidth ?? 0);
   }
   public readonly leftEdgeVarName = '--left-edge';
+  public readonly rowHeightVarName = '--row-height';
 
   private readonly _idMap = new WeakMap<WeakKey, Key>();
   public getRowKey(row: TRow): Key {

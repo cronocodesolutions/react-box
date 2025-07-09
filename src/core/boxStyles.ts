@@ -1085,8 +1085,8 @@ export const cssStyles = {
   /** The box-shadow CSS property adds shadow effects around an element's frame */
   shadow: [
     {
-      values: ['small-shadow', 'medium-shadow', 'large-shadow'] as const,
-      valueFormat: (value, getVariableValue) => getVariableValue(value),
+      values: ['small', 'medium', 'large'] as const,
+      valueFormat: (value, getVariableValue) => getVariableValue(`${value}-shadow`),
       styleName: 'box-shadow',
     },
   ],

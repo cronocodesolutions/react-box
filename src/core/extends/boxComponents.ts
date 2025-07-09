@@ -161,6 +161,9 @@ const boxComponents = {
         borderColor: 'gray-300',
       },
     },
+    variants: {
+      datagrid: {},
+    },
   },
   radioButton: {
     styles: {
@@ -546,7 +549,6 @@ const boxComponents = {
           transition: 'none',
           ai: 'center',
           overflow: 'hidden',
-          minHeight: 12,
           hoverGroup: { 'grid-row': { bgColor: 'gray-200' } },
         },
         variants: {

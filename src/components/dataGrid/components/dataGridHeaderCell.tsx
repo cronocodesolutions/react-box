@@ -46,7 +46,7 @@ export default function DataGridHeaderCell<TRow>(props: Props<TRow>) {
       const checked = grid.selectedRows.size === grid.props.data.length;
       const indeterminate = !checked && grid.selectedRows.size > 0;
 
-      return <Checkbox m={1} indeterminate={indeterminate} checked={checked} onChange={toggleSelectAll} />;
+      return <Checkbox variant="datagrid" m={1} indeterminate={indeterminate} checked={checked} onChange={toggleSelectAll} />;
     }
     if (isGroupingCell) {
       if (grid.groupColumns.size === 1) {

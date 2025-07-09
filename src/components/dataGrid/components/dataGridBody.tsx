@@ -7,9 +7,8 @@ import GroupRowModel from '../models/groupRowModel';
 import DataGridGroupRow from './dataGridGroupRow';
 import DataGridRow from './dataGridRow';
 
-const visibleRows = 10;
-const rowsOffset = 25;
-const take = visibleRows + rowsOffset * 2;
+const DEFAULT_VISIBLE_ROWS = 10;
+const ROWS_TO_PRELOAD = 20;
 
 interface Props<TRow> {
   grid: GridModel<TRow>;
@@ -20,11 +19,13 @@ export default function DataGridBody<TRow>(props: Props<TRow>) {
   const { grid, scrollTop } = props;
 
   const rowsCount = grid.flatRows.value.length;
-  const rowHeight = DEFAULT_REM_DIVIDER * grid.ROW_HEIGHT;
-  const startIndex = Math.max(0, Math.floor(scrollTop / rowHeight) - rowsOffset);
+  const startIndex = Math.max(0, Math.floor(scrollTop / grid.rowHeight) - ROWS_TO_PRELOAD);
+  const visibleRows = grid.props.def.visibleRows ?? DEFAULT_VISIBLE_ROWS;
 
   const rows = useMemo(() => {
     console.debug('\x1b[36m%s\x1b[0m', '[react-box]: DataGrid render rows');
+
+    const take = visibleRows + ROWS_TO_PRELOAD * 2;
 
     const rowsToRender = grid.flatRows.value.take(take, startIndex).map((row) => {
       if (row instanceof GroupRowModel) {
@@ -40,10 +41,10 @@ export default function DataGridBody<TRow>(props: Props<TRow>) {
   console.debug('\x1b[36m%s\x1b[0m', '[react-box]: DataGrid render DataGridBody');
 
   return (
-    <Box height={grid.ROW_HEIGHT * visibleRows + 4}>
+    <Box style={{ height: grid.rowHeight * visibleRows + grid.rowHeight / 5 }}>
       <Box
         style={{
-          height: `${rowsCount * rowHeight}px`,
+          height: `${rowsCount * grid.rowHeight}px`,
         }}
       >
         <Grid
@@ -51,7 +52,7 @@ export default function DataGridBody<TRow>(props: Props<TRow>) {
           minWidth="fit"
           transition="none"
           style={{
-            transform: `translateY(${startIndex * rowHeight}px)`,
+            transform: `translateY(${startIndex * grid.rowHeight}px)`,
             gridTemplateColumns: grid.gridTemplateColumns.value,
           }}
         >

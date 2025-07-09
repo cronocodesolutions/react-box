@@ -38,7 +38,7 @@ export default function DataGridTopBarContextMenu<TRow>(props: Props<TRow>) {
                 leaf.toggleVisibility();
               }}
             >
-              <Checkbox checked={leaf.isVisible} onChange={() => {}} focus={{ outline: 0 }} />
+              <Checkbox variant="datagrid" checked={leaf.isVisible} onChange={() => {}} focus={{ outline: 0 }} />
               {leaf.header ?? leaf.key}
             </Button>
           ))}
