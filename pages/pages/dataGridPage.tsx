@@ -79,6 +79,7 @@ export default function DataGridPage() {
       { key: 'language' },
       { key: 'currency_code' },
     ],
+    rowSelection: { pinned: true },
   };
 
   return (

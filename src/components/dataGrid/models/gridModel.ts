@@ -23,10 +23,19 @@ export default class GridModel<TRow> {
     this._sourceColumns.push(new ColumnModel({ key: EMPTY_CELL_KEY }, this));
 
     // add row selection column
-    this._sourceColumns.unshift(new ColumnModel({ key: ROW_SELECTION_CELL_KEY, pin: 'LEFT', width: 50, align: 'center' }, this));
+    if (props.def.rowSelection) {
+      const pin: PinPosition | undefined = typeof props.def.rowSelection === 'object' && props.def.rowSelection.pinned ? 'LEFT' : undefined;
+
+      this._sourceColumns.unshift(new ColumnModel({ key: ROW_SELECTION_CELL_KEY, pin, width: 50, align: 'center' }, this));
+    }
 
     // add row number column
-    this._sourceColumns.unshift(new ColumnModel({ key: ROW_NUMBER_CELL_KEY, pin: 'LEFT', width: 70, align: 'right' }, this));
+    if (props.def.showRowNumber) {
+      const pin: PinPosition | undefined =
+        typeof props.def.showRowNumber === 'object' && props.def.showRowNumber.pinned ? 'LEFT' : undefined;
+
+      this._sourceColumns.unshift(new ColumnModel({ key: ROW_NUMBER_CELL_KEY, pin, width: 70, align: 'right' }, this));
+    }
   }
 
   private _sourceColumns: ColumnModel<TRow>[] = [];

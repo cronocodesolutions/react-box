@@ -22,6 +22,8 @@ export interface ColumnType<TRow> {
 export interface GridDefinition<TRow> {
   rowKey?: KeysMatching<TRow, Key> | ((rowData: TRow) => Key);
   columns: ColumnType<TRow>[];
+  showRowNumber?: boolean | { pinned?: boolean };
+  rowSelection?: boolean | { pinned?: boolean };
   // pagination?: Pagination;
 }
 

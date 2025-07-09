@@ -12,7 +12,7 @@ export default function DataGridBottomBar<TRow>(props: Props<TRow>) {
   return (
     <Flex component="datagrid.bottomBar">
       <Box>Rows: {grid.props.data.length}</Box>
-      <Box>Selected: {grid.selectedRows.size}</Box>
+      {grid.props.def.rowSelection && <Box>Selected: {grid.selectedRows.size}</Box>}
     </Flex>
   );
 }
