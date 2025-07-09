@@ -550,9 +550,7 @@ const boxComponents = {
           hoverGroup: { 'grid-row': { bgColor: 'gray-200' } },
         },
         variants: {
-          isRowNumber: {
-            bgColor: 'gray-200',
-          },
+          isRowNumber: { bgColor: 'gray-200' },
           isRowSelection: {},
           isPinned: { position: 'sticky', bgColor: 'gray-100', zIndex: 1 },
           isFirstLeftPinned: {},
