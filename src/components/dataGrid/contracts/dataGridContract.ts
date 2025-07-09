@@ -28,4 +28,12 @@ export interface GridDefinition<TRow> {
 export interface DataGridProps<TRow> {
   data: TRow[];
   def: GridDefinition<TRow>;
+  onSelectionChange?: (event: SelectionChangeEvent<TRow>) => void;
+}
+
+interface SelectionChangeEvent<TRow, TKey = TRow[keyof TRow] | number | string> {
+  action: 'select' | 'deselect';
+  selectedRowKeys: TKey[];
+  affectedRowKeys: TKey[];
+  isAllSelected: boolean;
 }

@@ -28,9 +28,9 @@ export default function DataGridBody<TRow>(props: Props<TRow>) {
 
     const rowsToRender = grid.flatRows.value.take(take, startIndex).map((row) => {
       if (row instanceof GroupRowModel) {
-        return <DataGridGroupRow key={row.rowKey} row={row} />;
+        return <DataGridGroupRow key={row.key} row={row} />;
       } else {
-        return <DataGridRow key={row.rowKey} row={row} />;
+        return <DataGridRow key={row.key} row={row} />;
       }
     });
 
@@ -55,6 +55,13 @@ export default function DataGridBody<TRow>(props: Props<TRow>) {
             gridTemplateColumns: grid.gridTemplateColumns.value,
           }}
         >
+          {/* {grid.flatRows.value.take(take, startIndex).map((row) => {
+            if (row instanceof GroupRowModel) {
+              return <DataGridGroupRow key={row.key} row={row} />;
+            } else {
+              return <DataGridRow key={row.key + row.selected.toString()} row={row} />;
+            }
+          })} */}
           {rows}
         </Grid>
       </Box>

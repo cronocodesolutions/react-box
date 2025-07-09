@@ -152,7 +152,7 @@ export default class ColumnModel<TRow> {
   }
 
   public get isVisible(): boolean {
-    if (this.isLeaf) return !this.grid.hiddenColumns.includes(this.key);
+    if (this.isLeaf) return !this.grid.hiddenColumns.has(this.key);
 
     return this.leafs.some((l) => l.isVisible);
   }
@@ -203,7 +203,7 @@ export default class ColumnModel<TRow> {
 
       this.grid.sizes.clear();
       update();
-    }, 20);
+    }, 40);
 
     const controller = new AbortController();
 

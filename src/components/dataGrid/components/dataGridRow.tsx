@@ -1,3 +1,4 @@
+import { useCallback } from 'react';
 import Checkbox from '../../checkbox';
 import Flex from '../../flex';
 import { ROW_SELECTION_CELL_KEY } from '../models/gridModel';
@@ -11,11 +12,15 @@ interface Props<TRow> {
 export default function DataGridRow<TRow>(props: Props<TRow>) {
   const { row } = props;
 
+  const rowSelectedHandler = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    row.grid.toggleRowSelection(row.key);
+  }, []);
+
   return (
     <Flex className="grid-row" display="contents" props={{ role: 'row' }}>
       {row.cells.map((cell) => (
         <DataGridCell key={cell.column.key} column={cell.column}>
-          {cell.column.key === ROW_SELECTION_CELL_KEY ? <Checkbox /> : cell.value}
+          {cell.column.key === ROW_SELECTION_CELL_KEY ? <Checkbox checked={row.selected} onChange={rowSelectedHandler} /> : cell.value}
         </DataGridCell>
       ))}
     </Flex>

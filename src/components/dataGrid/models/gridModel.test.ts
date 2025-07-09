@@ -1,6 +1,8 @@
 import { beforeEach, describe, expect, it, suite } from 'vitest';
 import GridModel from './gridModel';
 import { ColumnType, GridDefinition } from '../contracts/dataGridContract';
+import GroupRowModel from './groupRowModel';
+import RowModel from './rowModel';
 
 interface Person {
   firstName: string;
@@ -119,6 +121,66 @@ describe('GridModel', () => {
 
       const parentColumns = grid.columns.value.flat.filter((c) => c.key === 'parent');
       expect(parentColumns).to.have.length(1);
+    });
+  });
+
+  suite('when group by column', () => {
+    const data: Partial<Person>[] = [
+      { firstName: 'John', day: 20, month: 3 },
+      { firstName: 'John1', day: 20, month: 3 },
+      { firstName: 'John2', day: 20, month: 4 },
+      { firstName: 'John3', day: 21, month: 5 },
+      { firstName: 'John4', day: 21, month: 6 },
+    ];
+
+    it('groups data by day', () => {
+      const grid = getGridModel({ data });
+
+      grid.toggleGrouping('day');
+
+      expect(grid.flatRows.value).to.have.length(2);
+      expect(grid.flatRows.value.at(0) instanceof GroupRowModel).to.be.true;
+      expect((grid.flatRows.value.at(0) as GroupRowModel<Person>).rows).to.have.length(3);
+
+      expect(grid.flatRows.value.at(1) instanceof GroupRowModel).to.be.true;
+      expect((grid.flatRows.value.at(1) as GroupRowModel<Person>).rows).to.have.length(2);
+    });
+
+    it('groups data by day and expand', () => {
+      const grid = getGridModel({ data });
+
+      grid.toggleGrouping('day');
+      grid.toggleGroupRow(grid.rows.value[0].key);
+
+      expect(grid.flatRows.value).to.have.length(5);
+      expect(grid.flatRows.value.at(0) instanceof GroupRowModel).to.be.true;
+      expect(grid.flatRows.value.at(1) instanceof RowModel).to.be.true;
+      expect(grid.flatRows.value.at(2) instanceof RowModel).to.be.true;
+      expect(grid.flatRows.value.at(3) instanceof RowModel).to.be.true;
+      expect(grid.flatRows.value.at(4) instanceof GroupRowModel).to.be.true;
+    });
+
+    it('groups data by day and month', () => {
+      const grid = getGridModel({ data });
+
+      grid.toggleGrouping('day');
+      grid.toggleGrouping('month');
+
+      expect(grid.rows.value).to.have.length(2);
+
+      expect(grid.rows.value.at(0) instanceof GroupRowModel).to.be.true;
+      expect((grid.rows.value.at(0) as GroupRowModel<Person>).rows).to.have.length(2);
+      expect((grid.rows.value.at(0) as GroupRowModel<Person>).rows.at(0) instanceof GroupRowModel).to.be.true;
+      expect(((grid.rows.value.at(0) as GroupRowModel<Person>).rows.at(0) as GroupRowModel<Person>).rows).to.have.length(2);
+      expect((grid.rows.value.at(0) as GroupRowModel<Person>).rows.at(1) instanceof GroupRowModel).to.be.true;
+      expect(((grid.rows.value.at(0) as GroupRowModel<Person>).rows.at(1) as GroupRowModel<Person>).rows).to.have.length(1);
+
+      expect(grid.rows.value.at(1) instanceof GroupRowModel).to.be.true;
+      expect((grid.rows.value.at(1) as GroupRowModel<Person>).rows).to.have.length(2);
+      expect((grid.rows.value.at(1) as GroupRowModel<Person>).rows.at(0) instanceof GroupRowModel).to.be.true;
+      expect(((grid.rows.value.at(1) as GroupRowModel<Person>).rows.at(0) as GroupRowModel<Person>).rows).to.have.length(1);
+      expect((grid.rows.value.at(1) as GroupRowModel<Person>).rows.at(1) instanceof GroupRowModel).to.be.true;
+      expect(((grid.rows.value.at(1) as GroupRowModel<Person>).rows.at(1) as GroupRowModel<Person>).rows).to.have.length(1);
     });
   });
 });

@@ -9,8 +9,6 @@ export default function ButtonPage() {
 
   const ref = useRef<HTMLButtonElement>(null);
   const counterHandler = () => {
-    console.log(ref.current?.getClientRects());
-
     setCounter((prev) => prev + 1);
   };
 

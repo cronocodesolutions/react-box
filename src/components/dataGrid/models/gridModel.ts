@@ -15,13 +15,15 @@ export default class GridModel<TRow> {
     public readonly props: DataGridProps<TRow>,
     public readonly update: () => void,
   ) {
+    console.debug('\x1b[32m%s\x1b[0m', '[react-box]: DataGrid GridModel ctor');
+
     this._sourceColumns = props.def.columns.map((def) => new ColumnModel(def, this));
 
     // add empty column
     this._sourceColumns.push(new ColumnModel({ key: EMPTY_CELL_KEY }, this));
 
     // add row selection column
-    this._sourceColumns.unshift(new ColumnModel({ key: ROW_SELECTION_CELL_KEY, width: 50, align: 'center' }, this));
+    this._sourceColumns.unshift(new ColumnModel({ key: ROW_SELECTION_CELL_KEY, pin: 'LEFT', width: 50, align: 'center' }, this));
 
     // add row number column
     this._sourceColumns.unshift(new ColumnModel({ key: ROW_NUMBER_CELL_KEY, pin: 'LEFT', width: 70, align: 'right' }, this));
@@ -78,6 +80,7 @@ export default class GridModel<TRow> {
 
     return `${left} auto ${right}`;
   });
+
   public readonly rows = memo(() => {
     console.debug('\x1b[36m%s\x1b[0m', '[react-box]: DataGrid rows memo');
     let data = this.props.data;
@@ -86,10 +89,10 @@ export default class GridModel<TRow> {
       data = data.sortBy((x) => x[this._sortColumn as keyof TRow], this._sortDirection);
     }
 
-    if (this.groupColumns.length > 0) {
-      const getRowsGroup = (dataToGroup: TRow[], groupColumns: Key[], rowIndex: number): GroupRowModel<TRow>[] => {
-        const groupKey = groupColumns[0];
-        groupColumns = groupColumns.removeBy((c) => c === groupKey);
+    if (this.groupColumns.size > 0) {
+      const getRowsGroup = (dataToGroup: TRow[], groupColumns: Set<Key>, rowIndex: number): GroupRowModel<TRow>[] => {
+        const groupKey = groupColumns.values().next().value!;
+        groupColumns.delete(groupKey);
         const column = this.columns.value.leafs.findOrThrow((c) => c.key === groupKey);
 
         if (this._sortColumn === GROUPING_CELL_KEY) {
@@ -101,8 +104,8 @@ export default class GridModel<TRow> {
           .map((group) => {
             let rows: RowModel<TRow>[] | GroupRowModel<TRow>[];
 
-            if (groupColumns.length > 0) {
-              rows = getRowsGroup(group.values, groupColumns, rowIndex + 1);
+            if (groupColumns.size > 0) {
+              rows = getRowsGroup(group.values, new Set(groupColumns), rowIndex + 1);
             } else {
               rows = group.values.map((dataRow, index) => new RowModel(this, dataRow, rowIndex + 1 + index));
             }
@@ -118,7 +121,7 @@ export default class GridModel<TRow> {
           });
       };
 
-      return getRowsGroup(data, this.groupColumns, 0);
+      return getRowsGroup(data, new Set(this.groupColumns), 0);
     }
 
     return data.map((dataRow, rowIndex) => new RowModel(this, dataRow, rowIndex));
@@ -176,7 +179,8 @@ export default class GridModel<TRow> {
   public readonly DEFAULT_COLUMN_WIDTH_PX = 200;
 
   public isResizeMode = false;
-  public expandedGroupRow: Record<Key, boolean> = {};
+  public expandedGroupRow: Set<Key> = new Set();
+  public selectedRows: Set<Key> = new Set();
   public get leftEdge() {
     return this.columns.value.left.sumBy((c) => c.inlineWidth ?? 0);
   }
@@ -184,6 +188,21 @@ export default class GridModel<TRow> {
     return this.columns.value.right.sumBy((c) => c.inlineWidth ?? 0);
   }
   public readonly leftEdgeVarName = '--left-edge';
+
+  private readonly _idMap = new WeakMap<WeakKey, Key>();
+  public getRowKey(row: TRow): Key {
+    const { rowKey } = this.props.def;
+
+    if (rowKey) {
+      return typeof rowKey === 'function' ? rowKey(row) : (row[rowKey] as string);
+    }
+
+    if (!this._idMap.has(row as WeakKey)) {
+      this._idMap.set(row as WeakKey, crypto.randomUUID());
+    }
+
+    return this._idMap.get(row as WeakKey)!;
+  }
 
   public setSortColumn: (columnKey: Key, sortDirection?: SortDirection) => void = (columnKey: Key, ...sortDirection: any[]) => {
     if (sortDirection.length > 0) {
@@ -219,19 +238,22 @@ export default class GridModel<TRow> {
   };
 
   public toggleGrouping = (columnKey: Key) => {
-    if (this.groupColumns.includes(columnKey)) {
-      this.groupColumns = this.groupColumns.removeBy((key) => key === columnKey);
-      this.hiddenColumns = this.hiddenColumns.removeBy((key) => key === columnKey);
+    this.groupColumns = new Set(this.groupColumns);
+    this.hiddenColumns = new Set(this.hiddenColumns);
+
+    if (this.groupColumns.has(columnKey)) {
+      this.groupColumns.delete(columnKey);
+      this.hiddenColumns.delete(columnKey);
     } else {
-      this.groupColumns = this.groupColumns.add(columnKey);
-      this.hiddenColumns = this.hiddenColumns.add(columnKey);
+      this.groupColumns.add(columnKey);
+      this.hiddenColumns.add(columnKey);
     }
 
     const groupingColumn = this._sourceColumns.find((c) => c.key === GROUPING_CELL_KEY);
-    if (this.groupColumns.length > 0 && !groupingColumn) {
+    if (this.groupColumns.size > 0 && !groupingColumn) {
       const position = this._sourceColumns.sumBy((c) => (c.key === ROW_NUMBER_CELL_KEY || c.key === ROW_SELECTION_CELL_KEY ? 1 : 0));
       this._sourceColumns.splice(position, 0, new ColumnModel({ key: GROUPING_CELL_KEY }, this));
-    } else if (this.groupColumns.length === 0 && groupingColumn) {
+    } else if (this.groupColumns.size === 0 && groupingColumn) {
       this._sourceColumns = this._sourceColumns.removeBy((c) => c.key === GROUPING_CELL_KEY);
     }
 
@@ -246,7 +268,7 @@ export default class GridModel<TRow> {
   };
 
   public unGroupAll = () => {
-    this.groupColumns = [];
+    this.groupColumns = new Set();
     this._sourceColumns = this._sourceColumns.removeBy((c) => c.key === GROUPING_CELL_KEY);
 
     this.columns.clear();
@@ -259,22 +281,56 @@ export default class GridModel<TRow> {
   };
 
   public toggleGroupRow = (groupRowKey: Key) => {
-    if (groupRowKey in this.expandedGroupRow) {
-      delete this.expandedGroupRow[groupRowKey];
+    this.expandedGroupRow = new Set(this.expandedGroupRow);
+
+    if (this.expandedGroupRow.has(groupRowKey)) {
+      this.expandedGroupRow.delete(groupRowKey);
     } else {
-      this.expandedGroupRow[groupRowKey] = true;
+      this.expandedGroupRow.add(groupRowKey);
     }
 
-    // this.rows.clear();
+    this.rows.clear(); // this one is required in order to update rowIndex
     this.flatRows.clear();
     this.update();
   };
 
-  public toggleColumnVisibility = (columnKey: Key) => {
-    if (this.hiddenColumns.includes(columnKey)) {
-      this.hiddenColumns = this.hiddenColumns.removeBy((key) => key === columnKey);
+  public toggleRowSelection = (rowKey: Key) => {
+    this.toggleRowsSelection([rowKey]);
+  };
+
+  public toggleRowsSelection = (rowKeys: Key[]) => {
+    this.selectedRows = new Set(this.selectedRows);
+
+    const hasAllSelected = rowKeys.every((rowKey) => this.selectedRows.has(rowKey));
+
+    if (hasAllSelected) {
+      rowKeys.forEach((rowKey) => this.selectedRows.delete(rowKey));
     } else {
-      this.hiddenColumns = this.hiddenColumns.add(columnKey);
+      rowKeys.forEach((rowKey) => this.selectedRows.add(rowKey));
+    }
+
+    this.flatRows.clear();
+    this.update();
+
+    this.props.onSelectionChange?.({
+      action: hasAllSelected ? 'deselect' : 'select',
+      affectedRowKeys: rowKeys,
+      selectedRowKeys: Array.from(this.selectedRows),
+      isAllSelected: this.selectedRows.size === this.props.data.length,
+    });
+  };
+
+  public toggleSelectAllRows = () => {
+    this.toggleRowsSelection(this.props.data.map((x) => this.getRowKey(x)));
+  };
+
+  public toggleColumnVisibility = (columnKey: Key) => {
+    this.hiddenColumns = new Set(this.hiddenColumns);
+
+    if (this.hiddenColumns.has(columnKey)) {
+      this.hiddenColumns.delete(columnKey);
+    } else {
+      this.hiddenColumns.add(columnKey);
     }
 
     this.columns.clear();
@@ -300,8 +356,8 @@ export default class GridModel<TRow> {
     sourceLeaf.setWidth(width);
   };
 
-  public groupColumns: Key[] = [];
-  public hiddenColumns: Key[] = [];
+  public groupColumns: Set<Key> = new Set();
+  public hiddenColumns: Set<Key> = new Set();
 
   private _sortColumn?: Key;
   public get sortColumn() {

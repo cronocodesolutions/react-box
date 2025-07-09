@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useCallback, useMemo } from 'react';
 import Box from '../../../box';
 import SortIcon from '../../../icons/sortIcon';
 import Checkbox from '../../checkbox';
@@ -36,12 +36,21 @@ export default function DataGridHeaderCell<TRow>(props: Props<TRow>) {
   const showResizer = !isRowNumber && !isRowSelection;
   const showContextMenu = !isRowNumber && !isRowSelection;
 
+  const toggleSelectAll = useCallback(() => {
+    grid.toggleSelectAllRows();
+  }, []);
+
   const value = useMemo(() => {
     if (isRowNumber) return null;
-    if (isRowSelection) return <Checkbox m={1} />;
+    if (isRowSelection) {
+      const checked = grid.selectedRows.size === grid.props.data.length;
+      const indeterminate = !checked && grid.selectedRows.size > 0;
+
+      return <Checkbox m={1} indeterminate={indeterminate} checked={checked} onChange={toggleSelectAll} />;
+    }
     if (isGroupingCell) {
-      if (grid.groupColumns.length === 1) {
-        const col = grid.columns.value.leafs.findOrThrow((l) => l.key === grid.groupColumns[0]);
+      if (grid.groupColumns.size === 1) {
+        const col = grid.columns.value.leafs.findOrThrow((l) => l.key === grid.groupColumns.values().next().value!);
 
         return col.header ?? col.key;
       }
@@ -50,7 +59,7 @@ export default function DataGridHeaderCell<TRow>(props: Props<TRow>) {
     }
 
     return header ?? key;
-  }, [grid.groupColumns]);
+  }, [grid.groupColumns, grid.selectedRows, toggleSelectAll]);
 
   return (
     <Flex

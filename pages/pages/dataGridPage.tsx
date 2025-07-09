@@ -11,6 +11,7 @@ import Data6 from '../data/MOCK_DATA_6.json';
 import Data7 from '../data/MOCK_DATA_7.json';
 import usePageContext from '../hooks/usePageContext';
 import { H3 } from '../../src/components/semantics';
+import { useMemo } from 'react';
 
 interface DataType {
   first_name: string;
@@ -86,7 +87,7 @@ export default function DataGridPage() {
         DataGrid (⚠️ WIP)
       </Box>
 
-      <DataGrid data={datata} def={def} />
+      <DataGrid data={datata} def={def} onSelectionChange={(e) => console.log(e)} />
     </Box>
   );
 }

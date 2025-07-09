@@ -567,6 +567,7 @@ const boxComponents = {
           bgColor: 'gray-200',
           bt: 1,
           borderColor: 'gray-400',
+          gap: 4,
         },
       },
     },

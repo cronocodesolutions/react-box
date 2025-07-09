@@ -1,4 +1,5 @@
 import Box from '../../../box';
+import Flex from '../../flex';
 import GridModel from '../models/gridModel';
 
 interface Props<TRow> {
@@ -8,5 +9,10 @@ interface Props<TRow> {
 export default function DataGridBottomBar<TRow>(props: Props<TRow>) {
   const { grid } = props;
 
-  return <Box component="datagrid.bottomBar">Rows: {grid.props.data.length}</Box>;
+  return (
+    <Flex component="datagrid.bottomBar">
+      <Box>Rows: {grid.props.data.length}</Box>
+      <Box>Selected: {grid.selectedRows.size}</Box>
+    </Flex>
+  );
 }

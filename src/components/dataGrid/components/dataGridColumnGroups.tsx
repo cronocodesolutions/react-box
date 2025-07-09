@@ -14,14 +14,14 @@ interface Props<TRow> {
 export default function DataGridColumnGroups<TRow>(props: Props<TRow>) {
   const { grid } = props;
 
-  if (grid.groupColumns.length === 0) return null;
+  if (grid.groupColumns.size === 0) return null;
 
   return (
     <Flex component="datagrid.topBar.columnGroups">
       <Span component="datagrid.topBar.columnGroups.icon">
         <GroupingIcon width="100%" fill="currentColor" />
       </Span>
-      {grid.groupColumns.map((groupColumn) => {
+      {Array.from(grid.groupColumns, (groupColumn) => {
         const column = grid.columns.value.leafs.findOrThrow((l) => l.key === groupColumn);
 
         return (

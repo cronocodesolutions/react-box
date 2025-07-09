@@ -6,35 +6,31 @@ import GroupRowModel from './groupRowModel';
 export default class RowModel<TRow> {
   constructor(
     public readonly grid: GridModel<TRow>,
-    public readonly row: TRow,
+    public readonly data: TRow,
     public readonly rowIndex: number,
   ) {
     this.grid = grid;
-    this.row = row;
+    this.data = data;
+    this.key = this.grid.getRowKey(data);
   }
 
-  public get rowKey(): Key {
-    return this.getRowKey();
-  }
+  public readonly key: Key;
   public parentRow?: GroupRowModel<TRow>;
+  public readonly count = 1;
 
   public get cells(): CellModel<TRow>[] {
     return this.grid.columns.value.visibleLeafs.map((c) => new CellModel<TRow>(this.grid, this, c));
   }
 
-  public get count(): number {
-    return 1;
+  public get selected() {
+    return this.grid.selectedRows.has(this.key);
   }
 
-  public get flatRows(): RowModel<TRow>[] {
-    return [this];
+  public get flatRows() {
+    return this;
   }
 
-  private getRowKey() {
-    const { rowKey } = this.grid.props.def;
-
-    const key = rowKey ? (typeof rowKey === 'function' ? rowKey(this.row) : (this.row[rowKey] as string)) : this.rowIndex;
-
-    return `${this.parentRow?.rowKey ?? ''}${key}`;
+  public get allRows() {
+    return this;
   }
 }
