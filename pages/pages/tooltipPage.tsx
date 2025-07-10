@@ -136,7 +136,7 @@ export default function TooltipPage() {
                   Click me!
                 </Button>
                 {open2 && (
-                  <Tooltip height={50} borderRadius={2} p={3} top={1} bgColor="violet-200" b={1}>
+                  <Tooltip height={50} borderRadius={2} p={3} mt={0.5} bgColor="violet-200" b={1}>
                     tooltip box
                   </Tooltip>
                 )}

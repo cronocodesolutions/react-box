@@ -198,6 +198,8 @@ function DropdownImpl<TVal>(props: Props<TVal>, ref: Ref<HTMLInputElement>): Rea
       {isOpen && (
         <Tooltip
           ref={itemsRef}
+          position="absolute"
+          width="fit"
           top={openUp ? undefined : 0}
           bottom={openUp ? 2 : undefined}
           style={{ transform: `translateY(-${translateY}px)` }}
