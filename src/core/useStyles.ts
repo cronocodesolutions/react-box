@@ -21,7 +21,6 @@ const identity = new IdentityFactory();
 
 const isBrowser = typeof window !== 'undefined' && typeof window.document !== 'undefined';
 const isTestEnv = process.env.NODE_ENV === 'test';
-const isDevEnv = process.env.NODE_ENV === 'development';
 
 const useEff = isBrowser && !isTestEnv ? useLayoutEffect : useEffect;
 
@@ -268,7 +267,7 @@ a,ul{all: unset;}
 
     const className = `${breakpoint === 'normal' ? '' : `${breakpoint}-`}${pseudoClasses.map((p) => `${p}-`).join('')}${pseudoClassParentName ? `${pseudoClassParentName}-` : ''}${key}-${value}`;
 
-    return isTestEnv || isDevEnv ? className : identity.getIdentity(className);
+    return isTestEnv ? className : identity.getIdentity(className);
   }
 
   const cronoStylesElementId = 'crono-styles';
