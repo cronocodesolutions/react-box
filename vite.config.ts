@@ -29,7 +29,7 @@ let currentFormat;
 
 export default defineConfig(({ mode }) => {
   return {
-    plugins: [dts({ entryRoot: './src', exclude: ['./pages/**', './src/**/*.test.*'] })],
+    plugins: [dts({ entryRoot: './src', exclude: ['./pages/**', './src/**/*.test.*', './dev/**'] })],
     build: {
       minify: mode !== 'dev',
       lib: {
@@ -44,6 +44,7 @@ export default defineConfig(({ mode }) => {
         external: ['react', 'react-dom', 'react/jsx-runtime', 'react-dom/server'],
         output: {
           inlineDynamicImports: false,
+          exports: 'named',
           manualChunks(id: string) {
             if (id.includes('/components/')) {
               const re = new RegExp('(.*)src/components/(.*)');
