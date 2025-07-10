@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import Box from '../../src/box';
-import Dropdown from '../../src/components/dropdown';
-import Code from '../components/code';
 import Button from '../../src/components/button';
+import Dropdown from '../../src/components/dropdown';
 import Flex from '../../src/components/flex';
+import Code from '../components/code';
 
 export default function DropdownPage() {
   const [selectedValue, setSelectedValue] = useState<number>(2);

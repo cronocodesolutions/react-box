@@ -1,8 +1,8 @@
-import { Key } from '../contracts/dataGridContract';
 import ColumnModel from './columnModel';
 import GridModel, { EMPTY_CELL_KEY, GROUPING_CELL_KEY, ROW_NUMBER_CELL_KEY, ROW_SELECTION_CELL_KEY } from './gridModel';
 import GroupRowCellModel from './groupRowCellModel';
 import RowModel from './rowModel';
+import { Key } from '../contracts/dataGridContract';
 
 export default class GroupRowModel<TRow> {
   constructor(

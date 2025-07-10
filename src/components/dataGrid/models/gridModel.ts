@@ -1,8 +1,8 @@
-import memo from '../../../utils/memo';
-import { DataGridProps, Key, NO_PIN, PinPosition } from '../contracts/dataGridContract';
 import ColumnModel from './columnModel';
 import GroupRowModel from './groupRowModel';
 import RowModel from './rowModel';
+import memo from '../../../utils/memo';
+import { DataGridProps, Key, NO_PIN, PinPosition } from '../contracts/dataGridContract';
 import '../../../array';
 
 export const EMPTY_CELL_KEY: Key = 'empty-cell';

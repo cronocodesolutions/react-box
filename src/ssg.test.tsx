@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
-import { renderToStaticMarkup } from './ssg';
 import Box from './box';
 import Flex from './components/flex';
+import { renderToStaticMarkup } from './ssg';
 import { ignoreLogs } from '../dev/tests';
 
 describe('SSG', () => {

@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import Box from '../../src/box';
-import Tooltip from '../../src/components/tooltip';
 import Button from '../../src/components/button';
 import Flex from '../../src/components/flex';
+import Tooltip from '../../src/components/tooltip';
 import Code from '../components/code';
 
 export default function TooltipPage() {

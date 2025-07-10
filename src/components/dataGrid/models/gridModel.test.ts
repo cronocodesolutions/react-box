@@ -1,9 +1,9 @@
 import { describe, expect, it, suite } from 'vitest';
 import GridModel from './gridModel';
-import { ColumnType, GridDefinition } from '../contracts/dataGridContract';
 import GroupRowModel from './groupRowModel';
 import RowModel from './rowModel';
 import { ignoreLogs } from '../../../../dev/tests';
+import { ColumnType, GridDefinition } from '../contracts/dataGridContract';
 
 interface Person {
   firstName: string;

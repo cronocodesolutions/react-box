@@ -1,5 +1,5 @@
-import { useEffect, useLayoutEffect, useState } from 'react';
 import Prism from 'prismjs';
+import { useEffect, useLayoutEffect, useState } from 'react';
 import 'prismjs/components/prism-bash';
 // import 'prismjs/components/prism-css';
 // import 'prismjs/components/prism-csv';
@@ -15,19 +15,18 @@ import 'prismjs/components/prism-jsx';
 // import 'prismjs/components/prism-sql';
 // import 'prismjs/components/prism-typescript';
 // import 'prismjs/components/prism-yaml';
-
 // import 'prismjs/themes/prism-coy.css';
 // import 'prismjs/themes/prism-dark.css';
 // import 'prismjs/themes/prism-funky.css';
 // import 'prismjs/themes/prism-tomorrow.css';
 // import 'prismjs/themes/prism-twilight.css';
 import 'prismjs/themes/prism-okaidia.css';
-import Button from '../../src/components/button';
 import Box, { BoxProps } from '../../src/box';
-import CopySvg from '../svgs/copySvg';
+import Button from '../../src/components/button';
+import Flex from '../../src/components/flex';
 import { Label } from '../../src/components/semantics';
 import CheckboxSvg from '../svgs/checkboxSvg';
-import Flex from '../../src/components/flex';
+import CopySvg from '../svgs/copySvg';
 
 interface Props extends BoxProps {
   language?: 'javascript' | 'shell' | 'jsx' | 'auto';

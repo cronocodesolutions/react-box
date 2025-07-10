@@ -1,11 +1,11 @@
 import React from 'react';
 import CloseSvg from '../../../../pages/svgs/closeSvg';
+import ExpandIcon from '../../../icons/expandIcon';
 import GroupingIcon from '../../../icons/groupingIcon';
 import Button from '../../button';
 import Flex from '../../flex';
 import { Span } from '../../semantics';
 import GridModel from '../models/gridModel';
-import ExpandIcon from '../../../icons/expandIcon';
 
 interface Props<TRow> {
   grid: GridModel<TRow>;

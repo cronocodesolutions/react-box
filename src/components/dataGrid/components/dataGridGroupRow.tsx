@@ -1,11 +1,11 @@
 import { useCallback } from 'react';
+import DataGridCell from './dataGridCell';
 import ExpandIcon from '../../../icons/expandIcon';
 import Button from '../../button';
 import Checkbox from '../../checkbox';
 import Flex from '../../flex';
 import { EMPTY_CELL_KEY, GROUPING_CELL_KEY, ROW_NUMBER_CELL_KEY, ROW_SELECTION_CELL_KEY } from '../models/gridModel';
 import GroupRowModel from '../models/groupRowModel';
-import DataGridCell from './dataGridCell';
 
 interface Props<TRow> {
   row: GroupRowModel<TRow>;

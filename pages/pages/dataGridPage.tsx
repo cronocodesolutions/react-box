@@ -1,5 +1,7 @@
 import Box from '../../src/box';
 import DataGrid from '../../src/components/dataGrid';
+import { H3 } from '../../src/components/semantics';
+import Code from '../components/code';
 import Data from '../data/MOCK_DATA.json';
 import Data1 from '../data/MOCK_DATA_1.json';
 import Data2 from '../data/MOCK_DATA_2.json';
@@ -9,8 +11,6 @@ import Data5 from '../data/MOCK_DATA_5.json';
 import Data6 from '../data/MOCK_DATA_6.json';
 import Data7 from '../data/MOCK_DATA_7.json';
 import usePageContext from '../hooks/usePageContext';
-import { H3 } from '../../src/components/semantics';
-import Code from '../components/code';
 
 const data = [...Data, ...Data1, ...Data2, ...Data3, ...Data4, ...Data5, ...Data6, ...Data7];
 

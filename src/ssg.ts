@@ -1,6 +1,6 @@
 import React from 'react';
-import { StylesContext } from './core/useStyles';
 import ReactDOMServer from 'react-dom/server';
+import { StylesContext } from './core/useStyles';
 
 const el = {
   innerHTML: '',

@@ -1,12 +1,12 @@
 import { useCallback, useMemo } from 'react';
+import DataGridHeaderCellContextMenu from './dataGridHeaderCellContextMenu';
+import DataGridHeaderCellResizer from './dataGridHeaderCellResizer';
 import Box from '../../../box';
 import SortIcon from '../../../icons/sortIcon';
 import Checkbox from '../../checkbox';
 import Flex from '../../flex';
 import ColumnModel from '../models/columnModel';
 import { EMPTY_CELL_KEY, GROUPING_CELL_KEY, ROW_NUMBER_CELL_KEY, ROW_SELECTION_CELL_KEY } from '../models/gridModel';
-import DataGridHeaderCellContextMenu from './dataGridHeaderCellContextMenu';
-import DataGridHeaderCellResizer from './dataGridHeaderCellResizer';
 
 interface Props<TRow> {
   column: ColumnModel<TRow>;

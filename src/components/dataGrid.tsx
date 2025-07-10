@@ -16,11 +16,11 @@
 // datagrid container
 
 import Box from '../box';
+import DataGridBottomBar from './dataGrid/components/dataGridBottomBar';
+import DataGridContent from './dataGrid/components/dataGridContent';
+import DataGridTopBar from './dataGrid/components/dataGridTopBar';
 import { DataGridProps } from './dataGrid/contracts/dataGridContract';
 import useGrid from './dataGrid/useGrid';
-import DataGridTopBar from './dataGrid/components/dataGridTopBar';
-import DataGridContent from './dataGrid/components/dataGridContent';
-import DataGridBottomBar from './dataGrid/components/dataGridBottomBar';
 
 export default function DataGrid<TRow extends object>(props: DataGridProps<TRow>) {
   const grid = useGrid(props);

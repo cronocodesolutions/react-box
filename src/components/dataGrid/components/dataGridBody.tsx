@@ -1,10 +1,10 @@
 import { useMemo } from 'react';
+import DataGridGroupRow from './dataGridGroupRow';
+import DataGridRow from './dataGridRow';
 import Box from '../../../box';
 import Grid from '../../grid';
 import GridModel from '../models/gridModel';
 import GroupRowModel from '../models/groupRowModel';
-import DataGridGroupRow from './dataGridGroupRow';
-import DataGridRow from './dataGridRow';
 
 const DEFAULT_VISIBLE_ROWS = 10;
 const ROWS_TO_PRELOAD = 20;

@@ -1,15 +1,15 @@
 import { useState, useMemo } from 'react';
 import Box, { useVisibility } from '../../../box';
-import SortIcon from '../../../icons/sortIcon';
 import DotsIcon from '../../../icons/dotsIcon';
 import GroupingIcon from '../../../icons/groupingIcon';
 import PinIcon from '../../../icons/pinIcon';
+import SortIcon from '../../../icons/sortIcon';
 import Button from '../../button';
 import Flex from '../../flex';
+import { Span } from '../../semantics';
 import Tooltip from '../../tooltip';
 import ColumnModel from '../models/columnModel';
 import { GROUPING_CELL_KEY } from '../models/gridModel';
-import { Span } from '../../semantics';
 
 interface Props<TRow> {
   column: ColumnModel<TRow>;

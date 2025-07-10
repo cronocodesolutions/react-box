@@ -1,7 +1,7 @@
 import { forwardRef, Ref, useEffect, useRef, useImperativeHandle, RefAttributes } from 'react';
 import Box, { BoxTagProps, BoxProps } from '../box';
-import ObjectUtils from '../utils/object/objectUtils';
 import { ComponentsAndVariants } from '../types';
+import ObjectUtils from '../utils/object/objectUtils';
 
 const tagProps = ['name', 'onInput', 'onChange', 'autoFocus', 'readOnly', 'value', 'defaultChecked'] as const;
 type TagPropsType = (typeof tagProps)[number];

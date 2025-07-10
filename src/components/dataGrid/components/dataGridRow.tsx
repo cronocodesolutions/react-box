@@ -1,9 +1,9 @@
 import { useCallback } from 'react';
+import DataGridCell from './dataGridCell';
 import Checkbox from '../../checkbox';
 import Flex from '../../flex';
 import { ROW_SELECTION_CELL_KEY } from '../models/gridModel';
 import RowModel from '../models/rowModel';
-import DataGridCell from './dataGridCell';
 
 interface Props<TRow> {
   row: RowModel<TRow>;

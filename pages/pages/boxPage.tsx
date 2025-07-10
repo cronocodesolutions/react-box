@@ -1,7 +1,7 @@
+import { useState } from 'react';
 import Box from '../../src/box';
 import Flex from '../../src/components/flex';
 import Textbox from '../../src/components/textbox';
-import { useState } from 'react';
 import Code from '../components/code';
 
 export default function BoxPage() {

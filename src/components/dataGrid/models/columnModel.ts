@@ -1,6 +1,6 @@
+import GridModel, { EMPTY_CELL_KEY } from './gridModel';
 import FnUtils from '../../../utils/fn/fnUtils';
 import { ColumnType, PinPosition } from '../contracts/dataGridContract';
-import GridModel, { EMPTY_CELL_KEY } from './gridModel';
 
 export default class ColumnModel<TRow> {
   constructor(

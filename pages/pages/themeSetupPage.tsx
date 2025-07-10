@@ -1,9 +1,9 @@
 import Box from '../../src/box';
 import Button from '../../src/components/button';
-import Code from '../components/code';
 import Flex from '../../src/components/flex';
-import LightSvg from '../svgs/lightSvg';
+import Code from '../components/code';
 import DarkSvg from '../svgs/darkSvg';
+import LightSvg from '../svgs/lightSvg';
 
 export default function ThemeSetupPage() {
   return (
