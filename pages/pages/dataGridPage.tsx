@@ -78,7 +78,7 @@ export default function DataGridPage() {
               { key: 'currency_code' },
             ],
             rowHeight: 40,
-            visibleRows: 5,
+            visibleRowsCount: 5,
           }}
         />
       </Code>

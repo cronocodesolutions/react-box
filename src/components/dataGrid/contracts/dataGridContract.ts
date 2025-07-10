@@ -25,7 +25,7 @@ export interface GridDefinition<TRow> {
   showRowNumber?: boolean | { pinned?: boolean };
   rowSelection?: boolean | { pinned?: boolean };
   rowHeight?: number;
-  visibleRows?: number;
+  visibleRowsCount?: number;
   // pagination?: Pagination;
 }
 

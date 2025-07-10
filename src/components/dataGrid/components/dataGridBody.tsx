@@ -6,7 +6,7 @@ import Grid from '../../grid';
 import GridModel from '../models/gridModel';
 import GroupRowModel from '../models/groupRowModel';
 
-const DEFAULT_VISIBLE_ROWS = 10;
+const DEFAULT_VISIBLE_ROWS_COUNT = 10;
 const ROWS_TO_PRELOAD = 20;
 
 interface Props<TRow> {
@@ -19,7 +19,7 @@ export default function DataGridBody<TRow>(props: Props<TRow>) {
 
   const rowsCount = grid.flatRows.value.length;
   const startIndex = Math.max(0, Math.floor(scrollTop / grid.rowHeight) - ROWS_TO_PRELOAD);
-  const visibleRows = grid.props.def.visibleRows ?? DEFAULT_VISIBLE_ROWS;
+  const visibleRows = grid.props.def.visibleRowsCount ?? DEFAULT_VISIBLE_ROWS_COUNT;
 
   const rows = useMemo(() => {
     console.debug('\x1b[36m%s\x1b[0m', '[react-box]: DataGrid render rows');
