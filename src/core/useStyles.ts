@@ -20,7 +20,7 @@ import ObjectUtils from '../utils/object/objectUtils';
 const identity = new IdentityFactory();
 
 const isBrowser = typeof window !== 'undefined' && typeof window.document !== 'undefined';
-const isTestEnv = process.env.NODE_ENV === 'test';
+const isTestEnv = typeof process === 'object' && process.env?.NODE_ENV === 'test';
 
 const useEff = isBrowser && !isTestEnv ? useLayoutEffect : useEffect;
 
