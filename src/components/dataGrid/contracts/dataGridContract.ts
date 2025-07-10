@@ -22,10 +22,22 @@ export interface ColumnType<TRow> {
 export interface GridDefinition<TRow> {
   rowKey?: KeysMatching<TRow, Key> | ((rowData: TRow) => Key);
   columns: ColumnType<TRow>[];
+  showRowNumber?: boolean | { pinned?: boolean };
+  rowSelection?: boolean | { pinned?: boolean };
+  rowHeight?: number;
+  visibleRowsCount?: number;
   // pagination?: Pagination;
 }
 
 export interface DataGridProps<TRow> {
   data: TRow[];
   def: GridDefinition<TRow>;
+  onSelectionChange?: (event: SelectionChangeEvent<TRow>) => void;
+}
+
+interface SelectionChangeEvent<TRow, TKey = TRow[keyof TRow] | number | string> {
+  action: 'select' | 'deselect';
+  selectedRowKeys: TKey[];
+  affectedRowKeys: TKey[];
+  isAllSelected: boolean;
 }

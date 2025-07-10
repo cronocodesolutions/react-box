@@ -1,8 +1,9 @@
-import { render, screen, fireEvent } from '@testing-library/react';
-import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
+import { render, screen, cleanup } from '@testing-library/react';
+import { describe, expect, it, afterEach } from 'vitest';
 import DataGrid from './dataGrid';
-import { DataGridProps, GridDefinition } from './dataGrid/contracts/dataGridContract';
 import Box from '../box';
+import { DataGridProps, GridDefinition } from './dataGrid/contracts/dataGridContract';
+import { ignoreLogs } from '../../dev/tests';
 
 interface Person {
   id: number;
@@ -15,14 +16,10 @@ interface Person {
 }
 
 describe('DataGrid', () => {
-  // Mock console.log to prevent noise in test output
-  const originalConsoleLog = console.log;
-  beforeEach(() => {
-    console.log = vi.fn();
-  });
+  ignoreLogs();
 
   afterEach(() => {
-    console.log = originalConsoleLog;
+    cleanup();
   });
 
   // Sample data for testing
@@ -101,8 +98,8 @@ describe('DataGrid', () => {
   it('renders column headers correctly', () => {
     renderDataGrid();
     // Check if column headers are rendered
-    expect(screen.getByText('First Name')).to.not.be.null;
-    // expect(screen.getByText('First Name')).toBeInTheDocument();
+    expect(screen.getByText('First Name')).not.toBeNull();
+    expect(screen.getByText('First Name')).toBeDefined();
     expect(screen.getByText('Last Name')).toBeTruthy();
     expect(screen.getByText('Age')).toBeTruthy();
     expect(screen.getByText('Visits')).toBeTruthy();

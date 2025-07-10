@@ -13,6 +13,6 @@ export default class CellModel<TRow> {
     if (this.column.key === EMPTY_CELL_KEY) return null;
     if (this.column.key === ROW_NUMBER_CELL_KEY) return this.row.rowIndex + 1;
 
-    return this.row.row[this.column.key as keyof TRow] as React.ReactNode;
+    return this.row.data[this.column.key as keyof TRow] as React.ReactNode;
   }
 }

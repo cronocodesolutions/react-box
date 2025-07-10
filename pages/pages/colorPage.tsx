@@ -1,7 +1,8 @@
-import Box, { BoxProps } from '../../src/box';
+import Box from '../../src/box';
 import Flex from '../../src/components/flex';
+import Variables from '../../src/core/variables';
 
-const colors: Record<string, BoxProps['color'][]> = {
+const colors: Record<string, Variables.ColorType[]> = {
   1: ['none', 'white', 'black', 'transparent', 'currentColor'],
   slate: [
     'slate-50',
@@ -185,6 +186,7 @@ export default function ColorPage() {
                 {item}
               </Box>
               <Box component="colorBox" bgColor={item}></Box>
+              <Box mt={2}>{Variables.colors[item as keyof typeof Variables.colors]}</Box>
             </Box>
           ))}
         </Flex>

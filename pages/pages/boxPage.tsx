@@ -1,7 +1,7 @@
+import { useState } from 'react';
 import Box from '../../src/box';
 import Flex from '../../src/components/flex';
 import Textbox from '../../src/components/textbox';
-import { useState } from 'react';
 import Code from '../components/code';
 
 export default function BoxPage() {
@@ -42,7 +42,7 @@ export default function BoxPage() {
       </Flex>
       <Flex flex1 d="column">
         <Flex flex1 ai="center" jc="center" bb={1}>
-          <Code language="javascript" label={'Box'} number={0}>
+          <Code language="javascript" label={'Box'}>
             {`import Box from '@cronocode/react-box';
 
 function Component () {
@@ -51,7 +51,6 @@ function Component () {
           </Code>
         </Flex>
         <Flex flex1 ai="center" jc="center">
-          {/* @ts-ignore */}
           <Box {...props}>Hello world</Box>
         </Flex>
       </Flex>

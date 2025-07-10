@@ -6,7 +6,7 @@ interface PageContext {
 }
 
 const PageContext = createContext<PageContext>({
-  setRightSidebar: (el: React.ReactNode) => {},
+  setRightSidebar: (_el: React.ReactNode) => {},
 });
 
 export default PageContext;

@@ -1,8 +1,8 @@
-import { Key } from '../contracts/dataGridContract';
 import ColumnModel from './columnModel';
 import GridModel, { EMPTY_CELL_KEY, GROUPING_CELL_KEY, ROW_NUMBER_CELL_KEY, ROW_SELECTION_CELL_KEY } from './gridModel';
 import GroupRowCellModel from './groupRowCellModel';
 import RowModel from './rowModel';
+import { Key } from '../contracts/dataGridContract';
 
 export default class GroupRowModel<TRow> {
   constructor(
@@ -15,8 +15,8 @@ export default class GroupRowModel<TRow> {
     rows.forEach((row) => (row.parentRow = this));
   }
 
-  public get rowKey(): Key {
-    return `${this.parentRow?.rowKey ?? ''}${this.groupColumn.key}${this.groupValue}`;
+  public get key(): Key {
+    return `${this.parentRow?.key ?? ''}${this.groupColumn.key}${this.groupValue}`;
   }
   public parentRow?: GroupRowModel<TRow>;
 
@@ -25,7 +25,7 @@ export default class GroupRowModel<TRow> {
   }
 
   public get expanded() {
-    return this.grid.expandedGroupRow[this.rowKey];
+    return this.grid.expandedGroupRow.has(this.key);
   }
 
   public get depth(): number {
@@ -44,6 +44,10 @@ export default class GroupRowModel<TRow> {
     return [this];
   }
 
+  public get allRows(): RowModel<TRow>[] {
+    return this.rows.flatMap((row) => row.allRows);
+  }
+
   public get groupingColumn() {
     return this.grid.columns.value.leafs.findOrThrow((c) => c.key === GROUPING_CELL_KEY);
   }
@@ -60,6 +64,6 @@ export default class GroupRowModel<TRow> {
   }
 
   public toggleRow() {
-    this.grid.toggleGroupRow(this.rowKey);
+    this.grid.toggleGroupRow(this.key);
   }
 }

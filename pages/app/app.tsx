@@ -1,37 +1,37 @@
+import { useEffect, useState } from 'react';
+import { Routes, Route, NavLink, useLocation } from 'react-router-dom';
+import Sidebar from './sidebar';
+import Box from '../../src/box';
+import Button from '../../src/components/button';
+import Flex from '../../src/components/flex';
+import PageContext from '../pageContext';
 import ButtonPage from '../pages/buttonPage';
 import CheckboxPage from '../pages/checkboxPage';
+import ColorPage from '../pages/colorPage';
 import DataGridPage from '../pages/dataGridPage';
+import DropdownPage from '../pages/dropdownPage';
 import FlexPage from '../pages/flexPage';
 import GridPage from '../pages/gridPage';
 import HomePage from '../pages/homePage';
-import RadioButtonPage from '../pages/radioButtonPage';
-import TextboxPage from '../pages/textboxPage';
-import TooltipPage from '../pages/tooltipPage';
-import Box from '../../src/box';
-import Flex from '../../src/components/flex';
-import { Routes, Route, NavLink, useLocation } from 'react-router-dom';
-import TextareaPage from '../pages/textareaPage';
-import ColorPage from '../pages/colorPage';
-import DropdownPage from '../pages/dropdownPage';
-import Button from '../../src/components/button';
-import { useEffect, useState } from 'react';
-import MenuSvg from '../svgs/menuSvg';
-import Sidebar from './sidebar';
-import BoxSvg from '../svgs/boxSvg';
 import InstallationPage from '../pages/installationPage';
+import RadioButtonPage from '../pages/radioButtonPage';
+import TextareaPage from '../pages/textareaPage';
+import TextboxPage from '../pages/textboxPage';
 import ThemeSetupPage from '../pages/themeSetupPage';
-import PageContext from '../pageContext';
+import TooltipPage from '../pages/tooltipPage';
+import BoxSvg from '../svgs/boxSvg';
+import MenuSvg from '../svgs/menuSvg';
 
 export default function App() {
   const [open, setOpen] = useState(false);
   const [rightSidebar, setRightSidebar] = useState<React.ReactNode | undefined>();
 
   return (
-    <Box color="violet-950" bgImage="body-bg" minHeight="fit-screen" position="relative">
+    <Box color="violet-950" minHeight="fit-screen" position="relative">
       <ScrollToTop />
       <Box position="sticky" top={0} lg={{ display: 'none' }} bgImage="body-bg" bgColor="white" zIndex={10}>
         <Flex gap={3} pl={2} sm={{ pl: 8 }} py={5}>
-          <Button clean onClick={() => setOpen(!open)} borderRadius={1} shadow="small-shadow" px={1} borderColor="violet-950">
+          <Button clean onClick={() => setOpen(!open)} borderRadius={1} shadow="small" px={1} borderColor="violet-950">
             <MenuSvg color="violet-950" />
           </Button>
           <NavLink to="/">

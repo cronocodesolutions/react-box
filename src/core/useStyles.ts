@@ -1,6 +1,7 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import IdentityFactory from '@cronocode/identity-factory';
 import { useEffect, useLayoutEffect, useMemo } from 'react';
 import { BoxStyleProps, BoxStyles, PseudoClassesType } from '../types';
-import ObjectUtils from '../utils/object/objectUtils';
 import {
   breakpoints,
   cssStyles,
@@ -11,10 +12,10 @@ import {
   pseudoClassesWeight,
   pseudoGroupClasses,
 } from './boxStyles';
-import IdentityFactory from '@cronocode/identity-factory';
 import { BoxStyle } from './coreTypes';
-import Variables from './variables';
 import useComponents from './extends/useComponents';
+import Variables from './variables';
+import ObjectUtils from '../utils/object/objectUtils';
 
 const identity = new IdentityFactory();
 

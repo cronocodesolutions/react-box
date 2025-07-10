@@ -1,7 +1,7 @@
-import { defineConfig } from 'vitest/config';
-import dts from 'vite-plugin-dts';
-import path from 'path';
 import fs from 'fs';
+import path from 'path';
+import dts from 'vite-plugin-dts';
+import { defineConfig } from 'vitest/config';
 
 const files = fs
   .readdirSync(path.resolve(__dirname, './src/components'))
@@ -29,7 +29,7 @@ let currentFormat;
 
 export default defineConfig(({ mode }) => {
   return {
-    plugins: [dts({ entryRoot: './src', exclude: ['./pages/**', './src/**/*.test.*'] })],
+    plugins: [dts({ entryRoot: './src', exclude: ['./pages/**', './src/**/*.test.*', './dev/**'] })],
     build: {
       minify: mode !== 'dev',
       lib: {
@@ -44,6 +44,7 @@ export default defineConfig(({ mode }) => {
         external: ['react', 'react-dom', 'react/jsx-runtime', 'react-dom/server'],
         output: {
           inlineDynamicImports: false,
+          exports: 'named',
           manualChunks(id: string) {
             if (id.includes('/components/')) {
               const re = new RegExp('(.*)src/components/(.*)');
@@ -66,7 +67,7 @@ export default defineConfig(({ mode }) => {
 
             return 'core';
           },
-          chunkFileNames: (info) => `[name].${extensions[currentFormat]}`,
+          chunkFileNames: (_info) => `[name].${extensions[currentFormat]}`,
         },
       },
     },

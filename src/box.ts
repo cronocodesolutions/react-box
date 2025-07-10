@@ -1,14 +1,14 @@
 import React, { forwardRef, memo, Ref, RefAttributes, useMemo, useState } from 'react';
 import { classNames, ClassNameType } from './core/classNames';
 import { ExtractElementFromTag } from './core/coreTypes';
-import { BoxStyleProps, ComponentsAndVariants } from './types';
-import useStyles from './core/useStyles';
 import BoxExtends from './core/extends/boxExtends';
 import Theme from './core/theme/theme';
+import useStyles from './core/useStyles';
 import Variables from './core/variables';
-import BoxUtils from './utils/box/boxUtils';
 import './array';
 import useVisibility from './hooks/useVisibility';
+import { BoxStyleProps, ComponentsAndVariants } from './types';
+import BoxUtils from './utils/box/boxUtils';
 
 type AllProps<TTag extends keyof React.JSX.IntrinsicElements> = React.ComponentProps<TTag>;
 type TagPropsType<TTag extends keyof React.JSX.IntrinsicElements> = Omit<
@@ -18,10 +18,15 @@ type TagPropsType<TTag extends keyof React.JSX.IntrinsicElements> = Omit<
 
 interface Props<TTag extends keyof React.JSX.IntrinsicElements, TKey extends keyof ComponentsAndVariants> extends BoxStyleProps<TKey> {
   children?: React.ReactNode | ((props: { isHover: boolean }) => React.ReactNode);
+  /** html tag element */
   tag?: TTag;
+  /** props (attributes) related to html tag */
   props?: TagPropsType<TTag>;
+  /** classNames. supports conditional classNames. */
   className?: ClassNameType;
+  /** CSSProperties */
   style?: React.ComponentProps<TTag>['style'];
+  /** The HTML id attribute is used to specify a unique id for an HTML element. */
   id?: string;
 }
 

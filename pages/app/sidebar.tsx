@@ -1,10 +1,10 @@
+import MenuGrouping from './menuGrouping';
+import MenuItem from './menuItem';
 import Box, { BoxProps } from '../../src/box';
 import BoxSvg from '../svgs/boxSvg';
 import ColorsSvg from '../svgs/colorsSvg';
 import ComponentSvg from '../svgs/componentSvg';
 import ConfigurationSvg from '../svgs/configurationSvg';
-import MenuGrouping from './menuGrouping';
-import MenuItem from './menuItem';
 
 export default function Sidebar(props: BoxProps) {
   return (

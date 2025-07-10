@@ -1,5 +1,8 @@
-import { beforeEach, describe, expect, it, suite } from 'vitest';
+import { describe, expect, it, suite } from 'vitest';
 import GridModel from './gridModel';
+import GroupRowModel from './groupRowModel';
+import RowModel from './rowModel';
+import { ignoreLogs } from '../../../../dev/tests';
 import { ColumnType, GridDefinition } from '../contracts/dataGridContract';
 
 interface Person {
@@ -14,8 +17,15 @@ interface Person {
   progress: number;
 }
 
+const testData: Person[] = [
+  { firstName: 'John', lastName: 'Doe', age: 20, day: 3, month: 5, year: 2000, visits: 23, status: 'OK', progress: 2 },
+  { firstName: 'Joe', lastName: 'Smith', age: 22, day: 24, month: 11, year: 2002, visits: 3, status: 'Fail', progress: 4 },
+];
+
 describe('GridModel', () => {
-  let gridDefinition: GridDefinition<Person> = {
+  ignoreLogs();
+
+  const gridDefinition: GridDefinition<Person> = {
     columns: [
       {
         key: 'employee',
@@ -45,7 +55,7 @@ describe('GridModel', () => {
     return new GridModel<Person>(
       {
         def,
-        data: (data ?? []) as Person[],
+        data: (data ?? testData) as Person[],
       },
       () => {},
     );
@@ -55,14 +65,14 @@ describe('GridModel', () => {
     it('creates header Columns', () => {
       const grid = getGridModel({ columns: [{ key: 'firstName' }] });
 
-      expect(grid.headerRows.value).to.length(1);
-      expect(grid.headerRows.value.at(0)).to.length(4);
+      expect(grid.headerRows.value).toHaveLength(1);
+      expect(grid.headerRows.value.at(0)).toHaveLength(2);
     });
 
     it('creates no rows when no data', () => {
-      const grid = getGridModel({ columns: [{ key: 'firstName' }] });
+      const grid = getGridModel({ columns: [{ key: 'firstName' }], data: [] });
 
-      expect(grid.rows.value).to.length(0);
+      expect(grid.rows.value).toHaveLength(0);
     });
 
     it('creates row model for each data item', () => {
@@ -75,7 +85,7 @@ describe('GridModel', () => {
       ];
       const grid = getGridModel({ columns: [{ key: 'firstName' }], data });
 
-      expect(grid.rows.value).to.length(5);
+      expect(grid.rows.value).toHaveLength(5);
     });
   });
 
@@ -105,7 +115,7 @@ describe('GridModel', () => {
       grid.pinColumn('firstName', 'LEFT');
 
       const parentColumns = grid.columns.value.flat.filter((c) => c.key === 'parent');
-      expect(parentColumns).to.have.length(1);
+      expect(parentColumns).toHaveLength(1);
     });
 
     it('moves parent header to the right pin position', () => {
@@ -115,10 +125,125 @@ describe('GridModel', () => {
       grid.pinColumn('firstNameLEFT');
 
       const parentColumn = grid.columns.value.flat.findOrThrow((c) => c.key === 'parent');
-      expect(parentColumn.pin).to.be.undefined;
+      expect(parentColumn.pin).toBeUndefined();
 
       const parentColumns = grid.columns.value.flat.filter((c) => c.key === 'parent');
-      expect(parentColumns).to.have.length(1);
+      expect(parentColumns).toHaveLength(1);
+    });
+  });
+
+  suite('when group by column', () => {
+    const data: Partial<Person>[] = [
+      { firstName: 'John', day: 20, month: 3 },
+      { firstName: 'John1', day: 20, month: 3 },
+      { firstName: 'John2', day: 20, month: 4 },
+      { firstName: 'John3', day: 21, month: 5 },
+      { firstName: 'John4', day: 21, month: 6 },
+    ];
+
+    it('groups data by day', () => {
+      const grid = getGridModel({ data });
+
+      grid.toggleGrouping('day');
+
+      expect(grid.flatRows.value).toHaveLength(2);
+      expect(grid.flatRows.value.at(0) instanceof GroupRowModel).toBeTruthy();
+      expect((grid.flatRows.value.at(0) as GroupRowModel<Person>).rows).toHaveLength(3);
+
+      expect(grid.flatRows.value.at(1) instanceof GroupRowModel).toBeTruthy();
+      expect((grid.flatRows.value.at(1) as GroupRowModel<Person>).rows).toHaveLength(2);
+    });
+
+    it('groups data by day and expand', () => {
+      const grid = getGridModel({ data });
+
+      grid.toggleGrouping('day');
+      grid.toggleGroupRow(grid.rows.value[0].key);
+
+      expect(grid.flatRows.value).toHaveLength(5);
+      expect(grid.flatRows.value.at(0) instanceof GroupRowModel).toBeTruthy();
+      expect(grid.flatRows.value.at(1) instanceof RowModel).toBeTruthy();
+      expect(grid.flatRows.value.at(2) instanceof RowModel).toBeTruthy();
+      expect(grid.flatRows.value.at(3) instanceof RowModel).toBeTruthy();
+      expect(grid.flatRows.value.at(4) instanceof GroupRowModel).toBeTruthy();
+    });
+
+    it('groups data by day and month', () => {
+      const grid = getGridModel({ data });
+
+      grid.toggleGrouping('day');
+      grid.toggleGrouping('month');
+
+      expect(grid.rows.value).toHaveLength(2);
+
+      expect(grid.rows.value.at(0) instanceof GroupRowModel).toBeTruthy();
+      expect((grid.rows.value.at(0) as GroupRowModel<Person>).rows).toHaveLength(2);
+      expect((grid.rows.value.at(0) as GroupRowModel<Person>).rows.at(0) instanceof GroupRowModel).toBeTruthy();
+      expect(((grid.rows.value.at(0) as GroupRowModel<Person>).rows.at(0) as GroupRowModel<Person>).rows).toHaveLength(2);
+      expect((grid.rows.value.at(0) as GroupRowModel<Person>).rows.at(1) instanceof GroupRowModel).toBeTruthy();
+      expect(((grid.rows.value.at(0) as GroupRowModel<Person>).rows.at(1) as GroupRowModel<Person>).rows).toHaveLength(1);
+
+      expect(grid.rows.value.at(1) instanceof GroupRowModel).toBeTruthy();
+      expect((grid.rows.value.at(1) as GroupRowModel<Person>).rows).toHaveLength(2);
+      expect((grid.rows.value.at(1) as GroupRowModel<Person>).rows.at(0) instanceof GroupRowModel).toBeTruthy();
+      expect(((grid.rows.value.at(1) as GroupRowModel<Person>).rows.at(0) as GroupRowModel<Person>).rows).toHaveLength(1);
+      expect((grid.rows.value.at(1) as GroupRowModel<Person>).rows.at(1) instanceof GroupRowModel).toBeTruthy();
+      expect(((grid.rows.value.at(1) as GroupRowModel<Person>).rows.at(1) as GroupRowModel<Person>).rows).toHaveLength(1);
+    });
+  });
+
+  suite('when sort column', () => {
+    it('sets the sort column', () => {
+      const grid = getGridModel();
+
+      grid.setSortColumn('firstName');
+
+      expect(grid.sortColumn).toEqual('firstName');
+      expect(grid.sortDirection).toEqual('ASC');
+    });
+
+    it('changes sort direction', () => {
+      const grid = getGridModel();
+
+      grid.setSortColumn('firstName');
+      grid.setSortColumn('firstName');
+
+      expect(grid.sortColumn).toEqual('firstName');
+      expect(grid.sortDirection).toEqual('DESC');
+    });
+
+    it('clears sort column', () => {
+      const grid = getGridModel();
+
+      grid.setSortColumn('firstName');
+      grid.setSortColumn('firstName');
+      grid.setSortColumn('firstName');
+
+      expect(grid.sortColumn).toBeUndefined();
+    });
+
+    it('sets the sort column and sort direction', () => {
+      const grid = getGridModel();
+
+      grid.setSortColumn('firstName', 'ASC');
+      expect(grid.sortColumn).toEqual('firstName');
+      expect(grid.sortDirection).toEqual('ASC');
+
+      grid.setSortColumn('firstName', 'ASC');
+      expect(grid.sortColumn).toEqual('firstName');
+      expect(grid.sortDirection).toEqual('ASC');
+
+      grid.setSortColumn('firstName', 'DESC');
+      expect(grid.sortColumn).toEqual('firstName');
+      expect(grid.sortDirection).toEqual('DESC');
+
+      grid.setSortColumn('age', 'DESC');
+      expect(grid.sortColumn).toEqual('age');
+      expect(grid.sortDirection).toEqual('DESC');
+
+      grid.setSortColumn('firstName', undefined);
+      expect(grid.sortColumn).toBeUndefined();
+      expect(grid.sortDirection).toBeUndefined();
     });
   });
 });

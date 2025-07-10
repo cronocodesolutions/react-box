@@ -14,7 +14,7 @@ export default function memo<T>(action: () => T): Memo<T> {
 
   return Object.defineProperty(obj, 'value', {
     get: () => {
-      if (!cache) {
+      if (cache === undefined) {
         cache = action();
       }
 

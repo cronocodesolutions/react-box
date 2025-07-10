@@ -11,7 +11,7 @@ export default function HomePage() {
         </Box>
         <Box fontSize={18} fontWeight={300} mt={6}>
           <Box>Utility framework with multiple props which cover all CSS styles.</Box>
-          <Box> Never DRY with your CSS styles. Keep typescript compilation power.</Box>
+          <Box>Never DRY with your CSS styles. Keep typescript compilation power.</Box>
         </Box>
       </Flex>
       <Flex mt={20} jc="center" fontSize={30}>
@@ -19,11 +19,10 @@ export default function HomePage() {
       </Flex>
 
       <Flex mt={12} d="column" gap={10} mx="auto">
-        <Code label="Install npm library" number={1} language="shell" code="npm install @cronocode/react-box"></Code>
+        <Code label="Install npm library" language="shell" code="npm install @cronocode/react-box"></Code>
 
         <Code
           label="Usage"
-          number={2}
           language="jsx"
           code={`import Box from '@cronocode/react-box';
 

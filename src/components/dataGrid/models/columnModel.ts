@@ -1,6 +1,6 @@
+import GridModel, { EMPTY_CELL_KEY } from './gridModel';
 import FnUtils from '../../../utils/fn/fnUtils';
 import { ColumnType, PinPosition } from '../contracts/dataGridContract';
-import GridModel, { EMPTY_CELL_KEY } from './gridModel';
 
 export default class ColumnModel<TRow> {
   constructor(
@@ -152,7 +152,7 @@ export default class ColumnModel<TRow> {
   }
 
   public get isVisible(): boolean {
-    if (this.isLeaf) return !this.grid.hiddenColumns.includes(this.key);
+    if (this.isLeaf) return !this.grid.hiddenColumns.has(this.key);
 
     return this.leafs.some((l) => l.isVisible);
   }
@@ -201,14 +201,13 @@ export default class ColumnModel<TRow> {
         leaf.setWidth(newWidth < MIN_WIDTH_PX ? MIN_WIDTH_PX : newWidth);
       });
 
-      this.grid.headerRows.clear();
       this.grid.sizes.clear();
       update();
-    }, 20);
+    }, 40);
 
     const controller = new AbortController();
 
-    const stopResize = (e: MouseEvent) => {
+    const stopResize = (_e: MouseEvent) => {
       controller.abort();
       this.grid.isResizeMode = false;
       update();
@@ -232,7 +231,7 @@ export default class ColumnModel<TRow> {
     this.grid.toggleGrouping(this.key);
   };
 
-  public sortColumn: (sortDirection?: SortDirection) => void = (...args: any[]) => {
+  public sortColumn: (sortDirection?: SortDirection) => void = (...args: [SortDirection | undefined]) => {
     this.grid.setSortColumn(this.key, ...args);
   };
 

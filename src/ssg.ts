@@ -1,25 +1,27 @@
 import React from 'react';
-import { StylesContext } from './core/useStyles';
 import ReactDOMServer from 'react-dom/server';
+import { StylesContext } from './core/useStyles';
 
 const el = {
   innerHTML: '',
 };
-const document = {
+const document: Partial<Document> = {
   head: {
-    insertBefore() {},
-  },
+    insertBefore<T extends Node>(node: T, _child: Node | null): T {
+      return node;
+    },
+  } as unknown as HTMLHeadElement,
   getElementById() {
-    return el;
+    return el as HTMLElement;
   },
   createElement() {
     return {
-      setAttribute() {},
-    };
+      setAttribute(_name: string, _value: string) {},
+    } as unknown as HTMLElement;
   },
 };
 
-global.document = document as any;
+global.document = document as Document;
 
 export function renderToStaticMarkup(element: React.ReactElement, addStylesToHead = true) {
   let html = ReactDOMServer.renderToStaticMarkup(element);

@@ -1,7 +1,8 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { pseudo2 } from '../../core/boxStyles';
 
 namespace ObjectUtils {
-  export function buildProps<T extends { props?: Object }, TKey extends keyof T>(props: T, keys: Readonly<TKey[]>, extraTagProps?: Object) {
+  export function buildProps<T extends { props?: object }, TKey extends keyof T>(props: T, keys: Readonly<TKey[]>, extraTagProps?: object) {
     const newProps = { ...props };
     const tagProps = (newProps.props || {}) as Record<TKey, T[TKey]>;
 

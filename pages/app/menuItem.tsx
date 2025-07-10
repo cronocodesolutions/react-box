@@ -1,9 +1,8 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
-import { BoxStyleProps } from '../../src/types';
-import Flex from '../../src/components/flex';
 import { BaseSvgProps } from '../../src/components/baseSvg';
-import Box from '../../src/box';
+import Flex from '../../src/components/flex';
+import { BoxStyleProps } from '../../src/types';
 
 interface Props extends BoxStyleProps {
   children: React.ReactNode;

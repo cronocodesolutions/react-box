@@ -11,6 +11,7 @@ namespace BoxUtils {
     props: TProps,
   ) {
     if (prop !== undefined && prop != null) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (props as any)[(pseudoAliases as any)[name] ?? name] = Array.isArray(prop) ? prop[0] : prop;
     }
   }

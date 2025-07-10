@@ -1,4 +1,5 @@
 import Box from '../src/box';
+import Variables from '../src/core/variables';
 
 // preload variable
 Box.getVariableValue('violet-300');
@@ -7,14 +8,31 @@ export const { extendedProps, extendedPropTypes } = Box.extend(
   {
     'bg-stripes': 'linear-gradient(135deg,var(--violet-300) 10%,#0000 0,#0000 50%,var(--violet-300) 0,var(--violet-300) 60%,#0000 0,#0000)',
     'body-bg': 'linear-gradient(19deg, white 40%, rgba(183, 33, 255, 0.05) 94%)',
+    'theme-bg': 'light-dark(#fff, #082f49)',
+    'theme-color': 'light-dark(#fff, #082f49)',
+    'bg-img-indeterminate-green': `url("data:image/svg+xml,${encodeURIComponent(`<svg xmlns='http://www.w3.org/2000/svg' width='100%' viewBox='0 0 20 20'><line stroke='${Variables.colors['green']}' x1='4' y1='10' x2='16' y2='10' stroke-width='1' /></svg>`)}")`,
   },
   {},
   {
     bgImage: [
       {
-        values: ['body-bg', 'bg-stripes'] as const,
-        valueFormat: (value, getVariableValue) => getVariableValue(`${value}`),
+        values: ['body-bg', 'bg-stripes', 'bg-img-indeterminate-green'] as const,
+        valueFormat: (value, getVariableValue) => getVariableValue(value),
         styleName: 'background-image',
+      },
+    ],
+    bgColor: [
+      {
+        values: ['theme-bg'] as const,
+        valueFormat: (value, getVariable) => getVariable(value),
+        styleName: 'background-color',
+      },
+    ],
+    color: [
+      {
+        values: ['theme-color'] as const,
+        valueFormat: (value, getVariable) => getVariable(value),
+        styleName: 'color',
       },
     ],
   },

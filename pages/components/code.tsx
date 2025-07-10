@@ -1,5 +1,5 @@
-import { useEffect, useLayoutEffect, useState } from 'react';
 import Prism from 'prismjs';
+import { useEffect, useLayoutEffect, useState } from 'react';
 import 'prismjs/components/prism-bash';
 // import 'prismjs/components/prism-css';
 // import 'prismjs/components/prism-csv';
@@ -15,29 +15,27 @@ import 'prismjs/components/prism-jsx';
 // import 'prismjs/components/prism-sql';
 // import 'prismjs/components/prism-typescript';
 // import 'prismjs/components/prism-yaml';
-
 // import 'prismjs/themes/prism-coy.css';
 // import 'prismjs/themes/prism-dark.css';
 // import 'prismjs/themes/prism-funky.css';
 // import 'prismjs/themes/prism-tomorrow.css';
 // import 'prismjs/themes/prism-twilight.css';
 import 'prismjs/themes/prism-okaidia.css';
-import Button from '../../src/components/button';
 import Box, { BoxProps } from '../../src/box';
-import CopySvg from '../svgs/copySvg';
+import Button from '../../src/components/button';
+import Flex from '../../src/components/flex';
 import { Label } from '../../src/components/semantics';
 import CheckboxSvg from '../svgs/checkboxSvg';
-import Flex from '../../src/components/flex';
+import CopySvg from '../svgs/copySvg';
 
 interface Props extends BoxProps {
   language?: 'javascript' | 'shell' | 'jsx' | 'auto';
   label?: string;
-  number?: number;
   code?: string;
 }
 
 export default function Code(props: Props) {
-  const { children, language = 'jsx', number, label, code, ...restProps } = props;
+  const { children, language = 'jsx', label, code, ...restProps } = props;
   const [copied, setCopied] = useState(false);
 
   function copyHandler() {
@@ -59,7 +57,7 @@ export default function Code(props: Props) {
       <Label fontSize={22} mb={2}>
         {label}
       </Label>
-      <Box shadow="small-shadow" b={1} borderColor="gray-300" borderRadius={3} overflow="hidden">
+      <Box shadow="medium" borderRadius={3} overflow="hidden">
         <Box position="relative">
           {children && (
             <Box px={3} py={6}>

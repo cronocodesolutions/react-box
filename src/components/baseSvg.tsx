@@ -1,7 +1,7 @@
 import { forwardRef, Ref } from 'react';
 import Box, { BoxTagProps } from '../box';
-import { BoxStyleProps } from '../types';
 import { ClassNameType } from '../core/classNames';
+import { BoxStyleProps } from '../types';
 
 type BoxSvgTagProps = Omit<BoxTagProps<'svg'>, 'viewBox' | 'width' | 'height'>;
 

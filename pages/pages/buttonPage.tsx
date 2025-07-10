@@ -9,8 +9,6 @@ export default function ButtonPage() {
 
   const ref = useRef<HTMLButtonElement>(null);
   const counterHandler = () => {
-    console.log(ref.current?.getClientRects());
-
     setCounter((prev) => prev + 1);
   };
 
@@ -55,6 +53,28 @@ export default function ButtonPage() {
             Increase count!
           </Button>
           <Box fontSize={18}>{counter}</Box>
+        </Flex>
+      </Code>
+
+      <Code
+        label="Hover variant"
+        code={`<Button variant="hover">
+  <Box position="relative">Basic</Box>
+</Button>
+
+<Button variant="hover" before={{ bgColor: 'indigo-900' }}>
+  <Box position="relative">Hover 2</Box>
+</Button>`}
+        mt={10}
+      >
+        <Flex gap={4}>
+          <Button variant="hover">
+            <Box position="relative">Hover</Box>
+          </Button>
+
+          <Button variant="hover" before={{ bgColor: 'indigo-900' }}>
+            <Box position="relative">Hover 2</Box>
+          </Button>
         </Flex>
       </Code>
     </Box>

@@ -1,7 +1,7 @@
 import { forwardRef, Ref, RefAttributes } from 'react';
 import Box, { BoxProps, BoxTagProps } from '../box';
-import ObjectUtils from '../utils/object/objectUtils';
 import { ComponentsAndVariants } from '../types';
+import ObjectUtils from '../utils/object/objectUtils';
 
 const tagProps = ['type', 'onClick'] as const;
 type TagPropsType = (typeof tagProps)[number];
