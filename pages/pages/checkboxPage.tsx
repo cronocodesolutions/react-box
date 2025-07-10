@@ -1,6 +1,5 @@
 import Box from '../../src/box';
 import Checkbox from '../../src/components/checkbox';
-import Flex from '../../src/components/flex';
 import Code from '../components/code';
 
 export default function CheckboxPage() {

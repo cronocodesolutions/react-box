@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 interface Props<T extends HTMLElement = HTMLDivElement> {
   node?: T | null;

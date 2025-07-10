@@ -22,7 +22,7 @@ import DataGridTopBar from './dataGrid/components/dataGridTopBar';
 import DataGridContent from './dataGrid/components/dataGridContent';
 import DataGridBottomBar from './dataGrid/components/dataGridBottomBar';
 
-export default function DataGrid<TRow extends {}>(props: DataGridProps<TRow>) {
+export default function DataGrid<TRow extends object>(props: DataGridProps<TRow>) {
   const grid = useGrid(props);
 
   console.debug('\x1b[36m%s\x1b[0m', '[react-box]: DataGrid render');

@@ -12,7 +12,7 @@ interface Props<TRow> {
 export default function DataGridRow<TRow>(props: Props<TRow>) {
   const { row } = props;
 
-  const rowSelectedHandler = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+  const rowSelectedHandler = useCallback((_e: React.ChangeEvent<HTMLInputElement>) => {
     row.grid.toggleRowSelection(row.key);
   }, []);
 

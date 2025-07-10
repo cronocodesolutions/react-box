@@ -36,7 +36,7 @@ function TooltipImpl(props: Props, ref: Ref<HTMLDivElement>) {
 
   const observeResize = useCallback(
     (element: HTMLDivElement, callback: (el: HTMLDivElement) => void) => {
-      const listener = (e: Event) => {
+      const listener = (_e: Event) => {
         callback(element);
       };
 

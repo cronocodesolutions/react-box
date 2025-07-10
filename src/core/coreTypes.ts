@@ -1,4 +1,4 @@
-export type BoxStylesType<T> = T extends ReadonlyArray<infer U> ? T[number] : T;
+export type BoxStylesType<T> = T extends ReadonlyArray<unknown> ? T[number] : T;
 
 export type ExtractElementType<T> =
   T extends React.DetailedHTMLProps<React.HTMLAttributes<infer E>, infer E> ? E : T extends React.SVGProps<infer E> ? E : never;

@@ -3,7 +3,6 @@ import { NavLink } from 'react-router-dom';
 import { BoxStyleProps } from '../../src/types';
 import Flex from '../../src/components/flex';
 import { BaseSvgProps } from '../../src/components/baseSvg';
-import Box from '../../src/box';
 
 interface Props extends BoxStyleProps {
   children: React.ReactNode;

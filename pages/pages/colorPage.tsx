@@ -1,4 +1,4 @@
-import Box, { BoxProps } from '../../src/box';
+import Box from '../../src/box';
 import Flex from '../../src/components/flex';
 import Variables from '../../src/core/variables';
 

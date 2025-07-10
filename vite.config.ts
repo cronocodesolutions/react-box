@@ -66,7 +66,7 @@ export default defineConfig(({ mode }) => {
 
             return 'core';
           },
-          chunkFileNames: (info) => `[name].${extensions[currentFormat]}`,
+          chunkFileNames: (_info) => `[name].${extensions[currentFormat]}`,
         },
       },
     },

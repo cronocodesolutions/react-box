@@ -2,8 +2,11 @@ import { describe, expect, it } from 'vitest';
 import { renderToStaticMarkup } from './ssg';
 import Box from './box';
 import Flex from './components/flex';
+import { ignoreLogs } from '../dev/tests';
 
 describe('SSG', () => {
+  ignoreLogs();
+
   it('generates static html', () => {
     const el = <Box>test</Box>;
 

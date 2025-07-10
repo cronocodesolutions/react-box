@@ -1,11 +1,8 @@
-import { useState } from 'react';
 import Box from '../../src/box';
 import Textbox from '../../src/components/textbox';
 import Code from '../components/code';
 
 export default function TextboxPage() {
-  const [controlledValue, setControlledValue] = useState('');
-
   return (
     <Box>
       <Box tag="h1" mb={3} fontSize={24}>

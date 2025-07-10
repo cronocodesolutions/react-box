@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useEffect, useLayoutEffect, useMemo } from 'react';
 import { BoxStyleProps, BoxStyles, PseudoClassesType } from '../types';
 import ObjectUtils from '../utils/object/objectUtils';

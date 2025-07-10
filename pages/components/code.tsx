@@ -32,12 +32,11 @@ import Flex from '../../src/components/flex';
 interface Props extends BoxProps {
   language?: 'javascript' | 'shell' | 'jsx' | 'auto';
   label?: string;
-  number?: number;
   code?: string;
 }
 
 export default function Code(props: Props) {
-  const { children, language = 'jsx', number, label, code, ...restProps } = props;
+  const { children, language = 'jsx', label, code, ...restProps } = props;
   const [copied, setCopied] = useState(false);
 
   function copyHandler() {

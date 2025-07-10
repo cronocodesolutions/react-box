@@ -577,7 +577,7 @@ export const cssStyles = {
     {
       styleName: 'line-height',
       values: ['font-size'] as const,
-      valueFormat: (value: string) => '1',
+      valueFormat: () => '1',
     },
   ],
   /** The list-style CSS shorthand property allows you to set all the list style properties at once. */

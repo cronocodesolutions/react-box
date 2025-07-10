@@ -207,7 +207,7 @@ export default class ColumnModel<TRow> {
 
     const controller = new AbortController();
 
-    const stopResize = (e: MouseEvent) => {
+    const stopResize = (_e: MouseEvent) => {
       controller.abort();
       this.grid.isResizeMode = false;
       update();
@@ -231,7 +231,7 @@ export default class ColumnModel<TRow> {
     this.grid.toggleGrouping(this.key);
   };
 
-  public sortColumn: (sortDirection?: SortDirection) => void = (...args: any[]) => {
+  public sortColumn: (sortDirection?: SortDirection) => void = (...args: [SortDirection | undefined]) => {
     this.grid.setSortColumn(this.key, ...args);
   };
 

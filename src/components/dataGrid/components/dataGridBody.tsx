@@ -1,6 +1,5 @@
 import { useMemo } from 'react';
 import Box from '../../../box';
-import { DEFAULT_REM_DIVIDER } from '../../../core/boxConstants';
 import Grid from '../../grid';
 import GridModel from '../models/gridModel';
 import GroupRowModel from '../models/groupRowModel';

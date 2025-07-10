@@ -23,7 +23,7 @@ interface Props<TKey extends keyof ComponentsAndVariants> extends RadioButtonPro
 function RadioButtonImpl<TKey extends keyof ComponentsAndVariants>(props: Props<TKey>, ref: Ref<HTMLInputElement>) {
   const newProps = ObjectUtils.buildProps(props, tagProps, { type: 'radio' });
 
-  return <Box tag="input" component={'radioButton' as TKey} {...newProps} />;
+  return <Box ref={ref} tag="input" component={'radioButton' as TKey} {...newProps} />;
 }
 
 const RadioButton = forwardRef(RadioButtonImpl);

@@ -6,7 +6,6 @@ import Button from '../../src/components/button';
 import Flex from '../../src/components/flex';
 
 export default function DropdownPage() {
-  const [selectedValues, setSelectedValues] = useState<number[]>([]);
   const [selectedValue, setSelectedValue] = useState<number>(2);
 
   return (

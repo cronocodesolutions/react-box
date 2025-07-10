@@ -219,7 +219,10 @@ export default class GridModel<TRow> {
     return this._idMap.get(row as WeakKey)!;
   }
 
-  public setSortColumn: (columnKey: Key, sortDirection?: SortDirection) => void = (columnKey: Key, ...sortDirection: any[]) => {
+  public setSortColumn: (columnKey: Key, sortDirection?: SortDirection) => void = (
+    columnKey: Key,
+    ...sortDirection: [SortDirection | undefined]
+  ) => {
     if (sortDirection.length > 0) {
       [this._sortDirection] = sortDirection;
       this._sortColumn = this._sortDirection ? columnKey : undefined;
@@ -378,7 +381,7 @@ export default class GridModel<TRow> {
   public get sortColumn() {
     return this._sortColumn;
   }
-  private _sortDirection: SortDirection = 'ASC';
+  private _sortDirection?: SortDirection = 'ASC';
   public get sortDirection() {
     return this._sortDirection;
   }

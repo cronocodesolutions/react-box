@@ -39,7 +39,7 @@ export default function FlexPage() {
       </Box>
 
       <Form
-        onSubmit={(obj, e) => {
+        onSubmit={(_obj, _e) => {
           // e.preventDefault();
           // var formData = new FormData(e.currentTarget);
         }}

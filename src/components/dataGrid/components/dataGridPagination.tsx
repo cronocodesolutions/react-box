@@ -5,8 +5,8 @@ interface Props<TRow> {
   grid: GridModel<TRow>;
 }
 
-export default function DataGridPagination<TRow>(props: Props<TRow>) {
-  const { grid } = props;
+export default function DataGridPagination<TRow>(_props: Props<TRow>) {
+  // const { grid } = props;
 
   return (
     <Flex gap={3}>

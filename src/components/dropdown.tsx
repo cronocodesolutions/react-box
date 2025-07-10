@@ -49,6 +49,7 @@ function DropdownImpl<TVal>(props: Props<TVal>, ref: Ref<HTMLInputElement>): Rea
     return refToUse.current?.getBoundingClientRect().height ?? 0;
   }, [openUp, refToUse]);
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const allKids = useMemo<ReactElement<any, FunctionComponent>[]>(
     () => (Array.isArray(children) ? children : [children]).flatMap((x) => x),
     [children],

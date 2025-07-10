@@ -20,5 +20,7 @@ jobs:
         run: npm install
       - name: Check compiling 🔧
         run: npm run compile
+      - name: Check linting 🔧
+        run: npm run lint
       - name: Check testing 🔧
         run: npm run test:all
