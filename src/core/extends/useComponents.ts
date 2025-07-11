@@ -1,9 +1,9 @@
 import { useMemo } from 'react';
-import { BoxComponent } from './boxComponents';
-import BoxExtends from './boxExtends';
-import { BoxStyleProps, BoxComponentStyles, ComponentsAndVariants } from '../../types';
+import { BoxComponentStyles, BoxStyleProps, ComponentsAndVariants } from '../../types';
 import ObjectUtils from '../../utils/object/objectUtils';
 import { classNames } from '../classNames';
+import { BoxComponent } from './boxComponents';
+import BoxExtends from './boxExtends';
 
 export default function useComponents<TKey extends keyof ComponentsAndVariants = never>(
   props: BoxStyleProps<TKey>,

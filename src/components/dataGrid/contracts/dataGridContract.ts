@@ -1,3 +1,5 @@
+import CellModel from '../models/cellModel';
+
 export type Key = string | number;
 export type PinPosition = 'LEFT' | 'RIGHT';
 export const NO_PIN = 'NO_PIN';
@@ -16,7 +18,8 @@ export interface ColumnType<TRow> {
   pin?: PinPosition;
   width?: number;
   columns?: ColumnType<TRow>[];
-  align?: 'right' | 'center';
+  align?: 'left' | 'right' | 'center';
+  Cell?: React.ComponentType<{ cell: CellModel<TRow> }>;
 }
 
 export interface GridDefinition<TRow> {
@@ -32,6 +35,7 @@ export interface GridDefinition<TRow> {
 export interface DataGridProps<TRow> {
   data: TRow[];
   def: GridDefinition<TRow>;
+  loading?: boolean;
   onSelectionChange?: (event: SelectionChangeEvent<TRow>) => void;
 }
 

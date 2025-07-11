@@ -1,7 +1,7 @@
+import { Key } from '../contracts/dataGridContract';
 import CellModel from './cellModel';
 import GridModel from './gridModel';
 import GroupRowModel from './groupRowModel';
-import { Key } from '../contracts/dataGridContract';
 
 export default class RowModel<TRow> {
   constructor(

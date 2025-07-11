@@ -1,6 +1,6 @@
-import DataGridHeaderCell from './dataGridHeaderCell';
 import Grid from '../../grid';
 import GridModel from '../models/gridModel';
+import DataGridHeaderCell from './dataGridHeaderCell';
 
 interface Props<TRow> {
   grid: GridModel<TRow>;

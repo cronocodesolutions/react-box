@@ -1,9 +1,9 @@
 import { render, screen, cleanup } from '@testing-library/react';
 import { describe, expect, it, afterEach } from 'vitest';
-import DataGrid from './dataGrid';
-import Box from '../box';
-import { DataGridProps, GridDefinition } from './dataGrid/contracts/dataGridContract';
 import { ignoreLogs } from '../../dev/tests';
+import Box from '../box';
+import DataGrid from './dataGrid';
+import { DataGridProps, GridDefinition } from './dataGrid/contracts/dataGridContract';
 
 interface Person {
   id: number;

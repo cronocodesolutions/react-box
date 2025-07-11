@@ -1,10 +1,10 @@
-import GridModel, { EMPTY_CELL_KEY } from './gridModel';
 import FnUtils from '../../../utils/fn/fnUtils';
 import { ColumnType, PinPosition } from '../contracts/dataGridContract';
+import GridModel, { EMPTY_CELL_KEY } from './gridModel';
 
 export default class ColumnModel<TRow> {
   constructor(
-    private readonly def: ColumnType<TRow>,
+    public readonly def: ColumnType<TRow>,
     public readonly grid: GridModel<TRow>,
     private parent?: ColumnModel<TRow>,
   ) {
@@ -32,6 +32,9 @@ export default class ColumnModel<TRow> {
   }
   public get isLeaf() {
     return this.columns.length === 0;
+  }
+  public get Cell() {
+    return this.def.Cell;
   }
 
   private _pin?: PinPosition;

@@ -1,7 +1,7 @@
-import DataGridColumnGroups from './dataGridColumnGroups';
-import DataGridTopBarContextMenu from './dataGridTopBarContextMenu';
 import Flex from '../../flex';
 import GridModel from '../models/gridModel';
+import DataGridColumnGroups from './dataGridColumnGroups';
+import DataGridTopBarContextMenu from './dataGridTopBarContextMenu';
 
 interface Props<TRow> {
   grid: GridModel<TRow>;

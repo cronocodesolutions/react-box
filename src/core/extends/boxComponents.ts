@@ -341,6 +341,7 @@ const boxComponents = {
   datagrid: {
     styles: {
       b: 1,
+      bgColor: 'white',
       borderColor: 'gray-400',
       overflow: 'hidden',
       borderRadius: 1,
@@ -548,11 +549,10 @@ const boxComponents = {
           borderColor: 'gray-400',
           transition: 'none',
           ai: 'center',
-          overflow: 'hidden',
           hoverGroup: { 'grid-row': { bgColor: 'gray-200' } },
         },
         variants: {
-          isRowNumber: { bgColor: 'gray-200' },
+          isRowNumber: { bgColor: 'gray-200', jc: 'right' },
           isRowSelection: {},
           isPinned: { position: 'sticky', bgColor: 'gray-100', zIndex: 1 },
           isFirstLeftPinned: {},

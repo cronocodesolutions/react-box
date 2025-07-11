@@ -1,6 +1,10 @@
+import { useCallback } from 'react';
 import Box from '../../src/box';
 import DataGrid from '../../src/components/dataGrid';
+import CellModel from '../../src/components/dataGrid/models/cellModel';
+import Flex from '../../src/components/flex';
 import { H3 } from '../../src/components/semantics';
+import { ArrayType } from '../../src/types';
 import Code from '../components/code';
 import Data from '../data/MOCK_DATA.json';
 import Data1 from '../data/MOCK_DATA_1.json';
@@ -17,8 +21,18 @@ const data = [...Data, ...Data1, ...Data2, ...Data3, ...Data4, ...Data5, ...Data
 export default function DataGridPage() {
   usePageContext(<RightSidebar />);
 
+  const ageCell = useCallback(({ cell }: { cell: CellModel<ArrayType<typeof data>> }) => {
+    return (
+      <Flex bgColor="blue-200" height="fit" width="fit" ai="center" overflow="hidden">
+        <Box px={4} textOverflow="ellipsis" overflow="hidden" textWrap="nowrap">
+          {cell.row.data.age}
+        </Box>
+      </Flex>
+    );
+  }, []);
+
   return (
-    <Box>
+    <Box bgColor="green">
       <Box tag="h1" fontSize={24}>
         DataGrid (⚠️ WIP)
       </Box>
@@ -30,7 +44,7 @@ export default function DataGridPage() {
   data={data}
   def={{
     rowHeight: 40,
-    visibleRows: 5,
+    visibleRowsCount: 5,
     columns: [
       { key: 'first_name', header: 'First name' },
       { key: 'last_name', header: 'Last name' },
@@ -60,7 +74,7 @@ export default function DataGridPage() {
             columns: [
               { key: 'first_name', header: 'First name' },
               { key: 'last_name', header: 'Last name' },
-              { key: 'age', header: 'Age', width: 90 },
+              { key: 'age', header: 'Age', width: 90, align: 'right', Cell: ageCell },
               { key: 'email', header: 'Email', width: 300 },
               { key: 'street_address' },
               { key: 'city' },
@@ -128,6 +142,7 @@ export const components = Box.components({
   datagrid: {
     styles: {
       b: 1,
+      bgColor: 'white',
       borderColor: 'gray-400',
       overflow: 'hidden',
       borderRadius: 1,
