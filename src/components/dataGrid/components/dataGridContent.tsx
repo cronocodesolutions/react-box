@@ -1,9 +1,9 @@
 import { useCallback, useState } from 'react';
-import DataGridBody from './dataGridBody';
-import DataGridHeader from './dataGridHeader';
 import Box from '../../../box';
 import FnUtils from '../../../utils/fn/fnUtils';
 import GridModel from '../models/gridModel';
+import DataGridBody from './dataGridBody';
+import DataGridHeader from './dataGridHeader';
 
 interface Props<TRow> {
   grid: GridModel<TRow>;

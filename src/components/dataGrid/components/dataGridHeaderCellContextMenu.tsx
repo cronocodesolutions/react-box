@@ -33,8 +33,11 @@ export default function DataGridHeaderCellContextMenu<TRow>(props: Props<TRow>) 
   const isSortingAvailable = isSortAscAvailable || isSortDescAvailable || isClearSortAvailable;
   const isPiningAvailable = isPinLeftAvailable || isPinRightAvailable || isUnpinAvailable;
 
+  const left = column.align === 'right' ? 2 : undefined;
+  const right = column.align === 'right' ? undefined : column.pin === 'RIGHT' ? 2.5 : 4;
+
   return (
-    <Flex position="absolute" right={column.pin === 'RIGHT' ? 2.5 : 4} top="1/2" translateY={-3} ai="center">
+    <Flex position="absolute" left={left} right={right} top="1/2" translateY={-3} ai="center">
       <Button component="datagrid.header.cell.contextMenu" onClick={() => setOpen(!isOpen)}>
         <Span component="datagrid.header.cell.contextMenu.icon">
           <DotsIcon fill="currentColor" />

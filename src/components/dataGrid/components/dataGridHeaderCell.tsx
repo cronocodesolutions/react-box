@@ -1,12 +1,12 @@
 import { useCallback, useMemo } from 'react';
-import DataGridHeaderCellContextMenu from './dataGridHeaderCellContextMenu';
-import DataGridHeaderCellResizer from './dataGridHeaderCellResizer';
 import Box from '../../../box';
 import SortIcon from '../../../icons/sortIcon';
 import Checkbox from '../../checkbox';
 import Flex from '../../flex';
 import ColumnModel from '../models/columnModel';
 import { EMPTY_CELL_KEY, GROUPING_CELL_KEY, ROW_NUMBER_CELL_KEY, ROW_SELECTION_CELL_KEY } from '../models/gridModel';
+import DataGridHeaderCellContextMenu from './dataGridHeaderCellContextMenu';
+import DataGridHeaderCellResizer from './dataGridHeaderCellResizer';
 
 interface Props<TRow> {
   column: ColumnModel<TRow>;
@@ -81,7 +81,7 @@ export default function DataGridHeaderCell<TRow>(props: Props<TRow>) {
               position={isLeaf ? undefined : 'sticky'}
               ai="center"
               transition="none"
-              pl={column.align ? undefined : 4}
+              pl={column.align === 'right' ? 10 : 4}
               style={{
                 left: !pin ? `var(${grid.leftEdgeVarName})` : undefined,
               }}
@@ -94,7 +94,7 @@ export default function DataGridHeaderCell<TRow>(props: Props<TRow>) {
                   <SortIcon width="16px" rotate={grid.sortDirection === 'ASC' ? 0 : 180} fill="currentColor" />
                 </Box>
               )}
-              {showContextMenu && <Box minWidth={10} />}
+              {showContextMenu && <Box minWidth={column.align === 'right' ? 4 : 10} />}
             </Flex>
           </Flex>
 

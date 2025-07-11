@@ -1,11 +1,11 @@
 import { forwardRef, FunctionComponent, ReactElement, Ref, RefAttributes, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import Box, { BoxProps } from '../box';
+import useVisibility from '../hooks/useVisibility';
 import BaseSvg from './baseSvg';
 import Button from './button';
 import Flex from './flex';
 import Textbox from './textbox';
 import Tooltip from './tooltip';
-import useVisibility from '../hooks/useVisibility';
 
 interface Props<TVal> extends Omit<BoxProps<'button'>, 'ref'> {
   name?: string;

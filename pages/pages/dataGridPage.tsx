@@ -1,6 +1,10 @@
+import { useCallback } from 'react';
 import Box from '../../src/box';
 import DataGrid from '../../src/components/dataGrid';
+import CellModel from '../../src/components/dataGrid/models/cellModel';
+import Flex from '../../src/components/flex';
 import { H3 } from '../../src/components/semantics';
+import { ArrayType } from '../../src/types';
 import Code from '../components/code';
 import Data from '../data/MOCK_DATA.json';
 import Data1 from '../data/MOCK_DATA_1.json';
@@ -13,9 +17,20 @@ import Data7 from '../data/MOCK_DATA_7.json';
 import usePageContext from '../hooks/usePageContext';
 
 const data = [...Data, ...Data1, ...Data2, ...Data3, ...Data4, ...Data5, ...Data6, ...Data7];
+type Person = ArrayType<typeof data>;
 
 export default function DataGridPage() {
   usePageContext(<RightSidebar />);
+
+  const ageCell = useCallback(({ cell }: { cell: CellModel<Person> }) => {
+    return (
+      <Flex bgColor="blue-200" height="fit" width="fit" ai="center" overflow="hidden">
+        <Box px={4} textOverflow="ellipsis" overflow="hidden" textWrap="nowrap">
+          {cell.row.data.age}
+        </Box>
+      </Flex>
+    );
+  }, []);
 
   return (
     <Box>
@@ -26,15 +41,24 @@ export default function DataGridPage() {
       <Code
         label="Basic"
         mt={10}
-        code={`<DataGrid
+        code={`
+const ageCell = useCallback(({ cell }: { cell: CellModel<Person> }) => {
+  return (
+    <Flex bgColor="blue-200" height="fit" width="fit" ai="center" overflow="hidden">
+      <Box px={4} textOverflow="ellipsis" overflow="hidden" textWrap="nowrap">
+        {cell.row.data.age}
+      </Box>
+    </Flex>
+  );
+}, []);
+
+<DataGrid
   data={data}
   def={{
-    rowHeight: 40,
-    visibleRows: 5,
     columns: [
       { key: 'first_name', header: 'First name' },
       { key: 'last_name', header: 'Last name' },
-      { key: 'age', header: 'Age', width: 90 },
+      { key: 'age', header: 'Age', width: 90, align: 'right', Cell: ageCell },
       { key: 'email', header: 'Email', width: 300 },
       { key: 'street_address' },
       { key: 'city' },
@@ -51,6 +75,8 @@ export default function DataGridPage() {
       { key: 'language' },
       { key: 'currency_code' },
     ],
+    rowHeight: 40,
+    visibleRowsCount: 5,
   }}
 />`}
       >
@@ -60,7 +86,7 @@ export default function DataGridPage() {
             columns: [
               { key: 'first_name', header: 'First name' },
               { key: 'last_name', header: 'Last name' },
-              { key: 'age', header: 'Age', width: 90 },
+              { key: 'age', header: 'Age', width: 90, align: 'right', Cell: ageCell },
               { key: 'email', header: 'Email', width: 300 },
               { key: 'street_address' },
               { key: 'city' },
@@ -128,6 +154,7 @@ export const components = Box.components({
   datagrid: {
     styles: {
       b: 1,
+      bgColor: 'white',
       borderColor: 'gray-400',
       overflow: 'hidden',
       borderRadius: 1,

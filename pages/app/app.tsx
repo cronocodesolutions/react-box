@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
 import { Routes, Route, NavLink, useLocation } from 'react-router-dom';
-import Sidebar from './sidebar';
 import Box from '../../src/box';
 import Button from '../../src/components/button';
 import Flex from '../../src/components/flex';
@@ -21,6 +20,7 @@ import ThemeSetupPage from '../pages/themeSetupPage';
 import TooltipPage from '../pages/tooltipPage';
 import BoxSvg from '../svgs/boxSvg';
 import MenuSvg from '../svgs/menuSvg';
+import Sidebar from './sidebar';
 
 export default function App() {
   const [open, setOpen] = useState(false);

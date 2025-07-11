@@ -1,9 +1,10 @@
+import '../../../array';
+import memo from '../../../utils/memo';
+import DataGridCellRowSelection from '../components/dataGridCellRowSelection';
+import { DataGridProps, Key, NO_PIN, PinPosition } from '../contracts/dataGridContract';
 import ColumnModel from './columnModel';
 import GroupRowModel from './groupRowModel';
 import RowModel from './rowModel';
-import memo from '../../../utils/memo';
-import { DataGridProps, Key, NO_PIN, PinPosition } from '../contracts/dataGridContract';
-import '../../../array';
 
 export const EMPTY_CELL_KEY: Key = 'empty-cell';
 export const ROW_NUMBER_CELL_KEY: Key = 'row-number-cell';
@@ -12,40 +13,51 @@ export const GROUPING_CELL_KEY: Key = 'grouping-cell';
 
 export default class GridModel<TRow> {
   constructor(
-    public readonly props: DataGridProps<TRow>,
+    public props: DataGridProps<TRow>,
     public readonly update: () => void,
   ) {
     console.debug('\x1b[32m%s\x1b[0m', '[react-box]: DataGrid GridModel ctor');
+  }
 
-    this._sourceColumns = props.def.columns.map((def) => new ColumnModel(def, this));
+  public readonly sourceColumns = memo(() => {
+    const { def } = this.props;
+
+    const sourceColumns: ColumnModel<TRow>[] = [];
+
+    if (this.groupColumns.size > 0) {
+      sourceColumns.push(new ColumnModel({ key: GROUPING_CELL_KEY }, this));
+    }
+
+    sourceColumns.push(...def.columns.map((d) => new ColumnModel(d, this)));
 
     // add empty column
-    this._sourceColumns.push(new ColumnModel({ key: EMPTY_CELL_KEY }, this));
+    sourceColumns.push(new ColumnModel({ key: EMPTY_CELL_KEY, Cell: () => null }, this));
 
     // add row selection column
-    if (props.def.rowSelection) {
-      const pin: PinPosition | undefined = typeof props.def.rowSelection === 'object' && props.def.rowSelection.pinned ? 'LEFT' : undefined;
+    if (def.rowSelection) {
+      const pin: PinPosition | undefined = typeof def.rowSelection === 'object' && def.rowSelection.pinned ? 'LEFT' : undefined;
 
-      this._sourceColumns.unshift(new ColumnModel({ key: ROW_SELECTION_CELL_KEY, pin, width: 50, align: 'center' }, this));
+      sourceColumns.unshift(
+        new ColumnModel({ key: ROW_SELECTION_CELL_KEY, pin, width: 50, align: 'center', Cell: DataGridCellRowSelection }, this),
+      );
     }
 
     // add row number column
-    if (props.def.showRowNumber) {
-      const pin: PinPosition | undefined =
-        typeof props.def.showRowNumber === 'object' && props.def.showRowNumber.pinned ? 'LEFT' : undefined;
+    if (def.showRowNumber) {
+      const pin: PinPosition | undefined = typeof def.showRowNumber === 'object' && def.showRowNumber.pinned ? 'LEFT' : undefined;
 
-      this._sourceColumns.unshift(new ColumnModel({ key: ROW_NUMBER_CELL_KEY, pin, width: 70, align: 'right' }, this));
+      sourceColumns.unshift(new ColumnModel({ key: ROW_NUMBER_CELL_KEY, pin, width: 70, align: 'right' }, this));
     }
-  }
 
-  private _sourceColumns: ColumnModel<TRow>[] = [];
+    return sourceColumns;
+  });
 
   public readonly columns = memo(() => {
     console.debug('\x1b[36m%s\x1b[0m', '[react-box]: DataGrid columns memo');
 
-    const left = this._sourceColumns.map((c) => c.getPinnedColumn('LEFT')).filter((c) => !!c);
-    const middle = this._sourceColumns.map((c) => c.getPinnedColumn()).filter((c) => !!c);
-    const right = this._sourceColumns.map((c) => c.getPinnedColumn('RIGHT')).filter((c) => !!c);
+    const left = this.sourceColumns.value.map((c) => c.getPinnedColumn('LEFT')).filter((c) => !!c);
+    const middle = this.sourceColumns.value.map((c) => c.getPinnedColumn()).filter((c) => !!c);
+    const right = this.sourceColumns.value.map((c) => c.getPinnedColumn('RIGHT')).filter((c) => !!c);
     const flat = [...left, ...middle, ...right].flatMap((c) => c.flatColumns);
     const leafs = flat.filter((x) => x.isLeaf);
     const visibleLeafs = flat.filter((x) => x.isLeaf && x.isVisible);
@@ -267,14 +279,7 @@ export default class GridModel<TRow> {
       this.hiddenColumns.add(columnKey);
     }
 
-    const groupingColumn = this._sourceColumns.find((c) => c.key === GROUPING_CELL_KEY);
-    if (this.groupColumns.size > 0 && !groupingColumn) {
-      const position = this._sourceColumns.sumBy((c) => (c.key === ROW_NUMBER_CELL_KEY || c.key === ROW_SELECTION_CELL_KEY ? 1 : 0));
-      this._sourceColumns.splice(position, 0, new ColumnModel({ key: GROUPING_CELL_KEY }, this));
-    } else if (this.groupColumns.size === 0 && groupingColumn) {
-      this._sourceColumns = this._sourceColumns.removeBy((c) => c.key === GROUPING_CELL_KEY);
-    }
-
+    this.sourceColumns.clear();
     this.columns.clear();
     this.headerRows.clear();
     this.gridTemplateColumns.clear();
@@ -287,8 +292,8 @@ export default class GridModel<TRow> {
 
   public unGroupAll = () => {
     this.groupColumns = new Set();
-    this._sourceColumns = this._sourceColumns.removeBy((c) => c.key === GROUPING_CELL_KEY);
 
+    this.sourceColumns.clear();
     this.columns.clear();
     this.headerRows.clear();
     this.gridTemplateColumns.clear();
@@ -370,7 +375,7 @@ export default class GridModel<TRow> {
 
     leaf.setWidth(width);
 
-    const sourceLeaf = this._sourceColumns.flatMap((x) => x.flatColumns).findOrThrow((l) => l.key === columnKey);
+    const sourceLeaf = this.sourceColumns.value.flatMap((x) => x.flatColumns).findOrThrow((l) => l.key === columnKey);
     sourceLeaf.setWidth(width);
   };
 

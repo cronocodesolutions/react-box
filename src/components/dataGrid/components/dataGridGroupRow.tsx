@@ -1,11 +1,12 @@
 import { useCallback } from 'react';
-import DataGridCell from './dataGridCell';
+import Box from '../../../box';
 import ExpandIcon from '../../../icons/expandIcon';
 import Button from '../../button';
 import Checkbox from '../../checkbox';
 import Flex from '../../flex';
 import { EMPTY_CELL_KEY, GROUPING_CELL_KEY, ROW_NUMBER_CELL_KEY, ROW_SELECTION_CELL_KEY } from '../models/gridModel';
 import GroupRowModel from '../models/groupRowModel';
+import DataGridCell from './dataGridCell';
 
 interface Props<TRow> {
   row: GroupRowModel<TRow>;
@@ -36,11 +37,14 @@ export default function DataGridGroupRow<TRow>(props: Props<TRow>) {
               br={row.groupingColumn.pin === 'LEFT' ? 1 : undefined}
               gridColumn={row.groupingColumnGridColumn}
               pl={4 * row.depth}
+              overflow="auto"
             >
-              <Button clean onClick={() => row.toggleRow()} cursor="pointer" display="flex" gap={1} ai="center">
-                <ExpandIcon fill="currentColor" width="14px" height="14px" rotate={row.expanded ? 0 : -90} />
-                {cell.value}
-              </Button>
+              <Box textWrap="nowrap" px={4}>
+                <Button clean onClick={() => row.toggleRow()} cursor="pointer" display="flex" gap={1} ai="center">
+                  <ExpandIcon fill="currentColor" width="14px" height="14px" rotate={row.expanded ? 0 : -90} />
+                  {cell.value}
+                </Button>
+              </Box>
             </DataGridCell>
           );
         }
@@ -57,9 +61,11 @@ export default function DataGridGroupRow<TRow>(props: Props<TRow>) {
           );
         }
 
-        if (pin !== row.groupingColumn.pin || key === EMPTY_CELL_KEY || key === ROW_NUMBER_CELL_KEY) {
+        if (key === EMPTY_CELL_KEY) return <Box key={key} />;
+
+        if (pin !== row.groupingColumn.pin || key === ROW_NUMBER_CELL_KEY) {
           return (
-            <DataGridCell key={key} column={cell.column}>
+            <DataGridCell key={key} column={cell.column} px={4}>
               {cell.value}
             </DataGridCell>
           );

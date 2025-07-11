@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-empty-object-type */
 import '@cronocode/react-box';
-import { extendedProps, extendedPropTypes, components } from './extends';
 import { ExtractBoxStyles, ExtractComponentsAndVariants } from '../src/types';
+import { extendedProps, extendedPropTypes, components } from './extends';
 
 declare module '../src/types' {
   namespace Augmented {

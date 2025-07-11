@@ -1,6 +1,6 @@
 import React, { useContext, useLayoutEffect, useState } from 'react';
-import ThemeContext from './themeContext';
 import Box from '../../box';
+import ThemeContext from './themeContext';
 
 interface ThemeProps {
   children: React.ReactNode;
