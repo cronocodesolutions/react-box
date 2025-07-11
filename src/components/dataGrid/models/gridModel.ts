@@ -279,14 +279,6 @@ export default class GridModel<TRow> {
       this.hiddenColumns.add(columnKey);
     }
 
-    // const groupingColumn = this._sourceColumns.find((c) => c.key === GROUPING_CELL_KEY);
-    // if (this.groupColumns.size > 0 && !groupingColumn) {
-    //   const position = this._sourceColumns.sumBy((c) => (c.key === ROW_NUMBER_CELL_KEY || c.key === ROW_SELECTION_CELL_KEY ? 1 : 0));
-    //   this._sourceColumns.splice(position, 0, new ColumnModel({ key: GROUPING_CELL_KEY }, this));
-    // } else if (this.groupColumns.size === 0 && groupingColumn) {
-    //   this._sourceColumns = this._sourceColumns.removeBy((c) => c.key === GROUPING_CELL_KEY);
-    // }
-
     this.sourceColumns.clear();
     this.columns.clear();
     this.headerRows.clear();
@@ -300,7 +292,6 @@ export default class GridModel<TRow> {
 
   public unGroupAll = () => {
     this.groupColumns = new Set();
-    // this._sourceColumns = this._sourceColumns.removeBy((c) => c.key === GROUPING_CELL_KEY);
 
     this.sourceColumns.clear();
     this.columns.clear();
