@@ -17,11 +17,12 @@ import Data7 from '../data/MOCK_DATA_7.json';
 import usePageContext from '../hooks/usePageContext';
 
 const data = [...Data, ...Data1, ...Data2, ...Data3, ...Data4, ...Data5, ...Data6, ...Data7];
+type Person = ArrayType<typeof data>;
 
 export default function DataGridPage() {
   usePageContext(<RightSidebar />);
 
-  const ageCell = useCallback(({ cell }: { cell: CellModel<ArrayType<typeof data>> }) => {
+  const ageCell = useCallback(({ cell }: { cell: CellModel<Person> }) => {
     return (
       <Flex bgColor="blue-200" height="fit" width="fit" ai="center" overflow="hidden">
         <Box px={4} textOverflow="ellipsis" overflow="hidden" textWrap="nowrap">
@@ -32,7 +33,7 @@ export default function DataGridPage() {
   }, []);
 
   return (
-    <Box bgColor="green">
+    <Box>
       <Box tag="h1" fontSize={24}>
         DataGrid (⚠️ WIP)
       </Box>
@@ -40,15 +41,24 @@ export default function DataGridPage() {
       <Code
         label="Basic"
         mt={10}
-        code={`<DataGrid
+        code={`
+const ageCell = useCallback(({ cell }: { cell: CellModel<Person> }) => {
+  return (
+    <Flex bgColor="blue-200" height="fit" width="fit" ai="center" overflow="hidden">
+      <Box px={4} textOverflow="ellipsis" overflow="hidden" textWrap="nowrap">
+        {cell.row.data.age}
+      </Box>
+    </Flex>
+  );
+}, []);
+
+<DataGrid
   data={data}
   def={{
-    rowHeight: 40,
-    visibleRowsCount: 5,
     columns: [
       { key: 'first_name', header: 'First name' },
       { key: 'last_name', header: 'Last name' },
-      { key: 'age', header: 'Age', width: 90 },
+      { key: 'age', header: 'Age', width: 90, align: 'right', Cell: ageCell },
       { key: 'email', header: 'Email', width: 300 },
       { key: 'street_address' },
       { key: 'city' },
@@ -65,6 +75,8 @@ export default function DataGridPage() {
       { key: 'language' },
       { key: 'currency_code' },
     ],
+    rowHeight: 40,
+    visibleRowsCount: 5,
   }}
 />`}
       >
