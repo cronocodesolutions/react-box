@@ -1,5 +1,5 @@
-import { render, screen, cleanup } from '@testing-library/react';
-import { describe, expect, it, afterEach } from 'vitest';
+import { cleanup, render, screen } from '@testing-library/react';
+import { afterEach, describe, expect, it } from 'vitest';
 import { ignoreLogs } from '../../dev/tests';
 import Box from '../box';
 import DataGrid from './dataGrid';
@@ -67,11 +67,10 @@ describe('DataGrid', () => {
   };
 
   // Helper function to render the DataGrid with props
-  const renderDataGrid = (props: Partial<DataGridProps<Person>> = {}) => {
+  const renderDataGrid = (props?: { gridDef: Partial<GridDefinition<Person>>; data?: Person[] }) => {
     const defaultProps: DataGridProps<Person> = {
-      data: sampleData,
-      def: basicGridDef as GridDefinition<Person>,
-      ...props,
+      data: props?.data ?? sampleData,
+      def: { ...basicGridDef, ...props?.gridDef },
     };
 
     return render(<DataGrid {...defaultProps} />);
@@ -90,7 +89,7 @@ describe('DataGrid', () => {
   });
 
   it('renders correct number of rows', () => {
-    renderDataGrid();
+    renderDataGrid({ gridDef: { bottomBar: true } });
     // Check if the footer shows the correct number of rows
     expect(screen.getByText(`Rows: ${sampleData.length}`)).toBeTruthy();
   });
@@ -108,7 +107,7 @@ describe('DataGrid', () => {
   });
 
   it('renders with empty data', () => {
-    renderDataGrid({ data: [] });
+    renderDataGrid({ gridDef: { bottomBar: true }, data: [] });
     // Check if the footer shows 0 rows
     expect(screen.getByText('Rows: 0')).toBeTruthy();
   });
@@ -132,7 +131,7 @@ describe('DataGrid', () => {
       ],
     };
 
-    renderDataGrid({ def: nestedGridDef });
+    renderDataGrid({ gridDef: nestedGridDef });
     // Check if parent and child column headers are rendered
     expect(screen.getByText('Name')).toBeTruthy();
     expect(screen.getByText('First Name')).toBeTruthy();
@@ -152,7 +151,7 @@ describe('DataGrid', () => {
       ],
     };
 
-    renderDataGrid({ def: alignedGridDef });
+    renderDataGrid({ gridDef: alignedGridDef });
     // We can't easily test the alignment visually, but we can check if the component renders
     expect(screen.getByRole('presentation')).toBeTruthy();
   });
@@ -165,14 +164,33 @@ describe('DataGrid', () => {
         { key: 'lastName', header: 'Last Name', width: 150 },
         { key: 'age', header: 'Age', width: 80 },
         { key: 'visits', header: 'Visits', width: 100 },
-        { key: 'status', header: 'Status', width: 120 },
+        { key: 'status', header: 'Status', width: 90 },
         { key: 'progress', header: 'Progress', width: 120 },
       ],
     };
 
-    renderDataGrid({ def: widthGridDef });
-    // We can't easily test the widths visually, but we can check if the component renders
+    renderDataGrid({ gridDef: widthGridDef });
     expect(screen.getByRole('presentation')).toBeTruthy();
+
+    [
+      ['First Name', 150],
+      ['Last Name', 150],
+      ['Age', 80],
+      ['Visits', 100],
+      ['Status', 90],
+      ['Progress', 120],
+    ].forEach(([title, width]) => {
+      const el = screen.getByText(title).closest('[role="columnheader"]')!;
+      expect(el).toBeDefined();
+
+      const styles = window.getComputedStyle(el);
+      expect(styles.width).toBe(`${width}px`);
+    });
+
+    // const firstNameEl = screen.getByText('First Name').closest('[role="columnheader"]')!;
+    // expect(firstNameEl).toBeDefined();
+
+    // const firstNameStyles = window.getComputedStyle(firstNameEl);
   });
 
   it('renders with pinned columns', () => {
@@ -188,11 +206,24 @@ describe('DataGrid', () => {
       ],
     };
 
-    renderDataGrid({ def: pinnedGridDef });
-    // We can't easily test the pinning visually, but we can check if the component renders
-    expect(screen.getByRole('presentation')).toBeTruthy();
-  });
+    renderDataGrid({ gridDef: pinnedGridDef });
 
-  // Test for scroll handling would require more complex setup with mocking
-  // the DOM elements and their scroll behavior, which is beyond the scope of this test
+    expect(screen.getByRole('presentation')).toBeTruthy();
+
+    const firstNameEl = screen.getByText('First Name').closest('[role="columnheader"]')!;
+    expect(firstNameEl).toBeDefined();
+
+    const firstNameStyles = window.getComputedStyle(firstNameEl);
+    expect(firstNameStyles.position).toBe('sticky');
+    expect(firstNameStyles.left).toBe('0px');
+    expect(firstNameStyles.right).toBe('');
+
+    const progressEl = screen.getByText('Progress').closest('[role="columnheader"]')!;
+    expect(progressEl).toBeDefined();
+
+    const progressStyles = window.getComputedStyle(progressEl);
+    expect(progressStyles.position).toBe('sticky');
+    expect(progressStyles.left).toBe('');
+    expect(progressStyles.right).toBe('0px');
+  });
 });

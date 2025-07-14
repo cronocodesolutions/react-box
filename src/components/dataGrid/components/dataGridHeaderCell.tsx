@@ -66,6 +66,7 @@ export default function DataGridHeaderCell<TRow>(props: Props<TRow>) {
 
   return (
     <Flex
+      props={{ role: 'columnheader' }}
       component="datagrid.header.cell"
       variant={{ isPinned, isFirstLeftPinned, isLastLeftPinned, isFirstRightPinned, isLastRightPinned, isSortable, isRowNumber }}
       gridRow={gridRows}
