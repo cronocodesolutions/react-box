@@ -92,4 +92,76 @@ export const components = Box.components({
       color: 'violet-600',
     },
   },
+  datagrid: {
+    children: {
+      header: {
+        styles: {
+          bgColor: 'gray-300',
+        },
+        children: {
+          cell: {
+            styles: {
+              bb: 0,
+              mb: 1,
+              bgColor: 'white',
+            },
+            variants: {
+              isPinned: {
+                bgColor: 'gray-100',
+              },
+              isLastLeftPinned: { br: 4, borderColor: 'gray-300' },
+              isFirstRightPinned: { bl: 4, borderColor: 'gray-300' },
+            },
+            children: {
+              contextMenu: {
+                styles: {
+                  bgColor: 'white',
+                  hover: {
+                    bgColor: 'gray-300',
+                  },
+                },
+                variants: {
+                  isPinned: {
+                    bgColor: 'gray-100',
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+      body: {
+        styles: {
+          rowGap: 1,
+          bgColor: 'gray-300',
+        },
+        children: {
+          cell: {
+            styles: {
+              bgColor: 'white',
+              selected: {
+                bgColor: 'violet-100',
+              },
+              bb: 0,
+            },
+            variants: {
+              isLastLeftPinned: { br: 4, borderColor: 'gray-300' },
+              isFirstRightPinned: { bl: 4, borderColor: 'gray-300' },
+              isRowSelected: {
+                bgColor: 'violet-100',
+                hoverGroup: {
+                  'grid-row': {
+                    bgColor: 'violet-200',
+                  },
+                },
+              },
+              isRowNumber: {
+                bgColor: 'gray-100',
+              },
+            },
+          },
+        },
+      },
+    },
+  },
 });

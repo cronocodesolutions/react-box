@@ -4,7 +4,7 @@ import ColumnModel from '../models/columnModel';
 import { ROW_NUMBER_CELL_KEY, ROW_SELECTION_CELL_KEY } from '../models/gridModel';
 
 interface Props<TRow> extends BoxProps {
-  children?: React.ReactNode;
+  children: React.ReactNode;
   column: ColumnModel<TRow>;
 }
 
@@ -27,9 +27,17 @@ export default function DataGridCell<TRow>(props: Props<TRow>) {
 
   return (
     <Flex
-      component="datagrid.cell"
+      component="datagrid.body.cell"
       props={{ role: 'cell' }}
-      variant={{ isPinned, isFirstLeftPinned, isLastLeftPinned, isFirstRightPinned, isLastRightPinned, isRowNumber, isRowSelection }}
+      variant={{
+        isPinned,
+        isFirstLeftPinned,
+        isLastLeftPinned,
+        isFirstRightPinned,
+        isLastRightPinned,
+        isRowSelection,
+        isRowNumber,
+      }}
       style={{
         width: `var(${widthVarName})`,
         height: `var(${column.grid.rowHeightVarName})`,

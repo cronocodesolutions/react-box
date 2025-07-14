@@ -38,6 +38,38 @@ export default function DataGridPage() {
         DataGrid (⚠️ WIP)
       </Box>
 
+      <Box p={5}>
+        <DataGrid
+          data={data}
+          def={{
+            columns: [
+              { key: 'first_name', header: 'First name', align: 'left' },
+              { key: 'last_name', header: 'Last name', align: 'center' },
+              { key: 'age', header: 'Age', width: 90, align: 'right' },
+              { key: 'email', header: 'Email', width: 300 },
+              { key: 'street_address' },
+              { key: 'city' },
+              { key: 'country' },
+              { key: 'favorite_color' },
+              { key: 'gender' },
+              { key: 'ssn' },
+              { key: 'birthdate' },
+              { key: 'phone_number' },
+              { key: 'username' },
+              { key: 'credit_card_number' },
+              { key: 'salary' },
+              { key: 'company_name' },
+              { key: 'language' },
+              { key: 'currency_code' },
+            ],
+            rowHeight: 40,
+            visibleRowsCount: 8,
+            rowSelection: { pinned: true },
+            showRowNumber: { pinned: true },
+          }}
+        />
+      </Box>
+
       <Code
         label="Basic"
         mt={10}

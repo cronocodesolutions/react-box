@@ -24,6 +24,14 @@ export default class GroupRowModel<TRow> {
     return this.grid.columns.value.visibleLeafs.map((c) => new GroupRowCellModel<TRow>(this.grid, this, c));
   }
 
+  public get selected() {
+    return this.allRows.every((r) => r.selected);
+  }
+
+  public get indeterminate() {
+    return !this.selected && this.allRows.some((r) => r.selected);
+  }
+
   public get expanded() {
     return this.grid.expandedGroupRow.has(this.key);
   }

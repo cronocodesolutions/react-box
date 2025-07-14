@@ -57,6 +57,7 @@ export default function DataGridBody<TRow>(props: Props<TRow>) {
         }}
       >
         <Grid
+          component="datagrid.body"
           width="max-content"
           minWidth="fit"
           transition="none"
@@ -65,13 +66,6 @@ export default function DataGridBody<TRow>(props: Props<TRow>) {
             gridTemplateColumns: grid.gridTemplateColumns.value,
           }}
         >
-          {/* {grid.flatRows.value.take(take, startIndex).map((row) => {
-            if (row instanceof GroupRowModel) {
-              return <DataGridGroupRow key={row.key} row={row} />;
-            } else {
-              return <DataGridRow key={row.key + row.selected.toString()} row={row} />;
-            }
-          })} */}
           {rows}
         </Grid>
       </Box>

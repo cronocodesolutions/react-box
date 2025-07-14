@@ -1173,6 +1173,7 @@ export const pseudoGroupClasses = {
   focusGroup: 'focus',
   activeGroup: 'active',
   disabledGroup: 'disabled',
+  selectedGroup: 'selected',
   theme: 'theme',
 } satisfies { [key: string]: keyof typeof pseudoClasses };
 
