@@ -186,11 +186,6 @@ describe('DataGrid', () => {
       const styles = window.getComputedStyle(el);
       expect(styles.width).toBe(`${width}px`);
     });
-
-    // const firstNameEl = screen.getByText('First Name').closest('[role="columnheader"]')!;
-    // expect(firstNameEl).toBeDefined();
-
-    // const firstNameStyles = window.getComputedStyle(firstNameEl);
   });
 
   it('renders with pinned columns', () => {
