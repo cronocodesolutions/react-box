@@ -25,10 +25,12 @@ export interface ColumnType<TRow> {
 export interface GridDefinition<TRow> {
   rowKey?: KeysMatching<TRow, Key> | ((rowData: TRow) => Key);
   columns: ColumnType<TRow>[];
-  showRowNumber?: boolean | { pinned?: boolean };
+  showRowNumber?: boolean | { pinned?: boolean; width?: number };
   rowSelection?: boolean | { pinned?: boolean };
   rowHeight?: number;
   visibleRowsCount?: number;
+  topBar?: boolean;
+  bottomBar?: boolean;
   // pagination?: Pagination;
 }
 

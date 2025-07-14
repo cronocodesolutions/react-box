@@ -11,7 +11,7 @@ export default function DataGridCellText<TRow>(props: Props<TRow>) {
 
   return (
     <Flex height="fit" width="fit" overflow="auto" ai="center" jc={cell.column.align}>
-      <Box px={4} textOverflow="ellipsis" overflow="hidden" textWrap="nowrap">
+      <Box px={3} textOverflow="ellipsis" overflow="hidden" textWrap="nowrap">
         {cell.value as string}
       </Box>
     </Flex>

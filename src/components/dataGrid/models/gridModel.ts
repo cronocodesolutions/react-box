@@ -8,6 +8,7 @@ import RowModel from './rowModel';
 
 export const EMPTY_CELL_KEY: Key = 'empty-cell';
 export const ROW_NUMBER_CELL_KEY: Key = 'row-number-cell';
+export const DEFAULT_ROW_NUMBER_COLUMN_WIDTH = 70;
 export const ROW_SELECTION_CELL_KEY: Key = 'row-selection-cell';
 export const GROUPING_CELL_KEY: Key = 'grouping-cell';
 
@@ -44,9 +45,14 @@ export default class GridModel<TRow> {
 
     // add row number column
     if (def.showRowNumber) {
-      const pin: PinPosition | undefined = typeof def.showRowNumber === 'object' && def.showRowNumber.pinned ? 'LEFT' : undefined;
+      let pin: PinPosition | undefined;
+      let width: number | undefined = DEFAULT_ROW_NUMBER_COLUMN_WIDTH;
+      if (typeof def.showRowNumber === 'object') {
+        def.showRowNumber.pinned && (pin = 'LEFT');
+        width = def.showRowNumber.width ?? DEFAULT_ROW_NUMBER_COLUMN_WIDTH;
+      }
 
-      sourceColumns.unshift(new ColumnModel({ key: ROW_NUMBER_CELL_KEY, pin, width: 70, align: 'right' }, this));
+      sourceColumns.unshift(new ColumnModel({ key: ROW_NUMBER_CELL_KEY, pin, width, align: 'right' }, this));
     }
 
     return sourceColumns;

@@ -29,11 +29,11 @@ export default function DataGrid<TRow extends object>(props: DataGridProps<TRow>
 
   return (
     <Box component="datagrid" style={grid.sizes.value} props={{ role: 'presentation' }}>
-      <DataGridTopBar grid={grid} />
+      {grid.props.def.topBar && <DataGridTopBar grid={grid} />}
 
       <DataGridContent grid={grid} />
 
-      <DataGridBottomBar grid={grid} />
+      {grid.props.def.bottomBar && <DataGridBottomBar grid={grid} />}
     </Box>
   );
 }

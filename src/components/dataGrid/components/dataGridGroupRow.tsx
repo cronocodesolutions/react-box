@@ -14,14 +14,15 @@ interface Props<TRow> {
 
 export default function DataGridGroupRow<TRow>(props: Props<TRow>) {
   const { row } = props;
+  const { selected, indeterminate, cells, groupingColumn, groupingColumnGridColumn, depth, expanded } = row;
 
   const selectAllHandler = useCallback(() => {
     row.grid.toggleRowsSelection(row.allRows.map((x) => x.key));
   }, []);
 
   return (
-    <Flex className="grid-row" display="contents" props={{ role: 'rowgroup' }}>
-      {row.cells.map((cell) => {
+    <Flex className="grid-row" selected={selected} display="contents" props={{ role: 'rowgroup' }}>
+      {cells.map((cell) => {
         const { key, pin, groupColumnWidthVarName } = cell.column;
         const isRightPinned = pin === 'RIGHT';
 
@@ -34,14 +35,14 @@ export default function DataGridGroupRow<TRow>(props: Props<TRow>) {
                 width: `var(${groupColumnWidthVarName})`,
                 right: isRightPinned ? '0' : undefined,
               }}
-              br={row.groupingColumn.pin === 'LEFT' ? 1 : undefined}
-              gridColumn={row.groupingColumnGridColumn}
-              pl={4 * row.depth}
+              br={groupingColumn.pin === 'LEFT' ? 1 : undefined}
+              gridColumn={groupingColumnGridColumn}
+              pl={4 * depth}
               overflow="auto"
             >
-              <Box textWrap="nowrap" px={4}>
+              <Box textWrap="nowrap" px={3}>
                 <Button clean onClick={() => row.toggleRow()} cursor="pointer" display="flex" gap={1} ai="center">
-                  <ExpandIcon fill="currentColor" width="14px" height="14px" rotate={row.expanded ? 0 : -90} />
+                  <ExpandIcon fill="currentColor" width="14px" height="14px" rotate={expanded ? 0 : -90} />
                   {cell.value}
                 </Button>
               </Box>
@@ -50,22 +51,16 @@ export default function DataGridGroupRow<TRow>(props: Props<TRow>) {
         }
 
         if (key === ROW_SELECTION_CELL_KEY) {
-          const rows = row.allRows;
-          const checked = rows.every((r) => r.selected);
-          const indeterminate = !checked && rows.some((r) => r.selected);
-
           return (
             <DataGridCell key={key} column={cell.column}>
-              <Checkbox variant="datagrid" m={1} checked={checked} indeterminate={indeterminate} onChange={selectAllHandler} />
+              <Checkbox variant="datagrid" m={1} checked={selected} indeterminate={indeterminate} onChange={selectAllHandler} />
             </DataGridCell>
           );
         }
 
-        if (key === EMPTY_CELL_KEY) return <Box key={key} />;
-
-        if (pin !== row.groupingColumn.pin || key === ROW_NUMBER_CELL_KEY) {
+        if (pin !== groupingColumn.pin || key === ROW_NUMBER_CELL_KEY || key === EMPTY_CELL_KEY) {
           return (
-            <DataGridCell key={key} column={cell.column} px={4}>
+            <DataGridCell key={key} column={cell.column} px={key === ROW_NUMBER_CELL_KEY ? 3 : undefined}>
               {cell.value}
             </DataGridCell>
           );

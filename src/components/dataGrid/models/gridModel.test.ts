@@ -1,7 +1,7 @@
 import { describe, expect, it, suite } from 'vitest';
 import { ignoreLogs } from '../../../../dev/tests';
-import { ColumnType, GridDefinition } from '../contracts/dataGridContract';
-import GridModel from './gridModel';
+import { GridDefinition } from '../contracts/dataGridContract';
+import GridModel, { DEFAULT_ROW_NUMBER_COLUMN_WIDTH, ROW_NUMBER_CELL_KEY } from './gridModel';
 import GroupRowModel from './groupRowModel';
 import RowModel from './rowModel';
 
@@ -46,11 +46,10 @@ describe('GridModel', () => {
     ],
   };
 
-  function getGridModel(props?: { columns?: ColumnType<Person>[]; data?: Partial<Person>[] }) {
-    const { columns, data } = props ?? {};
+  function getGridModel(props?: { gridDef?: Partial<GridDefinition<Person>>; data?: Partial<Person>[] }) {
+    const { gridDef, data } = props ?? {};
 
-    let def = { ...gridDefinition };
-    columns && (def = { ...def, columns });
+    const def = { ...gridDefinition, ...gridDef };
 
     return new GridModel<Person>(
       {
@@ -63,14 +62,14 @@ describe('GridModel', () => {
 
   suite('simple usage', () => {
     it('creates header Columns', () => {
-      const grid = getGridModel({ columns: [{ key: 'firstName' }] });
+      const grid = getGridModel({ gridDef: { columns: [{ key: 'firstName' }] } });
 
       expect(grid.headerRows.value).toHaveLength(1);
       expect(grid.headerRows.value.at(0)).toHaveLength(2);
     });
 
     it('creates no rows when no data', () => {
-      const grid = getGridModel({ columns: [{ key: 'firstName' }], data: [] });
+      const grid = getGridModel({ gridDef: { columns: [{ key: 'firstName' }] }, data: [] });
 
       expect(grid.rows.value).toHaveLength(0);
     });
@@ -83,7 +82,7 @@ describe('GridModel', () => {
         { firstName: 'John3' },
         { firstName: 'John4' },
       ];
-      const grid = getGridModel({ columns: [{ key: 'firstName' }], data });
+      const grid = getGridModel({ gridDef: { columns: [{ key: 'firstName' }] }, data });
 
       expect(grid.rows.value).toHaveLength(5);
     });
@@ -111,7 +110,7 @@ describe('GridModel', () => {
     });
 
     it('moves parent header to the right pin position', () => {
-      const grid = getGridModel({ columns: [{ key: 'parent', columns: [{ key: 'firstName' }] }] });
+      const grid = getGridModel({ gridDef: { columns: [{ key: 'parent', columns: [{ key: 'firstName' }] }] } });
       grid.pinColumn('firstName', 'LEFT');
 
       const parentColumns = grid.columns.value.flat.filter((c) => c.key === 'parent');
@@ -119,7 +118,7 @@ describe('GridModel', () => {
     });
 
     it('moves parent header to the right pin position', () => {
-      const grid = getGridModel({ columns: [{ key: 'parent', columns: [{ key: 'firstName' }] }] });
+      const grid = getGridModel({ gridDef: { columns: [{ key: 'parent', columns: [{ key: 'firstName' }] }] } });
 
       grid.pinColumn('parent', 'LEFT');
       grid.pinColumn('firstNameLEFT');
@@ -244,6 +243,35 @@ describe('GridModel', () => {
       grid.setSortColumn('firstName', undefined);
       expect(grid.sortColumn).toBeUndefined();
       expect(grid.sortDirection).toBeUndefined();
+    });
+  });
+
+  suite('when showRowNumber column', () => {
+    it('adds row number column', () => {
+      const grid = getGridModel({ gridDef: { showRowNumber: true } });
+
+      expect(grid.columns.value.visibleLeafs).toHaveLength(10);
+
+      const rowNumberColumn = grid.columns.value.visibleLeafs.find((x) => x.key === ROW_NUMBER_CELL_KEY);
+      expect(rowNumberColumn).toBeDefined();
+      expect(rowNumberColumn?.inlineWidth).toBe(DEFAULT_ROW_NUMBER_COLUMN_WIDTH);
+    });
+
+    it('should be at first position', () => {
+      const grid = getGridModel({ gridDef: { showRowNumber: true } });
+
+      const rowNumberColumnIndex = grid.columns.value.visibleLeafs.findIndex((x) => x.key === ROW_NUMBER_CELL_KEY);
+      expect(rowNumberColumnIndex).toEqual(0);
+    });
+
+    it('uses custom options', () => {
+      const grid = getGridModel({ gridDef: { showRowNumber: { pinned: true, width: 129 } } });
+
+      const rowNumberColumn = grid.columns.value.visibleLeafs.find((x) => x.key === ROW_NUMBER_CELL_KEY);
+      expect(rowNumberColumn).toBeDefined();
+
+      expect(rowNumberColumn?.inlineWidth).toEqual(129);
+      expect(rowNumberColumn?.pin).toEqual('LEFT');
     });
   });
 });

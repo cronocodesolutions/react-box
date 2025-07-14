@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import Box, { useVisibility } from '../../../box';
 import DotsIcon from '../../../icons/dotsIcon';
 import GroupingIcon from '../../../icons/groupingIcon';
@@ -9,7 +9,7 @@ import Flex from '../../flex';
 import { Span } from '../../semantics';
 import Tooltip from '../../tooltip';
 import ColumnModel from '../models/columnModel';
-import { GROUPING_CELL_KEY } from '../models/gridModel';
+import { EMPTY_CELL_KEY, GROUPING_CELL_KEY, ROW_NUMBER_CELL_KEY, ROW_SELECTION_CELL_KEY } from '../models/gridModel';
 
 interface Props<TRow> {
   column: ColumnModel<TRow>;
@@ -17,28 +17,47 @@ interface Props<TRow> {
 
 export default function DataGridHeaderCellContextMenu<TRow>(props: Props<TRow>) {
   const { column } = props;
+  const { key, pin, left, right, isEdge, isLeaf, align, header, grid } = column;
+
   const [isOpen, setOpen, refToUse] = useVisibility({ hideOnScroll: true, event: 'mousedown' });
   const [tooltipPosition, setTooltipPosition] = useState<{ top: number; left: number }>({ top: 0, left: 0 });
   const openLeft = useMemo(() => tooltipPosition.left > window.innerWidth / 2, [tooltipPosition.left]);
 
-  const isSortAscAvailable = column.isLeaf && (column.grid.sortColumn !== column.key || column.grid.sortDirection === 'DESC');
-  const isSortDescAvailable = column.isLeaf && (column.grid.sortColumn !== column.key || column.grid.sortDirection === 'ASC');
-  const isClearSortAvailable = column.isLeaf && column.grid.sortColumn === column.key;
-  const isPinLeftAvailable = column.pin !== 'LEFT';
-  const isPinRightAvailable = column.pin !== 'RIGHT';
-  const isUnpinAvailable = !!column.pin;
-  const isGroupByAvailable = column.isLeaf && column.key !== GROUPING_CELL_KEY;
-  const isUnGroupByAvailable = column.isLeaf && column.key === GROUPING_CELL_KEY;
+  const isSortAscAvailable = isLeaf && (grid.sortColumn !== key || grid.sortDirection === 'DESC');
+  const isSortDescAvailable = isLeaf && (grid.sortColumn !== key || grid.sortDirection === 'ASC');
+  const isClearSortAvailable = isLeaf && grid.sortColumn === key;
+  const isPinLeftAvailable = pin !== 'LEFT';
+  const isPinRightAvailable = pin !== 'RIGHT';
+  const isUnpinAvailable = !!pin;
+  const isGroupByAvailable = isLeaf && key !== GROUPING_CELL_KEY;
+  const isUnGroupByAvailable = isLeaf && key === GROUPING_CELL_KEY;
 
   const isSortingAvailable = isSortAscAvailable || isSortDescAvailable || isClearSortAvailable;
   const isPiningAvailable = isPinLeftAvailable || isPinRightAvailable || isUnpinAvailable;
 
-  const left = column.align === 'right' ? 2 : undefined;
-  const right = column.align === 'right' ? undefined : column.pin === 'RIGHT' ? 2.5 : 4;
+  const positionLeft = align === 'right' ? 2 : undefined;
+  const positionRight = align === 'right' ? undefined : pin === 'RIGHT' ? 2.5 : 4;
+
+  const isEmptyCell = key === EMPTY_CELL_KEY;
+  const isRowNumber = key === ROW_NUMBER_CELL_KEY;
+  const isRowSelection = key === ROW_SELECTION_CELL_KEY;
+
+  const isLeftPinned = pin === 'LEFT';
+  const isRightPinned = pin === 'RIGHT';
+  const isPinned = isLeftPinned || pin === 'RIGHT';
+  const isFirstLeftPinned = isLeftPinned && left === 0;
+  const isLastLeftPinned = isLeftPinned && isEdge;
+  const isFirstRightPinned = isRightPinned && isEdge;
+  const isLastRightPinned = isRightPinned && right === 0;
+  const isSortable = isLeaf && !isEmptyCell && !isRowNumber && !isRowSelection;
 
   return (
-    <Flex position="absolute" left={left} right={right} top="1/2" translateY={-3} ai="center">
-      <Button component="datagrid.header.cell.contextMenu" onClick={() => setOpen(!isOpen)}>
+    <Flex position="absolute" left={positionLeft} right={positionRight} top="1/2" translateY={-3} ai="center">
+      <Button
+        component="datagrid.header.cell.contextMenu"
+        onClick={() => setOpen(!isOpen)}
+        variant={{ isPinned, isFirstLeftPinned, isLastLeftPinned, isFirstRightPinned, isLastRightPinned, isSortable, isRowNumber }}
+      >
         <Span component="datagrid.header.cell.contextMenu.icon">
           <DotsIcon fill="currentColor" />
         </Span>
@@ -104,11 +123,11 @@ export default function DataGridHeaderCellContextMenu<TRow>(props: Props<TRow>) 
                 <Span component="datagrid.header.cell.contextMenu.tooltip.item.icon">
                   <GroupingIcon width="100%" fill="currentColor" />
                 </Span>
-                <Box textWrap="nowrap">Group by {column.header ?? column.key}</Box>
+                <Box textWrap="nowrap">Group by {header ?? key}</Box>
               </Button>
             )}
             {isUnGroupByAvailable && (
-              <Button component="datagrid.header.cell.contextMenu.tooltip.item" onClick={column.grid.unGroupAll}>
+              <Button component="datagrid.header.cell.contextMenu.tooltip.item" onClick={grid.unGroupAll}>
                 <Span component="datagrid.header.cell.contextMenu.tooltip.item.icon">
                   <GroupingIcon width="100%" fill="currentColor" />
                 </Span>

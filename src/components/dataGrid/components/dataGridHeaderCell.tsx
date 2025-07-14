@@ -36,6 +36,9 @@ export default function DataGridHeaderCell<TRow>(props: Props<TRow>) {
   const showResizer = !isRowNumber && !isRowSelection;
   const showContextMenu = !isRowNumber && !isRowSelection;
 
+  const pl = isRowSelection ? undefined : column.align === 'right' ? 10 : 3;
+  const pr = isRowSelection ? undefined : column.align === 'center' ? 3 : undefined;
+
   const toggleSelectAll = useCallback(() => {
     grid.toggleSelectAllRows();
   }, []);
@@ -63,8 +66,9 @@ export default function DataGridHeaderCell<TRow>(props: Props<TRow>) {
 
   return (
     <Flex
+      props={{ role: 'columnheader' }}
       component="datagrid.header.cell"
-      variant={{ isRowNumber, isPinned, isFirstLeftPinned, isLastLeftPinned, isFirstRightPinned, isLastRightPinned, isSortable }}
+      variant={{ isPinned, isFirstLeftPinned, isLastLeftPinned, isFirstRightPinned, isLastRightPinned, isSortable, isRowNumber }}
       gridRow={gridRows}
       gridColumn={gridColumn}
       style={{
@@ -81,7 +85,8 @@ export default function DataGridHeaderCell<TRow>(props: Props<TRow>) {
               position={isLeaf ? undefined : 'sticky'}
               ai="center"
               transition="none"
-              pl={column.align === 'right' ? 10 : 4}
+              pl={pl}
+              pr={pr}
               style={{
                 left: !pin ? `var(${grid.leftEdgeVarName})` : undefined,
               }}

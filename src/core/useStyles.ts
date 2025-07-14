@@ -175,8 +175,10 @@ a,ul{all: unset;}
 
                   const className = createClassName(key as keyof BoxStyles, value as BoxStyles[keyof BoxStyles], +weight, breakpoint, name);
                   const [pseudoClass] = pseudoClassesByWeight[+weight];
+                  const pseudoClassesToUse = pseudoClassesByWeight[+weight].map((p) => pseudoClasses[p]).join('');
 
-                  const defaultSelector = pseudoClass === 'theme' ? `.${name} .${className}` : `.${name}:${pseudoClass} .${className}`;
+                  const defaultSelector =
+                    pseudoClass === 'theme' ? `.${name} .${className}` : `.${name}${pseudoClassesToUse} .${className}`;
                   const selector = itemValue.selector?.(defaultSelector, '') ?? defaultSelector;
 
                   const styleName = Array.isArray(itemValue.styleName) ? itemValue.styleName : [itemValue.styleName ?? key];

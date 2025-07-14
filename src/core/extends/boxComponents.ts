@@ -460,14 +460,15 @@ const boxComponents = {
               transition: 'none',
             },
             variants: {
-              isRowNumber: {},
-              isRowSelection: {},
               isPinned: { position: 'sticky', zIndex: 2, bgColor: 'gray-200' },
               isFirstLeftPinned: {},
               isLastLeftPinned: { br: 1 },
               isFirstRightPinned: { bl: 1 },
               isLastRightPinned: {},
               isSortable: { cursor: 'pointer' },
+              isRowSelected: {},
+              isRowSelection: {},
+              isRowNumber: { jc: 'center' },
             },
             children: {
               contextMenu: {
@@ -483,7 +484,6 @@ const boxComponents = {
                   jc: 'center',
                   ai: 'center',
                   transition: 'none',
-                  bgColor: 'gray-200',
                   hover: { bgColor: 'gray-300' },
                 },
                 children: {
@@ -543,22 +543,28 @@ const boxComponents = {
           },
         },
       },
-      cell: {
-        styles: {
-          bb: 1,
-          borderColor: 'gray-400',
-          transition: 'none',
-          ai: 'center',
-          hoverGroup: { 'grid-row': { bgColor: 'gray-200' } },
-        },
-        variants: {
-          isRowNumber: { bgColor: 'gray-200', jc: 'right' },
-          isRowSelection: {},
-          isPinned: { position: 'sticky', bgColor: 'gray-100', zIndex: 1 },
-          isFirstLeftPinned: {},
-          isLastLeftPinned: { br: 1 },
-          isFirstRightPinned: { bl: 1 },
-          isLastRightPinned: {},
+      body: {
+        styles: {},
+        children: {
+          cell: {
+            styles: {
+              bb: 1,
+              borderColor: 'gray-400',
+              transition: 'none',
+              ai: 'center',
+              hoverGroup: { 'grid-row': { bgColor: 'gray-200' } },
+            },
+            variants: {
+              isPinned: { position: 'sticky', bgColor: 'gray-100', zIndex: 1 },
+              isFirstLeftPinned: {},
+              isLastLeftPinned: { br: 1 },
+              isFirstRightPinned: { bl: 1 },
+              isLastRightPinned: {},
+              isRowNumber: { bgColor: 'gray-200', jc: 'right' },
+              isRowSelection: {},
+              isRowSelected: {},
+            },
+          },
         },
       },
       bottomBar: {
