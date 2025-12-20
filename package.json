@@ -53,7 +53,9 @@
   "homepage": "https://github.com/cronocodesolutions/react-box#readme",
   "description": "",
   "dependencies": {
-    "@cronocode/identity-factory": "^0.0.6"
+    "@cronocode/identity-factory": "^0.0.6",
+    "framer-motion": "^12.23.26",
+    "lucide-react": "^0.562.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.30.1",

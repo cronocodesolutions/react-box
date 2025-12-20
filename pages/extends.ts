@@ -6,24 +6,71 @@ Box.getVariableValue('violet-300');
 
 export const { extendedProps, extendedPropTypes } = Box.extend(
   {
+    // Gradients
+    'gradient-hero': 'linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, rgba(168, 85, 247, 0.1) 50%, rgba(236, 72, 153, 0.05) 100%)',
+    'gradient-hero-dark': 'linear-gradient(135deg, rgba(99, 102, 241, 0.2) 0%, rgba(168, 85, 247, 0.15) 50%, rgba(236, 72, 153, 0.1) 100%)',
+    'gradient-card': 'linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(255, 255, 255, 0.7) 100%)',
+    'gradient-card-dark': 'linear-gradient(135deg, rgba(30, 41, 59, 0.9) 0%, rgba(30, 41, 59, 0.7) 100%)',
+    'gradient-sidebar': 'linear-gradient(180deg, rgba(255, 255, 255, 0.95) 0%, rgba(248, 250, 252, 0.98) 100%)',
+    'gradient-sidebar-dark': 'linear-gradient(180deg, rgba(15, 23, 42, 0.98) 0%, rgba(30, 41, 59, 0.95) 100%)',
+    'gradient-primary': 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #a855f7 100%)',
+    'gradient-accent': 'linear-gradient(135deg, #06b6d4 0%, #3b82f6 50%, #6366f1 100%)',
+    'gradient-glow': 'radial-gradient(ellipse 80% 50% at 50% -20%, rgba(120, 119, 198, 0.3), transparent)',
+    'gradient-glow-dark': 'radial-gradient(ellipse 80% 50% at 50% -20%, rgba(120, 119, 198, 0.5), transparent)',
+    'gradient-mesh':
+      'radial-gradient(at 40% 20%, rgba(99, 102, 241, 0.15) 0px, transparent 50%), radial-gradient(at 80% 0%, rgba(168, 85, 247, 0.1) 0px, transparent 50%), radial-gradient(at 0% 50%, rgba(236, 72, 153, 0.1) 0px, transparent 50%), radial-gradient(at 80% 50%, rgba(6, 182, 212, 0.1) 0px, transparent 50%), radial-gradient(at 0% 100%, rgba(99, 102, 241, 0.1) 0px, transparent 50%)',
+
+    // Backgrounds
     'bg-stripes': 'linear-gradient(135deg,var(--violet-300) 10%,#0000 0,#0000 50%,var(--violet-300) 0,var(--violet-300) 60%,#0000 0,#0000)',
     'body-bg': 'linear-gradient(19deg, white 40%, rgba(183, 33, 255, 0.05) 94%)',
+    'bg-dots': 'radial-gradient(circle, rgba(99, 102, 241, 0.15) 1px, transparent 1px)',
+    'bg-grid':
+      'linear-gradient(rgba(99, 102, 241, 0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(99, 102, 241, 0.03) 1px, transparent 1px)',
+
+    // Theme colors
     'theme-bg': 'light-dark(#fff, #082f49)',
     'theme-color': 'light-dark(#fff, #082f49)',
     'bg-img-indeterminate-green': `url("data:image/svg+xml,${encodeURIComponent(`<svg xmlns='http://www.w3.org/2000/svg' width='100%' viewBox='0 0 20 20'><line stroke='${Variables.colors['green']}' x1='4' y1='10' x2='16' y2='10' stroke-width='1' /></svg>`)}")`,
+
+    // Glass colors
+    'glass-light': 'rgba(255, 255, 255, 0.7)',
+    'glass-dark': 'rgba(15, 23, 42, 0.7)',
+    'glass-border-light': 'rgba(255, 255, 255, 0.3)',
+    'glass-border-dark': 'rgba(255, 255, 255, 0.1)',
+
+    // Code block
+    'code-bg': '#0f172a',
+    'code-bg-light': '#1e293b',
   },
   {},
   {
     bgImage: [
       {
-        values: ['body-bg', 'bg-stripes', 'bg-img-indeterminate-green'] as const,
+        values: [
+          'body-bg',
+          'bg-stripes',
+          'bg-img-indeterminate-green',
+          'gradient-hero',
+          'gradient-hero-dark',
+          'gradient-card',
+          'gradient-card-dark',
+          'gradient-sidebar',
+          'gradient-sidebar-dark',
+          'gradient-primary',
+          'gradient-accent',
+          'gradient-glow',
+          'gradient-glow-dark',
+          'gradient-mesh',
+          'bg-dots',
+          'bg-grid',
+        ] as const,
         valueFormat: (value, getVariableValue) => getVariableValue(value),
         styleName: 'background-image',
       },
     ],
     bgColor: [
       {
-        values: ['theme-bg'] as const,
+        values: ['theme-bg', 'glass-light', 'glass-dark', 'code-bg', 'code-bg-light'] as const,
         valueFormat: (value, getVariable) => getVariable(value),
         styleName: 'background-color',
       },
@@ -35,12 +82,72 @@ export const { extendedProps, extendedPropTypes } = Box.extend(
         styleName: 'color',
       },
     ],
+    borderColor: [
+      {
+        values: ['glass-border-light', 'glass-border-dark'] as const,
+        valueFormat: (value, getVariable) => getVariable(value),
+        styleName: 'border-color',
+      },
+    ],
   },
 );
 
 export const components = Box.components({
+  // Modern button styles
   button: {
-    styles: {},
+    styles: {
+      bgImage: 'gradient-primary',
+      bgColor: 'indigo-500',
+      borderColor: 'transparent',
+      color: 'white',
+      fontWeight: 500,
+      p: 3,
+      px: 5,
+      borderRadius: 2,
+      b: 0,
+      cursor: 'pointer',
+      transition: 'all',
+      transitionDuration: 150,
+      hover: {
+        translateY: -0.25,
+        shadow: 'large',
+      },
+      active: {
+        translateY: 0,
+      },
+      disabled: {
+        bgImage: 'none',
+        bgColor: 'slate-200',
+        color: 'slate-400',
+        cursor: 'not-allowed',
+      },
+    },
+    variants: {
+      secondary: {
+        bgImage: 'none',
+        bgColor: 'transparent',
+        color: 'slate-700',
+        b: 1,
+        borderColor: 'slate-300',
+        hover: {
+          bgColor: 'slate-100',
+          borderColor: 'slate-400',
+          shadow: 'small',
+        },
+      },
+      ghost: {
+        bgImage: 'none',
+        bgColor: 'transparent',
+        color: 'slate-600',
+        hover: {
+          bgColor: 'slate-100',
+          color: 'slate-900',
+        },
+      },
+      accent: {
+        bgImage: 'gradient-accent',
+      },
+    },
     children: {
       demo: {
         styles: {
@@ -71,25 +178,428 @@ export const components = Box.components({
       },
     },
   },
+
+  // Modern textbox
+  textbox: {
+    styles: {
+      display: 'inline-block',
+      b: 1,
+      borderColor: 'slate-300',
+      bgColor: 'white',
+      color: 'slate-900',
+      borderRadius: 2,
+      p: 3,
+      px: 4,
+      transition: 'all',
+      transitionDuration: 150,
+      lineHeight: 20,
+      hover: {
+        borderColor: 'slate-400',
+      },
+      focus: {
+        outline: 2,
+        outlineOffset: 0,
+        borderColor: 'indigo-500',
+        outlineColor: 'indigo-200',
+      },
+      disabled: {
+        cursor: 'not-allowed',
+        bgColor: 'slate-100',
+        color: 'slate-400',
+        borderColor: 'slate-200',
+      },
+    },
+  },
+
+  // Modern textarea
+  textarea: {
+    styles: {
+      display: 'inline-block',
+      b: 1,
+      borderColor: 'slate-300',
+      bgColor: 'white',
+      color: 'slate-900',
+      borderRadius: 2,
+      p: 3,
+      px: 4,
+      transition: 'all',
+      transitionDuration: 150,
+      hover: {
+        borderColor: 'slate-400',
+      },
+      focus: {
+        outline: 2,
+        outlineOffset: 0,
+        borderColor: 'indigo-500',
+        outlineColor: 'indigo-200',
+      },
+      disabled: {
+        cursor: 'not-allowed',
+        bgColor: 'slate-100',
+        color: 'slate-400',
+        borderColor: 'slate-200',
+        resize: 'none',
+      },
+    },
+  },
+
+  // Modern checkbox
+  checkbox: {
+    styles: {
+      display: 'inline-block',
+      appearance: 'none',
+      b: 2,
+      borderColor: 'slate-300',
+      borderRadius: 1,
+      p: 2,
+      cursor: 'pointer',
+      transition: 'all',
+      transitionDuration: 150,
+      hover: {
+        borderColor: 'indigo-400',
+      },
+      focus: {
+        outline: 2,
+        outlineOffset: 2,
+        outlineColor: 'indigo-200',
+      },
+      checked: {
+        bgColor: 'indigo-500',
+        borderColor: 'indigo-500',
+        bgImage: 'bg-img-checked',
+      },
+      indeterminate: {
+        color: 'indigo-500',
+        bgImage: 'bg-img-indeterminate',
+      },
+      disabled: {
+        cursor: 'not-allowed',
+        bgColor: 'slate-100',
+        color: 'slate-400',
+        borderColor: 'slate-200',
+      },
+    },
+  },
+
+  // Modern radio button
+  radioButton: {
+    styles: {
+      appearance: 'none',
+      b: 2,
+      borderColor: 'slate-300',
+      borderRadius: 3,
+      p: 2,
+      cursor: 'pointer',
+      transition: 'all',
+      transitionDuration: 150,
+      hover: {
+        borderColor: 'indigo-400',
+      },
+      focus: {
+        outline: 2,
+        outlineOffset: 2,
+        outlineColor: 'indigo-200',
+      },
+      checked: {
+        bgColor: 'indigo-500',
+        borderColor: 'indigo-500',
+        bgImage: 'bg-img-radio',
+      },
+      disabled: {
+        cursor: 'not-allowed',
+        bgColor: 'slate-100',
+        color: 'slate-400',
+        borderColor: 'slate-200',
+      },
+    },
+  },
+
+  // Modern dropdown
+  dropdown: {
+    styles: {
+      display: 'inline-flex',
+      ai: 'center',
+      gap: 2,
+      jc: 'space-between',
+      p: 3,
+      px: 4,
+      cursor: 'pointer',
+      bgColor: 'white',
+      color: 'slate-900',
+      b: 1,
+      borderColor: 'slate-300',
+      borderRadius: 2,
+      userSelect: 'none',
+      lineHeight: 20,
+      minWidth: 40,
+      transition: 'all',
+      transitionDuration: 150,
+      hover: {
+        borderColor: 'slate-400',
+      },
+      focus: {
+        outline: 2,
+        outlineOffset: 0,
+        borderColor: 'indigo-500',
+        outlineColor: 'indigo-200',
+      },
+      disabled: {
+        cursor: 'not-allowed',
+        bgColor: 'slate-100',
+        color: 'slate-400',
+        borderColor: 'slate-200',
+      },
+    },
+    children: {
+      display: {
+        styles: {
+          whiteSpace: 'nowrap',
+          textOverflow: 'ellipsis',
+          overflow: 'hidden',
+        },
+      },
+      items: {
+        styles: {
+          display: 'flex',
+          d: 'column',
+          gap: 1,
+          p: 2,
+          b: 1,
+          borderRadius: 2,
+          position: 'relative',
+          top: 2,
+          bgColor: 'white',
+          overflow: 'auto',
+          maxHeight: 62,
+          borderColor: 'slate-200',
+          color: 'slate-900',
+          shadow: 'large',
+        },
+      },
+      item: {
+        styles: {
+          display: 'flex',
+          width: 'fit',
+          p: 3,
+          cursor: 'pointer',
+          borderRadius: 1,
+          transition: 'all',
+          transitionDuration: 150,
+          hover: {
+            bgColor: 'slate-100',
+          },
+          focus: {
+            bgColor: 'indigo-50',
+          },
+          selected: {
+            bgColor: 'indigo-50',
+            color: 'indigo-600',
+            cursor: 'default',
+            hover: {
+              bgColor: 'indigo-100',
+            },
+          },
+        },
+      },
+    },
+  },
+
+  // Color box for docs
   colorBox: {
     styles: {
       width: 15,
       height: 15,
       b: 1,
-      borderRadius: 1,
-      hover: { outline: 1, outlineOffset: 1 },
-      transition: 'none',
+      borderRadius: 2,
+      shadow: 'small',
+      transition: 'all',
+      transitionDuration: 150,
+      hover: { outline: 2, outlineOffset: 2, outlineColor: 'indigo-200' },
     },
   },
+
+  // Number badge
   number: {
     styles: {
       borderRadius: 10,
-      bgColor: 'violet-50',
+      bgImage: 'gradient-primary',
       p: 3,
       lineHeight: 8,
+      b: 0,
+      color: 'white',
+      fontWeight: 600,
+    },
+  },
+
+  // Glass card
+  glassCard: {
+    styles: {
+      bgColor: 'glass-light',
       b: 1,
-      borderColor: 'violet-600',
-      color: 'violet-600',
+      borderColor: 'glass-border-light',
+      borderRadius: 3,
+      shadow: 'large',
+      p: 6,
+    },
+    variants: {
+      dark: {
+        bgColor: 'glass-dark',
+        borderColor: 'glass-border-dark',
+      },
+    },
+  },
+
+  // Code block
+  codeBlock: {
+    styles: {
+      bgColor: 'code-bg',
+      borderRadius: 3,
+      overflow: 'hidden',
+      shadow: 'large',
+    },
+    children: {
+      header: {
+        styles: {
+          display: 'flex',
+          jc: 'space-between',
+          ai: 'center',
+          px: 4,
+          py: 3,
+          bb: 1,
+          borderColor: 'slate-700',
+          bgColor: 'code-bg-light',
+        },
+      },
+      content: {
+        styles: {
+          p: 4,
+          overflow: 'auto',
+          maxHeight: 100,
+        },
+      },
+    },
+  },
+
+  // Feature card for home page
+  featureCard: {
+    styles: {
+      display: 'flex',
+      d: 'column',
+      gap: 3,
+      p: 6,
+      bgColor: 'white',
+      borderRadius: 3,
+      b: 1,
+      borderColor: 'slate-200',
+      transition: 'all',
+      transitionDuration: 200,
+      hover: {
+        shadow: 'large',
+        borderColor: 'indigo-200',
+        translateY: -0.5,
+      },
+    },
+    children: {
+      icon: {
+        styles: {
+          width: 12,
+          height: 12,
+          display: 'flex',
+          ai: 'center',
+          jc: 'center',
+          bgImage: 'gradient-primary',
+          borderRadius: 2,
+          color: 'white',
+        },
+      },
+      title: {
+        styles: {
+          fontSize: 18,
+          fontWeight: 600,
+          color: 'slate-900',
+        },
+      },
+      description: {
+        styles: {
+          fontSize: 14,
+          color: 'slate-600',
+          lineHeight: 24,
+        },
+      },
+    },
+  },
+
+  // Navigation item
+  navItem: {
+    styles: {
+      display: 'flex',
+      ai: 'center',
+      gap: 3,
+      p: 3,
+      px: 4,
+      borderRadius: 2,
+      cursor: 'pointer',
+      transition: 'all',
+      transitionDuration: 150,
+      color: 'slate-600',
+      hover: {
+        bgColor: 'slate-100',
+        color: 'slate-900',
+      },
+    },
+    variants: {
+      active: {
+        bgImage: 'gradient-primary',
+        color: 'white',
+        fontWeight: 500,
+        hover: {
+          bgColor: 'transparent',
+          color: 'white',
+        },
+      },
+    },
+  },
+
+  // Section header
+  sectionHeader: {
+    styles: {
+      fontSize: 12,
+      fontWeight: 600,
+      textTransform: 'uppercase',
+      letterSpacing: 1,
+      color: 'slate-400',
+      px: 4,
+      py: 2,
+    },
+  },
+
+  // Badge
+  badge: {
+    styles: {
+      display: 'inline-flex',
+      ai: 'center',
+      gap: 1,
+      px: 3,
+      py: 1,
+      borderRadius: 10,
+      fontSize: 12,
+      fontWeight: 500,
+      bgColor: 'indigo-100',
+      color: 'indigo-700',
+    },
+    variants: {
+      success: {
+        bgColor: 'emerald-100',
+        color: 'emerald-700',
+      },
+      warning: {
+        bgColor: 'amber-100',
+        color: 'amber-700',
+      },
+      error: {
+        bgColor: 'red-100',
+        color: 'red-700',
+      },
     },
   },
 });

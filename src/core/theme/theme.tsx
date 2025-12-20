@@ -21,7 +21,7 @@ function Theme(props: ThemeProps) {
     return () => {
       root.classList.remove(themeName);
     };
-  }, [themeName]);
+  }, [themeName, use]);
 
   if (use === 'local') {
     return (

@@ -1,6 +1,9 @@
+import { motion } from 'framer-motion';
+import { Palette } from 'lucide-react';
 import Box from '../../src/box';
 import Flex from '../../src/components/flex';
 import Variables from '../../src/core/variables';
+import PageHeader from '../components/pageHeader';
 
 const colors: Record<string, Variables.ColorType[]> = {
   1: ['none', 'white', 'black', 'transparent', 'currentColor'],
@@ -175,22 +178,48 @@ const colors: Record<string, Variables.ColorType[]> = {
 export default function ColorPage() {
   return (
     <Flex gap={10} d="column">
-      <Box tag="h1" mb={3} fontSize={24}>
-        Color
-      </Box>
-      {Object.entries(colors).map(([group, items]) => (
-        <Flex key={group} gap={10} flexWrap="wrap">
-          {items.map((item) => (
-            <Box key={item}>
-              <Box mb={2} fontSize={12}>
-                {item}
+      <PageHeader icon={Palette} title="Colors" description="Complete color palette available for use throughout your application." />
+
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
+        <Flex d="column" gap={8}>
+          {Object.entries(colors).map(([group, items]) => (
+            <Box key={group}>
+              <Box
+                tag="h3"
+                fontSize={14}
+                fontWeight={600}
+                textTransform="capitalize"
+                theme={{ dark: { color: 'slate-400' }, light: { color: 'slate-500' } }}
+                mb={4}
+              >
+                {group === '1' ? 'Base Colors' : group}
               </Box>
-              <Box component="colorBox" bgColor={item}></Box>
-              <Box mt={2}>{Variables.colors[item as keyof typeof Variables.colors]}</Box>
+              <Flex gap={3} flexWrap="wrap">
+                {items.map((item) => (
+                  <Box key={item} textAlign="center">
+                    <Box
+                      width={16}
+                      height={16}
+                      borderRadius={2}
+                      bgColor={item}
+                      b={1}
+                      theme={{ dark: { borderColor: 'slate-700' }, light: { borderColor: 'slate-200' } }}
+                      shadow="small"
+                      mb={2}
+                    />
+                    <Box fontSize={11} theme={{ dark: { color: 'slate-400' }, light: { color: 'slate-600' } }} mb={1}>
+                      {item}
+                    </Box>
+                    <Box fontSize={10} theme={{ dark: { color: 'slate-500' }, light: { color: 'slate-400' } }}>
+                      {Variables.colors[item as keyof typeof Variables.colors]}
+                    </Box>
+                  </Box>
+                ))}
+              </Flex>
             </Box>
           ))}
         </Flex>
-      ))}
+      </motion.div>
     </Flex>
   );
 }

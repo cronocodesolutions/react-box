@@ -1,27 +1,31 @@
+import { motion } from 'framer-motion';
+import { Paintbrush } from 'lucide-react';
 import Box from '../../src/box';
 import Button from '../../src/components/button';
 import Flex from '../../src/components/flex';
 import Code from '../components/code';
+import PageHeader from '../components/pageHeader';
 import DarkSvg from '../svgs/darkSvg';
 import LightSvg from '../svgs/lightSvg';
 
 export default function ThemeSetupPage() {
   return (
     <Box>
-      <Box tag="h1" mb={3} fontSize={24}>
-        Theme Setup
-      </Box>
+      <PageHeader
+        icon={Paintbrush}
+        title="Theme Setup"
+        description="Customize your app design by defining styles as a theme with variants."
+      />
 
-      <Box tag="h4" fontSize={18} fontWeight={400} mb={10}>
-        In order to customize your app design you can define your styles as a theme.
-      </Box>
-
-      <Code
-        label="Define your own styles"
-        code={`import Box from '@cronocode/react-box';
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
+        <Flex d="column" gap={8}>
+          <Code
+            label="Define Your Own Styles"
+            language="jsx"
+            code={`import Box from '@cronocode/react-box';
 import Flex from '@cronocode/react-box/components/flex';
 import Button from '@cronocode/react-box/components/button';
-        
+
 export const components = Box.components({
   button: {
     styles: {
@@ -68,25 +72,23 @@ function App() {
       <Button variant="secondary">Secondary</Button>
     </Flex>
   );
-}
+}`}
+          >
+            <Flex gap={3}>
+              <Button>Default</Button>
+              <Button component="button.demo" variant="primary">
+                Primary
+              </Button>
+              <Button component="button.demo" variant="secondary">
+                Secondary
+              </Button>
+            </Flex>
+          </Code>
 
-`}
-        mt={10}
-      >
-        <Flex gap={3}>
-          <Button>Default</Button>
-          <Button component="button.demo" variant="primary">
-            Primary
-          </Button>
-          <Button component="button.demo" variant="secondary">
-            Secondary
-          </Button>
-        </Flex>
-      </Code>
-
-      <Code
-        label="Change theme from the child component"
-        code={`import Box from '@cronocode/react-box';
+          <Code
+            label="Theme Switching"
+            language="jsx"
+            code={`import Box from '@cronocode/react-box';
 
 function App() {
   return (
@@ -122,14 +124,14 @@ function Sample() {
       </Flex>
     </Box>
   );
-}
-`}
-        mt={10}
-      >
-        <Box.Theme theme="light">
-          <Sample />
-        </Box.Theme>
-      </Code>
+}`}
+          >
+            <Box.Theme theme="light">
+              <Sample />
+            </Box.Theme>
+          </Code>
+        </Flex>
+      </motion.div>
     </Box>
   );
 }
