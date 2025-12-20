@@ -19,6 +19,10 @@ export const { extendedProps, extendedPropTypes } = Box.extend(
     'gradient-glow-dark': 'radial-gradient(ellipse 80% 50% at 50% -20%, rgba(120, 119, 198, 0.5), transparent)',
     'gradient-mesh':
       'radial-gradient(at 40% 20%, rgba(99, 102, 241, 0.15) 0px, transparent 50%), radial-gradient(at 80% 0%, rgba(168, 85, 247, 0.1) 0px, transparent 50%), radial-gradient(at 0% 50%, rgba(236, 72, 153, 0.1) 0px, transparent 50%), radial-gradient(at 80% 50%, rgba(6, 182, 212, 0.1) 0px, transparent 50%), radial-gradient(at 0% 100%, rgba(99, 102, 241, 0.1) 0px, transparent 50%)',
+    'gradient-aurora-light':
+      'radial-gradient(900px circle at 18% 18%, rgba(99, 102, 241, 0.12), transparent 46%), radial-gradient(780px circle at 82% 12%, rgba(14, 165, 233, 0.1), transparent 45%), radial-gradient(960px circle at 48% 78%, rgba(236, 72, 153, 0.08), transparent 55%), linear-gradient(180deg, rgba(255, 255, 255, 0.92) 0%, rgba(248, 250, 252, 0.88) 100%)',
+    'gradient-aurora-dark':
+      'radial-gradient(900px circle at 18% 18%, rgba(129, 140, 248, 0.16), transparent 46%), radial-gradient(820px circle at 82% 10%, rgba(45, 212, 191, 0.12), transparent 48%), radial-gradient(980px circle at 50% 80%, rgba(59, 130, 246, 0.12), transparent 55%), linear-gradient(180deg, rgba(15, 23, 42, 0.96) 0%, rgba(15, 23, 42, 0.9) 100%)',
 
     // Backgrounds
     'bg-stripes': 'linear-gradient(135deg,var(--violet-300) 10%,#0000 0,#0000 50%,var(--violet-300) 0,var(--violet-300) 60%,#0000 0,#0000)',
@@ -61,6 +65,8 @@ export const { extendedProps, extendedPropTypes } = Box.extend(
           'gradient-glow',
           'gradient-glow-dark',
           'gradient-mesh',
+          'gradient-aurora-light',
+          'gradient-aurora-dark',
           'bg-dots',
           'bg-grid',
         ] as const,

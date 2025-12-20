@@ -73,6 +73,7 @@ Short, actionable guidance so an AI assistant can be immediately productive in t
 
 - `CONTRIBUTING.md` — deep dive on architecture, examples, and best practices (this file is the canonical source).
 - `pages/` demos — live examples to reproduce behaviors quickly.
+- `docs/WEBSITE.md` — how the `pages/**` docs site is structured, routed, themed, and how to add new demo pages.
 
 ---
 

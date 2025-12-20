@@ -40,6 +40,7 @@ export default function Sidebar({ toggleTheme, onClose }: SidebarProps) {
       height="fit-screen"
       theme={{ dark: { bgColor: 'slate-900' }, light: { bgImage: 'gradient-sidebar' } }}
       br={1}
+      borderColor="gray-200"
       display="flex"
       d="column"
       overflow="hidden"

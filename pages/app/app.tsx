@@ -40,7 +40,10 @@ export default function App() {
     <Box
       minHeight="fit-screen"
       position="relative"
-      theme={{ dark: { bgColor: 'slate-900', color: 'slate-100' }, light: { bgColor: 'white', color: 'slate-900' } }}
+      theme={{
+        dark: { bgColor: 'slate-900', color: 'slate-100', bgImage: 'gradient-aurora-dark' },
+        light: { bgColor: 'white', color: 'slate-900', bgImage: 'gradient-aurora-light' },
+      }}
       transition="all"
       transitionDuration={200}
     >
@@ -124,7 +127,7 @@ export default function App() {
 
         {/* Main Content */}
         <Box flex1 overflow="auto" minHeight="fit-screen">
-          <Box maxWidth={220} mx="auto" px={4} sm={{ px: 8 }} py={8} lg={{ py: 12 }}>
+          <Box maxWidth={240} mx="auto" px={4} sm={{ px: 8 }} py={8} lg={{ py: 12 }}>
             <PageContext.Provider value={{ rightSidebar, setRightSidebar }}>
               <AnimatePresence mode="wait">
                 <motion.div
@@ -158,7 +161,7 @@ export default function App() {
         </Box>
 
         {/* Right Sidebar (Desktop) */}
-        <Box width={0} overflow="hidden" xl={{ width: 60 }} flexShrink={0}>
+        <Box width={0} overflow="hidden" xl={{ width: 50 }} flexShrink={0}>
           {rightSidebar}
         </Box>
       </Flex>
