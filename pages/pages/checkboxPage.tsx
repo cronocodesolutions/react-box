@@ -1,34 +1,37 @@
+import { motion } from 'framer-motion';
+import { CheckSquare } from 'lucide-react';
 import Box from '../../src/box';
 import Checkbox from '../../src/components/checkbox';
+import Flex from '../../src/components/flex';
 import Code from '../components/code';
+import PageHeader from '../components/pageHeader';
 
 export default function CheckboxPage() {
   return (
     <Box>
-      <Box tag="h1" mb={3} fontSize={24}>
-        Checkbox
-      </Box>
-      <Box tag="h4" fontSize={18} fontWeight={400} mb={10}>
-        Use Checkbox component in order to turn an option on or off
-      </Box>
+      <PageHeader icon={CheckSquare} title="Checkbox" description="Use Checkbox component to turn an option on or off." />
 
-      <Code label="Import" code="import Checkbox from '@cronocode/react-box/components/checkbox';" />
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
+        <Flex d="column" gap={8}>
+          <Code label="Import" language="jsx" code="import Checkbox from '@cronocode/react-box/components/checkbox';" />
 
-      <Code label="Basic Checkbox" code="<Checkbox defaultChecked />" mt={10}>
-        <Checkbox defaultChecked />
-      </Code>
+          <Code label="Basic Checkbox" language="jsx" code="<Checkbox defaultChecked />">
+            <Checkbox defaultChecked />
+          </Code>
 
-      <Code label="Clean Checkbox" code="<Checkbox clean defaultChecked />" mt={10}>
-        <Checkbox clean defaultChecked />
-      </Code>
+          <Code label="Clean Checkbox" language="jsx" code="<Checkbox clean defaultChecked />">
+            <Checkbox clean defaultChecked />
+          </Code>
 
-      <Code label="Disabled Checkbox" code="<Checkbox disabled defaultChecked />" mt={10}>
-        <Checkbox disabled defaultChecked />
-      </Code>
+          <Code label="Disabled Checkbox" language="jsx" code="<Checkbox disabled defaultChecked />">
+            <Checkbox disabled defaultChecked />
+          </Code>
 
-      <Code label="Indeterminate Checkbox" code="<Checkbox indeterminate />" mt={10}>
-        <Checkbox indeterminate />
-      </Code>
+          <Code label="Indeterminate Checkbox" language="jsx" code="<Checkbox indeterminate />">
+            <Checkbox indeterminate />
+          </Code>
+        </Flex>
+      </motion.div>
     </Box>
   );
 }
