@@ -1,20 +1,3 @@
-// ✅ simple table column definitions + data[]
-// ✅ hover row styles
-// ✅ horizontal scroll for headers + rows
-// ✅ vertical scroll rows only
-// ✅ column sorting
-// ❌ pagination
-// ✅ resize column
-// ✅ pin (left/right)
-// ✅ multi-level headers
-// ✅ grouping
-// ❌ select row checkbox
-// ❌ filters
-// ❌ empty table
-// ❌ column sorting by type
-
-// datagrid container
-
 import Box from '../box';
 import DataGridBottomBar from './dataGrid/components/dataGridBottomBar';
 import DataGridContent from './dataGrid/components/dataGridContent';

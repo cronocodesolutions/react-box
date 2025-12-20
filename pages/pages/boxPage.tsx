@@ -21,7 +21,11 @@ export default function BoxPage() {
 
   return (
     <Box>
-      <PageHeader icon={BoxIcon} title="Box" description="The foundational component with CSS-as-props. Build anything with type-safe styling." />
+      <PageHeader
+        icon={BoxIcon}
+        title="Box"
+        description="The foundational component with CSS-as-props. Build anything with type-safe styling."
+      />
 
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
         <Flex d="column" gap={8}>
@@ -122,7 +126,10 @@ function Component() {
                   b={1}
                   borderRadius={2}
                 >
-                  <Box {...props} theme={{ dark: { borderColor: 'slate-500', color: 'white' }, light: { borderColor: 'slate-300', color: 'slate-900' } }}>
+                  <Box
+                    {...props}
+                    theme={{ dark: { borderColor: 'slate-500', color: 'white' }, light: { borderColor: 'slate-300', color: 'slate-900' } }}
+                  >
                     Hello world
                   </Box>
                 </Flex>

@@ -35,17 +35,7 @@ export default function InstallationPage() {
           theme={{ dark: { bgImage: 'gradient-hero-dark' }, light: { bgImage: 'gradient-hero' } }}
           borderRadius={4}
         >
-          <Box
-            width={16}
-            height={16}
-            display="flex"
-            ai="center"
-            jc="center"
-            bgColor="emerald-500"
-            borderRadius={10}
-            color="white"
-            mb={6}
-          >
+          <Box width={16} height={16} display="flex" ai="center" jc="center" bgColor="emerald-500" borderRadius={10} color="white" mb={6}>
             <CheckCircle2 size={32} />
           </Box>
           <Box tag="h2" fontSize={28} fontWeight={700} theme={{ dark: { color: 'white' }, light: { color: 'slate-900' } }} mb={3}>
@@ -64,7 +54,11 @@ export default function InstallationPage() {
             Next Steps
           </Box>
           <Flex d="column" gap={4}>
-            <StepCard icon={<Package size={20} />} title="Import Box" description="Import the Box component and start using it in your JSX." />
+            <StepCard
+              icon={<Package size={20} />}
+              title="Import Box"
+              description="Import the Box component and start using it in your JSX."
+            />
             <StepCard
               icon={<Rocket size={20} />}
               title="Explore Components"
