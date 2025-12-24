@@ -93,7 +93,7 @@ describe('fuzzySearch', () => {
 
     it('should handle null/undefined values', () => {
       const objWithNull = { name: null, value: undefined };
-      expect(fuzzySearchObject('test', objWithNull as any)).toBe(false);
+      expect(fuzzySearchObject('test', objWithNull)).toBe(false);
     });
 
     it('should return false when no fields match', () => {
