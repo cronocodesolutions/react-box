@@ -1,4 +1,4 @@
-import { describe, expect, it, suite } from 'vitest';
+import { describe, expect, it, suite, vi } from 'vitest';
 import { ignoreLogs } from '../../../../dev/tests';
 import { GridDefinition } from '../contracts/dataGridContract';
 import GridModel, { DEFAULT_ROW_NUMBER_COLUMN_WIDTH, ROW_NUMBER_CELL_KEY } from './gridModel';
@@ -188,6 +188,53 @@ describe('GridModel', () => {
       expect(((grid.rows.value.at(1) as GroupRowModel<Person>).rows.at(0) as GroupRowModel<Person>).rows).toHaveLength(1);
       expect((grid.rows.value.at(1) as GroupRowModel<Person>).rows.at(1) instanceof GroupRowModel).toBeTruthy();
       expect(((grid.rows.value.at(1) as GroupRowModel<Person>).rows.at(1) as GroupRowModel<Person>).rows).toHaveLength(1);
+    });
+
+    it('resets hidden columns when ungrouping all', () => {
+      const grid = getGridModel({ data, gridDef: { columns: [{ key: 'day' }, { key: 'firstName' }] } });
+
+      grid.toggleGrouping('day');
+      expect(grid.hiddenColumns.has('day')).toBe(true);
+
+      grid.unGroupAll();
+
+      expect(grid.hiddenColumns.has('day')).toBe(false);
+      const dayColumn = grid.columns.value.leafs.find((c) => c.key === 'day');
+      expect(dayColumn?.isVisible).toBe(true);
+
+      // Ensure header rows are recalculated and include the day column
+      const headerLevel0 = grid.headerRows.value.at(0)!;
+      expect(headerLevel0.some((c) => c.key === 'day')).toBe(true);
+
+      // Ensure grid template columns recalculated (left + auto + right pattern)
+      const gtc = grid.gridTemplateColumns.value;
+      expect(typeof gtc).toBe('string');
+      expect(gtc.includes('auto')).toBe(true);
+    });
+  });
+
+  suite('selection events', () => {
+    it('emits selection change on select-all and deselect', () => {
+      const onSelectionChange = vi.fn();
+      const grid = getGridModel({ gridDef: { rowSelection: true, columns: [{ key: 'firstName' }] }, data: testData });
+
+      grid.props.onSelectionChange = onSelectionChange;
+
+      grid.toggleSelectAllRows();
+      expect(onSelectionChange).toHaveBeenCalledTimes(1);
+      const selectEvent = onSelectionChange.mock.calls.at(-1)![0];
+      expect(selectEvent.action).toBe('select');
+      expect(selectEvent.isAllSelected).toBe(true);
+      expect(selectEvent.selectedRowKeys).toHaveLength(testData.length);
+
+      const firstKey = grid.getRowKey(testData[0] as Person);
+      grid.toggleRowsSelection([firstKey]);
+
+      expect(onSelectionChange).toHaveBeenCalledTimes(2);
+      const deselectEvent = onSelectionChange.mock.calls.at(-1)![0];
+      expect(deselectEvent.action).toBe('deselect');
+      expect(deselectEvent.isAllSelected).toBe(false);
+      expect(deselectEvent.selectedRowKeys).not.toContain(firstKey);
     });
   });
 

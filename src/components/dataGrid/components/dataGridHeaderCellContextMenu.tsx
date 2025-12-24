@@ -64,9 +64,10 @@ export default function DataGridHeaderCellContextMenu<TRow>(props: Props<TRow>) 
         {isOpen && (
           <Tooltip
             component="datagrid.header.cell.contextMenu.tooltip"
-            variant={{ openLeft }}
             onPositionChange={setTooltipPosition}
             ref={refToUse}
+            adjustTranslateX={openLeft ? '-100%' : '-21px'}
+            adjustTranslateY="16px"
           >
             {isSortAscAvailable && (
               <Button component="datagrid.header.cell.contextMenu.tooltip.item" onClick={() => column.sortColumn('ASC')}>
@@ -91,7 +92,7 @@ export default function DataGridHeaderCellContextMenu<TRow>(props: Props<TRow>) 
               </Button>
             )}
             {isSortingAvailable && (isPiningAvailable || isGroupByAvailable || isUnGroupByAvailable) && (
-              <Box bb={1} my={2} borderColor="gray-300" />
+              <Box bb={1} my={2} borderColor="gray-300" component="datagrid.header.cell.contextMenu.tooltip.item.separator" />
             )}
             {isPinLeftAvailable && (
               <Button component="datagrid.header.cell.contextMenu.tooltip.item" onClick={() => column.pinColumn('LEFT')}>
@@ -116,7 +117,7 @@ export default function DataGridHeaderCellContextMenu<TRow>(props: Props<TRow>) 
               </Button>
             )}
             {isSortingAvailable && isPiningAvailable && (isGroupByAvailable || isUnGroupByAvailable) && (
-              <Box bb={1} my={2} borderColor="gray-300" />
+              <Box component="datagrid.header.cell.contextMenu.tooltip.item.separator" />
             )}
             {isGroupByAvailable && (
               <Button component="datagrid.header.cell.contextMenu.tooltip.item" onClick={column.toggleGrouping}>

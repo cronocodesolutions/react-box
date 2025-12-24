@@ -1,7 +1,8 @@
 import '../../../array';
 import memo from '../../../utils/memo';
+import { fuzzySearch } from '../../../utils/string/fuzzySearch';
 import DataGridCellRowSelection from '../components/dataGridCellRowSelection';
-import { DataGridProps, Key, NO_PIN, PinPosition } from '../contracts/dataGridContract';
+import { ColumnFilters, DataGridProps, FilterValue, Key, NO_PIN, PinPosition } from '../contracts/dataGridContract';
 import ColumnModel from './columnModel';
 import GroupRowModel from './groupRowModel';
 import RowModel from './rowModel';
@@ -108,9 +109,231 @@ export default class GridModel<TRow> {
     return `${left} auto ${right}`;
   });
 
+  // ========== Filtering ==========
+
+  private _globalFilterValue = '';
+  public get globalFilterValue(): string {
+    return this.props.globalFilterValue ?? this._globalFilterValue;
+  }
+
+  private _columnFilters: ColumnFilters<TRow> = {};
+  public get columnFilters(): ColumnFilters<TRow> {
+    return this.props.columnFilters ?? this._columnFilters;
+  }
+
+  /**
+   * Apply global filter (fuzzy search across all or specified columns)
+   */
+  private applyGlobalFilter(data: TRow[]): TRow[] {
+    const filterValue = this.globalFilterValue.trim();
+    if (!filterValue) return data;
+
+    const { globalFilterKeys } = this.props.def;
+    const searchableColumns =
+      globalFilterKeys ??
+      this.columns.value.leafs
+        .filter(
+          (c) =>
+            c.key !== EMPTY_CELL_KEY && c.key !== ROW_NUMBER_CELL_KEY && c.key !== ROW_SELECTION_CELL_KEY && c.key !== GROUPING_CELL_KEY,
+        )
+        .map((c) => c.key);
+
+    return data.filter((row) => {
+      return searchableColumns.some((key) => {
+        const value = row[key as keyof TRow];
+        if (value == null) return false;
+        return fuzzySearch(filterValue, String(value));
+      });
+    });
+  }
+
+  /**
+   * Apply column-level filters
+   */
+  private applyColumnFilters(data: TRow[]): TRow[] {
+    const filters = this.columnFilters;
+    const filterKeys = Object.keys(filters) as (keyof TRow)[];
+
+    if (filterKeys.length === 0) return data;
+
+    return data.filter((row) => {
+      return filterKeys.every((key) => {
+        const filter = filters[key];
+        if (!filter) return true;
+
+        const cellValue = row[key as keyof TRow];
+
+        return this.matchesFilter(cellValue, filter);
+      });
+    });
+  }
+
+  /**
+   * Check if a cell value matches a filter
+   */
+  private matchesFilter(cellValue: unknown, filter: FilterValue): boolean {
+    switch (filter.type) {
+      case 'text': {
+        if (!filter.value.trim()) return true;
+        if (cellValue == null) return false;
+        return fuzzySearch(filter.value, String(cellValue));
+      }
+
+      case 'number': {
+        if (cellValue == null) return false;
+        const numValue = typeof cellValue === 'number' ? cellValue : parseFloat(String(cellValue));
+        if (isNaN(numValue)) return false;
+
+        switch (filter.operator) {
+          case 'eq':
+            return numValue === filter.value;
+          case 'ne':
+            return numValue !== filter.value;
+          case 'gt':
+            return numValue > filter.value;
+          case 'gte':
+            return numValue >= filter.value;
+          case 'lt':
+            return numValue < filter.value;
+          case 'lte':
+            return numValue <= filter.value;
+          case 'between':
+            return filter.valueTo !== undefined ? numValue >= filter.value && numValue <= filter.valueTo : numValue >= filter.value;
+          default:
+            return true;
+        }
+      }
+
+      case 'multiselect': {
+        if (filter.values.length === 0) return true;
+        return filter.values.includes(cellValue as string | number | boolean | null);
+      }
+
+      default:
+        return true;
+    }
+  }
+
+  /**
+   * Get filtered data (applies global filter then column filters)
+   */
+  public get filteredData(): TRow[] {
+    let data = this.props.data;
+
+    // Apply global filter
+    if (this.props.def.globalFilter) {
+      data = this.applyGlobalFilter(data);
+    }
+
+    // Apply column filters
+    data = this.applyColumnFilters(data);
+
+    return data;
+  }
+
+  /**
+   * Set global filter value
+   */
+  public setGlobalFilter = (value: string): void => {
+    if (this.props.onGlobalFilterChange) {
+      this.props.onGlobalFilterChange(value);
+    } else {
+      this._globalFilterValue = value;
+    }
+
+    this.rows.clear();
+    this.flatRows.clear();
+    this.update();
+  };
+
+  /**
+   * Set a single column filter
+   */
+  public setColumnFilter = (columnKey: Key, filter: FilterValue | undefined): void => {
+    const newFilters = { ...this.columnFilters };
+
+    if (filter === undefined) {
+      delete newFilters[columnKey as keyof TRow];
+    } else {
+      newFilters[columnKey as keyof TRow] = filter;
+    }
+
+    if (this.props.onColumnFiltersChange) {
+      this.props.onColumnFiltersChange(newFilters);
+    } else {
+      this._columnFilters = newFilters;
+    }
+
+    this.rows.clear();
+    this.flatRows.clear();
+    this.update();
+  };
+
+  /**
+   * Clear all column filters
+   */
+  public clearColumnFilters = (): void => {
+    if (this.props.onColumnFiltersChange) {
+      this.props.onColumnFiltersChange({});
+    } else {
+      this._columnFilters = {};
+    }
+
+    this.rows.clear();
+    this.flatRows.clear();
+    this.update();
+  };
+
+  /**
+   * Clear all filters (global + column)
+   */
+  public clearAllFilters = (): void => {
+    this.setGlobalFilter('');
+    this.clearColumnFilters();
+  };
+
+  /**
+   * Get unique values for a column (used for multiselect filter options)
+   */
+  public getColumnUniqueValues = (columnKey: Key): (string | number | boolean | null)[] => {
+    const values = new Set<string | number | boolean | null>();
+
+    this.props.data.forEach((row) => {
+      const value = row[columnKey as keyof TRow];
+      if (value !== undefined) {
+        values.add(value as string | number | boolean | null);
+      }
+    });
+
+    return Array.from(values).sort((a, b) => {
+      if (a === null) return 1;
+      if (b === null) return -1;
+      if (typeof a === 'string' && typeof b === 'string') return a.localeCompare(b);
+      if (typeof a === 'number' && typeof b === 'number') return a - b;
+      return String(a).localeCompare(String(b));
+    });
+  };
+
+  /**
+   * Check if any filter is active
+   */
+  public get hasActiveFilters(): boolean {
+    return this.globalFilterValue.trim() !== '' || Object.keys(this.columnFilters).length > 0;
+  }
+
+  /**
+   * Get count of filtered rows vs total rows
+   */
+  public get filterStats(): { filtered: number; total: number } {
+    return {
+      filtered: this.filteredData.length,
+      total: this.props.data.length,
+    };
+  }
+
   public readonly rows = memo(() => {
     console.debug('\x1b[36m%s\x1b[0m', '[react-box]: DataGrid rows memo');
-    let data = this.props.data;
+    let data = this.filteredData;
 
     if (this._sortColumn) {
       data = data.sortBy((x) => x[this._sortColumn as keyof TRow], this._sortDirection);
@@ -297,7 +520,10 @@ export default class GridModel<TRow> {
   };
 
   public unGroupAll = () => {
+    const prevGroupColumns = new Set(this.groupColumns);
     this.groupColumns = new Set();
+    // Ensure previously grouped columns are made visible again
+    this.hiddenColumns = new Set(Array.from(this.hiddenColumns).filter((key) => !prevGroupColumns.has(key)));
 
     this.sourceColumns.clear();
     this.columns.clear();

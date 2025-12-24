@@ -254,8 +254,38 @@ namespace Variables {
   };
 
   export type ColorType = keyof typeof colors | 'none';
+  export const colorValues = Object.keys(Variables.colors) as Variables.ColorType[];
+  colorValues.push('none');
+
+  export const bgImages = {
+    'gradient-primary': 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #a855f7 100%)',
+    'gradient-aurora-light':
+      'radial-gradient(900px circle at 18% 18%, rgba(99, 102, 241, 0.12), transparent 46%), radial-gradient(780px circle at 82% 12%, rgba(14, 165, 233, 0.1), transparent 45%), radial-gradient(960px circle at 48% 78%, rgba(236, 72, 153, 0.08), transparent 55%), linear-gradient(180deg, rgba(255, 255, 255, 0.92) 0%, rgba(248, 250, 252, 0.88) 100%)',
+    'gradient-aurora-dark':
+      'radial-gradient(900px circle at 18% 18%, rgba(129, 140, 248, 0.16), transparent 46%), radial-gradient(820px circle at 82% 10%, rgba(45, 212, 191, 0.12), transparent 48%), radial-gradient(980px circle at 50% 80%, rgba(59, 130, 246, 0.12), transparent 55%), linear-gradient(180deg, rgba(15, 23, 42, 0.96) 0%, rgba(15, 23, 42, 0.9) 100%)',
+    'gradient-accent': 'linear-gradient(135deg, #06b6d4 0%, #3b82f6 50%, #6366f1 100%)',
+    // checkbox/radio images
+    'bg-img-checked': `url("data:image/svg+xml,${encodeURIComponent(`<svg xmlns='http://www.w3.org/2000/svg' width='100%' viewBox='0 0 20 20'><path fill='none' stroke='#FFF' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M6 10l3 3l6-6'/></svg>`)}")`,
+    'bg-img-indeterminate': `url("data:image/svg+xml,${encodeURIComponent(`<svg xmlns='http://www.w3.org/2000/svg' width='100%' viewBox='0 0 20 20'><line stroke='${colors['violet-400']}' x1='4' y1='10' x2='16' y2='10' stroke-width='1' /></svg>`)}")`,
+    'bg-img-radio': `url("data:image/svg+xml,${encodeURIComponent(`<svg xmlns='http://www.w3.org/2000/svg' width='100%' viewBox='0 0 20 20'><circle fill='#FFF' cx='10' cy='10' r='5'/></svg>`)}")`,
+  };
+
+  export type BgImageType = keyof typeof bgImages | 'none';
+  export const bgImageValues = Object.keys(Variables.bgImages) as Variables.BgImageType[];
+  bgImageValues.push('none');
+
+  export const shadows = {
+    small: 'rgba(0, 0, 0, 0.16) 0px 1px 4px',
+    medium: 'rgba(0, 0, 0, 0.24) 0px 3px 8px',
+    large: 'rgba(17, 17, 26, 0.1) 0px 4px 16px, rgba(17, 17, 26, 0.05) 0px 8px 32px',
+  };
+
+  export type ShadowType = keyof typeof shadows | 'none';
+  export const shadowValues = Object.keys(Variables.shadows) as Variables.ShadowType[];
+  shadowValues.push('none');
 
   export const percentages = [
+    '1/1',
     '1/2',
     '1/3',
     '2/3',
@@ -284,29 +314,60 @@ namespace Variables {
     '11/12',
   ] as const;
 
-  const internalVariables = {
+  export const negativePercentages = [
+    '-1/1',
+    '-1/2',
+    '-1/3',
+    '-2/3',
+    '-1/4',
+    '-2/4',
+    '-3/4',
+    '-1/5',
+    '-2/5',
+    '-3/5',
+    '-4/5',
+    '-1/6',
+    '-2/6',
+    '-3/6',
+    '-4/6',
+    '-5/6',
+    '-1/12',
+    '-2/12',
+    '-3/12',
+    '-4/12',
+    '-5/12',
+    '-6/12',
+    '-7/12',
+    '-8/12',
+    '-9/12',
+    '-10/12',
+    '-11/12',
+  ] as const;
+
+  const rootVariables = {
     inherit: 'inherit',
     none: 'none',
-    'bg-img-checked': `url("data:image/svg+xml,${encodeURIComponent(`<svg xmlns='http://www.w3.org/2000/svg' width='100%' viewBox='0 0 20 20'><path fill='none' stroke='#FFF' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M6 10l3 3l6-6'/></svg>`)}")`,
-    'bg-img-indeterminate': `url("data:image/svg+xml,${encodeURIComponent(`<svg xmlns='http://www.w3.org/2000/svg' width='100%' viewBox='0 0 20 20'><line stroke='${colors['violet-400']}' x1='4' y1='10' x2='16' y2='10' stroke-width='1' /></svg>`)}")`,
-    'bg-img-radio': `url("data:image/svg+xml,${encodeURIComponent(`<svg xmlns='http://www.w3.org/2000/svg' width='100%' viewBox='0 0 20 20'><circle fill='#FFF' cx='10' cy='10' r='5'/></svg>`)}")`,
-    'small-shadow': 'rgba(0, 0, 0, 0.16) 0px 1px 4px',
-    'medium-shadow': 'rgba(0, 0, 0, 0.24) 0px 3px 8px',
-    'large-shadow': 'rgba(17, 17, 26, 0.1) 0px 4px 16px, rgba(17, 17, 26, 0.05) 0px 8px 32px',
   };
 
+  const internalVariables = { ...rootVariables, ...colors, ...bgImages, ...shadows };
+
   const _usedVariables: Record<string, string> = {};
+  const _pendingVariables: Record<string, string> = {};
   let _userVariables: Record<string, string> = {};
 
   export function getVariableValue(name: string) {
-    if (name in _userVariables) {
-      _usedVariables[name] = _userVariables[name];
-    } else if (name in internalVariables) {
-      _usedVariables[name] = internalVariables[name as keyof typeof internalVariables];
-    } else if (name in colors) {
-      _usedVariables[name] = colors[name as keyof typeof colors];
-    } else {
-      _usedVariables[name] = name;
+    // Only track as pending if it's a new variable
+    if (!(name in _usedVariables)) {
+      if (name in _userVariables) {
+        _pendingVariables[name] = _userVariables[name];
+        _usedVariables[name] = _userVariables[name];
+      } else if (name in internalVariables) {
+        _pendingVariables[name] = internalVariables[name as keyof typeof internalVariables];
+        _usedVariables[name] = internalVariables[name as keyof typeof internalVariables];
+      } else {
+        _pendingVariables[name] = name;
+        _usedVariables[name] = name;
+      }
     }
 
     return `var(--${name})`;
@@ -316,6 +377,17 @@ namespace Variables {
     return Object.entries(_usedVariables)
       .map(([key, val]) => `--${key}: ${val};`)
       .join('');
+  }
+
+  export function getPendingVariables() {
+    const pending = { ..._pendingVariables };
+    // Clear pending after returning
+    Object.keys(_pendingVariables).forEach((key) => delete _pendingVariables[key]);
+    return pending;
+  }
+
+  export function hasPendingVariables() {
+    return Object.keys(_pendingVariables).length > 0;
   }
 
   export function setUserVariables(variables: Record<string, string>) {

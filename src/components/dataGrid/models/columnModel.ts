@@ -36,6 +36,9 @@ export default class ColumnModel<TRow> {
   public get Cell() {
     return this.def.Cell;
   }
+  public get filterable() {
+    return this.def.filterable;
+  }
 
   private _pin?: PinPosition;
   public get pin(): PinPosition | undefined {

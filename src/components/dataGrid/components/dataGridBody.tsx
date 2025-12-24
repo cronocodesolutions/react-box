@@ -62,7 +62,8 @@ export default function DataGridBody<TRow>(props: Props<TRow>) {
           minWidth="fit"
           transition="none"
           style={{
-            transform: `translateY(${startIndex * grid.rowHeight}px)`,
+            transform: `translate3d(0, ${startIndex * grid.rowHeight}px, 0)`,
+            willChange: 'transform',
             gridTemplateColumns: grid.gridTemplateColumns.value,
           }}
         >

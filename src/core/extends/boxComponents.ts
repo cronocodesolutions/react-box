@@ -34,42 +34,131 @@ const boxComponents = {
   button: {
     styles: {
       display: 'inline-flex',
+      ai: 'center',
+      jc: 'center',
+      gap: 2,
+      bgColor: 'indigo-600',
       color: 'white',
-      bgColor: 'violet-500',
-      borderColor: 'violet-500',
-      p: 3,
+      fontWeight: 500,
+      py: 2.5,
+      px: 5,
+      borderRadius: 2,
+      b: 0,
       cursor: 'pointer',
-      b: 1,
-      borderRadius: 1,
-      userSelect: 'none',
-      lineHeight: 20,
       hover: {
-        bgColor: 'violet-600',
-        borderColor: 'violet-600',
+        bgColor: 'indigo-700',
+      },
+      active: {
+        bgColor: 'indigo-800',
+      },
+      focus: {
+        outline: 2,
+        outlineOffset: 2,
+        outlineColor: 'indigo-200',
       },
       disabled: {
-        cursor: 'not-allowed',
-        bgColor: 'violet-50',
+        bgColor: 'gray-200',
         color: 'gray-400',
-        borderColor: 'gray-300',
+        cursor: 'not-allowed',
+        hover: {
+          bgColor: 'gray-200',
+        },
+      },
+      theme: {
+        dark: {
+          bgColor: 'indigo-500',
+          hover: {
+            bgColor: 'indigo-400',
+          },
+          active: {
+            bgColor: 'indigo-600',
+          },
+          focus: {
+            outlineColor: 'indigo-800',
+          },
+          disabled: {
+            bgColor: 'gray-800',
+            color: 'gray-600',
+            hover: {
+              bgColor: 'gray-800',
+            },
+          },
+        },
       },
     },
     variants: {
-      hover: {
-        position: 'relative',
-        overflow: 'hidden',
-        b: 0,
-        before: {
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          width: 0,
-          height: 'fit',
-          bgColor: 'violet-700',
-          content: 'empty',
-          transitionDuration: 300,
+      secondary: {
+        bgColor: 'white',
+        color: 'gray-900',
+        b: 1,
+        borderColor: 'gray-300',
+        hover: {
+          bgColor: 'gray-50',
         },
-        hover: { before: { width: 'fit' } },
+        active: {
+          bgColor: 'gray-100',
+        },
+        focus: {
+          borderColor: 'indigo-500',
+          outlineColor: 'indigo-100',
+        },
+        disabled: {
+          bgColor: 'gray-50',
+          color: 'gray-400',
+          borderColor: 'gray-200',
+        },
+        theme: {
+          dark: {
+            bgColor: 'gray-800',
+            color: 'gray-100',
+            borderColor: 'gray-700',
+            hover: {
+              bgColor: 'gray-700',
+            },
+            active: {
+              bgColor: 'gray-600',
+            },
+            focus: {
+              borderColor: 'indigo-400',
+              outlineColor: 'indigo-900',
+            },
+            disabled: {
+              bgColor: 'gray-900',
+              color: 'gray-600',
+              borderColor: 'gray-800',
+            },
+          },
+        },
+      },
+      ghost: {
+        bgColor: 'transparent',
+        color: 'gray-700',
+        hover: {
+          bgColor: 'gray-100',
+        },
+        active: {
+          bgColor: 'gray-200',
+        },
+        disabled: {
+          bgColor: 'transparent',
+          color: 'gray-400',
+        },
+        theme: {
+          dark: {
+            bgColor: 'transparent',
+            color: 'gray-300',
+            hover: {
+              bgColor: 'gray-800',
+            },
+            active: {
+              bgColor: 'gray-700',
+            },
+            disabled: {
+              bgColor: 'transparent',
+              color: 'gray-600',
+            },
+          },
+        },
       },
     },
   },
@@ -77,26 +166,53 @@ const boxComponents = {
     styles: {
       display: 'inline-block',
       b: 1,
-      borderColor: 'violet-200',
-      bgColor: 'violet-50',
-      color: 'violet-950',
-      borderRadius: 1,
+      borderColor: 'gray-300',
+      bgColor: 'white',
+      color: 'gray-900',
+      borderRadius: 2,
       p: 3,
-      transition: 'none',
+      px: 4,
       lineHeight: 20,
       hover: {
-        borderColor: 'violet-300',
+        borderColor: 'gray-400',
       },
       focus: {
-        outline: 1,
-        borderColor: 'violet-500',
-        outlineColor: 'violet-500',
+        outline: 2,
+        outlineOffset: 0,
+        borderColor: 'indigo-500',
+        outlineColor: 'indigo-200',
       },
       disabled: {
         cursor: 'not-allowed',
-        bgColor: 'violet-50',
+        bgColor: 'gray-100',
         color: 'gray-400',
-        borderColor: 'gray-300',
+        borderColor: 'gray-200',
+      },
+      theme: {
+        dark: {
+          bgColor: 'gray-800',
+          color: 'gray-100',
+          borderColor: 'gray-700',
+          hover: {
+            borderColor: 'gray-600',
+          },
+          focus: {
+            borderColor: 'indigo-400',
+            outlineColor: 'indigo-900',
+          },
+          disabled: {
+            bgColor: 'gray-900',
+            color: 'gray-600',
+            borderColor: 'gray-800',
+          },
+        },
+      },
+    },
+    variants: {
+      compact: {
+        px: 2,
+        py: 1,
+        fontSize: 13,
       },
     },
   },
@@ -104,26 +220,46 @@ const boxComponents = {
     styles: {
       display: 'inline-block',
       b: 1,
-      borderColor: 'violet-200',
-      bgColor: 'violet-50',
-      color: 'violet-950',
-      borderRadius: 1,
+      borderColor: 'gray-300',
+      bgColor: 'white',
+      color: 'gray-900',
+      borderRadius: 2,
       p: 3,
-      transition: 'none',
+      px: 4,
       hover: {
-        borderColor: 'violet-300',
+        borderColor: 'gray-400',
       },
       focus: {
-        outline: 1,
-        borderColor: 'violet-500',
-        outlineColor: 'violet-500',
+        outline: 2,
+        outlineOffset: 0,
+        borderColor: 'indigo-500',
+        outlineColor: 'indigo-200',
       },
       disabled: {
         cursor: 'not-allowed',
-        bgColor: 'violet-50',
+        bgColor: 'gray-100',
         color: 'gray-400',
-        borderColor: 'gray-300',
+        borderColor: 'gray-200',
         resize: 'none',
+      },
+      theme: {
+        dark: {
+          bgColor: 'gray-800',
+          color: 'gray-100',
+          borderColor: 'gray-700',
+          hover: {
+            borderColor: 'gray-600',
+          },
+          focus: {
+            borderColor: 'indigo-400',
+            outlineColor: 'indigo-900',
+          },
+          disabled: {
+            bgColor: 'gray-900',
+            color: 'gray-600',
+            borderColor: 'gray-800',
+          },
+        },
       },
     },
   },
@@ -131,34 +267,64 @@ const boxComponents = {
     styles: {
       display: 'inline-block',
       appearance: 'none',
-      b: 1,
-      borderColor: 'violet-300',
+      b: 2,
+      borderColor: 'gray-300',
       borderRadius: 1,
       p: 2,
       cursor: 'pointer',
-      transition: 'none',
       hover: {
-        borderColor: 'violet-500',
+        borderColor: 'indigo-400',
       },
       focus: {
         outline: 2,
         outlineOffset: 2,
-        outlineColor: 'violet-500',
+        outlineColor: 'indigo-200',
       },
       checked: {
-        bgColor: 'violet-500',
-        borderColor: 'violet-500',
+        bgColor: 'indigo-500',
+        borderColor: 'indigo-500',
         bgImage: 'bg-img-checked',
       },
       indeterminate: {
-        color: 'violet-500',
+        borderColor: 'indigo-500',
         bgImage: 'bg-img-indeterminate',
       },
       disabled: {
         cursor: 'not-allowed',
-        bgColor: 'violet-100',
-        color: 'gray-400',
-        borderColor: 'gray-300',
+        borderColor: 'gray-200',
+        checked: {
+          bgColor: 'gray-300',
+        },
+        hover: {
+          borderColor: 'gray-200',
+        },
+      },
+      theme: {
+        dark: {
+          borderColor: 'gray-600',
+          hover: {
+            borderColor: 'indigo-400',
+          },
+          focus: {
+            outlineColor: 'indigo-900',
+          },
+          checked: {
+            bgColor: 'indigo-500',
+            borderColor: 'indigo-500',
+          },
+          indeterminate: {
+            borderColor: 'indigo-500',
+          },
+          disabled: {
+            borderColor: 'gray-700',
+            checked: {
+              bgColor: 'gray-600',
+            },
+            hover: {
+              borderColor: 'gray-700',
+            },
+          },
+        },
       },
     },
     variants: {
@@ -169,72 +335,120 @@ const boxComponents = {
     styles: {
       appearance: 'none',
       b: 1,
-      borderColor: 'violet-300',
+      borderColor: 'gray-300',
       borderRadius: 3,
       p: 2,
       cursor: 'pointer',
-      transition: 'none',
       hover: {
-        borderColor: 'violet-500',
+        borderColor: 'indigo-400',
       },
       focus: {
         outline: 2,
         outlineOffset: 2,
-        outlineColor: 'violet-500',
+        outlineColor: 'indigo-200',
       },
       checked: {
-        bgColor: 'violet-500',
-        borderColor: 'violet-500',
+        bgColor: 'indigo-500',
+        borderColor: 'indigo-500',
         bgImage: 'bg-img-radio',
       },
       disabled: {
+        checked: {
+          bgColor: 'gray-300',
+        },
         cursor: 'not-allowed',
-        bgColor: 'violet-100',
-        color: 'gray-400',
-        borderColor: 'violet-200',
+        borderColor: 'gray-200',
+        hover: {
+          borderColor: 'gray-200',
+        },
+      },
+      theme: {
+        dark: {
+          borderColor: 'gray-600',
+          hover: {
+            borderColor: 'indigo-400',
+          },
+          focus: {
+            outlineColor: 'indigo-900',
+          },
+          checked: {
+            bgColor: 'indigo-500',
+            borderColor: 'indigo-500',
+          },
+          disabled: {
+            borderColor: 'gray-700',
+            checked: {
+              bgColor: 'gray-600',
+            },
+            hover: {
+              borderColor: 'gray-700',
+            },
+          },
+        },
       },
     },
   },
   dropdown: {
     styles: {
       display: 'inline-flex',
+      textWrap: 'nowrap',
+      overflow: 'hidden',
       ai: 'center',
       gap: 2,
-      jc: 'space-between',
       p: 3,
       cursor: 'pointer',
-      bgColor: 'violet-50',
-      color: 'violet-950',
+      bgColor: 'white',
+      color: 'gray-900',
       b: 1,
-      borderColor: 'violet-200',
-      borderRadius: 1,
+      borderColor: 'gray-300',
+      borderRadius: 2,
       userSelect: 'none',
       lineHeight: 20,
       minWidth: 40,
       transition: 'none',
       hover: {
-        borderColor: 'violet-300',
+        borderColor: 'gray-400',
       },
       focus: {
-        outline: 1,
-        borderColor: 'violet-500',
-        outlineColor: 'violet-500',
+        outline: 2,
+        outlineOffset: 0,
+        borderColor: 'indigo-500',
+        outlineColor: 'indigo-200',
       },
       disabled: {
         cursor: 'not-allowed',
-        bgColor: 'violet-50',
+        bgColor: 'gray-100',
         color: 'gray-400',
         borderColor: 'gray-300',
       },
-    },
-    children: {
-      display: {
-        styles: {
-          whiteSpace: 'nowrap',
-          textOverflow: 'ellipsis',
-          overflow: 'hidden',
+      theme: {
+        dark: {
+          bgColor: 'gray-800',
+          color: 'gray-100',
+          borderColor: 'gray-700',
+          hover: {
+            borderColor: 'gray-600',
+          },
+          focus: {
+            borderColor: 'indigo-400',
+            outlineColor: 'indigo-900',
+          },
+          disabled: {
+            bgColor: 'gray-900',
+            color: 'gray-500',
+            borderColor: 'gray-700',
+          },
         },
       },
+    },
+    variants: {
+      compact: {
+        px: 2,
+        py: 1,
+        fontSize: 13,
+      },
+    },
+    children: {
       items: {
         styles: {
           display: 'flex',
@@ -242,15 +456,21 @@ const boxComponents = {
           gap: 1,
           p: 1,
           b: 1,
-          borderRadius: 1,
+          borderRadius: 2,
           position: 'relative',
-          top: 1,
           bgColor: 'white',
           overflow: 'auto',
           maxHeight: 62,
-          borderColor: 'violet-300',
-          color: 'violet-950',
+          borderColor: 'gray-300',
+          color: 'gray-900',
           shadow: 'medium',
+          theme: {
+            dark: {
+              bgColor: 'gray-800',
+              borderColor: 'gray-700',
+              color: 'gray-100',
+            },
+          },
         },
       },
       item: {
@@ -260,21 +480,42 @@ const boxComponents = {
           p: 3,
           cursor: 'pointer',
           borderRadius: 1,
+          lineHeight: 20,
           hover: {
             bgColor: 'gray-100',
           },
           focus: {
-            bgColor: 'violet-50',
+            bgColor: 'indigo-50',
           },
           selected: {
-            bgColor: 'violet-50',
+            bgColor: 'indigo-50',
             cursor: 'default',
             hover: {
-              bgColor: 'violet-100',
+              bgColor: 'indigo-100',
+            },
+          },
+          theme: {
+            dark: {
+              hover: {
+                bgColor: 'gray-700',
+              },
+              focus: {
+                bgColor: 'gray-700',
+              },
+              selected: {
+                bgColor: 'indigo-900',
+                hover: {
+                  bgColor: 'indigo-800',
+                },
+              },
             },
           },
         },
         variants: {
+          compact: {
+            px: 2,
+            py: 1,
+          },
           multiple: {
             selected: {
               cursor: 'pointer',
@@ -290,16 +531,36 @@ const boxComponents = {
           cursor: 'pointer',
           lineHeight: 20,
           borderRadius: 1,
-          color: 'violet-400',
+          color: 'gray-500',
           hover: {
-            bgColor: 'violet-50',
+            bgColor: 'gray-100',
           },
           focus: {
-            bgColor: 'violet-50',
+            bgColor: 'gray-100',
           },
           selected: {
-            bgColor: 'violet-50',
+            bgColor: 'gray-100',
             cursor: 'default',
+          },
+          theme: {
+            dark: {
+              color: 'gray-400',
+              hover: {
+                bgColor: 'gray-700',
+              },
+              focus: {
+                bgColor: 'gray-700',
+              },
+              selected: {
+                bgColor: 'gray-700',
+              },
+            },
+          },
+        },
+        variants: {
+          compact: {
+            px: 2,
+            py: 1,
           },
         },
       },
@@ -311,16 +572,36 @@ const boxComponents = {
           cursor: 'pointer',
           lineHeight: 20,
           borderRadius: 1,
-          color: 'violet-400',
+          color: 'gray-500',
           hover: {
-            bgColor: 'violet-50',
+            bgColor: 'gray-100',
           },
           focus: {
-            bgColor: 'violet-50',
+            bgColor: 'gray-100',
           },
           selected: {
-            bgColor: 'violet-50',
+            bgColor: 'gray-100',
             cursor: 'default',
+          },
+          theme: {
+            dark: {
+              color: 'gray-400',
+              hover: {
+                bgColor: 'gray-700',
+              },
+              focus: {
+                bgColor: 'gray-700',
+              },
+              selected: {
+                bgColor: 'gray-700',
+              },
+            },
+          },
+        },
+        variants: {
+          compact: {
+            px: 2,
+            py: 1,
           },
         },
       },
@@ -332,7 +613,18 @@ const boxComponents = {
           cursor: 'default',
           lineHeight: 20,
           borderRadius: 1,
-          color: 'violet-400',
+          color: 'gray-400',
+          theme: {
+            dark: {
+              color: 'gray-500',
+            },
+          },
+        },
+        variants: {
+          compact: {
+            px: 2,
+            py: 1,
+          },
         },
       },
     },
@@ -342,44 +634,177 @@ const boxComponents = {
     styles: {
       b: 1,
       bgColor: 'white',
-      borderColor: 'gray-400',
+      borderColor: 'gray-200',
       overflow: 'hidden',
-      borderRadius: 1,
+      borderRadius: 3,
+      shadow: 'large',
+      theme: {
+        dark: {
+          bgColor: 'gray-900',
+          borderColor: 'gray-800',
+        },
+      },
     },
     children: {
       topBar: {
         styles: {
-          p: 2,
+          py: 3,
+          px: 4,
           bb: 1,
-          borderColor: 'gray-400',
-          color: 'gray-400',
-          gap: 2,
+          borderColor: 'gray-200',
+          color: 'gray-800',
+          gap: 3,
           ai: 'center',
+          bgColor: 'gray-50',
+          theme: {
+            dark: {
+              bgColor: 'gray-800',
+              borderColor: 'gray-700',
+              color: 'gray-200',
+            },
+          },
         },
         children: {
+          globalFilter: {
+            styles: {
+              display: 'flex',
+              ai: 'center',
+              gap: 2,
+            },
+            children: {
+              stats: {
+                styles: {
+                  fontSize: 13,
+                  color: 'gray-500',
+                  textWrap: 'nowrap',
+                  theme: {
+                    dark: {
+                      color: 'gray-400',
+                    },
+                  },
+                },
+              },
+              inputWrapper: {
+                styles: {
+                  display: 'flex',
+                  position: 'relative',
+                },
+                children: {
+                  icon: {
+                    styles: {
+                      display: 'flex',
+                      position: 'absolute',
+                      left: 2,
+                      top: '1/2',
+                      translateY: '-1/2',
+                      pointerEvents: 'none',
+                      color: 'gray-500',
+                      theme: {
+                        dark: {
+                          color: 'gray-400',
+                        },
+                      },
+                    },
+                  },
+                  input: {
+                    styles: {
+                      display: 'inline-block',
+                      b: 1,
+                      borderColor: 'gray-300',
+                      bgColor: 'white',
+                      color: 'gray-900',
+                      borderRadius: 2,
+                      py: 2,
+                      fontSize: 13,
+                      focus: {
+                        outline: 2,
+                        outlineOffset: 0,
+                        borderColor: 'violet-500',
+                        outlineColor: 'violet-100',
+                      },
+                      theme: {
+                        dark: {
+                          bgColor: 'gray-800',
+                          borderColor: 'gray-700',
+                          color: 'gray-100',
+                          focus: {
+                            borderColor: 'violet-500',
+                            outlineColor: 'violet-950',
+                          },
+                        },
+                      },
+                    },
+                  },
+                  clear: {
+                    styles: {
+                      display: 'flex',
+                      position: 'absolute',
+                      right: 2,
+                      top: '1/2',
+                      translateY: '-1/2',
+                      cursor: 'pointer',
+                      fontSize: 13,
+                      color: 'gray-500',
+                      hover: {
+                        color: 'gray-700',
+                      },
+                      theme: {
+                        dark: {
+                          color: 'gray-400',
+                          hover: {
+                            color: 'gray-200',
+                          },
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
           contextMenu: {
             clean: true,
             styles: {
               cursor: 'pointer',
-              p: 1,
-              hover: { bgColor: 'gray-200', borderRadius: 1 },
+              p: 2,
+              borderRadius: 2,
+              color: 'gray-700',
+              hover: {
+                bgColor: 'gray-100',
+              },
+              theme: {
+                dark: {
+                  color: 'gray-300',
+                  hover: {
+                    bgColor: 'gray-800',
+                  },
+                },
+              },
             },
             children: {
               tooltip: {
                 styles: {
                   bgColor: 'white',
+                  color: 'gray-900',
                   width: 56,
                   b: 1,
                   borderColor: 'gray-300',
-                  borderRadius: 1,
+                  borderRadius: 3,
                   display: 'flex',
                   d: 'column',
-                  mt: 4,
+                  mt: 2,
                   py: 2,
                   translateX: -1,
-                  shadow: 'medium',
+                  shadow: 'large',
                   overflow: 'auto',
                   maxHeight: 100,
+                  theme: {
+                    dark: {
+                      bgColor: 'gray-800',
+                      borderColor: 'gray-700',
+                      color: 'gray-100',
+                    },
+                  },
                 },
                 children: {
                   item: {
@@ -389,7 +814,31 @@ const boxComponents = {
                       gap: 2,
                       p: 3,
                       cursor: 'pointer',
-                      hover: { bgColor: 'gray-200' },
+                      color: 'gray-900',
+                      hover: {
+                        bgColor: 'violet-50',
+                      },
+                      theme: {
+                        dark: {
+                          color: 'gray-100',
+                          hover: {
+                            bgColor: 'gray-700',
+                          },
+                        },
+                      },
+                    },
+                    children: {
+                      icon: {
+                        styles: {
+                          width: 4,
+                          color: 'violet-950',
+                          theme: {
+                            dark: {
+                              color: 'violet-300',
+                            },
+                          },
+                        },
+                      },
                     },
                   },
                 },
@@ -404,8 +853,13 @@ const boxComponents = {
             children: {
               icon: {
                 styles: {
-                  color: 'violet-950',
+                  color: 'gray-700',
                   width: 4,
+                  theme: {
+                    dark: {
+                      color: 'gray-300',
+                    },
+                  },
                 },
               },
               separator: {
@@ -416,21 +870,129 @@ const boxComponents = {
                   gap: 2,
                   ai: 'center',
                   b: 1,
-                  borderColor: 'gray-400',
-                  bgColor: 'gray-100',
-                  borderRadius: 1,
-                  py: 1,
-                  pl: 2,
-                  pr: 1,
-                  color: 'violet-950',
+                  borderColor: 'gray-300',
+                  bgColor: 'white',
+                  borderRadius: 2,
+                  py: 2,
+                  pl: 3,
+                  pr: 2,
+                  color: 'gray-800',
+                  fontSize: 14,
+                  fontWeight: 500,
+                  shadow: 'small',
+                  theme: {
+                    dark: {
+                      bgColor: 'gray-800',
+                      borderColor: 'gray-700',
+                      color: 'gray-200',
+                    },
+                  },
                 },
                 children: {
                   icon: {
                     styles: {
                       width: 3,
-                      color: 'gray-400',
+                      color: 'gray-500',
                       cursor: 'pointer',
+                      hover: {
+                        color: 'gray-700',
+                      },
+                      theme: {
+                        dark: {
+                          color: 'gray-400',
+                          hover: {
+                            color: 'gray-200',
+                          },
+                        },
+                      },
                     },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+      filter: {
+        styles: {},
+        children: {
+          row: {
+            styles: {
+              bgColor: 'gray-50',
+              bb: 1,
+              borderColor: 'gray-200',
+              theme: {
+                dark: {
+                  bgColor: 'gray-800',
+                  borderColor: 'gray-700',
+                },
+              },
+            },
+          },
+          cell: {
+            styles: {
+              display: 'flex',
+              ai: 'center',
+              p: 2,
+              transition: 'none',
+            },
+            variants: {
+              isPinned: {
+                position: 'sticky',
+                bgColor: 'gray-50',
+                zIndex: 2,
+                theme: {
+                  dark: {
+                    bgColor: 'gray-800',
+                  },
+                },
+              },
+              isFirstLeftPinned: {},
+              isLastLeftPinned: {
+                br: 1,
+                borderColor: 'gray-200',
+                theme: {
+                  dark: {
+                    borderColor: 'gray-700',
+                  },
+                },
+              },
+              isFirstRightPinned: {
+                bl: 1,
+                borderColor: 'gray-200',
+                theme: {
+                  dark: {
+                    borderColor: 'gray-700',
+                  },
+                },
+              },
+              isLastRightPinned: {},
+            },
+          },
+          number: {
+            styles: {
+              display: 'inline-block',
+              b: 1,
+              borderColor: 'gray-300',
+              bgColor: 'white',
+              borderRadius: 2,
+              py: 2,
+              px: 2.5,
+              fontSize: 13,
+              focus: {
+                outline: 2,
+                outlineOffset: 0,
+                borderColor: 'violet-500',
+                outlineColor: 'violet-100',
+              },
+              theme: {
+                dark: {
+                  bgColor: 'gray-800',
+                  borderColor: 'gray-700',
+                  color: 'gray-100',
+                  focus: {
+                    borderColor: 'violet-500',
+                    outlineColor: 'violet-950',
                   },
                 },
               },
@@ -445,7 +1007,12 @@ const boxComponents = {
           width: 'max-content',
           minWidth: 'fit',
           zIndex: 1,
-          bgColor: 'gray-200',
+          bgColor: 'gray-50',
+          theme: {
+            dark: {
+              bgColor: 'gray-800',
+            },
+          },
         },
         variants: {
           isResizeMode: { userSelect: 'none' },
@@ -453,19 +1020,66 @@ const boxComponents = {
         children: {
           cell: {
             styles: {
-              borderColor: 'gray-400',
+              borderColor: 'gray-200',
               bb: 1,
               minHeight: 12,
               position: 'relative',
               transition: 'none',
+              fontSize: 13,
+              fontWeight: 600,
+              color: 'gray-800',
+              py: 3.5,
+              theme: {
+                dark: {
+                  borderColor: 'gray-700',
+                  color: 'gray-200',
+                },
+              },
             },
             variants: {
-              isPinned: { position: 'sticky', zIndex: 2, bgColor: 'gray-200' },
+              isPinned: {
+                position: 'sticky',
+                zIndex: 2,
+                bgColor: 'gray-50',
+                theme: {
+                  dark: {
+                    bgColor: 'gray-800',
+                  },
+                },
+              },
               isFirstLeftPinned: {},
-              isLastLeftPinned: { br: 1 },
-              isFirstRightPinned: { bl: 1 },
+              isLastLeftPinned: {
+                br: 1,
+                borderColor: 'gray-200',
+                theme: {
+                  dark: {
+                    borderColor: 'gray-700',
+                  },
+                },
+              },
+              isFirstRightPinned: {
+                bl: 1,
+                borderColor: 'gray-200',
+                theme: {
+                  dark: {
+                    borderColor: 'gray-700',
+                  },
+                },
+              },
               isLastRightPinned: {},
-              isSortable: { cursor: 'pointer' },
+              isSortable: {
+                cursor: 'pointer',
+                hover: {
+                  bgColor: 'gray-100',
+                },
+                theme: {
+                  dark: {
+                    hover: {
+                      bgColor: 'gray-800',
+                    },
+                  },
+                },
+              },
               isRowSelected: {},
               isRowSelection: {},
               isRowNumber: { jc: 'center' },
@@ -484,7 +1098,14 @@ const boxComponents = {
                   jc: 'center',
                   ai: 'center',
                   transition: 'none',
+                  color: 'gray-600',
                   hover: { bgColor: 'gray-300' },
+                  theme: {
+                    dark: {
+                      color: 'gray-400',
+                      hover: { bgColor: 'gray-700' },
+                    },
+                  },
                 },
                 children: {
                   icon: {
@@ -493,20 +1114,23 @@ const boxComponents = {
                   tooltip: {
                     styles: {
                       bgColor: 'white',
+                      color: 'gray-900',
                       width: 56,
                       b: 1,
                       borderColor: 'gray-300',
-                      borderRadius: 1,
+                      borderRadius: 3,
                       display: 'flex',
                       d: 'column',
-                      mt: 4,
                       py: 2,
                       overflow: 'hidden',
-                      translateX: -5,
                       shadow: 'medium',
-                    },
-                    variants: {
-                      openLeft: { translateX: -55 },
+                      theme: {
+                        dark: {
+                          bgColor: 'gray-800',
+                          borderColor: 'gray-700',
+                          color: 'gray-100',
+                        },
+                      },
                     },
                     children: {
                       item: {
@@ -516,13 +1140,37 @@ const boxComponents = {
                           gap: 2,
                           p: 3,
                           cursor: 'pointer',
-                          hover: { bgColor: 'gray-200' },
+                          color: 'gray-900',
+                          hover: { bgColor: 'violet-50' },
+                          theme: {
+                            dark: {
+                              color: 'gray-100',
+                              hover: { bgColor: 'gray-700' },
+                            },
+                          },
                         },
                         children: {
                           icon: {
                             styles: {
                               width: 4,
                               color: 'violet-950',
+                              theme: {
+                                dark: {
+                                  color: 'violet-300',
+                                },
+                              },
+                            },
+                          },
+                          separator: {
+                            styles: {
+                              bb: 1,
+                              my: 2,
+                              borderColor: 'gray-300',
+                              theme: {
+                                dark: {
+                                  borderColor: 'gray-700',
+                                },
+                              },
                             },
                           },
                         },
@@ -549,18 +1197,57 @@ const boxComponents = {
           cell: {
             styles: {
               bb: 1,
-              borderColor: 'gray-400',
+              borderColor: 'gray-200',
               transition: 'none',
               ai: 'center',
-              hoverGroup: { 'grid-row': { bgColor: 'gray-200' } },
+              hoverGroup: {
+                'grid-row': {
+                  bgColor: 'gray-100',
+                },
+              },
+              theme: {
+                dark: {
+                  borderColor: 'gray-800',
+                  hoverGroup: {
+                    'grid-row': {
+                      bgColor: 'gray-700',
+                    },
+                  },
+                },
+              },
             },
             variants: {
-              isPinned: { position: 'sticky', bgColor: 'gray-100', zIndex: 1 },
+              isPinned: {
+                position: 'sticky',
+                bgColor: 'white',
+                zIndex: 1,
+                theme: {
+                  dark: {
+                    bgColor: 'gray-900',
+                  },
+                },
+              },
               isFirstLeftPinned: {},
-              isLastLeftPinned: { br: 1 },
-              isFirstRightPinned: { bl: 1 },
+              isLastLeftPinned: {
+                br: 1,
+                borderColor: 'gray-200',
+                theme: {
+                  dark: {
+                    borderColor: 'gray-800',
+                  },
+                },
+              },
+              isFirstRightPinned: {
+                bl: 1,
+                borderColor: 'gray-200',
+                theme: {
+                  dark: {
+                    borderColor: 'gray-800',
+                  },
+                },
+              },
               isLastRightPinned: {},
-              isRowNumber: { bgColor: 'gray-200', jc: 'right' },
+              isRowNumber: { jc: 'right' },
               isRowSelection: {},
               isRowSelected: {},
             },
@@ -569,11 +1256,23 @@ const boxComponents = {
       },
       bottomBar: {
         styles: {
-          p: 3,
-          bgColor: 'gray-200',
+          py: 3,
+          px: 4,
+          lineHeight: 36,
+          bgColor: 'gray-50',
           bt: 1,
-          borderColor: 'gray-400',
+          borderColor: 'gray-200',
           gap: 4,
+          ai: 'center',
+          fontSize: 14,
+          color: 'gray-800',
+          theme: {
+            dark: {
+              bgColor: 'gray-800',
+              borderColor: 'gray-700',
+              color: 'gray-200',
+            },
+          },
         },
       },
     },

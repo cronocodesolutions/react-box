@@ -1,6 +1,6 @@
 {
   "name": "@cronocode/react-box",
-  "version": "3.1.3",
+  "version": "3.1.4",
   "type": "module",
   "main": "./box.cjs",
   "module": "./box.mjs",
@@ -33,8 +33,8 @@
     "postbuild": "cp package.json dist & cp LICENSE dist & cp README.md dist",
     "build:dev": "vite build --mode dev",
     "compile": "tsc --noEmit --skipLibCheck",
-    "test": "vitest",
-    "test:all": "vitest run",
+    "test": "vitest run",
+    "test:watch": "vitest",
     "lint": "eslint ."
   },
   "repository": {

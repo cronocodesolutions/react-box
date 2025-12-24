@@ -1,13 +1,14 @@
 import { forwardRef, FunctionComponent, ReactElement, Ref, RefAttributes, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import Box, { BoxProps } from '../box';
 import useVisibility from '../hooks/useVisibility';
+import { ComponentsAndVariants } from '../types';
 import BaseSvg from './baseSvg';
 import Button from './button';
 import Flex from './flex';
 import Textbox from './textbox';
 import Tooltip from './tooltip';
 
-interface Props<TVal> extends Omit<BoxProps<'button'>, 'ref'> {
+interface Props<TVal, TKey extends keyof ComponentsAndVariants = 'dropdown'> extends Omit<BoxProps<'button', TKey>, 'ref' | 'tag'> {
   name?: string;
   defaultValue?: TVal | TVal[];
   value?: TVal | TVal[];
@@ -23,7 +24,7 @@ function DropdownImpl<TVal>(props: Props<TVal>, ref: Ref<HTMLInputElement>): Rea
     name,
     defaultValue,
     value,
-    multiple,
+    multiple = false,
     isSearchable,
     searchPlaceholder,
     children,
@@ -33,6 +34,7 @@ function DropdownImpl<TVal>(props: Props<TVal>, ref: Ref<HTMLInputElement>): Rea
     ...restProps
   } = props;
 
+  const compact = restProps.variant === 'compact';
   const [selectedValues, setSelectedValues] = useState(Array.isArray(defaultValue) ? defaultValue : defaultValue ? [defaultValue] : []);
   const valueToUse = 'value' in props ? (Array.isArray(value) ? value : value ? [value] : []) : selectedValues;
   const [search, setSearch] = useState<string>('');
@@ -41,13 +43,20 @@ function DropdownImpl<TVal>(props: Props<TVal>, ref: Ref<HTMLInputElement>): Rea
   const searchBoxRef = useRef<HTMLInputElement>(null);
   const itemsRef = useRef<HTMLDivElement>(null);
 
-  const [openPosition, setOpenPosition] = useState(0);
-  const openUp = useMemo(() => openPosition > window.innerHeight / 2, [openPosition]);
-  const translateY = useMemo(() => {
-    if (!openUp) return 0;
+  const [optionsPosition, setOptionsPosition] = useState<{ top: number; scrollY: number }>({ top: 0, scrollY: 0 });
+  const openUp = useMemo(
+    () => optionsPosition.top - optionsPosition.scrollY > window.innerHeight / 2,
+    [optionsPosition.top, optionsPosition.scrollY],
+  );
+  const btnSize = useMemo(() => {
+    return refToUse.current?.getBoundingClientRect();
+  }, [refToUse.current]);
 
-    return refToUse.current?.getBoundingClientRect().height ?? 0;
-  }, [openUp, refToUse]);
+  const translateY = useMemo(() => {
+    if (openUp) return 0;
+
+    return btnSize?.height ?? 0;
+  }, [openUp, btnSize]);
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const allKids = useMemo<ReactElement<any, FunctionComponent>[]>(
@@ -73,6 +82,8 @@ function DropdownImpl<TVal>(props: Props<TVal>, ref: Ref<HTMLInputElement>): Rea
   const displayItem = useMemo(() => allKids.find((x) => (x.type as FunctionComponent)?.displayName === 'DropdownDisplay'), [allKids]);
 
   const display = useMemo(() => {
+    if (isOpen && isSearchable) return null;
+
     if (displayItem)
       return typeof displayItem.props.children === 'function' ? displayItem.props.children(valueToUse, isOpen) : displayItem.props.children;
 
@@ -151,29 +162,26 @@ function DropdownImpl<TVal>(props: Props<TVal>, ref: Ref<HTMLInputElement>): Rea
   const showUnselect = unselectItem && filteredItems.length > 0 && !showSelectAll;
 
   return (
-    <Box width="fit-content">
+    <Button
+      ref={refToUse}
+      onClick={() => setOpen((prev) => !prev)}
+      component="dropdown"
+      props={{ tabIndex: 0, ...tagProps }}
+      position="relative"
+      {...restProps}
+    >
       {valueToUse.map((x) => (
         <Textbox key={JSON.stringify(x)} ref={ref} name={name} type="hidden" value={JSON.stringify(x) ?? ''} />
       ))}
-      <Button
-        ref={refToUse}
-        type="button"
-        component="dropdown"
-        onClick={() => setOpen((prev) => !prev)}
-        props={{ tabIndex: 0, ...tagProps }}
-        {...restProps}
-      >
-        {isSearchable && (
+      {isSearchable && isOpen && (
+        <Flex ai="center" position="absolute" inset={0} p={3}>
           <Textbox
-            display={isOpen && isSearchable ? 'block' : 'none'}
             clean
-            flex1
-            width={1}
-            minHeight={5}
             placeholder={searchPlaceholder}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             ref={searchBoxRef}
+            color="currentColor"
             props={{
               onClick: (e) => {
                 if (isOpen && isSearchable) {
@@ -182,74 +190,74 @@ function DropdownImpl<TVal>(props: Props<TVal>, ref: Ref<HTMLInputElement>): Rea
               },
             }}
           />
-        )}
-        <Flex component="dropdown.display" display={isOpen && isSearchable ? 'none' : 'flex'}>
-          {display ?? <>&nbsp;</>}
         </Flex>
-        {!hideIcon && (
-          <Box>
-            <BaseSvg viewBox="0 0 10 6" width="0.6rem" rotate={isOpen ? 180 : 0}>
-              <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 1 4 4 4-4" />
-            </BaseSvg>
-          </Box>
-        )}
-      </Button>
-
-      {isOpen && (
-        <Tooltip
-          ref={itemsRef}
-          position="absolute"
-          width="fit"
-          top={openUp ? undefined : 0}
-          bottom={openUp ? 2 : undefined}
-          style={{ transform: `translateY(-${translateY}px)` }}
-          onPositionChange={(data) => setOpenPosition(data.top - window.scrollY)}
-        >
-          {(filteredItems.length > 0 || emptyItem) && (
-            <Box component="dropdown.items">
-              {showUnselect && (
-                <Box
-                  component="dropdown.unselect"
-                  selected={valueToUse.length === 0}
-                  {...{ ...unselectItem.props, props: { ...unselectItem.props.props, onClick: (e) => itemSelectHandler(e) } }}
-                />
-              )}
-              {showSelectAll && (
-                <Box
-                  component="dropdown.selectAll"
-                  {...{ ...selectAllItem.props, props: { ...selectAllItem.props.props, onClick: (e) => itemSelectHandler(e, ...items) } }}
-                />
-              )}
-              {filteredItems.map((item) => {
-                const { value, onClick, ...itemProps } = item.props;
-
-                return (
-                  <Box
-                    key={value as React.Key}
-                    component="dropdown.item"
-                    variant={multiple ? 'multiple' : undefined}
-                    selected={valueToUse.includes(value)}
-                    {...{
-                      ...itemProps,
-                      props: {
-                        ...itemProps.props,
-                        onClick: (e) => {
-                          onClick?.(e);
-
-                          itemSelectHandler(e, item);
-                        },
-                      },
-                    }}
-                  />
-                );
-              })}
-
-              {filteredItems.length === 0 && emptyItem && <Box component="dropdown.emptyItem" {...emptyItem.props} />}
-            </Box>
-          )}
-        </Tooltip>
       )}
-    </Box>
+      &nbsp;{display}&nbsp;
+      {!hideIcon && (
+        <Box position="absolute" right={2}>
+          <BaseSvg viewBox="0 0 10 6" width="0.6rem" rotate={isOpen ? 180 : 0}>
+            <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 1 4 4 4-4" />
+          </BaseSvg>
+        </Box>
+      )}
+      <Box position="absolute" inset={0}>
+        {isOpen && (
+          <Tooltip
+            ref={itemsRef}
+            minWidth="fit-content"
+            style={{ transform: openUp ? `translateY(calc(-100% - 2px))` : `translateY(${translateY}px)` }}
+            onPositionChange={(data) => setOptionsPosition({ top: data.top, scrollY: data.windowScrollY })}
+          >
+            {(filteredItems.length > 0 || emptyItem) && (
+              <Box component="dropdown.items">
+                {showUnselect && (
+                  <Box
+                    component="dropdown.unselect"
+                    variant={{ compact }}
+                    selected={valueToUse.length === 0}
+                    {...{ ...unselectItem.props, props: { ...unselectItem.props.props, onClick: (e) => itemSelectHandler(e) } }}
+                  />
+                )}
+                {showSelectAll && (
+                  <Box
+                    component="dropdown.selectAll"
+                    variant={{ compact }}
+                    {...{ ...selectAllItem.props, props: { ...selectAllItem.props.props, onClick: (e) => itemSelectHandler(e, ...items) } }}
+                  />
+                )}
+                {filteredItems.map((item) => {
+                  const { value, onClick, ...itemProps } = item.props;
+
+                  return (
+                    <Box
+                      key={value as React.Key}
+                      component="dropdown.item"
+                      variant={{ multiple, compact }}
+                      selected={valueToUse.includes(value)}
+                      {...{
+                        ...itemProps,
+                        props: {
+                          ...itemProps.props,
+                          'aria-selected': valueToUse.includes(value),
+                          onClick: (e) => {
+                            onClick?.(e);
+                            itemSelectHandler(e, item);
+                          },
+                        },
+                      }}
+                    />
+                  );
+                })}
+
+                {filteredItems.length === 0 && emptyItem && (
+                  <Box component="dropdown.emptyItem" variant={{ compact }} {...emptyItem.props} />
+                )}
+              </Box>
+            )}
+          </Tooltip>
+        )}
+      </Box>
+    </Button>
   );
 }
 

@@ -1,6 +1,5 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import Box from '../../../box';
-import FnUtils from '../../../utils/fn/fnUtils';
 import GridModel from '../models/gridModel';
 import DataGridBody from './dataGridBody';
 import DataGridHeader from './dataGridHeader';
@@ -13,16 +12,21 @@ export default function DataGridContent<TRow>(props: Props<TRow>) {
   const { grid } = props;
 
   const [scrollTop, setScrollTop] = useState(0);
+  const rafRef = useRef<number | null>(null);
 
-  const handleScroll = useCallback(
-    FnUtils.throttle((event: React.UIEvent) => {
+  const handleScroll = useCallback((event: React.UIEvent) => {
+    if (rafRef.current !== null) {
+      cancelAnimationFrame(rafRef.current);
+    }
+
+    rafRef.current = requestAnimationFrame(() => {
       setScrollTop((event.target as HTMLDivElement).scrollTop);
-    }, 100),
-    [],
-  );
+      rafRef.current = null;
+    });
+  }, []);
 
   return (
-    <Box overflowX="scroll" props={{ onScroll: handleScroll }}>
+    <Box overflowX="scroll" style={{ willChange: 'scroll-position' }} props={{ onScroll: handleScroll }}>
       <DataGridHeader grid={grid} />
 
       <DataGridBody grid={grid} scrollTop={scrollTop} />

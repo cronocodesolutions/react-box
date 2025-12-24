@@ -132,4 +132,128 @@ describe('useStyles', () => {
       expect(element.classList).toContain('hover-selected-parent-bgColor-blue-200');
     });
   });
+
+  suite('when use theme (dark mode)', () => {
+    it('applies dark theme styles with base padding override', () => {
+      render(
+        <Box.Theme theme="dark">
+          <Box id={testElementId} p={1} theme={{ dark: { p: 2 } }} />
+        </Box.Theme>,
+      );
+
+      const element = document.getElementById(testElementId)!;
+      const styleElement = document.getElementById('crono-styles')! as unknown as HTMLStyleElement;
+
+      // Base padding
+      expect(styleElement.innerText).toContain('.p-1{padding:0.25rem}');
+      // Dark theme padding override
+      expect(styleElement.innerText).toContain('.dark .theme-dark-p-2{padding:0.5rem}');
+
+      expect(element.classList).toContain('p-1');
+      expect(element.classList).toContain('theme-dark-p-2');
+    });
+
+    it('applies dark theme styles with nested hover state', () => {
+      render(
+        <Box.Theme theme="dark">
+          <Box id={testElementId} p={1} theme={{ dark: { p: 2, hover: { p: 3 } } }} />
+        </Box.Theme>,
+      );
+
+      const element = document.getElementById(testElementId)!;
+      const styleElement = document.getElementById('crono-styles')! as unknown as HTMLStyleElement;
+
+      // Base padding
+      expect(styleElement.innerText).toContain('.p-1{padding:0.25rem}');
+      // Dark theme padding override
+      expect(styleElement.innerText).toContain('.dark .theme-dark-p-2{padding:0.5rem}');
+      // Dark theme hover padding override
+      expect(styleElement.innerText).toContain('.dark .hover-theme-dark-p-3:hover{padding:0.75rem}');
+
+      expect(element.classList).toContain('p-1');
+      expect(element.classList).toContain('theme-dark-p-2');
+      expect(element.classList).toContain('hover-theme-dark-p-3');
+    });
+
+    it('applies dark theme with multiple style properties', () => {
+      render(
+        <Box.Theme theme="dark">
+          <Box
+            id={testElementId}
+            p={1}
+            bgColor="white"
+            theme={{
+              dark: {
+                p: 2,
+                bgColor: 'gray-900',
+                hover: {
+                  p: 3,
+                  bgColor: 'gray-800',
+                },
+              },
+            }}
+          />
+        </Box.Theme>,
+      );
+
+      const element = document.getElementById(testElementId)!;
+      const styleElement = document.getElementById('crono-styles')! as unknown as HTMLStyleElement;
+
+      // Base styles
+      expect(styleElement.innerText).toContain('.p-1{padding:0.25rem}');
+      expect(styleElement.innerText).toContain('.bgColor-white{background-color:var(--white)}');
+
+      // Dark theme base styles
+      expect(styleElement.innerText).toContain('.dark .theme-dark-p-2{padding:0.5rem}');
+      expect(styleElement.innerText).toContain('.dark .theme-dark-bgColor-gray-900{background-color:var(--gray-900)}');
+
+      // Dark theme hover styles
+      expect(styleElement.innerText).toContain('.dark .hover-theme-dark-p-3:hover{padding:0.75rem}');
+      expect(styleElement.innerText).toContain('.dark .hover-theme-dark-bgColor-gray-800:hover{background-color:var(--gray-800)}');
+
+      expect(element.classList).toContain('p-1');
+      expect(element.classList).toContain('bgColor-white');
+      expect(element.classList).toContain('theme-dark-p-2');
+      expect(element.classList).toContain('theme-dark-bgColor-gray-900');
+      expect(element.classList).toContain('hover-theme-dark-p-3');
+      expect(element.classList).toContain('hover-theme-dark-bgColor-gray-800');
+    });
+
+    it('applies dark theme with active and focus states', () => {
+      render(
+        <Box.Theme theme="dark">
+          <Box
+            id={testElementId}
+            p={1}
+            theme={{
+              dark: {
+                p: 2,
+                hover: { p: 3 },
+                active: { p: 4 },
+                focus: { p: 5 },
+              },
+            }}
+          />
+        </Box.Theme>,
+      );
+
+      const element = document.getElementById(testElementId)!;
+      const styleElement = document.getElementById('crono-styles')! as unknown as HTMLStyleElement;
+
+      // Base padding
+      expect(styleElement.innerText).toContain('.p-1{padding:0.25rem}');
+
+      // Dark theme states
+      expect(styleElement.innerText).toContain('.dark .theme-dark-p-2{padding:0.5rem}');
+      expect(styleElement.innerText).toContain('.dark .hover-theme-dark-p-3:hover{padding:0.75rem}');
+      expect(styleElement.innerText).toContain('.dark .active-theme-dark-p-4:active{padding:1rem}');
+      expect(styleElement.innerText).toContain('.dark .focus-theme-dark-p-5:focus-within{padding:1.25rem}');
+
+      expect(element.classList).toContain('p-1');
+      expect(element.classList).toContain('theme-dark-p-2');
+      expect(element.classList).toContain('hover-theme-dark-p-3');
+      expect(element.classList).toContain('active-theme-dark-p-4');
+      expect(element.classList).toContain('focus-theme-dark-p-5');
+    });
+  });
 });

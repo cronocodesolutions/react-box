@@ -38,5 +38,14 @@ export default function useGrid<TRow>(props: DataGridProps<TRow>): GridModel<TRo
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [props.loading]);
 
+  // Handle controlled filter changes
+  useEffect(() => {
+    gridRef.current!.props = props;
+    gridRef.current!.rows.clear();
+    gridRef.current!.flatRows.clear();
+    gridRef.current!.update();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [props.globalFilterValue, props.columnFilters]);
+
   return gridRef.current;
 }

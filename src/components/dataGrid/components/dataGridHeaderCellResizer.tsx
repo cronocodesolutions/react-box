@@ -21,6 +21,7 @@ export default function DataGridHeaderCellResizer<TRow>(props: Props<TRow>) {
       <Box
         cursor="col-resize"
         px={0.75}
+        mt={-6}
         className="resizer"
         height="fit"
         props={{ onMouseDown: column.resizeColumn, onTouchStart: column.resizeColumn }}

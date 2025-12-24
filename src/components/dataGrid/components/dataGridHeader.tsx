@@ -1,5 +1,6 @@
 import Grid from '../../grid';
 import GridModel from '../models/gridModel';
+import DataGridFilterRow from './dataGridFilterRow';
 import DataGridHeaderCell from './dataGridHeaderCell';
 
 interface Props<TRow> {
@@ -17,6 +18,8 @@ export default function DataGridHeader<TRow>(props: Props<TRow>) {
           return <DataGridHeaderCell key={cell.uniqueKey} column={cell} />;
         });
       })}
+
+      <DataGridFilterRow grid={grid} />
     </Grid>
   );
 }

@@ -4,23 +4,34 @@ import Prism from 'prismjs';
 import 'prismjs/components/prism-bash';
 import 'prismjs/components/prism-jsx';
 import 'prismjs/themes/prism-okaidia.css';
-import { useEffect, useLayoutEffect, useState } from 'react';
+import { useEffect, useLayoutEffect, useMemo, useState } from 'react';
 import Box, { BoxProps } from '../../src/box';
 import Button from '../../src/components/button';
 import Flex from '../../src/components/flex';
+import reactToJsx from '../utils/reactToJsx';
 
 interface Props extends BoxProps {
   language?: 'javascript' | 'shell' | 'jsx' | 'auto';
   label?: string;
+  /** Optional explicit code string. If not provided, children will be converted to JSX string. */
   code?: string;
+  /** If true, only show code block without rendering the children demo */
+  codeOnly?: boolean;
 }
 
 export default function Code(props: Props) {
-  const { children, language = 'jsx', label, code, ...restProps } = props;
+  const { children, language = 'jsx', label, code: codeProp, codeOnly, ...restProps } = props;
   const [copied, setCopied] = useState(false);
 
+  // Convert children to JSX string if no explicit code prop
+  const code = useMemo(() => {
+    if (codeProp) return codeProp;
+    if (!children) return '';
+    return reactToJsx(children as React.ReactNode);
+  }, [codeProp, children]);
+
   function copyHandler() {
-    navigator.clipboard.writeText(code!);
+    navigator.clipboard.writeText(code);
     setCopied(true);
   }
 
@@ -49,10 +60,10 @@ export default function Code(props: Props) {
         theme={{ dark: { borderColor: 'slate-700' }, light: { borderColor: 'slate-200' } }}
       >
         {/* Demo Area */}
-        {children && (
+        {children && !codeOnly && (
           <Box
             p={6}
-            theme={{ dark: { bgColor: 'slate-800', borderColor: 'slate-700' }, light: { bgColor: 'slate-50', borderColor: 'slate-200' } }}
+            theme={{ dark: { bgColor: 'slate-900', borderColor: 'slate-700' }, light: { bgColor: 'slate-50', borderColor: 'slate-200' } }}
             bb={1}
           >
             {children}

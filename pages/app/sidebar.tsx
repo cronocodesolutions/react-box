@@ -23,6 +23,7 @@ import {
 } from 'lucide-react';
 import { useState } from 'react';
 import { NavLink } from 'react-router-dom';
+import { version } from '../../package.json';
 import Box from '../../src/box';
 import Button from '../../src/components/button';
 import Flex from '../../src/components/flex';
@@ -38,9 +39,11 @@ export default function Sidebar({ toggleTheme, onClose }: SidebarProps) {
   return (
     <Box
       height="fit-screen"
-      theme={{ dark: { bgColor: 'slate-900' }, light: { bgImage: 'gradient-sidebar' } }}
+      theme={{
+        dark: { bgImage: 'gradient-sidebar-dark', bgColor: 'slate-900', borderColor: 'slate-800' },
+        light: { bgImage: 'gradient-sidebar', borderColor: 'slate-200' },
+      }}
       br={1}
-      borderColor="gray-200"
       display="flex"
       d="column"
       overflow="hidden"
@@ -57,7 +60,7 @@ export default function Sidebar({ toggleTheme, onClose }: SidebarProps) {
                 React Box
               </Box>
               <Box fontSize={11} theme={{ dark: { color: 'slate-500' }, light: { color: 'slate-400' } }}>
-                v3.1.3
+                v{version}
               </Box>
             </Box>
           </Flex>
@@ -120,6 +123,9 @@ export default function Sidebar({ toggleTheme, onClose }: SidebarProps) {
           <MenuItem to="/dropdown" icon={<List size={16} />}>
             Dropdown
           </MenuItem>
+          <MenuItem to="/datagrid" icon={<Table2 size={16} />}>
+            Data Grid
+          </MenuItem>
         </MenuSection>
 
         {/* Layout */}
@@ -129,9 +135,6 @@ export default function Sidebar({ toggleTheme, onClose }: SidebarProps) {
           </MenuItem>
           <MenuItem to="/grid" icon={<Grid3X3 size={16} />}>
             Grid
-          </MenuItem>
-          <MenuItem to="/datagrid" icon={<Table2 size={16} />}>
-            Data Grid
           </MenuItem>
         </MenuSection>
 

@@ -126,7 +126,7 @@ function Sample() {
   );
 }`}
           >
-            <Box.Theme theme="light">
+            <Box.Theme theme="inner-light">
               <Sample />
             </Box.Theme>
           </Code>
@@ -145,15 +145,15 @@ function Sample() {
       borderRadius={2}
       b={1}
       theme={{
-        light: { color: 'indigo-950', bgColor: 'white' },
-        dark: { color: 'white', bgColor: 'indigo-950' },
+        'inner-light': { color: 'indigo-950', bgColor: 'white' },
+        'inner-dark': { color: 'white', bgColor: 'indigo-950' },
       }}
     >
       <Flex gap={3} ai="center">
-        <Button bgColor="transparent" onClick={() => setTheme('light')}>
+        <Button bgColor="transparent" onClick={() => setTheme('inner-light')}>
           <LightSvg theme={{ light: { fill: 'indigo-950' }, dark: { fill: 'white' } }} />
         </Button>
-        <Button bgColor="transparent" onClick={() => setTheme('dark')}>
+        <Button bgColor="transparent" onClick={() => setTheme('inner-dark')}>
           <DarkSvg theme={{ light: { fill: 'indigo-950' }, dark: { fill: 'white' } }} />
         </Button>
         <Box textTransform="capitalize" p={3}>

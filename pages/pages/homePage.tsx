@@ -1,6 +1,7 @@
 import { motion } from 'framer-motion';
 import { ArrowRight, Box as BoxIcon, Code2, Layers, Palette, Sparkles, Zap } from 'lucide-react';
 import { NavLink } from 'react-router-dom';
+import { version } from '../../package.json';
 import Box from '../../src/box';
 import Button from '../../src/components/button';
 import Flex from '../../src/components/flex';
@@ -39,7 +40,7 @@ export default function HomePage() {
               mb={6}
             >
               <Sparkles size={14} />
-              <Box>Version 3.1.3 is here!</Box>
+              <Box>Version {version} is here!</Box>
             </Flex>
           </motion.div>
 

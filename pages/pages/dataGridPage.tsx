@@ -1,12 +1,9 @@
 import { motion } from 'framer-motion';
 import { Table } from 'lucide-react';
-import { useCallback } from 'react';
 import Box from '../../src/box';
 import DataGrid from '../../src/components/dataGrid';
-import CellModel from '../../src/components/dataGrid/models/cellModel';
 import Flex from '../../src/components/flex';
 import { H3 } from '../../src/components/semantics';
-import { ArrayType } from '../../src/types';
 import Code from '../components/code';
 import PageHeader from '../components/pageHeader';
 import Data from '../data/MOCK_DATA.json';
@@ -20,20 +17,9 @@ import Data7 from '../data/MOCK_DATA_7.json';
 import usePageContext from '../hooks/usePageContext';
 
 const data = [...Data, ...Data1, ...Data2, ...Data3, ...Data4, ...Data5, ...Data6, ...Data7];
-type Person = ArrayType<typeof data>;
 
 export default function DataGridPage() {
   usePageContext(<RightSidebar />);
-
-  const ageCell = useCallback(({ cell }: { cell: CellModel<Person> }) => {
-    return (
-      <Flex bgColor="blue-200" height="fit" width="fit" ai="center" overflow="hidden">
-        <Box px={4} textOverflow="ellipsis" overflow="hidden" textWrap="nowrap">
-          {cell.row.data.age}
-        </Box>
-      </Flex>
-    );
-  }, []);
 
   return (
     <Box>
@@ -50,27 +36,61 @@ export default function DataGridPage() {
           <Code
             label="Basic DataGrid"
             language="jsx"
-            code={`const ageCell = useCallback(({ cell }: { cell: CellModel<Person> }) => {
-  return (
-    <Flex bgColor="blue-200" height="fit" width="fit" ai="center" overflow="hidden">
-      <Box px={4} textOverflow="ellipsis" overflow="hidden" textWrap="nowrap">
-        {cell.row.data.age}
-      </Box>
-    </Flex>
-  );
-}, []);
-
-<DataGrid
+            code={`<DataGrid
   data={data}
   def={{
     columns: [
       { key: 'first_name', header: 'First name' },
       { key: 'last_name', header: 'Last name' },
-      { key: 'age', header: 'Age', width: 90, align: 'right', Cell: ageCell },
+      {
+        key: 'age',
+        header: 'Age',
+        width: 90,
+        align: 'right',
+        Cell: ({ cell }) => {
+          // better to define this function outside to avoid re-creation on each render
+          return (
+            <Flex
+              bgColor="violet-50"
+              height="fit"
+              width="fit"
+              ai="center"
+              jc="center"
+              overflow="hidden"
+              className="parent"
+              theme={{ dark: { bgColor: 'violet-600' } }}
+            >
+              <Box
+                px={4}
+                textOverflow="ellipsis"
+                overflow="hidden"
+                textWrap="nowrap"
+                color="violet-700"
+                fontWeight={600}
+                hoverGroup={{ parent: { rotate: 180 } }}
+                theme={{ dark: { color: 'violet-300' } }}
+              >
+                {cell.row.data.age}
+              </Box>
+            </Flex>
+          );
+        },
+      },
       { key: 'email', header: 'Email', width: 300 },
       { key: 'street_address' },
       { key: 'city' },
       { key: 'country' },
+      { key: 'favorite_color' },
+      { key: 'gender' },
+      { key: 'ssn' },
+      { key: 'birthdate' },
+      { key: 'phone_number' },
+      { key: 'username' },
+      { key: 'credit_card_number' },
+      { key: 'salary' },
+      { key: 'company_name' },
+      { key: 'language' },
+      { key: 'currency_code' },
     ],
     rowHeight: 40,
     visibleRowsCount: 5,
@@ -83,7 +103,40 @@ export default function DataGridPage() {
                 columns: [
                   { key: 'first_name', header: 'First name' },
                   { key: 'last_name', header: 'Last name' },
-                  { key: 'age', header: 'Age', width: 90, align: 'right', Cell: ageCell },
+                  {
+                    key: 'age',
+                    header: 'Age',
+                    width: 90,
+                    align: 'right',
+                    Cell: ({ cell }) => {
+                      // You can define this function outside the component to avoid re-creation on each render
+                      return (
+                        <Flex
+                          bgColor="violet-50"
+                          height="fit"
+                          width="fit"
+                          ai="center"
+                          jc="center"
+                          overflow="hidden"
+                          className="parent"
+                          theme={{ dark: { bgColor: 'violet-600' } }}
+                        >
+                          <Box
+                            px={4}
+                            textOverflow="ellipsis"
+                            overflow="hidden"
+                            textWrap="nowrap"
+                            color="violet-700"
+                            fontWeight={600}
+                            hoverGroup={{ parent: { rotate: 180 } }}
+                            theme={{ dark: { color: 'violet-300' } }}
+                          >
+                            {cell.row.data.age}
+                          </Box>
+                        </Flex>
+                      );
+                    },
+                  },
                   { key: 'email', header: 'Email', width: 300 },
                   { key: 'street_address' },
                   { key: 'city' },
@@ -102,6 +155,48 @@ export default function DataGridPage() {
                 ],
                 rowHeight: 40,
                 visibleRowsCount: 5,
+              }}
+            />
+          </Code>
+
+          <Code
+            label="DataGrid with Global Filter and Column Filters"
+            language="jsx"
+            code={`<DataGrid
+  data={data}
+  def={{
+    columns: [
+      { key: 'first_name', header: 'First name', filterable: true },
+      { key: 'last_name', header: 'Last name', filterable: true },
+      { key: 'age', header: 'Age', width: 120, align: 'right', filterable: { type: 'number' } },
+      { key: 'email', header: 'Email', width: 300, filterable: true },
+      { key: 'country', filterable: { type: 'multiselect' } },
+      { key: 'gender', filterable: { type: 'multiselect' } },
+    ],
+    rowHeight: 40,
+    visibleRowsCount: 8,
+    topBar: true,
+    bottomBar: true,
+    globalFilter: true,
+  }}
+/>`}
+          >
+            <DataGrid
+              data={data}
+              def={{
+                columns: [
+                  { key: 'first_name', header: 'First name', filterable: true },
+                  { key: 'last_name', header: 'Last name', filterable: true },
+                  { key: 'age', header: 'Age', width: 140, align: 'right', filterable: { type: 'number' } },
+                  { key: 'email', header: 'Email', width: 300, filterable: true },
+                  { key: 'country', filterable: { type: 'multiselect' } },
+                  { key: 'gender', filterable: { type: 'multiselect' } },
+                ],
+                rowHeight: 40,
+                visibleRowsCount: 8,
+                topBar: true,
+                bottomBar: true,
+                globalFilter: true,
               }}
             />
           </Code>
