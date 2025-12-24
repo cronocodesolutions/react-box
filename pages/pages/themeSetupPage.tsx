@@ -1,12 +1,10 @@
 import { motion } from 'framer-motion';
-import { Paintbrush } from 'lucide-react';
+import { Moon, Paintbrush, Sun } from 'lucide-react';
 import Box from '../../src/box';
 import Button from '../../src/components/button';
 import Flex from '../../src/components/flex';
 import Code from '../components/code';
 import PageHeader from '../components/pageHeader';
-import DarkSvg from '../svgs/darkSvg';
-import LightSvg from '../svgs/lightSvg';
 
 export default function ThemeSetupPage() {
   return (
@@ -151,10 +149,10 @@ function Sample() {
     >
       <Flex gap={3} ai="center">
         <Button bgColor="transparent" onClick={() => setTheme('inner-light')}>
-          <LightSvg theme={{ light: { fill: 'indigo-950' }, dark: { fill: 'white' } }} />
+          <Sun size={18} color="#fbbf24" />
         </Button>
         <Button bgColor="transparent" onClick={() => setTheme('inner-dark')}>
-          <DarkSvg theme={{ light: { fill: 'indigo-950' }, dark: { fill: 'white' } }} />
+          <Moon size={18} color="#6366f1" />
         </Button>
         <Box textTransform="capitalize" p={3}>
           This is {theme} theme

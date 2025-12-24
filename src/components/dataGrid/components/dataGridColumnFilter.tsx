@@ -68,18 +68,7 @@ function TextFilter<TRow>({ column, grid }: Props<TRow>) {
 
   return (
     <Flex ai="center" position="relative" width="fit">
-      <Textbox
-        variant="compact"
-        // component="datagrid.filter.text"
-        placeholder={config.placeholder ?? 'Filter...'}
-        value={localValue}
-        onChange={handleChange}
-        // height={7}
-        // width="fit"
-        // minWidth={20}
-        // px={2}
-        // fontSize={13}
-      />
+      <Textbox variant="compact" placeholder={config.placeholder ?? 'Filter...'} value={localValue} onChange={handleChange} />
       {localValue && (
         <Flex position="absolute" right={2} top="1/2" translateY="-1/2" cursor="pointer" props={{ onClick: handleClear }}>
           <Box fontSize={10} color="gray-400" hover={{ color: 'gray-600' }}>

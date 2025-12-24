@@ -355,6 +355,7 @@ const boxComponents = {
       disabled: {
         checked: {
           bgColor: 'gray-300',
+          borderColor: 'gray-200',
         },
         cursor: 'not-allowed',
         borderColor: 'gray-200',
