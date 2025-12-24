@@ -55,9 +55,12 @@ export default function App() {
         top={0}
         zIndex={15}
         lg={{ display: 'none' }}
-        className="glass"
         bb={1}
-        theme={{ dark: { borderColor: 'slate-800' }, light: { borderColor: 'slate-200' } }}
+        theme={{
+          dark: { borderColor: 'slate-800' },
+          light: { borderColor: 'slate-200' },
+        }}
+        style={{ backdropFilter: 'blur(12px)' }}
       >
         <Flex ai="center" jc="space-between" px={4} py={3}>
           <Flex ai="center" gap={3}>
@@ -104,7 +107,7 @@ export default function App() {
                 position: 'fixed',
                 inset: 0,
                 backgroundColor: 'rgba(0, 0, 0, 0.5)',
-                zIndex: 40,
+                zIndex: 12,
               }}
             />
           )}
