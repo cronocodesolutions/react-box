@@ -101,6 +101,7 @@ export default function Code(props: Props) {
                       animate={{ opacity: 1, scale: 1 }}
                       exit={{ opacity: 0, scale: 0.8 }}
                       transition={{ duration: 0.1 }}
+                      style={{ height: '14px' }}
                     >
                       {copied ? <Check size={14} /> : <Copy size={14} />}
                     </motion.div>

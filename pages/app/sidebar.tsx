@@ -246,8 +246,6 @@ function MenuItem({ to, icon, children }: MenuItemProps) {
           my={0.5}
           borderRadius={2}
           cursor={isActive ? 'default' : 'pointer'}
-          transition="all"
-          transitionDuration={150}
           bgImage={isActive ? 'gradient-primary' : 'none'}
           theme={{
             dark: { color: isActive ? 'white' : 'slate-300' },
@@ -257,6 +255,7 @@ function MenuItem({ to, icon, children }: MenuItemProps) {
           fontSize={14}
         >
           <Box
+            height={4}
             theme={{
               dark: { color: isActive ? 'white' : 'slate-500' },
               light: { color: isActive ? 'white' : 'slate-400' },
