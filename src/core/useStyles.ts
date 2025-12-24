@@ -398,7 +398,6 @@ namespace StylesContextImpl {
     let stylesElement = document.getElementById(cronoStylesElementId) as HTMLStyleElement | null;
 
     if (!stylesElement) {
-      document.createElement('style');
       stylesElement = document.createElement('style');
       stylesElement.setAttribute('id', cronoStylesElementId);
       stylesElement.setAttribute('type', 'text/css');

@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import Box from '../../../box';
 import Checkbox from '../../checkbox';
 import Dropdown from '../../dropdown';
@@ -25,22 +25,36 @@ function TextFilter<TRow>({ column, grid }: Props<TRow>) {
   const currentFilter = grid.columnFilters[column.key as keyof TRow];
   const initialValue = currentFilter?.type === 'text' ? currentFilter.value : '';
   const [localValue, setLocalValue] = useState(initialValue);
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+    };
+  }, []);
 
   const handleChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
       const value = e.target.value;
       setLocalValue(value);
 
+      // Clear previous timeout
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+
       // Debounced update
-      const timeoutId = setTimeout(() => {
+      timeoutRef.current = setTimeout(() => {
         if (value.trim()) {
           grid.setColumnFilter(column.key, { type: 'text', value });
         } else {
           grid.setColumnFilter(column.key, undefined);
         }
+        timeoutRef.current = null;
       }, 300);
-
-      return () => clearTimeout(timeoutId);
     },
     [grid, column.key],
   );
@@ -89,6 +103,20 @@ function NumberFilter<TRow>({ column, grid }: Props<TRow>) {
   const [localValue, setLocalValue] = useState<string | number>(initialValue);
   const [operator, setOperator] = useState<NumberFilterValue['operator']>(initialOperator);
   const [valueTo, setValueTo] = useState<string | number>(initialValueTo ?? '');
+  const valueTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const valueToTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Cleanup timeouts on unmount
+  useEffect(() => {
+    return () => {
+      if (valueTimeoutRef.current) {
+        clearTimeout(valueTimeoutRef.current);
+      }
+      if (valueToTimeoutRef.current) {
+        clearTimeout(valueToTimeoutRef.current);
+      }
+    };
+  }, []);
 
   const config: ColumnFilterConfig = typeof column.def.filterable === 'object' ? column.def.filterable : { type: 'number' };
 
@@ -124,11 +152,15 @@ function NumberFilter<TRow>({ column, grid }: Props<TRow>) {
       const value = e.target.value;
       setLocalValue(value);
 
-      const timeoutId = setTimeout(() => {
-        applyFilter(operator, value, valueTo);
-      }, 300);
+      // Clear previous timeout
+      if (valueTimeoutRef.current) {
+        clearTimeout(valueTimeoutRef.current);
+      }
 
-      return () => clearTimeout(timeoutId);
+      valueTimeoutRef.current = setTimeout(() => {
+        applyFilter(operator, value, valueTo);
+        valueTimeoutRef.current = null;
+      }, 300);
     },
     [operator, valueTo, applyFilter],
   );
@@ -146,11 +178,15 @@ function NumberFilter<TRow>({ column, grid }: Props<TRow>) {
       const value = e.target.value;
       setValueTo(value);
 
-      const timeoutId = setTimeout(() => {
-        applyFilter(operator, localValue, value);
-      }, 300);
+      // Clear previous timeout
+      if (valueToTimeoutRef.current) {
+        clearTimeout(valueToTimeoutRef.current);
+      }
 
-      return () => clearTimeout(timeoutId);
+      valueToTimeoutRef.current = setTimeout(() => {
+        applyFilter(operator, localValue, value);
+        valueToTimeoutRef.current = null;
+      }, 300);
     },
     [operator, localValue, applyFilter],
   );

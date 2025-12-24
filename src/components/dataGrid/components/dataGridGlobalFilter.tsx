@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import Box from '../../../box';
 import SearchIcon from '../../../icons/searchIcon';
 import Flex from '../../flex';
@@ -12,6 +12,16 @@ interface Props<TRow> {
 export default function DataGridGlobalFilter<TRow>(props: Props<TRow>) {
   const { grid } = props;
   const [localValue, setLocalValue] = useState(grid.globalFilterValue);
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+    };
+  }, []);
 
   // Debounce filter changes
   const handleChange = useCallback(
@@ -19,12 +29,16 @@ export default function DataGridGlobalFilter<TRow>(props: Props<TRow>) {
       const value = e.target.value;
       setLocalValue(value);
 
-      // Simple debounce using setTimeout
-      const timeoutId = setTimeout(() => {
-        grid.setGlobalFilter(value);
-      }, 300);
+      // Clear previous timeout
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
 
-      return () => clearTimeout(timeoutId);
+      // Set new timeout
+      timeoutRef.current = setTimeout(() => {
+        grid.setGlobalFilter(value);
+        timeoutRef.current = null;
+      }, 300);
     },
     [grid],
   );

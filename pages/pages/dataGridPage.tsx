@@ -109,7 +109,7 @@ export default function DataGridPage() {
                     width: 90,
                     align: 'right',
                     Cell: ({ cell }) => {
-                      // better to define this function outside to avoid re-creation on each render
+                      // You can define this function outside the component to avoid re-creation on each render
                       return (
                         <Flex
                           bgColor="violet-50"
