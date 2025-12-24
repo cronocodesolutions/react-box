@@ -8,6 +8,7 @@ const tagProps = [
   'onInput',
   'onChange',
   'type',
+  'step',
   'placeholder',
   'defaultValue',
   'autoFocus',
@@ -19,7 +20,7 @@ const tagProps = [
 type TagPropsType = (typeof tagProps)[number];
 
 type TextareaProps<TKey extends keyof ComponentsAndVariants> = Omit<BoxProps<'input', TKey>, 'tag' | 'props'>;
-type TextboxTagProps = Omit<BoxTagProps<'input'>, TagPropsType | 'type'>;
+type TextboxTagProps = Omit<BoxTagProps<'input'>, TagPropsType>;
 
 type TextboxType =
   | 'date'

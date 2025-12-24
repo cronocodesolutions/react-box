@@ -58,6 +58,9 @@ export default function GridPage() {
               gap={4}
               p={4}
               bgImage="bg-stripes"
+              theme={{
+                dark: { bgImage: 'bg-stripes-dark' },
+              }}
               gridTemplateColumns={4}
               style={{ backgroundSize: '7.07px 7.07px' }}
               color="white"

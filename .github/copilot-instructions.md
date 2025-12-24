@@ -14,8 +14,8 @@ Short, actionable guidance so an AI assistant can be immediately productive in t
 - Type check only: `npm run compile` (runs `tsc --noEmit`)
 - Build library: `npm run build` (uses `vite.config.ts` to emit ESM + CJS)
 - Build demo site: `npm run build:pages`
-- Tests (watch): `npm test` (Vitest, `happy-dom` environment)
-- Tests (CI / once): `npm run test:all`
+- Tests (watch): `npm run test:watch` (Vitest, `happy-dom` environment)
+- Tests (CI / once): `npm test`
 - Lint: `npm run lint`
 
 > Note: Vitest is configured with `environment: 'happy-dom'` (see `vite.config.ts` and `.vscode/settings.json`).
@@ -56,11 +56,11 @@ Short, actionable guidance so an AI assistant can be immediately productive in t
 
 - Builds produce both `*.mjs` and `*.cjs` and `.d.ts` (see `vite.config.ts` and `package.json` `exports`).
 - Post-build step copies `package.json`, `LICENSE`, and `README.md` into `dist/`.
-- CI runs `npm run test:all` (see `.github/workflows/test.yml`).
+- CI runs `npm test` (see `.github/workflows/test.yml`).
 
 ## Tests and debugging tips
 
-- Use `npm test` to run Vitest in watch mode (happy-dom DOM). Useful when editing `useStyles` or style generation.
+- Use `npm run test:watch` to run Vitest in watch mode (happy-dom DOM). Useful when editing `useStyles` or style generation.
 - To debug CSS output, inspect the runtime `<style id="crono-box">` in demo site (`npm run dev`).
 - For type errors, run `npm run compile`.
 

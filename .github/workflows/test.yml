@@ -22,6 +22,6 @@ jobs:
       - name: Check linting 🔧
         run: npm run lint
       - name: Check testing 🔧
-        run: npm run test:all
+        run: npm run test
       - name: Check build 🔧
         run: npm run build

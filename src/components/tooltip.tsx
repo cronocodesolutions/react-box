@@ -8,15 +8,20 @@ import { ComponentsAndVariants } from '../types';
 const positionDigitsAfterComma = 2;
 
 interface TooltipProps {
-  onPositionChange?(position: { top: number; left: number }): void;
+  onPositionChange?(position: { top: number; left: number; windowScrollX: number; windowScrollY: number }): void;
+  adjustTranslateX?: string;
+  adjustTranslateY?: string;
 }
 
 type Props = TooltipProps & BoxProps;
 
 function TooltipImpl(props: Props, ref: Ref<HTMLDivElement>) {
-  const { onPositionChange, ...restProps } = props;
+  const { onPositionChange, adjustTranslateX = '0px', adjustTranslateY = '0px', ...restProps } = props;
+
   const positionRef = useRef<HTMLDivElement>(null);
-  const [position, setPosition] = useState<{ top: number; left: number; width?: number } | undefined>();
+  const [position, setPosition] = useState<
+    { top: number; left: number; width?: number; windowScrollX: number; windowScrollY: number } | undefined
+  >();
   const portalContainer = usePortalContainer();
 
   const observeScroll = useCallback(
@@ -53,10 +58,17 @@ function TooltipImpl(props: Props, ref: Ref<HTMLDivElement>) {
 
       const top = Math.round((rect.top + window.scrollY) * positionDigitsAfterComma) / positionDigitsAfterComma;
       const left = Math.round((rect.left + window.scrollX) * positionDigitsAfterComma) / positionDigitsAfterComma;
+      const windowScrollX = window.scrollX;
+      const windowScrollY = window.scrollY;
 
-      if (position?.top !== top || position?.left !== left) {
-        onPositionChange?.({ top, left });
-        setPosition({ top, left, width: rect.width > 0 ? rect.width : undefined });
+      if (
+        position?.top !== top ||
+        position?.left !== left ||
+        position?.windowScrollX !== windowScrollX ||
+        position?.windowScrollY !== windowScrollY
+      ) {
+        onPositionChange?.({ top, left, windowScrollX, windowScrollY });
+        setPosition({ top, left, width: rect.width > 0 ? rect.width : undefined, windowScrollX, windowScrollY });
       }
     },
     [position],
@@ -86,7 +98,11 @@ function TooltipImpl(props: Props, ref: Ref<HTMLDivElement>) {
             top={0}
             left={0}
             transition="none"
-            style={{ transform: `translate(${position.left}px,${position.top}px)`, width: position.width }}
+            style={{
+              transform: `translate3d(calc(${position.left}px + ${adjustTranslateX}),calc(${position.top}px + ${adjustTranslateY}), 0)`,
+              willChange: 'transform',
+              width: position.width,
+            }}
           >
             <Box {...restProps} />
           </Box>,

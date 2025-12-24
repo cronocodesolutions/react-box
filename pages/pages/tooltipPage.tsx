@@ -92,7 +92,7 @@ export default function TooltipPage() {
 }`}
           >
             <Flex gap={4} flexWrap="wrap">
-              <Box flex1 height={40} b={1} borderRadius={1} overflow="auto" bgColor="violet-100" position="relative" minWidth={80}>
+              <Box flex1 height={40} b={1} borderRadius={1} overflow="auto" position="relative" minWidth={80}>
                 <Flex jc="space-between">
                   <Box position="sticky" top={4} textAlign="right" m={4}>
                     (position absolute)
@@ -112,8 +112,10 @@ export default function TooltipPage() {
                         p={3}
                         left={0}
                         top={12}
-                        color="violet-950"
-                        bgColor="violet-200"
+                        theme={{
+                          light: { bgColor: 'slate-300' },
+                          dark: { bgColor: 'slate-700' },
+                        }}
                         b={1}
                         position="absolute"
                       >
@@ -124,7 +126,7 @@ export default function TooltipPage() {
                 </Flex>
               </Box>
 
-              <Box flex1 height={40} b={1} borderRadius={1} overflow="auto" bgColor="violet-100" position="relative" minWidth={80}>
+              <Box flex1 height={40} b={1} borderRadius={1} overflow="auto" position="relative" minWidth={80}>
                 <Flex jc="space-between">
                   <Box position="sticky" top={4} textAlign="right" m={4}>
                     (tooltip)
@@ -139,7 +141,17 @@ export default function TooltipPage() {
                       Click me!
                     </Button>
                     {open2 && (
-                      <Tooltip height={50} borderRadius={2} p={3} mt={0.5} bgColor="violet-200" b={1}>
+                      <Tooltip
+                        height={50}
+                        borderRadius={2}
+                        p={3}
+                        mt={0.5}
+                        b={1}
+                        theme={{
+                          light: { bgColor: 'slate-300' },
+                          dark: { bgColor: 'slate-700' },
+                        }}
+                      >
                         tooltip box
                       </Tooltip>
                     )}

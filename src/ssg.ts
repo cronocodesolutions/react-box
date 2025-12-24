@@ -4,6 +4,12 @@ import { StylesContext } from './core/useStyles';
 
 const el = {
   innerHTML: '',
+  get textContent() {
+    return this.innerHTML;
+  },
+  set textContent(value: string) {
+    this.innerHTML = value;
+  },
 };
 const document: Partial<Document> = {
   head: {
@@ -24,6 +30,9 @@ const document: Partial<Document> = {
 global.document = document as Document;
 
 export function renderToStaticMarkup(element: React.ReactElement, addStylesToHead = true) {
+  // Clear innerHTML before each render for SSG
+  el.innerHTML = '';
+
   let html = ReactDOMServer.renderToStaticMarkup(element);
   StylesContext.flush();
 
@@ -39,10 +48,12 @@ export function renderToStaticMarkup(element: React.ReactElement, addStylesToHea
     }
   }
 
+  const styles = el.innerHTML;
+
   StylesContext.clear();
 
   return {
     html,
-    styles: el.innerHTML,
+    styles,
   };
 }

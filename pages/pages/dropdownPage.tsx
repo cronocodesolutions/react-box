@@ -19,14 +19,7 @@ export default function DropdownPage() {
         <Flex d="column" gap={8}>
           <Code label="Import" language="jsx" code="import Dropdown from '@cronocode/react-box/components/dropdown';" />
 
-          <Code
-            label="Basic Dropdown"
-            language="jsx"
-            code={`<Dropdown defaultValue={1}>
-  <Dropdown.Item value={1}>Option 1</Dropdown.Item>
-  <Dropdown.Item value={2}>Option 2</Dropdown.Item>
-</Dropdown>`}
-          >
+          <Code label="Basic Dropdown" language="jsx">
             <Dropdown defaultValue={1} props={{ role: 'combobox' }}>
               <Dropdown.Item value={1} props={{ role: 'option' }}>
                 Option 1
@@ -90,6 +83,22 @@ export default function DropdownPage() {
 </Dropdown>`}
           >
             <Dropdown disabled>
+              <Dropdown.Unselect>Select</Dropdown.Unselect>
+              <Dropdown.Item value={1}>Option 1</Dropdown.Item>
+              <Dropdown.Item value={2}>Option 2</Dropdown.Item>
+            </Dropdown>
+          </Code>
+
+          <Code
+            label="Compact"
+            language="jsx"
+            code={`<Dropdown variant="compact">
+  <Dropdown.Unselect>Select</Dropdown.Unselect>
+  <Dropdown.Item value={1}>Option 1</Dropdown.Item>
+  <Dropdown.Item value={2}>Option 2</Dropdown.Item>
+</Dropdown>`}
+          >
+            <Dropdown variant="compact">
               <Dropdown.Unselect>Select</Dropdown.Unselect>
               <Dropdown.Item value={1}>Option 1</Dropdown.Item>
               <Dropdown.Item value={2}>Option 2</Dropdown.Item>

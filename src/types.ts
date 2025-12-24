@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-empty-object-type */
 export * from './array';
 
-import { breakpoints, cssStyles, pseudo1, pseudo2, pseudoClasses, pseudoGroupClasses } from './core/boxStyles';
+import { breakpoints, cssStyles, pseudo1, pseudo2, pseudoClasses, pseudoGroupClasses, themeGroupClass } from './core/boxStyles';
 import { ClassNameType } from './core/classNames';
 import { BoxStyle, BoxStylesType, ExtractKeys } from './core/coreTypes';
 import boxComponents from './core/extends/boxComponents';
@@ -32,7 +32,14 @@ type BoxPseudoClassesStyles2TopLevel = ExtractKeys<typeof pseudo2, boolean | [bo
 export interface BoxStylesWithPseudoClasses extends BoxStyles, BoxPseudoClassesStyles1, BoxPseudoClassesStyles2Nested {}
 
 type BoxPseudoGroupClassesStyles = ExtractKeys<typeof pseudoGroupClasses, Record<string, BoxStylesWithPseudoClasses>>;
-type BoxBreakpointsStyles = ExtractKeys<typeof breakpoints, BoxStylesWithPseudoClasses & BoxPseudoGroupClassesStyles>;
+type BoxThemeGroupClassStyles = ExtractKeys<
+  typeof themeGroupClass,
+  Record<string, BoxStylesWithPseudoClasses & BoxPseudoGroupClassesStyles>
+>;
+type BoxBreakpointsStyles = ExtractKeys<
+  typeof breakpoints,
+  BoxStylesWithPseudoClasses & BoxPseudoGroupClassesStyles & BoxThemeGroupClassStyles
+>;
 
 type ExtractVariants<T> = T extends { variants?: infer Variants }
   ? keyof Variants extends never
@@ -84,7 +91,10 @@ export type BoxStyleProps<TKey extends keyof ComponentsAndVariants = never> = Si
     BoxPseudoClassesStyles1 &
     BoxPseudoClassesStyles2TopLevel &
     BoxPseudoGroupClassesStyles &
+    BoxThemeGroupClassStyles &
     BoxBreakpointsStyles &
     ComponentProps<TKey>
 >;
-export type BoxComponentStyles = Simplify<BoxStylesWithPseudoClasses & BoxBreakpointsStyles & BoxPseudoGroupClassesStyles>;
+export type BoxComponentStyles = Simplify<
+  BoxStylesWithPseudoClasses & BoxBreakpointsStyles & BoxPseudoGroupClassesStyles & BoxThemeGroupClassStyles
+>;

@@ -161,6 +161,10 @@ export const cssStyles = {
       values: Variables.percentages,
       valueFormat: BoxStylesFormatters.Value.fraction,
     },
+    {
+      values: Variables.negativePercentages,
+      valueFormat: BoxStylesFormatters.Value.fraction,
+    },
   ],
   /** The right CSS property participates in specifying the horizontal position of a positioned element. This inset property has no effect on non-positioned elements. */
   right: [
@@ -170,6 +174,10 @@ export const cssStyles = {
     },
     {
       values: Variables.percentages,
+      valueFormat: BoxStylesFormatters.Value.fraction,
+    },
+    {
+      values: Variables.negativePercentages,
       valueFormat: BoxStylesFormatters.Value.fraction,
     },
   ],
@@ -183,6 +191,10 @@ export const cssStyles = {
       values: Variables.percentages,
       valueFormat: BoxStylesFormatters.Value.fraction,
     },
+    {
+      values: Variables.negativePercentages,
+      valueFormat: BoxStylesFormatters.Value.fraction,
+    },
   ],
   /** The left CSS property participates in specifying the horizontal position of a positioned element. This inset property has no effect on non-positioned elements. */
   left: [
@@ -192,6 +204,10 @@ export const cssStyles = {
     },
     {
       values: Variables.percentages,
+      valueFormat: BoxStylesFormatters.Value.fraction,
+    },
+    {
+      values: Variables.negativePercentages,
       valueFormat: BoxStylesFormatters.Value.fraction,
     },
   ],
@@ -1032,14 +1048,14 @@ export const cssStyles = {
   /** The color CSS property sets the foreground color value of an element's text and text decorations, and sets the currentcolor value.  */
   color: [
     {
-      values: Object.keys(Variables.colors) as Variables.ColorType[],
+      values: Variables.colorValues,
       valueFormat: (value, getVariableValue) => getVariableValue(value),
     },
   ],
   /** The background-color CSS property sets the background color of an element. */
   bgColor: [
     {
-      values: Object.keys(Variables.colors) as Variables.ColorType[],
+      values: Variables.colorValues,
       valueFormat: (value, getVariableValue) => getVariableValue(value),
       styleName: 'background-color',
     },
@@ -1047,7 +1063,7 @@ export const cssStyles = {
   /** The border-color shorthand CSS property sets the color of an element's border. */
   borderColor: [
     {
-      values: Object.keys(Variables.colors) as Variables.ColorType[],
+      values: Variables.colorValues,
       valueFormat: (value, getVariableValue) => getVariableValue(value),
       styleName: 'border-color',
     },
@@ -1055,7 +1071,7 @@ export const cssStyles = {
   /** The outline-color CSS property sets the color of an element's outline. */
   outlineColor: [
     {
-      values: Object.keys(Variables.colors) as Variables.ColorType[],
+      values: Variables.colorValues,
       valueFormat: (value, getVariableValue) => getVariableValue(value),
       styleName: 'outline-color',
     },
@@ -1063,21 +1079,21 @@ export const cssStyles = {
   /** The fill CSS property defines how SVG text content and the interior canvas of SVG shapes are filled or painted. If present, it overrides the element's fill attribute. */
   fill: [
     {
-      values: Object.keys(Variables.colors) as Variables.ColorType[],
+      values: Variables.colorValues,
       valueFormat: (value, getVariableValue) => getVariableValue(value),
     },
   ],
   /** The stroke CSS property defines the color or SVG paint server used to draw an element's stroke. */
   stroke: [
     {
-      values: Object.keys(Variables.colors) as Variables.ColorType[],
+      values: Variables.colorValues,
       valueFormat: (value, getVariableValue) => getVariableValue(value),
     },
   ],
   /** The background-image CSS property sets one or more background images on an element. */
   bgImage: [
     {
-      values: ['none', 'bg-img-checked', 'bg-img-indeterminate', 'bg-img-radio'] as const,
+      values: Variables.bgImageValues,
       valueFormat: (value, getVariableValue) => getVariableValue(value),
       styleName: 'background-image',
     },
@@ -1085,16 +1101,26 @@ export const cssStyles = {
   /** The box-shadow CSS property adds shadow effects around an element's frame */
   shadow: [
     {
-      values: ['small', 'medium', 'large'] as const,
-      valueFormat: (value, getVariableValue) => getVariableValue(`${value}-shadow`),
+      values: Variables.shadowValues,
+      valueFormat: (value, getVariableValue) => getVariableValue(value),
       styleName: 'box-shadow',
     },
   ],
-  /** The translateY() CSS function repositions an element vertically on the 2D plane. */
+  /** The translateX() CSS function repositions an element horizontally on the 2D plane. */
   translateX: [
     {
       values: 0,
       valueFormat: (value: number) => `translateX(${value / DEFAULT_REM_DIVIDER}rem)`,
+      styleName: 'transform',
+    },
+    {
+      values: Variables.percentages,
+      valueFormat: (value: string) => `translateX(${BoxStylesFormatters.Value.fraction(value)})`,
+      styleName: 'transform',
+    },
+    {
+      values: Variables.negativePercentages,
+      valueFormat: (value: string) => `translateX(${BoxStylesFormatters.Value.fraction(value)})`,
       styleName: 'transform',
     },
   ],
@@ -1103,6 +1129,16 @@ export const cssStyles = {
     {
       values: 0,
       valueFormat: (value: number) => `translateY(${value / DEFAULT_REM_DIVIDER}rem)`,
+      styleName: 'transform',
+    },
+    {
+      values: Variables.percentages,
+      valueFormat: (value: string) => `translateY(${BoxStylesFormatters.Value.fraction(value)})`,
+      styleName: 'transform',
+    },
+    {
+      values: Variables.negativePercentages,
+      valueFormat: (value: string) => `translateY(${BoxStylesFormatters.Value.fraction(value)})`,
       styleName: 'transform',
     },
   ],
@@ -1174,6 +1210,9 @@ export const pseudoGroupClasses = {
   activeGroup: 'active',
   disabledGroup: 'disabled',
   selectedGroup: 'selected',
+} satisfies { [key: string]: keyof typeof pseudoClasses };
+
+export const themeGroupClass = {
   theme: 'theme',
 } satisfies { [key: string]: keyof typeof pseudoClasses };
 

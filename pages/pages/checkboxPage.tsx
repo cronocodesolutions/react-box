@@ -15,19 +15,19 @@ export default function CheckboxPage() {
         <Flex d="column" gap={8}>
           <Code label="Import" language="jsx" code="import Checkbox from '@cronocode/react-box/components/checkbox';" />
 
-          <Code label="Basic Checkbox" language="jsx" code="<Checkbox defaultChecked />">
+          <Code label="Basic Checkbox" language="jsx">
             <Checkbox defaultChecked />
           </Code>
 
-          <Code label="Clean Checkbox" language="jsx" code="<Checkbox clean defaultChecked />">
+          <Code label="Clean Checkbox" language="jsx">
             <Checkbox clean defaultChecked />
           </Code>
 
-          <Code label="Disabled Checkbox" language="jsx" code="<Checkbox disabled defaultChecked />">
+          <Code label="Disabled Checkbox" language="jsx">
             <Checkbox disabled defaultChecked />
           </Code>
 
-          <Code label="Indeterminate Checkbox" language="jsx" code="<Checkbox indeterminate />">
+          <Code label="Indeterminate Checkbox" language="jsx">
             <Checkbox indeterminate />
           </Code>
         </Flex>

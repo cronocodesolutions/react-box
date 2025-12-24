@@ -3,45 +3,44 @@ import Variables from '../src/core/variables';
 
 // preload variable
 Box.getVariableValue('violet-300');
+Box.getVariableValue('slate-700');
 
 export const { extendedProps, extendedPropTypes } = Box.extend(
   {
     // Gradients
     'gradient-hero': 'linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, rgba(168, 85, 247, 0.1) 50%, rgba(236, 72, 153, 0.05) 100%)',
     'gradient-hero-dark': 'linear-gradient(135deg, rgba(99, 102, 241, 0.2) 0%, rgba(168, 85, 247, 0.15) 50%, rgba(236, 72, 153, 0.1) 100%)',
-    'gradient-card': 'linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(255, 255, 255, 0.7) 100%)',
-    'gradient-card-dark': 'linear-gradient(135deg, rgba(30, 41, 59, 0.9) 0%, rgba(30, 41, 59, 0.7) 100%)',
+    // 'gradient-card': 'linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(255, 255, 255, 0.7) 100%)',
+    // 'gradient-card-dark': 'linear-gradient(135deg, rgba(30, 41, 59, 0.9) 0%, rgba(30, 41, 59, 0.7) 100%)',
     'gradient-sidebar': 'linear-gradient(180deg, rgba(255, 255, 255, 0.95) 0%, rgba(248, 250, 252, 0.98) 100%)',
     'gradient-sidebar-dark': 'linear-gradient(180deg, rgba(15, 23, 42, 0.98) 0%, rgba(30, 41, 59, 0.95) 100%)',
-    'gradient-primary': 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #a855f7 100%)',
-    'gradient-accent': 'linear-gradient(135deg, #06b6d4 0%, #3b82f6 50%, #6366f1 100%)',
-    'gradient-glow': 'radial-gradient(ellipse 80% 50% at 50% -20%, rgba(120, 119, 198, 0.3), transparent)',
-    'gradient-glow-dark': 'radial-gradient(ellipse 80% 50% at 50% -20%, rgba(120, 119, 198, 0.5), transparent)',
-    'gradient-mesh':
-      'radial-gradient(at 40% 20%, rgba(99, 102, 241, 0.15) 0px, transparent 50%), radial-gradient(at 80% 0%, rgba(168, 85, 247, 0.1) 0px, transparent 50%), radial-gradient(at 0% 50%, rgba(236, 72, 153, 0.1) 0px, transparent 50%), radial-gradient(at 80% 50%, rgba(6, 182, 212, 0.1) 0px, transparent 50%), radial-gradient(at 0% 100%, rgba(99, 102, 241, 0.1) 0px, transparent 50%)',
-    'gradient-aurora-light':
-      'radial-gradient(900px circle at 18% 18%, rgba(99, 102, 241, 0.12), transparent 46%), radial-gradient(780px circle at 82% 12%, rgba(14, 165, 233, 0.1), transparent 45%), radial-gradient(960px circle at 48% 78%, rgba(236, 72, 153, 0.08), transparent 55%), linear-gradient(180deg, rgba(255, 255, 255, 0.92) 0%, rgba(248, 250, 252, 0.88) 100%)',
-    'gradient-aurora-dark':
-      'radial-gradient(900px circle at 18% 18%, rgba(129, 140, 248, 0.16), transparent 46%), radial-gradient(820px circle at 82% 10%, rgba(45, 212, 191, 0.12), transparent 48%), radial-gradient(980px circle at 50% 80%, rgba(59, 130, 246, 0.12), transparent 55%), linear-gradient(180deg, rgba(15, 23, 42, 0.96) 0%, rgba(15, 23, 42, 0.9) 100%)',
-
+    // 'gradient-primary': 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #a855f7 100%)',
+    // 'gradient-accent': 'linear-gradient(135deg, #06b6d4 0%, #3b82f6 50%, #6366f1 100%)',
+    // 'gradient-glow': 'radial-gradient(ellipse 80% 50% at 50% -20%, rgba(120, 119, 198, 0.3), transparent)',
+    // 'gradient-glow-dark': 'radial-gradient(ellipse 80% 50% at 50% -20%, rgba(120, 119, 198, 0.5), transparent)',
+    // 'gradient-mesh':
+    //   'radial-gradient(at 40% 20%, rgba(99, 102, 241, 0.15) 0px, transparent 50%), radial-gradient(at 80% 0%, rgba(168, 85, 247, 0.1) 0px, transparent 50%), radial-gradient(at 0% 50%, rgba(236, 72, 153, 0.1) 0px, transparent 50%), radial-gradient(at 80% 50%, rgba(6, 182, 212, 0.1) 0px, transparent 50%), radial-gradient(at 0% 100%, rgba(99, 102, 241, 0.1) 0px, transparent 50%)',
+    // 'gradient-aurora-light':
+    //   'radial-gradient(900px circle at 18% 18%, rgba(99, 102, 241, 0.12), transparent 46%), radial-gradient(780px circle at 82% 12%, rgba(14, 165, 233, 0.1), transparent 45%), radial-gradient(960px circle at 48% 78%, rgba(236, 72, 153, 0.08), transparent 55%), linear-gradient(180deg, rgba(255, 255, 255, 0.92) 0%, rgba(248, 250, 252, 0.88) 100%)',
+    // 'gradient-aurora-dark':
+    //   'radial-gradient(900px circle at 18% 18%, rgba(129, 140, 248, 0.16), transparent 46%), radial-gradient(820px circle at 82% 10%, rgba(45, 212, 191, 0.12), transparent 48%), radial-gradient(980px circle at 50% 80%, rgba(59, 130, 246, 0.12), transparent 55%), linear-gradient(180deg, rgba(15, 23, 42, 0.96) 0%, rgba(15, 23, 42, 0.9) 100%)',
     // Backgrounds
     'bg-stripes': 'linear-gradient(135deg,var(--violet-300) 10%,#0000 0,#0000 50%,var(--violet-300) 0,var(--violet-300) 60%,#0000 0,#0000)',
-    'body-bg': 'linear-gradient(19deg, white 40%, rgba(183, 33, 255, 0.05) 94%)',
-    'bg-dots': 'radial-gradient(circle, rgba(99, 102, 241, 0.15) 1px, transparent 1px)',
-    'bg-grid':
-      'linear-gradient(rgba(99, 102, 241, 0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(99, 102, 241, 0.03) 1px, transparent 1px)',
-
+    'bg-stripes-dark':
+      'linear-gradient(135deg,var(--slate-700) 10%,#0000 0,#0000 50%,var(--slate-700) 0,var(--slate-700) 60%,#0000 0,#0000)',
+    // 'body-bg': 'linear-gradient(19deg, white 40%, rgba(183, 33, 255, 0.05) 94%)',
+    // 'bg-dots': 'radial-gradient(circle, rgba(99, 102, 241, 0.15) 1px, transparent 1px)',
+    // 'bg-grid':
+    //   'linear-gradient(rgba(99, 102, 241, 0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(99, 102, 241, 0.03) 1px, transparent 1px)',
     // Theme colors
     'theme-bg': 'light-dark(#fff, #082f49)',
     'theme-color': 'light-dark(#fff, #082f49)',
     'bg-img-indeterminate-green': `url("data:image/svg+xml,${encodeURIComponent(`<svg xmlns='http://www.w3.org/2000/svg' width='100%' viewBox='0 0 20 20'><line stroke='${Variables.colors['green']}' x1='4' y1='10' x2='16' y2='10' stroke-width='1' /></svg>`)}")`,
-
     // Glass colors
     'glass-light': 'rgba(255, 255, 255, 0.7)',
     'glass-dark': 'rgba(15, 23, 42, 0.7)',
     'glass-border-light': 'rgba(255, 255, 255, 0.3)',
     'glass-border-dark': 'rgba(255, 255, 255, 0.1)',
-
     // Code block
     'code-bg': '#0f172a',
     'code-bg-light': '#1e293b',
@@ -51,24 +50,25 @@ export const { extendedProps, extendedPropTypes } = Box.extend(
     bgImage: [
       {
         values: [
-          'body-bg',
+          // 'body-bg',
           'bg-stripes',
-          'bg-img-indeterminate-green',
+          'bg-stripes-dark',
+          // 'bg-img-indeterminate-green',
           'gradient-hero',
           'gradient-hero-dark',
-          'gradient-card',
-          'gradient-card-dark',
+          // 'gradient-card',
+          // 'gradient-card-dark',
           'gradient-sidebar',
           'gradient-sidebar-dark',
-          'gradient-primary',
-          'gradient-accent',
-          'gradient-glow',
-          'gradient-glow-dark',
-          'gradient-mesh',
-          'gradient-aurora-light',
-          'gradient-aurora-dark',
-          'bg-dots',
-          'bg-grid',
+          // 'gradient-primary',
+          // 'gradient-accent',
+          // 'gradient-glow',
+          // 'gradient-glow-dark',
+          // 'gradient-mesh',
+          // 'gradient-aurora-light',
+          // 'gradient-aurora-dark',
+          // 'bg-dots',
+          // 'bg-grid',
         ] as const,
         valueFormat: (value, getVariableValue) => getVariableValue(value),
         styleName: 'background-image',
@@ -99,61 +99,7 @@ export const { extendedProps, extendedPropTypes } = Box.extend(
 );
 
 export const components = Box.components({
-  // Modern button styles
   button: {
-    styles: {
-      bgImage: 'gradient-primary',
-      bgColor: 'indigo-500',
-      borderColor: 'transparent',
-      color: 'white',
-      fontWeight: 500,
-      p: 3,
-      px: 5,
-      borderRadius: 2,
-      b: 0,
-      cursor: 'pointer',
-      transition: 'all',
-      transitionDuration: 150,
-      hover: {
-        translateY: -0.25,
-        shadow: 'large',
-      },
-      active: {
-        translateY: 0,
-      },
-      disabled: {
-        bgImage: 'none',
-        bgColor: 'slate-200',
-        color: 'slate-400',
-        cursor: 'not-allowed',
-      },
-    },
-    variants: {
-      secondary: {
-        bgImage: 'none',
-        bgColor: 'transparent',
-        color: 'slate-700',
-        b: 1,
-        borderColor: 'slate-300',
-        hover: {
-          bgColor: 'slate-100',
-          borderColor: 'slate-400',
-          shadow: 'small',
-        },
-      },
-      ghost: {
-        bgImage: 'none',
-        bgColor: 'transparent',
-        color: 'slate-600',
-        hover: {
-          bgColor: 'slate-100',
-          color: 'slate-900',
-        },
-      },
-      accent: {
-        bgImage: 'gradient-accent',
-      },
-    },
     children: {
       demo: {
         styles: {
@@ -184,232 +130,6 @@ export const components = Box.components({
       },
     },
   },
-
-  // Modern textbox
-  textbox: {
-    styles: {
-      display: 'inline-block',
-      b: 1,
-      borderColor: 'slate-300',
-      bgColor: 'white',
-      color: 'slate-900',
-      borderRadius: 2,
-      p: 3,
-      px: 4,
-      transition: 'all',
-      transitionDuration: 150,
-      lineHeight: 20,
-      hover: {
-        borderColor: 'slate-400',
-      },
-      focus: {
-        outline: 2,
-        outlineOffset: 0,
-        borderColor: 'indigo-500',
-        outlineColor: 'indigo-200',
-      },
-      disabled: {
-        cursor: 'not-allowed',
-        bgColor: 'slate-100',
-        color: 'slate-400',
-        borderColor: 'slate-200',
-      },
-    },
-  },
-
-  // Modern textarea
-  textarea: {
-    styles: {
-      display: 'inline-block',
-      b: 1,
-      borderColor: 'slate-300',
-      bgColor: 'white',
-      color: 'slate-900',
-      borderRadius: 2,
-      p: 3,
-      px: 4,
-      transition: 'all',
-      transitionDuration: 150,
-      hover: {
-        borderColor: 'slate-400',
-      },
-      focus: {
-        outline: 2,
-        outlineOffset: 0,
-        borderColor: 'indigo-500',
-        outlineColor: 'indigo-200',
-      },
-      disabled: {
-        cursor: 'not-allowed',
-        bgColor: 'slate-100',
-        color: 'slate-400',
-        borderColor: 'slate-200',
-        resize: 'none',
-      },
-    },
-  },
-
-  // Modern checkbox
-  checkbox: {
-    styles: {
-      display: 'inline-block',
-      appearance: 'none',
-      b: 2,
-      borderColor: 'slate-300',
-      borderRadius: 1,
-      p: 2,
-      cursor: 'pointer',
-      transition: 'all',
-      transitionDuration: 150,
-      hover: {
-        borderColor: 'indigo-400',
-      },
-      focus: {
-        outline: 2,
-        outlineOffset: 2,
-        outlineColor: 'indigo-200',
-      },
-      checked: {
-        bgColor: 'indigo-500',
-        borderColor: 'indigo-500',
-        bgImage: 'bg-img-checked',
-      },
-      indeterminate: {
-        color: 'indigo-500',
-        bgImage: 'bg-img-indeterminate',
-      },
-      disabled: {
-        cursor: 'not-allowed',
-        bgColor: 'slate-100',
-        color: 'slate-400',
-        borderColor: 'slate-200',
-      },
-    },
-  },
-
-  // Modern radio button
-  radioButton: {
-    styles: {
-      appearance: 'none',
-      b: 2,
-      borderColor: 'slate-300',
-      borderRadius: 3,
-      p: 2,
-      cursor: 'pointer',
-      transition: 'all',
-      transitionDuration: 150,
-      hover: {
-        borderColor: 'indigo-400',
-      },
-      focus: {
-        outline: 2,
-        outlineOffset: 2,
-        outlineColor: 'indigo-200',
-      },
-      checked: {
-        bgColor: 'indigo-500',
-        borderColor: 'indigo-500',
-        bgImage: 'bg-img-radio',
-      },
-      disabled: {
-        cursor: 'not-allowed',
-        bgColor: 'slate-100',
-        color: 'slate-400',
-        borderColor: 'slate-200',
-      },
-    },
-  },
-
-  // Modern dropdown
-  dropdown: {
-    styles: {
-      display: 'inline-flex',
-      ai: 'center',
-      gap: 2,
-      jc: 'space-between',
-      p: 3,
-      px: 4,
-      cursor: 'pointer',
-      bgColor: 'white',
-      color: 'slate-900',
-      b: 1,
-      borderColor: 'slate-300',
-      borderRadius: 2,
-      userSelect: 'none',
-      lineHeight: 20,
-      minWidth: 40,
-      transition: 'all',
-      transitionDuration: 150,
-      hover: {
-        borderColor: 'slate-400',
-      },
-      focus: {
-        outline: 2,
-        outlineOffset: 0,
-        borderColor: 'indigo-500',
-        outlineColor: 'indigo-200',
-      },
-      disabled: {
-        cursor: 'not-allowed',
-        bgColor: 'slate-100',
-        color: 'slate-400',
-        borderColor: 'slate-200',
-      },
-    },
-    children: {
-      display: {
-        styles: {
-          whiteSpace: 'nowrap',
-          textOverflow: 'ellipsis',
-          overflow: 'hidden',
-        },
-      },
-      items: {
-        styles: {
-          display: 'flex',
-          d: 'column',
-          gap: 1,
-          p: 2,
-          b: 1,
-          borderRadius: 2,
-          position: 'relative',
-          top: 2,
-          bgColor: 'white',
-          overflow: 'auto',
-          maxHeight: 62,
-          borderColor: 'slate-200',
-          color: 'slate-900',
-          shadow: 'large',
-        },
-      },
-      item: {
-        styles: {
-          display: 'flex',
-          width: 'fit',
-          p: 3,
-          cursor: 'pointer',
-          borderRadius: 1,
-          transition: 'all',
-          transitionDuration: 150,
-          hover: {
-            bgColor: 'slate-100',
-          },
-          focus: {
-            bgColor: 'indigo-50',
-          },
-          selected: {
-            bgColor: 'indigo-50',
-            color: 'indigo-600',
-            cursor: 'default',
-            hover: {
-              bgColor: 'indigo-100',
-            },
-          },
-        },
-      },
-    },
-  },
-
   // Color box for docs
   colorBox: {
     styles: {

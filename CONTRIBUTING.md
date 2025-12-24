@@ -7,12 +7,14 @@ A comprehensive guide for senior software engineers contributing to this runtime
 1. [Architecture Overview](#architecture-overview)
 2. [Project Structure](#project-structure)
 3. [Core Concepts](#core-concepts)
-4. [Development Workflow](#development-workflow)
-5. [Adding New CSS Properties](#adding-new-css-properties)
-6. [Creating Components](#creating-components)
-7. [Type System](#type-system)
-8. [Testing](#testing)
-9. [Build & Publishing](#build--publishing)
+4. [CSS Generation Engine](#css-generation-engine)
+5. [Theme System](#theme-system)
+6. [Development Workflow](#development-workflow)
+7. [Adding New CSS Properties](#adding-new-css-properties)
+8. [Creating Components](#creating-components)
+9. [Type System](#type-system)
+10. [Testing](#testing)
+11. [Build & Publishing](#build--publishing)
 
 ---
 
@@ -154,11 +156,42 @@ export namespace BoxStylesFormatters {
   export namespace Value {
     export const rem = (v: number) => `${v / DEFAULT_REM_DIVIDER}rem`;
     export const px = (v: number) => `${v}px`;
-    export const fraction = (v: string) => { /* '1/2' → '50%' */ };
+    export const fraction = (v: string) => {
+      /* '1/2' → '50%' */
+    };
     export const gridColumns = (v: number) => `repeat(${v}, minmax(0, 1fr))`;
   }
 }
 ```
+
+### Understanding Numeric Prop Values
+
+**Important**: Most numeric props use specific formatters that transform the value. Understanding these transformations is critical for choosing correct values.
+
+| Prop Type                       | Formatter | Divider | Example            | CSS Output                    |
+| ------------------------------- | --------- | ------- | ------------------ | ----------------------------- |
+| Spacing (`p`, `m`, `gap`, etc.) | rem       | 4       | `p={4}`            | `padding: 1rem` (16px)        |
+| Font size (`fontSize`)          | rem       | **16**  | `fontSize={14}`    | `font-size: 0.875rem` (≈14px) |
+| Border width (`b`, `bx`, `by`)  | px        | -       | `b={1}`            | `border-width: 1px`           |
+| Width/Height (numeric)          | rem       | 4       | `width={20}`       | `width: 5rem` (80px)          |
+| Border radius (`borderRadius`)  | px        | -       | `borderRadius={8}` | `border-radius: 8px`          |
+
+**Common mistake**: Using small values for `fontSize` like `fontSize={3}` results in `3/16 = 0.1875rem ≈ 3px` - nearly invisible text!
+
+**Practical fontSize values**:
+
+- `fontSize={12}` → 0.75rem ≈ 12px (small text)
+- `fontSize={14}` → 0.875rem ≈ 14px (body text)
+- `fontSize={16}` → 1rem = 16px (default)
+- `fontSize={18}` → 1.125rem ≈ 18px (large text)
+- `fontSize={24}` → 1.5rem = 24px (heading)
+
+**Practical spacing values** (divider is 4, so value × 4 = pixels):
+
+- `p={1}` → 0.25rem = 4px
+- `p={2}` → 0.5rem = 8px
+- `p={3}` → 0.75rem = 12px
+- `p={4}` → 1rem = 16px
 
 ### 3. CSS Variables (variables.ts)
 
@@ -204,7 +237,7 @@ export const pseudoClassesWeight = {
 };
 
 export const breakpoints = {
-  sm: 640,   // @media (min-width: 640px)
+  sm: 640, // @media (min-width: 640px)
   md: 768,
   lg: 1024,
   xl: 1280,
@@ -213,13 +246,9 @@ export const breakpoints = {
 ```
 
 Usage in components:
+
 ```tsx
-<Box
-  p={2}
-  hover={{ bgColor: 'gray-100' }}
-  sm={{ p: 4 }}
-  md={{ p: 6, hover: { bgColor: 'gray-200' } }}
-/>
+<Box p={2} hover={{ bgColor: 'gray-100' }} sm={{ p: 4 }} md={{ p: 6, hover: { bgColor: 'gray-200' } }} />
 ```
 
 ### 5. Component System (boxComponents.ts)
@@ -249,6 +278,7 @@ const boxComponents = {
 ```
 
 Usage:
+
 ```tsx
 <Box component="button" variant="primary" />
 <Box component="button.icon" />
@@ -266,13 +296,13 @@ export const { extendedProps, extendedPropTypes } = Box.extend(
 
   // New props
   {
-    customProp: [{ values: ['a', 'b'] as const, styleName: 'custom-property' }]
+    customProp: [{ values: ['a', 'b'] as const, styleName: 'custom-property' }],
   },
 
   // Extend existing props with new values
   {
-    bgColor: [{ values: ['brand-primary'] as const }]
-  }
+    bgColor: [{ values: ['brand-primary'] as const }],
+  },
 );
 
 // User's boxComponents.ts
@@ -282,6 +312,224 @@ Box.components({
   },
 });
 ```
+
+---
+
+## CSS Generation Engine
+
+### Incremental CSS Injection (useStyles.ts)
+
+The library uses **incremental CSS generation** via `CSSStyleSheet.insertRule()` for optimal performance:
+
+```typescript
+// src/core/useStyles.ts
+
+// CSS rules are inserted incrementally, not by replacing innerHTML
+stylesheet.insertRule(cssRule, insertIndex);
+```
+
+Key mechanisms:
+
+1. **Rule tracking**: Each unique prop combination generates a class name via `IdentityFactory`
+2. **Deduplication**: Same prop values across components share the same CSS class
+3. **Batched insertion**: Styles accumulated during render, flushed in `useLayoutEffect`
+4. **Weight-based ordering**: Rules sorted by pseudo-class weight for correct specificity
+
+### Default Base Styles
+
+The library injects default reset styles on initialization:
+
+```typescript
+const defaultRules = [
+  `:root{${Variables.generateVariables()}}`,
+  `:root{--borderColor: black;--outlineColor: black;...}`,
+  `#crono-box {position: absolute;top: 0;left: 0;height: 0;z-index:99999;}`,
+  `html{font-size: 16px;font-family: Arial, sans-serif;}`,
+  `body{margin: 0;line-height: var(--lineHeight);font-size: var(--fontSize);}`,
+  `a,ul{all: unset;}`,
+  `button{color: inherit;}`, // Reset user-agent button color
+  // ... box and svg base classes
+];
+```
+
+### Pending Variables System
+
+CSS variables are loaded lazily. When a new color/variable is used for the first time:
+
+```typescript
+// src/core/variables.ts
+const _pendingVariables: Record<string, string> = {};
+
+export function hasPendingVariables(): boolean;
+export function getPendingVariables(): Record<string, string>; // Returns and clears pending
+```
+
+The `flush()` function in useStyles checks for pending variables and inserts a new `:root` rule:
+
+```typescript
+// In flush()
+if (Variables.hasPendingVariables()) {
+  const pendingVars = Variables.getPendingVariables();
+  const rootRule = `:root{${Object.entries(pendingVars)
+    .map(([k, v]) => `--${k}:${v}`)
+    .join(';')}}`;
+  stylesheet.insertRule(rootRule, baseRulesCount);
+}
+```
+
+This ensures variables are defined before they're used in CSS rules, even when navigating between pages.
+
+### Navigation/Route Change Handling
+
+When navigating between pages in a SPA, components may re-render with styles that were already generated but need to be re-applied. The `useStyles` hook handles this via:
+
+```typescript
+// propsToUse triggers effect when component styles change
+useLayoutEffect(() => {
+  flush();
+}, [propsToUse]);
+```
+
+---
+
+## Theme System
+
+### Theme Provider (Box.Theme)
+
+The theme system uses CSS class names (`.dark`, `.light`) applied to container elements:
+
+```tsx
+<Box.Theme value="dark">
+  <App /> {/* All children inherit dark theme */}
+</Box.Theme>
+```
+
+### Theme-Aware Styles
+
+Components can define theme-specific styles using the `theme` prop:
+
+```tsx
+<Box
+  bgColor="white"
+  color="gray-900"
+  theme={{
+    dark: {
+      bgColor: 'gray-900',
+      color: 'gray-100',
+    },
+  }}
+/>
+```
+
+### CSS Selector Generation for Themes
+
+Theme styles generate CSS selectors with the theme class as ancestor:
+
+```css
+/* Base styles */
+.className {
+  background-color: white;
+  color: #111827;
+}
+
+/* Theme-specific styles */
+.dark .className {
+  background-color: #111827;
+  color: #f3f4f6;
+}
+```
+
+### Nested Theme + Pseudo-Class Styles
+
+Themes can contain pseudo-class styles:
+
+```tsx
+<Box
+  bgColor="white"
+  hover={{ bgColor: 'gray-100' }}
+  theme={{
+    dark: {
+      bgColor: 'gray-900',
+      hover: { bgColor: 'gray-800' },
+    },
+  }}
+/>
+```
+
+Generates:
+
+```css
+.className {
+  background-color: white;
+}
+.className:hover {
+  background-color: #f3f4f6;
+}
+.dark .className {
+  background-color: #111827;
+}
+.dark .className:hover {
+  background-color: #1f2937;
+}
+```
+
+### Group Hover with Themes (hoverGroup)
+
+For parent-child hover relationships (e.g., highlighting a cell when row is hovered):
+
+```tsx
+// Parent element defines the group
+<Box className="grid-row">
+  {/* Child responds to parent hover */}
+  <Box
+    bgColor="white"
+    hoverGroup={{
+      'grid-row': { bgColor: 'gray-100' },
+    }}
+    theme={{
+      dark: {
+        bgColor: 'gray-900',
+        hoverGroup: {
+          'grid-row': { bgColor: 'gray-800' },
+        },
+      },
+    }}
+  />
+</Box>
+```
+
+Generates:
+
+```css
+.className {
+  background-color: white;
+}
+.grid-row:hover .className {
+  background-color: #f3f4f6;
+}
+.dark .className {
+  background-color: #111827;
+}
+.dark .grid-row:hover .className {
+  background-color: #1f2937;
+}
+```
+
+### Portal Container Theming
+
+Components rendered in portals (tooltips, dropdowns) need theme awareness. The `usePortalContainer` hook automatically applies the current theme class:
+
+```typescript
+// src/hooks/usePortalContainer.ts
+export default function usePortalContainer() {
+  const theme = Theme.useTheme(); // Get current theme from context
+
+  // Apply theme class to portal container
+  container.className = theme ?? '';
+}
+```
+
+This ensures portal content inherits correct theme colors.
 
 ---
 
@@ -310,14 +558,14 @@ npm run lint
 
 ### Key Scripts
 
-| Script | Description |
-|--------|-------------|
-| `npm run dev` | Start Vite dev server for pages/ |
-| `npm run build` | Build library to dist/ |
-| `npm run build:pages` | Build demo website |
-| `npm run compile` | TypeScript type check only |
-| `npm test` | Run Vitest tests |
-| `npm run lint` | ESLint check |
+| Script                | Description                      |
+| --------------------- | -------------------------------- |
+| `npm run dev`         | Start Vite dev server for pages/ |
+| `npm run build`       | Build library to dist/           |
+| `npm run build:pages` | Build demo website               |
+| `npm run compile`     | TypeScript type check only       |
+| `npm test`            | Run Vitest tests                 |
+| `npm run lint`        | ESLint check                     |
 
 ---
 
@@ -338,7 +586,7 @@ export const cssStyles = {
       styleName: 'aspect-ratio',
     },
     {
-      values: 0,  // Also accept numbers
+      values: 0, // Also accept numbers
       styleName: 'aspect-ratio',
     },
   ],
@@ -377,8 +625,8 @@ export type BoxStyles = ExtractBoxStylesInternal<typeof cssStyles>;
 
 namespace Variables {
   export const aspectRatios = {
-    'square': '1 / 1',
-    'video': '16 / 9',
+    square: '1 / 1',
+    video: '16 / 9',
     // ...
   };
 }
@@ -462,8 +710,8 @@ entry: {
 ```typescript
 // types.ts
 export namespace Augmented {
-  export interface BoxProps {}        // Add new props
-  export interface BoxPropTypes {}    // Extend existing prop values
+  export interface BoxProps {} // Add new props
+  export interface BoxPropTypes {} // Extend existing prop values
   export interface ComponentsTypes {} // Add component types
 }
 ```
@@ -507,6 +755,7 @@ type ExtractChildrenNames<T, Prefix extends string = ''> = T extends { children?
 ```
 
 This enables autocomplete for:
+
 - `component="button"`
 - `component="button.icon"`
 - `variant="primary"`
@@ -546,11 +795,7 @@ describe('Button', () => {
 ### Running Tests
 
 ```bash
-# Watch mode
 npm test
-
-# Run all once
-npm run test:all
 
 # With coverage
 npm test -- --coverage
@@ -604,10 +849,7 @@ export default defineConfig({
       },
     },
   },
-  plugins: [
-    react(),
-    dts({ exclude: ['**/*.test.*', 'pages/**'] }),
-  ],
+  plugins: [react(), dts({ exclude: ['**/*.test.*', 'pages/**'] })],
 });
 ```
 
@@ -638,14 +880,14 @@ npm publish --access public
 
 ### Naming Conventions
 
-| Type | Convention | Example |
-|------|------------|---------|
-| CSS Props (short) | camelCase | `p`, `px`, `bgColor` |
-| CSS Props (full) | camelCase | `borderRadius`, `fontSize` |
-| Components | PascalCase | `Button`, `DataGrid` |
-| Hooks | camelCase with `use` | `useStyles`, `useVisibility` |
-| Types | PascalCase | `BoxStyleProps`, `ComponentsAndVariants` |
-| Variables | camelCase | `stylesToGenerate`, `componentsStyles` |
+| Type              | Convention           | Example                                  |
+| ----------------- | -------------------- | ---------------------------------------- |
+| CSS Props (short) | camelCase            | `p`, `px`, `bgColor`                     |
+| CSS Props (full)  | camelCase            | `borderRadius`, `fontSize`               |
+| Components        | PascalCase           | `Button`, `DataGrid`                     |
+| Hooks             | camelCase with `use` | `useStyles`, `useVisibility`             |
+| Types             | PascalCase           | `BoxStyleProps`, `ComponentsAndVariants` |
+| Variables         | camelCase            | `stylesToGenerate`, `componentsStyles`   |
 
 ### File Organization
 
@@ -679,6 +921,22 @@ npm publish --access public
 3. Add to `pseudoClassesByWeight`
 4. Types auto-generate
 
+### Add Dark Theme Support to a Component
+
+1. Add `theme: { dark: { ... } }` to the component's styles in `boxComponents.ts`
+2. Include all color-related properties: `bgColor`, `color`, `borderColor`
+3. Include theme variants for pseudo-classes like `hover`:
+   ```typescript
+   hover: { bgColor: 'gray-100' },
+   theme: {
+     dark: {
+       hover: { bgColor: 'gray-800' },
+     },
+   },
+   ```
+4. For portal-based components (tooltips, dropdowns), ensure `usePortalContainer` is used
+5. Test in both light and dark themes
+
 ### Fix Styling Bug
 
 1. Check `useStyles.ts` for class generation logic
@@ -686,15 +944,27 @@ npm publish --access public
 3. Verify CSS output in browser DevTools (`<style id="crono-box">`)
 4. Add test case
 
+### Debug CSS Generation Issues
+
+1. **Inspect generated styles**: Open DevTools → Elements → find `<style id="crono-box">`
+2. **Check class names**: Inspect element to see generated class names (e.g., `_b`, `_2a`, etc.)
+3. **Verify CSS variables**: Check `:root` rules in the style tag for variable definitions
+4. **Navigation issues**: If styles don't apply after route change, check:
+   - `propsToUse` dependency in useLayoutEffect
+   - `hasPendingVariables()` being called in `flush()`
+5. **Portal theming issues**: Verify `#crono-box` container has the correct theme class
+
 ---
 
 ## Performance Considerations
 
 1. **Styles are cached**: Same prop values generate same class names (via IdentityFactory)
 2. **Lazy generation**: CSS only generated when props are used
-3. **Single flush**: Styles batched and flushed together with `useLayoutEffect`
-4. **Component memoization**: Box uses `React.memo` to prevent unnecessary renders
-5. **Deep merge optimization**: Component styles merged efficiently
+3. **Incremental insertion**: CSS rules added via `insertRule()` not innerHTML replacement
+4. **Single flush**: Styles batched and flushed together with `useLayoutEffect`
+5. **Component memoization**: Box uses `React.memo` to prevent unnecessary renders
+6. **Deep merge optimization**: Component styles merged efficiently
+7. **Pending variables**: New CSS variables added incrementally, not regenerating all
 
 ---
 
