@@ -39,7 +39,8 @@ export default function reactToJsx(node: ReactNode, options: Options = {}): stri
   if (typeof type === 'string') {
     tagName = type;
   } else if (typeof type === 'function') {
-    tagName = type.displayName || type.name || 'Unknown';
+    const fn = type as { displayName?: string; name?: string };
+    tagName = fn.displayName || fn.name || 'Unknown';
   } else if (typeof type === 'object' && type !== null) {
     // Handle forwardRef, memo, etc.
     const typeObj = type as { displayName?: string; name?: string; render?: { displayName?: string; name?: string } };
