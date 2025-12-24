@@ -1151,6 +1151,12 @@ export const cssStyles = {
       },
     },
   ],
+  backdropFilter: [
+    {
+      values: ['none', 'blur(12px)', 'blur(8px)', 'blur(4px)'] as const,
+      styleName: 'backdrop-filter',
+    },
+  ],
 } satisfies Record<string, BoxStyle[]>;
 
 export const pseudo1 = {

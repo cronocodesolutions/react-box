@@ -53,14 +53,13 @@ export default function App() {
       <Box
         position="sticky"
         top={0}
-        zIndex={15}
         lg={{ display: 'none' }}
         bb={1}
         theme={{
           dark: { borderColor: 'slate-800' },
           light: { borderColor: 'slate-200' },
         }}
-        style={{ backdropFilter: 'blur(12px)' }}
+        backdropFilter="blur(12px)"
       >
         <Flex ai="center" jc="space-between" px={4} py={3}>
           <Flex ai="center" gap={3}>
@@ -107,7 +106,7 @@ export default function App() {
                 position: 'fixed',
                 inset: 0,
                 backgroundColor: 'rgba(0, 0, 0, 0.5)',
-                zIndex: 12,
+                zIndex: 4,
               }}
             />
           )}
@@ -119,10 +118,10 @@ export default function App() {
           top={0}
           left={0}
           height="fit-screen"
-          zIndex={15}
+          zIndex={5}
           width={70}
           translateX={sidebarOpen ? 0 : -70}
-          lg={{ position: 'sticky', translateX: 0 }}
+          lg={{ position: 'sticky', translateX: 0, zIndex: 3 }}
           style={{ transition: 'transform 0.3s ease-in-out' }}
         >
           <Sidebar toggleTheme={toggleTheme} onClose={() => setSidebarOpen(false)} />
