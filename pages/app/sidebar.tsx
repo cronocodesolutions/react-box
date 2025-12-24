@@ -23,6 +23,7 @@ import {
 } from 'lucide-react';
 import { useState } from 'react';
 import { NavLink } from 'react-router-dom';
+import { version } from '../../package.json';
 import Box from '../../src/box';
 import Button from '../../src/components/button';
 import Flex from '../../src/components/flex';
@@ -59,7 +60,7 @@ export default function Sidebar({ toggleTheme, onClose }: SidebarProps) {
                 React Box
               </Box>
               <Box fontSize={11} theme={{ dark: { color: 'slate-500' }, light: { color: 'slate-400' } }}>
-                v3.1.3
+                v{version}
               </Box>
             </Box>
           </Flex>
