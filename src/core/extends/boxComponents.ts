@@ -355,6 +355,7 @@ const boxComponents = {
       disabled: {
         checked: {
           bgColor: 'gray-300',
+          borderColor: 'gray-200',
         },
         cursor: 'not-allowed',
         borderColor: 'gray-200',
@@ -390,10 +391,11 @@ const boxComponents = {
   },
   dropdown: {
     styles: {
-      display: 'inline-flex',
-      textWrap: 'nowrap',
+      display: 'inline-block',
       overflow: 'hidden',
-      ai: 'center',
+      whiteSpace: 'nowrap',
+      textOverflow: 'ellipsis',
+      textAlign: 'left',
       gap: 2,
       p: 3,
       cursor: 'pointer',
@@ -625,6 +627,15 @@ const boxComponents = {
             px: 2,
             py: 1,
           },
+        },
+      },
+      icon: {
+        styles: {
+          position: 'absolute',
+          top: 0,
+          right: 0,
+          height: 'fit',
+          px: 1.5,
         },
       },
     },
@@ -967,35 +978,6 @@ const boxComponents = {
                 },
               },
               isLastRightPinned: {},
-            },
-          },
-          number: {
-            styles: {
-              display: 'inline-block',
-              b: 1,
-              borderColor: 'gray-300',
-              bgColor: 'white',
-              borderRadius: 2,
-              py: 2,
-              px: 2.5,
-              fontSize: 13,
-              focus: {
-                outline: 2,
-                outlineOffset: 0,
-                borderColor: 'violet-500',
-                outlineColor: 'violet-100',
-              },
-              theme: {
-                dark: {
-                  bgColor: 'gray-800',
-                  borderColor: 'gray-700',
-                  color: 'gray-100',
-                  focus: {
-                    borderColor: 'violet-500',
-                    outlineColor: 'violet-950',
-                  },
-                },
-              },
             },
           },
         },

@@ -1,24 +1,22 @@
 import { motion } from 'framer-motion';
 import {
+  AlignLeft,
   BookOpen,
   Box as BoxIcon,
   CheckSquare,
   ChevronDown,
   Circle,
   Download,
-  Grid3X3,
   Layers,
-  List,
-  MessageSquare,
+  LayoutGrid,
   Moon,
   MousePointer2,
-  PanelLeft,
-  Settings,
-  Square,
+  Paintbrush,
+  Palette,
+  Rows3,
   Sun,
-  Table2,
+  Table,
   TextCursor,
-  Type,
   X,
 } from 'lucide-react';
 import { useState } from 'react';
@@ -88,14 +86,14 @@ export default function Sidebar({ toggleTheme, onClose }: SidebarProps) {
           <MenuItem to="/installation" icon={<Download size={16} />}>
             Installation
           </MenuItem>
-          <MenuItem to="/theme-setup" icon={<Settings size={16} />}>
+          <MenuItem to="/theme-setup" icon={<Paintbrush size={16} />}>
             Theme Setup
           </MenuItem>
         </MenuSection>
 
         {/* Core */}
         <MenuSection label="Core" defaultOpen>
-          <MenuItem to="/box" icon={<Square size={16} />}>
+          <MenuItem to="/box" icon={<BoxIcon size={16} />}>
             Box
           </MenuItem>
         </MenuSection>
@@ -108,7 +106,7 @@ export default function Sidebar({ toggleTheme, onClose }: SidebarProps) {
           <MenuItem to="/textbox" icon={<TextCursor size={16} />}>
             Textbox
           </MenuItem>
-          <MenuItem to="/textarea" icon={<Type size={16} />}>
+          <MenuItem to="/textarea" icon={<AlignLeft size={16} />}>
             Textarea
           </MenuItem>
           <MenuItem to="/checkbox" icon={<CheckSquare size={16} />}>
@@ -117,30 +115,30 @@ export default function Sidebar({ toggleTheme, onClose }: SidebarProps) {
           <MenuItem to="/radiobutton" icon={<Circle size={16} />}>
             Radio Button
           </MenuItem>
-          <MenuItem to="/tooltip" icon={<MessageSquare size={16} />}>
+          <MenuItem to="/tooltip" icon={<MousePointer2 size={16} />}>
             Tooltip
           </MenuItem>
-          <MenuItem to="/dropdown" icon={<List size={16} />}>
+          <MenuItem to="/dropdown" icon={<ChevronDown size={16} />}>
             Dropdown
           </MenuItem>
-          <MenuItem to="/datagrid" icon={<Table2 size={16} />}>
+          <MenuItem to="/datagrid" icon={<Table size={16} />}>
             Data Grid
           </MenuItem>
         </MenuSection>
 
         {/* Layout */}
         <MenuSection label="Layout" defaultOpen>
-          <MenuItem to="/flex" icon={<PanelLeft size={16} />}>
+          <MenuItem to="/flex" icon={<Rows3 size={16} />}>
             Flex
           </MenuItem>
-          <MenuItem to="/grid" icon={<Grid3X3 size={16} />}>
+          <MenuItem to="/grid" icon={<LayoutGrid size={16} />}>
             Grid
           </MenuItem>
         </MenuSection>
 
         {/* Resources */}
         <MenuSection label="Resources">
-          <MenuItem to="/colors" icon={<Layers size={16} />}>
+          <MenuItem to="/colors" icon={<Palette size={16} />}>
             Colors
           </MenuItem>
         </MenuSection>

@@ -1,5 +1,5 @@
 import React from 'react';
-import CloseSvg from '../../../../pages/svgs/closeSvg';
+import Box from '../../../box';
 import ExpandIcon from '../../../icons/expandIcon';
 import GroupingIcon from '../../../icons/groupingIcon';
 import Button from '../../button';
@@ -29,8 +29,11 @@ export default function DataGridColumnGroups<TRow>(props: Props<TRow>) {
             <ExpandIcon fill="currentColor" width="14px" height="14px" rotate={-90} />
             <Flex component="datagrid.topBar.columnGroups.item">
               {column.header ?? column.key}
+
               <Button component="datagrid.topBar.columnGroups.item.icon" onClick={() => grid.toggleGrouping(column.key)}>
-                <CloseSvg fill="currentColor" width="100%" />
+                <Box fontSize={10} color="gray-400" hover={{ color: 'gray-600' }}>
+                  ✕
+                </Box>
               </Button>
             </Flex>
           </React.Fragment>

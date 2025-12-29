@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import Box from '../../../box';
-import Checkbox from '../../checkbox';
 import Dropdown from '../../dropdown';
 import Flex from '../../flex';
 import Textbox from '../../textbox';
@@ -68,18 +67,7 @@ function TextFilter<TRow>({ column, grid }: Props<TRow>) {
 
   return (
     <Flex ai="center" position="relative" width="fit">
-      <Textbox
-        variant="compact"
-        // component="datagrid.filter.text"
-        placeholder={config.placeholder ?? 'Filter...'}
-        value={localValue}
-        onChange={handleChange}
-        // height={7}
-        // width="fit"
-        // minWidth={20}
-        // px={2}
-        // fontSize={13}
-      />
+      <Textbox width="fit" variant="compact" placeholder={config.placeholder ?? 'Filter...'} value={localValue} onChange={handleChange} />
       {localValue && (
         <Flex position="absolute" right={2} top="1/2" translateY="-1/2" cursor="pointer" props={{ onClick: handleClear }}>
           <Box fontSize={10} color="gray-400" hover={{ color: 'gray-600' }}>
@@ -199,28 +187,13 @@ function NumberFilter<TRow>({ column, grid }: Props<TRow>) {
   }, [grid, column.key]);
 
   return (
-    <Flex ai="center" gap={1} width="fit">
+    <Flex ai={operator === 'between' ? 'start' : 'center'} gap={1} width="fit">
       <Dropdown<NumberFilterValue['operator']>
         value={operator}
         variant="compact"
         onChange={(val) => val && handleOperatorChange(val)}
-        height={7}
-        px={2}
-        py={0}
-        minWidth={0}
+        minWidth={6}
         hideIcon
-        b={1}
-        borderColor="gray-300"
-        bgColor="white"
-        borderRadius={2}
-        fontSize={13}
-        theme={{
-          dark: {
-            bgColor: 'gray-800',
-            borderColor: 'gray-700',
-            color: 'gray-100',
-          },
-        }}
       >
         <Dropdown.Item value="eq">=</Dropdown.Item>
         <Dropdown.Item value="ne">≠</Dropdown.Item>
@@ -231,33 +204,15 @@ function NumberFilter<TRow>({ column, grid }: Props<TRow>) {
         <Dropdown.Item value="between">↔</Dropdown.Item>
       </Dropdown>
       {operator === 'between' ? (
-        <>
-          <Textbox
-            type="number"
-            component="datagrid.filter.number"
-            placeholder={config.placeholder ?? 'From'}
-            value={localValue}
-            onChange={handleValueChange}
-            height={7}
-            width={20}
-            px={2}
-            fontSize={13}
-            step={config.step}
-          />
-          <Box fontSize={13} color="gray-500" theme={{ dark: { color: 'gray-400' } }}>
-            -
-          </Box>
-          <Flex ai="center" position="relative">
+        <Flex d="column" gap={1} flex1>
+          <Flex ai="center" position="relative" flex1>
             <Textbox
               type="number"
-              component="datagrid.filter.number"
-              placeholder="To"
-              value={valueTo}
-              onChange={handleValueToChange}
-              height={7}
-              width={20}
-              px={2}
-              fontSize={13}
+              variant="compact"
+              placeholder={config.placeholder ?? 'From'}
+              value={localValue}
+              onChange={handleValueChange}
+              width="fit"
               step={config.step}
             />
             {(localValue !== '' || valueTo !== '') && (
@@ -268,19 +223,27 @@ function NumberFilter<TRow>({ column, grid }: Props<TRow>) {
               </Flex>
             )}
           </Flex>
-        </>
+          <Flex ai="center" flex1>
+            <Textbox
+              type="number"
+              variant="compact"
+              placeholder="To"
+              value={valueTo}
+              onChange={handleValueToChange}
+              width="fit"
+              step={config.step}
+            />
+          </Flex>
+        </Flex>
       ) : (
-        <Flex ai="center" position="relative">
+        <Flex ai="center" position="relative" flex1>
           <Textbox
             type="number"
-            component="datagrid.filter.number"
+            variant="compact"
             placeholder={config.placeholder ?? 'Value'}
             value={localValue}
             onChange={handleValueChange}
-            height={7}
-            width={20}
-            px={2}
-            fontSize={13}
+            width="fit"
             step={config.step}
           />
           {localValue !== '' && (
@@ -332,9 +295,12 @@ function MultiselectFilter<TRow>({ column, grid }: Props<TRow>) {
   return (
     <Dropdown<string | number | boolean | null>
       multiple
+      showCheckbox
       isSearchable
       searchPlaceholder="Search..."
       value={selectedValues}
+      width="fit"
+      minWidth={0}
       onChange={handleChange}
       variant="compact"
     >
@@ -342,8 +308,6 @@ function MultiselectFilter<TRow>({ column, grid }: Props<TRow>) {
       <Dropdown.SelectAll>Select All</Dropdown.SelectAll>
       {options.map((option) => (
         <Dropdown.Item<string | number | boolean | null> key={String(option.value)} value={option.value} ai="center" gap={2}>
-          <Checkbox readOnly checked={selectedValues.includes(option.value)} />
-
           {option.label}
         </Dropdown.Item>
       ))}
