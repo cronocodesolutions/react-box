@@ -4,6 +4,7 @@ import useVisibility from '../hooks/useVisibility';
 import { ComponentsAndVariants } from '../types';
 import BaseSvg from './baseSvg';
 import Button from './button';
+import Checkbox from './checkbox';
 import Flex from './flex';
 import Textbox from './textbox';
 import Tooltip from './tooltip';
@@ -16,6 +17,8 @@ interface Props<TVal, TKey extends keyof ComponentsAndVariants = 'dropdown'> ext
   isSearchable?: boolean;
   searchPlaceholder?: string;
   hideIcon?: boolean;
+  /** Show checkbox for each item in multiple selection mode */
+  showCheckbox?: boolean;
   onChange?: (value: TVal | undefined, values: TVal[]) => void;
 }
 
@@ -29,6 +32,7 @@ function DropdownImpl<TVal>(props: Props<TVal>, ref: Ref<HTMLInputElement>): Rea
     searchPlaceholder,
     children,
     hideIcon,
+    showCheckbox,
     onChange,
     props: tagProps,
     ...restProps
@@ -168,6 +172,7 @@ function DropdownImpl<TVal>(props: Props<TVal>, ref: Ref<HTMLInputElement>): Rea
       component="dropdown"
       props={{ tabIndex: 0, ...tagProps }}
       position="relative"
+      pr={!hideIcon ? 4 : undefined}
       {...restProps}
     >
       {valueToUse.map((x) => (
@@ -182,6 +187,7 @@ function DropdownImpl<TVal>(props: Props<TVal>, ref: Ref<HTMLInputElement>): Rea
             onChange={(e) => setSearch(e.target.value)}
             ref={searchBoxRef}
             color="currentColor"
+            width="fit"
             props={{
               onClick: (e) => {
                 if (isOpen && isSearchable) {
@@ -194,11 +200,11 @@ function DropdownImpl<TVal>(props: Props<TVal>, ref: Ref<HTMLInputElement>): Rea
       )}
       &nbsp;{display}&nbsp;
       {!hideIcon && (
-        <Box position="absolute" right={2}>
+        <Flex component="dropdown.icon">
           <BaseSvg viewBox="0 0 10 6" width="0.6rem" rotate={isOpen ? 180 : 0}>
             <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 1 4 4 4-4" />
           </BaseSvg>
-        </Box>
+        </Flex>
       )}
       <Box position="absolute" inset={0}>
         {isOpen && (
@@ -226,19 +232,29 @@ function DropdownImpl<TVal>(props: Props<TVal>, ref: Ref<HTMLInputElement>): Rea
                   />
                 )}
                 {filteredItems.map((item) => {
-                  const { value, onClick, ...itemProps } = item.props;
+                  const { value, onClick, children: itemChildren, ...itemProps } = item.props;
+                  const isSelected = valueToUse.includes(value);
 
                   return (
                     <Box
                       key={value as React.Key}
                       component="dropdown.item"
                       variant={{ multiple, compact }}
-                      selected={valueToUse.includes(value)}
+                      selected={isSelected}
                       {...{
                         ...itemProps,
+                        children:
+                          showCheckbox && multiple ? (
+                            <>
+                              <Checkbox readOnly checked={isSelected} />
+                              {itemChildren}
+                            </>
+                          ) : (
+                            itemChildren
+                          ),
                         props: {
                           ...itemProps.props,
-                          'aria-selected': valueToUse.includes(value),
+                          'aria-selected': isSelected,
                           onClick: (e) => {
                             onClick?.(e);
                             itemSelectHandler(e, item);
