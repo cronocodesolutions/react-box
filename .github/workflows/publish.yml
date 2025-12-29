@@ -1,39 +1,26 @@
 name: Publish to NPM
+
 on:
   release:
-    types: [published] # Recommended over 'created'
+    types: [published]
 
 permissions:
-  id-token: write # Required for OIDC
+  id-token: write
   contents: read
 
 jobs:
-  build:
+  publish:
     runs-on: ubuntu-latest
+
     steps:
-      - name: Debug npm-related env
-        run: |
-          env | sort | grep -i token || true
-      - name: Checkout
-        uses: actions/checkout@v2
-      - name: Setup Node
-        uses: actions/setup-node@v4
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
         with:
           node-version-file: '.nvmrc'
-          registry-url: 'https://registry.npmjs.org'
-      - name: Debug npm-related env - 2nd time
-        run: |
-          env | sort | grep -i token || true
-      - name: Install dependencies and build 🔧
-        run: |
-          npm ci
-          npm run build
-      - run: npm config list
-      - name: Verify npm OIDC authentication
-        run: npm whoami
-        env:
-          NODE_AUTH_TOKEN: ''
-      - name: Publish package on NPM 📦
-        run: npm publish ./dist --access public --provenance
-        env:
-          NODE_AUTH_TOKEN: ''
+          registry-url: https://registry.npmjs.org
+
+      - run: npm ci
+      - run: npm run build
+
+      - run: npm publish ./dist --access public --provenance
