@@ -1,7 +1,7 @@
 name: Publish to NPM
 on:
   release:
-    types: [created]
+    types: [published] # Recommended over 'created'
 
 permissions:
   id-token: write # Required for OIDC
@@ -19,7 +19,8 @@ jobs:
           node-version-file: '.nvmrc'
           registry-url: 'https://registry.npmjs.org'
       - name: Install dependencies and build 🔧
-        run: npm install && npm run build
+        run: |
+          npm ci
+          npm run build
       - name: Publish package on NPM 📦
-        working-directory: ./dist
-        run: npm publish
+        run: npm publish ./dist --access public --provenance
