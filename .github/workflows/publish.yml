@@ -11,6 +11,9 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
+      - name: Debug npm-related env
+        run: |
+          env | sort | grep -i token || true
       - name: Checkout
         uses: actions/checkout@v2
       - name: Setup Node
