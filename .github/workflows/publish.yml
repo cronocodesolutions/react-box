@@ -22,5 +22,8 @@ jobs:
         run: |
           npm ci
           npm run build
+      - run: npm config list
+      - name: Verify npm OIDC authentication
+        run: npm whoami
       - name: Publish package on NPM 📦
         run: npm publish ./dist --access public --provenance
