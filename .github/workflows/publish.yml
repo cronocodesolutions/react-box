@@ -21,6 +21,9 @@ jobs:
         with:
           node-version-file: '.nvmrc'
           registry-url: 'https://registry.npmjs.org'
+      - name: Debug npm-related env - 2nd time
+        run: |
+          env | sort | grep -i token || true
       - name: Install dependencies and build 🔧
         run: |
           npm ci
@@ -28,5 +31,9 @@ jobs:
       - run: npm config list
       - name: Verify npm OIDC authentication
         run: npm whoami
+        env:
+          NODE_AUTH_TOKEN: ''
       - name: Publish package on NPM 📦
         run: npm publish ./dist --access public --provenance
+        env:
+          NODE_AUTH_TOKEN: ''
