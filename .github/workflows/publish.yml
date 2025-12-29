@@ -22,4 +22,4 @@ jobs:
         run: npm install && npm run build
       - name: Publish package on NPM 📦
         working-directory: ./dist
-        run: npm publish --access public --provenance
+        run: npm publish
