@@ -1,4 +1,3 @@
-import { AnimatePresence, motion } from 'framer-motion';
 import { forwardRef, FunctionComponent, ReactElement, Ref, RefAttributes, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import Box, { BoxProps } from '../box';
 import useVisibility from '../hooks/useVisibility';
@@ -9,32 +8,6 @@ import Checkbox from './checkbox';
 import Flex from './flex';
 import Textbox from './textbox';
 import Tooltip from './tooltip';
-
-const dropdownVariants = {
-  initial: (openUp: boolean) => ({
-    opacity: 0,
-    y: openUp ? 8 : -8,
-    scale: 0.95,
-  }),
-  animate: {
-    opacity: 1,
-    y: 0,
-    scale: 1,
-    transition: {
-      duration: 0.15,
-      ease: [0.4, 0, 0.2, 1] as [number, number, number, number],
-    },
-  },
-  exit: (openUp: boolean) => ({
-    opacity: 0,
-    y: openUp ? 8 : -8,
-    scale: 0.95,
-    transition: {
-      duration: 0.1,
-      ease: [0.4, 0, 1, 1] as [number, number, number, number],
-    },
-  }),
-};
 
 interface Props<TVal, TKey extends keyof ComponentsAndVariants = 'dropdown'> extends Omit<BoxProps<'button', TKey>, 'ref' | 'tag'> {
   name?: string;
@@ -236,85 +209,74 @@ function DropdownImpl<TVal>(props: Props<TVal>, ref: Ref<HTMLInputElement>): Rea
         </Flex>
       )}
       <Box position="absolute" inset={0}>
-        <AnimatePresence>
-          {isOpen && (
-            <Tooltip
-              ref={itemsRef}
-              minWidth="fit-content"
-              style={{ transform: openUp ? `translateY(calc(-100% - 2px))` : `translateY(${translateY}px)` }}
-              onPositionChange={(data) => setOptionsPosition({ top: data.top, scrollY: data.windowScrollY })}
-            >
-              {(filteredItems.length > 0 || emptyItem) && (
-                <motion.div
-                  variants={dropdownVariants}
-                  initial="initial"
-                  animate="animate"
-                  exit="exit"
-                  custom={openUp}
-                  style={{ transformOrigin: openUp ? 'bottom' : 'top' }}
-                >
-                  <Box component="dropdown.items">
-                    {showUnselect && (
-                      <Box
-                        component="dropdown.unselect"
-                        variant={{ compact }}
-                        selected={valueToUse.length === 0}
-                        {...{ ...unselectItem.props, props: { ...unselectItem.props.props, onClick: (e) => itemSelectHandler(e) } }}
-                      />
-                    )}
-                    {showSelectAll && (
-                      <Box
-                        component="dropdown.selectAll"
-                        variant={{ compact }}
-                        {...{
-                          ...selectAllItem.props,
-                          props: { ...selectAllItem.props.props, onClick: (e) => itemSelectHandler(e, ...items) },
-                        }}
-                      />
-                    )}
-                    {filteredItems.map((item) => {
-                      const { value, onClick, children: itemChildren, ...itemProps } = item.props;
-                      const isSelected = valueToUse.includes(value);
+        {isOpen && (
+          <Tooltip
+            ref={itemsRef}
+            minWidth="fit-content"
+            style={{ transform: openUp ? `translateY(calc(-100% - 2px))` : `translateY(${translateY}px)` }}
+            onPositionChange={(data) => setOptionsPosition({ top: data.top, scrollY: data.windowScrollY })}
+          >
+            {(filteredItems.length > 0 || emptyItem) && (
+              <Box component="dropdown.items">
+                {showUnselect && (
+                  <Box
+                    component="dropdown.unselect"
+                    variant={{ compact }}
+                    selected={valueToUse.length === 0}
+                    {...{ ...unselectItem.props, props: { ...unselectItem.props.props, onClick: (e) => itemSelectHandler(e) } }}
+                  />
+                )}
+                {showSelectAll && (
+                  <Box
+                    component="dropdown.selectAll"
+                    variant={{ compact }}
+                    {...{
+                      ...selectAllItem.props,
+                      props: { ...selectAllItem.props.props, onClick: (e) => itemSelectHandler(e, ...items) },
+                    }}
+                  />
+                )}
+                {filteredItems.map((item) => {
+                  const { value, onClick, children: itemChildren, ...itemProps } = item.props;
+                  const isSelected = valueToUse.includes(value);
 
-                      return (
-                        <Box
-                          key={value as React.Key}
-                          component="dropdown.item"
-                          variant={{ multiple, compact }}
-                          selected={isSelected}
-                          {...{
-                            ...itemProps,
-                            children:
-                              showCheckbox && multiple ? (
-                                <>
-                                  <Checkbox readOnly checked={isSelected} mr={2} />
-                                  {itemChildren}
-                                </>
-                              ) : (
-                                itemChildren
-                              ),
-                            props: {
-                              ...itemProps.props,
-                              'aria-selected': isSelected,
-                              onClick: (e) => {
-                                onClick?.(e);
-                                itemSelectHandler(e, item);
-                              },
-                            },
-                          }}
-                        />
-                      );
-                    })}
+                  return (
+                    <Box
+                      key={value as React.Key}
+                      component="dropdown.item"
+                      variant={{ multiple, compact }}
+                      selected={isSelected}
+                      {...{
+                        ...itemProps,
+                        children:
+                          showCheckbox && multiple ? (
+                            <>
+                              <Checkbox readOnly checked={isSelected} mr={2} />
+                              {itemChildren}
+                            </>
+                          ) : (
+                            itemChildren
+                          ),
+                        props: {
+                          ...itemProps.props,
+                          'aria-selected': isSelected,
+                          onClick: (e) => {
+                            onClick?.(e);
+                            itemSelectHandler(e, item);
+                          },
+                        },
+                      }}
+                    />
+                  );
+                })}
 
-                    {filteredItems.length === 0 && emptyItem && (
-                      <Box component="dropdown.emptyItem" variant={{ compact }} {...emptyItem.props} />
-                    )}
-                  </Box>
-                </motion.div>
-              )}
-            </Tooltip>
-          )}
-        </AnimatePresence>
+                {filteredItems.length === 0 && emptyItem && (
+                  <Box component="dropdown.emptyItem" variant={{ compact }} {...emptyItem.props} />
+                )}
+              </Box>
+            )}
+          </Tooltip>
+        )}
       </Box>
     </Button>
   );
