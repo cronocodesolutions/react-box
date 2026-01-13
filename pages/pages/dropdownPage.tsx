@@ -20,7 +20,7 @@ export default function DropdownPage() {
           <Code label="Import" language="jsx" code="import Dropdown from '@cronocode/react-box/components/dropdown';" />
 
           <Code label="Basic Dropdown" language="jsx">
-            <Dropdown defaultValue={1} props={{ role: 'combobox' }}>
+            <Dropdown defaultValue={1} props={{ role: 'combobox' }} width={50}>
               <Dropdown.Item value={1} props={{ role: 'option' }}>
                 Option 1
               </Dropdown.Item>
@@ -47,7 +47,7 @@ export default function DropdownPage() {
 </Dropdown>`}
           >
             <Flex gap={4}>
-              <Dropdown value={selectedValue} onChange={(value) => setSelectedValue(value!)}>
+              <Dropdown value={selectedValue} onChange={(value) => setSelectedValue(value!)} width={50}>
                 <Dropdown.Item value={1}>Option 1</Dropdown.Item>
                 <Dropdown.Item value={2}>Option 2</Dropdown.Item>
                 <Dropdown.Item value={3}>Option 3</Dropdown.Item>
@@ -66,57 +66,31 @@ export default function DropdownPage() {
   <Dropdown.Item value={2}>Option 2</Dropdown.Item>
 </Dropdown>`}
           >
-            <Dropdown>
+            <Dropdown width={50}>
               <Dropdown.Unselect>Select</Dropdown.Unselect>
               <Dropdown.Item value={1}>Option 1</Dropdown.Item>
               <Dropdown.Item value={2}>Option 2</Dropdown.Item>
             </Dropdown>
           </Code>
 
-          <Code
-            label="Disabled"
-            language="jsx"
-            code={`<Dropdown disabled>
-  <Dropdown.Unselect>Select</Dropdown.Unselect>
-  <Dropdown.Item value={1}>Option 1</Dropdown.Item>
-  <Dropdown.Item value={2}>Option 2</Dropdown.Item>
-</Dropdown>`}
-          >
-            <Dropdown disabled>
+          <Code label="Disabled" language="jsx">
+            <Dropdown disabled width={50}>
               <Dropdown.Unselect>Select</Dropdown.Unselect>
               <Dropdown.Item value={1}>Option 1</Dropdown.Item>
               <Dropdown.Item value={2}>Option 2</Dropdown.Item>
             </Dropdown>
           </Code>
 
-          <Code
-            label="Compact"
-            language="jsx"
-            code={`<Dropdown variant="compact">
-  <Dropdown.Unselect>Select</Dropdown.Unselect>
-  <Dropdown.Item value={1}>Option 1</Dropdown.Item>
-  <Dropdown.Item value={2}>Option 2</Dropdown.Item>
-</Dropdown>`}
-          >
-            <Dropdown variant="compact">
+          <Code label="Compact" language="jsx">
+            <Dropdown variant="compact" width={40}>
               <Dropdown.Unselect>Select</Dropdown.Unselect>
               <Dropdown.Item value={1}>Option 1</Dropdown.Item>
               <Dropdown.Item value={2}>Option 2</Dropdown.Item>
             </Dropdown>
           </Code>
 
-          <Code
-            label="Searchable"
-            language="jsx"
-            code={`<Dropdown isSearchable>
-  <Dropdown.Unselect>Select</Dropdown.Unselect>
-  <Dropdown.Item value={1}>John Doe</Dropdown.Item>
-  <Dropdown.Item value={2}>Joe Smith</Dropdown.Item>
-  <Dropdown.Item value={3}>Alice</Dropdown.Item>
-  <Dropdown.Item value={4}>Bob</Dropdown.Item>
-</Dropdown>`}
-          >
-            <Dropdown isSearchable>
+          <Code label="Searchable" language="jsx">
+            <Dropdown isSearchable width={50}>
               <Dropdown.Unselect>Select</Dropdown.Unselect>
               <Dropdown.Item value={1}>John Doe</Dropdown.Item>
               <Dropdown.Item value={2}>Joe Smith</Dropdown.Item>
@@ -125,17 +99,8 @@ export default function DropdownPage() {
             </Dropdown>
           </Code>
 
-          <Code
-            label="Searchable with Empty Item"
-            language="jsx"
-            code={`<Dropdown isSearchable>
-  <Dropdown.EmptyItem>No options</Dropdown.EmptyItem>
-  <Dropdown.Unselect>Select</Dropdown.Unselect>
-  <Dropdown.Item value={1}>John Doe</Dropdown.Item>
-  <Dropdown.Item value={2}>Joe Smith</Dropdown.Item>
-</Dropdown>`}
-          >
-            <Dropdown isSearchable>
+          <Code label="Searchable with Empty Item" language="jsx">
+            <Dropdown isSearchable width={50}>
               <Dropdown.EmptyItem>No options</Dropdown.EmptyItem>
               <Dropdown.Unselect>Select</Dropdown.Unselect>
               <Dropdown.Item value={1}>John Doe</Dropdown.Item>
@@ -145,39 +110,8 @@ export default function DropdownPage() {
             </Dropdown>
           </Code>
 
-          <Code
-            label="Multiple Selection"
-            language="jsx"
-            code={`<Dropdown multiple>
-  <Dropdown.Unselect>Select</Dropdown.Unselect>
-  <Dropdown.Item value={1}>John Doe</Dropdown.Item>
-  <Dropdown.Item value={2}>Joe Smith</Dropdown.Item>
-  <Dropdown.Item value={3}>Alice</Dropdown.Item>
-  <Dropdown.Item value={4}>Bob</Dropdown.Item>
-</Dropdown>`}
-          >
-            <Dropdown multiple>
-              <Dropdown.EmptyItem>No options</Dropdown.EmptyItem>
-              <Dropdown.Unselect>Select</Dropdown.Unselect>
-              <Dropdown.Item value={1}>John Doe</Dropdown.Item>
-              <Dropdown.Item value={2}>Joe Smith</Dropdown.Item>
-              <Dropdown.Item value={3}>Alice</Dropdown.Item>
-              <Dropdown.Item value={4}>Bob</Dropdown.Item>
-            </Dropdown>
-          </Code>
-
-          <Code
-            label="Multiple with Custom Display"
-            language="jsx"
-            code={`<Dropdown multiple>
-  <Dropdown.Display>{(selectedValues) => selectedValues.join('+')}</Dropdown.Display>
-  <Dropdown.Unselect>Select</Dropdown.Unselect>
-  <Dropdown.Item value={1}>John Doe</Dropdown.Item>
-  <Dropdown.Item value={2}>Joe Smith</Dropdown.Item>
-</Dropdown>`}
-          >
-            <Dropdown multiple showCheckbox>
-              <Dropdown.Display>{(selectedValues: number[]) => selectedValues.join('+')}</Dropdown.Display>
+          <Code label="Multiple Selection" language="jsx">
+            <Dropdown multiple width={50}>
               <Dropdown.EmptyItem>No options</Dropdown.EmptyItem>
               <Dropdown.Unselect>Unselect All</Dropdown.Unselect>
               <Dropdown.SelectAll>Select All</Dropdown.SelectAll>
@@ -188,17 +122,22 @@ export default function DropdownPage() {
             </Dropdown>
           </Code>
 
-          <Code
-            label="Select All / Unselect All"
-            language="jsx"
-            code={`<Dropdown multiple>
-  <Dropdown.Unselect>Unselect All</Dropdown.Unselect>
-  <Dropdown.SelectAll>Select All</Dropdown.SelectAll>
-  <Dropdown.Item value={1}>John Doe</Dropdown.Item>
-  <Dropdown.Item value={2}>Joe Smith</Dropdown.Item>
-</Dropdown>`}
-          >
-            <Dropdown multiple>
+          <Code label="Multiple Selection with Checkboxes" language="jsx">
+            <Dropdown multiple showCheckbox width={50}>
+              <Dropdown.EmptyItem>No options</Dropdown.EmptyItem>
+              <Dropdown.Unselect>Unselect All</Dropdown.Unselect>
+              <Dropdown.SelectAll>Select All</Dropdown.SelectAll>
+              <Dropdown.Item value={1}>John Doe</Dropdown.Item>
+              <Dropdown.Item value={2}>Joe Smith</Dropdown.Item>
+              <Dropdown.Item value={3}>Alice</Dropdown.Item>
+              <Dropdown.Item value={4}>Bob</Dropdown.Item>
+            </Dropdown>
+          </Code>
+
+          <Code label="Multiple with Custom Display" language="jsx">
+            <Dropdown multiple showCheckbox width={50}>
+              <Dropdown.Display>{(selectedValues: number[]) => <Box height={16}>{selectedValues.join('+')}</Box>}</Dropdown.Display>
+              <Dropdown.EmptyItem>No options</Dropdown.EmptyItem>
               <Dropdown.Unselect>Unselect All</Dropdown.Unselect>
               <Dropdown.SelectAll>Select All</Dropdown.SelectAll>
               <Dropdown.Item value={1}>John Doe</Dropdown.Item>
