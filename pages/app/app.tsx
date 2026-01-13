@@ -165,11 +165,6 @@ export default function App() {
             </PageContext.Provider>
           </Box>
         </Box>
-
-        {/* Right Sidebar (Desktop) */}
-        {/* <Box width={0} overflow="hidden" xl={{ width: 50 }} flexShrink={0}>
-          {rightSidebar}
-        </Box> */}
       </Flex>
     </Box>
   );

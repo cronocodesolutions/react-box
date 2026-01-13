@@ -345,6 +345,5 @@ export default function FidoEnrollmentPage() {
         }}
       />
     </Box>
-    // </Box>
   );
 }
