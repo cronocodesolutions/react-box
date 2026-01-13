@@ -1,6 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import { HashRouter } from 'react-router-dom';
+import { BrowserRouter } from 'react-router-dom';
 import Box from '../src/box';
 import App from './app/app';
 import './extends';
@@ -10,10 +10,10 @@ const root = ReactDOM.createRoot(document.getElementById('root')!);
 
 root.render(
   <React.StrictMode>
-    <HashRouter>
+    <BrowserRouter>
       <Box.Theme theme="dark">
         <App />
       </Box.Theme>
-    </HashRouter>
+    </BrowserRouter>
   </React.StrictMode>,
 );

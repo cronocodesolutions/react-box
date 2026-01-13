@@ -82,6 +82,10 @@ export interface GridDefinition<TRow> {
   visibleRowsCount?: number;
   topBar?: boolean;
   bottomBar?: boolean;
+  /** Title displayed in the top bar */
+  title?: React.ReactNode;
+  /** Custom filters or actions rendered in the top bar */
+  topBarContent?: React.ReactNode;
   /** Enable global filter with fuzzy search */
   globalFilter?: boolean;
   /** Keys of columns to search in global filter. If not provided, all columns are searched */

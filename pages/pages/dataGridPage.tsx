@@ -235,6 +235,8 @@ export default function DataGridPage() {
             <DataGrid
               data={data}
               def={{
+                topBar: true,
+                title: 'Users Table',
                 columns: [
                   {
                     key: 'person',

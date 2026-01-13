@@ -1,23 +1,940 @@
-import { motion } from 'framer-motion';
-import { Box as BoxIcon } from 'lucide-react';
-import { useState } from 'react';
+import { AnimatePresence, motion } from 'framer-motion';
+import { ArrowRight, Box as BoxIcon, Eye, Grid3X3, Layers, Maximize2, MousePointer, Move, Palette, Type } from 'lucide-react';
+import { ReactNode, useState } from 'react';
 import Box from '../../src/box';
 import Flex from '../../src/components/flex';
-import Textbox from '../../src/components/textbox';
+import Grid from '../../src/components/grid';
 import Code from '../components/code';
 import PageHeader from '../components/pageHeader';
 
-export default function BoxPage() {
-  const [props, setProps] = useState({
-    b: 1,
-    borderRadius: 2,
-    m: 0,
-    p: 4,
-  });
+// Property category definitions with visual demos
+const categories = [
+  { id: 'spacing', name: 'Spacing', icon: Move, color: 'violet' },
+  { id: 'sizing', name: 'Sizing', icon: Maximize2, color: 'blue' },
+  { id: 'layout', name: 'Layout', icon: Grid3X3, color: 'emerald' },
+  { id: 'position', name: 'Position', icon: Layers, color: 'amber' },
+  { id: 'typography', name: 'Typography', icon: Type, color: 'rose' },
+  { id: 'visual', name: 'Visual', icon: Palette, color: 'cyan' },
+  { id: 'border', name: 'Border', icon: BoxIcon, color: 'orange' },
+  { id: 'interaction', name: 'Interaction', icon: MousePointer, color: 'pink' },
+  { id: 'misc', name: 'Misc', icon: Eye, color: 'slate' },
+] as const;
 
-  const stringProps = Object.entries(props)
-    .map(([key, value]) => `${key}={${value}}`)
-    .join(' ');
+type CategoryId = (typeof categories)[number]['id'];
+
+// Demo wrapper component
+function DemoCard({ title, description, children, code }: { title: string; description: string; children: ReactNode; code: string }) {
+  const [showCode, setShowCode] = useState(false);
+
+  return (
+    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>
+      <Flex
+        d="column"
+        b={1}
+        borderRadius={2}
+        overflow="hidden"
+        theme={{ dark: { bgColor: 'slate-800', borderColor: 'slate-700' }, light: { bgColor: 'white', borderColor: 'slate-200' } }}
+      >
+        <Flex p={4} d="column" gap={1} theme={{ dark: { bgColor: 'slate-900' }, light: { bgColor: 'slate-50' } }} bb={1}>
+          <Box fontSize={14} fontWeight={600} theme={{ dark: { color: 'slate-200' }, light: { color: 'slate-800' } }}>
+            {title}
+          </Box>
+          <Box fontSize={12} theme={{ dark: { color: 'slate-400' }, light: { color: 'slate-500' } }}>
+            {description}
+          </Box>
+        </Flex>
+        <Box p={4} minHeight={32}>
+          {children}
+        </Box>
+        <Flex
+          px={4}
+          py={2}
+          bt={1}
+          jc="space-between"
+          ai="center"
+          theme={{ dark: { bgColor: 'slate-900', borderColor: 'slate-700' }, light: { bgColor: 'slate-50', borderColor: 'slate-200' } }}
+        >
+          <Box fontSize={11} fontWeight={500} theme={{ dark: { color: 'slate-500' }, light: { color: 'slate-400' } }} fontStyle="italic">
+            {code}
+          </Box>
+          <Box
+            fontSize={11}
+            cursor="pointer"
+            theme={{ dark: { color: 'violet-400' }, light: { color: 'violet-600' } }}
+            hover={{ textDecoration: 'underline' }}
+            props={{ onClick: () => setShowCode(!showCode) }}
+          >
+            {showCode ? 'Hide' : 'Show'} code
+          </Box>
+        </Flex>
+        <AnimatePresence>
+          {showCode && (
+            <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }}>
+              <Box bt={1} theme={{ dark: { borderColor: 'slate-700' }, light: { borderColor: 'slate-200' } }}>
+                <Code language="jsx" code={`<Box ${code}>content</Box>`} />
+              </Box>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </Flex>
+    </motion.div>
+  );
+}
+
+// Visual box for demos
+function DemoBox(props: Parameters<typeof Box>[0] & { label?: string }) {
+  const { label, children, ...boxProps } = props;
+  return (
+    <Box
+      theme={{ dark: { bgColor: 'violet-950', borderColor: 'violet-500' }, light: { bgColor: 'violet-100', borderColor: 'violet-400' } }}
+      b={1}
+      borderStyle="dashed"
+      p={2}
+      fontSize={11}
+      textAlign="center"
+      {...boxProps}
+    >
+      {label ?? children}
+    </Box>
+  );
+}
+
+// Category content components
+function SpacingDemo() {
+  return (
+    <Flex d="column" gap={6}>
+      <DemoCard title="Margin (m, mx, my, mt, mr, mb, ml)" description="Controls space outside the element" code="m={4} mx={2} mt={6}">
+        <Flex gap={4} ai="center" flexWrap="wrap">
+          <Flex theme={{ dark: { bgColor: 'slate-700' }, light: { bgColor: 'slate-200' } }} borderRadius={1}>
+            <DemoBox m={0} label="m={0}" />
+          </Flex>
+          <Flex theme={{ dark: { bgColor: 'slate-700' }, light: { bgColor: 'slate-200' } }} borderRadius={1}>
+            <DemoBox m={2} label="m={2}" />
+          </Flex>
+          <Flex theme={{ dark: { bgColor: 'slate-700' }, light: { bgColor: 'slate-200' } }} borderRadius={1}>
+            <DemoBox m={4} label="m={4}" />
+          </Flex>
+          <Flex theme={{ dark: { bgColor: 'slate-700' }, light: { bgColor: 'slate-200' } }} borderRadius={1}>
+            <DemoBox mx={4} my={1} label="mx={4} my={1}" />
+          </Flex>
+        </Flex>
+      </DemoCard>
+
+      <DemoCard title="Padding (p, px, py, pt, pr, pb, pl)" description="Controls space inside the element" code="p={4} px={6}">
+        <Flex gap={4} ai="center" flexWrap="wrap">
+          <DemoBox p={1} label="p={1}" />
+          <DemoBox p={3} label="p={3}" />
+          <DemoBox p={5} label="p={5}" />
+          <DemoBox px={6} py={2} label="px={6} py={2}" />
+        </Flex>
+      </DemoCard>
+
+      <DemoCard title="Gap (gap, rowGap, columnGap)" description="Controls space between flex/grid children" code="gap={4}">
+        <Flex gap={8} flexWrap="wrap">
+          <Flex d="column" gap={1}>
+            <Box fontSize={11} theme={{ dark: { color: 'slate-400' }, light: { color: 'slate-500' } }}>
+              gap={1}
+            </Box>
+            <Flex gap={1}>
+              <DemoBox p={2} />
+              <DemoBox p={2} />
+              <DemoBox p={2} />
+            </Flex>
+          </Flex>
+          <Flex d="column" gap={1}>
+            <Box fontSize={11} theme={{ dark: { color: 'slate-400' }, light: { color: 'slate-500' } }}>
+              gap={4}
+            </Box>
+            <Flex gap={4}>
+              <DemoBox p={2} />
+              <DemoBox p={2} />
+              <DemoBox p={2} />
+            </Flex>
+          </Flex>
+        </Flex>
+      </DemoCard>
+    </Flex>
+  );
+}
+
+function SizingDemo() {
+  return (
+    <Flex d="column" gap={6}>
+      <DemoCard title="Width (width, minWidth, maxWidth)" description="Controls element width" code="width={40} minWidth={20}">
+        <Flex d="column" gap={3}>
+          <DemoBox width={20} label="width={20}" />
+          <DemoBox width={40} label="width={40}" />
+          <DemoBox width="fit" label='width="fit"' />
+          <DemoBox width="1/2" label='width="1/2"' />
+        </Flex>
+      </DemoCard>
+
+      <DemoCard title="Height (height, minHeight, maxHeight)" description="Controls element height" code="height={20} minHeight={10}">
+        <Flex gap={4} ai="flex-end" height={32}>
+          <DemoBox height={8} width={16} label="h={8}" />
+          <DemoBox height={16} width={16} label="h={16}" />
+          <DemoBox height={24} width={16} label="h={24}" />
+          <DemoBox height="fit" width={16} label='h="fit"' />
+        </Flex>
+      </DemoCard>
+
+      <DemoCard
+        title="Flex Sizing (flex1, flexGrow, flexShrink)"
+        description="Controls how elements grow/shrink in flex containers"
+        code="flex1"
+      >
+        <Flex gap={2}>
+          <DemoBox p={3} label="normal" />
+          <DemoBox p={3} flex1 label="flex1" />
+          <DemoBox p={3} label="normal" />
+        </Flex>
+      </DemoCard>
+    </Flex>
+  );
+}
+
+function LayoutDemo() {
+  return (
+    <Flex d="column" gap={6}>
+      <DemoCard title="Display (display, inline)" description="Controls element display type" code='display="flex"'>
+        <Flex d="column" gap={4}>
+          <Flex gap={2} ai="center">
+            <Box fontSize={11} width={24} theme={{ dark: { color: 'slate-400' }, light: { color: 'slate-500' } }}>
+              block:
+            </Box>
+            <DemoBox display="block" width="fit" label="Full width block" />
+          </Flex>
+          <Flex gap={2} ai="center">
+            <Box fontSize={11} width={24} theme={{ dark: { color: 'slate-400' }, light: { color: 'slate-500' } }}>
+              inline:
+            </Box>
+            <DemoBox inline label="Inline" />
+            <DemoBox inline label="Inline" />
+          </Flex>
+        </Flex>
+      </DemoCard>
+
+      <DemoCard title="Flex Direction (d)" description="Controls main axis direction" code='d="column"'>
+        <Flex gap={8}>
+          <Flex d="column" gap={1}>
+            <Box fontSize={11} theme={{ dark: { color: 'slate-400' }, light: { color: 'slate-500' } }}>
+              d="row"
+            </Box>
+            <Flex d="row" gap={1}>
+              <DemoBox p={2}>1</DemoBox>
+              <DemoBox p={2}>2</DemoBox>
+              <DemoBox p={2}>3</DemoBox>
+            </Flex>
+          </Flex>
+          <Flex d="column" gap={1}>
+            <Box fontSize={11} theme={{ dark: { color: 'slate-400' }, light: { color: 'slate-500' } }}>
+              d="column"
+            </Box>
+            <Flex d="column" gap={1}>
+              <DemoBox p={2}>1</DemoBox>
+              <DemoBox p={2}>2</DemoBox>
+              <DemoBox p={2}>3</DemoBox>
+            </Flex>
+          </Flex>
+        </Flex>
+      </DemoCard>
+
+      <DemoCard title="Justify & Align (jc, ai)" description="Controls alignment on main and cross axes" code='jc="center" ai="center"'>
+        <Flex gap={4} flexWrap="wrap">
+          {(['flex-start', 'center', 'flex-end', 'space-between'] as const).map((jc) => (
+            <Flex key={jc} d="column" gap={1}>
+              <Box fontSize={10} theme={{ dark: { color: 'slate-400' }, light: { color: 'slate-500' } }}>
+                jc="{jc}"
+              </Box>
+              <Flex
+                jc={jc}
+                width={28}
+                p={2}
+                b={1}
+                borderStyle="dashed"
+                theme={{ dark: { borderColor: 'slate-600' }, light: { borderColor: 'slate-300' } }}
+              >
+                <DemoBox p={1} />
+                <DemoBox p={1} />
+              </Flex>
+            </Flex>
+          ))}
+        </Flex>
+      </DemoCard>
+
+      <DemoCard title="Grid Layout" description="Create grid-based layouts" code="gridTemplateColumns={3} gap={2}">
+        <Grid gridTemplateColumns={3} gap={2}>
+          {[1, 2, 3, 4, 5, 6].map((n) => (
+            <DemoBox key={n} p={3} label={`${n}`} />
+          ))}
+        </Grid>
+      </DemoCard>
+
+      <DemoCard title="Flex Wrap (flexWrap)" description="Controls how items wrap" code='flexWrap="wrap"'>
+        <Flex gap={4}>
+          <Flex d="column" gap={1}>
+            <Box fontSize={11} theme={{ dark: { color: 'slate-400' }, light: { color: 'slate-500' } }}>
+              nowrap
+            </Box>
+            <Flex flexWrap="nowrap" width={24} gap={1} overflow="hidden">
+              <DemoBox p={2} minWidth={10} />
+              <DemoBox p={2} minWidth={10} />
+              <DemoBox p={2} minWidth={10} />
+            </Flex>
+          </Flex>
+          <Flex d="column" gap={1}>
+            <Box fontSize={11} theme={{ dark: { color: 'slate-400' }, light: { color: 'slate-500' } }}>
+              wrap
+            </Box>
+            <Flex flexWrap="wrap" width={24} gap={1}>
+              <DemoBox p={2} minWidth={10} />
+              <DemoBox p={2} minWidth={10} />
+              <DemoBox p={2} minWidth={10} />
+            </Flex>
+          </Flex>
+        </Flex>
+      </DemoCard>
+    </Flex>
+  );
+}
+
+function PositionDemo() {
+  return (
+    <Flex d="column" gap={6}>
+      <DemoCard title="Position" description="Controls positioning scheme" code='position="absolute" top={0} right={0}'>
+        <Flex gap={4}>
+          <Flex d="column" gap={1}>
+            <Box fontSize={11} theme={{ dark: { color: 'slate-400' }, light: { color: 'slate-500' } }}>
+              relative
+            </Box>
+            <Box
+              position="relative"
+              width={24}
+              height={24}
+              b={1}
+              borderStyle="dashed"
+              theme={{ dark: { borderColor: 'slate-600' }, light: { borderColor: 'slate-300' } }}
+            >
+              <DemoBox position="absolute" top={1} left={1} p={1} label="top left" />
+              <DemoBox position="absolute" bottom={1} right={1} p={1} label="bottom right" />
+            </Box>
+          </Flex>
+          <Flex d="column" gap={1}>
+            <Box fontSize={11} theme={{ dark: { color: 'slate-400' }, light: { color: 'slate-500' } }}>
+              inset={0}
+            </Box>
+            <Box
+              position="relative"
+              width={24}
+              height={24}
+              b={1}
+              borderStyle="dashed"
+              theme={{ dark: { borderColor: 'slate-600' }, light: { borderColor: 'slate-300' } }}
+            >
+              <DemoBox position="absolute" inset={2} label="inset={2}" />
+            </Box>
+          </Flex>
+        </Flex>
+      </DemoCard>
+
+      <DemoCard title="Z-Index" description="Controls stacking order" code="zIndex={10}">
+        <Box position="relative" height={20}>
+          <DemoBox position="absolute" left={0} top={0} width={16} height={16} zIndex={1} label="z={1}" />
+          <DemoBox
+            position="absolute"
+            left={8}
+            top={2}
+            width={16}
+            height={16}
+            zIndex={2}
+            theme={{
+              dark: { bgColor: 'emerald-950', borderColor: 'emerald-500' },
+              light: { bgColor: 'emerald-100', borderColor: 'emerald-400' },
+            }}
+            label="z={2}"
+          />
+          <DemoBox
+            position="absolute"
+            left={16}
+            top={4}
+            width={16}
+            height={16}
+            zIndex={3}
+            theme={{ dark: { bgColor: 'amber-950', borderColor: 'amber-500' }, light: { bgColor: 'amber-100', borderColor: 'amber-400' } }}
+            label="z={3}"
+          />
+        </Box>
+      </DemoCard>
+
+      <DemoCard
+        title="Transform (translateX, translateY, rotate)"
+        description="Apply transforms to elements"
+        code="translateX={4} rotate={90}"
+      >
+        <Flex gap={8} ai="center">
+          <Flex d="column" ai="center" gap={1}>
+            <Box fontSize={11} theme={{ dark: { color: 'slate-400' }, light: { color: 'slate-500' } }}>
+              translateX
+            </Box>
+            <Flex gap={2}>
+              <DemoBox p={2} translateX={0} label="0" />
+              <DemoBox p={2} translateX={4} label="4" />
+            </Flex>
+          </Flex>
+          <Flex d="column" ai="center" gap={1}>
+            <Box fontSize={11} theme={{ dark: { color: 'slate-400' }, light: { color: 'slate-500' } }}>
+              rotate
+            </Box>
+            <Flex gap={4}>
+              <DemoBox p={2} rotate={0} label="0°" />
+              <DemoBox p={2} rotate={90} label="90°" />
+              <DemoBox p={2} rotate={180} label="180°" />
+            </Flex>
+          </Flex>
+        </Flex>
+      </DemoCard>
+    </Flex>
+  );
+}
+
+function TypographyDemo() {
+  return (
+    <Flex d="column" gap={6}>
+      <DemoCard title="Font Size (fontSize)" description="Controls text size" code="fontSize={16}">
+        <Flex gap={4} ai="baseline" flexWrap="wrap">
+          <Box fontSize={12} theme={{ dark: { color: 'slate-300' }, light: { color: 'slate-700' } }}>
+            12px
+          </Box>
+          <Box fontSize={14} theme={{ dark: { color: 'slate-300' }, light: { color: 'slate-700' } }}>
+            14px
+          </Box>
+          <Box fontSize={18} theme={{ dark: { color: 'slate-300' }, light: { color: 'slate-700' } }}>
+            18px
+          </Box>
+          <Box fontSize={24} theme={{ dark: { color: 'slate-300' }, light: { color: 'slate-700' } }}>
+            24px
+          </Box>
+          <Box fontSize={32} theme={{ dark: { color: 'slate-300' }, light: { color: 'slate-700' } }}>
+            32px
+          </Box>
+        </Flex>
+      </DemoCard>
+
+      <DemoCard title="Font Weight (fontWeight)" description="Controls text boldness" code="fontWeight={600}">
+        <Flex gap={4} flexWrap="wrap">
+          {([300, 400, 500, 600, 700] as const).map((weight) => (
+            <Box key={weight} fontWeight={weight} theme={{ dark: { color: 'slate-300' }, light: { color: 'slate-700' } }}>
+              {weight}
+            </Box>
+          ))}
+        </Flex>
+      </DemoCard>
+
+      <DemoCard title="Text Align (textAlign)" description="Controls text alignment" code='textAlign="center"'>
+        <Flex d="column" gap={2}>
+          {(['left', 'center', 'right'] as const).map((align) => (
+            <Box
+              key={align}
+              textAlign={align}
+              p={2}
+              b={1}
+              borderStyle="dashed"
+              theme={{ dark: { borderColor: 'slate-600', color: 'slate-300' }, light: { borderColor: 'slate-300', color: 'slate-700' } }}
+            >
+              {align}
+            </Box>
+          ))}
+        </Flex>
+      </DemoCard>
+
+      <DemoCard
+        title="Text Decoration & Transform"
+        description="Modify text appearance"
+        code='textDecoration="underline" textTransform="uppercase"'
+      >
+        <Flex gap={4} flexWrap="wrap">
+          <Box textDecoration="underline" theme={{ dark: { color: 'slate-300' }, light: { color: 'slate-700' } }}>
+            underline
+          </Box>
+          <Box textDecoration="line-through" theme={{ dark: { color: 'slate-300' }, light: { color: 'slate-700' } }}>
+            line-through
+          </Box>
+          <Box textTransform="uppercase" theme={{ dark: { color: 'slate-300' }, light: { color: 'slate-700' } }}>
+            uppercase
+          </Box>
+          <Box textTransform="capitalize" theme={{ dark: { color: 'slate-300' }, light: { color: 'slate-700' } }}>
+            capitalize this
+          </Box>
+        </Flex>
+      </DemoCard>
+
+      <DemoCard
+        title="Text Overflow (textOverflow, textWrap)"
+        description="Handle text overflow"
+        code='textOverflow="ellipsis" textWrap="nowrap"'
+      >
+        <Flex d="column" gap={2}>
+          <Box
+            width={40}
+            textOverflow="ellipsis"
+            textWrap="nowrap"
+            overflow="hidden"
+            theme={{ dark: { color: 'slate-300' }, light: { color: 'slate-700' } }}
+          >
+            This is a very long text that will be truncated with ellipsis
+          </Box>
+          <Box width={40} textWrap="wrap" theme={{ dark: { color: 'slate-300' }, light: { color: 'slate-700' } }}>
+            This text will wrap normally when it reaches the container width
+          </Box>
+        </Flex>
+      </DemoCard>
+
+      <DemoCard title="Line Height & Letter Spacing" description="Fine-tune text spacing" code="lineHeight={24} letterSpacing={2}">
+        <Flex gap={6}>
+          <Flex d="column" gap={1}>
+            <Box fontSize={11} theme={{ dark: { color: 'slate-400' }, light: { color: 'slate-500' } }}>
+              lineHeight
+            </Box>
+            <Box lineHeight={16} width={32} theme={{ dark: { color: 'slate-300' }, light: { color: 'slate-700' } }}>
+              Tight line height makes text compact
+            </Box>
+          </Flex>
+          <Flex d="column" gap={1}>
+            <Box fontSize={11} theme={{ dark: { color: 'slate-400' }, light: { color: 'slate-500' } }}>
+              letterSpacing
+            </Box>
+            <Box letterSpacing={2} theme={{ dark: { color: 'slate-300' }, light: { color: 'slate-700' } }}>
+              Spaced Letters
+            </Box>
+          </Flex>
+        </Flex>
+      </DemoCard>
+    </Flex>
+  );
+}
+
+function VisualDemo() {
+  return (
+    <Flex d="column" gap={6}>
+      <DemoCard
+        title="Colors (color, bgColor)"
+        description="Apply foreground and background colors"
+        code='color="violet-500" bgColor="slate-800"'
+      >
+        <Flex gap={3} flexWrap="wrap">
+          {(['violet', 'blue', 'emerald', 'amber', 'rose'] as const).map((c) => (
+            <Box key={c} bgColor={`${c}-500`} color="white" p={3} borderRadius={1} fontSize={12}>
+              {c}-500
+            </Box>
+          ))}
+        </Flex>
+      </DemoCard>
+
+      <DemoCard title="Opacity" description="Control element transparency" code="opacity={0.5}">
+        <Flex gap={2}>
+          {([1, 0.8, 0.6, 0.4, 0.2] as const).map((o) => (
+            <Box key={o} bgColor="violet-500" p={4} borderRadius={1} opacity={o} fontSize={11} color="white">
+              {o}
+            </Box>
+          ))}
+        </Flex>
+      </DemoCard>
+
+      <DemoCard title="Box Shadow (shadow)" description="Add shadows to elements" code='shadow="medium"'>
+        <Flex gap={6} flexWrap="wrap" p={4}>
+          {(['small', 'medium', 'large'] as const).map((s) => (
+            <Box
+              key={s}
+              shadow={s}
+              p={4}
+              borderRadius={2}
+              theme={{ dark: { bgColor: 'slate-700' }, light: { bgColor: 'white' } }}
+              fontSize={12}
+            >
+              {s}
+            </Box>
+          ))}
+        </Flex>
+      </DemoCard>
+
+      <DemoCard title="Backdrop Filter" description="Apply blur effects to backgrounds" code='backdropFilter="blur(8px)"'>
+        <Box position="relative" height={24} overflow="hidden" borderRadius={2}>
+          <Box position="absolute" inset={0} bgImage="gradient-primary" />
+          <Flex position="absolute" inset={0} ai="center" jc="center" gap={4}>
+            <Box backdropFilter="blur(4px)" bgColor="slate-800" opacity={0.7} p={3} borderRadius={1} color="white" fontSize={12}>
+              blur(4px)
+            </Box>
+            <Box backdropFilter="blur(8px)" bgColor="slate-800" opacity={0.7} p={3} borderRadius={1} color="white" fontSize={12}>
+              blur(8px)
+            </Box>
+            <Box backdropFilter="blur(12px)" bgColor="slate-800" opacity={0.7} p={3} borderRadius={1} color="white" fontSize={12}>
+              blur(12px)
+            </Box>
+          </Flex>
+        </Box>
+      </DemoCard>
+    </Flex>
+  );
+}
+
+function BorderDemo() {
+  return (
+    <Flex d="column" gap={6}>
+      <DemoCard title="Border Width (b, bt, br, bb, bl)" description="Control border thickness" code="b={2} bt={4}">
+        <Flex gap={4} flexWrap="wrap">
+          <DemoBox b={1} label="b={1}" />
+          <DemoBox b={2} label="b={2}" />
+          <DemoBox bt={2} label="bt={2}" />
+          <DemoBox br={2} label="br={2}" />
+          <DemoBox bb={2} label="bb={2}" />
+          <DemoBox bl={2} label="bl={2}" />
+        </Flex>
+      </DemoCard>
+
+      <DemoCard title="Border Style" description="Change border appearance" code='borderStyle="dashed"'>
+        <Flex gap={4} flexWrap="wrap">
+          {(['solid', 'dashed', 'dotted', 'double'] as const).map((style) => (
+            <Box
+              key={style}
+              b={2}
+              borderStyle={style}
+              p={3}
+              theme={{ dark: { borderColor: 'violet-500' }, light: { borderColor: 'violet-400' } }}
+              fontSize={12}
+            >
+              {style}
+            </Box>
+          ))}
+        </Flex>
+      </DemoCard>
+
+      <DemoCard title="Border Radius" description="Round element corners" code="borderRadius={2}">
+        <Flex gap={4} flexWrap="wrap" ai="center">
+          {[0, 1, 2, 3, 4].map((r) => (
+            <Box
+              key={r}
+              borderRadius={r}
+              bgColor="violet-500"
+              width={12}
+              height={12}
+              theme={{ dark: { bgColor: 'violet-500' }, light: { bgColor: 'violet-400' } }}
+            />
+          ))}
+          <Box fontSize={11} theme={{ dark: { color: 'slate-400' }, light: { color: 'slate-500' } }}>
+            0 → 4
+          </Box>
+        </Flex>
+      </DemoCard>
+
+      <DemoCard title="Individual Border Radius" description="Round specific corners" code="borderRadiusTopLeft={3}">
+        <Flex gap={4} flexWrap="wrap">
+          <DemoBox borderRadiusTop={2} p={3} label="Top" />
+          <DemoBox borderRadiusRight={2} p={3} label="Right" />
+          <DemoBox borderRadiusBottom={2} p={3} label="Bottom" />
+          <DemoBox borderRadiusLeft={2} p={3} label="Left" />
+          <DemoBox borderRadiusTopLeft={3} borderRadiusBottomRight={3} p={3} label="Diagonal" />
+        </Flex>
+      </DemoCard>
+
+      <DemoCard title="Outline" description="Draw outside the border" code='outline={2} outlineColor="violet-500"'>
+        <Flex gap={6} flexWrap="wrap">
+          <Box
+            outline={2}
+            outlineStyle="solid"
+            outlineColor="violet-500"
+            p={3}
+            borderRadius={1}
+            theme={{ dark: { color: 'slate-300' }, light: { color: 'slate-700' } }}
+          >
+            outline={2}
+          </Box>
+          <Box
+            outline={2}
+            outlineStyle="dashed"
+            outlineColor="emerald-500"
+            outlineOffset={2}
+            p={3}
+            borderRadius={1}
+            theme={{ dark: { color: 'slate-300' }, light: { color: 'slate-700' } }}
+          >
+            offset={2}
+          </Box>
+        </Flex>
+      </DemoCard>
+    </Flex>
+  );
+}
+
+function InteractionDemo() {
+  return (
+    <Flex d="column" gap={6}>
+      <DemoCard title="Cursor" description="Change mouse cursor on hover" code='cursor="pointer"'>
+        <Flex gap={3} flexWrap="wrap">
+          {(['default', 'pointer', 'move', 'text', 'not-allowed', 'grab'] as const).map((c) => (
+            <Box
+              key={c}
+              cursor={c}
+              p={3}
+              b={1}
+              borderRadius={1}
+              theme={{ dark: { borderColor: 'slate-600', color: 'slate-300' }, light: { borderColor: 'slate-300', color: 'slate-700' } }}
+              fontSize={12}
+            >
+              {c}
+            </Box>
+          ))}
+        </Flex>
+      </DemoCard>
+
+      <DemoCard title="Hover States" description="Apply styles on hover" code='hover={{ bgColor: "violet-500" }}'>
+        <Flex gap={4} flexWrap="wrap">
+          <Box
+            p={3}
+            b={1}
+            borderRadius={1}
+            cursor="pointer"
+            transition="all"
+            transitionDuration={200}
+            theme={{ dark: { borderColor: 'slate-600', color: 'slate-300' }, light: { borderColor: 'slate-300', color: 'slate-700' } }}
+            hover={{ bgColor: 'violet-500', color: 'white', borderColor: 'violet-500' }}
+            fontSize={12}
+          >
+            Hover me!
+          </Box>
+          <Box
+            p={3}
+            b={1}
+            borderRadius={1}
+            cursor="pointer"
+            transition="all"
+            transitionDuration={200}
+            theme={{ dark: { borderColor: 'slate-600', color: 'slate-300' }, light: { borderColor: 'slate-300', color: 'slate-700' } }}
+            hover={{ translateY: -1, shadow: 'large' }}
+            fontSize={12}
+          >
+            Lift effect
+          </Box>
+        </Flex>
+      </DemoCard>
+
+      <DemoCard title="Pointer Events" description="Control click/touch behavior" code='pointerEvents="none"'>
+        <Flex gap={4}>
+          <Box
+            p={3}
+            b={1}
+            borderRadius={1}
+            pointerEvents="none"
+            opacity={0.5}
+            theme={{ dark: { borderColor: 'slate-600', color: 'slate-300' }, light: { borderColor: 'slate-300', color: 'slate-700' } }}
+            fontSize={12}
+          >
+            pointerEvents="none"
+          </Box>
+          <Box
+            p={3}
+            b={1}
+            borderRadius={1}
+            cursor="pointer"
+            theme={{ dark: { borderColor: 'slate-600', color: 'slate-300' }, light: { borderColor: 'slate-300', color: 'slate-700' } }}
+            fontSize={12}
+          >
+            pointerEvents="auto"
+          </Box>
+        </Flex>
+      </DemoCard>
+
+      <DemoCard title="User Select" description="Control text selection" code='userSelect="none"'>
+        <Flex gap={4} flexWrap="wrap">
+          <Box
+            p={3}
+            b={1}
+            borderRadius={1}
+            userSelect="none"
+            theme={{ dark: { borderColor: 'slate-600', color: 'slate-300' }, light: { borderColor: 'slate-300', color: 'slate-700' } }}
+            fontSize={12}
+          >
+            Cannot select this
+          </Box>
+          <Box
+            p={3}
+            b={1}
+            borderRadius={1}
+            userSelect="all"
+            theme={{ dark: { borderColor: 'slate-600', color: 'slate-300' }, light: { borderColor: 'slate-300', color: 'slate-700' } }}
+            fontSize={12}
+          >
+            Select all at once
+          </Box>
+        </Flex>
+      </DemoCard>
+
+      <DemoCard title="Transitions" description="Animate property changes" code='transition="all" transitionDuration={300}'>
+        <Flex gap={4}>
+          <Box
+            p={3}
+            b={1}
+            borderRadius={1}
+            cursor="pointer"
+            transition="all"
+            transitionDuration={100}
+            theme={{ dark: { borderColor: 'slate-600', color: 'slate-300' }, light: { borderColor: 'slate-300', color: 'slate-700' } }}
+            hover={{ bgColor: 'violet-500', color: 'white' }}
+            fontSize={12}
+          >
+            100ms
+          </Box>
+          <Box
+            p={3}
+            b={1}
+            borderRadius={1}
+            cursor="pointer"
+            transition="all"
+            transitionDuration={300}
+            theme={{ dark: { borderColor: 'slate-600', color: 'slate-300' }, light: { borderColor: 'slate-300', color: 'slate-700' } }}
+            hover={{ bgColor: 'violet-500', color: 'white' }}
+            fontSize={12}
+          >
+            300ms
+          </Box>
+          <Box
+            p={3}
+            b={1}
+            borderRadius={1}
+            cursor="pointer"
+            transition="all"
+            transitionDuration={500}
+            theme={{ dark: { borderColor: 'slate-600', color: 'slate-300' }, light: { borderColor: 'slate-300', color: 'slate-700' } }}
+            hover={{ bgColor: 'violet-500', color: 'white' }}
+            fontSize={12}
+          >
+            500ms
+          </Box>
+        </Flex>
+      </DemoCard>
+    </Flex>
+  );
+}
+
+function MiscDemo() {
+  return (
+    <Flex d="column" gap={6}>
+      <DemoCard title="Overflow" description="Handle content overflow" code='overflow="hidden"'>
+        <Flex gap={4}>
+          <Flex d="column" gap={1}>
+            <Box fontSize={11} theme={{ dark: { color: 'slate-400' }, light: { color: 'slate-500' } }}>
+              hidden
+            </Box>
+            <Box
+              width={24}
+              height={16}
+              overflow="hidden"
+              b={1}
+              borderStyle="dashed"
+              theme={{ dark: { borderColor: 'slate-600' }, light: { borderColor: 'slate-300' } }}
+            >
+              <DemoBox width={32} height={24} label="Large content" />
+            </Box>
+          </Flex>
+          <Flex d="column" gap={1}>
+            <Box fontSize={11} theme={{ dark: { color: 'slate-400' }, light: { color: 'slate-500' } }}>
+              auto
+            </Box>
+            <Box
+              width={24}
+              height={16}
+              overflow="auto"
+              b={1}
+              borderStyle="dashed"
+              theme={{ dark: { borderColor: 'slate-600' }, light: { borderColor: 'slate-300' } }}
+            >
+              <DemoBox width={32} height={24} label="Large content" />
+            </Box>
+          </Flex>
+        </Flex>
+      </DemoCard>
+
+      <DemoCard title="Visibility" description="Show/hide without affecting layout" code='visibility="hidden"'>
+        <Flex gap={2}>
+          <DemoBox p={3} label="1" />
+          <DemoBox p={3} visibility="hidden" label="2 (hidden)" />
+          <DemoBox p={3} label="3" />
+        </Flex>
+        <Box fontSize={11} mt={2} theme={{ dark: { color: 'slate-400' }, light: { color: 'slate-500' } }}>
+          Notice: box 2 is hidden but still takes space
+        </Box>
+      </DemoCard>
+
+      <DemoCard title="Object Fit" description="Control replaced element sizing" code='objectFit="cover"'>
+        <Flex gap={4}>
+          {(['fill', 'contain', 'cover'] as const).map((fit) => (
+            <Flex key={fit} d="column" gap={1}>
+              <Box fontSize={11} theme={{ dark: { color: 'slate-400' }, light: { color: 'slate-500' } }}>
+                {fit}
+              </Box>
+              <Box width={20} height={16} b={1} theme={{ dark: { borderColor: 'slate-600' }, light: { borderColor: 'slate-300' } }}>
+                <Box tag="img" width="fit" height="fit" objectFit={fit} props={{ src: 'https://picsum.photos/200/100', alt: 'demo' }} />
+              </Box>
+            </Flex>
+          ))}
+        </Flex>
+      </DemoCard>
+
+      <DemoCard
+        title="Responsive Breakpoints (sm, md, lg, xl)"
+        description="Apply styles at different screen sizes"
+        code="p={2} md={{ p: 4 }} lg={{ p: 6 }}"
+      >
+        <DemoBox p={2} sm={{ p: 3 }} md={{ p: 4 }} lg={{ p: 5 }} xl={{ p: 6 }} label="Resize window to see padding change" />
+        <Box fontSize={11} mt={2} theme={{ dark: { color: 'slate-400' }, light: { color: 'slate-500' } }}>
+          sm: 640px | md: 768px | lg: 1024px | xl: 1280px
+        </Box>
+      </DemoCard>
+
+      <DemoCard
+        title="Pseudo Classes (hover, focus, active)"
+        description="Style different element states"
+        code='hover={{ bgColor: "violet-500" }}'
+      >
+        <Box
+          tag="button"
+          p={3}
+          b={1}
+          borderRadius={1}
+          cursor="pointer"
+          transition="all"
+          transitionDuration={150}
+          theme={{
+            dark: { borderColor: 'slate-600', color: 'slate-300', bgColor: 'slate-800' },
+            light: { borderColor: 'slate-300', color: 'slate-700', bgColor: 'white' },
+          }}
+          hover={{ bgColor: 'violet-500', color: 'white', borderColor: 'violet-500' }}
+          active={{ bgColor: 'violet-600' }}
+          focus={{ outline: 2, outlineColor: 'violet-500', outlineOffset: 2 }}
+          fontSize={12}
+        >
+          Focus, hover, or click me
+        </Box>
+      </DemoCard>
+    </Flex>
+  );
+}
+
+// Category content map
+const categoryContent: Record<CategoryId, () => JSX.Element> = {
+  spacing: SpacingDemo,
+  sizing: SizingDemo,
+  layout: LayoutDemo,
+  position: PositionDemo,
+  typography: TypographyDemo,
+  visual: VisualDemo,
+  border: BorderDemo,
+  interaction: InteractionDemo,
+  misc: MiscDemo,
+};
+
+export default function BoxPage() {
+  const [activeCategory, setActiveCategory] = useState<CategoryId>('spacing');
+  const ActiveContent = categoryContent[activeCategory];
 
   return (
     <Box>
@@ -31,110 +948,81 @@ export default function BoxPage() {
         <Flex d="column" gap={8}>
           <Code label="Import" language="jsx" code="import Box from '@cronocode/react-box';" />
 
+          {/* Category Navigation */}
           <Box>
             <Box fontSize={14} fontWeight={600} theme={{ dark: { color: 'slate-300' }, light: { color: 'slate-700' } }} mb={4}>
-              Interactive Playground
+              Property Categories
             </Box>
-            <Flex gap={6} d="column" lg={{ d: 'row' }}>
-              <Flex
-                width="fit"
-                lg={{ width: 60 }}
-                p={5}
-                d="column"
-                gap={4}
-                theme={{
-                  dark: { bgColor: 'slate-800', borderColor: 'slate-700' },
-                  light: { bgColor: 'white', borderColor: 'slate-200' },
-                }}
-                b={1}
-                borderRadius={2}
-              >
-                <Box fontSize={13} fontWeight={500} theme={{ dark: { color: 'slate-400' }, light: { color: 'slate-500' } }} mb={2}>
-                  Adjust Props
-                </Box>
-                <Flex d="column" gap={3}>
-                  <Flex ai="center" jc="space-between">
-                    <Box fontSize={13} theme={{ dark: { color: 'slate-300' }, light: { color: 'slate-600' } }}>
-                      Border
-                    </Box>
-                    <Textbox
-                      width={20}
-                      defaultValue={props.b}
-                      type="number"
-                      theme={{ dark: { bgColor: 'slate-700', color: 'white' } }}
-                      onChange={(e) => setProps((prev) => ({ ...prev, b: +e.target.value }))}
-                    />
-                  </Flex>
-                  <Flex ai="center" jc="space-between">
-                    <Box fontSize={13} theme={{ dark: { color: 'slate-300' }, light: { color: 'slate-600' } }}>
-                      Border Radius
-                    </Box>
-                    <Textbox
-                      width={20}
-                      defaultValue={props.borderRadius}
-                      type="number"
-                      theme={{ dark: { bgColor: 'slate-700', color: 'white' } }}
-                      onChange={(e) => setProps((prev) => ({ ...prev, borderRadius: +e.target.value }))}
-                    />
-                  </Flex>
-                  <Flex ai="center" jc="space-between">
-                    <Box fontSize={13} theme={{ dark: { color: 'slate-300' }, light: { color: 'slate-600' } }}>
-                      Margin
-                    </Box>
-                    <Textbox
-                      width={20}
-                      defaultValue={props.m}
-                      type="number"
-                      theme={{ dark: { bgColor: 'slate-700', color: 'white' } }}
-                      onChange={(e) => setProps((prev) => ({ ...prev, m: +e.target.value }))}
-                    />
-                  </Flex>
-                  <Flex ai="center" jc="space-between">
-                    <Box fontSize={13} theme={{ dark: { color: 'slate-300' }, light: { color: 'slate-600' } }}>
-                      Padding
-                    </Box>
-                    <Textbox
-                      width={20}
-                      defaultValue={props.p}
-                      type="number"
-                      theme={{ dark: { bgColor: 'slate-700', color: 'white' } }}
-                      onChange={(e) => setProps((prev) => ({ ...prev, p: +e.target.value }))}
-                    />
-                  </Flex>
-                </Flex>
-              </Flex>
+            <Grid
+              gridTemplateColumns={3}
+              sm={{ gridTemplateColumns: 4 }}
+              md={{ gridTemplateColumns: 5 }}
+              lg={{ gridTemplateColumns: 9 }}
+              gap={2}
+            >
+              {categories.map((cat) => {
+                const Icon = cat.icon;
+                const isActive = activeCategory === cat.id;
+                return (
+                  <motion.div key={cat.id} whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+                    <Flex
+                      d="column"
+                      ai="center"
+                      gap={2}
+                      p={3}
+                      borderRadius={2}
+                      cursor="pointer"
+                      b={1}
+                      transition="all"
+                      transitionDuration={150}
+                      theme={{
+                        dark: {
+                          bgColor: isActive ? 'violet-950' : 'slate-800',
+                          borderColor: isActive ? 'violet-500' : 'slate-700',
+                        },
+                        light: {
+                          bgColor: isActive ? 'violet-50' : 'white',
+                          borderColor: isActive ? 'violet-400' : 'slate-200',
+                        },
+                      }}
+                      hover={{
+                        borderColor: 'violet-500',
+                      }}
+                      props={{ onClick: () => setActiveCategory(cat.id) }}
+                    >
+                      <Icon size={20} />
+                      <Box fontSize={11} fontWeight={500} textAlign="center">
+                        {cat.name}
+                      </Box>
+                    </Flex>
+                  </motion.div>
+                );
+              })}
+            </Grid>
+          </Box>
 
-              <Flex flex1 d="column" gap={4}>
-                <Code language="jsx" label="Generated Code">
-                  {`import Box from '@cronocode/react-box';
-
-function Component() {
-  return <Box ${stringProps}>Hello world</Box>;
-}`}
-                </Code>
-
-                <Flex
-                  flex1
-                  ai="center"
-                  jc="center"
-                  p={8}
-                  minHeight={40}
-                  theme={{
-                    dark: { bgColor: 'slate-800', borderColor: 'slate-700' },
-                    light: { bgColor: 'slate-50', borderColor: 'slate-200' },
-                  }}
-                  b={1}
-                  borderRadius={2}
-                >
-                  <Box
-                    {...props}
-                    theme={{ dark: { borderColor: 'slate-500', color: 'white' }, light: { borderColor: 'slate-300', color: 'slate-900' } }}
-                  >
-                    Hello world
-                  </Box>
-                </Flex>
-              </Flex>
+          {/* Active Category Content */}
+          <Box>
+            <Flex ai="center" gap={2} mb={4}>
+              <Box fontSize={14} fontWeight={600} theme={{ dark: { color: 'slate-300' }, light: { color: 'slate-700' } }}>
+                {categories.find((c) => c.id === activeCategory)?.name} Properties
+              </Box>
+              <ArrowRight size={14} />
+              <Box fontSize={12} theme={{ dark: { color: 'slate-500' }, light: { color: 'slate-400' } }}>
+                Interactive demos
+              </Box>
             </Flex>
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={activeCategory}
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -20 }}
+                transition={{ duration: 0.2 }}
+              >
+                <ActiveContent />
+              </motion.div>
+            </AnimatePresence>
           </Box>
         </Flex>
       </motion.div>

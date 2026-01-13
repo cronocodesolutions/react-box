@@ -21,6 +21,18 @@ export default class ColumnModel<TRow> {
     return this.columns.filter((c) => c.isVisible);
   }
 
+  public get isFirstLeaf() {
+    const { leafs } = this;
+
+    return leafs.length > 0 && leafs.at(0) === this;
+  }
+
+  public get isLastLeaf() {
+    const { leafs } = this;
+
+    return leafs.length > 0 && leafs.at(-1) === this;
+  }
+
   public get key() {
     return this.def.key;
   }

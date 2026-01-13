@@ -176,10 +176,11 @@ export default function DropdownPage() {
   <Dropdown.Item value={2}>Joe Smith</Dropdown.Item>
 </Dropdown>`}
           >
-            <Dropdown multiple>
+            <Dropdown multiple showCheckbox>
               <Dropdown.Display>{(selectedValues: number[]) => selectedValues.join('+')}</Dropdown.Display>
               <Dropdown.EmptyItem>No options</Dropdown.EmptyItem>
-              <Dropdown.Unselect>Select</Dropdown.Unselect>
+              <Dropdown.Unselect>Unselect All</Dropdown.Unselect>
+              <Dropdown.SelectAll>Select All</Dropdown.SelectAll>
               <Dropdown.Item value={1}>John Doe</Dropdown.Item>
               <Dropdown.Item value={2}>Joe Smith</Dropdown.Item>
               <Dropdown.Item value={3}>Alice</Dropdown.Item>

@@ -68,6 +68,9 @@ export default class GridModel<TRow> {
     const flat = [...left, ...middle, ...right].flatMap((c) => c.flatColumns);
     const leafs = flat.filter((x) => x.isLeaf);
     const visibleLeafs = flat.filter((x) => x.isLeaf && x.isVisible);
+    const userVisibleLeafs = visibleLeafs.filter(
+      (c) => ![EMPTY_CELL_KEY, ROW_NUMBER_CELL_KEY, ROW_SELECTION_CELL_KEY, GROUPING_CELL_KEY].includes(c.key),
+    );
     const maxDeath = flat.maxBy((x) => x.death) + 1;
 
     return {
@@ -77,6 +80,7 @@ export default class GridModel<TRow> {
       flat,
       leafs,
       visibleLeafs,
+      userVisibleLeafs,
       maxDeath,
     };
   });

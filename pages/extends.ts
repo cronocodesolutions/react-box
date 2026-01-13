@@ -328,4 +328,43 @@ export const components = Box.components({
       },
     },
   },
+
+  // ========== FIDO Enrollment Page (Cybersecurity Theme) ==========
+
+  // Override DataGrid for FIDO page - cybersecurity dark theme
+  // datagrid: {
+  //   styles: {
+  //     p: 5,
+  //   },
+  //   children: {
+  //     topBar: {
+  //       styles: {
+  //         bb: 0,
+  //         bgColor: 'transparent',
+  //         theme: { dark: { bgColor: 'transparent' } },
+  //         pb: 8,
+  //         px: 0,
+  //       },
+  //     },
+  //     header: {
+  //       styles: {},
+  //       children: {
+  //         cell: {
+  //           styles: {
+  //             bt: 1,
+  //             textTransform: 'uppercase',
+  //             bgColor: 'slate-100',
+  //             hover: { bgColor: 'slate-100' },
+  //             theme: { dark: { bgColor: 'slate-700', hover: { bgColor: 'slate-700' } } },
+  //           },
+  //           variants: {
+  //             isSortable: {
+  //               hover: { bgColor: 'slate-100' },
+  //             },
+  //           },
+  //         },
+  //       },
+  //     },
+  //   },
+  // },
 });

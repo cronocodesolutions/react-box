@@ -6,12 +6,14 @@ import Box from '../../src/box';
 import Button from '../../src/components/button';
 import Flex from '../../src/components/flex';
 import PageContext from '../pageContext';
+import AiContextPage from '../pages/aiContextPage';
 import BoxPage from '../pages/boxPage';
 import ButtonPage from '../pages/buttonPage';
 import CheckboxPage from '../pages/checkboxPage';
 import ColorPage from '../pages/colorPage';
 import DataGridPage from '../pages/dataGridPage';
 import DropdownPage from '../pages/dropdownPage';
+import FidoEnrollmentPage from '../pages/fidoEnrollmentPage';
 import FlexPage from '../pages/flexPage';
 import GridPage from '../pages/gridPage';
 import HomePage from '../pages/homePage';
@@ -155,6 +157,8 @@ export default function App() {
                     <Route path="/tooltip" element={<TooltipPage />} />
                     <Route path="/dropdown" element={<DropdownPage />} />
                     <Route path="/colors" element={<ColorPage />} />
+                    <Route path="/ai-context" element={<AiContextPage />} />
+                    <Route path="/fido-enrollment" element={<FidoEnrollmentPage />} />
                   </Routes>
                 </motion.div>
               </AnimatePresence>
@@ -163,9 +167,9 @@ export default function App() {
         </Box>
 
         {/* Right Sidebar (Desktop) */}
-        <Box width={0} overflow="hidden" xl={{ width: 50 }} flexShrink={0}>
+        {/* <Box width={0} overflow="hidden" xl={{ width: 50 }} flexShrink={0}>
           {rightSidebar}
-        </Box>
+        </Box> */}
       </Flex>
     </Box>
   );
