@@ -8,6 +8,7 @@ This document describes the current capabilities of the DataGrid component and r
 
 - Location: `src/components/dataGrid/*` (main entry: `src/components/dataGrid.tsx`, model: `models/gridModel.ts`)
 - Existing strengths: grouping, sorting, column pinning, column resizing, column visibility toggles, row selection (checkbox), row numbering, simple virtualization, custom cell renderers via `ColumnType.Cell`, header context menus and top/bottom bars, theming through the hosting library.
+- Feature toggles: sorting and resizing can be disabled globally or per-column via `sortable` and `resizable` flags.
 
 ---
 
@@ -16,14 +17,15 @@ This document describes the current capabilities of the DataGrid component and r
 ### Data & definition API
 
 - DataGridProps: `{ data: TRow[]; def: GridDefinition<TRow>; loading?: boolean; onSelectionChange?: ... }`
-- GridDefinition includes: `columns`, `rowKey`, `showRowNumber`, `rowSelection`, `rowHeight`, `visibleRowsCount`, `topBar`, `bottomBar`.
-- Column type supports nested columns (`columns`), `key`, `header`, `pin` (`LEFT`/`RIGHT`), `width`, `align`, and a custom `Cell` component.
+- GridDefinition includes: `columns`, `rowKey`, `showRowNumber`, `rowSelection`, `rowHeight`, `visibleRowsCount`, `topBar`, `bottomBar`, `sortable`, `resizable`.
+- Column type supports nested columns (`columns`), `key`, `header`, `pin` (`LEFT`/`RIGHT`), `width`, `align`, `sortable`, `resizable`, and a custom `Cell` component.
 
 ### UX features
 
-- Sorting: header context menu and header click can toggle sort state; supports ASC/DESC/clear.
+- Sorting: header context menu and header click can toggle sort state; supports ASC/DESC/clear. Can be disabled globally (`GridDefinition.sortable: false`) or per-column (`ColumnType.sortable: false`). Column-level settings take priority over global.
 - Column pinning (LEFT/RIGHT) with header controls and grouping-aware pinning.
-- Column resizing via drag handle; columns respect min/max widths in model logic.
+- Column resizing via drag handle; columns respect min/max widths in model logic. Can be disabled globally (`GridDefinition.resizable: false`) or per-column (`ColumnType.resizable: false`). Column-level settings take priority over global.
+- Flexible column sizing: columns automatically fill available horizontal space proportionally based on their base width. Set `ColumnType.flexible: false` to keep a column fixed at its width.
 - Column visibility toggling via a top-bar context menu (checkbox list).
 - Column grouping (grouping by a column): top bar shows active grouping and groups can be toggled (expand/collapse).
 - Row selection: per-row checkboxes and select-all in header; `onSelectionChange` callback provides selection state.
@@ -41,6 +43,80 @@ This document describes the current capabilities of the DataGrid component and r
 ### Tests
 
 - Unit tests cover header construction, pinning logic, grouping, sorting and row number behavior (`src/components/dataGrid/models/gridModel.test.ts`).
+- Unit tests for `sortable` and `resizable` column flags including global/column-level priority logic (`src/components/dataGrid/models/columnModel.test.ts`).
+
+### Usage examples
+
+#### Disable sorting and resizing globally
+
+```tsx
+<DataGrid
+  data={data}
+  def={{
+    columns: [
+      { key: 'name', header: 'Name' },
+      { key: 'email', header: 'Email' },
+    ],
+    sortable: false,   // Disables sorting for all columns
+    resizable: false,  // Disables resizing for all columns
+  }}
+/>
+```
+
+#### Override global settings per column
+
+```tsx
+<DataGrid
+  data={data}
+  def={{
+    columns: [
+      { key: 'name', header: 'Name' },                         // Not sortable, not resizable (inherits global)
+      { key: 'age', header: 'Age', sortable: true },           // Sortable (overrides global)
+      { key: 'email', header: 'Email', resizable: true },      // Resizable (overrides global)
+    ],
+    sortable: false,   // Global default: no sorting
+    resizable: false,  // Global default: no resizing
+  }}
+/>
+```
+
+#### Disable specific columns while others remain enabled
+
+```tsx
+<DataGrid
+  data={data}
+  def={{
+    columns: [
+      { key: 'id', header: 'ID', sortable: false, resizable: false },  // Fixed column
+      { key: 'name', header: 'Name' },                                  // Sortable & resizable (default)
+      { key: 'email', header: 'Email' },                                // Sortable & resizable (default)
+    ],
+    // sortable and resizable default to true when not specified
+  }}
+/>
+```
+
+#### Flexible column sizing (columns fill available space)
+
+By default, all columns flex proportionally based on their width. The grid automatically distributes extra horizontal space.
+
+```tsx
+<DataGrid
+  data={data}
+  def={{
+    columns: [
+      { key: 'id', header: 'ID', width: 80, flexible: false },  // Fixed at 80px, won't stretch
+      { key: 'name', header: 'Name', width: 200 },              // Will stretch (default flexible: true)
+      { key: 'email', header: 'Email', width: 300 },            // Will stretch more (larger base width)
+    ],
+  }}
+/>
+```
+
+In the example above:
+- The 'ID' column stays fixed at 80px
+- The remaining space is distributed between 'Name' and 'Email' proportionally (200:300 ratio)
+- If the grid is 1000px wide: ID=80px, Name=368px, Email=552px
 
 ---
 
@@ -86,7 +162,9 @@ Prioritized (must-have → nice-to-have):
 
 4. Column improvements (must-have)
 
-- Column definitions: add `sortable?: boolean`, `filterable?: boolean`, `editable?: boolean`, `resizable?: boolean`, `minWidth`, `maxWidth`, `defaultWidth`.
+- ✅ Column definitions: `sortable?: boolean` and `resizable?: boolean` — implemented with global and per-column flags (column-level takes priority).
+- ✅ Column definitions: `flexible?: boolean` — flexible column sizing implemented. All columns flex proportionally by default. Set `flexible: false` to keep a column fixed.
+- Column definitions: add `filterable?: boolean`, `editable?: boolean`, `minWidth`, `maxWidth`, `defaultWidth`.
 - Column reordering (drag-and-drop) with `onColumnOrderChange`.
 - Column width persistence / controlled widths with `width` prop support and `onColumnResize` callback.
 
@@ -166,7 +244,7 @@ interface DataGridProps<TRow> {
 }
 ```
 
-- ColumnType additions:
+- ColumnType additions (✅ = implemented):
 
 ```ts
 interface ColumnType<TRow> {
@@ -175,12 +253,23 @@ interface ColumnType<TRow> {
   width?: number;
   minWidth?: number;
   maxWidth?: number;
-  sortable?: boolean;
+  sortable?: boolean;    // ✅ Implemented - disable sorting for this column
+  resizable?: boolean;   // ✅ Implemented - disable resizing for this column
+  flexible?: boolean;    // ✅ Implemented - disable flexible sizing for this column (default: true)
   filterable?: boolean | { type: 'text' | 'select' | 'number' | 'date' };
   editable?: boolean | { Editor: React.ComponentType<any> };
-  resizable?: boolean;
   reorderable?: boolean;
   Cell?: React.ComponentType<{ cell: CellModel<TRow>; rowIndex: number }>;
+}
+```
+
+- GridDefinition additions (✅ = implemented):
+
+```ts
+interface GridDefinition<TRow> {
+  // ... existing props ...
+  sortable?: boolean;    // ✅ Implemented - disable sorting for all columns (default: true)
+  resizable?: boolean;   // ✅ Implemented - disable resizing for all columns (default: true)
 }
 ```
 
@@ -188,11 +277,14 @@ interface ColumnType<TRow> {
 
 ## Tests and examples to add
 
+- ✅ Unit tests for `sortable` and `resizable` flags (global and column-level priority) — added to `columnModel.test.ts`
+- ✅ Unit tests for `flexible` flag and flex width calculation — added to `columnModel.test.ts`
 - Unit tests for selection (single and multi), select-all edge cases (empty data, partial selections), and `onSelectionChange` payload.
 - Tests for `onColumnResize` and width updates (simulate mouse events)
 - Tests for pin/unpin and column visibility toggles (state change and layout update assertions)
 - Integration tests for grouping expand/collapse and grouping aggregates
 - Visual/manual test pages in `pages/`:
+  - ✅ Disable Sorting and Resizing demo — added to `dataGridPage.tsx`
   - Controlled selection demo
   - Server-side pagination + sorting demo
   - Column reordering + persistence demo

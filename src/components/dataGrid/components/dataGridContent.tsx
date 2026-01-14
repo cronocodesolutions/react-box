@@ -2,6 +2,7 @@ import { useCallback, useRef, useState } from 'react';
 import Box from '../../../box';
 import GridModel from '../models/gridModel';
 import DataGridBody from './dataGridBody';
+import DataGridEmptyColumns from './dataGridEmptyColumns';
 import DataGridHeader from './dataGridHeader';
 
 interface Props<TRow> {
@@ -24,6 +25,12 @@ export default function DataGridContent<TRow>(props: Props<TRow>) {
       rafRef.current = null;
     });
   }, []);
+
+  const hasVisibleColumns = grid.columns.value.userVisibleLeafs.length > 0;
+
+  if (!hasVisibleColumns) {
+    return <DataGridEmptyColumns />;
+  }
 
   return (
     <Box overflowX="scroll" style={{ willChange: 'scroll-position' }} props={{ onScroll: handleScroll }}>

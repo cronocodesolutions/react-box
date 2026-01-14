@@ -23,9 +23,9 @@ export default function DataGridHeaderCellContextMenu<TRow>(props: Props<TRow>) 
   const [tooltipPosition, setTooltipPosition] = useState<{ top: number; left: number }>({ top: 0, left: 0 });
   const openLeft = useMemo(() => tooltipPosition.left > window.innerWidth / 2, [tooltipPosition.left]);
 
-  const isSortAscAvailable = isLeaf && (grid.sortColumn !== key || grid.sortDirection === 'DESC');
-  const isSortDescAvailable = isLeaf && (grid.sortColumn !== key || grid.sortDirection === 'ASC');
-  const isClearSortAvailable = isLeaf && grid.sortColumn === key;
+  const isSortAscAvailable = isLeaf && column.sortable && (grid.sortColumn !== key || grid.sortDirection === 'DESC');
+  const isSortDescAvailable = isLeaf && column.sortable && (grid.sortColumn !== key || grid.sortDirection === 'ASC');
+  const isClearSortAvailable = isLeaf && column.sortable && grid.sortColumn === key;
   const isPinLeftAvailable = pin !== 'LEFT';
   const isPinRightAvailable = pin !== 'RIGHT';
   const isUnpinAvailable = !!pin;
@@ -49,7 +49,7 @@ export default function DataGridHeaderCellContextMenu<TRow>(props: Props<TRow>) 
   const isLastLeftPinned = isLeftPinned && isEdge;
   const isFirstRightPinned = isRightPinned && isEdge;
   const isLastRightPinned = isRightPinned && right === 0;
-  const isSortable = isLeaf && !isEmptyCell && !isRowNumber && !isRowSelection;
+  const isSortable = isLeaf && !isEmptyCell && !isRowNumber && !isRowSelection && column.sortable;
 
   return (
     <Flex position="absolute" left={positionLeft} right={positionRight} top="1/2" translateY={-3} ai="center">

@@ -55,26 +55,28 @@ export default function DataGridGlobalFilter<TRow>(props: Props<TRow>) {
     <Flex component="datagrid.topBar.globalFilter">
       {showStats && (
         <Box component="datagrid.topBar.globalFilter.stats">
-          {filtered} / {total}
+          {filtered}/{total}
         </Box>
       )}
-      <Flex component="datagrid.topBar.globalFilter.inputWrapper">
-        <Flex component="datagrid.topBar.globalFilter.inputWrapper.icon">
-          <SearchIcon fill="currentColor" width="1rem" />
+      <Flex position="relative" ai="center">
+        <Flex position="absolute" left={3} pointerEvents="none" color="gray-400" theme={{ dark: { color: 'gray-500' } }}>
+          <SearchIcon fill="currentColor" width="14px" />
         </Flex>
-        <Textbox
-          component="datagrid.topBar.globalFilter.inputWrapper.input"
-          placeholder="Search..."
-          value={localValue}
-          onChange={handleChange}
-          pl={8}
-          pr={localValue ? 8 : 3}
-          height={8}
-          width={50}
-        />
+        <Textbox placeholder="Search..." variant="compact" value={localValue} onChange={handleChange} pl={8} pr={localValue ? 8 : 3} />
         {localValue && (
-          <Box component="datagrid.topBar.globalFilter.inputWrapper.clear" props={{ onClick: handleClear }}>
-            ✕
+          <Box
+            position="absolute"
+            right={2}
+            cursor="pointer"
+            p={1}
+            color="gray-400"
+            hover={{ color: 'gray-600' }}
+            theme={{ dark: { color: 'gray-500', hover: { color: 'gray-300' } } }}
+            props={{ onClick: handleClear }}
+          >
+            <Box fontSize={12} fontWeight={600}>
+              ✕
+            </Box>
           </Box>
         )}
       </Flex>

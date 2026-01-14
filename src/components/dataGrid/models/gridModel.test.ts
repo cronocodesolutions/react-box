@@ -65,7 +65,8 @@ describe('GridModel', () => {
       const grid = getGridModel({ gridDef: { columns: [{ key: 'firstName' }] } });
 
       expect(grid.headerRows.value).toHaveLength(1);
-      expect(grid.headerRows.value.at(0)).toHaveLength(2);
+      // 1 user column (no empty cell with flexible sizing)
+      expect(grid.headerRows.value.at(0)).toHaveLength(1);
     });
 
     it('creates no rows when no data', () => {
@@ -206,10 +207,10 @@ describe('GridModel', () => {
       const headerLevel0 = grid.headerRows.value.at(0)!;
       expect(headerLevel0.some((c) => c.key === 'day')).toBe(true);
 
-      // Ensure grid template columns recalculated (left + auto + right pattern)
+      // Ensure grid template columns recalculated (uses max-content for columns)
       const gtc = grid.gridTemplateColumns.value;
       expect(typeof gtc).toBe('string');
-      expect(gtc.includes('auto')).toBe(true);
+      expect(gtc.includes('max-content')).toBe(true);
     });
   });
 
@@ -297,7 +298,8 @@ describe('GridModel', () => {
     it('adds row number column', () => {
       const grid = getGridModel({ gridDef: { showRowNumber: true } });
 
-      expect(grid.columns.value.visibleLeafs).toHaveLength(10);
+      // 8 user columns + 1 row number column (no empty cell with flexible sizing)
+      expect(grid.columns.value.visibleLeafs).toHaveLength(9);
 
       const rowNumberColumn = grid.columns.value.visibleLeafs.find((x) => x.key === ROW_NUMBER_CELL_KEY);
       expect(rowNumberColumn).toBeDefined();

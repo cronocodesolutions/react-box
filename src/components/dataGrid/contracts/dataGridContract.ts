@@ -71,6 +71,12 @@ export interface ColumnType<TRow> {
   Cell?: React.ComponentType<{ cell: CellModel<TRow> }>;
   /** Enable filtering for this column. Set to true for default text filter, or provide config */
   filterable?: boolean | ColumnFilterConfig;
+  /** Enable sorting for this column. If undefined, inherits from GridDefinition.sortable */
+  sortable?: boolean;
+  /** Enable resizing for this column. If undefined, inherits from GridDefinition.resizable */
+  resizable?: boolean;
+  /** If false, column stays fixed at its width and doesn't participate in flex distribution. Default: true */
+  flexible?: boolean;
 }
 
 export interface GridDefinition<TRow> {
@@ -82,10 +88,18 @@ export interface GridDefinition<TRow> {
   visibleRowsCount?: number;
   topBar?: boolean;
   bottomBar?: boolean;
+  /** Title displayed in the top bar */
+  title?: React.ReactNode;
+  /** Custom filters or actions rendered in the top bar */
+  topBarContent?: React.ReactNode;
   /** Enable global filter with fuzzy search */
   globalFilter?: boolean;
   /** Keys of columns to search in global filter. If not provided, all columns are searched */
   globalFilterKeys?: (keyof TRow | Key)[];
+  /** Enable sorting for all columns. Default is true. Individual column settings take priority. */
+  sortable?: boolean;
+  /** Enable resizing for all columns. Default is true. Individual column settings take priority. */
+  resizable?: boolean;
   // pagination?: Pagination;
 }
 

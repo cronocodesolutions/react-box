@@ -1,6 +1,6 @@
 {
   "name": "@cronocode/react-box",
-  "version": "3.1.6",
+  "version": "3.1.7",
   "type": "module",
   "main": "./box.cjs",
   "module": "./box.mjs",
@@ -28,9 +28,10 @@
   "scripts": {
     "dev": "vite ./pages --config ./pages.vite.config.ts --mode dev",
     "build:pages": "vite build ./pages --config ./pages.vite.config.ts --outDir ../dist --mode production",
+    "postbuild:pages": "cp ./dist/index.html ./dist/404.html",
     "preview": "vite preview",
     "build": "vite build",
-    "postbuild": "cp package.json dist & cp LICENSE dist & cp README.md dist",
+    "postbuild": "cp package.json dist && cp LICENSE dist && cp README.md dist && cp src/BOX_AI_CONTEXT.md dist",
     "build:dev": "vite build --mode dev",
     "compile": "tsc --noEmit --skipLibCheck",
     "test": "vitest run",
@@ -53,9 +54,7 @@
   "homepage": "https://github.com/cronocodesolutions/react-box#readme",
   "description": "",
   "dependencies": {
-    "@cronocode/identity-factory": "^0.0.6",
-    "framer-motion": "^12.23.26",
-    "lucide-react": "^0.562.0"
+    "@cronocode/identity-factory": "^0.0.6"
   },
   "devDependencies": {
     "@eslint/js": "^9.30.1",
@@ -76,8 +75,10 @@
     "eslint-plugin-prettier": "^5.5.1",
     "eslint-plugin-react-hooks": "^5.2.0",
     "eslint-plugin-react-refresh": "^0.4.20",
+    "framer-motion": "^12.26.2",
     "globals": "^16.3.0",
     "happy-dom": "^15.7.4",
+    "lucide-react": "^0.562.0",
     "prettier": "^3.3.3",
     "prismjs": "^1.29.0",
     "react": "^18.3.1",

@@ -406,7 +406,7 @@ const boxComponents = {
       borderRadius: 2,
       userSelect: 'none',
       lineHeight: 20,
-      minWidth: 40,
+      width: 'fit-content',
       transition: 'none',
       hover: {
         borderColor: 'gray-400',
@@ -448,6 +448,7 @@ const boxComponents = {
         px: 2,
         py: 1,
         fontSize: 13,
+        height: 7.5,
       },
     },
     children: {
@@ -477,6 +478,7 @@ const boxComponents = {
       },
       item: {
         styles: {
+          textWrap: 'nowrap',
           display: 'flex',
           width: 'fit',
           p: 3,
@@ -685,173 +687,20 @@ const boxComponents = {
             children: {
               stats: {
                 styles: {
-                  fontSize: 13,
-                  color: 'gray-500',
+                  fontSize: 11,
+                  fontWeight: 500,
+                  px: 2,
+                  py: 1,
+                  borderRadius: 1,
+                  bgColor: 'violet-100',
+                  color: 'violet-700',
+                  theme: {
+                    dark: {
+                      bgColor: 'violet-900',
+                      color: 'violet-300',
+                    },
+                  },
                   textWrap: 'nowrap',
-                  theme: {
-                    dark: {
-                      color: 'gray-400',
-                    },
-                  },
-                },
-              },
-              inputWrapper: {
-                styles: {
-                  display: 'flex',
-                  position: 'relative',
-                },
-                children: {
-                  icon: {
-                    styles: {
-                      display: 'flex',
-                      position: 'absolute',
-                      left: 2,
-                      top: '1/2',
-                      translateY: '-1/2',
-                      pointerEvents: 'none',
-                      color: 'gray-500',
-                      theme: {
-                        dark: {
-                          color: 'gray-400',
-                        },
-                      },
-                    },
-                  },
-                  input: {
-                    styles: {
-                      display: 'inline-block',
-                      b: 1,
-                      borderColor: 'gray-300',
-                      bgColor: 'white',
-                      color: 'gray-900',
-                      borderRadius: 2,
-                      py: 2,
-                      fontSize: 13,
-                      focus: {
-                        outline: 2,
-                        outlineOffset: 0,
-                        borderColor: 'violet-500',
-                        outlineColor: 'violet-100',
-                      },
-                      theme: {
-                        dark: {
-                          bgColor: 'gray-800',
-                          borderColor: 'gray-700',
-                          color: 'gray-100',
-                          focus: {
-                            borderColor: 'violet-500',
-                            outlineColor: 'violet-950',
-                          },
-                        },
-                      },
-                    },
-                  },
-                  clear: {
-                    styles: {
-                      display: 'flex',
-                      position: 'absolute',
-                      right: 2,
-                      top: '1/2',
-                      translateY: '-1/2',
-                      cursor: 'pointer',
-                      fontSize: 13,
-                      color: 'gray-500',
-                      hover: {
-                        color: 'gray-700',
-                      },
-                      theme: {
-                        dark: {
-                          color: 'gray-400',
-                          hover: {
-                            color: 'gray-200',
-                          },
-                        },
-                      },
-                    },
-                  },
-                },
-              },
-            },
-          },
-          contextMenu: {
-            clean: true,
-            styles: {
-              cursor: 'pointer',
-              p: 2,
-              borderRadius: 2,
-              color: 'gray-700',
-              hover: {
-                bgColor: 'gray-100',
-              },
-              theme: {
-                dark: {
-                  color: 'gray-300',
-                  hover: {
-                    bgColor: 'gray-800',
-                  },
-                },
-              },
-            },
-            children: {
-              tooltip: {
-                styles: {
-                  bgColor: 'white',
-                  color: 'gray-900',
-                  width: 56,
-                  b: 1,
-                  borderColor: 'gray-300',
-                  borderRadius: 3,
-                  display: 'flex',
-                  d: 'column',
-                  mt: 2,
-                  py: 2,
-                  translateX: -1,
-                  shadow: 'large',
-                  overflow: 'auto',
-                  maxHeight: 100,
-                  theme: {
-                    dark: {
-                      bgColor: 'gray-800',
-                      borderColor: 'gray-700',
-                      color: 'gray-100',
-                    },
-                  },
-                },
-                children: {
-                  item: {
-                    clean: true,
-                    styles: {
-                      display: 'flex',
-                      gap: 2,
-                      p: 3,
-                      cursor: 'pointer',
-                      color: 'gray-900',
-                      hover: {
-                        bgColor: 'violet-50',
-                      },
-                      theme: {
-                        dark: {
-                          color: 'gray-100',
-                          hover: {
-                            bgColor: 'gray-700',
-                          },
-                        },
-                      },
-                    },
-                    children: {
-                      icon: {
-                        styles: {
-                          width: 4,
-                          color: 'violet-950',
-                          theme: {
-                            dark: {
-                              color: 'violet-300',
-                            },
-                          },
-                        },
-                      },
-                    },
-                  },
                 },
               },
             },
@@ -996,9 +845,6 @@ const boxComponents = {
             },
           },
         },
-        variants: {
-          isResizeMode: { userSelect: 'none' },
-        },
         children: {
           cell: {
             styles: {
@@ -1065,6 +911,9 @@ const boxComponents = {
               isRowSelected: {},
               isRowSelection: {},
               isRowNumber: { jc: 'center' },
+              isFirstLeaf: {},
+              isLastLeaf: {},
+              isEmptyCell: {},
             },
             children: {
               contextMenu: {
@@ -1232,6 +1081,9 @@ const boxComponents = {
               isRowNumber: { jc: 'right' },
               isRowSelection: {},
               isRowSelected: {},
+              isFirstLeaf: {},
+              isLastLeaf: {},
+              isEmptyCell: {},
             },
           },
         },

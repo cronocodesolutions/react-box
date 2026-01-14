@@ -11,7 +11,9 @@ export default class ColumnModel<TRow> {
     this.columns = def.columns?.map((d) => new ColumnModel(def.pin ? { ...d, pin: def.pin } : d, grid, this)) ?? [];
 
     if (this.isLeaf) {
-      this._inlineWidth = this.key == EMPTY_CELL_KEY ? undefined : (this.def.width ?? this.grid.DEFAULT_COLUMN_WIDTH_PX);
+      // Use stored width if available (survives memo recreation), otherwise use def.width or default
+      const storedWidth = this.grid.columnWidths.get(this.key);
+      this._inlineWidth = this.key == EMPTY_CELL_KEY ? undefined : (storedWidth ?? this.def.width ?? this.grid.DEFAULT_COLUMN_WIDTH_PX);
       this._pin = def.pin;
     }
   }
@@ -19,6 +21,18 @@ export default class ColumnModel<TRow> {
   public columns: ColumnModel<TRow>[] = [];
   public get visibleColumns() {
     return this.columns.filter((c) => c.isVisible);
+  }
+
+  public get isFirstLeaf() {
+    const { leafs } = this;
+
+    return leafs.length > 0 && leafs.at(0) === this;
+  }
+
+  public get isLastLeaf() {
+    const { leafs } = this;
+
+    return leafs.length > 0 && leafs.at(-1) === this;
   }
 
   public get key() {
@@ -38,6 +52,32 @@ export default class ColumnModel<TRow> {
   }
   public get filterable() {
     return this.def.filterable;
+  }
+
+  /** Whether sorting is enabled for this column. Column-level setting takes priority over grid-level. */
+  public get sortable(): boolean {
+    if (this.def.sortable !== undefined) {
+      return this.def.sortable;
+    }
+    return this.grid.props.def.sortable !== false;
+  }
+
+  /** Whether resizing is enabled for this column. Column-level setting takes priority over grid-level. */
+  public get resizable(): boolean {
+    if (this.def.resizable !== undefined) {
+      return this.def.resizable;
+    }
+    return this.grid.props.def.resizable !== false;
+  }
+
+  /** Whether column participates in flex distribution. Default true unless explicitly false. */
+  public get isFlexible(): boolean {
+    return this.def.flexible !== false;
+  }
+
+  /** The base width before flex calculation (what user set or DEFAULT). */
+  public get baseWidth(): number {
+    return this._inlineWidth ?? this.grid.DEFAULT_COLUMN_WIDTH_PX;
   }
 
   private _pin?: PinPosition;
@@ -90,7 +130,11 @@ export default class ColumnModel<TRow> {
 
   private _inlineWidth?: number;
   public get inlineWidth(): number | undefined {
-    if (this.isLeaf) return this._inlineWidth;
+    if (this.isLeaf) {
+      // Use flex-calculated width if available, otherwise use base width
+      const flexWidth = this.grid.getFlexWidth(this.key);
+      return flexWidth ?? this._inlineWidth;
+    }
 
     const sizes = this.visibleColumns.map((c) => c.inlineWidth).filter((width) => typeof width === 'number');
 
@@ -189,11 +233,12 @@ export default class ColumnModel<TRow> {
   }
 
   public resizeColumn = (e: unknown) => {
-    this.grid.isResizeMode = true;
     const startPageX = (e as MouseEvent).pageX;
     const { MIN_COLUMN_WIDTH_PX: MIN_WIDTH_PX, update } = this.grid;
-    const totalWidth = this.leafs.sumBy((c) => c.inlineWidth as number) - this.leafs.length * MIN_WIDTH_PX;
-    const sizes = this.leafs.toRecord((leaf) => [leaf.key, leaf.inlineWidth as number]);
+
+    // Capture current visual widths (includes flex-calculated width) as starting point
+    const sizes = this.leafs.toRecord((leaf) => [leaf.key, leaf.inlineWidth ?? leaf.baseWidth]);
+    const totalWidth = this.leafs.sumBy((c) => sizes[c.key]) - this.leafs.length * MIN_WIDTH_PX;
 
     const resize = FnUtils.throttle((e: MouseEvent) => {
       const dragDistance = (e.pageX - startPageX) * (this.pin === 'RIGHT' ? -1 : 1);
@@ -207,6 +252,7 @@ export default class ColumnModel<TRow> {
         leaf.setWidth(newWidth < MIN_WIDTH_PX ? MIN_WIDTH_PX : newWidth);
       });
 
+      this.grid.flexWidths.clear();
       this.grid.sizes.clear();
       update();
     }, 40);
@@ -215,7 +261,6 @@ export default class ColumnModel<TRow> {
 
     const stopResize = (_e: MouseEvent) => {
       controller.abort();
-      this.grid.isResizeMode = false;
       update();
     };
 

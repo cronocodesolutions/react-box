@@ -14,8 +14,24 @@ interface Props<TRow> {
 
 export default function DataGridHeaderCell<TRow>(props: Props<TRow>) {
   const { column } = props;
-  const { key, pin, left, right, isEdge, isLeaf, leafs, grid, header, gridRows, widthVarName, leftVarName, rightVarName, inlineWidth } =
-    column;
+  const {
+    key,
+    pin,
+    left,
+    right,
+    isEdge,
+    isLeaf,
+    leafs,
+    grid,
+    header,
+    gridRows,
+    widthVarName,
+    leftVarName,
+    rightVarName,
+    inlineWidth,
+    isFirstLeaf,
+    isLastLeaf,
+  } = column;
 
   const isEmptyCell = key === EMPTY_CELL_KEY;
   const isGroupingCell = key === GROUPING_CELL_KEY;
@@ -29,11 +45,11 @@ export default function DataGridHeaderCell<TRow>(props: Props<TRow>) {
   const isLastLeftPinned = isLeftPinned && isEdge;
   const isFirstRightPinned = isRightPinned && isEdge;
   const isLastRightPinned = isRightPinned && right === 0;
-  const isSortable = isLeaf && !isEmptyCell && !isRowNumber && !isRowSelection;
+  const isSortable = isLeaf && !isEmptyCell && !isRowNumber && !isRowSelection && column.sortable;
 
   const gridColumn = isLeaf ? 1 : leafs.length;
 
-  const showResizer = !isRowNumber && !isRowSelection;
+  const showResizer = !isRowNumber && !isRowSelection && column.resizable;
   const showContextMenu = !isRowNumber && !isRowSelection;
 
   const pl = isRowSelection ? undefined : column.align === 'right' ? 10 : 3;
@@ -68,7 +84,18 @@ export default function DataGridHeaderCell<TRow>(props: Props<TRow>) {
     <Flex
       props={{ role: 'columnheader' }}
       component="datagrid.header.cell"
-      variant={{ isPinned, isFirstLeftPinned, isLastLeftPinned, isFirstRightPinned, isLastRightPinned, isSortable, isRowNumber }}
+      variant={{
+        isPinned,
+        isFirstLeftPinned,
+        isLastLeftPinned,
+        isFirstRightPinned,
+        isLastRightPinned,
+        isSortable,
+        isRowNumber,
+        isFirstLeaf,
+        isLastLeaf,
+        isEmptyCell,
+      }}
       gridRow={gridRows}
       gridColumn={gridColumn}
       style={{

@@ -172,7 +172,9 @@ function DropdownImpl<TVal>(props: Props<TVal>, ref: Ref<HTMLInputElement>): Rea
       component="dropdown"
       props={{ tabIndex: 0, ...tagProps }}
       position="relative"
-      pr={!hideIcon ? 4 : undefined}
+      pr={!hideIcon ? 6 : undefined}
+      minWidth={isOpen && isSearchable ? 36 : undefined}
+      width="fit-content"
       {...restProps}
     >
       {valueToUse.map((x) => (
@@ -198,7 +200,7 @@ function DropdownImpl<TVal>(props: Props<TVal>, ref: Ref<HTMLInputElement>): Rea
           />
         </Flex>
       )}
-      &nbsp;{display}&nbsp;
+      {display ?? '\u00A0'}
       {!hideIcon && (
         <Flex component="dropdown.icon">
           <BaseSvg viewBox="0 0 10 6" width="0.6rem" rotate={isOpen ? 180 : 0}>
@@ -228,7 +230,10 @@ function DropdownImpl<TVal>(props: Props<TVal>, ref: Ref<HTMLInputElement>): Rea
                   <Box
                     component="dropdown.selectAll"
                     variant={{ compact }}
-                    {...{ ...selectAllItem.props, props: { ...selectAllItem.props.props, onClick: (e) => itemSelectHandler(e, ...items) } }}
+                    {...{
+                      ...selectAllItem.props,
+                      props: { ...selectAllItem.props.props, onClick: (e) => itemSelectHandler(e, ...items) },
+                    }}
                   />
                 )}
                 {filteredItems.map((item) => {
@@ -246,7 +251,7 @@ function DropdownImpl<TVal>(props: Props<TVal>, ref: Ref<HTMLInputElement>): Rea
                         children:
                           showCheckbox && multiple ? (
                             <>
-                              <Checkbox readOnly checked={isSelected} />
+                              <Checkbox readOnly checked={isSelected} mr={2} />
                               {itemChildren}
                             </>
                           ) : (

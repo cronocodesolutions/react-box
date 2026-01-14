@@ -2,6 +2,7 @@ import { motion } from 'framer-motion';
 import {
   AlignLeft,
   BookOpen,
+  Bot,
   Box as BoxIcon,
   CheckSquare,
   ChevronDown,
@@ -90,6 +91,62 @@ export default function Sidebar({ toggleTheme, onClose }: SidebarProps) {
             Theme Setup
           </MenuItem>
         </MenuSection>
+
+        {/* AI Context - Highlighted */}
+        <Box mb={4}>
+          <NavLink to="/ai-context">
+            {({ isActive }) => (
+              <Flex
+                ai="center"
+                gap={3}
+                py={2.5}
+                px={3}
+                borderRadius={2}
+                cursor={isActive ? 'default' : 'pointer'}
+                bgImage={isActive ? 'gradient-primary' : 'none'}
+                theme={{
+                  dark: {
+                    bgColor: isActive ? undefined : 'indigo-950',
+                    color: isActive ? 'white' : 'indigo-300',
+                    borderColor: 'indigo-800',
+                  },
+                  light: {
+                    bgColor: isActive ? undefined : 'indigo-50',
+                    color: isActive ? 'white' : 'indigo-600',
+                    borderColor: 'indigo-200',
+                  },
+                }}
+                b={isActive ? 0 : 1}
+                fontWeight={500}
+                fontSize={14}
+              >
+                <Box
+                  height={4}
+                  theme={{
+                    dark: { color: isActive ? 'white' : 'indigo-400' },
+                    light: { color: isActive ? 'white' : 'indigo-500' },
+                  }}
+                >
+                  <Bot size={16} />
+                </Box>
+                <Box flex1>AI Context</Box>
+                <Box
+                  px={2}
+                  py={0.5}
+                  borderRadius={10}
+                  fontSize={10}
+                  fontWeight={600}
+                  theme={{
+                    dark: { bgColor: isActive ? 'white' : 'indigo-800', color: isActive ? 'indigo-600' : 'indigo-300' },
+                    light: { bgColor: isActive ? 'white' : 'indigo-200', color: 'indigo-600' },
+                  }}
+                >
+                  NEW
+                </Box>
+              </Flex>
+            )}
+          </NavLink>
+        </Box>
 
         {/* Core */}
         <MenuSection label="Core" defaultOpen>
