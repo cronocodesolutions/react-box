@@ -845,9 +845,6 @@ const boxComponents = {
             },
           },
         },
-        variants: {
-          isResizeMode: { userSelect: 'none' },
-        },
         children: {
           cell: {
             styles: {
