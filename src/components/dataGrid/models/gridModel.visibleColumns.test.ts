@@ -35,21 +35,20 @@ describe('GridModel - Visible Columns', () => {
   }
 
   describe('visibleLeafs computation', () => {
-    it('should include empty cell column in visibleLeafs', () => {
+    it('should not include empty cell column in visibleLeafs (flexible sizing handles space)', () => {
       const grid = getGridModel();
       const emptyCell = grid.columns.value.visibleLeafs.find((c) => c.key === EMPTY_CELL_KEY);
-      expect(emptyCell).toBeDefined();
+      expect(emptyCell).toBeUndefined();
     });
 
-    it('should include only user columns and empty cell when no special columns', () => {
+    it('should include only user columns when no special columns', () => {
       const grid = getGridModel();
       const visibleKeys = grid.columns.value.visibleLeafs.map((c) => c.key);
 
       expect(visibleKeys).toContain('firstName');
       expect(visibleKeys).toContain('lastName');
       expect(visibleKeys).toContain('age');
-      expect(visibleKeys).toContain(EMPTY_CELL_KEY);
-      expect(visibleKeys).toHaveLength(4);
+      expect(visibleKeys).toHaveLength(3);
     });
 
     it('should include row number column in visibleLeafs when enabled', () => {
@@ -58,7 +57,6 @@ describe('GridModel - Visible Columns', () => {
 
       expect(visibleKeys).toContain(ROW_NUMBER_CELL_KEY);
       expect(visibleKeys).toContain('firstName');
-      expect(visibleKeys).toContain(EMPTY_CELL_KEY);
     });
 
     it('should include row selection column in visibleLeafs when enabled', () => {
@@ -67,7 +65,6 @@ describe('GridModel - Visible Columns', () => {
 
       expect(visibleKeys).toContain(ROW_SELECTION_CELL_KEY);
       expect(visibleKeys).toContain('firstName');
-      expect(visibleKeys).toContain(EMPTY_CELL_KEY);
     });
 
     it('should include grouping column in visibleLeafs when grouping is active', () => {
@@ -77,12 +74,11 @@ describe('GridModel - Visible Columns', () => {
       const visibleKeys = grid.columns.value.visibleLeafs.map((c) => c.key);
 
       expect(visibleKeys).toContain(GROUPING_CELL_KEY);
-      expect(visibleKeys).toContain(EMPTY_CELL_KEY);
     });
   });
 
   describe('hidden user columns scenario', () => {
-    it('should only have empty cell when all user columns are hidden', () => {
+    it('should have no visible columns when all user columns are hidden', () => {
       const grid = getGridModel();
 
       // Hide all user columns
@@ -96,12 +92,12 @@ describe('GridModel - Visible Columns', () => {
 
       const visibleKeys = grid.columns.value.visibleLeafs.map((c) => c.key);
 
-      // Should only contain the empty cell
-      expect(visibleKeys).toEqual([EMPTY_CELL_KEY]);
-      expect(grid.columns.value.visibleLeafs).toHaveLength(1);
+      // Should be empty (no empty cell anymore with flexible sizing)
+      expect(visibleKeys).toEqual([]);
+      expect(grid.columns.value.visibleLeafs).toHaveLength(0);
     });
 
-    it('should have empty cell and special columns when all user columns are hidden but special columns are enabled', () => {
+    it('should have only special columns when all user columns are hidden but special columns are enabled', () => {
       const grid = getGridModel({ gridDef: { showRowNumber: true, rowSelection: true } });
 
       // Hide all user columns
@@ -117,7 +113,6 @@ describe('GridModel - Visible Columns', () => {
 
       expect(visibleKeys).toContain(ROW_NUMBER_CELL_KEY);
       expect(visibleKeys).toContain(ROW_SELECTION_CELL_KEY);
-      expect(visibleKeys).toContain(EMPTY_CELL_KEY);
       expect(visibleKeys).not.toContain('firstName');
       expect(visibleKeys).not.toContain('lastName');
       expect(visibleKeys).not.toContain('age');

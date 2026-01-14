@@ -131,7 +131,7 @@ export default function App() {
 
         {/* Main Content */}
         <Box flex1 overflow="auto" minHeight="fit-screen">
-          <Box maxWidth={240} mx="auto" px={4} sm={{ px: 8 }} py={8} lg={{ py: 12 }}>
+          <Box maxWidth={300} mx="auto" px={4} sm={{ px: 8 }} py={8} lg={{ py: 12 }}>
             <PageContext.Provider value={{ rightSidebar, setRightSidebar }}>
               <AnimatePresence mode="wait">
                 <motion.div

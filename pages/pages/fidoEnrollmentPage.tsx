@@ -321,6 +321,7 @@ export default function FidoEnrollmentPage() {
               key: 'email',
               header: 'Email',
               width: 250,
+              flexible: false,
               Cell: ({ cell }) => (
                 <Box color="slate-400" textOverflow="ellipsis" overflow="hidden" textWrap="nowrap" px={3} fontSize={13}>
                   {cell.row.data.email}

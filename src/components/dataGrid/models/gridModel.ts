@@ -32,9 +32,6 @@ export default class GridModel<TRow> {
 
     sourceColumns.push(...def.columns.map((d) => new ColumnModel(d, this)));
 
-    // add empty column
-    sourceColumns.push(new ColumnModel({ key: EMPTY_CELL_KEY, Cell: () => null }, this));
-
     // add row selection column
     if (def.rowSelection) {
       const pin: PinPosition | undefined = typeof def.rowSelection === 'object' && def.rowSelection.pinned ? 'LEFT' : undefined;
@@ -105,12 +102,12 @@ export default class GridModel<TRow> {
     const { visibleLeafs } = this.columns.value;
 
     const rightPinnedColumnsCount = visibleLeafs.sumBy((x) => (x.pin === 'RIGHT' ? 1 : 0));
-    const leftColsCount = visibleLeafs.length - rightPinnedColumnsCount - 1;
+    const leftAndMiddleCount = visibleLeafs.length - rightPinnedColumnsCount;
 
-    const left = leftColsCount > 0 ? `repeat(${leftColsCount}, max-content)` : '';
+    const left = leftAndMiddleCount > 0 ? `repeat(${leftAndMiddleCount}, max-content)` : '';
     const right = rightPinnedColumnsCount > 0 ? `repeat(${rightPinnedColumnsCount}, max-content)` : '';
 
-    return `${left} auto ${right}`;
+    return `${left} ${right}`.trim();
   });
 
   // ========== Filtering ==========
@@ -433,11 +430,75 @@ export default class GridModel<TRow> {
     return size;
   });
 
+  // ========== Flexible Column Sizing ==========
+
+  private _containerWidth = 0;
+  public get containerWidth() {
+    return this._containerWidth;
+  }
+
+  public setContainerWidth = (width: number) => {
+    if (this._containerWidth !== width) {
+      this._containerWidth = width;
+      this.flexWidths.clear();
+      this.sizes.clear();
+      this.update();
+    }
+  };
+
+  public readonly flexWidths = memo(() => {
+    console.debug('\x1b[36m%s\x1b[0m', '[react-box]: DataGrid flexWidths memo');
+
+    const containerWidth = this._containerWidth;
+    if (containerWidth <= 0) return {};
+
+    const visibleLeafs = this.columns.value.visibleLeafs.filter((c) => c.key !== EMPTY_CELL_KEY);
+
+    // A column is "fixed" if: flexible: false OR it has been manually resized (in columnWidths)
+    const isColumnFixed = (c: ColumnModel<TRow>) => !c.isFlexible || this.columnWidths.has(c.key);
+
+    // Sum of fixed column widths
+    const fixedWidth = visibleLeafs.filter(isColumnFixed).sumBy((c) => c.baseWidth);
+
+    // Flexible columns (not fixed and not manually resized)
+    const flexCols = visibleLeafs.filter((c) => !isColumnFixed(c));
+    const totalFlexBase = flexCols.sumBy((c) => c.baseWidth);
+
+    // Available space for flex columns
+    const availableSpace = containerWidth - fixedWidth;
+
+    // Distribute proportionally (never shrink below base width)
+    if (availableSpace <= totalFlexBase) {
+      // Not enough space - use base widths
+      return flexCols.toRecord((c) => [c.key, c.baseWidth]);
+    }
+
+    // Proportional distribution using floor to avoid exceeding available space
+    const result: Record<Key, number> = {};
+    let distributed = 0;
+
+    flexCols.forEach((c, index) => {
+      if (index === flexCols.length - 1) {
+        // Last column gets the remainder to avoid rounding issues
+        result[c.key] = availableSpace - distributed;
+      } else {
+        const width = Math.floor((c.baseWidth / totalFlexBase) * availableSpace);
+        result[c.key] = width;
+        distributed += width;
+      }
+    });
+
+    return result;
+  });
+
+  public getFlexWidth(key: Key): number | undefined {
+    return this.flexWidths.value[key];
+  }
+
   public readonly DEFAULT_ROW_HEIGHT_PX = 48;
   public readonly MIN_COLUMN_WIDTH_PX = 48;
   public readonly DEFAULT_COLUMN_WIDTH_PX = 200;
 
-  public isResizeMode = false;
   public expandedGroupRow: Set<Key> = new Set();
   public selectedRows: Set<Key> = new Set();
   public get leftEdge() {
@@ -495,6 +556,7 @@ export default class GridModel<TRow> {
     this.gridTemplateColumns.clear();
     this.rows.clear();
     this.flatRows.clear();
+    this.flexWidths.clear();
     this.sizes.clear();
 
     this.update();
@@ -518,6 +580,7 @@ export default class GridModel<TRow> {
     this.gridTemplateColumns.clear();
     this.rows.clear();
     this.flatRows.clear();
+    this.flexWidths.clear();
     this.sizes.clear();
 
     this.update();
@@ -535,6 +598,7 @@ export default class GridModel<TRow> {
     this.gridTemplateColumns.clear();
     this.rows.clear();
     this.flatRows.clear();
+    this.flexWidths.clear();
     this.sizes.clear();
     this.update();
   };
@@ -597,26 +661,20 @@ export default class GridModel<TRow> {
     this.gridTemplateColumns.clear();
     this.rows.clear();
     this.flatRows.clear();
+    this.flexWidths.clear();
     this.sizes.clear();
 
     this.update();
   };
 
   public setWidth = (columnKey: Key, width: number) => {
-    const leaf = this.columns.value.leafs.find((l) => l.key === columnKey);
-
-    if (!leaf) {
-      throw new Error('Leaf column not found.');
-    }
-
-    leaf.setWidth(width);
-
-    const sourceLeaf = this.sourceColumns.value.flatMap((x) => x.flatColumns).findOrThrow((l) => l.key === columnKey);
-    sourceLeaf.setWidth(width);
+    // Store width persistently so it survives memo recreation
+    this.columnWidths.set(columnKey, width);
   };
 
   public groupColumns: Set<Key> = new Set();
   public hiddenColumns: Set<Key> = new Set();
+  public columnWidths: Map<Key, number> = new Map();
 
   private _sortColumn?: Key;
   public get sortColumn() {

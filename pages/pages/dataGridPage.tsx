@@ -280,6 +280,46 @@ export default function DataGridPage() {
               }}
             />
           </Code>
+
+          <Code
+            label="Disable Sorting and Resizing"
+            language="jsx"
+            code={`<DataGrid
+  data={data}
+  def={{
+    columns: [
+      { key: 'first_name', header: 'First name' },
+      { key: 'last_name', header: 'Last name' },
+      { key: 'age', header: 'Age', width: 100, sortable: true }, // Override: sortable
+      { key: 'email', header: 'Email', width: 300, resizable: true }, // Override: resizable
+      { key: 'country' },
+      { key: 'city' },
+    ],
+    rowHeight: 40,
+    visibleRowsCount: 5,
+    sortable: false,   // Disable sorting globally
+    resizable: false,  // Disable resizing globally
+  }}
+/>`}
+          >
+            <DataGrid
+              data={data}
+              def={{
+                columns: [
+                  { key: 'first_name', header: 'First name' },
+                  { key: 'last_name', header: 'Last name' },
+                  { key: 'age', header: 'Age', width: 100, sortable: true },
+                  { key: 'email', header: 'Email', width: 300, resizable: true },
+                  { key: 'country' },
+                  { key: 'city' },
+                ],
+                rowHeight: 40,
+                visibleRowsCount: 5,
+                sortable: false,
+                resizable: false,
+              }}
+            />
+          </Code>
         </Flex>
       </motion.div>
     </Box>

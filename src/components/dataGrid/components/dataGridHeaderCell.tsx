@@ -45,11 +45,11 @@ export default function DataGridHeaderCell<TRow>(props: Props<TRow>) {
   const isLastLeftPinned = isLeftPinned && isEdge;
   const isFirstRightPinned = isRightPinned && isEdge;
   const isLastRightPinned = isRightPinned && right === 0;
-  const isSortable = isLeaf && !isEmptyCell && !isRowNumber && !isRowSelection;
+  const isSortable = isLeaf && !isEmptyCell && !isRowNumber && !isRowSelection && column.sortable;
 
   const gridColumn = isLeaf ? 1 : leafs.length;
 
-  const showResizer = !isRowNumber && !isRowSelection;
+  const showResizer = !isRowNumber && !isRowSelection && column.resizable;
   const showContextMenu = !isRowNumber && !isRowSelection;
 
   const pl = isRowSelection ? undefined : column.align === 'right' ? 10 : 3;
