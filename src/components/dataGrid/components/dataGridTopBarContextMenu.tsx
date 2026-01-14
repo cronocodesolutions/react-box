@@ -83,7 +83,7 @@ export default function DataGridTopBarContextMenu<TRow>(props: Props<TRow>) {
                     },
                   }}
                 >
-                  {noneSelected ? '0' : selected.length}/{totalColumns}
+                  {selected.length}/{totalColumns}
                 </Box>
               )}
             </Flex>
