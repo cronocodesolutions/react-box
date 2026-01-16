@@ -4,6 +4,155 @@ Reference document for AI assistants helping developers use this runtime CSS-in-
 
 ---
 
+## CRITICAL RULES (Read First!)
+
+### Rule #1: NEVER Use Inline Styles
+
+**WRONG** - Using `style` attribute:
+
+```tsx
+// DO NOT DO THIS
+<Box style={{ minHeight: "100vh", width: "100%" }} />
+<Box style={{ pointerEvents: "none" }} />
+<Box style={{ alignItems: "center" }} />
+<Box style={{ maxWidth: "1200px" }} />
+```
+
+**CORRECT** - Using Box props:
+
+```tsx
+// DO THIS INSTEAD
+<Box minHeight="fit-screen" width="fit" />
+<Box pointerEvents="none" />
+<Box ai="center" />
+<Box maxWidth={300} />
+```
+
+**If a prop doesn't exist for a CSS property**, create it using `Box.extend()` in your boxExtends.ts file. Never fall back to inline styles.
+
+### Common Style-to-Prop Conversions
+
+| Inline Style (WRONG)                          | Box Prop (CORRECT)                    |
+| --------------------------------------------- | ------------------------------------- |
+| `style={{ width: "100%" }}`                   | `width="fit"`                         |
+| `style={{ width: "100vw" }}`                  | `width="fit-screen"`                  |
+| `style={{ height: "100%" }}`                  | `height="fit"`                        |
+| `style={{ height: "100vh" }}`                 | `height="fit-screen"`                 |
+| `style={{ minHeight: "100vh" }}`              | `minHeight="fit-screen"`              |
+| `style={{ maxWidth: "1200px" }}`              | `maxWidth={300}` (300/4=75rem=1200px) |
+| `style={{ alignItems: "center" }}`            | `ai="center"`                         |
+| `style={{ justifyContent: "space-between" }}` | `jc="between"`                        |
+| `style={{ flexDirection: "column" }}`         | `d="column"`                          |
+| `style={{ pointerEvents: "none" }}`           | `pointerEvents="none"`                |
+| `style={{ cursor: "pointer" }}`               | `cursor="pointer"`                    |
+| `style={{ overflow: "hidden" }}`              | `overflow="hidden"`                   |
+| `style={{ position: "relative" }}`            | `position="relative"`                 |
+| `style={{ zIndex: 10 }}`                      | `zIndex={10}`                         |
+| `style={{ opacity: 0.5 }}`                    | `opacity={0.5}`                       |
+
+### When a Prop Doesn't Exist
+
+If you need a CSS property that doesn't have a Box prop, extend Box instead of using inline styles:
+
+```tsx
+// boxExtends.ts - Create new props for missing CSS properties
+import Box from '@cronocode/react-box';
+
+export const { extendedProps, extendedPropTypes } = Box.extend(
+  {}, // CSS variables (if needed)
+  {
+    // Add new props
+    aspectRatio: [
+      {
+        values: ['auto', '1/1', '16/9', '4/3', '3/2'] as const,
+        styleName: 'aspect-ratio',
+        valueFormat: (value) => value,
+      },
+    ],
+    backdropBlur: [
+      {
+        values: ['none', 'sm', 'md', 'lg'] as const,
+        styleName: 'backdrop-filter',
+        valueFormat: (value) => {
+          const map = { none: 'none', sm: 'blur(4px)', md: 'blur(8px)', lg: 'blur(16px)' };
+          return map[value];
+        },
+      },
+    ],
+  },
+  {}, // Extended existing props (if needed)
+);
+
+// Now use the new props
+<Box aspectRatio="16/9" backdropBlur="md" />;
+```
+
+### Rule #2: ALWAYS Use Component Shortcuts
+
+**⚠️ NEVER use `<Box tag="...">` when a semantic component exists!**
+
+The `tag` prop should ONLY be used for rare HTML elements that don't have a component shortcut (e.g., `<Box tag="datalist">`). For all common elements, use the corresponding component.
+
+**WRONG** - Using `tag` prop for common elements:
+
+```tsx
+// ❌ DO NOT DO THIS - These are WRONG even though they work
+<Box tag="img" props={{ src: logo, alt: "Logo" }} />   // WRONG!
+<Box tag="a" props={{ href: "#" }}>Link</Box>          // WRONG!
+<Box tag="button" onClick={...}>Click</Box>            // WRONG!
+<Box tag="nav">...</Box>                               // WRONG!
+<Box tag="h1" fontSize={32}>Title</Box>                // WRONG!
+<Box tag="p">Text</Box>                                // WRONG!
+<Box tag="span">Inline</Box>                           // WRONG!
+<Box display="flex" gap={4}>...</Box>                  // WRONG!
+<Box display="grid" gridCols={3}>...</Box>             // WRONG!
+```
+
+**CORRECT** - Using semantic components:
+
+```tsx
+// DO THIS INSTEAD
+import { Img, Link, H1, Nav } from '@cronocode/react-box/components/semantics';
+import Button from '@cronocode/react-box/components/button';
+import Flex from '@cronocode/react-box/components/flex';
+import Grid from '@cronocode/react-box/components/grid';
+
+<Img props={{ src: logo, alt: "Logo" }} />
+<Link props={{ href: "#" }}>Link</Link>
+<Button onClick={...}>Click</Button>
+<Flex gap={4}>...</Flex>
+<Grid gridCols={3}>...</Grid>
+<Nav>...</Nav>
+<H1 fontSize={32}>Title</H1>
+```
+
+### Component Shortcuts Reference
+
+| Instead of...          | Use...       | Import from                                 |
+| ---------------------- | ------------ | ------------------------------------------- |
+| `<Box display="flex">` | `<Flex>`     | `@cronocode/react-box/components/flex`      |
+| `<Box display="grid">` | `<Grid>`     | `@cronocode/react-box/components/grid`      |
+| `<Box tag="button">`   | `<Button>`   | `@cronocode/react-box/components/button`    |
+| `<Box tag="input">`    | `<Textbox>`  | `@cronocode/react-box/components/textbox`   |
+| `<Box tag="textarea">` | `<Textarea>` | `@cronocode/react-box/components/textarea`  |
+| `<Box tag="a">`        | `<Link>`     | `@cronocode/react-box/components/semantics` |
+| `<Box tag="img">`      | `<Img>`      | `@cronocode/react-box/components/semantics` |
+| `<Box tag="h1">`       | `<H1>`       | `@cronocode/react-box/components/semantics` |
+| `<Box tag="h2">`       | `<H2>`       | `@cronocode/react-box/components/semantics` |
+| `<Box tag="h3">`       | `<H3>`       | `@cronocode/react-box/components/semantics` |
+| `<Box tag="p">`        | `<P>`        | `@cronocode/react-box/components/semantics` |
+| `<Box tag="span">`     | `<Span>`     | `@cronocode/react-box/components/semantics` |
+| `<Box tag="nav">`      | `<Nav>`      | `@cronocode/react-box/components/semantics` |
+| `<Box tag="header">`   | `<Header>`   | `@cronocode/react-box/components/semantics` |
+| `<Box tag="footer">`   | `<Footer>`   | `@cronocode/react-box/components/semantics` |
+| `<Box tag="main">`     | `<Main>`     | `@cronocode/react-box/components/semantics` |
+| `<Box tag="section">`  | `<Section>`  | `@cronocode/react-box/components/semantics` |
+| `<Box tag="article">`  | `<Article>`  | `@cronocode/react-box/components/semantics` |
+| `<Box tag="aside">`    | `<Aside>`    | `@cronocode/react-box/components/semantics` |
+| `<Box tag="label">`    | `<Label>`    | `@cronocode/react-box/components/semantics` |
+
+---
+
 ## Quick Overview
 
 **What it is**: A React library that converts component props directly into CSS classes at runtime. No CSS files needed.
@@ -31,15 +180,16 @@ import Button from '@cronocode/react-box/components/button';
 
 **This is the #1 source of confusion.** Different props have different dividers:
 
-| Prop Category | Divider | Formula | Example | CSS Output |
-|--------------|---------|---------|---------|------------|
-| Spacing (`p`, `m`, `gap`, `px`, `py`, `mx`, `my`, etc.) | 4 | value/4 rem | `p={4}` | `padding: 1rem` (16px) |
-| Font size (`fontSize`) | **16** | value/16 rem | `fontSize={16}` | `font-size: 1rem` (16px) |
-| Width/Height (numeric) | 4 | value/4 rem | `width={20}` | `width: 5rem` (80px) |
-| Border width (`b`, `bx`, `by`, `bt`, `br`, `bb`, `bl`) | none | direct px | `b={1}` | `border-width: 1px` |
-| Border radius (`borderRadius`) | none | direct px | `borderRadius={8}` | `border-radius: 8px` |
+| Prop Category                                           | Divider | Formula      | Example            | CSS Output               |
+| ------------------------------------------------------- | ------- | ------------ | ------------------ | ------------------------ |
+| Spacing (`p`, `m`, `gap`, `px`, `py`, `mx`, `my`, etc.) | 4       | value/4 rem  | `p={4}`            | `padding: 1rem` (16px)   |
+| Font size (`fontSize`)                                  | **16**  | value/16 rem | `fontSize={16}`    | `font-size: 1rem` (16px) |
+| Width/Height (numeric)                                  | 4       | value/4 rem  | `width={20}`       | `width: 5rem` (80px)     |
+| Border width (`b`, `bx`, `by`, `bt`, `br`, `bb`, `bl`)  | none    | direct px    | `b={1}`            | `border-width: 1px`      |
+| Border radius (`borderRadius`)                          | none    | direct px    | `borderRadius={8}` | `border-radius: 8px`     |
 
 ### Common fontSize Values
+
 ```tsx
 fontSize={12}  // → 0.75rem ≈ 12px (small)
 fontSize={14}  // → 0.875rem ≈ 14px (body)
@@ -50,6 +200,7 @@ fontSize={32}  // → 2rem = 32px (h1)
 ```
 
 ### Common Spacing Values (divider = 4)
+
 ```tsx
 p={1}   // → 0.25rem = 4px
 p={2}   // → 0.5rem = 8px
@@ -64,87 +215,95 @@ p={8}   // → 2rem = 32px
 ## Prop Reference
 
 ### Spacing
-| Prop | CSS Property |
-|------|-------------|
-| `p` | padding |
-| `px` | padding-left + padding-right |
-| `py` | padding-top + padding-bottom |
+
+| Prop                   | CSS Property                  |
+| ---------------------- | ----------------------------- |
+| `p`                    | padding                       |
+| `px`                   | padding-left + padding-right  |
+| `py`                   | padding-top + padding-bottom  |
 | `pt`, `pr`, `pb`, `pl` | padding-top/right/bottom/left |
-| `m` | margin |
-| `mx`, `my` | margin horizontal/vertical |
-| `mt`, `mr`, `mb`, `ml` | margin-top/right/bottom/left |
-| `gap` | gap (flexbox/grid) |
+| `m`                    | margin                        |
+| `mx`, `my`             | margin horizontal/vertical    |
+| `mt`, `mr`, `mb`, `ml` | margin-top/right/bottom/left  |
+| `gap`                  | gap (flexbox/grid)            |
 
 ### Layout
-| Prop | CSS Property | Values |
-|------|-------------|--------|
-| `display` | display | `'flex'`, `'block'`, `'inline'`, `'grid'`, `'none'`, `'inline-flex'`, etc. |
-| `d` | flex-direction | `'row'`, `'column'`, `'row-reverse'`, `'column-reverse'` |
-| `wrap` | flex-wrap | `'wrap'`, `'nowrap'`, `'wrap-reverse'` |
-| `items` | align-items | `'center'`, `'start'`, `'end'`, `'stretch'`, `'baseline'` |
-| `justify` | justify-content | `'center'`, `'start'`, `'end'`, `'between'`, `'around'`, `'evenly'` |
-| `flex` | flex | number or string |
-| `grow` | flex-grow | number |
-| `shrink` | flex-shrink | number |
+
+| Prop      | CSS Property    | Values                                                                     |
+| --------- | --------------- | -------------------------------------------------------------------------- |
+| `display` | display         | `'flex'`, `'block'`, `'inline'`, `'grid'`, `'none'`, `'inline-flex'`, etc. |
+| `d`       | flex-direction  | `'row'`, `'column'`, `'row-reverse'`, `'column-reverse'`                   |
+| `wrap`    | flex-wrap       | `'wrap'`, `'nowrap'`, `'wrap-reverse'`                                     |
+| `ai`      | align-items     | `'center'`, `'start'`, `'end'`, `'stretch'`, `'baseline'`                  |
+| `jc`      | justify-content | `'center'`, `'start'`, `'end'`, `'between'`, `'around'`, `'evenly'`        |
+| `flex`    | flex            | number or string                                                           |
+| `grow`    | flex-grow       | number                                                                     |
+| `shrink`  | flex-shrink     | number                                                                     |
 
 ### Sizing
-| Prop | CSS Property | Accepts |
-|------|-------------|---------|
-| `width` | width | number (rem/4), string (`'auto'`, `'1/2'`, `'fit'`, `'fit-screen'`) |
-| `height` | height | number (rem/4), string (`'auto'`, `'fit'`, `'fit-screen'`) |
-| `minWidth`, `maxWidth` | min/max-width | number or string |
-| `minHeight`, `maxHeight` | min/max-height | number or string |
+
+| Prop                     | CSS Property   | Accepts                                                             |
+| ------------------------ | -------------- | ------------------------------------------------------------------- |
+| `width`                  | width          | number (rem/4), string (`'auto'`, `'1/2'`, `'fit'`, `'fit-screen'`) |
+| `height`                 | height         | number (rem/4), string (`'auto'`, `'fit'`, `'fit-screen'`)          |
+| `minWidth`, `maxWidth`   | min/max-width  | number or string                                                    |
+| `minHeight`, `maxHeight` | min/max-height | number or string                                                    |
 
 ### Colors (Tailwind-like palette)
-| Prop | CSS Property |
-|------|-------------|
-| `bgColor` | background-color |
-| `color` | color |
-| `borderColor` | border-color |
+
+| Prop          | CSS Property     |
+| ------------- | ---------------- |
+| `bgColor`     | background-color |
+| `color`       | color            |
+| `borderColor` | border-color     |
 
 **Color values**: `'gray-50'` through `'gray-900'`, same for `red`, `orange`, `yellow`, `green`, `teal`, `blue`, `indigo`, `purple`, `pink`, `violet`.
 
 Also: `'white'`, `'black'`, `'transparent'`, `'inherit'`, `'currentColor'`
 
 ### Borders
-| Prop | CSS Property |
-|------|-------------|
-| `b` | border-width (all sides) |
-| `bx` | border-left-width + border-right-width |
-| `by` | border-top-width + border-bottom-width |
-| `bt`, `br`, `bb`, `bl` | individual sides |
-| `borderRadius` | border-radius |
-| `borderStyle` | border-style (`'solid'`, `'dashed'`, `'dotted'`, `'none'`) |
+
+| Prop                   | CSS Property                                               |
+| ---------------------- | ---------------------------------------------------------- |
+| `b`                    | border-width (all sides)                                   |
+| `bx`                   | border-left-width + border-right-width                     |
+| `by`                   | border-top-width + border-bottom-width                     |
+| `bt`, `br`, `bb`, `bl` | individual sides                                           |
+| `borderRadius`         | border-radius                                              |
+| `borderStyle`          | border-style (`'solid'`, `'dashed'`, `'dotted'`, `'none'`) |
 
 ### Typography
-| Prop | CSS Property |
-|------|-------------|
-| `fontSize` | font-size (divider: 16) |
-| `fontWeight` | font-weight (`400`, `500`, `600`, `700`, etc.) |
-| `lineHeight` | line-height |
-| `textAlign` | text-align |
-| `textDecoration` | text-decoration |
-| `textTransform` | text-transform |
-| `whiteSpace` | white-space |
-| `overflow` | overflow |
-| `textOverflow` | text-overflow |
+
+| Prop             | CSS Property                                                 |
+| ---------------- | ------------------------------------------------------------ |
+| `fontSize`       | font-size (divider: 16)                                      |
+| `fontWeight`     | font-weight (`400`, `500`, `600`, `700`, etc.)               |
+| `lineHeight`     | line-height (number = pixels, e.g. `lineHeight={24}` → 24px) |
+| `textAlign`      | text-align                                                   |
+| `textDecoration` | text-decoration                                              |
+| `textTransform`  | text-transform                                               |
+| `whiteSpace`     | white-space                                                  |
+| `overflow`       | overflow                                                     |
+| `textOverflow`   | text-overflow                                                |
 
 ### Positioning
-| Prop | CSS Property |
-|------|-------------|
-| `position` | position (`'relative'`, `'absolute'`, `'fixed'`, `'sticky'`) |
-| `top`, `right`, `bottom`, `left` | positioning offsets |
-| `zIndex` | z-index |
+
+| Prop                             | CSS Property                                                 |
+| -------------------------------- | ------------------------------------------------------------ |
+| `position`                       | position (`'relative'`, `'absolute'`, `'fixed'`, `'sticky'`) |
+| `top`, `right`, `bottom`, `left` | positioning offsets                                          |
+| `zIndex`                         | z-index                                                      |
 
 ### Effects
-| Prop | CSS Property |
-|------|-------------|
-| `shadow` | box-shadow (`'small'`, `'medium'`, `'large'`, `'xl'`, `'none'`) |
-| `opacity` | opacity |
-| `cursor` | cursor |
-| `pointerEvents` | pointer-events |
-| `transition` | transition |
-| `transform` | transform |
+
+| Prop            | CSS Property                                                    |
+| --------------- | --------------------------------------------------------------- |
+| `shadow`        | box-shadow (`'small'`, `'medium'`, `'large'`, `'xl'`, `'none'`) |
+| `opacity`       | opacity                                                         |
+| `cursor`        | cursor                                                          |
+| `pointerEvents` | pointer-events                                                  |
+| `transition`    | transition                                                      |
+| `transform`     | transform                                                       |
 
 ---
 
@@ -172,23 +331,24 @@ Mobile-first breakpoints using min-width media queries:
 
 ```tsx
 <Box
-  p={2}           // Base (mobile)
-  sm={{ p: 3 }}   // ≥640px
-  md={{ p: 4 }}   // ≥768px
-  lg={{ p: 6 }}   // ≥1024px
-  xl={{ p: 8 }}   // ≥1280px
+  p={2} // Base (mobile)
+  sm={{ p: 3 }} // ≥640px
+  md={{ p: 4 }} // ≥768px
+  lg={{ p: 6 }} // ≥1024px
+  xl={{ p: 8 }} // ≥1280px
   xxl={{ p: 10 }} // ≥1536px
 />
 ```
 
 **Combine with pseudo-classes**:
+
 ```tsx
 <Box
   bgColor="white"
   hover={{ bgColor: 'gray-100' }}
   md={{
     bgColor: 'gray-50',
-    hover: { bgColor: 'gray-200' }
+    hover: { bgColor: 'gray-200' },
   }}
 />
 ```
@@ -199,19 +359,69 @@ Mobile-first breakpoints using min-width media queries:
 
 ### Setting Up Themes
 
+The `Box.Theme` component provides theme management with automatic detection based on system preferences.
+
+**Auto-detect theme** (recommended):
+
 ```tsx
 import Box from '@cronocode/react-box';
 
 function App() {
   return (
-    <Box.Theme value="dark">
+    <Box.Theme>
+      {/* Theme auto-detects from prefers-color-scheme: 'light' or 'dark' */}
       <YourApp />
     </Box.Theme>
   );
 }
 ```
 
+**Explicit theme**:
+
+```tsx
+<Box.Theme theme="dark">
+  <YourApp />
+</Box.Theme>
+```
+
+**Global vs Local theme**:
+
+```tsx
+// Global: Adds theme class to document.documentElement (affects entire page)
+<Box.Theme theme="dark" use="global">
+  <YourApp />
+</Box.Theme>
+
+// Local (default): Wraps children in a Box with theme class (scoped)
+<Box.Theme theme="dark" use="local">
+  <Section>Content</Section>
+</Box.Theme>
+```
+
+### Using the Theme Hook
+
+```tsx
+import Box from '@cronocode/react-box';
+
+function ThemeSwitcher() {
+  const [theme, setTheme] = Box.useTheme();
+
+  return <button onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')}>Current: {theme}</button>;
+}
+
+// Must be used within Box.Theme provider
+function App() {
+  return (
+    <Box.Theme>
+      <ThemeSwitcher />
+    </Box.Theme>
+  );
+}
+```
+
 ### Theme-Aware Styles
+
+Apply styles based on the active theme:
 
 ```tsx
 <Box
@@ -228,6 +438,8 @@ function App() {
 
 ### Theme + Pseudo-Classes
 
+Combine theme styles with pseudo-classes:
+
 ```tsx
 <Box
   bgColor="white"
@@ -236,6 +448,29 @@ function App() {
     dark: {
       bgColor: 'gray-800',
       hover: { bgColor: 'gray-700' },
+    },
+  }}
+/>
+```
+
+### Theme + Responsive Breakpoints
+
+Combine all three systems:
+
+```tsx
+<Box
+  p={4}
+  bgColor="white"
+  md={{
+    p: 6,
+    bgColor: 'gray-50',
+  }}
+  theme={{
+    dark: {
+      bgColor: 'gray-900',
+      md: {
+        bgColor: 'gray-800',
+      },
     },
   }}
 />
@@ -261,6 +496,7 @@ Import ready-to-use components:
 import Button from '@cronocode/react-box/components/button';
 import Textbox from '@cronocode/react-box/components/textbox';
 import Checkbox from '@cronocode/react-box/components/checkbox';
+import RadioButton from '@cronocode/react-box/components/radioButton';
 import Dropdown from '@cronocode/react-box/components/dropdown';
 import Tooltip from '@cronocode/react-box/components/tooltip';
 
@@ -270,7 +506,7 @@ import Grid from '@cronocode/react-box/components/grid';  // Box with display="g
 
 <Button variant="primary">Submit</Button>
 <Textbox placeholder="Enter text..." />
-<Flex gap={4} items="center">...</Flex>
+<Flex gap={4} ai="center">...</Flex>
 <Flex inline gap={2}>Inline flex</Flex>
 ```
 
@@ -324,7 +560,7 @@ Box.components({
 <Box component="card" variant="bordered">
   <Box component="card.header">Title</Box>
   <Box component="card.body">Content</Box>
-</Box>
+</Box>;
 ```
 
 ---
@@ -362,11 +598,13 @@ export const { extendedProps, extendedPropTypes } = Box.extend(
         valueFormat: (value, getVariable) => getVariable(value),
       },
     ],
-  }
+  },
 );
 
 // Now use your custom colors
-<Box bgColor="brand-primary" color="white">Branded</Box>
+<Box bgColor="brand-primary" color="white">
+  Branded
+</Box>;
 ```
 
 ### TypeScript Type Augmentation
@@ -411,15 +649,17 @@ declare module '@cronocode/react-box/types' {
 ## Common Patterns
 
 ### Flex Container
+
 ```tsx
 import Flex from '@cronocode/react-box/components/flex';
 
-<Flex d="column" gap={4} items="center" justify="between">
+<Flex d="column" gap={4} ai="center" jc="between">
   {children}
-</Flex>
+</Flex>;
 ```
 
 ### Card
+
 ```tsx
 <Box p={4} bgColor="white" borderRadius={8} shadow="medium">
   {content}
@@ -427,6 +667,7 @@ import Flex from '@cronocode/react-box/components/flex';
 ```
 
 ### Button
+
 ```tsx
 import Button from '@cronocode/react-box/components/button';
 
@@ -441,10 +682,11 @@ import Button from '@cronocode/react-box/components/button';
   disabled={{ opacity: 0.5, cursor: 'not-allowed' }}
 >
   Click me
-</Button>
+</Button>;
 ```
 
 ### Input Field
+
 ```tsx
 import Textbox from '@cronocode/react-box/components/textbox';
 
@@ -457,50 +699,43 @@ import Textbox from '@cronocode/react-box/components/textbox';
   borderColor="gray-300"
   borderRadius={6}
   focus={{ borderColor: 'blue-500', outline: 'none' }}
-/>
+/>;
 ```
 
 ### Grid Layout
+
 ```tsx
 import Grid from '@cronocode/react-box/components/grid';
 
 <Grid gridCols={3} gap={4}>
-  {items.map(item => <Box key={item.id}>{item.content}</Box>)}
-</Grid>
+  {items.map((item) => (
+    <Box key={item.id}>{item.content}</Box>
+  ))}
+</Grid>;
 ```
 
 ### Responsive Stack
+
 ```tsx
 import Flex from '@cronocode/react-box/components/flex';
 
 <Flex d="column" gap={2} md={{ d: 'row', gap: 4 }}>
   {children}
-</Flex>
+</Flex>;
 ```
 
 ### Truncated Text
+
 ```tsx
-<Box
-  overflow="hidden"
-  textOverflow="ellipsis"
-  whiteSpace="nowrap"
->
+<Box overflow="hidden" textOverflow="ellipsis" whiteSpace="nowrap">
   Long text that will be truncated...
 </Box>
 ```
 
 ### Overlay/Modal Backdrop
+
 ```tsx
-<Box
-  position="fixed"
-  top={0}
-  left={0}
-  right={0}
-  bottom={0}
-  bgColor="black"
-  opacity={0.5}
-  zIndex={50}
-/>
+<Box position="fixed" top={0} left={0} right={0} bottom={0} bgColor="black" opacity={0.5} zIndex={50} />
 ```
 
 **Note**: For tooltips, dropdowns, and popups that need to escape `overflow: hidden` containers, use the `Tooltip` component instead of manual `zIndex`. It uses React portals to render content outside the DOM hierarchy, avoiding z-index and overflow issues.
@@ -510,7 +745,7 @@ import Tooltip from '@cronocode/react-box/components/tooltip';
 
 <Tooltip content="Tooltip text">
   <Button>Hover me</Button>
-</Tooltip>
+</Tooltip>;
 ```
 
 ---
@@ -523,10 +758,7 @@ Style child elements when parent is hovered:
 // Parent with a className
 <Flex className="card-row" gap={2}>
   {/* Child responds to parent hover */}
-  <Box
-    opacity={0}
-    hoverGroup={{ 'card-row': { opacity: 1 } }}
-  >
+  <Box opacity={0} hoverGroup={{ 'card-row': { opacity: 1 } }}>
     Actions
   </Box>
 </Flex>
@@ -543,7 +775,7 @@ import { getStyles, resetStyles } from '@cronocode/react-box/ssg';
 const cssString = getStyles();
 
 // Inject into your HTML
-<style id="crono-box">{cssString}</style>
+<style id="crono-box">{cssString}</style>;
 
 // Reset for next request (in SSR)
 resetStyles();
@@ -553,17 +785,34 @@ resetStyles();
 
 ## Key Reminders for AI Assistants
 
-1. **fontSize uses divider 16**, not 4. `fontSize={14}` → 14px, NOT 3.5px
-2. **Spacing uses divider 4**. `p={4}` → 16px (1rem)
-3. **Border width is direct px**. `b={1}` → 1px
-4. **Colors are Tailwind-like**: `'gray-500'`, `'blue-600'`, etc.
-5. **Breakpoints are mobile-first**: base → sm → md → lg → xl → xxl
-6. **Theme styles nest**: `theme={{ dark: { hover: { ... } } }}`
-7. **Use `tag` prop** to change the HTML element: `<Box tag="button">`
-8. **HTML attributes go in `props`**: `<Box tag="a" props={{ href: '/link' }}>` - NOT directly as Box props
-9. **Percentage widths**: Use strings like `width="1/2"` for 50%
-10. **Full size shortcuts**: `width="fit"` = 100%, `width="fit-screen"` = 100vw
-11. **Box is memoized** with `React.memo` - props comparison is efficient
+### ⚠️ MOST IMPORTANT (Common AI Mistakes)
+
+1. **NEVER use `style={{ }}` attribute** - Always use Box props instead. If a prop doesn't exist, extend Box with `Box.extend()`
+2. **NEVER use `<Box tag="...">` for common elements** - Use semantic components instead:
+   - `<Box tag="a">` → `<Link>`
+   - `<Box tag="img">` → `<Img>`
+   - `<Box tag="button">` → `<Button>`
+   - `<Box tag="h1/h2/h3">` → `<H1>/<H2>/<H3>`
+   - `<Box tag="p">` → `<P>`
+   - `<Box tag="nav/header/footer>` → `<Nav>/<Header>/<Footer>`
+3. **NEVER use `<Box display="flex/grid">`** - Use `<Flex>` or `<Grid>` components instead
+
+### Value Formatting
+
+4. **fontSize uses divider 16**, not 4. `fontSize={14}` → 14px, NOT 3.5px
+5. **Spacing uses divider 4**. `p={4}` → 16px (1rem)
+6. **Border width is direct px**. `b={1}` → 1px
+7. **lineHeight is direct px**. `lineHeight={24}` → 24px
+
+### Syntax & Patterns
+
+8. **Colors are Tailwind-like**: `'gray-500'`, `'blue-600'`, etc.
+9. **Breakpoints are mobile-first**: base → sm → md → lg → xl → xxl
+10. **Theme styles nest**: `theme={{ dark: { hover: { ... } } }}`
+11. **HTML attributes go in `props`**: `<Link props={{ href: '/link' }}>` - NOT directly as Box props
+12. **Percentage widths**: Use strings like `width="1/2"` for 50%
+13. **Full size shortcuts**: `width="fit"` = 100%, `width="fit-screen"` = 100vw
+14. **Box is memoized** with `React.memo` - props comparison is efficient
 
 ---
 
