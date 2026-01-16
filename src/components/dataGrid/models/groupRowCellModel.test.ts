@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { ignoreLogs } from '../../../../dev/tests';
 import { GridDefinition } from '../contracts/dataGridContract';
 import GridModel from './gridModel';
 import GroupRowCellModel from './groupRowCellModel';
@@ -25,6 +26,8 @@ function getGrid() {
 }
 
 describe('GroupRowCellModel', () => {
+  ignoreLogs();
+
   it('returns group label with count for grouping cell', () => {
     const grid = getGrid();
     grid.toggleGrouping('day');

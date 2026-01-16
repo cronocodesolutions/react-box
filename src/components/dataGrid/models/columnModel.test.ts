@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { ignoreLogs } from '../../../../dev/tests';
 import { GridDefinition } from '../contracts/dataGridContract';
 import GridModel from './gridModel';
 
@@ -23,6 +24,8 @@ function getGrid() {
 }
 
 describe('ColumnModel', () => {
+  ignoreLogs();
+
   it('propagates pin from parent to leafs', () => {
     const grid = getGrid();
     const firstName = grid.columns.value.flat.findOrThrow((c) => c.key === 'firstName');

@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { ignoreLogs } from '../../../../dev/tests';
 import { GridDefinition } from '../contracts/dataGridContract';
 import GridModel from './gridModel';
 
@@ -18,6 +19,8 @@ function getGrid() {
 }
 
 describe('CellModel', () => {
+  ignoreLogs();
+
   it('returns data value for regular columns', () => {
     const grid = getGrid();
     const row = grid.rows.value[0];

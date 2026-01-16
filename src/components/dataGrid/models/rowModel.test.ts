@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { ignoreLogs } from '../../../../dev/tests';
 import { GridDefinition } from '../contracts/dataGridContract';
 import GridModel from './gridModel';
 
@@ -22,6 +23,8 @@ function getGrid() {
 }
 
 describe('RowModel', () => {
+  ignoreLogs();
+
   it('generates key using rowKey', () => {
     const grid = getGrid();
     const row = grid.rows.value[0];

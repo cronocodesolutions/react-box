@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { ignoreLogs } from '../../../../dev/tests';
 import { GridDefinition } from '../contracts/dataGridContract';
 import GridModel from './gridModel';
 import GroupRowModel from './groupRowModel';
@@ -24,6 +25,8 @@ function getGrid() {
 }
 
 describe('GroupRowModel', () => {
+  ignoreLogs();
+
   it('creates group rows with correct key and count', () => {
     const grid = getGrid();
     grid.toggleGrouping('day');
