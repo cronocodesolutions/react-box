@@ -11,7 +11,7 @@ const root = ReactDOM.createRoot(document.getElementById('root')!);
 root.render(
   <React.StrictMode>
     <BrowserRouter>
-      <Box.Theme theme="dark">
+      <Box.Theme>
         <App />
       </Box.Theme>
     </BrowserRouter>

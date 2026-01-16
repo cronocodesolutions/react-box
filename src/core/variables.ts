@@ -344,6 +344,9 @@ namespace Variables {
     '-11/12',
   ] as const;
 
+  export type PercentString = `${number}%`;
+  export const percentString = '' as PercentString;
+
   const rootVariables = {
     inherit: 'inherit',
     none: 'none',

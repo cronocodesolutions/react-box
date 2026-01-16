@@ -1,4 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
+import { ignoreLogs } from '../../../../dev/tests';
 import { DataGridProps } from '../contracts/dataGridContract';
 import GridModel from './gridModel';
 
@@ -37,6 +38,8 @@ const createGridModel = (props?: Partial<DataGridProps<TestRow>>): GridModel<Tes
 };
 
 describe('GridModel Filtering', () => {
+  ignoreLogs();
+
   describe('Global Filter', () => {
     it('should filter data using fuzzy search', () => {
       const grid = createGridModel();

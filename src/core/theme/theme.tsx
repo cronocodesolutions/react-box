@@ -4,13 +4,31 @@ import ThemeContext from './themeContext';
 
 interface ThemeProps {
   children: React.ReactNode;
-  theme: string;
+  theme?: string; // Optional: auto-detects using prefers-color-scheme when not provided
   use?: 'global' | 'local';
 }
 
 function Theme(props: ThemeProps) {
   const { children, theme, use = 'local' } = props;
-  const [themeName, setThemeName] = useState(theme);
+  // Initialize with 'light' for SSR consistency - actual system theme is set in useLayoutEffect
+  const [themeName, setThemeName] = useState(theme ?? 'light');
+
+  // Detect system theme and listen for changes (client-only, prevents hydration mismatch)
+  useLayoutEffect(() => {
+    if (theme !== undefined) return; // Only auto-detect if theme not explicitly provided
+
+    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+
+    // Set actual system theme after hydration
+    setThemeName(mediaQuery.matches ? 'dark' : 'light');
+
+    const handleChange = (e: MediaQueryListEvent) => {
+      setThemeName(e.matches ? 'dark' : 'light');
+    };
+
+    mediaQuery.addEventListener('change', handleChange);
+    return () => mediaQuery.removeEventListener('change', handleChange);
+  }, [theme]);
 
   useLayoutEffect(() => {
     if (use === 'local') return;

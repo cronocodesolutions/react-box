@@ -165,6 +165,9 @@ export const cssStyles = {
       values: Variables.negativePercentages,
       valueFormat: BoxStylesFormatters.Value.fraction,
     },
+    {
+      values: Variables.percentString,
+    },
   ],
   /** The right CSS property participates in specifying the horizontal position of a positioned element. This inset property has no effect on non-positioned elements. */
   right: [
@@ -179,6 +182,9 @@ export const cssStyles = {
     {
       values: Variables.negativePercentages,
       valueFormat: BoxStylesFormatters.Value.fraction,
+    },
+    {
+      values: Variables.percentString,
     },
   ],
   /** The bottom CSS property participates in setting the vertical position of a positioned element. This inset property has no effect on non-positioned elements. */
@@ -195,6 +201,9 @@ export const cssStyles = {
       values: Variables.negativePercentages,
       valueFormat: BoxStylesFormatters.Value.fraction,
     },
+    {
+      values: Variables.percentString,
+    },
   ],
   /** The left CSS property participates in specifying the horizontal position of a positioned element. This inset property has no effect on non-positioned elements. */
   left: [
@@ -210,12 +219,18 @@ export const cssStyles = {
       values: Variables.negativePercentages,
       valueFormat: BoxStylesFormatters.Value.fraction,
     },
+    {
+      values: Variables.percentString,
+    },
   ],
   /** The inset CSS property is a shorthand that corresponds to the top, right, bottom, and/or left properties. It has the same multi-value syntax of the margin shorthand. */
   inset: [
     {
       values: 0,
       valueFormat: BoxStylesFormatters.Value.rem,
+    },
+    {
+      values: Variables.percentString,
     },
   ],
   /** The `box-sizing` CSS property sets how the total width and height of an element is calculated. */
@@ -421,6 +436,9 @@ export const cssStyles = {
       values: 0,
       valueFormat: BoxStylesFormatters.Value.rem,
     },
+    {
+      values: Variables.percentString,
+    },
   ],
   /** The row-gap CSS property sets the size of the gap (gutter) between an element's rows. */
   rowGap: [
@@ -429,6 +447,10 @@ export const cssStyles = {
       values: 0,
       valueFormat: BoxStylesFormatters.Value.rem,
     },
+    {
+      styleName: 'row-gap',
+      values: Variables.percentString,
+    },
   ],
   /** The column-gap CSS property sets the size of the gap (gutter) between an element's columns. */
   columnGap: [
@@ -436,6 +458,10 @@ export const cssStyles = {
       styleName: 'column-gap',
       values: 0,
       valueFormat: BoxStylesFormatters.Value.rem,
+    },
+    {
+      styleName: 'column-gap',
+      values: Variables.percentString,
     },
   ],
   /** The order CSS property sets the order to lay out an item in a flex or grid container. Items in a container are sorted by ascending order value and then by their source code order. Items not given an explicit order value are assigned the default value of 0. */
@@ -463,6 +489,9 @@ export const cssStyles = {
     {
       values: ['auto', 'fit-content', 'max-content', 'min-content'] as const,
     },
+    {
+      values: Variables.percentString,
+    },
   ],
   /** The min-height CSS property sets the minimum height of an element. It prevents the used value of the height property from becoming smaller than the value specified for min-height. */
   minHeight: [
@@ -485,6 +514,10 @@ export const cssStyles = {
     {
       styleName: 'min-height',
       values: ['auto', 'fit-content', 'max-content', 'min-content'] as const,
+    },
+    {
+      styleName: 'min-height',
+      values: Variables.percentString,
     },
   ],
   /** The max-height CSS property sets the maximum height of an element. It prevents the used value of the height property from becoming larger than the value specified for max-height. */
@@ -509,6 +542,10 @@ export const cssStyles = {
       styleName: 'max-height',
       values: ['auto', 'fit-content', 'max-content', 'min-content'] as const,
     },
+    {
+      styleName: 'max-height',
+      values: Variables.percentString,
+    },
   ],
   /** The width CSS property sets an element's width. By default, it sets the width of the content area, but if box-sizing is set to border-box, it sets the width of the border area. */
   width: [
@@ -527,6 +564,9 @@ export const cssStyles = {
     },
     {
       values: ['auto', 'fit-content', 'max-content', 'min-content'] as const,
+    },
+    {
+      values: Variables.percentString,
     },
   ],
   /** The min-width CSS property sets the minimum width of an element. It prevents the used value of the width property from becoming smaller than the value specified for min-width. */
@@ -551,6 +591,10 @@ export const cssStyles = {
       styleName: 'min-width',
       values: ['auto', 'fit-content', 'max-content', 'min-content'] as const,
     },
+    {
+      styleName: 'min-width',
+      values: Variables.percentString,
+    },
   ],
   /** The max-width CSS property sets the maximum width of an element. It prevents the used value of the width property from becoming larger than the value specified by max-width. */
   maxWidth: [
@@ -573,6 +617,10 @@ export const cssStyles = {
     {
       styleName: 'max-width',
       values: ['auto', 'fit-content', 'max-content', 'min-content'] as const,
+    },
+    {
+      styleName: 'max-width',
+      values: Variables.percentString,
     },
   ],
   /** The letter-spacing CSS property sets the horizontal spacing behavior between text characters. This value is added to the natural spacing between characters while rendering the text. Positive values of letter-spacing causes characters to spread farther apart, while negative values of letter-spacing bring characters closer together. */
@@ -615,8 +663,13 @@ export const cssStyles = {
       styleName: 'margin',
     },
     {
+      styleName: 'margin',
       values: Variables.percentages,
       valueFormat: BoxStylesFormatters.Value.fraction,
+    },
+    {
+      values: Variables.percentString,
+      styleName: 'margin',
     },
   ],
   /** The margin-inline CSS shorthand property is a shorthand property that defines both the logical inline start and end margins of an element, which maps to physical margins depending on the element's writing mode, directionality, and text orientation. */
@@ -631,8 +684,13 @@ export const cssStyles = {
       styleName: 'margin-inline',
     },
     {
+      styleName: 'margin-inline',
       values: Variables.percentages,
       valueFormat: BoxStylesFormatters.Value.fraction,
+    },
+    {
+      values: Variables.percentString,
+      styleName: 'margin-inline',
     },
   ],
   /** The margin-block CSS shorthand property defines the logical block start and end margins of an element, which maps to physical margins depending on the element's writing mode, directionality, and text orientation. */
@@ -647,8 +705,13 @@ export const cssStyles = {
       styleName: 'margin-block',
     },
     {
+      styleName: 'margin-block',
       values: Variables.percentages,
       valueFormat: BoxStylesFormatters.Value.fraction,
+    },
+    {
+      values: Variables.percentString,
+      styleName: 'margin-block',
     },
   ],
   /** The margin-top CSS property sets the margin area on the top of an element. A positive value places it farther from its neighbors, while a negative value places it closer. */
@@ -665,6 +728,11 @@ export const cssStyles = {
     {
       values: Variables.percentages,
       valueFormat: BoxStylesFormatters.Value.fraction,
+      styleName: 'margin-top',
+    },
+    {
+      values: Variables.percentString,
+      styleName: 'margin-top',
     },
   ],
   /** The margin-right CSS property sets the margin area on the right side of an element. A positive value places it farther from its neighbors, while a negative value places it closer. */
@@ -681,6 +749,11 @@ export const cssStyles = {
     {
       values: Variables.percentages,
       valueFormat: BoxStylesFormatters.Value.fraction,
+      styleName: 'margin-right',
+    },
+    {
+      values: Variables.percentString,
+      styleName: 'margin-right',
     },
   ],
   /** The margin-bottom CSS property sets the margin area on the bottom of an element. A positive value places it farther from its neighbors, while a negative value places it closer. */
@@ -697,6 +770,11 @@ export const cssStyles = {
     {
       values: Variables.percentages,
       valueFormat: BoxStylesFormatters.Value.fraction,
+      styleName: 'margin-bottom',
+    },
+    {
+      values: Variables.percentString,
+      styleName: 'margin-bottom',
     },
   ],
   /** The margin-left CSS property sets the margin area on the left side of an element. A positive value places it farther from its neighbors, while a negative value places it closer. */
@@ -713,6 +791,11 @@ export const cssStyles = {
     {
       values: Variables.percentages,
       valueFormat: BoxStylesFormatters.Value.fraction,
+      styleName: 'margin-left',
+    },
+    {
+      values: Variables.percentString,
+      styleName: 'margin-left',
     },
   ],
   /** The padding CSS shorthand property sets the padding area on all four sides of an element at once. */
@@ -725,6 +808,11 @@ export const cssStyles = {
     {
       values: Variables.percentages,
       valueFormat: BoxStylesFormatters.Value.fraction,
+      styleName: 'padding',
+    },
+    {
+      values: Variables.percentString,
+      styleName: 'padding',
     },
   ],
   /** The padding-inline CSS shorthand property defines the logical inline start and end padding of an element, which maps to physical padding properties depending on the element's writing mode, directionality, and text orientation. */
@@ -737,6 +825,11 @@ export const cssStyles = {
     {
       values: Variables.percentages,
       valueFormat: BoxStylesFormatters.Value.fraction,
+      styleName: 'padding-inline',
+    },
+    {
+      values: Variables.percentString,
+      styleName: 'padding-inline',
     },
   ],
   /** The padding-block CSS shorthand property defines the logical block start and end padding of an element, which maps to physical padding properties depending on the element's writing mode, directionality, and text orientation. */
@@ -749,6 +842,11 @@ export const cssStyles = {
     {
       values: Variables.percentages,
       valueFormat: BoxStylesFormatters.Value.fraction,
+      styleName: 'padding-block',
+    },
+    {
+      values: Variables.percentString,
+      styleName: 'padding-block',
     },
   ],
   /** The padding-top CSS property sets the height of the padding area on the top of an element. */
@@ -761,6 +859,11 @@ export const cssStyles = {
     {
       values: Variables.percentages,
       valueFormat: BoxStylesFormatters.Value.fraction,
+      styleName: 'padding-top',
+    },
+    {
+      values: Variables.percentString,
+      styleName: 'padding-top',
     },
   ],
   /** The padding-right CSS property sets the width of the padding area on the right of an element. */
@@ -773,6 +876,11 @@ export const cssStyles = {
     {
       values: Variables.percentages,
       valueFormat: BoxStylesFormatters.Value.fraction,
+      styleName: 'padding-right',
+    },
+    {
+      values: Variables.percentString,
+      styleName: 'padding-right',
     },
   ],
   /** The padding-bottom CSS property sets the height of the padding area on the bottom of an element. */
@@ -785,6 +893,11 @@ export const cssStyles = {
     {
       values: Variables.percentages,
       valueFormat: BoxStylesFormatters.Value.fraction,
+      styleName: 'padding-bottom',
+    },
+    {
+      values: Variables.percentString,
+      styleName: 'padding-bottom',
     },
   ],
   /** The padding-left CSS property sets the width of the padding area to the left of an element. */
@@ -797,6 +910,11 @@ export const cssStyles = {
     {
       values: Variables.percentages,
       valueFormat: BoxStylesFormatters.Value.fraction,
+      styleName: 'padding-left',
+    },
+    {
+      values: Variables.percentString,
+      styleName: 'padding-left',
     },
   ],
   /** The object-fit CSS property sets how the content of a replaced element, such as an <img> or <video>, should be resized to fit its container. */
@@ -1123,6 +1241,11 @@ export const cssStyles = {
       valueFormat: (value: string) => `translateX(${BoxStylesFormatters.Value.fraction(value)})`,
       styleName: 'transform',
     },
+    {
+      values: Variables.percentString,
+      valueFormat: (value: string) => `translateX(${value})`,
+      styleName: 'transform',
+    },
   ],
   /** The translateY() CSS function repositions an element vertically on the 2D plane. */
   translateY: [
@@ -1139,6 +1262,11 @@ export const cssStyles = {
     {
       values: Variables.negativePercentages,
       valueFormat: (value: string) => `translateY(${BoxStylesFormatters.Value.fraction(value)})`,
+      styleName: 'transform',
+    },
+    {
+      values: Variables.percentString,
+      valueFormat: (value: string) => `translateY(${value})`,
       styleName: 'transform',
     },
   ],

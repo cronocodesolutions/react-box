@@ -34,6 +34,86 @@ export default function DataGridPage() {
           <Code label="Import" language="jsx" code="import DataGrid from '@cronocode/react-box/components/dataGrid';" />
 
           <Code
+            label="Full Featured DataGrid"
+            language="jsx"
+            code={`<DataGrid
+  data={data}
+  def={{
+    title: 'All Features Demo',
+    topBar: true,
+    bottomBar: true,
+    globalFilter: true,
+    rowSelection: { pinned: true },
+    showRowNumber: { pinned: true },
+    rowHeight: 40,
+    visibleRowsCount: 8,
+    sortable: true,
+    resizable: true,
+    columns: [
+      {
+        key: 'personal',
+        header: 'Personal Info',
+        columns: [
+          { key: 'first_name', header: 'First Name', filterable: true },
+          { key: 'last_name', header: 'Last Name', filterable: true },
+          { key: 'age', header: 'Age', width: 120, align: 'right', filterable: { type: 'number' } },
+        ],
+      },
+      {
+        key: 'contact',
+        header: 'Contact',
+        columns: [
+          { key: 'email', header: 'Email', width: 280, filterable: true },
+          { key: 'phone_number', header: 'Phone', width: 160 },
+        ],
+      },
+      { key: 'country', header: 'Country', filterable: { type: 'multiselect' } },
+      { key: 'gender', header: 'Gender', width: 120, filterable: { type: 'multiselect' } },
+      { key: 'city', header: 'City', pin: 'RIGHT' },
+    ],
+  }}
+/>`}
+          >
+            <DataGrid
+              data={data}
+              def={{
+                title: 'All Features Demo',
+                topBar: true,
+                bottomBar: true,
+                globalFilter: true,
+                rowSelection: { pinned: true },
+                showRowNumber: { pinned: true },
+                rowHeight: 40,
+                visibleRowsCount: 8,
+                sortable: true,
+                resizable: true,
+                columns: [
+                  {
+                    key: 'personal',
+                    header: 'Personal Info',
+                    columns: [
+                      { key: 'first_name', header: 'First Name', filterable: true },
+                      { key: 'last_name', header: 'Last Name', filterable: true },
+                      { key: 'age', header: 'Age', width: 120, align: 'right', filterable: { type: 'number' } },
+                    ],
+                  },
+                  {
+                    key: 'contact',
+                    header: 'Contact',
+                    columns: [
+                      { key: 'email', header: 'Email', width: 280, filterable: true },
+                      { key: 'phone_number', header: 'Phone', width: 160 },
+                    ],
+                  },
+                  { key: 'country', header: 'Country', filterable: { type: 'multiselect' } },
+                  { key: 'gender', header: 'Gender', width: 120, filterable: { type: 'multiselect' } },
+                  { key: 'city', header: 'City', pin: 'RIGHT' },
+                ],
+              }}
+            />
+          </Code>
+
+          <Code
             label="Basic DataGrid"
             language="jsx"
             code={`<DataGrid
