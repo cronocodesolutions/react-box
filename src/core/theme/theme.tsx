@@ -8,20 +8,20 @@ interface ThemeProps {
   use?: 'global' | 'local';
 }
 
-function getSystemTheme(): string {
-  if (typeof window === 'undefined') return 'light';
-  return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-}
-
 function Theme(props: ThemeProps) {
   const { children, theme, use = 'local' } = props;
-  const [themeName, setThemeName] = useState(theme ?? getSystemTheme());
+  // Initialize with 'light' for SSR consistency - actual system theme is set in useLayoutEffect
+  const [themeName, setThemeName] = useState(theme ?? 'light');
 
-  // Listen for system theme changes when auto-detecting (theme prop not provided)
+  // Detect system theme and listen for changes (client-only, prevents hydration mismatch)
   useLayoutEffect(() => {
     if (theme !== undefined) return; // Only auto-detect if theme not explicitly provided
 
     const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+
+    // Set actual system theme after hydration
+    setThemeName(mediaQuery.matches ? 'dark' : 'light');
+
     const handleChange = (e: MediaQueryListEvent) => {
       setThemeName(e.matches ? 'dark' : 'light');
     };
