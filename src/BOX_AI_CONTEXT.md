@@ -249,6 +249,46 @@ p={8}   // → 2rem = 32px
 | `minWidth`, `maxWidth`   | min/max-width  | number or string                                                    |
 | `minHeight`, `maxHeight` | min/max-height | number or string                                                    |
 
+**Percentage/Fraction Values:**
+
+All sizing, spacing, and positioning props accept percentage strings:
+
+```tsx
+// Sizing
+width="33%"     // → 33%
+height="50%"    // → 50%
+minWidth="20%"  // → min-width: 20%
+maxWidth="80%"  // → max-width: 80%
+minHeight="10%" // → min-height: 10%
+maxHeight="90%" // → max-height: 90%
+
+// Spacing (margin, padding, gap)
+p="5%"          // → padding: 5%
+px="10%"        // → padding-left/right: 10%
+m="10%"         // → margin: 10%
+mt="5%"         // → margin-top: 5%
+gap="2%"        // → gap: 2%
+
+// Positioning
+top="10%"       // → top: 10%
+left="50%"      // → left: 50%
+right="0%"      // → right: 0%
+bottom="20%"    // → bottom: 20%
+
+// Fraction shortcuts (width/height only)
+width="1/2"   // → 50%
+width="1/3"   // → 33.333%
+width="2/3"   // → 66.666%
+width="1/4"   // → 25%
+width="3/4"   // → 75%
+
+// Special values
+width="fit"        // → 100%
+width="fit-screen" // → 100vw
+height="fit"       // → 100%
+height="fit-screen"// → 100vh
+```
+
 ### Colors (Tailwind-like palette)
 
 | Prop          | CSS Property     |
@@ -813,6 +853,256 @@ resetStyles();
 12. **Percentage widths**: Use strings like `width="1/2"` for 50%
 13. **Full size shortcuts**: `width="fit"` = 100%, `width="fit-screen"` = 100vw
 14. **Box is memoized** with `React.memo` - props comparison is efficient
+
+---
+
+## DataGrid Component
+
+A powerful data grid with sorting, filtering, grouping, row selection, column pinning, and virtualization.
+
+### Import and Basic Usage
+
+```tsx
+import DataGrid from '@cronocode/react-box/components/dataGrid';
+
+const data = [
+  { id: 1, name: 'John', email: 'john@example.com', age: 30 },
+  { id: 2, name: 'Jane', email: 'jane@example.com', age: 25 },
+];
+
+<DataGrid
+  data={data}
+  def={{
+    columns: [
+      { key: 'name', header: 'Name' },
+      { key: 'email', header: 'Email' },
+      { key: 'age', header: 'Age', align: 'right' },
+    ],
+  }}
+/>;
+```
+
+### GridDefinition Props
+
+| Prop | Type | Description |
+|------|------|-------------|
+| `columns` | `ColumnType[]` | Column definitions (required) |
+| `rowKey` | `keyof TRow \| (row) => Key` | Unique key for each row |
+| `rowHeight` | `number` | Row height in pixels (default: 36) |
+| `visibleRowsCount` | `number` | Number of visible rows (default: 10) |
+| `showRowNumber` | `boolean \| { pinned?: boolean; width?: number }` | Show row numbers |
+| `rowSelection` | `boolean \| { pinned?: boolean }` | Enable row selection checkboxes |
+| `topBar` | `boolean` | Show top bar with title and controls |
+| `bottomBar` | `boolean` | Show bottom bar with row count |
+| `title` | `ReactNode` | Title displayed in top bar |
+| `topBarContent` | `ReactNode` | Custom content in top bar |
+| `globalFilter` | `boolean` | Enable global search filter |
+| `globalFilterKeys` | `Key[]` | Columns to search (default: all) |
+| `sortable` | `boolean` | Enable sorting globally (default: true) |
+| `resizable` | `boolean` | Enable column resizing globally (default: true) |
+| `noDataComponent` | `ReactNode` | Custom empty state component |
+
+### ColumnType Props
+
+| Prop | Type | Description |
+|------|------|-------------|
+| `key` | `string \| number` | Column key matching data property (required) |
+| `header` | `string` | Column header text |
+| `width` | `number` | Column width in pixels |
+| `align` | `'left' \| 'right' \| 'center'` | Text alignment |
+| `pin` | `'LEFT' \| 'RIGHT'` | Pin column to side |
+| `columns` | `ColumnType[]` | Nested columns for grouping |
+| `sortable` | `boolean` | Override global sortable setting |
+| `resizable` | `boolean` | Override global resizable setting |
+| `flexible` | `boolean` | Participate in flex distribution (default: true) |
+| `filterable` | `boolean \| FilterConfig` | Enable column filtering |
+| `Cell` | `React.ComponentType<{ cell }>` | Custom cell renderer |
+
+### DataGridProps
+
+| Prop | Type | Description |
+|------|------|-------------|
+| `data` | `TRow[]` | Data array (required) |
+| `def` | `GridDefinition` | Grid definition (required) |
+| `loading` | `boolean` | Show loading state |
+| `onSelectionChange` | `(event) => void` | Selection change callback |
+| `globalFilterValue` | `string` | Controlled global filter |
+| `onGlobalFilterChange` | `(value) => void` | Global filter change callback |
+| `columnFilters` | `ColumnFilters` | Controlled column filters |
+| `onColumnFiltersChange` | `(filters) => void` | Column filters change callback |
+
+### Filter Types
+
+```tsx
+// Text filter (default) - fuzzy search
+{ key: 'name', filterable: true }
+{ key: 'name', filterable: { type: 'text', placeholder: 'Search...' } }
+
+// Number filter - with comparison operators
+{ key: 'age', filterable: { type: 'number', min: 0, max: 100 } }
+
+// Multiselect filter - dropdown with checkboxes
+{ key: 'status', filterable: { type: 'multiselect' } }
+{ key: 'status', filterable: {
+  type: 'multiselect',
+  options: [
+    { label: 'Active', value: 'active' },
+    { label: 'Inactive', value: 'inactive' },
+  ]
+}}
+```
+
+### Column Grouping (Nested Headers)
+
+```tsx
+columns: [
+  {
+    key: 'personal',
+    header: 'Personal Info',
+    columns: [
+      { key: 'firstName', header: 'First Name' },
+      { key: 'lastName', header: 'Last Name' },
+    ],
+  },
+  {
+    key: 'contact',
+    header: 'Contact',
+    columns: [
+      { key: 'email', header: 'Email' },
+      { key: 'phone', header: 'Phone' },
+    ],
+  },
+]
+```
+
+### Custom Cell Renderer
+
+```tsx
+columns: [
+  {
+    key: 'status',
+    header: 'Status',
+    Cell: ({ cell }) => (
+      <Box
+        px={2}
+        py={1}
+        borderRadius={4}
+        bgColor={cell.value === 'active' ? 'green-100' : 'red-100'}
+        color={cell.value === 'active' ? 'green-800' : 'red-800'}
+      >
+        {cell.value}
+      </Box>
+    ),
+  },
+  {
+    key: 'actions',
+    header: 'Actions',
+    Cell: ({ cell }) => (
+      <Button onClick={() => handleEdit(cell.row)}>Edit</Button>
+    ),
+  },
+]
+```
+
+The `cell` object provides:
+- `cell.value` - Cell value
+- `cell.row` - Full row data
+- `cell.column` - Column model
+
+### Row Selection
+
+```tsx
+<DataGrid
+  data={data}
+  def={{
+    rowSelection: true,  // or { pinned: true } to pin checkbox column
+    columns: [...],
+  }}
+  onSelectionChange={(event) => {
+    console.log('Selected keys:', event.selectedRowKeys);
+    console.log('Action:', event.action); // 'select' | 'deselect'
+    console.log('All selected:', event.isAllSelected);
+  }}
+/>
+```
+
+### Sorting and Resizing Control
+
+```tsx
+// Disable globally
+def={{
+  sortable: false,
+  resizable: false,
+  columns: [...]
+}}
+
+// Override per column
+def={{
+  sortable: false,  // Global: no sorting
+  columns: [
+    { key: 'id', header: 'ID' },  // Not sortable (inherits global)
+    { key: 'name', header: 'Name', sortable: true },  // Sortable (override)
+  ]
+}}
+```
+
+### Flexible Column Sizing
+
+Columns automatically fill available space proportionally. Use `flexible: false` for fixed-width columns.
+
+```tsx
+columns: [
+  { key: 'id', header: 'ID', width: 60, flexible: false },  // Fixed at 60px
+  { key: 'name', header: 'Name', width: 200 },  // Flexes (200 base)
+  { key: 'email', header: 'Email', width: 300 },  // Flexes more (300 base)
+]
+```
+
+### Custom Empty State
+
+```tsx
+def={{
+  columns: [...],
+  noDataComponent: (
+    <Flex d="column" ai="center" gap={4} p={8}>
+      <Box fontSize={48}>📭</Box>
+      <Box color="gray-500">No records found</Box>
+    </Flex>
+  ),
+}}
+```
+
+### Full-Featured Example
+
+```tsx
+<DataGrid
+  data={users}
+  def={{
+    title: 'Users Table',
+    topBar: true,
+    bottomBar: true,
+    globalFilter: true,
+    rowSelection: { pinned: true },
+    showRowNumber: { pinned: true },
+    rowHeight: 40,
+    visibleRowsCount: 10,
+    columns: [
+      {
+        key: 'personal',
+        header: 'Personal',
+        columns: [
+          { key: 'name', header: 'Name', filterable: true },
+          { key: 'age', header: 'Age', width: 80, align: 'right', filterable: { type: 'number' } },
+        ],
+      },
+      { key: 'email', header: 'Email', width: 250, filterable: true },
+      { key: 'status', header: 'Status', filterable: { type: 'multiselect' } },
+      { key: 'country', header: 'Country', pin: 'RIGHT' },
+    ],
+  }}
+  onSelectionChange={(e) => setSelected(e.selectedRowKeys)}
+/>
+```
 
 ---
 
