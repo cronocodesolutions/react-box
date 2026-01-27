@@ -100,6 +100,8 @@ export interface GridDefinition<TRow> {
   sortable?: boolean;
   /** Enable resizing for all columns. Default is true. Individual column settings take priority. */
   resizable?: boolean;
+  /** Custom component to render when data is empty */
+  noDataComponent?: React.ReactNode;
   // pagination?: Pagination;
 }
 

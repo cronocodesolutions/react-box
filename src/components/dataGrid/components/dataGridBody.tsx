@@ -22,16 +22,13 @@ export default function DataGridBody<TRow>(props: Props<TRow>) {
   const startIndex = Math.max(0, Math.floor(scrollTop / grid.rowHeight) - ROWS_TO_PRELOAD);
   const visibleRowsCount = grid.props.def.visibleRowsCount ?? DEFAULT_VISIBLE_ROWS_COUNT;
   const viewHeight = grid.rowHeight * visibleRowsCount + grid.rowHeight / 5;
+  const isEmpty = grid.props.data.length === 0;
 
   const rows = useMemo(() => {
     console.debug('\x1b[36m%s\x1b[0m', '[react-box]: DataGrid render rows');
 
-    if (grid.props.data.length === 0) {
-      return (
-        <Flex jc="center" ai="center" gridColumn="full-row" style={{ height: viewHeight }}>
-          {grid.props.loading ? 'loading...' : 'empty'}
-        </Flex>
-      );
+    if (isEmpty) {
+      return null;
     }
 
     const take = visibleRowsCount + ROWS_TO_PRELOAD * 2;
@@ -45,9 +42,21 @@ export default function DataGridBody<TRow>(props: Props<TRow>) {
     });
 
     return rowsToRender;
-  }, [grid.flatRows.value, grid.props.data.length, grid.props.loading, startIndex, viewHeight, visibleRowsCount]);
+  }, [grid.flatRows.value, isEmpty, startIndex, visibleRowsCount]);
 
   console.debug('\x1b[36m%s\x1b[0m', '[react-box]: DataGrid render DataGridBody');
+
+  // Render empty state outside the CSS Grid to ensure full width
+  if (isEmpty) {
+    const { noDataComponent } = grid.props.def;
+    const defaultEmpty = grid.props.loading ? 'loading...' : 'empty';
+
+    return (
+      <Flex jc="center" ai="center" width="fit" position="sticky" left={0} style={{ height: viewHeight }}>
+        {noDataComponent ?? defaultEmpty}
+      </Flex>
+    );
+  }
 
   return (
     <Box style={{ height: viewHeight }}>

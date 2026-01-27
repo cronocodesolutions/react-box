@@ -67,10 +67,11 @@ describe('DataGrid', () => {
   };
 
   // Helper function to render the DataGrid with props
-  const renderDataGrid = (props?: { gridDef: Partial<GridDefinition<Person>>; data?: Person[] }) => {
+  const renderDataGrid = (props?: { gridDef?: Partial<GridDefinition<Person>>; data?: Person[]; loading?: boolean }) => {
     const defaultProps: DataGridProps<Person> = {
       data: props?.data ?? sampleData,
       def: { ...basicGridDef, ...props?.gridDef },
+      loading: props?.loading,
     };
 
     return render(<DataGrid {...defaultProps} />);
@@ -110,6 +111,53 @@ describe('DataGrid', () => {
     renderDataGrid({ gridDef: { bottomBar: true }, data: [] });
     // Check if the footer shows 0 rows
     expect(screen.getByText('Rows: 0')).toBeTruthy();
+  });
+
+  describe('noDataComponent', () => {
+    it('renders default "empty" text when data is empty', () => {
+      renderDataGrid({ data: [] });
+      expect(screen.getByText('empty')).toBeTruthy();
+    });
+
+    it('renders "loading..." when data is empty and loading is true', () => {
+      renderDataGrid({ data: [], loading: true });
+      expect(screen.getByText('loading...')).toBeTruthy();
+    });
+
+    it('renders custom noDataComponent when provided and data is empty', () => {
+      renderDataGrid({
+        data: [],
+        gridDef: {
+          noDataComponent: <div data-testid="custom-empty">No records found</div>,
+        },
+      });
+      expect(screen.getByTestId('custom-empty')).toBeTruthy();
+      expect(screen.getByText('No records found')).toBeTruthy();
+    });
+
+    it('renders custom noDataComponent instead of "loading..." even when loading', () => {
+      renderDataGrid({
+        data: [],
+        loading: true,
+        gridDef: {
+          noDataComponent: <div>Custom empty state</div>,
+        },
+      });
+      // Custom component takes priority over loading state
+      expect(screen.getByText('Custom empty state')).toBeTruthy();
+      expect(screen.queryByText('loading...')).toBeNull();
+    });
+
+    it('does not render noDataComponent when data is present', () => {
+      renderDataGrid({
+        gridDef: {
+          noDataComponent: <div data-testid="custom-empty">No records found</div>,
+        },
+      });
+      expect(screen.queryByTestId('custom-empty')).toBeNull();
+      // Data should be rendered instead
+      expect(screen.getByText('John')).toBeTruthy();
+    });
   });
 
   it('renders with nested columns', () => {
