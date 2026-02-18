@@ -45,7 +45,7 @@ export default function useGrid<TRow>(props: DataGridProps<TRow>): GridModel<TRo
     gridRef.current!.flatRows.clear();
     gridRef.current!.update();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [props.globalFilterValue, props.columnFilters]);
+  }, [props.globalFilterValue, props.columnFilters, props.filters]);
 
   return gridRef.current;
 }

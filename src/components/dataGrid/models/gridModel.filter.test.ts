@@ -277,4 +277,95 @@ describe('GridModel Filtering', () => {
       expect(uniqueAges).toEqual([25, 28, 30, 32, 35]);
     });
   });
+
+  describe('External Filters (filters prop)', () => {
+    it('should apply a single external filter predicate', () => {
+      const grid = createGridModel({
+        filters: [(row) => row.country === 'USA'],
+      });
+
+      expect(grid.filteredData).toHaveLength(2);
+      expect(grid.filteredData.every((r) => r.country === 'USA')).toBe(true);
+    });
+
+    it('should apply multiple external filter predicates with AND logic', () => {
+      const grid = createGridModel({
+        filters: [(row) => row.country === 'USA', (row) => row.age > 30],
+      });
+
+      expect(grid.filteredData).toHaveLength(1);
+      expect(grid.filteredData[0].name).toBe('Bob Johnson');
+    });
+
+    it('should return all data when filters array is empty', () => {
+      const grid = createGridModel({ filters: [] });
+
+      expect(grid.filteredData).toHaveLength(5);
+    });
+
+    it('should return all data when filters is undefined', () => {
+      const grid = createGridModel({ filters: undefined });
+
+      expect(grid.filteredData).toHaveLength(5);
+    });
+
+    it('should apply external filters before global filter', () => {
+      const grid = createGridModel({
+        filters: [(row) => row.country === 'USA'],
+      });
+
+      // External: USA only (John Doe, Bob Johnson)
+      // Global "bob": matches only Bob Johnson among USA rows
+      grid.setGlobalFilter('bob');
+      expect(grid.filteredData).toHaveLength(1);
+      expect(grid.filteredData[0].name).toBe('Bob Johnson');
+    });
+
+    it('should apply external filters before column filters', () => {
+      const grid = createGridModel({
+        filters: [(row) => row.age >= 30],
+      });
+
+      // External: age >= 30 (John 30, Bob 35, Charlie 32)
+      // Column: country = USA (John 30, Bob 35)
+      grid.setColumnFilter('country', { type: 'multiselect', values: ['USA'] });
+      expect(grid.filteredData).toHaveLength(2);
+    });
+
+    it('should not affect hasActiveFilters when only external filters are active', () => {
+      const grid = createGridModel({
+        filters: [(row) => row.country === 'USA'],
+      });
+
+      expect(grid.hasActiveFilters).toBe(false);
+    });
+
+    it('should report correct filterStats with external filters', () => {
+      const grid = createGridModel({
+        filters: [(row) => row.country === 'USA'],
+      });
+
+      expect(grid.filterStats).toEqual({ filtered: 2, total: 5 });
+    });
+
+    it('should report correct filterStats with external and internal filters combined', () => {
+      const grid = createGridModel({
+        filters: [(row) => row.country !== 'Canada'],
+      });
+
+      // External: removes Alice Brown (Canada), leaves 4
+      // Column: age >= 30 → John(30), Bob(35), Charlie(32) = 3
+      grid.setColumnFilter('age', { type: 'number', operator: 'gte', value: 30 });
+      expect(grid.filterStats).toEqual({ filtered: 3, total: 5 });
+    });
+
+    it('should handle external filter that matches no rows', () => {
+      const grid = createGridModel({
+        filters: [(row) => row.country === 'Australia'],
+      });
+
+      expect(grid.filteredData).toHaveLength(0);
+      expect(grid.filterStats).toEqual({ filtered: 0, total: 5 });
+    });
+  });
 });
