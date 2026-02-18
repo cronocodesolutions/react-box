@@ -118,6 +118,8 @@ export interface DataGridProps<TRow> {
   columnFilters?: ColumnFilters<TRow>;
   /** Callback when column filters change */
   onColumnFiltersChange?: (filters: ColumnFilters<TRow>) => void;
+  /** External predicate filters applied before global/column filters. Memoize with useMemo for performance. */
+  filters?: ((row: TRow) => boolean)[];
 }
 
 interface SelectionChangeEvent<TRow, TKey = TRow[keyof TRow] | number | string> {

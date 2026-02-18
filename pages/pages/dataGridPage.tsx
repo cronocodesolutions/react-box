@@ -160,15 +160,14 @@ export default function DataGridPage() {
   const [genderFilter, setGenderFilter] = useState<string | null>(null);
   const [ageFilter, setAgeFilter] = useState<string | null>(null);
 
-  // Apply custom filters
-  const filteredData = useMemo(() => {
-    return allData.filter((row) => {
-      if (genderFilter && row.gender !== genderFilter) return false;
-      if (ageFilter === 'under30' && row.age >= 30) return false;
-      if (ageFilter === '30to50' && (row.age < 30 || row.age > 50)) return false;
-      if (ageFilter === 'over200' && row.age <= 200) return false;
-      return true;
-    });
+  // External predicate filters — DataGrid applies these internally and shows correct "filtered / total" in bottom bar
+  const filters = useMemo(() => {
+    const result: ((row: (typeof allData)[0]) => boolean)[] = [];
+    if (genderFilter) result.push((row) => row.gender === genderFilter);
+    if (ageFilter === 'under30') result.push((row) => row.age < 30);
+    if (ageFilter === '30to50') result.push((row) => row.age >= 30 && row.age <= 50);
+    if (ageFilter === 'over200') result.push((row) => row.age > 200);
+    return result;
   }, [genderFilter, ageFilter]);
 
   return (
@@ -186,8 +185,16 @@ export default function DataGridPage() {
           <Code
             label="Full Featured DataGrid"
             language="jsx"
-            code={`<DataGrid
-  data={filteredData}
+            code={`const filters = useMemo(() => {
+  const result = [];
+  if (genderFilter) result.push((row) => row.gender === genderFilter);
+  if (ageFilter === 'under30') result.push((row) => row.age < 30);
+  return result;
+}, [genderFilter, ageFilter]);
+
+<DataGrid
+  data={allData}
+  filters={filters}
   def={{
     title: 'All Features Demo',
     topBar: true,
@@ -203,7 +210,8 @@ export default function DataGridPage() {
 />`}
           >
             <DataGrid
-              data={filteredData}
+              data={allData}
+              filters={filters}
               def={{
                 title: 'All Features Demo',
                 topBar: true,

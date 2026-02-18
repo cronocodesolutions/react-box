@@ -216,10 +216,23 @@ export default class GridModel<TRow> {
   }
 
   /**
-   * Get filtered data (applies global filter then column filters)
+   * Apply external predicate filters from the filters prop
+   */
+  private applyExternalFilters(data: TRow[]): TRow[] {
+    const filters = this.props.filters;
+    if (!filters || filters.length === 0) return data;
+
+    return data.filter((row) => filters.every((predicate) => predicate(row)));
+  }
+
+  /**
+   * Get filtered data (applies external, global, then column filters)
    */
   public get filteredData(): TRow[] {
     let data = this.props.data;
+
+    // Apply external predicate filters
+    data = this.applyExternalFilters(data);
 
     // Apply global filter
     if (this.props.def.globalFilter) {

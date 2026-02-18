@@ -13,7 +13,7 @@ export default function DataGridBottomBar<TRow>(props: Props<TRow>) {
 
   return (
     <Flex component="datagrid.bottomBar">
-      <Box>Rows: {hasActiveFilters ? `${filtered} / ${total}` : total}</Box>
+      <Box>Rows: {filtered !== total ? `${filtered} / ${total}` : total}</Box>
       {grid.props.def.rowSelection && <Box>Selected: {grid.selectedRows.size}</Box>}
       {hasActiveFilters && (
         <Box color="blue-600" cursor="pointer" hover={{ textDecoration: 'underline' }} props={{ onClick: grid.clearAllFilters }}>
