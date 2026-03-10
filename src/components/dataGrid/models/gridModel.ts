@@ -3,7 +3,7 @@ import memo from '../../../utils/memo';
 import { fuzzySearch } from '../../../utils/string/fuzzySearch';
 import DataGridCellRowDetail from '../components/dataGridCellRowDetail';
 import DataGridCellRowSelection from '../components/dataGridCellRowSelection';
-import { ColumnFilters, DataGridProps, FilterValue, Key, NO_PIN, PinPosition } from '../contracts/dataGridContract';
+import { ColumnFilters, DataGridProps, FilterValue, Key, NO_PIN, PaginationState, PinPosition } from '../contracts/dataGridContract';
 import ColumnModel from './columnModel';
 import DetailRowModel from './detailRowModel';
 import GroupRowModel from './groupRowModel';
@@ -244,6 +244,9 @@ export default class GridModel<TRow> {
    * Get filtered data (applies external, global, then column filters)
    */
   public get filteredData(): TRow[] {
+    // With server-side pagination, data is already filtered by the server
+    if (this.isPaginated) return this.props.data;
+
     let data = this.props.data;
 
     // Apply external predicate filters
@@ -270,6 +273,15 @@ export default class GridModel<TRow> {
       this._globalFilterValue = value;
     }
 
+    // Reset to page 1 when filter changes (server needs to re-filter from first page)
+    if (this.isPaginated && this.page !== 1) {
+      if (this.props.onPageChange) {
+        this.props.onPageChange(1, this.pageSize);
+      } else {
+        this._page = 1;
+      }
+    }
+
     this.rows.clear();
     this.flatRows.clear();
     this.rowOffsets.clear();
@@ -292,6 +304,15 @@ export default class GridModel<TRow> {
       this.props.onColumnFiltersChange(newFilters);
     } else {
       this._columnFilters = newFilters;
+    }
+
+    // Reset to page 1 when filter changes (server needs to re-filter from first page)
+    if (this.isPaginated && this.page !== 1) {
+      if (this.props.onPageChange) {
+        this.props.onPageChange(1, this.pageSize);
+      } else {
+        this._page = 1;
+      }
     }
 
     this.rows.clear();
@@ -357,6 +378,10 @@ export default class GridModel<TRow> {
    * Get count of filtered rows vs total rows
    */
   public get filterStats(): { filtered: number; total: number } {
+    if (this.isPaginated) {
+      const totalCount = this.props.def.pagination!.totalCount;
+      return { filtered: totalCount, total: totalCount };
+    }
     return {
       filtered: this.filteredData.length,
       total: this.props.data.length,
@@ -367,7 +392,7 @@ export default class GridModel<TRow> {
     console.debug('\x1b[36m%s\x1b[0m', '[react-box]: DataGrid rows memo');
     let data = this.filteredData;
 
-    if (this._sortColumn) {
+    if (this._sortColumn && !this.isPaginated) {
       data = data.sortBy((x) => x[this._sortColumn as keyof TRow], this._sortDirection);
     }
 
@@ -569,6 +594,57 @@ export default class GridModel<TRow> {
     this.update();
   };
 
+  // ========== Pagination ==========
+
+  private _page = 1;
+
+  public get page(): number {
+    return this.props.page ?? this._page;
+  }
+
+  public get pageSize(): number {
+    const pagination = this.props.def.pagination;
+    if (pagination?.pageSize) return pagination.pageSize;
+    const vrc = this.props.def.visibleRowsCount;
+    if (typeof vrc === 'number') return vrc;
+    return 10;
+  }
+
+  public get isPaginated(): boolean {
+    return !!this.props.def.pagination;
+  }
+
+  public get paginationState(): PaginationState | undefined {
+    const pagination = this.props.def.pagination;
+    if (!pagination) return undefined;
+    const totalItems = pagination.totalCount;
+    const pageSize = this.pageSize;
+    return {
+      page: this.page,
+      pageSize,
+      totalItems,
+      totalPages: Math.max(1, Math.ceil(totalItems / pageSize)),
+    };
+  }
+
+  public changePage = (page: number) => {
+    const state = this.paginationState;
+    if (!state) return;
+    const clamped = Math.max(1, Math.min(page, state.totalPages));
+    if (clamped === this.page) return;
+
+    if (this.props.onPageChange) {
+      this.props.onPageChange(clamped, state.pageSize);
+    } else {
+      this._page = clamped;
+    }
+
+    this.rows.clear();
+    this.flatRows.clear();
+    this.rowOffsets.clear();
+    this.update();
+  };
+
   // ========== Row Offsets (for variable-height virtualization) ==========
 
   public readonly rowOffsets = memo(() => {
@@ -620,6 +696,18 @@ export default class GridModel<TRow> {
 
       this._sortColumn = _sortColumn === columnKey && _sortDirection === 'DESC' ? undefined : columnKey;
       this._sortDirection = _sortColumn === columnKey && _sortDirection === 'ASC' ? 'DESC' : 'ASC';
+    }
+
+    // Notify parent for server-side sorting
+    this.props.onSortChange?.(this._sortColumn, this._sortDirection);
+
+    // Reset to page 1 when sort changes (server needs to re-sort from first page)
+    if (this.isPaginated && this.page !== 1) {
+      if (this.props.onPageChange) {
+        this.props.onPageChange(1, this.pageSize);
+      } else {
+        this._page = 1;
+      }
     }
 
     this.headerRows.clear();

@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion';
 import { Filter, Table, X } from 'lucide-react';
-import { useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import Box from '../../src/box';
 import Button from '../../src/components/button';
 import DataGrid from '../../src/components/dataGrid';
@@ -727,6 +727,8 @@ export default function DataGridPage() {
             />
           </Code>
 
+          <PaginatedDataGridDemo />
+
           <Code
             label="Disable Sorting and Resizing"
             language="jsx"
@@ -769,6 +771,95 @@ export default function DataGridPage() {
         </Flex>
       </motion.div>
     </Box>
+  );
+}
+
+function PaginatedDataGridDemo() {
+  const pageSize = 8;
+  const [data, setData] = useState<(typeof allData)[0][]>([]);
+  const [page, setPage] = useState(1);
+  const [totalCount, setTotalCount] = useState(0);
+  const [loading, setLoading] = useState(true);
+
+  const fetchPage = useCallback(
+    (p: number) => {
+      setLoading(true);
+      // Simulate server response with 300ms delay
+      setTimeout(() => {
+        const start = (p - 1) * pageSize;
+        setData(allData.slice(start, start + pageSize));
+        setTotalCount(allData.length);
+        setPage(p);
+        setLoading(false);
+      }, 300);
+    },
+    [pageSize],
+  );
+
+  useEffect(() => {
+    fetchPage(1);
+  }, [fetchPage]);
+
+  const def = useMemo(
+    () => ({
+      columns: [
+        { key: 'first_name' as const, header: 'First Name' },
+        { key: 'last_name' as const, header: 'Last Name' },
+        { key: 'age' as const, header: 'Age', width: 100, align: 'right' as const },
+        { key: 'email' as const, header: 'Email', width: 280 },
+        { key: 'country' as const, header: 'Country' },
+        { key: 'city' as const, header: 'City' },
+      ],
+      rowHeight: 40,
+      visibleRowsCount: pageSize,
+      topBar: true,
+      bottomBar: true,
+      title: 'Server-Side Pagination',
+      pagination: { totalCount },
+    }),
+    [totalCount, pageSize],
+  );
+
+  return (
+    <Code
+      label="Server-Side Pagination"
+      language="jsx"
+      code={`const [data, setData] = useState([]);
+const [page, setPage] = useState(1);
+const [totalCount, setTotalCount] = useState(0);
+const [loading, setLoading] = useState(true);
+const pageSize = 8;
+
+const fetchPage = useCallback((p) => {
+  setLoading(true);
+  api.getUsers({ Page: p, PageSize: pageSize }).then((res) => {
+    setData(res.Items);
+    setTotalCount(res.TotalCount);
+    setPage(res.Page);
+    setLoading(false);
+  });
+}, [pageSize]);
+
+useEffect(() => { fetchPage(1); }, []);
+
+<DataGrid
+  data={data}
+  loading={loading}
+  page={page}
+  onPageChange={(p) => fetchPage(p)}
+  onSortChange={(col, dir) => { /* re-fetch with sort params */ }}
+  def={{
+    columns: [...],
+    visibleRowsCount: pageSize,
+    topBar: true,
+    bottomBar: true,
+    title: 'Server-Side Pagination',
+    pagination: { totalCount },
+  }}
+/>`}
+    >
+      <DataGrid data={data} loading={loading} page={page} onPageChange={(p) => fetchPage(p)} def={def} />
+    </Code>
   );
 }
 

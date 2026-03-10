@@ -11,7 +11,13 @@ export interface PaginationState {
   totalItems: number;
   totalPages: number;
 }
-export type Pagination = boolean | { pageSize: number };
+/** Server-side pagination configuration on GridDefinition */
+export interface PaginationConfig {
+  /** Total number of items across all pages (from server response) */
+  totalCount: number;
+  /** Page size override. If omitted, defaults to visibleRowsCount (or 10). */
+  pageSize?: number;
+}
 
 // ========== Filter Types ==========
 
@@ -121,7 +127,8 @@ export interface GridDefinition<TRow> {
   noDataComponent?: React.ReactNode;
   /** Enable expandable row detail panel */
   rowDetail?: RowDetailConfig<TRow>;
-  // pagination?: Pagination;
+  /** Server-side pagination. Provide totalCount from the API response. */
+  pagination?: PaginationConfig;
 }
 
 export interface DataGridProps<TRow> {
@@ -143,6 +150,12 @@ export interface DataGridProps<TRow> {
   expandedRowKeys?: Key[];
   /** Callback when expanded detail rows change */
   onExpandedRowKeysChange?: (keys: Key[]) => void;
+  /** Controlled current page (1-indexed). Used with pagination. */
+  page?: number;
+  /** Callback when page changes. Receives page (1-indexed) and pageSize. */
+  onPageChange?: (page: number, pageSize: number) => void;
+  /** Callback when sort changes. For server-side sorting with pagination. */
+  onSortChange?: (columnKey: Key | undefined, direction: SortDirection | undefined) => void;
 }
 
 interface SelectionChangeEvent<TRow, TKey = TRow[keyof TRow] | number | string> {

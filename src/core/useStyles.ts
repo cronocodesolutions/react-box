@@ -94,6 +94,7 @@ namespace StylesContextImpl {
     pseudoClassParentName?: string,
   ) {
     Object.entries(props).forEach(([key, value]) => {
+      if (value === undefined || value === null) return;
       if (ObjectUtils.isKeyOf(key, cssStyles)) {
         addClassName(key, value, classNames, currentPseudoClasses, breakpoint, pseudoClassParentName);
       } else if (ObjectUtils.isKeyOf(key, pseudo1)) {
