@@ -1,9 +1,11 @@
 import '../../../array';
 import memo from '../../../utils/memo';
 import { fuzzySearch } from '../../../utils/string/fuzzySearch';
+import DataGridCellRowDetail from '../components/dataGridCellRowDetail';
 import DataGridCellRowSelection from '../components/dataGridCellRowSelection';
 import { ColumnFilters, DataGridProps, FilterValue, Key, NO_PIN, PinPosition } from '../contracts/dataGridContract';
 import ColumnModel from './columnModel';
+import DetailRowModel from './detailRowModel';
 import GroupRowModel from './groupRowModel';
 import RowModel from './rowModel';
 
@@ -12,6 +14,7 @@ export const ROW_NUMBER_CELL_KEY: Key = 'row-number-cell';
 export const DEFAULT_ROW_NUMBER_COLUMN_WIDTH = 70;
 export const ROW_SELECTION_CELL_KEY: Key = 'row-selection-cell';
 export const GROUPING_CELL_KEY: Key = 'grouping-cell';
+export const ROW_DETAIL_CELL_KEY: Key = 'row-detail-cell';
 
 export default class GridModel<TRow> {
   constructor(
@@ -53,6 +56,14 @@ export default class GridModel<TRow> {
       sourceColumns.unshift(new ColumnModel({ key: ROW_NUMBER_CELL_KEY, pin, width, align: 'right' }, this));
     }
 
+    // add row detail expand column
+    if (def.rowDetail) {
+      const pin: PinPosition | undefined = def.rowDetail.pinned ? 'LEFT' : undefined;
+      const width = def.rowDetail.expandColumnWidth ?? 50;
+
+      sourceColumns.unshift(new ColumnModel({ key: ROW_DETAIL_CELL_KEY, pin, width, align: 'center', Cell: DataGridCellRowDetail }, this));
+    }
+
     return sourceColumns;
   });
 
@@ -66,7 +77,7 @@ export default class GridModel<TRow> {
     const leafs = flat.filter((x) => x.isLeaf);
     const visibleLeafs = flat.filter((x) => x.isLeaf && x.isVisible);
     const userVisibleLeafs = visibleLeafs.filter(
-      (c) => ![EMPTY_CELL_KEY, ROW_NUMBER_CELL_KEY, ROW_SELECTION_CELL_KEY, GROUPING_CELL_KEY].includes(c.key),
+      (c) => ![EMPTY_CELL_KEY, ROW_NUMBER_CELL_KEY, ROW_SELECTION_CELL_KEY, GROUPING_CELL_KEY, ROW_DETAIL_CELL_KEY].includes(c.key),
     );
     const maxDeath = flat.maxBy((x) => x.death) + 1;
 
@@ -135,7 +146,11 @@ export default class GridModel<TRow> {
       this.columns.value.leafs
         .filter(
           (c) =>
-            c.key !== EMPTY_CELL_KEY && c.key !== ROW_NUMBER_CELL_KEY && c.key !== ROW_SELECTION_CELL_KEY && c.key !== GROUPING_CELL_KEY,
+            c.key !== EMPTY_CELL_KEY &&
+            c.key !== ROW_NUMBER_CELL_KEY &&
+            c.key !== ROW_SELECTION_CELL_KEY &&
+            c.key !== GROUPING_CELL_KEY &&
+            c.key !== ROW_DETAIL_CELL_KEY,
         )
         .map((c) => c.key);
 
@@ -257,6 +272,7 @@ export default class GridModel<TRow> {
 
     this.rows.clear();
     this.flatRows.clear();
+    this.rowOffsets.clear();
     this.update();
   };
 
@@ -280,6 +296,7 @@ export default class GridModel<TRow> {
 
     this.rows.clear();
     this.flatRows.clear();
+    this.rowOffsets.clear();
     this.update();
   };
 
@@ -295,6 +312,7 @@ export default class GridModel<TRow> {
 
     this.rows.clear();
     this.flatRows.clear();
+    this.rowOffsets.clear();
     this.update();
   };
 
@@ -395,7 +413,7 @@ export default class GridModel<TRow> {
     console.debug('\x1b[36m%s\x1b[0m', '[react-box]: DataGrid flatRows memo');
 
     return this.rows.value.flatMap((row) => {
-      return row.flatRows;
+      return row.flatRows as (RowModel<TRow> | GroupRowModel<TRow> | DetailRowModel<TRow>)[];
     });
   });
 
@@ -430,7 +448,12 @@ export default class GridModel<TRow> {
     const groupingColumn = visibleLeafs.find((c) => c.key === GROUPING_CELL_KEY);
     if (groupingColumn) {
       const groupingColumnSize = visibleLeafs.sumBy((c) => {
-        return c.pin === groupingColumn.pin && c.key !== ROW_NUMBER_CELL_KEY && c.key !== ROW_SELECTION_CELL_KEY ? (c.inlineWidth ?? 0) : 0;
+        return c.pin === groupingColumn.pin &&
+          c.key !== ROW_NUMBER_CELL_KEY &&
+          c.key !== ROW_SELECTION_CELL_KEY &&
+          c.key !== ROW_DETAIL_CELL_KEY
+          ? (c.inlineWidth ?? 0)
+          : 0;
       });
       size[groupingColumn.groupColumnWidthVarName] = `${groupingColumnSize}px`;
     }
@@ -513,6 +536,53 @@ export default class GridModel<TRow> {
   public readonly DEFAULT_COLUMN_WIDTH_PX = 200;
 
   public expandedGroupRow: Set<Key> = new Set();
+
+  // ========== Row Detail Expansion ==========
+
+  private _expandedDetailRows: Set<Key> = new Set();
+
+  public get expandedDetailRows(): Set<Key> {
+    if (this.props.expandedRowKeys) {
+      return new Set(this.props.expandedRowKeys);
+    }
+    return this._expandedDetailRows;
+  }
+
+  public toggleDetailRow = (rowKey: Key) => {
+    const expandedKeys = new Set(this.expandedDetailRows);
+
+    if (expandedKeys.has(rowKey)) {
+      expandedKeys.delete(rowKey);
+    } else {
+      expandedKeys.add(rowKey);
+    }
+
+    if (this.props.onExpandedRowKeysChange) {
+      this.props.onExpandedRowKeysChange(Array.from(expandedKeys));
+    } else {
+      this._expandedDetailRows = expandedKeys;
+    }
+
+    this.rows.clear();
+    this.flatRows.clear();
+    this.rowOffsets.clear();
+    this.update();
+  };
+
+  // ========== Row Offsets (for variable-height virtualization) ==========
+
+  public readonly rowOffsets = memo(() => {
+    const offsets: number[] = [];
+    let cumulative = 0;
+
+    for (const row of this.flatRows.value) {
+      offsets.push(cumulative);
+      cumulative += row instanceof DetailRowModel ? row.heightForOffset : this.rowHeight;
+    }
+
+    return { offsets, totalHeight: cumulative };
+  });
+
   public selectedRows: Set<Key> = new Set();
   public get leftEdge() {
     return this.columns.value.left.sumBy((c) => c.inlineWidth ?? 0);
@@ -555,6 +625,7 @@ export default class GridModel<TRow> {
     this.headerRows.clear();
     this.rows.clear();
     this.flatRows.clear();
+    this.rowOffsets.clear();
     this.update();
   };
 
@@ -569,6 +640,7 @@ export default class GridModel<TRow> {
     this.gridTemplateColumns.clear();
     this.rows.clear();
     this.flatRows.clear();
+    this.rowOffsets.clear();
     this.flexWidths.clear();
     this.sizes.clear();
 
@@ -593,6 +665,7 @@ export default class GridModel<TRow> {
     this.gridTemplateColumns.clear();
     this.rows.clear();
     this.flatRows.clear();
+    this.rowOffsets.clear();
     this.flexWidths.clear();
     this.sizes.clear();
 
@@ -611,6 +684,7 @@ export default class GridModel<TRow> {
     this.gridTemplateColumns.clear();
     this.rows.clear();
     this.flatRows.clear();
+    this.rowOffsets.clear();
     this.flexWidths.clear();
     this.sizes.clear();
     this.update();
@@ -627,6 +701,7 @@ export default class GridModel<TRow> {
 
     this.rows.clear(); // this one is required in order to update rowIndex
     this.flatRows.clear();
+    this.rowOffsets.clear();
     this.update();
   };
 
@@ -646,6 +721,7 @@ export default class GridModel<TRow> {
     }
 
     this.flatRows.clear();
+    this.rowOffsets.clear();
     this.update();
 
     this.props.onSelectionChange?.({
@@ -674,6 +750,7 @@ export default class GridModel<TRow> {
     this.gridTemplateColumns.clear();
     this.rows.clear();
     this.flatRows.clear();
+    this.rowOffsets.clear();
     this.flexWidths.clear();
     this.sizes.clear();
 

@@ -1,6 +1,13 @@
 import { Key } from '../contracts/dataGridContract';
 import ColumnModel from './columnModel';
-import GridModel, { EMPTY_CELL_KEY, GROUPING_CELL_KEY, ROW_NUMBER_CELL_KEY, ROW_SELECTION_CELL_KEY } from './gridModel';
+import DetailRowModel from './detailRowModel';
+import GridModel, {
+  EMPTY_CELL_KEY,
+  GROUPING_CELL_KEY,
+  ROW_DETAIL_CELL_KEY,
+  ROW_NUMBER_CELL_KEY,
+  ROW_SELECTION_CELL_KEY,
+} from './gridModel';
 import GroupRowCellModel from './groupRowCellModel';
 import RowModel from './rowModel';
 
@@ -44,9 +51,9 @@ export default class GroupRowModel<TRow> {
     return this.rows.sumBy((row) => row.count, 0);
   }
 
-  public get flatRows(): (RowModel<TRow> | GroupRowModel<TRow>)[] {
+  public get flatRows(): (RowModel<TRow> | GroupRowModel<TRow> | DetailRowModel<TRow>)[] {
     if (this.expanded) {
-      return [this, ...this.rows.flatMap((row) => row.flatRows)];
+      return [this, ...this.rows.flatMap((row) => row.flatRows as (RowModel<TRow> | GroupRowModel<TRow> | DetailRowModel<TRow>)[])];
     }
 
     return [this];
@@ -65,7 +72,13 @@ export default class GroupRowModel<TRow> {
     const { groupingColumn } = this;
 
     const gridColumn = visibleLeafs.sumBy((c) =>
-      c.pin === groupingColumn.pin && c.key !== EMPTY_CELL_KEY && c.key !== ROW_SELECTION_CELL_KEY && c.key !== ROW_NUMBER_CELL_KEY ? 1 : 0,
+      c.pin === groupingColumn.pin &&
+      c.key !== EMPTY_CELL_KEY &&
+      c.key !== ROW_SELECTION_CELL_KEY &&
+      c.key !== ROW_NUMBER_CELL_KEY &&
+      c.key !== ROW_DETAIL_CELL_KEY
+        ? 1
+        : 0,
     );
 
     return gridColumn;

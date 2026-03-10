@@ -59,6 +59,22 @@ export interface ColumnFilterConfig {
   max?: number;
 }
 
+// ========== Row Detail ==========
+
+/** Configuration for expandable row detail panel */
+export interface RowDetailConfig<TRow> {
+  /** Render function for the detail content */
+  content: (row: TRow) => React.ReactNode;
+  /** Height of the detail row. 'auto' sizes to content. Default: 'auto' */
+  height?: 'auto' | number | ((row: TRow) => number);
+  /** Whether clicking the row also toggles expansion. Default: false */
+  expandOnRowClick?: boolean;
+  /** Pin the expand column to LEFT. Default: false */
+  pinned?: boolean;
+  /** Width of the expand column. Default: 50 */
+  expandColumnWidth?: number;
+}
+
 // ========== Column Type ==========
 
 export interface ColumnType<TRow> {
@@ -85,7 +101,8 @@ export interface GridDefinition<TRow> {
   showRowNumber?: boolean | { pinned?: boolean; width?: number };
   rowSelection?: boolean | { pinned?: boolean };
   rowHeight?: number;
-  visibleRowsCount?: number;
+  /** Number of visible rows. Set to 'all' to render all rows without virtualization or vertical scrollbar. */
+  visibleRowsCount?: number | 'all';
   topBar?: boolean;
   bottomBar?: boolean;
   /** Title displayed in the top bar */
@@ -102,6 +119,8 @@ export interface GridDefinition<TRow> {
   resizable?: boolean;
   /** Custom component to render when data is empty */
   noDataComponent?: React.ReactNode;
+  /** Enable expandable row detail panel */
+  rowDetail?: RowDetailConfig<TRow>;
   // pagination?: Pagination;
 }
 
@@ -120,6 +139,10 @@ export interface DataGridProps<TRow> {
   onColumnFiltersChange?: (filters: ColumnFilters<TRow>) => void;
   /** External predicate filters applied before global/column filters. Memoize with useMemo for performance. */
   filters?: ((row: TRow) => boolean)[];
+  /** Controlled expanded detail row keys */
+  expandedRowKeys?: Key[];
+  /** Callback when expanded detail rows change */
+  onExpandedRowKeysChange?: (keys: Key[]) => void;
 }
 
 interface SelectionChangeEvent<TRow, TKey = TRow[keyof TRow] | number | string> {

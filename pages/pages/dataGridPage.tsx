@@ -20,6 +20,89 @@ import usePageContext from '../hooks/usePageContext';
 
 const allData = [...Data, ...Data1, ...Data2, ...Data3, ...Data4, ...Data5, ...Data6, ...Data7];
 
+const ordersData = [
+  {
+    orderId: 1001,
+    customer: 'Alice Johnson',
+    date: '2026-03-01',
+    status: 'Shipped',
+    total: 259.97,
+    items: [
+      { product: 'Wireless Mouse', sku: 'WM-001', qty: 2, price: 29.99 },
+      { product: 'Mechanical Keyboard', sku: 'MK-042', qty: 1, price: 149.99 },
+      { product: 'USB-C Hub', sku: 'UC-015', qty: 1, price: 49.99 },
+    ],
+  },
+  {
+    orderId: 1002,
+    customer: 'Bob Smith',
+    date: '2026-03-03',
+    status: 'Processing',
+    total: 89.98,
+    items: [
+      { product: 'Webcam HD', sku: 'WC-007', qty: 1, price: 59.99 },
+      { product: 'Mouse Pad XL', sku: 'MP-003', qty: 1, price: 29.99 },
+    ],
+  },
+  {
+    orderId: 1003,
+    customer: 'Charlie Brown',
+    date: '2026-03-05',
+    status: 'Pending',
+    total: 599.99,
+    items: [{ product: '27" Monitor', sku: 'MN-027', qty: 1, price: 599.99 }],
+  },
+  {
+    orderId: 1004,
+    customer: 'Diana Prince',
+    date: '2026-03-06',
+    status: 'Shipped',
+    total: 174.97,
+    items: [
+      { product: 'Desk Lamp LED', sku: 'DL-011', qty: 1, price: 44.99 },
+      { product: 'Cable Management Kit', sku: 'CM-022', qty: 2, price: 19.99 },
+      { product: 'Monitor Stand', sku: 'MS-008', qty: 1, price: 89.99 },
+    ],
+  },
+  {
+    orderId: 1005,
+    customer: 'Eve Davis',
+    date: '2026-03-07',
+    status: 'Processing',
+    total: 329.98,
+    items: [
+      { product: 'Noise Cancelling Headphones', sku: 'NC-033', qty: 1, price: 249.99 },
+      { product: 'Headphone Stand', sku: 'HS-005', qty: 1, price: 39.99 },
+      { product: 'Audio Cable 3.5mm', sku: 'AC-012', qty: 2, price: 19.99 },
+    ],
+  },
+  {
+    orderId: 1006,
+    customer: 'Frank Miller',
+    date: '2026-03-08',
+    status: 'Shipped',
+    total: 1249.98,
+    items: [
+      { product: 'Ergonomic Chair', sku: 'EC-001', qty: 1, price: 899.99 },
+      { product: 'Standing Desk Mat', sku: 'SD-014', qty: 1, price: 49.99 },
+      { product: 'Wrist Rest', sku: 'WR-009', qty: 2, price: 24.99 },
+      { product: 'Footrest', sku: 'FR-006', qty: 1, price: 249.99 },
+    ],
+  },
+  {
+    orderId: 1007,
+    customer: 'Grace Lee',
+    date: '2026-03-09',
+    status: 'Pending',
+    total: 79.98,
+    items: [
+      { product: 'Webcam Cover', sku: 'WV-002', qty: 3, price: 9.99 },
+      { product: 'Screen Cleaner Kit', sku: 'SC-018', qty: 1, price: 19.99 },
+      { product: 'Keyboard Cover', sku: 'KC-025', qty: 1, price: 29.99 },
+    ],
+  },
+];
+
 // Filter chip component
 function FilterChip({ label, active, onClick, onClear }: { label: string; active: boolean; onClick: () => void; onClear?: () => void }) {
   return (
@@ -522,6 +605,124 @@ export default function DataGridPage() {
                 ],
                 rowSelection: { pinned: true },
                 showRowNumber: { pinned: true },
+              }}
+            />
+          </Code>
+
+          <Code
+            label="Row Detail — Orders with Items"
+            language="jsx"
+            code={`<DataGrid
+  data={orders}
+  def={{
+    rowKey: 'orderId',
+    topBar: true,
+    bottomBar: true,
+    title: 'Orders',
+    columns: [
+      { key: 'orderId', header: 'Order #', width: 100, flexible: false },
+      { key: 'customer', header: 'Customer' },
+      { key: 'date', header: 'Date', width: 120 },
+      { key: 'status', header: 'Status', width: 120 },
+      { key: 'total', header: 'Total', width: 100, align: 'right' },
+    ],
+    rowDetail: {
+      content: (order) => (
+        <DataGrid
+          data={order.items}
+          def={{
+            columns: [
+              { key: 'product', header: 'Product' },
+              { key: 'qty', header: 'Qty', width: 80, align: 'right' },
+              { key: 'price', header: 'Price', width: 100, align: 'right' },
+            ],
+            visibleRowsCount: 3,
+            rowHeight: 36,
+          }}
+        />
+      ),
+      pinned: true,
+    },
+  }}
+/>`}
+          >
+            <DataGrid
+              data={ordersData}
+              def={{
+                rowKey: 'orderId',
+                topBar: true,
+                bottomBar: true,
+                title: 'Orders',
+                rowHeight: 40,
+                visibleRowsCount: 8,
+                columns: [
+                  { key: 'orderId', header: 'Order #', width: 100, flexible: false },
+                  { key: 'customer', header: 'Customer' },
+                  { key: 'date', header: 'Date', width: 120 },
+                  {
+                    key: 'status',
+                    header: 'Status',
+                    width: 120,
+                    Cell: ({ cell }) => {
+                      const status = cell.row.data.status;
+                      return (
+                        <Box
+                          px={2}
+                          py={0.5}
+                          borderRadius={4}
+                          fontSize={12}
+                          fontWeight={600}
+                          bgColor={status === 'Shipped' ? 'green-100' : status === 'Processing' ? 'blue-100' : 'yellow-100'}
+                          color={status === 'Shipped' ? 'green-700' : status === 'Processing' ? 'blue-700' : 'yellow-700'}
+                          theme={{
+                            dark: {
+                              bgColor: status === 'Shipped' ? 'green-900' : status === 'Processing' ? 'blue-900' : 'yellow-900',
+                              color: status === 'Shipped' ? 'green-300' : status === 'Processing' ? 'blue-300' : 'yellow-300',
+                            },
+                          }}
+                        >
+                          {status}
+                        </Box>
+                      );
+                    },
+                  },
+                  {
+                    key: 'total',
+                    header: 'Total',
+                    width: 100,
+                    align: 'right',
+                    Cell: ({ cell }) => <Box fontWeight={600}>${cell.row.data.total}</Box>,
+                  },
+                ],
+                rowDetail: {
+                  content: (order: (typeof ordersData)[0]) => (
+                    <Box p={4}>
+                      <Box fontSize={13} fontWeight={600} mb={2} color="gray-600" theme={{ dark: { color: 'gray-400' } }}>
+                        Items for Order #{order.orderId}
+                      </Box>
+                      <DataGrid
+                        data={order.items}
+                        def={{
+                          columns: [
+                            { key: 'product', header: 'Product' },
+                            { key: 'sku', header: 'SKU', width: 120 },
+                            { key: 'qty', header: 'Qty', width: 80, align: 'right' },
+                            {
+                              key: 'price',
+                              header: 'Price',
+                              width: 100,
+                              align: 'right',
+                              Cell: ({ cell }) => <Box>${cell.row.data.price}</Box>,
+                            },
+                          ],
+                          visibleRowsCount: 'all',
+                          rowHeight: 36,
+                        }}
+                      />
+                    </Box>
+                  ),
+                  pinned: true,
+                },
               }}
             />
           </Code>

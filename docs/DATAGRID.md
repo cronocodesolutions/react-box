@@ -1,320 +1,471 @@
-# DataGrid — Feature Inventory and Roadmap
+# DataGrid
 
-This document describes the current capabilities of the DataGrid component and recommends features and API changes to make it production-ready and a competitive third‑party grid.
+A feature-rich, model-driven data grid component with sorting, filtering, grouping, pinning, resizing, row selection, row detail expansion, virtualization, and more.
 
----
-
-## Quick summary
-
-- Location: `src/components/dataGrid/*` (main entry: `src/components/dataGrid.tsx`, model: `models/gridModel.ts`)
-- Existing strengths: grouping, sorting, column pinning, column resizing, column visibility toggles, row selection (checkbox), row numbering, simple virtualization, custom cell renderers via `ColumnType.Cell`, header context menus and top/bottom bars, theming through the hosting library.
-- Feature toggles: sorting and resizing can be disabled globally or per-column via `sortable` and `resizable` flags.
+**Location:** `src/components/dataGrid/` (entry: `dataGrid.tsx`, model: `models/gridModel.ts`)
 
 ---
 
-## What exists today (current capabilities)
-
-### Data & definition API
-
-- DataGridProps: `{ data: TRow[]; def: GridDefinition<TRow>; loading?: boolean; onSelectionChange?: ... }`
-- GridDefinition includes: `columns`, `rowKey`, `showRowNumber`, `rowSelection`, `rowHeight`, `visibleRowsCount`, `topBar`, `bottomBar`, `sortable`, `resizable`.
-- Column type supports nested columns (`columns`), `key`, `header`, `pin` (`LEFT`/`RIGHT`), `width`, `align`, `sortable`, `resizable`, and a custom `Cell` component.
-
-### UX features
-
-- Sorting: header context menu and header click can toggle sort state; supports ASC/DESC/clear. Can be disabled globally (`GridDefinition.sortable: false`) or per-column (`ColumnType.sortable: false`). Column-level settings take priority over global.
-- Column pinning (LEFT/RIGHT) with header controls and grouping-aware pinning.
-- Column resizing via drag handle; columns respect min/max widths in model logic. Can be disabled globally (`GridDefinition.resizable: false`) or per-column (`ColumnType.resizable: false`). Column-level settings take priority over global.
-- Flexible column sizing: columns automatically fill available horizontal space proportionally based on their base width. Set `ColumnType.flexible: false` to keep a column fixed at its width.
-- Column visibility toggling via a top-bar context menu (checkbox list).
-- Column grouping (grouping by a column): top bar shows active grouping and groups can be toggled (expand/collapse).
-- Row selection: per-row checkboxes and select-all in header; `onSelectionChange` callback provides selection state.
-- Row numbering column (configurable/pinnable/custom width).
-- Virtualized rendering: simple windowing by calculating `startIndex` and rendering a subset of rows (`visibleRowsCount` + preload buffer).
-- Header & body render as CSS grid with `gridTemplateColumns` adjusted for pinned columns.
-- Group rows (aggregate rows): render header-like row with ability to expand/collapse and select all children.
-- Top/Bottom bars: pluggable via `def.topBar` and `def.bottomBar` boolean flags; bottom bar currently shows rows count and selected count.
-
-### Extensibility
-
-- Custom cell renderers: `ColumnType.Cell` receives `{ cell }` with `.value`, `.row`, `.column` and can render arbitrary React components.
-- Internals are model-driven (GridModel / ColumnModel / RowModel / CellModel), making behavioral changes observable and (relatively) encapsulated.
-
-### Tests
-
-- Unit tests cover header construction, pinning logic, grouping, sorting and row number behavior (`src/components/dataGrid/models/gridModel.test.ts`).
-- Unit tests for `sortable` and `resizable` column flags including global/column-level priority logic (`src/components/dataGrid/models/columnModel.test.ts`).
-
-### Usage examples
-
-#### Disable sorting and resizing globally
+## Quick Start
 
 ```tsx
+import DataGrid from '@cronocode/react-box/components/dataGrid';
+
+const data = [
+  { id: 1, name: 'Alice', age: 30 },
+  { id: 2, name: 'Bob', age: 25 },
+];
+
 <DataGrid
   data={data}
   def={{
+    rowKey: 'id',
     columns: [
       { key: 'name', header: 'Name' },
+      { key: 'age', header: 'Age', align: 'right' },
+    ],
+  }}
+/>
+```
+
+---
+
+## API Reference
+
+### DataGridProps\<TRow\>
+
+| Prop | Type | Description |
+|------|------|-------------|
+| `data` | `TRow[]` | Row data array |
+| `def` | `GridDefinition<TRow>` | Grid configuration |
+| `loading` | `boolean` | Loading state |
+| `onSelectionChange` | `(event) => void` | Row selection change callback |
+| `globalFilterValue` | `string` | Controlled global filter value |
+| `onGlobalFilterChange` | `(value: string) => void` | Global filter change callback |
+| `columnFilters` | `ColumnFilters<TRow>` | Controlled column filters |
+| `onColumnFiltersChange` | `(filters) => void` | Column filters change callback |
+| `filters` | `((row: TRow) => boolean)[]` | External predicate filters |
+| `expandedRowKeys` | `Key[]` | Controlled expanded detail row keys |
+| `onExpandedRowKeysChange` | `(keys: Key[]) => void` | Expanded rows change callback |
+
+### GridDefinition\<TRow\>
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `columns` | `ColumnType<TRow>[]` | required | Column definitions |
+| `rowKey` | `keyof TRow \| (row) => Key` | auto UUID | Unique row identifier |
+| `rowHeight` | `number` | `48` | Row height in pixels |
+| `visibleRowsCount` | `number` | `10` | Visible rows before scrolling |
+| `showRowNumber` | `boolean \| { pinned?, width? }` | `false` | Show row number column |
+| `rowSelection` | `boolean \| { pinned? }` | `false` | Enable row selection checkboxes |
+| `rowDetail` | `RowDetailConfig<TRow>` | — | Enable expandable row detail panel |
+| `topBar` | `boolean` | `false` | Show top bar |
+| `bottomBar` | `boolean` | `false` | Show bottom bar |
+| `title` | `React.ReactNode` | — | Title in the top bar |
+| `topBarContent` | `React.ReactNode` | — | Custom content in the top bar |
+| `globalFilter` | `boolean` | `false` | Enable global fuzzy search |
+| `globalFilterKeys` | `(keyof TRow)[]` | all columns | Columns to search in global filter |
+| `sortable` | `boolean` | `true` | Enable sorting for all columns |
+| `resizable` | `boolean` | `true` | Enable resizing for all columns |
+| `noDataComponent` | `React.ReactNode` | `'empty'` | Custom empty state |
+
+### ColumnType\<TRow\>
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `key` | `Key` | required | Column identifier (maps to `TRow` property) |
+| `header` | `string` | — | Column header text |
+| `width` | `number` | `200` | Base column width in pixels |
+| `align` | `'left' \| 'right' \| 'center'` | `'left'` | Cell text alignment |
+| `pin` | `'LEFT' \| 'RIGHT'` | — | Pin column to edge |
+| `columns` | `ColumnType<TRow>[]` | — | Nested columns (grouped header) |
+| `Cell` | `React.ComponentType<{ cell }>` | — | Custom cell renderer |
+| `sortable` | `boolean` | inherits | Override grid-level sortable |
+| `resizable` | `boolean` | inherits | Override grid-level resizable |
+| `flexible` | `boolean` | `true` | Participate in flex width distribution |
+| `filterable` | `boolean \| ColumnFilterConfig` | — | Enable column filter |
+
+### RowDetailConfig\<TRow\>
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `content` | `(row: TRow) => React.ReactNode` | required | Render function for detail panel |
+| `height` | `'auto' \| number \| ((row: TRow) => number)` | `'auto'` | Detail panel height. `'auto'` sizes to content |
+| `expandOnRowClick` | `boolean` | `false` | Toggle detail on row click |
+| `pinned` | `boolean` | `false` | Pin expand column to LEFT |
+| `expandColumnWidth` | `number` | `50` | Width of the expand column |
+
+---
+
+## Features
+
+### Sorting
+
+Click a column header to sort ASC → DESC → clear. Use the header context menu for explicit sort control.
+
+```tsx
+// Sorting enabled by default. Disable globally:
+def={{ sortable: false, columns: [...] }}
+
+// Disable for specific columns:
+columns: [
+  { key: 'id', header: 'ID', sortable: false },  // Fixed
+  { key: 'name', header: 'Name' },                 // Sortable (default)
+]
+
+// Override global setting per column:
+def={{
+  sortable: false,
+  columns: [
+    { key: 'name', header: 'Name' },                // Not sortable (inherits)
+    { key: 'age', header: 'Age', sortable: true },  // Sortable (override)
+  ],
+}}
+```
+
+### Column Filters
+
+Three built-in filter types: text (fuzzy search), number (comparison operators), and multiselect (checkbox dropdown).
+
+```tsx
+columns: [
+  // Text filter (fuzzy search)
+  { key: 'name', header: 'Name', filterable: true },
+
+  // Number filter with operators (=, ≠, >, ≥, <, ≤, between)
+  { key: 'age', header: 'Age', filterable: { type: 'number', min: 0, max: 120 } },
+
+  // Multiselect filter (auto-computes unique values from data)
+  { key: 'status', header: 'Status', filterable: { type: 'multiselect' } },
+
+  // Multiselect with custom options
+  {
+    key: 'role',
+    header: 'Role',
+    filterable: {
+      type: 'multiselect',
+      options: [
+        { label: 'Admin', value: 'admin' },
+        { label: 'User', value: 'user' },
+      ],
+    },
+  },
+]
+```
+
+**Controlled column filters:**
+
+```tsx
+const [filters, setFilters] = useState({});
+
+<DataGrid
+  data={data}
+  def={def}
+  columnFilters={filters}
+  onColumnFiltersChange={setFilters}
+/>
+```
+
+### Global Filter
+
+Fuzzy search across all (or specified) columns. Requires `topBar: true` and `globalFilter: true`.
+
+```tsx
+<DataGrid
+  data={data}
+  def={{
+    topBar: true,
+    globalFilter: true,
+    globalFilterKeys: ['name', 'email'],  // optional: limit search columns
+    columns: [...],
+  }}
+/>
+```
+
+**Controlled global filter:**
+
+```tsx
+const [search, setSearch] = useState('');
+
+<DataGrid
+  data={data}
+  def={def}
+  globalFilterValue={search}
+  onGlobalFilterChange={setSearch}
+/>
+```
+
+### External Filters
+
+Apply custom predicate functions before global/column filters. Useful for building custom filter UIs outside the grid.
+
+```tsx
+const [gender, setGender] = useState<string | null>(null);
+
+const filters = useMemo(() => {
+  const result: ((row: Person) => boolean)[] = [];
+  if (gender) result.push((row) => row.gender === gender);
+  return result;
+}, [gender]);
+
+<DataGrid data={data} def={def} filters={filters} />
+```
+
+External filters are applied first (before global and column filters). They don't appear in the "active filters" count or "clear filters" UI — you manage them externally.
+
+### Grouping
+
+Group rows by a column via the header context menu. Supports multi-level nested grouping with expand/collapse.
+
+- Grouped columns are auto-hidden from the column list
+- Group rows show the group value and row count
+- Expand/collapse groups by clicking the arrow
+- Select-all within a group selects all child rows
+
+### Column Pinning
+
+Pin columns to LEFT or RIGHT edges. Pinned columns stay visible during horizontal scroll.
+
+```tsx
+columns: [
+  { key: 'name', header: 'Name', pin: 'LEFT' },
+  { key: 'email', header: 'Email' },
+  { key: 'actions', header: '', pin: 'RIGHT', width: 80 },
+]
+```
+
+Pin/unpin via the header context menu at runtime.
+
+### Column Resizing
+
+Drag the column border to resize. Minimum width: 48px. Resized columns become "fixed" and stop participating in flex distribution.
+
+```tsx
+// Disable globally:
+def={{ resizable: false, columns: [...] }}
+
+// Disable per column:
+{ key: 'id', header: 'ID', resizable: false }
+```
+
+### Flexible Column Sizing
+
+By default, columns stretch proportionally to fill available horizontal space based on their base `width`. Resized columns and columns with `flexible: false` don't stretch.
+
+```tsx
+columns: [
+  { key: 'id', header: 'ID', width: 80, flexible: false },  // Fixed 80px
+  { key: 'name', header: 'Name', width: 200 },               // Stretches (ratio 200)
+  { key: 'email', header: 'Email', width: 300 },              // Stretches more (ratio 300)
+]
+// Grid 1000px: ID=80px, Name=368px, Email=552px
+```
+
+### Column Visibility
+
+Toggle column visibility via the top bar context menu (checkbox list). Requires `topBar: true`.
+
+### Row Selection
+
+Checkbox column for selecting rows. Supports select-all with indeterminate state for partial selections.
+
+```tsx
+<DataGrid
+  data={data}
+  def={{
+    rowSelection: true,              // or { pinned: true } to pin LEFT
+    columns: [...],
+  }}
+  onSelectionChange={(event) => {
+    // event.action: 'select' | 'deselect'
+    // event.selectedRowKeys: Key[]
+    // event.affectedRowKeys: Key[]
+    // event.isAllSelected: boolean
+  }}
+/>
+```
+
+### Row Numbering
+
+Auto-generated row number column.
+
+```tsx
+def={{
+  showRowNumber: true,
+  // or with options:
+  showRowNumber: { pinned: true, width: 50 },
+  columns: [...],
+}}
+```
+
+### Row Detail (Expandable Rows)
+
+Show a detail panel below each row when expanded. Ideal for master-detail patterns like orders → order items, bookings → details.
+
+```tsx
+<DataGrid
+  data={orders}
+  def={{
+    rowKey: 'orderId',
+    columns: [
+      { key: 'orderId', header: 'Order #' },
+      { key: 'customer', header: 'Customer' },
+      { key: 'total', header: 'Total', align: 'right' },
+    ],
+    rowDetail: {
+      content: (order) => (
+        <DataGrid
+          data={order.items}
+          def={{
+            columns: [
+              { key: 'product', header: 'Product' },
+              { key: 'qty', header: 'Qty', align: 'right' },
+              { key: 'price', header: 'Price', align: 'right' },
+            ],
+          }}
+        />
+      ),
+      height: 250,
+    },
+  }}
+/>
+```
+
+**Options:**
+- `content(row)` — render function for the detail panel
+- `height` — `'auto'` (default, sizes to content), static number, or `(row) => number`
+- `expandOnRowClick` — toggle detail by clicking the row (default: false)
+- `pinned` — pin the expand column to LEFT (default: false)
+
+**Controlled mode:**
+
+```tsx
+const [expanded, setExpanded] = useState<Key[]>([]);
+
+<DataGrid
+  data={orders}
+  def={def}
+  expandedRowKeys={expanded}
+  onExpandedRowKeysChange={setExpanded}
+/>
+```
+
+### Top Bar & Bottom Bar
+
+```tsx
+def={{
+  topBar: true,
+  bottomBar: true,
+  title: 'Users',
+  topBarContent: <MyCustomFilters />,
+  globalFilter: true,
+  columns: [...],
+}}
+```
+
+**Top bar** shows: title, custom content, global filter input, column visibility menu, active grouping chips.
+
+**Bottom bar** shows: row count (filtered / total), selected count, "clear filters" link.
+
+### Custom Cell Renderers
+
+```tsx
+columns: [
+  {
+    key: 'status',
+    header: 'Status',
+    Cell: ({ cell }) => (
+      <Badge color={cell.value === 'active' ? 'green' : 'red'}>
+        {cell.value}
+      </Badge>
+    ),
+  },
+]
+```
+
+The `cell` prop provides: `cell.value`, `cell.row` (RowModel), `cell.column` (ColumnModel), `cell.grid` (GridModel).
+
+### Empty State
+
+```tsx
+def={{
+  noDataComponent: <MyEmptyState />,
+  columns: [...],
+}}
+```
+
+When `loading` is true and data is empty, shows "loading..." by default.
+
+### Virtualization
+
+Renders only visible rows plus a preload buffer (20 rows above/below). Configure visible area:
+
+```tsx
+def={{
+  visibleRowsCount: 15,  // default: 10
+  rowHeight: 40,          // default: 48px
+  columns: [...],
+}}
+```
+
+### Grouped Column Headers
+
+Nest columns to create multi-level headers:
+
+```tsx
+columns: [
+  { key: 'name', header: 'Name' },
+  {
+    key: 'contact',
+    header: 'Contact Info',
+    columns: [
       { key: 'email', header: 'Email' },
+      { key: 'phone', header: 'Phone' },
     ],
-    sortable: false,   // Disables sorting for all columns
-    resizable: false,  // Disables resizing for all columns
-  }}
-/>
-```
-
-#### Override global settings per column
-
-```tsx
-<DataGrid
-  data={data}
-  def={{
-    columns: [
-      { key: 'name', header: 'Name' },                         // Not sortable, not resizable (inherits global)
-      { key: 'age', header: 'Age', sortable: true },           // Sortable (overrides global)
-      { key: 'email', header: 'Email', resizable: true },      // Resizable (overrides global)
-    ],
-    sortable: false,   // Global default: no sorting
-    resizable: false,  // Global default: no resizing
-  }}
-/>
-```
-
-#### Disable specific columns while others remain enabled
-
-```tsx
-<DataGrid
-  data={data}
-  def={{
-    columns: [
-      { key: 'id', header: 'ID', sortable: false, resizable: false },  // Fixed column
-      { key: 'name', header: 'Name' },                                  // Sortable & resizable (default)
-      { key: 'email', header: 'Email' },                                // Sortable & resizable (default)
-    ],
-    // sortable and resizable default to true when not specified
-  }}
-/>
-```
-
-#### Flexible column sizing (columns fill available space)
-
-By default, all columns flex proportionally based on their width. The grid automatically distributes extra horizontal space.
-
-```tsx
-<DataGrid
-  data={data}
-  def={{
-    columns: [
-      { key: 'id', header: 'ID', width: 80, flexible: false },  // Fixed at 80px, won't stretch
-      { key: 'name', header: 'Name', width: 200 },              // Will stretch (default flexible: true)
-      { key: 'email', header: 'Email', width: 300 },            // Will stretch more (larger base width)
-    ],
-  }}
-/>
-```
-
-In the example above:
-- The 'ID' column stays fixed at 80px
-- The remaining space is distributed between 'Name' and 'Email' proportionally (200:300 ratio)
-- If the grid is 1000px wide: ID=80px, Name=368px, Email=552px
-
----
-
-## Current limitations / notable gaps
-
-- Pagination is stubbed and not implemented (commented code in `dataGridPagination.tsx`).
-- No server-side modes (server paging, server sorting, server filtering) or built-in data fetching hooks.
-- No filters (per-column or global) or filter UI.
-- No multi-column sorting (only single sort column supported).
-- No column reordering (drag-and-drop columns).
-- The selection API is limited: internal state with `onSelectionChange` callback but no controlled selection props (e.g., `selectedRowKeys` input) or `selectionMode` (single/multi/none).
-- No events/callbacks for: sort changes, column pin changes, column resize/width change, column visibility change, group changes, or row expand/collapse.
-- Virtualization is a basic window; no support for variable row heights, true windowing libraries like `react-window`, or virtualization optimizations for very large datasets.
-- Accessibility: limited ARIA/focus keyboard navigation and no keyboard-driven sorting/selection navigation.
-- No cell editing API (inline editors, edit lifecycle events) or validation.
-- No column footers/aggregation (sum/count/avg) or built-in aggregation functions for groups.
-- No CSV/Excel export, copy/paste, or clipboard API.
-- No row or column virtualization tests, integration tests for interactive features (resize drag, context menus, keyboard navigation).
-- Column width persistence and controlled column state across re-renders or external state is missing (no onColumnWidthChange callback).
-
----
-
-## Recommended feature set to make DataGrid competitive
-
-Prioritized (must-have → nice-to-have):
-
-1. Core data & control APIs (must-have)
-
-- Controlled selection: add `selectedRowKeys?: Key[]` and `selectionMode?: 'single' | 'multiple' | 'none'` and keep `onSelectionChange` for events.
-- Sort/Filter events: `onSortChange?(sort: {key: Key | undefined; dir?: 'ASC'|'DESC'})` and `onFilterChange?(filters)`.
-- Column events: `onColumnVisibilityChange`, `onColumnResize`, `onColumnPinChange`, `onColumnOrderChange`.
-- Paginated data support: `pagination?: { pageSize?: number } | { server: true }` and callbacks `onPageChange`, `onPageSizeChange`.
-
-2. Server-side / controlled modes (must-have for large data)
-
-- `mode: 'client'|'server'` flag and APIs to drive server paging, sorting, filtering.
-- Simple examples/hooks for implementing server-side fetching and debounced requests (demo in `pages/`).
-
-3. Filtering & multi-sort (must-have)
-
-- Per-column filter controls (text/number/date/select-based) with pluggable filter UI components.
-- Multi-column sort capability (array of sort descriptors).
-
-4. Column improvements (must-have)
-
-- ✅ Column definitions: `sortable?: boolean` and `resizable?: boolean` — implemented with global and per-column flags (column-level takes priority).
-- ✅ Column definitions: `flexible?: boolean` — flexible column sizing implemented. All columns flex proportionally by default. Set `flexible: false` to keep a column fixed.
-- Column definitions: add `filterable?: boolean`, `editable?: boolean`, `minWidth`, `maxWidth`, `defaultWidth`.
-- Column reordering (drag-and-drop) with `onColumnOrderChange`.
-- Column width persistence / controlled widths with `width` prop support and `onColumnResize` callback.
-
-5. UX & accessibility (must-have)
-
-- Keyboard navigation: arrow keys, space/enter for selection, home/end, page up/down; focus management for cells/headers.
-- Proper ARIA attributes (aria-selected, aria-rowindex, etc.).
-- Screen reader friendly header context menus and controls.
-
-6. Editing & validation (highly recommended)
-
-- Inline cell editors (text, select, number, custom), edit lifecycle events (`onCellEditStart`, `onCellEditCommit`, `onCellEditCancel`).
-- Cell-level validation support.
-
-7. Virtualization & performance (highly recommended)
-
-- Replace/simple option to use `react-window` or `react-virtual` for robust virtualization (variable row heights, windowing).
-- Expose virtualization configuration (`overscan`, `itemSize`, variable heights support).
-
-8. Grouping & aggregation (strongly recommended)
-
-- Group aggregates (sum/count/avg/min/max) with column-level aggregation functions.
-- Group footers and group render customization.
-
-9. API ergonomics & customization (recommended)
-
-- `components` override system or render props for: `HeaderCell`, `Row`, `Cell`, `GroupRow`, `NoData`, `Loading`.
-- Plugin/hooks API to add custom behaviors (e.g., selection persistence, column state plugin).
-
-10. Export, copy & integrations (nice-to-have)
-
-- CSV/Excel export, copy selected rows to clipboard, print-friendly mode.
-
-11. Tests & examples (must-have for 3rd-party usage)
-
-- Add tests for selection, resizing, pin/unpin, grouping expand/collapse, paging and server-driven data, keyboard navigation and accessibility.
-- Add interactive demos in `pages/` showing: controlled selection, server-side data, inline editing, column reordering, grouping + aggregation, and per-column filters.
-
----
-
-## Suggested API additions (concrete proposals)
-
-- DataGridProps additions:
-
-```ts
-interface DataGridProps<TRow> {
-  data: TRow[];
-  def: GridDefinition<TRow>;
-  loading?: boolean;
-
-  // Events / controlled props
-  selectedRowKeys?: Key[];
-  onSelectionChange?: (event: SelectionChangeEvent) => void; // already exists
-  selectionMode?: 'single' | 'multiple' | 'none';
-
-  onSortChange?: (sort?: { key: Key; dir: 'ASC' | 'DESC' } | undefined) => void;
-  sort?: { key: Key; dir: 'ASC' | 'DESC' } | { key: Key; dir: 'ASC' | 'DESC' }[]; // allow multi-sort
-
-  onFilterChange?: (filters: Record<Key, any>) => void;
-  filters?: Record<Key, any>;
-
-  pagination?: { pageSize?: number; page?: number } | { server: true; pageSize: number; page: number };
-  onPageChange?: (page: number) => void;
-
-  onColumnResize?: (columnKey: Key, width: number) => void;
-  onColumnVisibilityChange?: (columnKey: Key, visible: boolean) => void;
-  onColumnPinChange?: (columnKey: Key, pin?: 'LEFT' | 'RIGHT') => void;
-  onColumnOrderChange?: (order: Key[]) => void;
-
-  components?: Partial<{
-    HeaderCell: React.ComponentType<any>;
-    Row: React.ComponentType<any>;
-    Cell: React.ComponentType<any>;
-    NoData: React.ComponentType<any>;
-    Loading: React.ComponentType<any>;
-  }>;
-}
-```
-
-- ColumnType additions (✅ = implemented):
-
-```ts
-interface ColumnType<TRow> {
-  key: Key;
-  header?: string;
-  width?: number;
-  minWidth?: number;
-  maxWidth?: number;
-  sortable?: boolean;    // ✅ Implemented - disable sorting for this column
-  resizable?: boolean;   // ✅ Implemented - disable resizing for this column
-  flexible?: boolean;    // ✅ Implemented - disable flexible sizing for this column (default: true)
-  filterable?: boolean | { type: 'text' | 'select' | 'number' | 'date' };
-  editable?: boolean | { Editor: React.ComponentType<any> };
-  reorderable?: boolean;
-  Cell?: React.ComponentType<{ cell: CellModel<TRow>; rowIndex: number }>;
-}
-```
-
-- GridDefinition additions (✅ = implemented):
-
-```ts
-interface GridDefinition<TRow> {
-  // ... existing props ...
-  sortable?: boolean;    // ✅ Implemented - disable sorting for all columns (default: true)
-  resizable?: boolean;   // ✅ Implemented - disable resizing for all columns (default: true)
-}
+  },
+]
 ```
 
 ---
 
-## Tests and examples to add
+## Architecture
 
-- ✅ Unit tests for `sortable` and `resizable` flags (global and column-level priority) — added to `columnModel.test.ts`
-- ✅ Unit tests for `flexible` flag and flex width calculation — added to `columnModel.test.ts`
-- Unit tests for selection (single and multi), select-all edge cases (empty data, partial selections), and `onSelectionChange` payload.
-- Tests for `onColumnResize` and width updates (simulate mouse events)
-- Tests for pin/unpin and column visibility toggles (state change and layout update assertions)
-- Integration tests for grouping expand/collapse and grouping aggregates
-- Visual/manual test pages in `pages/`:
-  - ✅ Disable Sorting and Resizing demo — added to `dataGridPage.tsx`
-  - Controlled selection demo
-  - Server-side pagination + sorting demo
-  - Column reordering + persistence demo
-  - Inline editing + validation demo
+The grid is model-driven with observable state:
+
+- **GridModel** — orchestrator: manages columns, rows, filters, sorting, grouping, selection, sizing
+- **ColumnModel** — column definition, pinning, width, visibility, sorting, filtering
+- **RowModel** — wraps row data, selection state, cell generation
+- **GroupRowModel** — grouped rows with expand/collapse, child rows, aggregation
+- **DetailRowModel** — detail panel row for expanded master-detail views
+- **CellModel** — row + column intersection, value computation
+
+State changes trigger memo invalidation and React re-render via `useGrid` hook.
 
 ---
 
-## Implementation notes & pointers
+## Current Limitations
 
-- The model-driven design (GridModel / ColumnModel / RowModel / CellModel) is a good foundation—add controlled props and events at the GridModel boundary and wire them via `useGrid`.
-- Virtualization: the current approach uses a calculated startIndex and CSS `transform` translate. For production-ready virtualization support, consider integrating `react-window` for stable performance on large datasets.
-- Accessibility: enrich roles (rowgroup/row/columnheader/cell) with ARIA attributes and expose keyboard hooks on header/cell to handle actions (sorting, selecting, editing).
-- Persistence: column widths and order can be persisted to external state via `onColumnResize` and `onColumnOrderChange` events to enable controlled columns and user preferences.
-
----
-
-## Proposed roadmap (phases)
-
-1. Stabilize core APIs & events (controlled selection, sort/filter events, column events).
-2. Implement server mode (pagination, server sorting, filtering) + example demo.
-3. Add filtering UI, multi-sort, and column reordering.
-4. Add inline editing and validation.
-5. Improve virtualization (react-window), accessibility, and comprehensive tests.
-6. Add export & nice-to-have features (column grouping aggregates, export CSV/Excel).
+- No pagination (type defined but not implemented)
+- No server-side modes (server paging, sorting, filtering)
+- No multi-column sorting (single sort column only)
+- No column reordering (drag-and-drop)
+- No controlled selection props (`selectedRowKeys` input)
+- No column event callbacks (`onColumnResize`, `onColumnPinChange`, etc.)
+- No cell editing or validation
+- No column footers or group aggregation functions
+- No CSV/Excel export or clipboard
+- Limited keyboard navigation and ARIA attributes
+- Basic virtualization (uniform row height, no react-window integration)
 
 ---
 
-If you'd like, I can:
+## Roadmap
 
-- Draft the exact TypeScript changes (interfaces and models) and open a PR with incremental changes; or
-- Implement a single high-impact feature first (e.g., controlled selection + events + tests).
-
-Tell me which you'd prefer and I will proceed. ✅
+1. **Core events** — controlled selection, sort/filter/column change callbacks
+2. **Server mode** — server paging, sorting, filtering with hooks/examples
+3. **Multi-sort & column reorder** — multi-column sort, drag-and-drop columns
+4. **Inline editing** — cell editors, edit lifecycle events, validation
+5. **Accessibility** — keyboard navigation, ARIA attributes, screen reader support
+6. **Advanced virtualization** — react-window/react-virtual integration, variable row heights
+7. **Aggregation** — group footers, column aggregation functions (sum/count/avg)
+8. **Export** — CSV/Excel export, clipboard copy

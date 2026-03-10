@@ -15,6 +15,7 @@ export default function useGrid<TRow>(props: DataGridProps<TRow>): GridModel<TRo
     gridRef.current!.props = props;
     gridRef.current!.rows.clear();
     gridRef.current!.flatRows.clear();
+    gridRef.current!.rowOffsets.clear();
     gridRef.current!.update();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [props.data]);
@@ -27,6 +28,7 @@ export default function useGrid<TRow>(props: DataGridProps<TRow>): GridModel<TRo
     gridRef.current!.gridTemplateColumns.clear();
     gridRef.current!.rows.clear();
     gridRef.current!.flatRows.clear();
+    gridRef.current!.rowOffsets.clear();
     gridRef.current!.sizes.clear();
     gridRef.current!.update();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -43,9 +45,20 @@ export default function useGrid<TRow>(props: DataGridProps<TRow>): GridModel<TRo
     gridRef.current!.props = props;
     gridRef.current!.rows.clear();
     gridRef.current!.flatRows.clear();
+    gridRef.current!.rowOffsets.clear();
     gridRef.current!.update();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [props.globalFilterValue, props.columnFilters, props.filters]);
+
+  // Handle controlled expanded row keys
+  useEffect(() => {
+    gridRef.current!.props = props;
+    gridRef.current!.rows.clear();
+    gridRef.current!.flatRows.clear();
+    gridRef.current!.rowOffsets.clear();
+    gridRef.current!.update();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [props.expandedRowKeys]);
 
   return gridRef.current;
 }
