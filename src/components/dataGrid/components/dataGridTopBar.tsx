@@ -14,7 +14,7 @@ export default function DataGridTopBar<TRow>(props: Props<TRow>) {
   const { title, topBarContent, globalFilter } = grid.props.def;
 
   return (
-    <Flex component="datagrid.topBar" position="relative" ai="center" jc="space-between" gap={4} flexWrap="wrap">
+    <Flex component={`${grid.componentName}.topBar` as never} position="relative" ai="center" jc="space-between" gap={4} flexWrap="wrap">
       {/* Left section: Title and grouping context */}
       <Flex ai="center" gap={3} flexWrap="wrap" minWidth={0}>
         <DataGridTopBarContextMenu grid={grid} />

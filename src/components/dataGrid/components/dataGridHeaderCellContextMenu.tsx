@@ -54,82 +54,102 @@ export default function DataGridHeaderCellContextMenu<TRow>(props: Props<TRow>) 
   return (
     <Flex position="absolute" left={positionLeft} right={positionRight} top="1/2" translateY={-3} ai="center">
       <Button
-        component="datagrid.header.cell.contextMenu"
+        component={`${grid.componentName}.header.cell.contextMenu` as never}
         onClick={() => setOpen(!isOpen)}
-        variant={{ isPinned, isFirstLeftPinned, isLastLeftPinned, isFirstRightPinned, isLastRightPinned, isSortable, isRowNumber }}
+        variant={{ isPinned, isFirstLeftPinned, isLastLeftPinned, isFirstRightPinned, isLastRightPinned, isSortable, isRowNumber } as never}
       >
-        <Span component="datagrid.header.cell.contextMenu.icon">
+        <Span component={`${grid.componentName}.header.cell.contextMenu.icon` as never}>
           <DotsIcon fill="currentColor" />
         </Span>
         {isOpen && (
           <Tooltip
-            component="datagrid.header.cell.contextMenu.tooltip"
+            component={`${grid.componentName}.header.cell.contextMenu.tooltip` as never}
             onPositionChange={setTooltipPosition}
             ref={refToUse}
             adjustTranslateX={openLeft ? '-100%' : '-21px'}
             adjustTranslateY="16px"
           >
             {isSortAscAvailable && (
-              <Button component="datagrid.header.cell.contextMenu.tooltip.item" onClick={() => column.sortColumn('ASC')}>
-                <Span component="datagrid.header.cell.contextMenu.tooltip.item.icon">
+              <Button
+                component={`${grid.componentName}.header.cell.contextMenu.tooltip.item` as never}
+                onClick={() => column.sortColumn('ASC')}
+              >
+                <Span component={`${grid.componentName}.header.cell.contextMenu.tooltip.item.icon` as never}>
                   <SortIcon width="100%" fill="currentColor" />
                 </Span>
                 Sort Ascending
               </Button>
             )}
             {isSortDescAvailable && (
-              <Button component="datagrid.header.cell.contextMenu.tooltip.item" onClick={() => column.sortColumn('DESC')}>
-                <Span component="datagrid.header.cell.contextMenu.tooltip.item.icon">
+              <Button
+                component={`${grid.componentName}.header.cell.contextMenu.tooltip.item` as never}
+                onClick={() => column.sortColumn('DESC')}
+              >
+                <Span component={`${grid.componentName}.header.cell.contextMenu.tooltip.item.icon` as never}>
                   <SortIcon width="100%" fill="currentColor" rotate={180} />
                 </Span>
                 Sort Descending
               </Button>
             )}
             {isClearSortAvailable && (
-              <Button component="datagrid.header.cell.contextMenu.tooltip.item" onClick={() => column.sortColumn(undefined)}>
+              <Button
+                component={`${grid.componentName}.header.cell.contextMenu.tooltip.item` as never}
+                onClick={() => column.sortColumn(undefined)}
+              >
                 <Box width={4} />
                 Clear Sort
               </Button>
             )}
             {isSortingAvailable && (isPiningAvailable || isGroupByAvailable || isUnGroupByAvailable) && (
-              <Box bb={1} my={2} borderColor="gray-300" component="datagrid.header.cell.contextMenu.tooltip.item.separator" />
+              <Box
+                bb={1}
+                my={2}
+                borderColor="gray-300"
+                component={`${grid.componentName}.header.cell.contextMenu.tooltip.item.separator` as never}
+              />
             )}
             {isPinLeftAvailable && (
-              <Button component="datagrid.header.cell.contextMenu.tooltip.item" onClick={() => column.pinColumn('LEFT')}>
-                <Span component="datagrid.header.cell.contextMenu.tooltip.item.icon">
+              <Button
+                component={`${grid.componentName}.header.cell.contextMenu.tooltip.item` as never}
+                onClick={() => column.pinColumn('LEFT')}
+              >
+                <Span component={`${grid.componentName}.header.cell.contextMenu.tooltip.item.icon` as never}>
                   <PinIcon width="100%" fill="currentColor" />
                 </Span>
                 Pin Left
               </Button>
             )}
             {isPinRightAvailable && (
-              <Button component="datagrid.header.cell.contextMenu.tooltip.item" onClick={() => column.pinColumn('RIGHT')}>
-                <Span component="datagrid.header.cell.contextMenu.tooltip.item.icon">
+              <Button
+                component={`${grid.componentName}.header.cell.contextMenu.tooltip.item` as never}
+                onClick={() => column.pinColumn('RIGHT')}
+              >
+                <Span component={`${grid.componentName}.header.cell.contextMenu.tooltip.item.icon` as never}>
                   <PinIcon width="100%" fill="currentColor" rotate={-90} />
                 </Span>
                 Pin Right
               </Button>
             )}
             {isUnpinAvailable && (
-              <Button component="datagrid.header.cell.contextMenu.tooltip.item" onClick={() => column.pinColumn()}>
+              <Button component={`${grid.componentName}.header.cell.contextMenu.tooltip.item` as never} onClick={() => column.pinColumn()}>
                 <Box width={4} />
                 Unpin
               </Button>
             )}
             {isSortingAvailable && isPiningAvailable && (isGroupByAvailable || isUnGroupByAvailable) && (
-              <Box component="datagrid.header.cell.contextMenu.tooltip.item.separator" />
+              <Box component={`${grid.componentName}.header.cell.contextMenu.tooltip.item.separator` as never} />
             )}
             {isGroupByAvailable && (
-              <Button component="datagrid.header.cell.contextMenu.tooltip.item" onClick={column.toggleGrouping}>
-                <Span component="datagrid.header.cell.contextMenu.tooltip.item.icon">
+              <Button component={`${grid.componentName}.header.cell.contextMenu.tooltip.item` as never} onClick={column.toggleGrouping}>
+                <Span component={`${grid.componentName}.header.cell.contextMenu.tooltip.item.icon` as never}>
                   <GroupingIcon width="100%" fill="currentColor" />
                 </Span>
                 <Box textWrap="nowrap">Group by {header ?? key}</Box>
               </Button>
             )}
             {isUnGroupByAvailable && (
-              <Button component="datagrid.header.cell.contextMenu.tooltip.item" onClick={grid.unGroupAll}>
-                <Span component="datagrid.header.cell.contextMenu.tooltip.item.icon">
+              <Button component={`${grid.componentName}.header.cell.contextMenu.tooltip.item` as never} onClick={grid.unGroupAll}>
+                <Span component={`${grid.componentName}.header.cell.contextMenu.tooltip.item.icon` as never}>
                   <GroupingIcon width="100%" fill="currentColor" />
                 </Span>
                 <Box textWrap="nowrap">Un-Group All</Box>

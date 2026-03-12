@@ -1,3 +1,4 @@
+import { ComponentsAndVariants } from '../../../types';
 import CellModel from '../models/cellModel';
 
 export type Key = string | number;
@@ -11,7 +12,25 @@ export interface PaginationState {
   totalItems: number;
   totalPages: number;
 }
-export type Pagination = boolean | { pageSize: number };
+/** Server-side pagination configuration on GridDefinition */
+export interface PaginationConfig {
+  /** Total number of items across all pages (from server response) */
+  totalCount: number;
+  /** Page size override. If omitted, defaults to visibleRowsCount (or 10). */
+  pageSize?: number;
+}
+
+// ========== Server State ==========
+
+/** Snapshot of all server-relevant grid state, passed to onServerStateChange */
+export interface ServerState<TRow> {
+  page: number;
+  pageSize: number;
+  sortColumn: Key | undefined;
+  sortDirection: SortDirection | undefined;
+  columnFilters: ColumnFilters<TRow>;
+  globalFilterValue: string;
+}
 
 // ========== Filter Types ==========
 
@@ -59,6 +78,22 @@ export interface ColumnFilterConfig {
   max?: number;
 }
 
+// ========== Row Detail ==========
+
+/** Configuration for expandable row detail panel */
+export interface RowDetailConfig<TRow> {
+  /** Render function for the detail content */
+  content: (row: TRow) => React.ReactNode;
+  /** Height of the detail row. 'auto' sizes to content. Default: 'auto' */
+  height?: 'auto' | number | ((row: TRow) => number);
+  /** Whether clicking the row also toggles expansion. Default: false */
+  expandOnRowClick?: boolean;
+  /** Pin the expand column to LEFT. Default: false */
+  pinned?: boolean;
+  /** Width of the expand column. Default: 50 */
+  expandColumnWidth?: number;
+}
+
 // ========== Column Type ==========
 
 export interface ColumnType<TRow> {
@@ -85,7 +120,8 @@ export interface GridDefinition<TRow> {
   showRowNumber?: boolean | { pinned?: boolean; width?: number };
   rowSelection?: boolean | { pinned?: boolean };
   rowHeight?: number;
-  visibleRowsCount?: number;
+  /** Number of visible rows. Set to 'all' to render all rows without virtualization or vertical scrollbar. */
+  visibleRowsCount?: number | 'all';
   topBar?: boolean;
   bottomBar?: boolean;
   /** Title displayed in the top bar */
@@ -102,10 +138,15 @@ export interface GridDefinition<TRow> {
   resizable?: boolean;
   /** Custom component to render when data is empty */
   noDataComponent?: React.ReactNode;
-  // pagination?: Pagination;
+  /** Enable expandable row detail panel */
+  rowDetail?: RowDetailConfig<TRow>;
+  /** Server-side pagination. Provide totalCount from the API response. */
+  pagination?: PaginationConfig;
 }
 
 export interface DataGridProps<TRow> {
+  /** Component name for style resolution. Default: 'datagrid'. Set to a custom name to use a different component style tree. */
+  component?: keyof ComponentsAndVariants;
   data: TRow[];
   def: GridDefinition<TRow>;
   loading?: boolean;
@@ -120,6 +161,18 @@ export interface DataGridProps<TRow> {
   onColumnFiltersChange?: (filters: ColumnFilters<TRow>) => void;
   /** External predicate filters applied before global/column filters. Memoize with useMemo for performance. */
   filters?: ((row: TRow) => boolean)[];
+  /** Controlled expanded detail row keys */
+  expandedRowKeys?: Key[];
+  /** Callback when expanded detail rows change */
+  onExpandedRowKeysChange?: (keys: Key[]) => void;
+  /** Controlled current page (1-indexed). Used with pagination. */
+  page?: number;
+  /** Callback when page changes. Receives page (1-indexed) and pageSize. */
+  onPageChange?: (page: number, pageSize: number) => void;
+  /** Callback when sort changes. For server-side sorting with pagination. */
+  onSortChange?: (columnKey: Key | undefined, direction: SortDirection | undefined) => void;
+  /** Fires on any server-relevant state change (page, sort, filter). Provides full state snapshot for API calls. */
+  onServerStateChange?: (state: ServerState<TRow>) => void;
 }
 
 interface SelectionChangeEvent<TRow, TKey = TRow[keyof TRow] | number | string> {

@@ -29,11 +29,16 @@ export default function DataGridContent<TRow>(props: Props<TRow>) {
   const hasVisibleColumns = grid.columns.value.userVisibleLeafs.length > 0;
 
   if (!hasVisibleColumns) {
-    return <DataGridEmptyColumns />;
+    return <DataGridEmptyColumns grid={grid} />;
   }
 
   return (
-    <Box overflowX="scroll" style={{ willChange: 'scroll-position' }} props={{ onScroll: handleScroll }}>
+    <Box
+      component={`${grid.componentName}.content` as never}
+      overflowX="scroll"
+      style={{ willChange: 'scroll-position' }}
+      props={{ onScroll: handleScroll }}
+    >
       <DataGridHeader grid={grid} />
 
       <DataGridBody grid={grid} scrollTop={scrollTop} />

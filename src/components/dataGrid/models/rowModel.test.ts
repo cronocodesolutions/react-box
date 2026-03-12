@@ -44,10 +44,33 @@ describe('RowModel', () => {
     expect(row.cells.length).toEqual(grid.columns.value.visibleLeafs.length);
   });
 
-  it('flatRows and allRows return self', () => {
+  it('flatRows returns array with self when no rowDetail', () => {
     const grid = getGrid();
     const row = grid.rows.value[0];
-    expect(row.flatRows).toBe(row);
+    expect(row.flatRows).toEqual([row]);
     expect(row.allRows).toBe(row);
+  });
+
+  it('flatRows returns self and detail row when expanded with rowDetail', () => {
+    const grid = new GridModel<Person>(
+      {
+        data,
+        def: { ...def, rowDetail: { content: () => null } },
+      },
+      () => {},
+    );
+    const row = grid.rows.value[0];
+
+    // Not expanded yet
+    expect(row.flatRows).toHaveLength(1);
+    expect(row.expanded).toBe(false);
+
+    // Expand the row
+    grid.toggleDetailRow(row.key);
+    const newRow = grid.rows.value[0];
+    expect(newRow.expanded).toBe(true);
+    expect(newRow.flatRows).toHaveLength(2);
+    expect(newRow.flatRows[0]).toBe(newRow);
+    expect(newRow.flatRows[1].key).toBe(`detail-${newRow.key}`);
   });
 });

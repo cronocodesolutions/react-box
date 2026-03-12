@@ -17,8 +17,8 @@ export default function DataGridColumnGroups<TRow>(props: Props<TRow>) {
   if (grid.groupColumns.size === 0) return null;
 
   return (
-    <Flex component="datagrid.topBar.columnGroups">
-      <Span component="datagrid.topBar.columnGroups.icon">
+    <Flex component={`${grid.componentName}.topBar.columnGroups` as never}>
+      <Span component={`${grid.componentName}.topBar.columnGroups.icon` as never}>
         <GroupingIcon width="100%" fill="currentColor" />
       </Span>
       {Array.from(grid.groupColumns, (groupColumn) => {
@@ -27,10 +27,13 @@ export default function DataGridColumnGroups<TRow>(props: Props<TRow>) {
         return (
           <React.Fragment key={groupColumn}>
             <ExpandIcon fill="currentColor" width="14px" height="14px" rotate={-90} />
-            <Flex component="datagrid.topBar.columnGroups.item">
+            <Flex component={`${grid.componentName}.topBar.columnGroups.item` as never}>
               {column.header ?? column.key}
 
-              <Button component="datagrid.topBar.columnGroups.item.icon" onClick={() => grid.toggleGrouping(column.key)}>
+              <Button
+                component={`${grid.componentName}.topBar.columnGroups.item.icon` as never}
+                onClick={() => grid.toggleGrouping(column.key)}
+              >
                 <Box fontSize={10} color="gray-400" hover={{ color: 'gray-600' }}>
                   ✕
                 </Box>

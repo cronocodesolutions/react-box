@@ -1,6 +1,7 @@
 import { BoxComponentStyles } from '../../types';
 
 export interface BoxComponent {
+  extends?: string;
   clean?: boolean;
   styles?: BoxComponentStyles;
   variants?: Record<string, BoxComponentStyles>;
@@ -659,6 +660,9 @@ const boxComponents = {
       },
     },
     children: {
+      content: {
+        styles: {},
+      },
       topBar: {
         styles: {
           py: 3,
@@ -1086,7 +1090,19 @@ const boxComponents = {
               isEmptyCell: {},
             },
           },
+          detailRow: {
+            styles: {},
+          },
+          row: {
+            styles: {},
+          },
+          groupRow: {
+            styles: {},
+          },
         },
+      },
+      emptyColumns: {
+        styles: {},
       },
       bottomBar: {
         styles: {
@@ -1106,6 +1122,11 @@ const boxComponents = {
               borderColor: 'gray-700',
               color: 'gray-200',
             },
+          },
+        },
+        children: {
+          pagination: {
+            styles: {},
           },
         },
       },

@@ -28,20 +28,22 @@ export default function DataGridCell<TRow>(props: Props<TRow>) {
 
   return (
     <Flex
-      component="datagrid.body.cell"
+      component={`${column.grid.componentName}.body.cell` as never}
       props={{ role: 'cell' }}
-      variant={{
-        isPinned,
-        isFirstLeftPinned,
-        isLastLeftPinned,
-        isFirstRightPinned,
-        isLastRightPinned,
-        isRowSelection,
-        isRowNumber,
-        isFirstLeaf,
-        isLastLeaf,
-        isEmptyCell,
-      }}
+      variant={
+        {
+          isPinned,
+          isFirstLeftPinned,
+          isLastLeftPinned,
+          isFirstRightPinned,
+          isLastRightPinned,
+          isRowSelection,
+          isRowNumber,
+          isFirstLeaf,
+          isLastLeaf,
+          isEmptyCell,
+        } as never
+      }
       style={{
         width: `var(${widthVarName})`,
         height: `var(${column.grid.rowHeightVarName})`,

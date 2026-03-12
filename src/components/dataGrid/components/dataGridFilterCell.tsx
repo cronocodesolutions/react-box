@@ -28,8 +28,8 @@ export default function DataGridFilterCell<TRow>(props: Props<TRow>) {
 
   return (
     <Flex
-      component="datagrid.filter.cell"
-      variant={{ isPinned, isFirstLeftPinned, isLastLeftPinned, isFirstRightPinned, isLastRightPinned }}
+      component={`${grid.componentName}.filter.cell` as never}
+      variant={{ isPinned, isFirstLeftPinned, isLastLeftPinned, isFirstRightPinned, isLastRightPinned } as never}
       px={isEmptyCell ? 0 : 2}
       style={{
         width: `var(${widthVarName})`,

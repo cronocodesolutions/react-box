@@ -1,9 +1,21 @@
 import '../../../array';
+import { ComponentsAndVariants } from '../../../types';
 import memo from '../../../utils/memo';
 import { fuzzySearch } from '../../../utils/string/fuzzySearch';
+import DataGridCellRowDetail from '../components/dataGridCellRowDetail';
 import DataGridCellRowSelection from '../components/dataGridCellRowSelection';
-import { ColumnFilters, DataGridProps, FilterValue, Key, NO_PIN, PinPosition } from '../contracts/dataGridContract';
+import {
+  ColumnFilters,
+  DataGridProps,
+  FilterValue,
+  Key,
+  NO_PIN,
+  PaginationState,
+  PinPosition,
+  ServerState,
+} from '../contracts/dataGridContract';
 import ColumnModel from './columnModel';
+import DetailRowModel from './detailRowModel';
 import GroupRowModel from './groupRowModel';
 import RowModel from './rowModel';
 
@@ -12,6 +24,7 @@ export const ROW_NUMBER_CELL_KEY: Key = 'row-number-cell';
 export const DEFAULT_ROW_NUMBER_COLUMN_WIDTH = 70;
 export const ROW_SELECTION_CELL_KEY: Key = 'row-selection-cell';
 export const GROUPING_CELL_KEY: Key = 'grouping-cell';
+export const ROW_DETAIL_CELL_KEY: Key = 'row-detail-cell';
 
 export default class GridModel<TRow> {
   constructor(
@@ -19,6 +32,10 @@ export default class GridModel<TRow> {
     public readonly update: () => void,
   ) {
     console.debug('\x1b[32m%s\x1b[0m', '[react-box]: DataGrid GridModel ctor');
+  }
+
+  public get componentName(): keyof ComponentsAndVariants {
+    return (this.props.component || 'datagrid') as keyof ComponentsAndVariants;
   }
 
   public readonly sourceColumns = memo(() => {
@@ -53,6 +70,14 @@ export default class GridModel<TRow> {
       sourceColumns.unshift(new ColumnModel({ key: ROW_NUMBER_CELL_KEY, pin, width, align: 'right' }, this));
     }
 
+    // add row detail expand column
+    if (def.rowDetail) {
+      const pin: PinPosition | undefined = def.rowDetail.pinned ? 'LEFT' : undefined;
+      const width = def.rowDetail.expandColumnWidth ?? 50;
+
+      sourceColumns.unshift(new ColumnModel({ key: ROW_DETAIL_CELL_KEY, pin, width, align: 'center', Cell: DataGridCellRowDetail }, this));
+    }
+
     return sourceColumns;
   });
 
@@ -66,7 +91,7 @@ export default class GridModel<TRow> {
     const leafs = flat.filter((x) => x.isLeaf);
     const visibleLeafs = flat.filter((x) => x.isLeaf && x.isVisible);
     const userVisibleLeafs = visibleLeafs.filter(
-      (c) => ![EMPTY_CELL_KEY, ROW_NUMBER_CELL_KEY, ROW_SELECTION_CELL_KEY, GROUPING_CELL_KEY].includes(c.key),
+      (c) => ![EMPTY_CELL_KEY, ROW_NUMBER_CELL_KEY, ROW_SELECTION_CELL_KEY, GROUPING_CELL_KEY, ROW_DETAIL_CELL_KEY].includes(c.key),
     );
     const maxDeath = flat.maxBy((x) => x.death) + 1;
 
@@ -135,7 +160,11 @@ export default class GridModel<TRow> {
       this.columns.value.leafs
         .filter(
           (c) =>
-            c.key !== EMPTY_CELL_KEY && c.key !== ROW_NUMBER_CELL_KEY && c.key !== ROW_SELECTION_CELL_KEY && c.key !== GROUPING_CELL_KEY,
+            c.key !== EMPTY_CELL_KEY &&
+            c.key !== ROW_NUMBER_CELL_KEY &&
+            c.key !== ROW_SELECTION_CELL_KEY &&
+            c.key !== GROUPING_CELL_KEY &&
+            c.key !== ROW_DETAIL_CELL_KEY,
         )
         .map((c) => c.key);
 
@@ -229,6 +258,9 @@ export default class GridModel<TRow> {
    * Get filtered data (applies external, global, then column filters)
    */
   public get filteredData(): TRow[] {
+    // With server-side pagination, data is already filtered by the server
+    if (this.isPaginated) return this.props.data;
+
     let data = this.props.data;
 
     // Apply external predicate filters
@@ -245,6 +277,17 @@ export default class GridModel<TRow> {
     return data;
   }
 
+  private fireServerStateChange(overrides?: Partial<ServerState<TRow>>): void {
+    this.props.onServerStateChange?.({
+      page: overrides?.page ?? this.page,
+      pageSize: this.pageSize,
+      sortColumn: 'sortColumn' in (overrides ?? {}) ? overrides!.sortColumn : this._sortColumn,
+      sortDirection: 'sortDirection' in (overrides ?? {}) ? overrides!.sortDirection : this._sortDirection,
+      columnFilters: overrides?.columnFilters ?? this.columnFilters,
+      globalFilterValue: overrides?.globalFilterValue ?? this.globalFilterValue,
+    });
+  }
+
   /**
    * Set global filter value
    */
@@ -255,8 +298,21 @@ export default class GridModel<TRow> {
       this._globalFilterValue = value;
     }
 
+    // Reset to page 1 when filter changes (server needs to re-filter from first page)
+    const nextPage = this.isPaginated && this.page !== 1 ? 1 : this.page;
+    if (nextPage !== this.page) {
+      if (this.props.onPageChange) {
+        this.props.onPageChange(1, this.pageSize);
+      } else {
+        this._page = 1;
+      }
+    }
+
+    this.fireServerStateChange({ globalFilterValue: value, page: nextPage });
+
     this.rows.clear();
     this.flatRows.clear();
+    this.rowOffsets.clear();
     this.update();
   };
 
@@ -278,8 +334,21 @@ export default class GridModel<TRow> {
       this._columnFilters = newFilters;
     }
 
+    // Reset to page 1 when filter changes (server needs to re-filter from first page)
+    const nextPage = this.isPaginated && this.page !== 1 ? 1 : this.page;
+    if (nextPage !== this.page) {
+      if (this.props.onPageChange) {
+        this.props.onPageChange(1, this.pageSize);
+      } else {
+        this._page = 1;
+      }
+    }
+
+    this.fireServerStateChange({ columnFilters: newFilters, page: nextPage });
+
     this.rows.clear();
     this.flatRows.clear();
+    this.rowOffsets.clear();
     this.update();
   };
 
@@ -293,8 +362,11 @@ export default class GridModel<TRow> {
       this._columnFilters = {};
     }
 
+    this.fireServerStateChange({ columnFilters: {} });
+
     this.rows.clear();
     this.flatRows.clear();
+    this.rowOffsets.clear();
     this.update();
   };
 
@@ -339,6 +411,10 @@ export default class GridModel<TRow> {
    * Get count of filtered rows vs total rows
    */
   public get filterStats(): { filtered: number; total: number } {
+    if (this.isPaginated) {
+      const totalCount = this.props.def.pagination!.totalCount;
+      return { filtered: totalCount, total: totalCount };
+    }
     return {
       filtered: this.filteredData.length,
       total: this.props.data.length,
@@ -349,7 +425,7 @@ export default class GridModel<TRow> {
     console.debug('\x1b[36m%s\x1b[0m', '[react-box]: DataGrid rows memo');
     let data = this.filteredData;
 
-    if (this._sortColumn) {
+    if (this._sortColumn && !this.isPaginated) {
       data = data.sortBy((x) => x[this._sortColumn as keyof TRow], this._sortDirection);
     }
 
@@ -395,7 +471,7 @@ export default class GridModel<TRow> {
     console.debug('\x1b[36m%s\x1b[0m', '[react-box]: DataGrid flatRows memo');
 
     return this.rows.value.flatMap((row) => {
-      return row.flatRows;
+      return row.flatRows as (RowModel<TRow> | GroupRowModel<TRow> | DetailRowModel<TRow>)[];
     });
   });
 
@@ -430,7 +506,12 @@ export default class GridModel<TRow> {
     const groupingColumn = visibleLeafs.find((c) => c.key === GROUPING_CELL_KEY);
     if (groupingColumn) {
       const groupingColumnSize = visibleLeafs.sumBy((c) => {
-        return c.pin === groupingColumn.pin && c.key !== ROW_NUMBER_CELL_KEY && c.key !== ROW_SELECTION_CELL_KEY ? (c.inlineWidth ?? 0) : 0;
+        return c.pin === groupingColumn.pin &&
+          c.key !== ROW_NUMBER_CELL_KEY &&
+          c.key !== ROW_SELECTION_CELL_KEY &&
+          c.key !== ROW_DETAIL_CELL_KEY
+          ? (c.inlineWidth ?? 0)
+          : 0;
       });
       size[groupingColumn.groupColumnWidthVarName] = `${groupingColumnSize}px`;
     }
@@ -513,6 +594,106 @@ export default class GridModel<TRow> {
   public readonly DEFAULT_COLUMN_WIDTH_PX = 200;
 
   public expandedGroupRow: Set<Key> = new Set();
+
+  // ========== Row Detail Expansion ==========
+
+  private _expandedDetailRows: Set<Key> = new Set();
+
+  public get expandedDetailRows(): Set<Key> {
+    if (this.props.expandedRowKeys) {
+      return new Set(this.props.expandedRowKeys);
+    }
+    return this._expandedDetailRows;
+  }
+
+  public toggleDetailRow = (rowKey: Key) => {
+    const expandedKeys = new Set(this.expandedDetailRows);
+
+    if (expandedKeys.has(rowKey)) {
+      expandedKeys.delete(rowKey);
+    } else {
+      expandedKeys.add(rowKey);
+    }
+
+    if (this.props.onExpandedRowKeysChange) {
+      this.props.onExpandedRowKeysChange(Array.from(expandedKeys));
+    } else {
+      this._expandedDetailRows = expandedKeys;
+    }
+
+    this.rows.clear();
+    this.flatRows.clear();
+    this.rowOffsets.clear();
+    this.update();
+  };
+
+  // ========== Pagination ==========
+
+  private _page = 1;
+
+  public get page(): number {
+    return this.props.page ?? this._page;
+  }
+
+  public get pageSize(): number {
+    const pagination = this.props.def.pagination;
+    if (pagination?.pageSize) return pagination.pageSize;
+    const vrc = this.props.def.visibleRowsCount;
+    if (typeof vrc === 'number') return vrc;
+    return 10;
+  }
+
+  public get isPaginated(): boolean {
+    return !!this.props.def.pagination;
+  }
+
+  public get paginationState(): PaginationState | undefined {
+    const pagination = this.props.def.pagination;
+    if (!pagination) return undefined;
+    const totalItems = pagination.totalCount;
+    const pageSize = this.pageSize;
+    return {
+      page: this.page,
+      pageSize,
+      totalItems,
+      totalPages: Math.max(1, Math.ceil(totalItems / pageSize)),
+    };
+  }
+
+  public changePage = (page: number) => {
+    const state = this.paginationState;
+    if (!state) return;
+    const clamped = Math.max(1, Math.min(page, state.totalPages));
+    if (clamped === this.page) return;
+
+    if (this.props.onPageChange) {
+      this.props.onPageChange(clamped, state.pageSize);
+    } else {
+      this._page = clamped;
+    }
+
+    this.fireServerStateChange({ page: clamped });
+
+    this.rows.clear();
+    this.flatRows.clear();
+    this.rowOffsets.clear();
+    this.update();
+  };
+
+  // ========== Row Offsets (for variable-height virtualization) ==========
+
+  public readonly rowOffsets = memo(() => {
+    const offsets: number[] = [];
+    let cumulative = 0;
+
+    for (const row of this.flatRows.value) {
+      offsets.push(cumulative);
+      cumulative += row instanceof DetailRowModel ? row.heightForOffset : this.rowHeight;
+    }
+
+    return { offsets, totalHeight: cumulative };
+  });
+
   public selectedRows: Set<Key> = new Set();
   public get leftEdge() {
     return this.columns.value.left.sumBy((c) => c.inlineWidth ?? 0);
@@ -552,9 +733,25 @@ export default class GridModel<TRow> {
       this._sortDirection = _sortColumn === columnKey && _sortDirection === 'ASC' ? 'DESC' : 'ASC';
     }
 
+    // Notify parent for server-side sorting
+    this.props.onSortChange?.(this._sortColumn, this._sortDirection);
+
+    // Reset to page 1 when sort changes (server needs to re-sort from first page)
+    const nextPage = this.isPaginated && this.page !== 1 ? 1 : this.page;
+    if (nextPage !== this.page) {
+      if (this.props.onPageChange) {
+        this.props.onPageChange(1, this.pageSize);
+      } else {
+        this._page = 1;
+      }
+    }
+
+    this.fireServerStateChange({ sortColumn: this._sortColumn, sortDirection: this._sortDirection, page: nextPage });
+
     this.headerRows.clear();
     this.rows.clear();
     this.flatRows.clear();
+    this.rowOffsets.clear();
     this.update();
   };
 
@@ -569,6 +766,7 @@ export default class GridModel<TRow> {
     this.gridTemplateColumns.clear();
     this.rows.clear();
     this.flatRows.clear();
+    this.rowOffsets.clear();
     this.flexWidths.clear();
     this.sizes.clear();
 
@@ -593,6 +791,7 @@ export default class GridModel<TRow> {
     this.gridTemplateColumns.clear();
     this.rows.clear();
     this.flatRows.clear();
+    this.rowOffsets.clear();
     this.flexWidths.clear();
     this.sizes.clear();
 
@@ -611,6 +810,7 @@ export default class GridModel<TRow> {
     this.gridTemplateColumns.clear();
     this.rows.clear();
     this.flatRows.clear();
+    this.rowOffsets.clear();
     this.flexWidths.clear();
     this.sizes.clear();
     this.update();
@@ -627,6 +827,7 @@ export default class GridModel<TRow> {
 
     this.rows.clear(); // this one is required in order to update rowIndex
     this.flatRows.clear();
+    this.rowOffsets.clear();
     this.update();
   };
 
@@ -646,6 +847,7 @@ export default class GridModel<TRow> {
     }
 
     this.flatRows.clear();
+    this.rowOffsets.clear();
     this.update();
 
     this.props.onSelectionChange?.({
@@ -674,6 +876,7 @@ export default class GridModel<TRow> {
     this.gridTemplateColumns.clear();
     this.rows.clear();
     this.flatRows.clear();
+    this.rowOffsets.clear();
     this.flexWidths.clear();
     this.sizes.clear();
 

@@ -1,5 +1,6 @@
 import { Key } from '../contracts/dataGridContract';
 import CellModel from './cellModel';
+import DetailRowModel from './detailRowModel';
 import GridModel from './gridModel';
 import GroupRowModel from './groupRowModel';
 
@@ -26,8 +27,16 @@ export default class RowModel<TRow> {
     return this.grid.selectedRows.has(this.key);
   }
 
-  public get flatRows() {
-    return this;
+  public get expanded() {
+    return this.grid.expandedDetailRows.has(this.key);
+  }
+
+  public get flatRows(): (RowModel<TRow> | DetailRowModel<TRow>)[] {
+    if (this.grid.props.def.rowDetail && this.expanded) {
+      return [this, new DetailRowModel(this.grid, this)];
+    }
+
+    return [this];
   }
 
   public get allRows() {

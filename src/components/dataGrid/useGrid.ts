@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 import { DataGridProps } from './contracts/dataGridContract';
 import GridModel from './models/gridModel';
 
@@ -10,42 +10,38 @@ export default function useGrid<TRow>(props: DataGridProps<TRow>): GridModel<TRo
     gridRef.current = new GridModel(props, () => setUpdate((u) => u + 1));
   }
 
-  // This ensures any prop changes are updated in the model
-  useEffect(() => {
-    gridRef.current!.props = props;
-    gridRef.current!.rows.clear();
-    gridRef.current!.flatRows.clear();
-    gridRef.current!.update();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [props.data]);
+  const grid = gridRef.current;
+  const prev = grid.props;
 
-  useEffect(() => {
-    gridRef.current!.props = props;
-    gridRef.current!.sourceColumns.clear();
-    gridRef.current!.columns.clear();
-    gridRef.current!.headerRows.clear();
-    gridRef.current!.gridTemplateColumns.clear();
-    gridRef.current!.rows.clear();
-    gridRef.current!.flatRows.clear();
-    gridRef.current!.sizes.clear();
-    gridRef.current!.update();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [props.def]);
+  // Sync props during render — no useEffect needed.
+  // Memos recompute lazily when accessed, so no extra render cycle is triggered.
+  if (prev !== props) {
+    grid.props = props;
 
-  useEffect(() => {
-    gridRef.current!.props = props;
-    gridRef.current!.update();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [props.loading]);
+    // Definition changed — clear everything (columns, headers, layout, rows)
+    if (prev.def !== props.def) {
+      grid.sourceColumns.clear();
+      grid.columns.clear();
+      grid.headerRows.clear();
+      grid.gridTemplateColumns.clear();
+      grid.sizes.clear();
+    }
 
-  // Handle controlled filter changes
-  useEffect(() => {
-    gridRef.current!.props = props;
-    gridRef.current!.rows.clear();
-    gridRef.current!.flatRows.clear();
-    gridRef.current!.update();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [props.globalFilterValue, props.columnFilters, props.filters]);
+    // Clear row-related memos when any row-affecting prop changes
+    if (
+      prev.data !== props.data ||
+      prev.def !== props.def ||
+      prev.globalFilterValue !== props.globalFilterValue ||
+      prev.columnFilters !== props.columnFilters ||
+      prev.filters !== props.filters ||
+      prev.expandedRowKeys !== props.expandedRowKeys ||
+      prev.page !== props.page
+    ) {
+      grid.rows.clear();
+      grid.flatRows.clear();
+      grid.rowOffsets.clear();
+    }
+  }
 
-  return gridRef.current;
+  return grid;
 }

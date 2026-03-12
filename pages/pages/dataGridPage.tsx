@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion';
 import { Filter, Table, X } from 'lucide-react';
-import { useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import Box from '../../src/box';
 import Button from '../../src/components/button';
 import DataGrid from '../../src/components/dataGrid';
@@ -19,6 +19,89 @@ import Data7 from '../data/MOCK_DATA_7.json';
 import usePageContext from '../hooks/usePageContext';
 
 const allData = [...Data, ...Data1, ...Data2, ...Data3, ...Data4, ...Data5, ...Data6, ...Data7];
+
+const ordersData = [
+  {
+    orderId: 1001,
+    customer: 'Alice Johnson',
+    date: '2026-03-01',
+    status: 'Shipped',
+    total: 259.97,
+    items: [
+      { product: 'Wireless Mouse', sku: 'WM-001', qty: 2, price: 29.99 },
+      { product: 'Mechanical Keyboard', sku: 'MK-042', qty: 1, price: 149.99 },
+      { product: 'USB-C Hub', sku: 'UC-015', qty: 1, price: 49.99 },
+    ],
+  },
+  {
+    orderId: 1002,
+    customer: 'Bob Smith',
+    date: '2026-03-03',
+    status: 'Processing',
+    total: 89.98,
+    items: [
+      { product: 'Webcam HD', sku: 'WC-007', qty: 1, price: 59.99 },
+      { product: 'Mouse Pad XL', sku: 'MP-003', qty: 1, price: 29.99 },
+    ],
+  },
+  {
+    orderId: 1003,
+    customer: 'Charlie Brown',
+    date: '2026-03-05',
+    status: 'Pending',
+    total: 599.99,
+    items: [{ product: '27" Monitor', sku: 'MN-027', qty: 1, price: 599.99 }],
+  },
+  {
+    orderId: 1004,
+    customer: 'Diana Prince',
+    date: '2026-03-06',
+    status: 'Shipped',
+    total: 174.97,
+    items: [
+      { product: 'Desk Lamp LED', sku: 'DL-011', qty: 1, price: 44.99 },
+      { product: 'Cable Management Kit', sku: 'CM-022', qty: 2, price: 19.99 },
+      { product: 'Monitor Stand', sku: 'MS-008', qty: 1, price: 89.99 },
+    ],
+  },
+  {
+    orderId: 1005,
+    customer: 'Eve Davis',
+    date: '2026-03-07',
+    status: 'Processing',
+    total: 329.98,
+    items: [
+      { product: 'Noise Cancelling Headphones', sku: 'NC-033', qty: 1, price: 249.99 },
+      { product: 'Headphone Stand', sku: 'HS-005', qty: 1, price: 39.99 },
+      { product: 'Audio Cable 3.5mm', sku: 'AC-012', qty: 2, price: 19.99 },
+    ],
+  },
+  {
+    orderId: 1006,
+    customer: 'Frank Miller',
+    date: '2026-03-08',
+    status: 'Shipped',
+    total: 1249.98,
+    items: [
+      { product: 'Ergonomic Chair', sku: 'EC-001', qty: 1, price: 899.99 },
+      { product: 'Standing Desk Mat', sku: 'SD-014', qty: 1, price: 49.99 },
+      { product: 'Wrist Rest', sku: 'WR-009', qty: 2, price: 24.99 },
+      { product: 'Footrest', sku: 'FR-006', qty: 1, price: 249.99 },
+    ],
+  },
+  {
+    orderId: 1007,
+    customer: 'Grace Lee',
+    date: '2026-03-09',
+    status: 'Pending',
+    total: 79.98,
+    items: [
+      { product: 'Webcam Cover', sku: 'WV-002', qty: 3, price: 9.99 },
+      { product: 'Screen Cleaner Kit', sku: 'SC-018', qty: 1, price: 19.99 },
+      { product: 'Keyboard Cover', sku: 'KC-025', qty: 1, price: 29.99 },
+    ],
+  },
+];
 
 // Filter chip component
 function FilterChip({ label, active, onClick, onClear }: { label: string; active: boolean; onClick: () => void; onClear?: () => void }) {
@@ -210,6 +293,7 @@ export default function DataGridPage() {
 />`}
           >
             <DataGrid
+              component="subgrid"
               data={allData}
               filters={filters}
               def={{
@@ -527,6 +611,127 @@ export default function DataGridPage() {
           </Code>
 
           <Code
+            label="Row Detail — Orders with Items"
+            language="jsx"
+            code={`<DataGrid
+  data={orders}
+  def={{
+    rowKey: 'orderId',
+    topBar: true,
+    bottomBar: true,
+    title: 'Orders',
+    columns: [
+      { key: 'orderId', header: 'Order #', width: 100, flexible: false },
+      { key: 'customer', header: 'Customer' },
+      { key: 'date', header: 'Date', width: 120 },
+      { key: 'status', header: 'Status', width: 120 },
+      { key: 'total', header: 'Total', width: 100, align: 'right' },
+    ],
+    rowDetail: {
+      content: (order) => (
+        <DataGrid
+          data={order.items}
+          def={{
+            columns: [
+              { key: 'product', header: 'Product' },
+              { key: 'qty', header: 'Qty', width: 80, align: 'right' },
+              { key: 'price', header: 'Price', width: 100, align: 'right' },
+            ],
+            visibleRowsCount: 3,
+            rowHeight: 36,
+          }}
+        />
+      ),
+      pinned: true,
+    },
+  }}
+/>`}
+          >
+            <DataGrid
+              data={ordersData}
+              def={{
+                rowKey: 'orderId',
+                topBar: true,
+                bottomBar: true,
+                title: 'Orders',
+                rowHeight: 40,
+                visibleRowsCount: 8,
+                columns: [
+                  { key: 'orderId', header: 'Order #', width: 100, flexible: false },
+                  { key: 'customer', header: 'Customer' },
+                  { key: 'date', header: 'Date', width: 120 },
+                  {
+                    key: 'status',
+                    header: 'Status',
+                    width: 120,
+                    Cell: ({ cell }) => {
+                      const status = cell.row.data.status;
+                      return (
+                        <Box
+                          px={2}
+                          py={0.5}
+                          borderRadius={4}
+                          fontSize={12}
+                          fontWeight={600}
+                          bgColor={status === 'Shipped' ? 'green-100' : status === 'Processing' ? 'blue-100' : 'yellow-100'}
+                          color={status === 'Shipped' ? 'green-700' : status === 'Processing' ? 'blue-700' : 'yellow-700'}
+                          theme={{
+                            dark: {
+                              bgColor: status === 'Shipped' ? 'green-900' : status === 'Processing' ? 'blue-900' : 'yellow-900',
+                              color: status === 'Shipped' ? 'green-300' : status === 'Processing' ? 'blue-300' : 'yellow-300',
+                            },
+                          }}
+                        >
+                          {status}
+                        </Box>
+                      );
+                    },
+                  },
+                  {
+                    key: 'total',
+                    header: 'Total',
+                    width: 100,
+                    align: 'right',
+                    Cell: ({ cell }) => <Box fontWeight={600}>${cell.row.data.total}</Box>,
+                  },
+                ],
+                rowDetail: {
+                  content: (order: (typeof ordersData)[0]) => (
+                    <Box p={4}>
+                      <Box fontSize={13} fontWeight={600} mb={2} color="gray-600" theme={{ dark: { color: 'gray-400' } }}>
+                        Items for Order #{order.orderId}
+                      </Box>
+                      <DataGrid
+                        component="subgrid"
+                        data={order.items}
+                        def={{
+                          columns: [
+                            { key: 'product', header: 'Product' },
+                            { key: 'sku', header: 'SKU', width: 120 },
+                            { key: 'qty', header: 'Qty', width: 80, align: 'right' },
+                            {
+                              key: 'price',
+                              header: 'Price',
+                              width: 100,
+                              align: 'right',
+                              Cell: ({ cell }) => <Box>${cell.row.data.price}</Box>,
+                            },
+                          ],
+                          visibleRowsCount: 'all',
+                          rowHeight: 36,
+                        }}
+                      />
+                    </Box>
+                  ),
+                  pinned: true,
+                },
+              }}
+            />
+          </Code>
+
+          <PaginatedDataGridDemo />
+
+          <Code
             label="Disable Sorting and Resizing"
             language="jsx"
             code={`<DataGrid
@@ -568,6 +773,106 @@ export default function DataGridPage() {
         </Flex>
       </motion.div>
     </Box>
+  );
+}
+
+function PaginatedDataGridDemo() {
+  const pageSize = 8;
+  const [data, setData] = useState<(typeof allData)[0][]>([]);
+  const [page, setPage] = useState(1);
+  const [totalCount, setTotalCount] = useState(0);
+  const [loading, setLoading] = useState(true);
+
+  const fetchData = useCallback((state: { page: number; pageSize: number; sortColumn?: string | number; sortDirection?: string }) => {
+    setLoading(true);
+    // Simulate server response with 300ms delay
+    setTimeout(() => {
+      const result = [...allData];
+      if (state.sortColumn && state.sortDirection) {
+        const key = state.sortColumn as keyof (typeof allData)[0];
+        result.sort((a, b) => {
+          const aVal = a[key],
+            bVal = b[key];
+          const cmp = aVal! < bVal! ? -1 : aVal! > bVal! ? 1 : 0;
+          return state.sortDirection === 'DESC' ? -cmp : cmp;
+        });
+      }
+      const start = (state.page - 1) * state.pageSize;
+      setData(result.slice(start, start + state.pageSize));
+      setTotalCount(result.length);
+      setPage(state.page);
+      setLoading(false);
+    }, 300);
+  }, []);
+
+  useEffect(() => {
+    fetchData({ page: 1, pageSize });
+  }, [fetchData]);
+
+  const def = useMemo(
+    () => ({
+      columns: [
+        { key: 'first_name' as const, header: 'First Name' },
+        { key: 'last_name' as const, header: 'Last Name' },
+        { key: 'age' as const, header: 'Age', width: 100, align: 'right' as const },
+        { key: 'email' as const, header: 'Email', width: 280 },
+        { key: 'country' as const, header: 'Country' },
+        { key: 'city' as const, header: 'City' },
+      ],
+      rowHeight: 40,
+      visibleRowsCount: pageSize,
+      topBar: true,
+      bottomBar: true,
+      title: 'Server-Side Pagination',
+      pagination: { totalCount },
+    }),
+    [totalCount, pageSize],
+  );
+
+  return (
+    <Code
+      label="Server-Side Pagination"
+      language="jsx"
+      code={`const [data, setData] = useState([]);
+const [page, setPage] = useState(1);
+const [totalCount, setTotalCount] = useState(0);
+const [loading, setLoading] = useState(true);
+const pageSize = 8;
+
+const fetchData = useCallback((state) => {
+  setLoading(true);
+  api.getUsers({
+    Page: state.page, PageSize: state.pageSize,
+    SortBy: state.sortColumn, SortDir: state.sortDirection,
+    Search: state.globalFilterValue,
+    Filters: state.columnFilters,
+  }).then((res) => {
+    setData(res.Items);
+    setTotalCount(res.TotalCount);
+    setPage(res.Page);
+    setLoading(false);
+  });
+}, []);
+
+useEffect(() => { fetchData({ page: 1, pageSize }); }, []);
+
+<DataGrid
+  data={data}
+  loading={loading}
+  page={page}
+  onServerStateChange={fetchData}
+  def={{
+    columns: [...],
+    visibleRowsCount: pageSize,
+    topBar: true,
+    bottomBar: true,
+    title: 'Server-Side Pagination',
+    pagination: { totalCount },
+  }}
+/>`}
+    >
+      <DataGrid data={data} loading={loading} page={page} onServerStateChange={fetchData} def={def} />
+    </Code>
   );
 }
 
