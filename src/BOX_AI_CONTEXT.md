@@ -603,6 +603,24 @@ Box.components({
 </Box>;
 ```
 
+#### Component Inheritance with `extends`
+
+Components can inherit from other components using the `extends` property. The base component's full style tree (styles, variants, children) is used as the foundation, and the extending component's definitions are deep-merged on top:
+
+```tsx
+Box.components({
+  subgrid: {
+    extends: 'datagrid', // inherit all datagrid styles, variants, and children
+    styles: { b: 0, borderRadius: 0, shadow: 'none' },
+    children: {
+      header: { children: { cell: { styles: { fontSize: 12 } } } },
+    },
+  },
+});
+```
+
+This is especially useful for DataGrid, where the internal style tree is complex (pinning, sticky headers, hover groups, etc.). With `extends`, you only need to declare overrides.
+
 ---
 
 ## Extension System
@@ -858,250 +876,102 @@ resetStyles();
 
 ## DataGrid Component
 
-A powerful data grid with sorting, filtering, grouping, row selection, column pinning, and virtualization.
+> **Full documentation:** See [`../docs/DATAGRID.md`](../docs/DATAGRID.md) for complete API reference, all features, component tree, style customization, and designs system.
 
-### Import and Basic Usage
+A feature-rich data grid with sorting, filtering, grouping, row selection, column pinning, row detail, server-side pagination, virtualization, and full style customization via the component design system.
 
 ```tsx
 import DataGrid from '@cronocode/react-box/components/dataGrid';
-
-const data = [
-  { id: 1, name: 'John', email: 'john@example.com', age: 30 },
-  { id: 2, name: 'Jane', email: 'jane@example.com', age: 25 },
-];
-
-<DataGrid
-  data={data}
-  def={{
-    columns: [
-      { key: 'name', header: 'Name' },
-      { key: 'email', header: 'Email' },
-      { key: 'age', header: 'Age', align: 'right' },
-    ],
-  }}
-/>;
 ```
 
-### GridDefinition Props
-
-| Prop | Type | Description |
-|------|------|-------------|
-| `columns` | `ColumnType[]` | Column definitions (required) |
-| `rowKey` | `keyof TRow \| (row) => Key` | Unique key for each row |
-| `rowHeight` | `number` | Row height in pixels (default: 36) |
-| `visibleRowsCount` | `number` | Number of visible rows (default: 10) |
-| `showRowNumber` | `boolean \| { pinned?: boolean; width?: number }` | Show row numbers |
-| `rowSelection` | `boolean \| { pinned?: boolean }` | Enable row selection checkboxes |
-| `topBar` | `boolean` | Show top bar with title and controls |
-| `bottomBar` | `boolean` | Show bottom bar with row count |
-| `title` | `ReactNode` | Title displayed in top bar |
-| `topBarContent` | `ReactNode` | Custom content in top bar |
-| `globalFilter` | `boolean` | Enable global search filter |
-| `globalFilterKeys` | `Key[]` | Columns to search (default: all) |
-| `sortable` | `boolean` | Enable sorting globally (default: true) |
-| `resizable` | `boolean` | Enable column resizing globally (default: true) |
-| `noDataComponent` | `ReactNode` | Custom empty state component |
-
-### ColumnType Props
-
-| Prop | Type | Description |
-|------|------|-------------|
-| `key` | `string \| number` | Column key matching data property (required) |
-| `header` | `string` | Column header text |
-| `width` | `number` | Column width in pixels |
-| `align` | `'left' \| 'right' \| 'center'` | Text alignment |
-| `pin` | `'LEFT' \| 'RIGHT'` | Pin column to side |
-| `columns` | `ColumnType[]` | Nested columns for grouping |
-| `sortable` | `boolean` | Override global sortable setting |
-| `resizable` | `boolean` | Override global resizable setting |
-| `flexible` | `boolean` | Participate in flex distribution (default: true) |
-| `filterable` | `boolean \| FilterConfig` | Enable column filtering |
-| `Cell` | `React.ComponentType<{ cell }>` | Custom cell renderer |
-
-### DataGridProps
-
-| Prop | Type | Description |
-|------|------|-------------|
-| `data` | `TRow[]` | Data array (required) |
-| `def` | `GridDefinition` | Grid definition (required) |
-| `loading` | `boolean` | Show loading state |
-| `onSelectionChange` | `(event) => void` | Selection change callback |
-| `globalFilterValue` | `string` | Controlled global filter |
-| `onGlobalFilterChange` | `(value) => void` | Global filter change callback |
-| `columnFilters` | `ColumnFilters` | Controlled column filters |
-| `onColumnFiltersChange` | `(filters) => void` | Column filters change callback |
-
-### Filter Types
-
-```tsx
-// Text filter (default) - fuzzy search
-{ key: 'name', filterable: true }
-{ key: 'name', filterable: { type: 'text', placeholder: 'Search...' } }
-
-// Number filter - with comparison operators
-{ key: 'age', filterable: { type: 'number', min: 0, max: 100 } }
-
-// Multiselect filter - dropdown with checkboxes
-{ key: 'status', filterable: { type: 'multiselect' } }
-{ key: 'status', filterable: {
-  type: 'multiselect',
-  options: [
-    { label: 'Active', value: 'active' },
-    { label: 'Inactive', value: 'inactive' },
-  ]
-}}
-```
-
-### Column Grouping (Nested Headers)
-
-```tsx
-columns: [
-  {
-    key: 'personal',
-    header: 'Personal Info',
-    columns: [
-      { key: 'firstName', header: 'First Name' },
-      { key: 'lastName', header: 'Last Name' },
-    ],
-  },
-  {
-    key: 'contact',
-    header: 'Contact',
-    columns: [
-      { key: 'email', header: 'Email' },
-      { key: 'phone', header: 'Phone' },
-    ],
-  },
-]
-```
-
-### Custom Cell Renderer
-
-```tsx
-columns: [
-  {
-    key: 'status',
-    header: 'Status',
-    Cell: ({ cell }) => (
-      <Box
-        px={2}
-        py={1}
-        borderRadius={4}
-        bgColor={cell.value === 'active' ? 'green-100' : 'red-100'}
-        color={cell.value === 'active' ? 'green-800' : 'red-800'}
-      >
-        {cell.value}
-      </Box>
-    ),
-  },
-  {
-    key: 'actions',
-    header: 'Actions',
-    Cell: ({ cell }) => (
-      <Button onClick={() => handleEdit(cell.row)}>Edit</Button>
-    ),
-  },
-]
-```
-
-The `cell` object provides:
-- `cell.value` - Cell value
-- `cell.row` - Full row data
-- `cell.column` - Column model
-
-### Row Selection
-
-```tsx
-<DataGrid
-  data={data}
-  def={{
-    rowSelection: true,  // or { pinned: true } to pin checkbox column
-    columns: [...],
-  }}
-  onSelectionChange={(event) => {
-    console.log('Selected keys:', event.selectedRowKeys);
-    console.log('Action:', event.action); // 'select' | 'deselect'
-    console.log('All selected:', event.isAllSelected);
-  }}
-/>
-```
-
-### Sorting and Resizing Control
-
-```tsx
-// Disable globally
-def={{
-  sortable: false,
-  resizable: false,
-  columns: [...]
-}}
-
-// Override per column
-def={{
-  sortable: false,  // Global: no sorting
-  columns: [
-    { key: 'id', header: 'ID' },  // Not sortable (inherits global)
-    { key: 'name', header: 'Name', sortable: true },  // Sortable (override)
-  ]
-}}
-```
-
-### Flexible Column Sizing
-
-Columns automatically fill available space proportionally. Use `flexible: false` for fixed-width columns.
-
-```tsx
-columns: [
-  { key: 'id', header: 'ID', width: 60, flexible: false },  // Fixed at 60px
-  { key: 'name', header: 'Name', width: 200 },  // Flexes (200 base)
-  { key: 'email', header: 'Email', width: 300 },  // Flexes more (300 base)
-]
-```
-
-### Custom Empty State
-
-```tsx
-def={{
-  columns: [...],
-  noDataComponent: (
-    <Flex d="column" ai="center" gap={4} p={8}>
-      <Box fontSize={48}>📭</Box>
-      <Box color="gray-500">No records found</Box>
-    </Flex>
-  ),
-}}
-```
-
-### Full-Featured Example
+### Quick Reference
 
 ```tsx
 <DataGrid
   data={users}
   def={{
-    title: 'Users Table',
+    rowKey: 'id',
+    title: 'Users',
     topBar: true,
     bottomBar: true,
     globalFilter: true,
     rowSelection: { pinned: true },
     showRowNumber: { pinned: true },
     rowHeight: 40,
-    visibleRowsCount: 10,
+    visibleRowsCount: 15,         // or 'all' to disable virtualization
     columns: [
-      {
-        key: 'personal',
-        header: 'Personal',
-        columns: [
-          { key: 'name', header: 'Name', filterable: true },
-          { key: 'age', header: 'Age', width: 80, align: 'right', filterable: { type: 'number' } },
-        ],
-      },
+      { key: 'name', header: 'Name', filterable: true },
+      { key: 'age', header: 'Age', width: 80, align: 'right', filterable: { type: 'number' } },
       { key: 'email', header: 'Email', width: 250, filterable: true },
       { key: 'status', header: 'Status', filterable: { type: 'multiselect' } },
       { key: 'country', header: 'Country', pin: 'RIGHT' },
     ],
+    rowDetail: {
+      content: (user) => <UserDetails user={user} />,
+      height: 'auto',
+      expandOnRowClick: true,
+    },
+    // pagination: { totalCount: 500, pageSize: 25 },  // for server-side pagination
   }}
-  onSelectionChange={(e) => setSelected(e.selectedRowKeys)}
+  component="subgrid"               // optional: use a different component style tree
+  onSelectionChange={(e) => console.log(e.selectedRowKeys)}
+  // page={1}                       // controlled pagination
+  // onPageChange={(p, size) => {}} // page change handler
+  // onSortChange={(col, dir) => {}} // server-side sort handler
+  // onServerStateChange={(state) => fetch(state)} // unified server state callback
 />
+```
+
+### Key Props
+
+| Prop | Type | Description |
+|------|------|-------------|
+| `data` | `TRow[]` | Row data array (required) |
+| `def` | `GridDefinition` | Grid configuration (required) |
+| `component` | `string` | Component style tree name (default: `'datagrid'`) |
+| `loading` | `boolean` | Loading state |
+| `filters` | `((row: TRow) => boolean)[]` | External predicate filters |
+| `page` | `number` | Controlled page (1-indexed) |
+| `onPageChange` | `(page, pageSize) => void` | Page change callback |
+| `onSortChange` | `(columnKey, direction) => void` | Sort change callback |
+| `onServerStateChange` | `(state: ServerState) => void` | Unified callback with full state (page, pageSize, sort, filters) |
+| `onSelectionChange` | `(event) => void` | Selection change callback |
+| `expandedRowKeys` | `Key[]` | Controlled expanded rows |
+
+### Filter Types
+
+```tsx
+{ key: 'name', filterable: true }                              // Text (fuzzy)
+{ key: 'age', filterable: { type: 'number', min: 0, max: 100 } } // Number
+{ key: 'status', filterable: { type: 'multiselect' } }         // Multiselect
+```
+
+### Style Customization
+
+Every subcomponent is customizable via `Box.components()`. Register a separate component tree for different visual styles:
+
+```tsx
+Box.components({
+  // Customize default datagrid
+  datagrid: {
+    children: {
+      body: { children: { detailRow: { styles: { bgColor: 'blue-50' } } } },
+      header: { children: { cell: { styles: { textTransform: 'uppercase' } } } },
+    },
+  },
+  // Extend datagrid styles for embedded grids — inherits all internal styles (pinning, sticky, etc.)
+  subgrid: {
+    extends: 'datagrid',
+    styles: { b: 0, shadow: 'none', bgColor: 'transparent' },
+    children: {
+      header: { children: { cell: { styles: { fontSize: 12, py: 1 } } } },
+      body: { children: { cell: { styles: { fontSize: 13 } } } },
+    },
+  },
+});
+
+// Use it — all children automatically resolve under "subgrid.*"
+<DataGrid component="subgrid" data={data} def={def} />
 ```
 
 ---

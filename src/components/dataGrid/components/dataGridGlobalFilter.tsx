@@ -52,9 +52,9 @@ export default function DataGridGlobalFilter<TRow>(props: Props<TRow>) {
   const showStats = grid.hasActiveFilters && filtered !== total;
 
   return (
-    <Flex component="datagrid.topBar.globalFilter">
+    <Flex component={`${grid.componentName}.topBar.globalFilter` as never}>
       {showStats && (
-        <Box component="datagrid.topBar.globalFilter.stats">
+        <Box component={`${grid.componentName}.topBar.globalFilter.stats` as never}>
           {filtered}/{total}
         </Box>
       )}

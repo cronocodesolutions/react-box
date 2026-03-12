@@ -1,3 +1,4 @@
+import { ComponentsAndVariants } from '../../../types';
 import CellModel from '../models/cellModel';
 
 export type Key = string | number;
@@ -17,6 +18,18 @@ export interface PaginationConfig {
   totalCount: number;
   /** Page size override. If omitted, defaults to visibleRowsCount (or 10). */
   pageSize?: number;
+}
+
+// ========== Server State ==========
+
+/** Snapshot of all server-relevant grid state, passed to onServerStateChange */
+export interface ServerState<TRow> {
+  page: number;
+  pageSize: number;
+  sortColumn: Key | undefined;
+  sortDirection: SortDirection | undefined;
+  columnFilters: ColumnFilters<TRow>;
+  globalFilterValue: string;
 }
 
 // ========== Filter Types ==========
@@ -132,6 +145,8 @@ export interface GridDefinition<TRow> {
 }
 
 export interface DataGridProps<TRow> {
+  /** Component name for style resolution. Default: 'datagrid'. Set to a custom name to use a different component style tree. */
+  component?: keyof ComponentsAndVariants;
   data: TRow[];
   def: GridDefinition<TRow>;
   loading?: boolean;
@@ -156,6 +171,8 @@ export interface DataGridProps<TRow> {
   onPageChange?: (page: number, pageSize: number) => void;
   /** Callback when sort changes. For server-side sorting with pagination. */
   onSortChange?: (columnKey: Key | undefined, direction: SortDirection | undefined) => void;
+  /** Fires on any server-relevant state change (page, sort, filter). Provides full state snapshot for API calls. */
+  onServerStateChange?: (state: ServerState<TRow>) => void;
 }
 
 interface SelectionChangeEvent<TRow, TKey = TRow[keyof TRow] | number | string> {

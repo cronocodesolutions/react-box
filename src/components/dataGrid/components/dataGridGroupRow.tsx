@@ -21,7 +21,13 @@ export default function DataGridGroupRow<TRow>(props: Props<TRow>) {
   }, []);
 
   return (
-    <Flex className="grid-row" selected={selected} display="contents" props={{ role: 'rowgroup' }}>
+    <Flex
+      component={`${row.grid.componentName}.body.groupRow` as never}
+      className="grid-row"
+      selected={selected}
+      display="contents"
+      props={{ role: 'rowgroup' }}
+    >
       {cells.map((cell) => {
         const { key, pin, groupColumnWidthVarName } = cell.column;
         const isRightPinned = pin === 'RIGHT';

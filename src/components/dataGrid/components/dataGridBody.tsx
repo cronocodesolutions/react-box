@@ -104,7 +104,7 @@ export default function DataGridBody<TRow>(props: Props<TRow>) {
   if (showAll) {
     return (
       <Grid
-        component="datagrid.body"
+        component={`${grid.componentName}.body` as never}
         width="max-content"
         minWidth="fit"
         transition="none"
@@ -123,7 +123,7 @@ export default function DataGridBody<TRow>(props: Props<TRow>) {
         }}
       >
         <Grid
-          component="datagrid.body"
+          component={`${grid.componentName}.body` as never}
           width="max-content"
           minWidth="fit"
           transition="none"

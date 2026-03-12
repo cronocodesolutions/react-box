@@ -1,10 +1,18 @@
 import Box from '../../../box';
 import BaseSvg from '../../baseSvg';
 import Flex from '../../flex';
+import GridModel from '../models/gridModel';
 
-export default function DataGridEmptyColumns() {
+interface Props<TRow> {
+  grid: GridModel<TRow>;
+}
+
+export default function DataGridEmptyColumns<TRow>(props: Props<TRow>) {
+  const { grid } = props;
+
   return (
     <Flex
+      component={`${grid.componentName}.emptyColumns` as never}
       d="column"
       ai="center"
       jc="center"

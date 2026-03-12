@@ -2,7 +2,23 @@ import ObjectUtils from '../../utils/object/objectUtils';
 import { cssStyles } from '../boxStyles';
 import { BoxStyle } from '../coreTypes';
 import Variables from '../variables';
-import boxComponents, { Components } from './boxComponents';
+import boxComponents, { BoxComponent, Components } from './boxComponents';
+
+function resolveExtends(components: Components): Components {
+  const resolved = { ...components };
+
+  for (const [name, component] of Object.entries(resolved)) {
+    if (!component.extends) continue;
+
+    const baseComponent = resolved[component.extends];
+    if (!baseComponent) continue;
+
+    const { extends: _, ...override } = component;
+    resolved[name] = ObjectUtils.mergeDeep<BoxComponent>({}, baseComponent, override);
+  }
+
+  return resolved;
+}
 
 namespace BoxExtends {
   export function extend<TProps extends Record<string, BoxStyle[]>, TPropTypes extends Record<string, BoxStyle[]>>(
@@ -27,7 +43,7 @@ namespace BoxExtends {
   export let componentsStyles: Components = boxComponents;
 
   export function components<T extends Components>(components: T) {
-    componentsStyles = ObjectUtils.mergeDeep<Components>(boxComponents, components);
+    componentsStyles = resolveExtends(ObjectUtils.mergeDeep<Components>(boxComponents, components));
 
     return components;
   }

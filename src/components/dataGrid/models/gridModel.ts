@@ -1,9 +1,19 @@
 import '../../../array';
+import { ComponentsAndVariants } from '../../../types';
 import memo from '../../../utils/memo';
 import { fuzzySearch } from '../../../utils/string/fuzzySearch';
 import DataGridCellRowDetail from '../components/dataGridCellRowDetail';
 import DataGridCellRowSelection from '../components/dataGridCellRowSelection';
-import { ColumnFilters, DataGridProps, FilterValue, Key, NO_PIN, PaginationState, PinPosition } from '../contracts/dataGridContract';
+import {
+  ColumnFilters,
+  DataGridProps,
+  FilterValue,
+  Key,
+  NO_PIN,
+  PaginationState,
+  PinPosition,
+  ServerState,
+} from '../contracts/dataGridContract';
 import ColumnModel from './columnModel';
 import DetailRowModel from './detailRowModel';
 import GroupRowModel from './groupRowModel';
@@ -22,6 +32,10 @@ export default class GridModel<TRow> {
     public readonly update: () => void,
   ) {
     console.debug('\x1b[32m%s\x1b[0m', '[react-box]: DataGrid GridModel ctor');
+  }
+
+  public get componentName(): keyof ComponentsAndVariants {
+    return (this.props.component || 'datagrid') as keyof ComponentsAndVariants;
   }
 
   public readonly sourceColumns = memo(() => {
@@ -263,6 +277,17 @@ export default class GridModel<TRow> {
     return data;
   }
 
+  private fireServerStateChange(overrides?: Partial<ServerState<TRow>>): void {
+    this.props.onServerStateChange?.({
+      page: overrides?.page ?? this.page,
+      pageSize: this.pageSize,
+      sortColumn: 'sortColumn' in (overrides ?? {}) ? overrides!.sortColumn : this._sortColumn,
+      sortDirection: 'sortDirection' in (overrides ?? {}) ? overrides!.sortDirection : this._sortDirection,
+      columnFilters: overrides?.columnFilters ?? this.columnFilters,
+      globalFilterValue: overrides?.globalFilterValue ?? this.globalFilterValue,
+    });
+  }
+
   /**
    * Set global filter value
    */
@@ -274,13 +299,16 @@ export default class GridModel<TRow> {
     }
 
     // Reset to page 1 when filter changes (server needs to re-filter from first page)
-    if (this.isPaginated && this.page !== 1) {
+    const nextPage = this.isPaginated && this.page !== 1 ? 1 : this.page;
+    if (nextPage !== this.page) {
       if (this.props.onPageChange) {
         this.props.onPageChange(1, this.pageSize);
       } else {
         this._page = 1;
       }
     }
+
+    this.fireServerStateChange({ globalFilterValue: value, page: nextPage });
 
     this.rows.clear();
     this.flatRows.clear();
@@ -307,13 +335,16 @@ export default class GridModel<TRow> {
     }
 
     // Reset to page 1 when filter changes (server needs to re-filter from first page)
-    if (this.isPaginated && this.page !== 1) {
+    const nextPage = this.isPaginated && this.page !== 1 ? 1 : this.page;
+    if (nextPage !== this.page) {
       if (this.props.onPageChange) {
         this.props.onPageChange(1, this.pageSize);
       } else {
         this._page = 1;
       }
     }
+
+    this.fireServerStateChange({ columnFilters: newFilters, page: nextPage });
 
     this.rows.clear();
     this.flatRows.clear();
@@ -330,6 +361,8 @@ export default class GridModel<TRow> {
     } else {
       this._columnFilters = {};
     }
+
+    this.fireServerStateChange({ columnFilters: {} });
 
     this.rows.clear();
     this.flatRows.clear();
@@ -639,6 +672,8 @@ export default class GridModel<TRow> {
       this._page = clamped;
     }
 
+    this.fireServerStateChange({ page: clamped });
+
     this.rows.clear();
     this.flatRows.clear();
     this.rowOffsets.clear();
@@ -702,13 +737,16 @@ export default class GridModel<TRow> {
     this.props.onSortChange?.(this._sortColumn, this._sortDirection);
 
     // Reset to page 1 when sort changes (server needs to re-sort from first page)
-    if (this.isPaginated && this.page !== 1) {
+    const nextPage = this.isPaginated && this.page !== 1 ? 1 : this.page;
+    if (nextPage !== this.page) {
       if (this.props.onPageChange) {
         this.props.onPageChange(1, this.pageSize);
       } else {
         this._page = 1;
       }
     }
+
+    this.fireServerStateChange({ sortColumn: this._sortColumn, sortDirection: this._sortDirection, page: nextPage });
 
     this.headerRows.clear();
     this.rows.clear();

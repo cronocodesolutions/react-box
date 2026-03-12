@@ -26,7 +26,7 @@ export default function DataGridPagination<TRow>(props: Props<TRow>) {
   if (!state) return null;
 
   return (
-    <Flex gap={0.5} ai="center">
+    <Flex component={`${grid.componentName}.bottomBar.pagination` as never} gap={0.5} ai="center">
       <PaginationButton onClick={goFirst} disabled={isFirst}>
         <ChevronDoubleLeft />
       </PaginationButton>

@@ -293,6 +293,7 @@ export default function DataGridPage() {
 />`}
           >
             <DataGrid
+              component="subgrid"
               data={allData}
               filters={filters}
               def={{
@@ -701,6 +702,7 @@ export default function DataGridPage() {
                         Items for Order #{order.orderId}
                       </Box>
                       <DataGrid
+                        component="subgrid"
                         data={order.items}
                         def={{
                           columns: [
@@ -781,24 +783,31 @@ function PaginatedDataGridDemo() {
   const [totalCount, setTotalCount] = useState(0);
   const [loading, setLoading] = useState(true);
 
-  const fetchPage = useCallback(
-    (p: number) => {
-      setLoading(true);
-      // Simulate server response with 300ms delay
-      setTimeout(() => {
-        const start = (p - 1) * pageSize;
-        setData(allData.slice(start, start + pageSize));
-        setTotalCount(allData.length);
-        setPage(p);
-        setLoading(false);
-      }, 300);
-    },
-    [pageSize],
-  );
+  const fetchData = useCallback((state: { page: number; pageSize: number; sortColumn?: string | number; sortDirection?: string }) => {
+    setLoading(true);
+    // Simulate server response with 300ms delay
+    setTimeout(() => {
+      const result = [...allData];
+      if (state.sortColumn && state.sortDirection) {
+        const key = state.sortColumn as keyof (typeof allData)[0];
+        result.sort((a, b) => {
+          const aVal = a[key],
+            bVal = b[key];
+          const cmp = aVal! < bVal! ? -1 : aVal! > bVal! ? 1 : 0;
+          return state.sortDirection === 'DESC' ? -cmp : cmp;
+        });
+      }
+      const start = (state.page - 1) * state.pageSize;
+      setData(result.slice(start, start + state.pageSize));
+      setTotalCount(result.length);
+      setPage(state.page);
+      setLoading(false);
+    }, 300);
+  }, []);
 
   useEffect(() => {
-    fetchPage(1);
-  }, [fetchPage]);
+    fetchData({ page: 1, pageSize });
+  }, [fetchData]);
 
   const def = useMemo(
     () => ({
@@ -830,24 +839,28 @@ const [totalCount, setTotalCount] = useState(0);
 const [loading, setLoading] = useState(true);
 const pageSize = 8;
 
-const fetchPage = useCallback((p) => {
+const fetchData = useCallback((state) => {
   setLoading(true);
-  api.getUsers({ Page: p, PageSize: pageSize }).then((res) => {
+  api.getUsers({
+    Page: state.page, PageSize: state.pageSize,
+    SortBy: state.sortColumn, SortDir: state.sortDirection,
+    Search: state.globalFilterValue,
+    Filters: state.columnFilters,
+  }).then((res) => {
     setData(res.Items);
     setTotalCount(res.TotalCount);
     setPage(res.Page);
     setLoading(false);
   });
-}, [pageSize]);
+}, []);
 
-useEffect(() => { fetchPage(1); }, []);
+useEffect(() => { fetchData({ page: 1, pageSize }); }, []);
 
 <DataGrid
   data={data}
   loading={loading}
   page={page}
-  onPageChange={(p) => fetchPage(p)}
-  onSortChange={(col, dir) => { /* re-fetch with sort params */ }}
+  onServerStateChange={fetchData}
   def={{
     columns: [...],
     visibleRowsCount: pageSize,
@@ -858,7 +871,7 @@ useEffect(() => { fetchPage(1); }, []);
   }}
 />`}
     >
-      <DataGrid data={data} loading={loading} page={page} onPageChange={(p) => fetchPage(p)} def={def} />
+      <DataGrid data={data} loading={loading} page={page} onServerStateChange={fetchData} def={def} />
     </Code>
   );
 }

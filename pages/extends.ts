@@ -329,42 +329,58 @@ export const components = Box.components({
     },
   },
 
-  // ========== FIDO Enrollment Page (Cybersecurity Theme) ==========
+  // DataGrid customization
+  datagrid: {
+    children: {
+      body: {
+        children: {
+          detailRow: {
+            styles: {
+              theme: { dark: { bgColor: 'blue-950' } },
+            },
+          },
+        },
+      },
+    },
+  },
 
-  // Override DataGrid for FIDO page - cybersecurity dark theme
-  // datagrid: {
-  //   styles: {
-  //     p: 5,
-  //   },
-  //   children: {
-  //     topBar: {
-  //       styles: {
-  //         bb: 0,
-  //         bgColor: 'transparent',
-  //         theme: { dark: { bgColor: 'transparent' } },
-  //         pb: 8,
-  //         px: 0,
-  //       },
-  //     },
-  //     header: {
-  //       styles: {},
-  //       children: {
-  //         cell: {
-  //           styles: {
-  //             bt: 1,
-  //             textTransform: 'uppercase',
-  //             bgColor: 'slate-100',
-  //             hover: { bgColor: 'slate-100' },
-  //             theme: { dark: { bgColor: 'slate-700', hover: { bgColor: 'slate-700' } } },
-  //           },
-  //           variants: {
-  //             isSortable: {
-  //               hover: { bgColor: 'slate-100' },
-  //             },
-  //           },
-  //         },
-  //       },
-  //     },
-  //   },
-  // },
+  // Subgrid — extends datagrid styles with visual overrides for embedded DataGrids
+  subgrid: {
+    extends: 'datagrid',
+    styles: {
+      b: 0,
+      br: 1,
+      bl: 1,
+      borderRadius: 0,
+      shadow: 'none',
+      theme: { dark: { bgColor: 'transparent' } },
+    },
+    children: {
+      header: {
+        children: {
+          cell: {
+            styles: {
+              fontSize: 12,
+              py: 1,
+              bgColor: 'transparent',
+              color: 'gray-100',
+              fontWeight: 500,
+              theme: { dark: { bgColor: 'transparent', color: 'gray-500' } },
+            },
+          },
+        },
+      },
+      body: {
+        children: {
+          cell: {
+            styles: {
+              fontSize: 13,
+              bgColor: 'transparent',
+              theme: { dark: { bgColor: 'gray-600' } },
+            },
+          },
+        },
+      },
+    },
+  },
 });

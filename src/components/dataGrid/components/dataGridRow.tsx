@@ -19,6 +19,7 @@ export default function DataGridRow<TRow>(props: Props<TRow>) {
 
   return (
     <Flex
+      component={`${row.grid.componentName}.body.row` as never}
       className="grid-row"
       selected={selected}
       display="contents"

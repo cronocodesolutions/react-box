@@ -11,7 +11,7 @@ export default function DataGridHeader<TRow>(props: Props<TRow>) {
   const { grid } = props;
 
   return (
-    <Grid component="datagrid.header" style={{ gridTemplateColumns: grid.gridTemplateColumns.value }}>
+    <Grid component={`${grid.componentName}.header` as never} style={{ gridTemplateColumns: grid.gridTemplateColumns.value }}>
       {grid.headerRows.value.map((row) => {
         return row.map((cell) => {
           return <DataGridHeaderCell key={cell.uniqueKey} column={cell} />;

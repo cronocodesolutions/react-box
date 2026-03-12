@@ -1,6 +1,6 @@
 # DataGrid
 
-A feature-rich, model-driven data grid component with sorting, filtering, grouping, pinning, resizing, row selection, row detail expansion, virtualization, and more.
+A feature-rich, model-driven data grid component with sorting, filtering, grouping, pinning, resizing, row selection, row detail expansion, pagination, virtualization, and full style customization via the component system.
 
 **Location:** `src/components/dataGrid/` (entry: `dataGrid.tsx`, model: `models/gridModel.ts`)
 
@@ -38,6 +38,7 @@ const data = [
 |------|------|-------------|
 | `data` | `TRow[]` | Row data array |
 | `def` | `GridDefinition<TRow>` | Grid configuration |
+| `component` | `string` | Component style tree name (default: `'datagrid'`). See [Custom Component Trees](#custom-component-trees) |
 | `loading` | `boolean` | Loading state |
 | `onSelectionChange` | `(event) => void` | Row selection change callback |
 | `globalFilterValue` | `string` | Controlled global filter value |
@@ -47,6 +48,10 @@ const data = [
 | `filters` | `((row: TRow) => boolean)[]` | External predicate filters |
 | `expandedRowKeys` | `Key[]` | Controlled expanded detail row keys |
 | `onExpandedRowKeysChange` | `(keys: Key[]) => void` | Expanded rows change callback |
+| `page` | `number` | Controlled current page (1-indexed, for pagination) |
+| `onPageChange` | `(page: number, pageSize: number) => void` | Page change callback |
+| `onSortChange` | `(columnKey, direction) => void` | Sort change callback (for server-side sorting) |
+| `onServerStateChange` | `(state: ServerState<TRow>) => void` | Fires on any server-relevant state change (page, sort, filter). Provides full state snapshot for API calls. |
 
 ### GridDefinition\<TRow\>
 
@@ -55,10 +60,11 @@ const data = [
 | `columns` | `ColumnType<TRow>[]` | required | Column definitions |
 | `rowKey` | `keyof TRow \| (row) => Key` | auto UUID | Unique row identifier |
 | `rowHeight` | `number` | `48` | Row height in pixels |
-| `visibleRowsCount` | `number` | `10` | Visible rows before scrolling |
+| `visibleRowsCount` | `number \| 'all'` | `10` | Visible rows before scrolling. `'all'` disables virtualization and shows all rows |
 | `showRowNumber` | `boolean \| { pinned?, width? }` | `false` | Show row number column |
 | `rowSelection` | `boolean \| { pinned? }` | `false` | Enable row selection checkboxes |
 | `rowDetail` | `RowDetailConfig<TRow>` | — | Enable expandable row detail panel |
+| `pagination` | `PaginationConfig` | — | Server-side pagination config |
 | `topBar` | `boolean` | `false` | Show top bar |
 | `bottomBar` | `boolean` | `false` | Show bottom bar |
 | `title` | `React.ReactNode` | — | Title in the top bar |
@@ -95,6 +101,13 @@ const data = [
 | `pinned` | `boolean` | `false` | Pin expand column to LEFT |
 | `expandColumnWidth` | `number` | `50` | Width of the expand column |
 
+### PaginationConfig
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `totalCount` | `number` | required | Total number of items across all pages (from server) |
+| `pageSize` | `number` | `visibleRowsCount` or `10` | Number of rows per page |
+
 ---
 
 ## Features
@@ -121,6 +134,19 @@ def={{
     { key: 'age', header: 'Age', sortable: true },  // Sortable (override)
   ],
 }}
+```
+
+**Server-side sorting** — use `onSortChange` to receive sort events and fetch sorted data from your API:
+
+```tsx
+<DataGrid
+  data={data}
+  def={def}
+  onSortChange={(columnKey, direction) => {
+    // direction: 'ASC' | 'DESC' | undefined (cleared)
+    fetchData({ sortBy: columnKey, sortDir: direction });
+  }}
+/>
 ```
 
 ### Column Filters
@@ -350,6 +376,71 @@ const [expanded, setExpanded] = useState<Key[]>([]);
 />
 ```
 
+### Pagination (Server-Side)
+
+Server-side pagination with first/prev/next/last navigation. The grid expects the server to handle page slicing — `data` should contain only the current page's rows.
+
+```tsx
+const [page, setPage] = useState(1);
+const pageSize = 20;
+const { data, totalCount } = useQuery(['users', page], () =>
+  fetchUsers({ page, pageSize })
+);
+
+<DataGrid
+  data={data}
+  def={{
+    columns: [...],
+    bottomBar: true,
+    pagination: {
+      totalCount,        // Total items across all pages
+      pageSize,          // Optional: defaults to visibleRowsCount or 10
+    },
+  }}
+  page={page}
+  onPageChange={(newPage, size) => setPage(newPage)}
+/>
+```
+
+When pagination is enabled:
+- Client-side filtering is bypassed (data comes pre-filtered from the server)
+- The bottom bar shows `Rows: 1–20 of 500` format with page navigation controls
+- Use `onServerStateChange` to get a full state snapshot on any change (page, sort, filter)
+
+**`onServerStateChange`** — fires whenever page, sort, or filters change, providing all state needed for an API call:
+
+```tsx
+<DataGrid
+  data={data}
+  loading={loading}
+  page={page}
+  onServerStateChange={(state) => {
+    // state = { page, pageSize, sortColumn, sortDirection, columnFilters, globalFilterValue }
+    fetchData(state);
+  }}
+  def={{
+    columns: [...],
+    bottomBar: true,
+    pagination: { totalCount },
+    globalFilter: true,
+  }}
+/>
+```
+
+**Uncontrolled mode** (internal page state):
+
+```tsx
+<DataGrid
+  data={data}
+  def={{
+    columns: [...],
+    bottomBar: true,
+    pagination: { totalCount: 500 },
+  }}
+  onPageChange={(page, pageSize) => refetch({ page, pageSize })}
+/>
+```
+
 ### Top Bar & Bottom Bar
 
 ```tsx
@@ -365,7 +456,7 @@ def={{
 
 **Top bar** shows: title, custom content, global filter input, column visibility menu, active grouping chips.
 
-**Bottom bar** shows: row count (filtered / total), selected count, "clear filters" link.
+**Bottom bar** shows: row count (filtered / total), selected count, "clear filters" link. With pagination: page range, navigation controls.
 
 ### Custom Cell Renderers
 
@@ -408,6 +499,8 @@ def={{
 }}
 ```
 
+Set `visibleRowsCount: 'all'` to disable virtualization and render all rows without a vertical scrollbar.
+
 ### Grouped Column Headers
 
 Nest columns to create multi-level headers:
@@ -428,11 +521,188 @@ columns: [
 
 ---
 
+## Style Customization
+
+Every part of the DataGrid is customizable via `Box.components()`. Each subcomponent has a `component` name that maps to the component tree.
+
+### Component Tree
+
+```
+datagrid                          — Root container
+├── content                       — Scrollable content area
+├── topBar                        — Top bar with title, filters, controls
+│   ├── globalFilter              — Global search wrapper
+│   │   └── stats                 — Filter stats badge
+│   └── columnGroups              — Active grouping chips
+│       ├── icon                  — Grouping icon
+│       └── item                  — Individual group chip
+│           └── icon              — Remove group button
+├── header                        — Sticky header row
+│   └── cell                      — Header cell
+│       ├── contextMenu           — Column context menu button
+│       │   ├── icon              — Menu button icon
+│       │   └── tooltip           — Menu dropdown
+│       │       └── item          — Menu item
+│       │           ├── icon      — Menu item icon
+│       │           └── separator — Menu item separator
+│       └── resizer               — Column resize handle
+├── filter                        — Column filter row
+│   ├── row                       — Filter row container
+│   └── cell                      — Filter cell
+├── body                          — Body area
+│   ├── cell                      — Body cell
+│   ├── row                       — Data row
+│   ├── groupRow                  — Group header row
+│   └── detailRow                 — Expanded detail row
+├── emptyColumns                  — Empty state (no columns visible)
+└── bottomBar                     — Bottom bar with counts and pagination
+    └── pagination                — Pagination controls
+```
+
+### Customizing Base Styles
+
+Override default styles for any subcomponent using `Box.components()`:
+
+```tsx
+Box.components({
+  datagrid: {
+    // Override root styles
+    styles: {
+      borderRadius: 0,
+      shadow: 'none',
+    },
+    children: {
+      // Override header cell styles
+      header: {
+        children: {
+          cell: {
+            styles: {
+              fontSize: 11,
+              textTransform: 'uppercase',
+              fontWeight: 700,
+              color: 'gray-500',
+            },
+          },
+        },
+      },
+      // Override body cell styles
+      body: {
+        children: {
+          cell: {
+            styles: { fontSize: 13 },
+          },
+          detailRow: {
+            styles: {
+              bgColor: 'blue-50',
+              theme: { dark: { bgColor: 'blue-900' } },
+            },
+          },
+        },
+      },
+      // Override bottom bar
+      bottomBar: {
+        styles: { fontSize: 12 },
+      },
+    },
+  },
+});
+```
+
+### Custom Component Trees
+
+The DataGrid uses `component="datagrid"` by default and all children resolve under the `datagrid.*` component tree. You can register custom component trees with different visual styles using `extends` to inherit all internal datagrid styles (pinning, sticky headers, hover groups, filters, etc.) and only override what you need:
+
+**Registering a custom component tree:**
+
+```tsx
+Box.components({
+  // Customize default datagrid styles
+  datagrid: {
+    children: {
+      body: { children: { detailRow: { styles: { bgColor: 'blue-50' } } } },
+    },
+  },
+  // A lightweight style for embedded/nested grids — extends datagrid to inherit all internal styles
+  subgrid: {
+    extends: 'datagrid',
+    styles: {
+      b: 0,
+      borderRadius: 0,
+      shadow: 'none',
+      bgColor: 'transparent',
+    },
+    children: {
+      header: {
+        children: {
+          cell: {
+            styles: {
+              fontSize: 12,
+              py: 1,
+              bgColor: 'transparent',
+              color: 'gray-400',
+              fontWeight: 500,
+            },
+          },
+        },
+      },
+      body: {
+        children: {
+          cell: {
+            styles: { fontSize: 13, bgColor: 'transparent' },
+          },
+        },
+      },
+    },
+  },
+  // A compact style — extends datagrid so pinning, sorting, etc. all work
+  compactGrid: {
+    extends: 'datagrid',
+    styles: { borderRadius: 1 },
+    children: {
+      header: { children: { cell: { styles: { py: 1, fontSize: 11 } } } },
+      body: { children: { cell: { styles: { py: 0 } } } },
+    },
+  },
+});
+```
+
+> **Why `extends`?** Without it, a custom component tree would not inherit any of the internal datagrid styles — pinned columns, sticky headers, hover groups, filter cells, context menus, and resizers would all break. With `extends: 'datagrid'`, the full internal style tree is used as the base, and your overrides are deep-merged on top.
+
+**Using a custom component tree:**
+
+```tsx
+<DataGrid component="subgrid" data={data} def={def} />
+<DataGrid component="compactGrid" data={data} def={def} />
+<DataGrid data={data} def={def} />  {/* default "datagrid" styles */}
+```
+
+All children automatically resolve under the specified component tree (e.g., `subgrid.header.cell`, `subgrid.body.cell`, etc.).
+
+**Nested DataGrids** — ideal for master-detail patterns:
+
+```tsx
+<DataGrid
+  data={orders}
+  def={{
+    rowDetail: {
+      content: (order) => (
+        <DataGrid component="subgrid" data={order.items} def={itemDef} />
+      ),
+    },
+    columns: [...],
+  }}
+/>
+```
+
+The outer DataGrid uses `datagrid.*` styles; the inner one uses `subgrid.*` styles. Each DataGrid independently resolves its component tree — no context propagation needed.
+
+---
+
 ## Architecture
 
 The grid is model-driven with observable state:
 
-- **GridModel** — orchestrator: manages columns, rows, filters, sorting, grouping, selection, sizing
+- **GridModel** — orchestrator: manages columns, rows, filters, sorting, grouping, selection, pagination, sizing
 - **ColumnModel** — column definition, pinning, width, visibility, sorting, filtering
 - **RowModel** — wraps row data, selection state, cell generation
 - **GroupRowModel** — grouped rows with expand/collapse, child rows, aggregation
@@ -443,29 +713,69 @@ State changes trigger memo invalidation and React re-render via `useGrid` hook.
 
 ---
 
-## Current Limitations
+## Full-Featured Example
 
-- No pagination (type defined but not implemented)
-- No server-side modes (server paging, sorting, filtering)
-- No multi-column sorting (single sort column only)
-- No column reordering (drag-and-drop)
-- No controlled selection props (`selectedRowKeys` input)
-- No column event callbacks (`onColumnResize`, `onColumnPinChange`, etc.)
-- No cell editing or validation
-- No column footers or group aggregation functions
-- No CSV/Excel export or clipboard
-- Limited keyboard navigation and ARIA attributes
-- Basic virtualization (uniform row height, no react-window integration)
+```tsx
+import DataGrid from '@cronocode/react-box/components/dataGrid';
 
----
+<DataGrid
+  data={users}
+  def={{
+    rowKey: 'id',
+    title: 'Users',
+    topBar: true,
+    bottomBar: true,
+    globalFilter: true,
+    rowSelection: { pinned: true },
+    showRowNumber: { pinned: true },
+    rowHeight: 40,
+    visibleRowsCount: 15,
+    columns: [
+      {
+        key: 'personal',
+        header: 'Personal',
+        columns: [
+          { key: 'name', header: 'Name', filterable: true },
+          { key: 'age', header: 'Age', width: 80, align: 'right', filterable: { type: 'number' } },
+        ],
+      },
+      { key: 'email', header: 'Email', width: 250, filterable: true },
+      { key: 'status', header: 'Status', filterable: { type: 'multiselect' } },
+      { key: 'country', header: 'Country', pin: 'RIGHT' },
+    ],
+    rowDetail: {
+      content: (user) => <UserDetails user={user} />,
+      height: 'auto',
+      expandOnRowClick: true,
+    },
+  }}
+  onSelectionChange={(e) => setSelected(e.selectedRowKeys)}
+/>
+```
 
-## Roadmap
+## Server-Side Paginated Example
 
-1. **Core events** — controlled selection, sort/filter/column change callbacks
-2. **Server mode** — server paging, sorting, filtering with hooks/examples
-3. **Multi-sort & column reorder** — multi-column sort, drag-and-drop columns
-4. **Inline editing** — cell editors, edit lifecycle events, validation
-5. **Accessibility** — keyboard navigation, ARIA attributes, screen reader support
-6. **Advanced virtualization** — react-window/react-virtual integration, variable row heights
-7. **Aggregation** — group footers, column aggregation functions (sum/count/avg)
-8. **Export** — CSV/Excel export, clipboard copy
+```tsx
+const [page, setPage] = useState(1);
+const { data, totalCount } = useServerData(page);
+
+<DataGrid
+  data={data}
+  page={page}
+  onServerStateChange={(state) => {
+    // state: { page, pageSize, sortColumn, sortDirection, columnFilters, globalFilterValue }
+    setPage(state.page);
+    refetch(state);
+  }}
+  def={{
+    rowKey: 'id',
+    topBar: true,
+    bottomBar: true,
+    columns: [
+      { key: 'name', header: 'Name' },
+      { key: 'email', header: 'Email' },
+    ],
+    pagination: { totalCount, pageSize: 25 },
+  }}
+/>
+```

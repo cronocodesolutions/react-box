@@ -15,6 +15,7 @@ export default function DataGridDetailRow<TRow>(props: Props<TRow>) {
 
   return (
     <Flex
+      component={`${grid.componentName}.body.detailRow` as never}
       props={{ role: 'row' }}
       style={{
         gridColumn: '1 / -1',

@@ -26,7 +26,7 @@ export default function DataGridHeaderCellResizer<TRow>(props: Props<TRow>) {
         height="fit"
         props={{ onMouseDown: column.resizeColumn, onTouchStart: column.resizeColumn }}
       >
-        <Box component="datagrid.header.cell.resizer" />
+        <Box component={`${column.grid.componentName}.header.cell.resizer` as never} />
       </Box>
     </Flex>
   );
