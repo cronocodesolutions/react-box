@@ -91,6 +91,22 @@ describe('useStyles', () => {
     expect(element.classList).toContain('required-borderColor-red-500');
   });
 
+  it('applies placeholderStyles pseudo-element styles', () => {
+    const { element, styleElement } = act({
+      placeholderStyles: { color: 'gray-400' },
+    });
+    expect(styleElement.innerText).toContain('.placeholderStyles-color-gray-400::placeholder{color:var(--gray-400)}');
+    expect(element.classList).toContain('placeholderStyles-color-gray-400');
+  });
+
+  it('applies placeholderStyles with hover combination', () => {
+    const { element, styleElement } = act({
+      hover: { placeholderStyles: { color: 'gray-500' } },
+    });
+    expect(styleElement.innerText).toContain('.hover-placeholderStyles-color-gray-500:hover::placeholder{color:var(--gray-500)}');
+    expect(element.classList).toContain('hover-placeholderStyles-color-gray-500');
+  });
+
   it('applies multiple combinations of styles', () => {
     const { element, styleElement } = act({
       m: 2,
