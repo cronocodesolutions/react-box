@@ -1302,6 +1302,7 @@ export const pseudo1 = {
   hasDisabled: ':has([disabled])',
   before: '::before',
   after: '::after',
+  placeholderStyles: '::placeholder',
 };
 
 export const pseudo2 = {
