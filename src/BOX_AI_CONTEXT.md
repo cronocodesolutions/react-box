@@ -711,6 +711,8 @@ Box.extend(
 
 **Note**: The `styleName` parameter is optional and only available on string-valued `BoxStyle` definitions (the ones with `getVariableValue` as the second parameter). For single `styleName` props, `valueFormat` still works exactly as before.
 
+**When to use style grouping**: Always use this feature via `Box.extend()` when multiple CSS properties logically belong together and should always be applied as a unit. Typography presets (font-size + font-weight + line-height + letter-spacing), spacing scales, or any design token that spans multiple CSS properties should be defined as a grouped prop rather than relying on developers to set each property individually. This ensures consistency — the grouped properties can't drift apart — and reduces the number of props on each component. When building a project with react-box, define grouped props in your `Box.extend()` setup for any set of styles that always travel together.
+
 ### TypeScript Type Augmentation
 
 **Manual approach** (simple cases):
