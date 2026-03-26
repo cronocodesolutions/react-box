@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { Type } from 'lucide-react';
+import { Layers } from 'lucide-react';
 import Box from '../../src/box';
 import Flex from '../../src/components/flex';
 import Code from '../components/code';
@@ -9,33 +9,71 @@ export default function TextStylePage() {
   return (
     <Box>
       <PageHeader
-        icon={Type}
-        title="Text Style"
-        description="One prop, multiple CSS properties with different values. Define typography presets using valueFormat with per-property resolution."
+        icon={Layers}
+        title="Style Grouping"
+        description="Group multiple CSS properties under a single prop, each with its own value. One prop, one class name, multiple declarations."
         badge="NEW"
       />
 
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
         <Flex d="column" gap={8}>
           <Code
-            label="Define text style variables and prop"
+            label="The concept"
             language="jsx"
             codeOnly
-            code={`// extends.ts
+            code={`// By default, a styleName array applies the SAME value to all CSS properties:
+{
+  styleName: ['padding-left', 'padding-right'],
+  values: [2, 4, 6] as const,
+  valueFormat: (value) => \`\${value / 4}rem\`,
+}
+// px={4} → padding-left: 1rem; padding-right: 1rem  (same value)
+
+// With per-property valueFormat, each CSS property gets a DIFFERENT value.
+// The 3rd argument to valueFormat is the current styleName being generated:
+{
+  styleName: ['font-size', 'font-weight', 'line-height', 'letter-spacing'],
+  values: ['display-lg'] as const,
+  valueFormat: (value, getVariable, styleName) => {
+    // styleName is 'font-size', then 'font-weight', then 'line-height', etc.
+    // Return a different value for each one.
+  },
+}`}
+          />
+
+          <Code
+            label="Generated CSS"
+            language="jsx"
+            codeOnly
+            code={`// <Box textStyle="display-lg" />
+// Generates a single class with four different CSS declarations:
+
+.textStyle-display-lg {
+  font-size: var(--text-display-lg-size);            /* 36px */
+  font-weight: var(--text-display-lg-weight);        /* 700 */
+  line-height: var(--text-display-lg-line-height);   /* 1.2 */
+  letter-spacing: var(--text-display-lg-letter-spacing); /* -0.02em */
+}`}
+          />
+
+          <Code
+            label="Full example: typography presets"
+            language="jsx"
+            codeOnly
+            code={`// 1. Define CSS variables for each property per variant
 Box.extend(
   {
-    // Display Large
     'text-display-lg-size': '36px',
     'text-display-lg-weight': '700',
     'text-display-lg-line-height': '1.2',
     'text-display-lg-letter-spacing': '-0.02em',
 
-    // Display Small
     'text-display-sm-size': '28px',
     'text-display-sm-weight': '700',
     'text-display-sm-line-height': '1.25',
     'text-display-sm-letter-spacing': '-0.015em',
   },
+  // 2. Create a prop with styleName array + per-property valueFormat
   {
     textStyle: [
       {
@@ -57,51 +95,32 @@ Box.extend(
 );`}
           />
 
-          <Code label="Display Large" language="jsx">
+          <Code label="Live: display-lg" language="jsx">
             <Box textStyle="display-lg" theme={{ dark: { color: 'white' }, light: { color: 'slate-900' } }}>
               The quick brown fox jumps over the lazy dog
             </Box>
           </Code>
 
-          <Code label="Display Small" language="jsx">
+          <Code label="Live: display-sm" language="jsx">
             <Box textStyle="display-sm" theme={{ dark: { color: 'white' }, light: { color: 'slate-900' } }}>
               The quick brown fox jumps over the lazy dog
             </Box>
           </Code>
 
-          <Code label="Combined with other props" language="jsx">
+          <Code label="Composing with other Box props" language="jsx">
             <Flex d="column" gap={6}>
               <Box textStyle="display-lg" color="indigo-500">
-                Heading with color
+                Display Large in color
               </Box>
               <Box textStyle="display-sm" color="slate-500">
-                Subheading with muted color
+                Display Small muted
               </Box>
               <Box fontSize={16} lineHeight={28} theme={{ dark: { color: 'slate-400' }, light: { color: 'slate-600' } }}>
-                Regular body text using standard fontSize and lineHeight props for comparison. The textStyle prop sets font-size,
-                font-weight, line-height, and letter-spacing all at once from CSS variables.
+                Regular body text for comparison — using individual fontSize and lineHeight props. The textStyle prop above sets four CSS
+                properties at once from a single value.
               </Box>
             </Flex>
           </Code>
-
-          <Code
-            label="How it works"
-            language="jsx"
-            codeOnly
-            code={`// One prop generates four CSS properties with different values:
-<Box textStyle="display-lg" />
-
-// Generated CSS:
-// .textStyle-display-lg {
-//   font-size: var(--text-display-lg-size);          /* 36px */
-//   font-weight: var(--text-display-lg-weight);      /* 700 */
-//   line-height: var(--text-display-lg-line-height);  /* 1.2 */
-//   letter-spacing: var(--text-display-lg-letter-spacing); /* -0.02em */
-// }
-
-// The key: valueFormat receives the current styleName as the 3rd argument,
-// so it can return a different value for each CSS property.`}
-          />
         </Flex>
       </motion.div>
     </Box>

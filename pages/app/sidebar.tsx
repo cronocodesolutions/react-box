@@ -196,8 +196,8 @@ export default function Sidebar({ toggleTheme, onClose }: SidebarProps) {
 
         {/* Extensions */}
         <MenuSection label="Extensions" defaultOpen>
-          <MenuItem to="/text-style" icon={<Type size={16} />}>
-            Text Style
+          <MenuItem to="/style-grouping" icon={<Type size={16} />}>
+            Style Grouping
           </MenuItem>
         </MenuSection>
 
