@@ -12,8 +12,8 @@ export namespace BoxStylesFormatters {
   }
 
   export namespace Value {
-    export function rem(value: number, _fn?: () => void, divider = DEFAULT_REM_DIVIDER) {
-      return `${value / divider}rem`;
+    export function rem(value: number) {
+      return `${value / DEFAULT_REM_DIVIDER}rem`;
     }
     export function px(value: number) {
       return `${value}px`;

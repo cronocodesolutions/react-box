@@ -80,6 +80,15 @@ Pre-built components wrap Box with the correct HTML tag. Each is a separate entr
 - Prettier: 140 char width, single quotes, trailing commas
 - Import order enforced by ESLint: builtin → external → internal → parent → sibling → index (no blank lines between groups, alphabetized)
 
+## Verification
+
+After any code change, all of the following must pass before considering the work done:
+
+1. `npm run compile` — TypeScript type check
+2. `npm run lint` — ESLint check
+3. `npm run build` — Library build
+4. `npm test` — All tests
+
 ## Adding New CSS Properties
 
 1. Define in `src/core/boxStyles.ts` with JSDoc comment

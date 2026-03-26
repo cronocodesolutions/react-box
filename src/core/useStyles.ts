@@ -292,9 +292,13 @@ namespace StylesContextImpl {
       const selector = itemValue.selector?.(defaultSelector, '') ?? defaultSelector;
 
       const styleName = Array.isArray(itemValue.styleName) ? itemValue.styleName : [itemValue.styleName ?? key];
-      const styleValue = itemValue.valueFormat?.(value as never, Variables.getVariableValue) ?? value;
 
-      const rule = `${selector}{${styleName.map((s) => `${s}:${styleValue}`).join(';')}}`;
+      const rule = `${selector}{${styleName
+        .map((s) => {
+          const styleValue = (itemValue.valueFormat as any)?.(value, Variables.getVariableValue, s) ?? value;
+          return `${s}:${styleValue}`;
+        })
+        .join(';')}}`;
 
       // Wrap in media query if needed
       if (breakpoint !== 'normal') {
@@ -306,9 +310,13 @@ namespace StylesContextImpl {
       const selector = itemValue.selector?.(`.${className}`, pseudoClassesToUse) ?? `.${className}${pseudoClassesToUse}`;
 
       const styleName = Array.isArray(itemValue.styleName) ? itemValue.styleName : [itemValue.styleName ?? key];
-      const styleValue = itemValue.valueFormat?.(value as never, Variables.getVariableValue) ?? value;
 
-      const rule = `${selector}{${styleName.map((s) => `${s}:${styleValue}`).join(';')}}`;
+      const rule = `${selector}{${styleName
+        .map((s) => {
+          const styleValue = (itemValue.valueFormat as any)?.(value, Variables.getVariableValue, s) ?? value;
+          return `${s}:${styleValue}`;
+        })
+        .join(';')}}`;
 
       // Wrap in media query if needed
       if (breakpoint !== 'normal') {

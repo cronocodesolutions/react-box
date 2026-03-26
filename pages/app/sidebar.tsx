@@ -18,6 +18,7 @@ import {
   Sun,
   Table,
   TextCursor,
+  Type,
   X,
 } from 'lucide-react';
 import { useState } from 'react';
@@ -190,6 +191,13 @@ export default function Sidebar({ toggleTheme, onClose }: SidebarProps) {
           </MenuItem>
           <MenuItem to="/grid" icon={<LayoutGrid size={16} />}>
             Grid
+          </MenuItem>
+        </MenuSection>
+
+        {/* Extensions */}
+        <MenuSection label="Extensions" defaultOpen>
+          <MenuItem to="/style-grouping" icon={<Type size={16} />}>
+            Style Grouping
           </MenuItem>
         </MenuSection>
 
