@@ -149,6 +149,436 @@ describe('useStyles', () => {
     });
   });
 
+  suite('string enum values', () => {
+    it('applies display prop', () => {
+      const { element, styleElement } = act({ display: 'flex' });
+      expect(styleElement.innerText).toContain('.display-flex{display:flex}');
+      expect(element.classList).toContain('display-flex');
+    });
+
+    it('applies position prop', () => {
+      const { element, styleElement } = act({ position: 'absolute' });
+      expect(styleElement.innerText).toContain('.position-absolute{position:absolute}');
+      expect(element.classList).toContain('position-absolute');
+    });
+
+    it('applies overflow prop', () => {
+      const { element, styleElement } = act({ overflow: 'hidden' });
+      expect(styleElement.innerText).toContain('.overflow-hidden{overflow:hidden}');
+      expect(element.classList).toContain('overflow-hidden');
+    });
+
+    it('applies textAlign prop with custom styleName', () => {
+      const { element, styleElement } = act({ textAlign: 'center' });
+      expect(styleElement.innerText).toContain('.textAlign-center{text-align:center}');
+      expect(element.classList).toContain('textAlign-center');
+    });
+
+    it('applies cursor prop', () => {
+      const { element, styleElement } = act({ cursor: 'pointer' });
+      expect(styleElement.innerText).toContain('.cursor-pointer{cursor:pointer}');
+      expect(element.classList).toContain('cursor-pointer');
+    });
+  });
+
+  suite('boolean values', () => {
+    it('applies inline prop (boolean to display: inline-block)', () => {
+      const { element, styleElement } = act({ inline: true });
+      expect(styleElement.innerText).toContain('.inline-true{display:inline-block}');
+      expect(element.classList).toContain('inline-true');
+    });
+
+    it('applies flex1 prop (boolean to flex: 1)', () => {
+      const { element, styleElement } = act({ flex1: true });
+      expect(styleElement.innerText).toContain('.flex1-true{flex:1}');
+      expect(element.classList).toContain('flex1-true');
+    });
+  });
+
+  suite('number values with formatters', () => {
+    it('applies fontSize with divider 16 (rem)', () => {
+      const { element, styleElement } = act({ fontSize: 14 });
+      expect(styleElement.innerText).toContain('.fontSize-14{font-size:0.875rem}');
+      expect(element.classList).toContain('fontSize-14');
+    });
+
+    it('applies fontSize=16 equals 1rem', () => {
+      const { element, styleElement } = act({ fontSize: 16 });
+      expect(styleElement.innerText).toContain('.fontSize-16{font-size:1rem}');
+      expect(element.classList).toContain('fontSize-16');
+    });
+
+    it('applies borderRadius with rem formatter', () => {
+      const { element, styleElement } = act({ borderRadius: 8 });
+      expect(styleElement.innerText).toContain('.borderRadius-8{border-radius:2rem}');
+      expect(element.classList).toContain('borderRadius-8');
+    });
+
+    it('applies lineHeight with px formatter', () => {
+      const { element, styleElement } = act({ lineHeight: 24 });
+      expect(styleElement.innerText).toContain('.lineHeight-24{line-height:24px}');
+      expect(element.classList).toContain('lineHeight-24');
+    });
+
+    it('applies letterSpacing with px formatter', () => {
+      const { element, styleElement } = act({ letterSpacing: 2 });
+      expect(styleElement.innerText).toContain('.letterSpacing-2{letter-spacing:2px}');
+      expect(element.classList).toContain('letterSpacing-2');
+    });
+
+    it('applies outline with px formatter', () => {
+      const { element, styleElement } = act({ outline: 2 });
+      expect(styleElement.innerText).toContain('.outline-2{outline-width:2px}');
+      expect(element.classList).toContain('outline-2');
+    });
+
+    it('applies opacity as a direct numeric value', () => {
+      const { element, styleElement } = act({ opacity: 0.5 });
+      expect(styleElement.innerText).toContain('.opacity-0.5{opacity:0.5}');
+      expect(element.classList).toContain('opacity-0.5');
+    });
+
+    it('applies fontWeight as a direct numeric value', () => {
+      const { element, styleElement } = act({ fontWeight: 700 });
+      expect(styleElement.innerText).toContain('.fontWeight-700{font-weight:700}');
+      expect(element.classList).toContain('fontWeight-700');
+    });
+
+    it('applies rotate with degree formatter', () => {
+      const { element, styleElement } = act({ rotate: 90 });
+      expect(styleElement.innerText).toContain('.rotate-90{rotate:90deg}');
+      expect(element.classList).toContain('rotate-90');
+    });
+  });
+
+  suite('multi-styleName props', () => {
+    it('applies borderRadiusTop to both top-left and top-right', () => {
+      const { element, styleElement } = act({ borderRadiusTop: 4 });
+      expect(styleElement.innerText).toContain('.borderRadiusTop-4{border-top-left-radius:1rem;border-top-right-radius:1rem}');
+      expect(element.classList).toContain('borderRadiusTop-4');
+    });
+
+    it('applies borderRadiusRight to both top-right and bottom-right', () => {
+      const { element, styleElement } = act({ borderRadiusRight: 4 });
+      expect(styleElement.innerText).toContain('.borderRadiusRight-4{border-top-right-radius:1rem;border-bottom-right-radius:1rem}');
+      expect(element.classList).toContain('borderRadiusRight-4');
+    });
+
+    it('applies borderRadiusBottom to both bottom-left and bottom-right', () => {
+      const { element, styleElement } = act({ borderRadiusBottom: 4 });
+      expect(styleElement.innerText).toContain('.borderRadiusBottom-4{border-bottom-left-radius:1rem;border-bottom-right-radius:1rem}');
+      expect(element.classList).toContain('borderRadiusBottom-4');
+    });
+
+    it('applies borderRadiusLeft to both top-left and bottom-left', () => {
+      const { element, styleElement } = act({ borderRadiusLeft: 4 });
+      expect(styleElement.innerText).toContain('.borderRadiusLeft-4{border-top-left-radius:1rem;border-bottom-left-radius:1rem}');
+      expect(element.classList).toContain('borderRadiusLeft-4');
+    });
+  });
+
+  suite('color props with variable resolution', () => {
+    it('applies color prop with CSS variable', () => {
+      const { element, styleElement } = act({ color: 'red-500' });
+      expect(styleElement.innerText).toContain('.color-red-500{color:var(--red-500)}');
+      expect(element.classList).toContain('color-red-500');
+    });
+
+    it('applies borderColor prop with CSS variable', () => {
+      const { element, styleElement } = act({ borderColor: 'blue-500' });
+      expect(styleElement.innerText).toContain('.borderColor-blue-500{border-color:var(--blue-500)}');
+      expect(element.classList).toContain('borderColor-blue-500');
+    });
+  });
+
+  suite('special value formats', () => {
+    it('applies height fit as 100%', () => {
+      const { element, styleElement } = act({ height: 'fit' });
+      expect(styleElement.innerText).toContain('.height-fit{height:100%}');
+      expect(element.classList).toContain('height-fit');
+    });
+
+    it('applies height fit-screen as 100vh', () => {
+      const { element, styleElement } = act({ height: 'fit-screen' });
+      expect(styleElement.innerText).toContain('.height-fit-screen{height:100vh}');
+      expect(element.classList).toContain('height-fit-screen');
+    });
+
+    it('applies width fit as 100%', () => {
+      const { element, styleElement } = act({ width: 'fit' });
+      expect(styleElement.innerText).toContain('.width-fit{width:100%}');
+      expect(element.classList).toContain('width-fit');
+    });
+
+    it('applies height with fraction value', () => {
+      const { element, styleElement } = act({ height: '1/2' });
+      expect(styleElement.innerText).toContain('.height-1/2{height:50%}');
+      expect(element.classList).toContain('height-1/2');
+    });
+
+    it('applies gridTemplateColumns with repeat formatter', () => {
+      const { element, styleElement } = act({ gridTemplateColumns: 3 });
+      expect(styleElement.innerText).toContain('.gridTemplateColumns-3{grid-template-columns:repeat(3,minmax(0,1fr))}');
+      expect(element.classList).toContain('gridTemplateColumns-3');
+    });
+
+    it('applies gridColumn with span formatter', () => {
+      const { element, styleElement } = act({ gridColumn: 2 });
+      expect(styleElement.innerText).toContain('.gridColumn-2{grid-column:span 2/span 2}');
+      expect(element.classList).toContain('gridColumn-2');
+    });
+
+    it('applies gridColumn full-row', () => {
+      const { element, styleElement } = act({ gridColumn: 'full-row' });
+      expect(styleElement.innerText).toContain('.gridColumn-full-row{grid-column:1/-1}');
+      expect(element.classList).toContain('gridColumn-full-row');
+    });
+
+    it('applies content empty as empty string', () => {
+      const { element, styleElement } = act({ content: 'empty' });
+      expect(styleElement.innerText).toContain(".content-empty{content:''}");
+      expect(element.classList).toContain('content-empty');
+    });
+
+    it('applies flip xAxis', () => {
+      const { element, styleElement } = act({ flip: 'xAxis' });
+      expect(styleElement.innerText).toContain('.flip-xAxis{scale:-1 1}');
+      expect(element.classList).toContain('flip-xAxis');
+    });
+
+    it('applies translateX with rem', () => {
+      const { element, styleElement } = act({ translateX: 4 });
+      expect(styleElement.innerText).toContain('.translateX-4{transform:translateX(1rem)}');
+      expect(element.classList).toContain('translateX-4');
+    });
+  });
+
+  suite('null and undefined values', () => {
+    it('skips undefined values', () => {
+      const { element, styleElement } = act({ p: 4, m: undefined });
+      expect(styleElement.innerText).toContain('.p-4{padding:1rem}');
+      expect(element.classList).toContain('p-4');
+      expect(styleElement.innerText).not.toContain('m-undefined');
+    });
+
+    it('skips null values', () => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const { element, styleElement } = act({ p: 4, m: null as unknown as any });
+      expect(styleElement.innerText).toContain('.p-4{padding:1rem}');
+      expect(element.classList).toContain('p-4');
+      expect(styleElement.innerText).not.toContain('m-null');
+    });
+  });
+
+  suite('breakpoint styles', () => {
+    it('applies sm breakpoint styles', () => {
+      const { element, styleElement } = act({ sm: { p: 4 } });
+      expect(styleElement.innerText).toContain('@media(min-width: 640px){.sm-p-4{padding:1rem}}');
+      expect(element.classList).toContain('sm-p-4');
+    });
+
+    it('applies md breakpoint styles', () => {
+      const { element, styleElement } = act({ md: { p: 6 } });
+      expect(styleElement.innerText).toContain('@media(min-width: 768px){.md-p-6{padding:1.5rem}}');
+      expect(element.classList).toContain('md-p-6');
+    });
+
+    it('applies lg breakpoint styles', () => {
+      const { element, styleElement } = act({ lg: { p: 8 } });
+      expect(styleElement.innerText).toContain('@media(min-width: 1024px){.lg-p-8{padding:2rem}}');
+      expect(element.classList).toContain('lg-p-8');
+    });
+
+    it('applies xl breakpoint styles', () => {
+      const { element, styleElement } = act({ xl: { display: 'flex' } });
+      expect(styleElement.innerText).toContain('@media(min-width: 1280px){.xl-display-flex{display:flex}}');
+      expect(element.classList).toContain('xl-display-flex');
+    });
+
+    it('applies breakpoint with hover pseudo class', () => {
+      const { element, styleElement } = act({ sm: { hover: { bgColor: 'gray-100' } } });
+      expect(styleElement.innerText).toContain(
+        '@media(min-width: 640px){.sm-hover-bgColor-gray-100:hover{background-color:var(--gray-100)}}',
+      );
+      expect(element.classList).toContain('sm-hover-bgColor-gray-100');
+    });
+
+    it('applies multiple breakpoints on same element', () => {
+      const { element, styleElement } = act({ p: 2, sm: { p: 4 }, md: { p: 6 }, lg: { p: 8 } });
+      expect(styleElement.innerText).toContain('.p-2{padding:0.5rem}');
+      expect(styleElement.innerText).toContain('@media(min-width: 640px){.sm-p-4{padding:1rem}}');
+      expect(styleElement.innerText).toContain('@media(min-width: 768px){.md-p-6{padding:1.5rem}}');
+      expect(styleElement.innerText).toContain('@media(min-width: 1024px){.lg-p-8{padding:2rem}}');
+      expect(element.classList).toContain('p-2');
+      expect(element.classList).toContain('sm-p-4');
+      expect(element.classList).toContain('md-p-6');
+      expect(element.classList).toContain('lg-p-8');
+    });
+  });
+
+  suite('pseudo2 as object form', () => {
+    it('applies disabled styles as object (without boolean flag)', () => {
+      // Object form works at runtime via ObjectUtils.isObject check, though types only expose array form at top level
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const { element, styleElement } = act({ disabled: { opacity: 0.4 } } as any);
+      expect(styleElement.innerText).toContain('.disabled-opacity-0.4[disabled]{opacity:0.4}');
+      expect(element.classList).toContain('disabled-opacity-0.4');
+    });
+
+    it('applies indeterminate styles', () => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const { element, styleElement } = act({ indeterminate: { opacity: 0.6 } } as any);
+      expect(styleElement.innerText).toContain('.indeterminate-opacity-0.6:indeterminate{opacity:0.6}');
+      expect(element.classList).toContain('indeterminate-opacity-0.6');
+    });
+  });
+
+  suite('combined pseudo classes (weight composition)', () => {
+    it('applies hover + focus combined weight', () => {
+      const { element, styleElement } = act({
+        hover: { focus: { bgColor: 'blue-100' } },
+      });
+      expect(styleElement.innerText).toContain('.hover-focus-bgColor-blue-100:hover:focus-within{background-color:var(--blue-100)}');
+      expect(element.classList).toContain('hover-focus-bgColor-blue-100');
+    });
+  });
+
+  suite('pseudoGroupClasses', () => {
+    it('applies hoverGroup styles', () => {
+      const { element, styleElement } = act({
+        hoverGroup: {
+          parent: {
+            bgColor: 'green-100',
+          },
+        },
+      });
+      expect(styleElement.innerText).toContain('.parent:hover .hover-parent-bgColor-green-100{background-color:var(--green-100)}');
+      expect(element.classList).toContain('hover-parent-bgColor-green-100');
+    });
+
+    it('applies disabledGroup styles', () => {
+      const { element, styleElement } = act({
+        disabledGroup: {
+          parent: {
+            opacity: 0.4,
+          },
+        },
+      });
+      expect(styleElement.innerText).toContain('.parent[disabled] .disabled-parent-opacity-0.4{opacity:0.4}');
+      expect(element.classList).toContain('disabled-parent-opacity-0.4');
+    });
+  });
+
+  suite('rule deduplication', () => {
+    it('generates CSS rule only once for duplicate prop values', () => {
+      render(
+        <Box>
+          <Box id="el1" p={4} />
+          <Box id="el2" p={4} />
+        </Box>,
+      );
+
+      const styleElement = document.getElementById('crono-styles')! as unknown as HTMLStyleElement;
+      const content = styleElement.innerText ?? '';
+      const matches = content.match(/\.p-4\{padding:1rem\}/g);
+      expect(matches).toHaveLength(1);
+    });
+  });
+
+  suite('SVG className', () => {
+    it('applies _s class for svg tag', () => {
+      render(
+        <Box>
+          <Box tag="svg" id={testElementId} />
+        </Box>,
+      );
+
+      const element = document.getElementById(testElementId)!;
+      expect(element.classList).toContain('_s');
+      expect(element.classList).not.toContain('_b');
+    });
+
+    it('applies _b class for non-svg tag', () => {
+      const { element } = act({ p: 1 });
+      expect(element.classList).toContain('_b');
+    });
+  });
+
+  suite('multi-styleName with breakpoints', () => {
+    it('applies borderRadiusTop inside a breakpoint', () => {
+      const { element, styleElement } = act({ sm: { borderRadiusTop: 4 } });
+      expect(styleElement.innerText).toContain(
+        '@media(min-width: 640px){.sm-borderRadiusTop-4{border-top-left-radius:1rem;border-top-right-radius:1rem}}',
+      );
+      expect(element.classList).toContain('sm-borderRadiusTop-4');
+    });
+  });
+
+  suite('multi-styleName with pseudo classes', () => {
+    it('applies borderRadiusTop inside hover', () => {
+      const { element, styleElement } = act({ hover: { borderRadiusTop: 4 } });
+      expect(styleElement.innerText).toContain('.hover-borderRadiusTop-4:hover{border-top-left-radius:1rem;border-top-right-radius:1rem}');
+      expect(element.classList).toContain('hover-borderRadiusTop-4');
+    });
+  });
+
+  suite('theme with nested pseudoGroupClasses (themeAndGroup path)', () => {
+    it('applies theme + hoverGroup combined selector', () => {
+      render(
+        <Box.Theme theme="dark">
+          <Box
+            id={testElementId}
+            theme={{
+              dark: {
+                hoverGroup: {
+                  parent: {
+                    bgColor: 'gray-100',
+                  },
+                },
+              },
+            }}
+          />
+        </Box.Theme>,
+      );
+
+      const element = document.getElementById(testElementId)!;
+      const styleElement = document.getElementById('crono-styles')! as unknown as HTMLStyleElement;
+
+      expect(styleElement.innerText).toContain(
+        '.dark .parent:hover .hover-theme-dark|parent-bgColor-gray-100{background-color:var(--gray-100)}',
+      );
+      expect(element.classList).toContain('hover-theme-dark|parent-bgColor-gray-100');
+    });
+  });
+
+  suite('valueFormat receives styleName for per-property values', () => {
+    it('calls valueFormat with different styleName and returns different values', () => {
+      Box.extend(
+        { 'test-size': '1rem', 'test-weight': '700' },
+        {
+          textStyle: [
+            {
+              values: ['heading'] as const,
+              styleName: ['font-size', 'font-weight'],
+              valueFormat: (value: string, getVariable: (v: string) => string, styleName?: string) => {
+                if (styleName === 'font-size') return getVariable('test-size');
+                if (styleName === 'font-weight') return getVariable('test-weight');
+                return value;
+              },
+            },
+          ],
+        },
+        {},
+      );
+
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const { element, styleElement } = act({ textStyle: 'heading' } as any);
+
+      expect(styleElement.innerText).toContain('.textStyle-heading{font-size:var(--test-size);font-weight:var(--test-weight)}');
+      expect(element.classList).toContain('textStyle-heading');
+    });
+  });
+
   suite('when use theme (dark mode)', () => {
     it('applies dark theme styles with base padding override', () => {
       render(
