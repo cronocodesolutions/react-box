@@ -21,6 +21,7 @@ import InstallationPage from '../pages/installationPage';
 import RadioButtonPage from '../pages/radioButtonPage';
 import TextareaPage from '../pages/textareaPage';
 import TextboxPage from '../pages/textboxPage';
+import TextStylePage from '../pages/textStylePage';
 import ThemeSetupPage from '../pages/themeSetupPage';
 import TooltipPage from '../pages/tooltipPage';
 import Sidebar from './sidebar';
@@ -156,6 +157,7 @@ export default function App() {
                     <Route path="/radiobutton" element={<RadioButtonPage />} />
                     <Route path="/tooltip" element={<TooltipPage />} />
                     <Route path="/dropdown" element={<DropdownPage />} />
+                    <Route path="/text-style" element={<TextStylePage />} />
                     <Route path="/colors" element={<ColorPage />} />
                     <Route path="/ai-context" element={<AiContextPage />} />
                     <Route path="/fido-enrollment" element={<FidoEnrollmentPage />} />
