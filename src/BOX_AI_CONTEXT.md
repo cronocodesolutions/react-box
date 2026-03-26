@@ -665,6 +665,52 @@ export const { extendedProps, extendedPropTypes } = Box.extend(
 </Box>;
 ```
 
+### Per-Property Values (Multi-styleName with Different Values)
+
+When a `BoxStyle` has `styleName` as an array, `valueFormat` is called once **per CSS property** with the current `styleName` as the third argument. This lets a single prop generate multiple CSS properties with different values:
+
+```tsx
+const textStyleNames = ['display-lg', 'display-sm'] as const;
+
+Box.extend(
+  {
+    'text-display-lg-size': '36px',
+    'text-display-lg-weight': '700',
+    'text-display-lg-line-height': '1.2',
+    'text-display-lg-letter-spacing': '-0.02em',
+    'text-display-sm-size': '28px',
+    'text-display-sm-weight': '700',
+    'text-display-sm-line-height': '1.25',
+    'text-display-sm-letter-spacing': '-0.015em',
+  },
+  {
+    textStyle: [
+      {
+        values: textStyleNames,
+        styleName: ['font-size', 'font-weight', 'line-height', 'letter-spacing'],
+        valueFormat: (value, getVariable, styleName) => {
+          const suffixMap: Record<string, string> = {
+            'font-size': 'size',
+            'font-weight': 'weight',
+            'line-height': 'line-height',
+            'letter-spacing': 'letter-spacing',
+          };
+          return getVariable(`text-${value}-${suffixMap[styleName!]}`);
+        },
+      },
+    ],
+  },
+  {},
+);
+
+// Usage — one prop sets four CSS properties with different values
+<Box textStyle="display-lg" />
+// Generates: font-size:var(--text-display-lg-size); font-weight:var(--text-display-lg-weight);
+//            line-height:var(--text-display-lg-line-height); letter-spacing:var(--text-display-lg-letter-spacing)
+```
+
+**Note**: The `styleName` parameter is optional and only available on string-valued `BoxStyle` definitions (the ones with `getVariableValue` as the second parameter). For single `styleName` props, `valueFormat` still works exactly as before.
+
 ### TypeScript Type Augmentation
 
 **Manual approach** (simple cases):

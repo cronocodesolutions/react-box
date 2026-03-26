@@ -44,8 +44,33 @@ export const { extendedProps, extendedPropTypes } = Box.extend(
     // Code block
     'code-bg': '#0f172a',
     'code-bg-light': '#1e293b',
+    // Text styles
+    'text-display-lg-size': '36px',
+    'text-display-lg-weight': '700',
+    'text-display-lg-line-height': '1.2',
+    'text-display-lg-letter-spacing': '-0.02em',
+    'text-display-sm-size': '28px',
+    'text-display-sm-weight': '700',
+    'text-display-sm-line-height': '1.25',
+    'text-display-sm-letter-spacing': '-0.015em',
   },
-  {},
+  {
+    textStyle: [
+      {
+        values: ['display-lg', 'display-sm'] as const,
+        styleName: ['font-size', 'font-weight', 'line-height', 'letter-spacing'],
+        valueFormat: (value: string, getVariable: (v: string) => string, styleName?: string) => {
+          const suffixMap: Record<string, string> = {
+            'font-size': 'size',
+            'font-weight': 'weight',
+            'line-height': 'line-height',
+            'letter-spacing': 'letter-spacing',
+          };
+          return getVariable(`text-${value}-${suffixMap[styleName!]}`);
+        },
+      },
+    ],
+  },
   {
     bgImage: [
       {
