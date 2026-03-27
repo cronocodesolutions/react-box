@@ -314,4 +314,446 @@ describe('Theme', () => {
       expect(content.parentElement?.classList.contains('high-contrast')).toBe(true);
     });
   });
+
+  describe('reset to system theme', () => {
+    it('setTheme(null) resets to system light', () => {
+      window.matchMedia = mockMatchMedia(false);
+      let capturedSetTheme: ((theme: string | null) => void) | undefined;
+
+      function TestComponent() {
+        const [theme, setTheme] = Theme.useTheme();
+        capturedSetTheme = setTheme;
+        return <Box id={testId}>{theme}</Box>;
+      }
+
+      render(
+        <Theme>
+          <TestComponent />
+        </Theme>,
+      );
+
+      const content = document.getElementById(testId)!;
+      expect(content.textContent).toBe('light');
+
+      act(() => {
+        capturedSetTheme?.('dark');
+      });
+
+      expect(content.textContent).toBe('dark');
+
+      act(() => {
+        capturedSetTheme?.(null);
+      });
+
+      expect(content.textContent).toBe('light');
+    });
+
+    it('setTheme(null) resets to system dark', () => {
+      window.matchMedia = mockMatchMedia(true);
+      let capturedSetTheme: ((theme: string | null) => void) | undefined;
+
+      function TestComponent() {
+        const [theme, setTheme] = Theme.useTheme();
+        capturedSetTheme = setTheme;
+        return <Box id={testId}>{theme}</Box>;
+      }
+
+      render(
+        <Theme>
+          <TestComponent />
+        </Theme>,
+      );
+
+      const content = document.getElementById(testId)!;
+      expect(content.textContent).toBe('dark');
+
+      act(() => {
+        capturedSetTheme?.('light');
+      });
+
+      expect(content.textContent).toBe('light');
+
+      act(() => {
+        capturedSetTheme?.(null);
+      });
+
+      expect(content.textContent).toBe('dark');
+    });
+
+    it('after reset, system theme changes are tracked again', () => {
+      window.matchMedia = mockMatchMedia(false);
+      let capturedSetTheme: ((theme: string | null) => void) | undefined;
+
+      function TestComponent() {
+        const [theme, setTheme] = Theme.useTheme();
+        capturedSetTheme = setTheme;
+        return <Box id={testId}>{theme}</Box>;
+      }
+
+      render(
+        <Theme>
+          <TestComponent />
+        </Theme>,
+      );
+
+      const content = document.getElementById(testId)!;
+
+      // Override to dark
+      act(() => {
+        capturedSetTheme?.('dark');
+      });
+
+      expect(content.textContent).toBe('dark');
+      expect(matchMediaListeners.length).toBe(0);
+
+      // Reset to system
+      act(() => {
+        capturedSetTheme?.(null);
+      });
+
+      expect(content.textContent).toBe('light');
+      expect(matchMediaListeners.length).toBe(1);
+
+      // System changes should be tracked again
+      act(() => {
+        matchMediaListeners.forEach((listener) => {
+          listener({ matches: true } as MediaQueryListEvent);
+        });
+      });
+
+      expect(content.textContent).toBe('dark');
+    });
+
+    it('system changes are ignored during user override', () => {
+      window.matchMedia = mockMatchMedia(false);
+      let capturedSetTheme: ((theme: string | null) => void) | undefined;
+
+      function TestComponent() {
+        const [theme, setTheme] = Theme.useTheme();
+        capturedSetTheme = setTheme;
+        return <Box id={testId}>{theme}</Box>;
+      }
+
+      render(
+        <Theme>
+          <TestComponent />
+        </Theme>,
+      );
+
+      const content = document.getElementById(testId)!;
+
+      act(() => {
+        capturedSetTheme?.('dark');
+      });
+
+      expect(content.textContent).toBe('dark');
+
+      // Simulate system change — should have no effect since listener is removed
+      act(() => {
+        matchMediaListeners.forEach((listener) => {
+          listener({ matches: false } as MediaQueryListEvent);
+        });
+      });
+
+      expect(content.textContent).toBe('dark');
+    });
+
+    it('multiple override/reset cycles work correctly', () => {
+      window.matchMedia = mockMatchMedia(false);
+      let capturedSetTheme: ((theme: string | null) => void) | undefined;
+
+      function TestComponent() {
+        const [theme, setTheme] = Theme.useTheme();
+        capturedSetTheme = setTheme;
+        return <Box id={testId}>{theme}</Box>;
+      }
+
+      render(
+        <Theme>
+          <TestComponent />
+        </Theme>,
+      );
+
+      const content = document.getElementById(testId)!;
+      expect(content.textContent).toBe('light');
+
+      // Cycle 1
+      act(() => {
+        capturedSetTheme?.('dark');
+      });
+      expect(content.textContent).toBe('dark');
+
+      act(() => {
+        capturedSetTheme?.(null);
+      });
+      expect(content.textContent).toBe('light');
+
+      // Cycle 2
+      act(() => {
+        capturedSetTheme?.('dark');
+      });
+      expect(content.textContent).toBe('dark');
+
+      act(() => {
+        capturedSetTheme?.(null);
+      });
+      expect(content.textContent).toBe('light');
+    });
+
+    it('event listener removed on override, re-added on reset', () => {
+      window.matchMedia = mockMatchMedia(false);
+      let capturedSetTheme: ((theme: string | null) => void) | undefined;
+
+      function TestComponent() {
+        const [, setTheme] = Theme.useTheme();
+        capturedSetTheme = setTheme;
+        return <Box id={testId}>Content</Box>;
+      }
+
+      render(
+        <Theme>
+          <TestComponent />
+        </Theme>,
+      );
+
+      expect(matchMediaListeners.length).toBe(1);
+
+      act(() => {
+        capturedSetTheme?.('dark');
+      });
+
+      expect(matchMediaListeners.length).toBe(0);
+
+      act(() => {
+        capturedSetTheme?.(null);
+      });
+
+      expect(matchMediaListeners.length).toBe(1);
+    });
+
+    it('reset works with use="global"', () => {
+      window.matchMedia = mockMatchMedia(false);
+      let capturedSetTheme: ((theme: string | null) => void) | undefined;
+
+      function TestComponent() {
+        const [, setTheme] = Theme.useTheme();
+        capturedSetTheme = setTheme;
+        return <Box id={testId}>Content</Box>;
+      }
+
+      render(
+        <Theme use="global">
+          <TestComponent />
+        </Theme>,
+      );
+
+      expect(document.documentElement.classList.contains('light')).toBe(true);
+
+      act(() => {
+        capturedSetTheme?.('dark');
+      });
+
+      expect(document.documentElement.classList.contains('dark')).toBe(true);
+
+      act(() => {
+        capturedSetTheme?.(null);
+      });
+
+      expect(document.documentElement.classList.contains('light')).toBe(true);
+    });
+  });
+
+  describe('data-theme attribute', () => {
+    it('sets data-theme on wrapper Box in local mode', () => {
+      render(
+        <Theme theme="dark">
+          <Box id={testId}>Content</Box>
+        </Theme>,
+      );
+
+      const content = document.getElementById(testId)!;
+      expect(content.parentElement?.getAttribute('data-theme')).toBe('dark');
+    });
+
+    it('sets data-theme on document root in global mode', () => {
+      render(
+        <Theme theme="dark" use="global">
+          <Box id={testId}>Content</Box>
+        </Theme>,
+      );
+
+      expect(document.documentElement.getAttribute('data-theme')).toBe('dark');
+    });
+
+    it('removes data-theme from document root on unmount in global mode', () => {
+      const { unmount } = render(
+        <Theme theme="dark" use="global">
+          <Box id={testId}>Content</Box>
+        </Theme>,
+      );
+
+      expect(document.documentElement.getAttribute('data-theme')).toBe('dark');
+
+      unmount();
+
+      expect(document.documentElement.getAttribute('data-theme')).toBeNull();
+    });
+
+    it('updates data-theme when theme changes', () => {
+      let capturedSetTheme: ((theme: string | null) => void) | undefined;
+
+      function TestComponent() {
+        const [, setTheme] = Theme.useTheme();
+        capturedSetTheme = setTheme;
+        return <Box id={testId}>Content</Box>;
+      }
+
+      render(
+        <Theme theme="light">
+          <TestComponent />
+        </Theme>,
+      );
+
+      const content = document.getElementById(testId)!;
+      expect(content.parentElement?.getAttribute('data-theme')).toBe('light');
+
+      act(() => {
+        capturedSetTheme?.('dark');
+      });
+
+      expect(content.parentElement?.getAttribute('data-theme')).toBe('dark');
+    });
+  });
+
+  describe('localStorage persistence', () => {
+    const storageKey = 'test-theme';
+
+    beforeEach(() => {
+      localStorage.clear();
+    });
+
+    it('persists user-selected theme to localStorage', () => {
+      let capturedSetTheme: ((theme: string | null) => void) | undefined;
+
+      function TestComponent() {
+        const [, setTheme] = Theme.useTheme();
+        capturedSetTheme = setTheme;
+        return <Box id={testId}>Content</Box>;
+      }
+
+      render(
+        <Theme storageKey={storageKey}>
+          <TestComponent />
+        </Theme>,
+      );
+
+      act(() => {
+        capturedSetTheme?.('dark');
+      });
+
+      expect(localStorage.getItem(storageKey)).toBe('dark');
+    });
+
+    it('restores persisted theme on mount', () => {
+      localStorage.setItem(storageKey, 'dark');
+      window.matchMedia = mockMatchMedia(false); // System prefers light
+
+      render(
+        <Theme storageKey={storageKey}>
+          <Box id={testId}>Content</Box>
+        </Theme>,
+      );
+
+      const content = document.getElementById(testId)!;
+      expect(content.parentElement?.classList.contains('dark')).toBe(true);
+    });
+
+    it('clears localStorage on setTheme(null)', () => {
+      let capturedSetTheme: ((theme: string | null) => void) | undefined;
+
+      function TestComponent() {
+        const [, setTheme] = Theme.useTheme();
+        capturedSetTheme = setTheme;
+        return <Box id={testId}>Content</Box>;
+      }
+
+      render(
+        <Theme storageKey={storageKey}>
+          <TestComponent />
+        </Theme>,
+      );
+
+      act(() => {
+        capturedSetTheme?.('dark');
+      });
+
+      expect(localStorage.getItem(storageKey)).toBe('dark');
+
+      act(() => {
+        capturedSetTheme?.(null);
+      });
+
+      expect(localStorage.getItem(storageKey)).toBeNull();
+    });
+
+    it('does not persist when storageKey is not provided', () => {
+      let capturedSetTheme: ((theme: string | null) => void) | undefined;
+
+      function TestComponent() {
+        const [, setTheme] = Theme.useTheme();
+        capturedSetTheme = setTheme;
+        return <Box id={testId}>Content</Box>;
+      }
+
+      render(
+        <Theme>
+          <TestComponent />
+        </Theme>,
+      );
+
+      act(() => {
+        capturedSetTheme?.('dark');
+      });
+
+      expect(localStorage.getItem(storageKey)).toBeNull();
+    });
+
+    it('restores persisted theme then tracks system changes after reset', () => {
+      localStorage.setItem(storageKey, 'dark');
+      window.matchMedia = mockMatchMedia(false);
+      let capturedSetTheme: ((theme: string | null) => void) | undefined;
+
+      function TestComponent() {
+        const [theme, setTheme] = Theme.useTheme();
+        capturedSetTheme = setTheme;
+        return <Box id={testId}>{theme}</Box>;
+      }
+
+      render(
+        <Theme storageKey={storageKey}>
+          <TestComponent />
+        </Theme>,
+      );
+
+      const content = document.getElementById(testId)!;
+      expect(content.textContent).toBe('dark');
+
+      // Reset to system
+      act(() => {
+        capturedSetTheme?.(null);
+      });
+
+      expect(content.textContent).toBe('light');
+      expect(localStorage.getItem(storageKey)).toBeNull();
+
+      // System changes should be tracked
+      act(() => {
+        matchMediaListeners.forEach((listener) => {
+          listener({ matches: true } as MediaQueryListEvent);
+        });
+      });
+
+      expect(content.textContent).toBe('dark');
+    });
+  });
 });
