@@ -1,213 +1,74 @@
 # @cronocode/react-box - AI Assistant Context
 
-Reference document for AI assistants helping developers use this runtime CSS-in-JS library.
+Runtime CSS-in-JS library. `Box` component accepts ~144 CSS props and generates CSS classes at runtime. Same prop values share a single class.
 
 ---
 
-## CRITICAL RULES (Read First!)
+## CRITICAL RULES
 
 ### Rule #1: NEVER Use Inline Styles
 
-**WRONG** - Using `style` attribute:
+Always use Box props. If a prop doesn't exist, create it with `Box.extend()` (see Extension System).
 
-```tsx
-// DO NOT DO THIS
-<Box style={{ minHeight: "100vh", width: "100%" }} />
-<Box style={{ pointerEvents: "none" }} />
-<Box style={{ alignItems: "center" }} />
-<Box style={{ maxWidth: "1200px" }} />
-```
-
-**CORRECT** - Using Box props:
-
-```tsx
-// DO THIS INSTEAD
-<Box minHeight="fit-screen" width="fit" />
-<Box pointerEvents="none" />
-<Box ai="center" />
-<Box maxWidth={300} />
-```
-
-**If a prop doesn't exist for a CSS property**, create it using `Box.extend()` in your boxExtends.ts file. Never fall back to inline styles.
-
-### Common Style-to-Prop Conversions
-
-| Inline Style (WRONG)                          | Box Prop (CORRECT)                    |
-| --------------------------------------------- | ------------------------------------- |
-| `style={{ width: "100%" }}`                   | `width="fit"`                         |
-| `style={{ width: "100vw" }}`                  | `width="fit-screen"`                  |
-| `style={{ height: "100%" }}`                  | `height="fit"`                        |
-| `style={{ height: "100vh" }}`                 | `height="fit-screen"`                 |
-| `style={{ minHeight: "100vh" }}`              | `minHeight="fit-screen"`              |
-| `style={{ maxWidth: "1200px" }}`              | `maxWidth={300}` (300/4=75rem=1200px) |
-| `style={{ alignItems: "center" }}`            | `ai="center"`                         |
-| `style={{ justifyContent: "space-between" }}` | `jc="between"`                        |
-| `style={{ flexDirection: "column" }}`         | `d="column"`                          |
-| `style={{ pointerEvents: "none" }}`           | `pointerEvents="none"`                |
-| `style={{ cursor: "pointer" }}`               | `cursor="pointer"`                    |
-| `style={{ overflow: "hidden" }}`              | `overflow="hidden"`                   |
-| `style={{ position: "relative" }}`            | `position="relative"`                 |
-| `style={{ zIndex: 10 }}`                      | `zIndex={10}`                         |
-| `style={{ opacity: 0.5 }}`                    | `opacity={0.5}`                       |
-
-### When a Prop Doesn't Exist
-
-If you need a CSS property that doesn't have a Box prop, extend Box instead of using inline styles:
-
-```tsx
-// boxExtends.ts - Create new props for missing CSS properties
-import Box from '@cronocode/react-box';
-
-export const { extendedProps, extendedPropTypes } = Box.extend(
-  {}, // CSS variables (if needed)
-  {
-    // Add new props
-    aspectRatio: [
-      {
-        values: ['auto', '1/1', '16/9', '4/3', '3/2'] as const,
-        styleName: 'aspect-ratio',
-        valueFormat: (value) => value,
-      },
-    ],
-    backdropBlur: [
-      {
-        values: ['none', 'sm', 'md', 'lg'] as const,
-        styleName: 'backdrop-filter',
-        valueFormat: (value) => {
-          const map = { none: 'none', sm: 'blur(4px)', md: 'blur(8px)', lg: 'blur(16px)' };
-          return map[value];
-        },
-      },
-    ],
-  },
-  {}, // Extended existing props (if needed)
-);
-
-// Now use the new props
-<Box aspectRatio="16/9" backdropBlur="md" />;
-```
+| Inline Style (WRONG) | Box Prop (CORRECT) |
+|---|---|
+| `style={{ width: "100%" }}` | `width="fit"` |
+| `style={{ width: "100vw" }}` | `width="fit-screen"` |
+| `style={{ height: "100%" }}` | `height="fit"` |
+| `style={{ height: "100vh" }}` | `height="fit-screen"` |
+| `style={{ minHeight: "100vh" }}` | `minHeight="fit-screen"` |
+| `style={{ maxWidth: "1200px" }}` | `maxWidth={300}` (300/4=75rem=1200px) |
+| `style={{ alignItems: "center" }}` | `ai="center"` |
+| `style={{ justifyContent: "space-between" }}` | `jc="between"` |
+| `style={{ flexDirection: "column" }}` | `d="column"` |
+| `style={{ pointerEvents: "none" }}` | `pointerEvents="none"` |
+| `style={{ cursor: "pointer" }}` | `cursor="pointer"` |
+| `style={{ overflow: "hidden" }}` | `overflow="hidden"` |
+| `style={{ position: "relative" }}` | `position="relative"` |
+| `style={{ zIndex: 10 }}` | `zIndex={10}` |
+| `style={{ opacity: 0.5 }}` | `opacity={0.5}` |
 
 ### Rule #2: ALWAYS Use Component Shortcuts
 
-**⚠️ NEVER use `<Box tag="...">` when a semantic component exists!**
+NEVER use `<Box tag="...">` when a component exists. NEVER use `<Box display="flex/grid">`.
 
-The `tag` prop should ONLY be used for rare HTML elements that don't have a component shortcut (e.g., `<Box tag="datalist">`). For all common elements, use the corresponding component.
+| Instead of... | Use... | Import from |
+|---|---|---|
+| `<Box display="flex">` | `<Flex>` | `components/flex` |
+| `<Box display="grid">` | `<Grid>` | `components/grid` |
+| `<Box tag="button">` | `<Button>` | `components/button` |
+| `<Box tag="input">` | `<Textbox>` | `components/textbox` |
+| `<Box tag="textarea">` | `<Textarea>` | `components/textarea` |
+| `<Box tag="a/img/label">` | `<Link>/<Img>/<Label>` | `components/semantics` |
+| `<Box tag="h1/h2/h3/h4/h5/h6">` | `<H1>/<H2>/.../<H6>` | `components/semantics` |
+| `<Box tag="p/span">` | `<P>/<Span>` | `components/semantics` |
+| `<Box tag="nav/header/footer/main">` | `<Nav>/<Header>/<Footer>/<Main>` | `components/semantics` |
+| `<Box tag="section/article/aside">` | `<Section>/<Article>/<Aside>` | `components/semantics` |
 
-**WRONG** - Using `tag` prop for common elements:
-
-```tsx
-// ❌ DO NOT DO THIS - These are WRONG even though they work
-<Box tag="img" props={{ src: logo, alt: "Logo" }} />   // WRONG!
-<Box tag="a" props={{ href: "#" }}>Link</Box>          // WRONG!
-<Box tag="button" onClick={...}>Click</Box>            // WRONG!
-<Box tag="nav">...</Box>                               // WRONG!
-<Box tag="h1" fontSize={32}>Title</Box>                // WRONG!
-<Box tag="p">Text</Box>                                // WRONG!
-<Box tag="span">Inline</Box>                           // WRONG!
-<Box display="flex" gap={4}>...</Box>                  // WRONG!
-<Box display="grid" gridCols={3}>...</Box>             // WRONG!
-```
-
-**CORRECT** - Using semantic components:
-
-```tsx
-// DO THIS INSTEAD
-import { Img, Link, H1, Nav } from '@cronocode/react-box/components/semantics';
-import Button from '@cronocode/react-box/components/button';
-import Flex from '@cronocode/react-box/components/flex';
-import Grid from '@cronocode/react-box/components/grid';
-
-<Img props={{ src: logo, alt: "Logo" }} />
-<Link props={{ href: "#" }}>Link</Link>
-<Button onClick={...}>Click</Button>
-<Flex gap={4}>...</Flex>
-<Grid gridCols={3}>...</Grid>
-<Nav>...</Nav>
-<H1 fontSize={32}>Title</H1>
-```
-
-### Component Shortcuts Reference
-
-| Instead of...          | Use...       | Import from                                 |
-| ---------------------- | ------------ | ------------------------------------------- |
-| `<Box display="flex">` | `<Flex>`     | `@cronocode/react-box/components/flex`      |
-| `<Box display="grid">` | `<Grid>`     | `@cronocode/react-box/components/grid`      |
-| `<Box tag="button">`   | `<Button>`   | `@cronocode/react-box/components/button`    |
-| `<Box tag="input">`    | `<Textbox>`  | `@cronocode/react-box/components/textbox`   |
-| `<Box tag="textarea">` | `<Textarea>` | `@cronocode/react-box/components/textarea`  |
-| `<Box tag="a">`        | `<Link>`     | `@cronocode/react-box/components/semantics` |
-| `<Box tag="img">`      | `<Img>`      | `@cronocode/react-box/components/semantics` |
-| `<Box tag="h1">`       | `<H1>`       | `@cronocode/react-box/components/semantics` |
-| `<Box tag="h2">`       | `<H2>`       | `@cronocode/react-box/components/semantics` |
-| `<Box tag="h3">`       | `<H3>`       | `@cronocode/react-box/components/semantics` |
-| `<Box tag="p">`        | `<P>`        | `@cronocode/react-box/components/semantics` |
-| `<Box tag="span">`     | `<Span>`     | `@cronocode/react-box/components/semantics` |
-| `<Box tag="nav">`      | `<Nav>`      | `@cronocode/react-box/components/semantics` |
-| `<Box tag="header">`   | `<Header>`   | `@cronocode/react-box/components/semantics` |
-| `<Box tag="footer">`   | `<Footer>`   | `@cronocode/react-box/components/semantics` |
-| `<Box tag="main">`     | `<Main>`     | `@cronocode/react-box/components/semantics` |
-| `<Box tag="section">`  | `<Section>`  | `@cronocode/react-box/components/semantics` |
-| `<Box tag="article">`  | `<Article>`  | `@cronocode/react-box/components/semantics` |
-| `<Box tag="aside">`    | `<Aside>`    | `@cronocode/react-box/components/semantics` |
-| `<Box tag="label">`    | `<Label>`    | `@cronocode/react-box/components/semantics` |
+All imports from `@cronocode/react-box/components/...`. Semantics also export: `Mark`, `Figure`, `Figcaption`, `Details`, `Summary`, `Menu`, `Time`.
 
 ---
 
-## Quick Overview
+## Numeric Value Formatters
 
-**What it is**: A React library that converts component props directly into CSS classes at runtime. No CSS files needed.
+**#1 source of confusion.** Different props have different dividers:
 
-**Core component**: `Box` - a polymorphic component that accepts ~144 CSS props and renders any HTML element.
-
-```tsx
-import Box from '@cronocode/react-box';
-
-// Basic usage
-<Box p={4} bgColor="blue-500" color="white">Content</Box>
-
-// Renders as different elements
-<Box tag="button" p={3}>Button</Box>
-<Box tag="a" props={{ href: '/link' }}>Link</Box>
-
-// Alias components (recommended)
-import Button from '@cronocode/react-box/components/button';
-<Button p={3}>Button</Button>
-```
-
----
-
-## Critical: Numeric Value Formatters
-
-**This is the #1 source of confusion.** Different props have different dividers:
-
-| Prop Category                                           | Divider | Formula      | Example            | CSS Output               |
-| ------------------------------------------------------- | ------- | ------------ | ------------------ | ------------------------ |
-| Spacing (`p`, `m`, `gap`, `px`, `py`, `mx`, `my`, etc.) | 4       | value/4 rem  | `p={4}`            | `padding: 1rem` (16px)   |
-| Font size (`fontSize`)                                  | **16**  | value/16 rem | `fontSize={16}`    | `font-size: 1rem` (16px) |
-| Width/Height (numeric)                                  | 4       | value/4 rem  | `width={20}`       | `width: 5rem` (80px)     |
-| Border width (`b`, `bx`, `by`, `bt`, `br`, `bb`, `bl`)  | none    | direct px    | `b={1}`            | `border-width: 1px`      |
-| Border radius (`borderRadius`)                          | none    | direct px    | `borderRadius={8}` | `border-radius: 8px`     |
-
-### Common fontSize Values
+| Prop Category | Divider | Example | CSS Output |
+|---|---|---|---|
+| Spacing (`p`, `m`, `gap`, `px`, `py`, `mx`, `my`, etc.) | 4 | `p={4}` | `padding: 1rem` (16px) |
+| Font size (`fontSize`) | **16** | `fontSize={14}` | `font-size: 0.875rem` (14px) |
+| Width/Height (numeric) | 4 | `width={20}` | `width: 5rem` (80px) |
+| Border width (`b`, `bx`, `by`, `bt`, `br`, `bb`, `bl`) | none | `b={1}` | `border-width: 1px` |
+| Border radius (`borderRadius`) | none | `borderRadius={8}` | `border-radius: 8px` |
+| Line height (`lineHeight`) | none | `lineHeight={24}` | `line-height: 24px` |
 
 ```tsx
-fontSize={12}  // → 0.75rem ≈ 12px (small)
-fontSize={14}  // → 0.875rem ≈ 14px (body)
-fontSize={16}  // → 1rem = 16px (default)
-fontSize={18}  // → 1.125rem ≈ 18px (large)
-fontSize={24}  // → 1.5rem = 24px (h2)
-fontSize={32}  // → 2rem = 32px (h1)
-```
+// fontSize: divider 16 → value maps directly to px
+fontSize={12} // 12px    fontSize={14} // 14px    fontSize={16} // 16px
+fontSize={18} // 18px    fontSize={24} // 24px    fontSize={32} // 32px
 
-### Common Spacing Values (divider = 4)
-
-```tsx
-p={1}   // → 0.25rem = 4px
-p={2}   // → 0.5rem = 8px
-p={3}   // → 0.75rem = 12px
-p={4}   // → 1rem = 16px
-p={6}   // → 1.5rem = 24px
-p={8}   // → 2rem = 32px
+// Spacing: divider 4 → value/4 = rem
+p={1} // 4px    p={2} // 8px    p={3} // 12px    p={4} // 16px    p={6} // 24px    p={8} // 32px
 ```
 
 ---
@@ -216,375 +77,116 @@ p={8}   // → 2rem = 32px
 
 ### Spacing
 
-| Prop                   | CSS Property                  |
-| ---------------------- | ----------------------------- |
-| `p`                    | padding                       |
-| `px`                   | padding-left + padding-right  |
-| `py`                   | padding-top + padding-bottom  |
-| `pt`, `pr`, `pb`, `pl` | padding-top/right/bottom/left |
-| `m`                    | margin                        |
-| `mx`, `my`             | margin horizontal/vertical    |
-| `mt`, `mr`, `mb`, `ml` | margin-top/right/bottom/left  |
-| `gap`                  | gap (flexbox/grid)            |
+| Prop | CSS Property |
+|---|---|
+| `p` / `px` / `py` / `pt` / `pr` / `pb` / `pl` | padding (all / horizontal / vertical / individual) |
+| `m` / `mx` / `my` / `mt` / `mr` / `mb` / `ml` | margin (all / horizontal / vertical / individual) |
+| `gap` | gap (flexbox/grid) |
 
 ### Layout
 
-| Prop      | CSS Property    | Values                                                                     |
-| --------- | --------------- | -------------------------------------------------------------------------- |
-| `display` | display         | `'flex'`, `'block'`, `'inline'`, `'grid'`, `'none'`, `'inline-flex'`, etc. |
-| `d`       | flex-direction  | `'row'`, `'column'`, `'row-reverse'`, `'column-reverse'`                   |
-| `wrap`    | flex-wrap       | `'wrap'`, `'nowrap'`, `'wrap-reverse'`                                     |
-| `ai`      | align-items     | `'center'`, `'start'`, `'end'`, `'stretch'`, `'baseline'`                  |
-| `jc`      | justify-content | `'center'`, `'start'`, `'end'`, `'between'`, `'around'`, `'evenly'`        |
-| `flex`    | flex            | number or string                                                           |
-| `grow`    | flex-grow       | number                                                                     |
-| `shrink`  | flex-shrink     | number                                                                     |
+| Prop | CSS Property | Values |
+|---|---|---|
+| `display` | display | `'flex'`, `'block'`, `'inline'`, `'grid'`, `'none'`, `'inline-flex'`, etc. |
+| `d` | flex-direction | `'row'`, `'column'`, `'row-reverse'`, `'column-reverse'` |
+| `wrap` | flex-wrap | `'wrap'`, `'nowrap'`, `'wrap-reverse'` |
+| `ai` | align-items | `'center'`, `'start'`, `'end'`, `'stretch'`, `'baseline'` |
+| `jc` | justify-content | `'center'`, `'start'`, `'end'`, `'between'`, `'around'`, `'evenly'` |
+| `flex` / `grow` / `shrink` | flex / flex-grow / flex-shrink | number or string |
 
 ### Sizing
 
-| Prop                     | CSS Property   | Accepts                                                             |
-| ------------------------ | -------------- | ------------------------------------------------------------------- |
-| `width`                  | width          | number (rem/4), string (`'auto'`, `'1/2'`, `'fit'`, `'fit-screen'`) |
-| `height`                 | height         | number (rem/4), string (`'auto'`, `'fit'`, `'fit-screen'`)          |
-| `minWidth`, `maxWidth`   | min/max-width  | number or string                                                    |
-| `minHeight`, `maxHeight` | min/max-height | number or string                                                    |
+| Prop | CSS Property | Accepts |
+|---|---|---|
+| `width` / `height` | width / height | number (rem/4), `'auto'`, `'fit'` (100%), `'fit-screen'` (100vw/vh), fractions (`'1/2'`, `'1/3'`, `'2/3'`, `'1/4'`, `'3/4'`), percentages (`'33%'`) |
+| `minWidth` / `maxWidth` / `minHeight` / `maxHeight` | min/max sizing | number or string |
 
-**Percentage/Fraction Values:**
+All sizing, spacing, and positioning props also accept percentage strings: `p="5%"`, `top="10%"`, `gap="2%"`.
 
-All sizing, spacing, and positioning props accept percentage strings:
+### Visual
 
-```tsx
-// Sizing
-width="33%"     // → 33%
-height="50%"    // → 50%
-minWidth="20%"  // → min-width: 20%
-maxWidth="80%"  // → max-width: 80%
-minHeight="10%" // → min-height: 10%
-maxHeight="90%" // → max-height: 90%
-
-// Spacing (margin, padding, gap)
-p="5%"          // → padding: 5%
-px="10%"        // → padding-left/right: 10%
-m="10%"         // → margin: 10%
-mt="5%"         // → margin-top: 5%
-gap="2%"        // → gap: 2%
-
-// Positioning
-top="10%"       // → top: 10%
-left="50%"      // → left: 50%
-right="0%"      // → right: 0%
-bottom="20%"    // → bottom: 20%
-
-// Fraction shortcuts (width/height only)
-width="1/2"   // → 50%
-width="1/3"   // → 33.333%
-width="2/3"   // → 66.666%
-width="1/4"   // → 25%
-width="3/4"   // → 75%
-
-// Special values
-width="fit"        // → 100%
-width="fit-screen" // → 100vw
-height="fit"       // → 100%
-height="fit-screen"// → 100vh
-```
-
-### Colors (Tailwind-like palette)
-
-| Prop          | CSS Property     |
-| ------------- | ---------------- |
-| `bgColor`     | background-color |
-| `color`       | color            |
-| `borderColor` | border-color     |
-
-**Color values**: `'gray-50'` through `'gray-900'`, same for `red`, `orange`, `yellow`, `green`, `teal`, `blue`, `indigo`, `purple`, `pink`, `violet`.
-
-Also: `'white'`, `'black'`, `'transparent'`, `'inherit'`, `'currentColor'`
-
-### Borders
-
-| Prop                   | CSS Property                                               |
-| ---------------------- | ---------------------------------------------------------- |
-| `b`                    | border-width (all sides)                                   |
-| `bx`                   | border-left-width + border-right-width                     |
-| `by`                   | border-top-width + border-bottom-width                     |
-| `bt`, `br`, `bb`, `bl` | individual sides                                           |
-| `borderRadius`         | border-radius                                              |
-| `borderStyle`          | border-style (`'solid'`, `'dashed'`, `'dotted'`, `'none'`) |
-
-### Typography
-
-| Prop             | CSS Property                                                 |
-| ---------------- | ------------------------------------------------------------ |
-| `fontSize`       | font-size (divider: 16)                                      |
-| `fontWeight`     | font-weight (`400`, `500`, `600`, `700`, etc.)               |
-| `lineHeight`     | line-height (number = pixels, e.g. `lineHeight={24}` → 24px) |
-| `textAlign`      | text-align                                                   |
-| `textDecoration` | text-decoration                                              |
-| `textTransform`  | text-transform                                               |
-| `whiteSpace`     | white-space                                                  |
-| `overflow`       | overflow                                                     |
-| `textOverflow`   | text-overflow                                                |
-
-### Positioning
-
-| Prop                             | CSS Property                                                 |
-| -------------------------------- | ------------------------------------------------------------ |
-| `position`                       | position (`'relative'`, `'absolute'`, `'fixed'`, `'sticky'`) |
-| `top`, `right`, `bottom`, `left` | positioning offsets                                          |
-| `zIndex`                         | z-index                                                      |
-
-### Effects
-
-| Prop            | CSS Property                                                    |
-| --------------- | --------------------------------------------------------------- |
-| `shadow`        | box-shadow (`'small'`, `'medium'`, `'large'`, `'xl'`, `'none'`) |
-| `opacity`       | opacity                                                         |
-| `cursor`        | cursor                                                          |
-| `pointerEvents` | pointer-events                                                  |
-| `transition`    | transition                                                      |
-| `transform`     | transform                                                       |
+| Prop | CSS Property | Notes |
+|---|---|---|
+| `bgColor` / `color` / `borderColor` | background-color / color / border-color | Tailwind palette: `'gray-50'`..`'gray-900'`, same for red/orange/yellow/green/teal/blue/indigo/purple/pink/violet. Also `'white'`, `'black'`, `'transparent'`, `'currentColor'` |
+| `b` / `bx` / `by` / `bt` / `br` / `bb` / `bl` | border-width | direct px |
+| `borderRadius` | border-radius | direct px |
+| `borderStyle` | border-style | `'solid'`, `'dashed'`, `'dotted'`, `'none'` |
+| `fontSize` | font-size | divider 16 |
+| `fontWeight` | font-weight | `400`, `500`, `600`, `700`, etc. |
+| `lineHeight` | line-height | direct px |
+| `textAlign` / `textDecoration` / `textTransform` / `whiteSpace` / `textOverflow` | text properties | string values |
+| `overflow` | overflow | `'hidden'`, `'auto'`, `'scroll'`, `'visible'` |
+| `position` | position | `'relative'`, `'absolute'`, `'fixed'`, `'sticky'` |
+| `top` / `right` / `bottom` / `left` / `inset` | positioning offsets | number or string |
+| `zIndex` | z-index | number |
+| `shadow` | box-shadow | `'small'`, `'medium'`, `'large'`, `'xl'`, `'none'` |
+| `opacity` | opacity | number |
+| `cursor` / `pointerEvents` / `transition` / `transform` / `userSelect` | misc | string values |
 
 ---
 
-## Pseudo-Classes
-
-Apply styles on interaction states:
+## Pseudo-Classes, Breakpoints & Themes
 
 ```tsx
-<Box
-  bgColor="blue-500"
-  hover={{ bgColor: 'blue-600' }}
-  focus={{ outline: 'none', ring: 2 }}
-  active={{ bgColor: 'blue-700' }}
-  disabled={{ opacity: 0.5, cursor: 'not-allowed' }}
-/>
+// Pseudo-classes: hover, focus, active, disabled, checked, indeterminate, required, selected,
+//   focusWithin, focusVisible, first, last, even, odd, empty
+<Box bgColor="blue-500" hover={{ bgColor: 'blue-600' }} disabled={{ opacity: 0.5 }} />
+
+// Responsive breakpoints (mobile-first): sm(640) md(768) lg(1024) xl(1280) xxl(1536)
+<Box p={2} md={{ p: 4 }} lg={{ p: 6 }} />
+
+// Combine: breakpoints can nest pseudo-classes
+<Box bgColor="white" hover={{ bgColor: 'gray-100' }} md={{ bgColor: 'gray-50', hover: { bgColor: 'gray-200' } }} />
 ```
 
-**Available pseudo-classes**: `hover`, `focus`, `active`, `disabled`, `checked`, `indeterminate`, `required`, `selected`, `focusWithin`, `focusVisible`, `first`, `last`, `even`, `odd`, `empty`
-
----
-
-## Responsive Breakpoints
-
-Mobile-first breakpoints using min-width media queries:
-
-```tsx
-<Box
-  p={2} // Base (mobile)
-  sm={{ p: 3 }} // ≥640px
-  md={{ p: 4 }} // ≥768px
-  lg={{ p: 6 }} // ≥1024px
-  xl={{ p: 8 }} // ≥1280px
-  xxl={{ p: 10 }} // ≥1536px
-/>
-```
-
-**Combine with pseudo-classes**:
-
-```tsx
-<Box
-  bgColor="white"
-  hover={{ bgColor: 'gray-100' }}
-  md={{
-    bgColor: 'gray-50',
-    hover: { bgColor: 'gray-200' },
-  }}
-/>
-```
-
----
-
-## Theme System
-
-### Setting Up Themes
-
-The `Box.Theme` component provides theme management with automatic detection based on system preferences.
-
-**Auto-detect theme** (recommended):
+### Theme System
 
 ```tsx
 import Box from '@cronocode/react-box';
 
-function App() {
-  return (
-    <Box.Theme>
-      {/* Theme auto-detects from prefers-color-scheme: 'light' or 'dark' */}
-      <YourApp />
-    </Box.Theme>
-  );
-}
-```
+// Setup: wrap app in Box.Theme (auto-detects via prefers-color-scheme)
+<Box.Theme>                                      {/* auto light/dark detection */}
+<Box.Theme theme="dark">                         {/* explicit theme, ignores system pref */}
+<Box.Theme theme="dark" use="global">            {/* applies class + data-theme to <html> */}
+<Box.Theme storageKey="app-theme">               {/* persists user choice to localStorage */}
 
-**Explicit theme**:
+// Hook: read + set theme programmatically (must be within Box.Theme)
+const [theme, setTheme] = Box.useTheme();
+setTheme('dark');   // set explicit theme (persists to localStorage if storageKey provided)
+setTheme(null);     // reset to system auto-detection (clears localStorage)
 
-```tsx
-<Box.Theme theme="dark">
-  <YourApp />
-</Box.Theme>
-```
+// Supports any custom theme name — not limited to 'light'/'dark'
+<Box.Theme theme="high-contrast">
 
-**Global vs Local theme**:
-
-```tsx
-// Global: Adds theme class to document.documentElement (affects entire page)
-<Box.Theme theme="dark" use="global">
-  <YourApp />
-</Box.Theme>
-
-// Local (default): Wraps children in a Box with theme class (scoped)
-<Box.Theme theme="dark" use="local">
-  <Section>Content</Section>
-</Box.Theme>
-```
-
-### Using the Theme Hook
-
-```tsx
-import Box from '@cronocode/react-box';
-
-function ThemeSwitcher() {
-  const [theme, setTheme] = Box.useTheme();
-
-  return <button onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')}>Current: {theme}</button>;
-}
-
-// Must be used within Box.Theme provider
-function App() {
-  return (
-    <Box.Theme>
-      <ThemeSwitcher />
-    </Box.Theme>
-  );
-}
-```
-
-### Theme-Aware Styles
-
-Apply styles based on the active theme:
-
-```tsx
+// Theme-aware styles — nests with pseudo-classes and breakpoints
 <Box
-  bgColor="white"
-  color="gray-900"
-  theme={{
-    dark: {
-      bgColor: 'gray-900',
-      color: 'gray-100',
-    },
-  }}
-/>
-```
-
-### Theme + Pseudo-Classes
-
-Combine theme styles with pseudo-classes:
-
-```tsx
-<Box
-  bgColor="white"
+  bgColor="white" color="gray-900"
   hover={{ bgColor: 'gray-100' }}
-  theme={{
-    dark: {
-      bgColor: 'gray-800',
-      hover: { bgColor: 'gray-700' },
-    },
-  }}
+  theme={{ dark: { bgColor: 'gray-900', color: 'gray-100', hover: { bgColor: 'gray-700' } } }}
 />
 ```
 
-### Theme + Responsive Breakpoints
-
-Combine all three systems:
-
-```tsx
-<Box
-  p={4}
-  bgColor="white"
-  md={{
-    p: 6,
-    bgColor: 'gray-50',
-  }}
-  theme={{
-    dark: {
-      bgColor: 'gray-900',
-      md: {
-        bgColor: 'gray-800',
-      },
-    },
-  }}
-/>
-```
+**Props**: `theme?` (string — explicit theme name), `use?` (`'global'`|`'local'`, default `'local'`), `storageKey?` (string — localStorage key for persistence).
+**DOM**: Sets `data-theme` attribute and theme class on wrapper (local) or `document.documentElement` (global). Cleaned up on unmount.
 
 ---
 
 ## Component System
 
-### Using Built-in Components
-
 ```tsx
-<Box component="button" variant="primary">Click me</Box>
-<Box component="button.icon" />
+// Component + variant props apply registered styles from Box.components()
+<Box component="card" variant="bordered">
+  <Box component="card.header">Title</Box>
+  <Box component="card.body">Content</Box>
+</Box>
 ```
 
-### Pre-built Components
-
-Import ready-to-use components:
+### Box.components() — Define Custom Component Styles
 
 ```tsx
-// Form components
-import Button from '@cronocode/react-box/components/button';
-import Textbox from '@cronocode/react-box/components/textbox';
-import Checkbox from '@cronocode/react-box/components/checkbox';
-import RadioButton from '@cronocode/react-box/components/radioButton';
-import Dropdown from '@cronocode/react-box/components/dropdown';
-import Tooltip from '@cronocode/react-box/components/tooltip';
-
-// Layout
-import Flex from '@cronocode/react-box/components/flex';  // Box with display="flex" (supports inline prop)
-import Grid from '@cronocode/react-box/components/grid';  // Box with display="grid" (supports inline prop)
-
-<Button variant="primary">Submit</Button>
-<Textbox placeholder="Enter text..." />
-<Flex gap={4} ai="center">...</Flex>
-<Flex inline gap={2}>Inline flex</Flex>
-```
-
-### Semantic HTML Components
-
-Alias components for semantic HTML elements (from `components/semantics`):
-
-```tsx
-import {
-  // Typography
-  P, H1, H2, H3, H4, H5, H6, Span, Mark,
-  // Structure
-  Header, Footer, Main, Nav, Section, Article, Aside,
-  // Other
-  Label, Link, Img, Figure, Figcaption, Details, Summary, Menu, Time,
-} from '@cronocode/react-box/components/semantics';
-
-// These are Box aliases with the correct HTML tag
-<H1 fontSize={32} fontWeight={700}>Title</H1>
-<P color="gray-600">Paragraph text</P>
-<Link props={{ href: '/about' }} color="blue-500">About</Link>
-<Flex tag="nav" gap={4}>...</Flex>
-```
-
-### Custom Components with Box.components()
-
-```tsx
-// Define custom component styles
 Box.components({
   card: {
-    styles: {
-      display: 'flex',
-      d: 'column',
-      p: 4,
-      bgColor: 'white',
-      borderRadius: 8,
-      shadow: 'medium',
-    },
+    styles: { display: 'flex', d: 'column', p: 4, bgColor: 'white', borderRadius: 8, shadow: 'medium' },
     variants: {
       bordered: { b: 1, borderColor: 'gray-200', shadow: 'none' },
       elevated: { shadow: 'large' },
@@ -595,148 +197,78 @@ Box.components({
     },
   },
 });
-
-// Use it
-<Box component="card" variant="bordered">
-  <Box component="card.header">Title</Box>
-  <Box component="card.body">Content</Box>
-</Box>;
 ```
 
-#### Component Inheritance with `extends`
-
-Components can inherit from other components using the `extends` property. The base component's full style tree (styles, variants, children) is used as the foundation, and the extending component's definitions are deep-merged on top:
+### Component Inheritance with `extends`
 
 ```tsx
 Box.components({
   subgrid: {
-    extends: 'datagrid', // inherit all datagrid styles, variants, and children
+    extends: 'datagrid', // inherits all styles, variants, and children; deep-merges overrides
     styles: { b: 0, borderRadius: 0, shadow: 'none' },
-    children: {
-      header: { children: { cell: { styles: { fontSize: 12 } } } },
-    },
+    children: { header: { children: { cell: { styles: { fontSize: 12 } } } } },
   },
 });
 ```
-
-This is especially useful for DataGrid, where the internal style tree is complex (pinning, sticky headers, hover groups, etc.). With `extends`, you only need to declare overrides.
 
 ---
 
 ## Extension System
 
-### Adding Custom Colors/Variables
+### Box.extend() — Add New Props, Colors, Variables
 
 ```tsx
 import Box from '@cronocode/react-box';
 
 export const { extendedProps, extendedPropTypes } = Box.extend(
-  // Custom CSS variables
-  {
-    'brand-primary': '#ff6600',
-    'brand-secondary': '#0066ff',
+  { 'brand-primary': '#ff6600', 'brand-secondary': '#0066ff' }, // CSS variables
+  { // New props
+    aspectRatio: [{
+      values: ['auto', '1/1', '16/9', '4/3'] as const,
+      styleName: 'aspect-ratio',
+      valueFormat: (value) => value,
+    }],
   },
-
-  // New props (optional)
-  {},
-
-  // Extend existing props with new values
-  {
-    bgColor: [
-      {
-        values: ['brand-primary', 'brand-secondary'] as const,
-        styleName: 'background-color',
-        valueFormat: (value, getVariable) => getVariable(value),
-      },
-    ],
-    color: [
-      {
-        values: ['brand-primary', 'brand-secondary'] as const,
-        styleName: 'color',
-        valueFormat: (value, getVariable) => getVariable(value),
-      },
-    ],
+  { // Extend existing props with new values
+    bgColor: [{
+      values: ['brand-primary', 'brand-secondary'] as const,
+      styleName: 'background-color',
+      valueFormat: (value, getVariable) => getVariable(value),
+    }],
+    color: [{
+      values: ['brand-primary', 'brand-secondary'] as const,
+      styleName: 'color',
+      valueFormat: (value, getVariable) => getVariable(value),
+    }],
   },
 );
-
-// Now use your custom colors
-<Box bgColor="brand-primary" color="white">
-  Branded
-</Box>;
 ```
 
-### Per-Property Values (Multi-styleName with Different Values)
+### Per-Property Values (Multi-styleName)
 
-When a `BoxStyle` has `styleName` as an array, `valueFormat` is called once **per CSS property** with the current `styleName` as the third argument. This lets a single prop generate multiple CSS properties with different values:
+When `styleName` is an array, `valueFormat` is called once per CSS property with `styleName` as the third argument. Use for typography presets or any design token spanning multiple CSS properties:
 
 ```tsx
-const textStyleNames = ['display-lg', 'display-sm'] as const;
-
 Box.extend(
-  {
-    'text-display-lg-size': '36px',
-    'text-display-lg-weight': '700',
-    'text-display-lg-line-height': '1.2',
-    'text-display-lg-letter-spacing': '-0.02em',
-    'text-display-sm-size': '28px',
-    'text-display-sm-weight': '700',
-    'text-display-sm-line-height': '1.25',
-    'text-display-sm-letter-spacing': '-0.015em',
-  },
-  {
-    textStyle: [
-      {
-        values: textStyleNames,
-        styleName: ['font-size', 'font-weight', 'line-height', 'letter-spacing'],
-        valueFormat: (value, getVariable, styleName) => {
-          const suffixMap: Record<string, string> = {
-            'font-size': 'size',
-            'font-weight': 'weight',
-            'line-height': 'line-height',
-            'letter-spacing': 'letter-spacing',
-          };
-          return getVariable(`text-${value}-${suffixMap[styleName!]}`);
-        },
+  { 'text-display-lg-size': '36px', 'text-display-lg-weight': '700',
+    'text-display-lg-line-height': '1.2', 'text-display-lg-letter-spacing': '-0.02em' },
+  { textStyle: [{
+      values: ['display-lg', 'display-sm'] as const,
+      styleName: ['font-size', 'font-weight', 'line-height', 'letter-spacing'],
+      valueFormat: (value, getVariable, styleName) => {
+        const suffix = { 'font-size': 'size', 'font-weight': 'weight', 'line-height': 'line-height', 'letter-spacing': 'letter-spacing' };
+        return getVariable(`text-${value}-${suffix[styleName!]}`);
       },
-    ],
-  },
+  }] },
   {},
 );
-
-// Usage — one prop sets four CSS properties with different values
-<Box textStyle="display-lg" />
-// Generates: font-size:var(--text-display-lg-size); font-weight:var(--text-display-lg-weight);
-//            line-height:var(--text-display-lg-line-height); letter-spacing:var(--text-display-lg-letter-spacing)
+// <Box textStyle="display-lg" /> → sets all 4 CSS properties
 ```
-
-**Note**: The `styleName` parameter is optional and only available on string-valued `BoxStyle` definitions (the ones with `getVariableValue` as the second parameter). For single `styleName` props, `valueFormat` still works exactly as before.
-
-**When to use style grouping**: Always use this feature via `Box.extend()` when multiple CSS properties logically belong together and should always be applied as a unit. Typography presets (font-size + font-weight + line-height + letter-spacing), spacing scales, or any design token that spans multiple CSS properties should be defined as a grouped prop rather than relying on developers to set each property individually. This ensures consistency — the grouped properties can't drift apart — and reduces the number of props on each component. When building a project with react-box, define grouped props in your `Box.extend()` setup for any set of styles that always travel together.
 
 ### TypeScript Type Augmentation
 
-**Manual approach** (simple cases):
-
 ```typescript
-// types.d.ts
-import '@cronocode/react-box/types';
-
-declare module '@cronocode/react-box/types' {
-  namespace Augmented {
-    interface BoxPropTypes {
-      bgColor: 'brand-primary' | 'brand-secondary';
-    }
-    interface ComponentsTypes {
-      card: 'bordered' | 'elevated';
-    }
-  }
-}
-```
-
-**Generic approach** (recommended - auto-extracts types from your definitions):
-
-```typescript
-// types.d.ts
+// types.d.ts — Generic approach (recommended)
 import { ExtractComponentsAndVariants, ExtractBoxStyles } from '@cronocode/react-box/types';
 import { components } from './boxComponents';
 import { extendedPropTypes, extendedProps } from './boxExtends';
@@ -748,201 +280,103 @@ declare module '@cronocode/react-box/types' {
     interface ComponentsTypes extends ExtractComponentsAndVariants<typeof components> {}
   }
 }
+
+// Manual approach (simple cases):
+declare module '@cronocode/react-box/types' {
+  namespace Augmented {
+    interface BoxPropTypes { bgColor: 'brand-primary' | 'brand-secondary' }
+    interface ComponentsTypes { card: 'bordered' | 'elevated' }
+  }
+}
 ```
 
 ---
 
 ## Common Patterns
 
-### Flex Container
-
 ```tsx
 import Flex from '@cronocode/react-box/components/flex';
-
-<Flex d="column" gap={4} ai="center" jc="between">
-  {children}
-</Flex>;
-```
-
-### Card
-
-```tsx
-<Box p={4} bgColor="white" borderRadius={8} shadow="medium">
-  {content}
-</Box>
-```
-
-### Button
-
-```tsx
+import Grid from '@cronocode/react-box/components/grid';
 import Button from '@cronocode/react-box/components/button';
-
-<Button
-  px={4}
-  py={2}
-  bgColor="blue-500"
-  color="white"
-  borderRadius={6}
-  fontWeight={500}
-  hover={{ bgColor: 'blue-600' }}
-  disabled={{ opacity: 0.5, cursor: 'not-allowed' }}
->
-  Click me
-</Button>;
-```
-
-### Input Field
-
-```tsx
 import Textbox from '@cronocode/react-box/components/textbox';
 
-<Textbox
-  placeholder="Enter text..."
-  width="fit"
-  px={3}
-  py={2}
-  b={1}
-  borderColor="gray-300"
-  borderRadius={6}
-  focus={{ borderColor: 'blue-500', outline: 'none' }}
-/>;
-```
+// Flex layout
+<Flex d="column" gap={4} ai="center" jc="between">{children}</Flex>
+<Flex inline gap={2}>Inline flex</Flex>
 
-### Grid Layout
+// Responsive stack
+<Flex d="column" gap={2} md={{ d: 'row', gap: 4 }}>{children}</Flex>
 
-```tsx
-import Grid from '@cronocode/react-box/components/grid';
+// Grid
+<Grid gridCols={3} gap={4}>{items.map(i => <Box key={i.id}>{i.content}</Box>)}</Grid>
 
-<Grid gridCols={3} gap={4}>
-  {items.map((item) => (
-    <Box key={item.id}>{item.content}</Box>
-  ))}
-</Grid>;
-```
+// Card
+<Box p={4} bgColor="white" borderRadius={8} shadow="medium">{content}</Box>
 
-### Responsive Stack
+// Button with states
+<Button px={4} py={2} bgColor="blue-500" color="white" borderRadius={6}
+  hover={{ bgColor: 'blue-600' }} disabled={{ opacity: 0.5, cursor: 'not-allowed' }}>Click</Button>
 
-```tsx
-import Flex from '@cronocode/react-box/components/flex';
+// Input
+<Textbox placeholder="Enter..." width="fit" px={3} py={2} b={1} borderColor="gray-300"
+  borderRadius={6} focus={{ borderColor: 'blue-500', outline: 'none' }} />
 
-<Flex d="column" gap={2} md={{ d: 'row', gap: 4 }}>
-  {children}
-</Flex>;
-```
+// Truncated text
+<Box overflow="hidden" textOverflow="ellipsis" whiteSpace="nowrap">Long text...</Box>
 
-### Truncated Text
-
-```tsx
-<Box overflow="hidden" textOverflow="ellipsis" whiteSpace="nowrap">
-  Long text that will be truncated...
-</Box>
-```
-
-### Overlay/Modal Backdrop
-
-```tsx
+// Overlay
 <Box position="fixed" top={0} left={0} right={0} bottom={0} bgColor="black" opacity={0.5} zIndex={50} />
 ```
 
-**Note**: For tooltips, dropdowns, and popups that need to escape `overflow: hidden` containers, use the `Tooltip` component instead of manual `zIndex`. It uses React portals to render content outside the DOM hierarchy, avoiding z-index and overflow issues.
+**Portals**: For tooltips/dropdowns that need to escape `overflow: hidden`, use `Tooltip` component (renders via React portal into `#crono-box` container).
+
+### Group Hover (hoverGroup)
 
 ```tsx
-import Tooltip from '@cronocode/react-box/components/tooltip';
-
-<Tooltip content="Tooltip text">
-  <Button>Hover me</Button>
-</Tooltip>;
-```
-
----
-
-## Group Hover (hoverGroup)
-
-Style child elements when parent is hovered:
-
-```tsx
-// Parent with a className
 <Flex className="card-row" gap={2}>
-  {/* Child responds to parent hover */}
-  <Box opacity={0} hoverGroup={{ 'card-row': { opacity: 1 } }}>
-    Actions
-  </Box>
+  <Box opacity={0} hoverGroup={{ 'card-row': { opacity: 1 } }}>Actions</Box>
 </Flex>
 ```
 
----
-
-## Server-Side Rendering (SSG/SSR)
+### Server-Side Rendering
 
 ```tsx
 import { getStyles, resetStyles } from '@cronocode/react-box/ssg';
-
-// After rendering your app, get generated styles
-const cssString = getStyles();
-
-// Inject into your HTML
-<style id="crono-box">{cssString}</style>;
-
-// Reset for next request (in SSR)
-resetStyles();
+const cssString = getStyles();        // after rendering, get CSS string
+<style id="crono-box">{cssString}</style>
+resetStyles();                         // reset for next SSR request
 ```
 
 ---
 
 ## Key Reminders for AI Assistants
 
-### ⚠️ MOST IMPORTANT (Common AI Mistakes)
-
-1. **NEVER use `style={{ }}` attribute** - Always use Box props instead. If a prop doesn't exist, extend Box with `Box.extend()`
-2. **NEVER use `<Box tag="...">` for common elements** - Use semantic components instead:
-   - `<Box tag="a">` → `<Link>`
-   - `<Box tag="img">` → `<Img>`
-   - `<Box tag="button">` → `<Button>`
-   - `<Box tag="h1/h2/h3">` → `<H1>/<H2>/<H3>`
-   - `<Box tag="p">` → `<P>`
-   - `<Box tag="nav/header/footer>` → `<Nav>/<Header>/<Footer>`
-3. **NEVER use `<Box display="flex/grid">`** - Use `<Flex>` or `<Grid>` components instead
-
-### Value Formatting
-
-4. **fontSize uses divider 16**, not 4. `fontSize={14}` → 14px, NOT 3.5px
-5. **Spacing uses divider 4**. `p={4}` → 16px (1rem)
-6. **Border width is direct px**. `b={1}` → 1px
-7. **lineHeight is direct px**. `lineHeight={24}` → 24px
-
-### Syntax & Patterns
-
-8. **Colors are Tailwind-like**: `'gray-500'`, `'blue-600'`, etc.
-9. **Breakpoints are mobile-first**: base → sm → md → lg → xl → xxl
-10. **Theme styles nest**: `theme={{ dark: { hover: { ... } } }}`
-11. **HTML attributes go in `props`**: `<Link props={{ href: '/link' }}>` - NOT directly as Box props
-12. **Percentage widths**: Use strings like `width="1/2"` for 50%
-13. **Full size shortcuts**: `width="fit"` = 100%, `width="fit-screen"` = 100vw
-14. **Box is memoized** with `React.memo` - props comparison is efficient
+1. **NEVER `style={{ }}`** — use Box props. Missing prop? Use `Box.extend()`
+2. **NEVER `<Box tag="...">` for common elements** — use `<Button>`, `<Link>`, `<H1>`, `<P>`, `<Nav>`, etc.
+3. **NEVER `<Box display="flex/grid">`** — use `<Flex>` / `<Grid>`
+4. **fontSize divider is 16** (not 4). `fontSize={14}` → 14px
+5. **Spacing divider is 4**. `p={4}` → 16px (1rem)
+6. **Border/borderRadius/lineHeight are direct px**. `b={1}` → 1px
+7. **Colors are Tailwind-like**: `'gray-500'`, `'blue-600'`
+8. **Breakpoints are mobile-first**: base → sm → md → lg → xl → xxl
+9. **Theme styles nest**: `theme={{ dark: { hover: { ... } } }}`
+10. **HTML attributes go in `props` prop**: `<Link props={{ href: '/about' }}>` not `<Link href>`
+11. **Size shortcuts**: `width="fit"` = 100%, `width="fit-screen"` = 100vw, `width="1/2"` = 50%
+12. **Box is memoized** with `React.memo`
 
 ---
 
 ## DataGrid Component
 
-> **Full documentation:** See [`../docs/DATAGRID.md`](../docs/DATAGRID.md) for complete API reference, all features, component tree, style customization, and designs system.
-
-A feature-rich data grid with sorting, filtering, grouping, row selection, column pinning, row detail, server-side pagination, virtualization, and full style customization via the component design system.
-
 ```tsx
 import DataGrid from '@cronocode/react-box/components/dataGrid';
-```
 
-### Quick Reference
-
-```tsx
 <DataGrid
   data={users}
   def={{
     rowKey: 'id',
     title: 'Users',
-    topBar: true,
-    bottomBar: true,
-    globalFilter: true,
+    topBar: true, bottomBar: true, globalFilter: true,
     rowSelection: { pinned: true },
     showRowNumber: { pinned: true },
     rowHeight: 40,
@@ -953,81 +387,265 @@ import DataGrid from '@cronocode/react-box/components/dataGrid';
       { key: 'email', header: 'Email', width: 250, filterable: true },
       { key: 'status', header: 'Status', filterable: { type: 'multiselect' } },
       { key: 'country', header: 'Country', pin: 'RIGHT' },
+      {
+        key: 'actions', header: '', pin: 'RIGHT', width: 80, sortable: false, resizable: false,
+        Cell: ({ cell }) => <Button onClick={() => edit(cell.row.data)}>Edit</Button>,
+      },
     ],
-    rowDetail: {
-      content: (user) => <UserDetails user={user} />,
-      height: 'auto',
-      expandOnRowClick: true,
-    },
-    // pagination: { totalCount: 500, pageSize: 25 },  // for server-side pagination
+    rowDetail: { content: (user) => <UserDetails user={user} />, height: 'auto', expandOnRowClick: true },
   }}
-  component="subgrid"               // optional: use a different component style tree
   onSelectionChange={(e) => console.log(e.selectedRowKeys)}
-  // page={1}                       // controlled pagination
-  // onPageChange={(p, size) => {}} // page change handler
-  // onSortChange={(col, dir) => {}} // server-side sort handler
-  // onServerStateChange={(state) => fetch(state)} // unified server state callback
 />
 ```
 
-### Key Props
+### DataGridProps
 
 | Prop | Type | Description |
-|------|------|-------------|
-| `data` | `TRow[]` | Row data array (required) |
-| `def` | `GridDefinition` | Grid configuration (required) |
-| `component` | `string` | Component style tree name (default: `'datagrid'`) |
+|---|---|---|
+| `data` | `TRow[]` | Row data (required) |
+| `def` | `GridDefinition` | Grid config (required) |
+| `component` | `string` | Style tree name (default: `'datagrid'`) |
 | `loading` | `boolean` | Loading state |
-| `filters` | `((row: TRow) => boolean)[]` | External predicate filters |
-| `page` | `number` | Controlled page (1-indexed) |
-| `onPageChange` | `(page, pageSize) => void` | Page change callback |
-| `onSortChange` | `(columnKey, direction) => void` | Sort change callback |
-| `onServerStateChange` | `(state: ServerState) => void` | Unified callback with full state (page, pageSize, sort, filters) |
-| `onSelectionChange` | `(event) => void` | Selection change callback |
-| `expandedRowKeys` | `Key[]` | Controlled expanded rows |
+| `filters` | `((row) => boolean)[]` | External predicate filters (applied before column/global filters) |
+| `page` / `onPageChange` | `number` / `(page, size) => void` | Controlled pagination (1-indexed) |
+| `onSortChange` | `(columnKey, direction) => void` | Sort callback (`direction`: `'ASC'`/`'DESC'`/`undefined`) |
+| `onServerStateChange` | `(state) => void` | Unified: `{ page, pageSize, sortColumn, sortDirection, columnFilters, globalFilterValue }` |
+| `onSelectionChange` | `(event) => void` | `event`: `{ action, selectedRowKeys, affectedRowKeys, isAllSelected }` |
+| `expandedRowKeys` / `onExpandedRowKeysChange` | `Key[]` / `(keys) => void` | Controlled expanded rows |
+| `globalFilterValue` / `onGlobalFilterChange` | `string` / `(value) => void` | Controlled global filter |
+| `columnFilters` / `onColumnFiltersChange` | `ColumnFilters` / `(filters) => void` | Controlled column filters |
 
-### Filter Types
+### GridDefinition
+
+| Prop | Type | Default | Description |
+|---|---|---|---|
+| `columns` | `ColumnType[]` | required | Column definitions |
+| `rowKey` | `keyof TRow \| (row) => Key` | auto | Unique row identifier |
+| `rowHeight` | `number` | `48` | Row height in px |
+| `visibleRowsCount` | `number \| 'all'` | `10` | Visible rows. `'all'` disables virtualization |
+| `showRowNumber` | `boolean \| { pinned?, width? }` | `false` | Row number column |
+| `rowSelection` | `boolean \| { pinned? }` | `false` | Checkbox selection column |
+| `rowDetail` | `{ content, height?, expandOnRowClick?, pinned? }` | — | Expandable detail panel. `height`: `'auto'`/number/`(row) => number` |
+| `pagination` | `{ totalCount, pageSize? }` | — | Server-side pagination. Bypasses client-side filtering |
+| `topBar` / `bottomBar` | `boolean` | `false` | Show top/bottom bars |
+| `title` / `topBarContent` | `ReactNode` | — | Top bar content |
+| `globalFilter` | `boolean` | `false` | Enable global fuzzy search |
+| `globalFilterKeys` | `(keyof TRow)[]` | all | Limit global filter columns |
+| `sortable` / `resizable` | `boolean` | `true` | Enable sorting/resizing for all columns |
+| `noDataComponent` | `ReactNode` | `'empty'` | Custom empty state |
+
+### ColumnType
+
+| Prop | Type | Default | Description |
+|---|---|---|---|
+| `key` | `Key` | required | Column identifier (maps to TRow property) |
+| `header` | `string` | — | Header text |
+| `width` | `number` | `200` | Base width in px |
+| `align` | `'left' \| 'right' \| 'center'` | `'left'` | Cell alignment |
+| `pin` | `'LEFT' \| 'RIGHT'` | — | Pin to edge (sticky on scroll) |
+| `columns` | `ColumnType[]` | — | Nested columns (grouped header) |
+| `Cell` | `({ cell }) => ReactNode` | — | Custom renderer. `cell`: `{ value, row, column, grid }` |
+| `sortable` / `resizable` | `boolean` | inherits | Override grid-level setting |
+| `flexible` | `boolean` | `true` | Participate in flex width distribution |
+| `filterable` | `boolean \| FilterConfig` | — | `true` (text), `{ type: 'number', min?, max? }`, `{ type: 'multiselect', options? }` |
+
+### Server-Side Pagination
 
 ```tsx
-{ key: 'name', filterable: true }                              // Text (fuzzy)
-{ key: 'age', filterable: { type: 'number', min: 0, max: 100 } } // Number
-{ key: 'status', filterable: { type: 'multiselect' } }         // Multiselect
+<DataGrid
+  data={pageData} page={page} loading={loading}
+  onServerStateChange={(state) => {
+    // state = { page, pageSize, sortColumn, sortDirection, columnFilters, globalFilterValue }
+    setPage(state.page); refetch(state);
+  }}
+  def={{ columns: [...], bottomBar: true, pagination: { totalCount, pageSize: 25 }, globalFilter: true }}
+/>
 ```
 
 ### Style Customization
 
-Every subcomponent is customizable via `Box.components()`. Register a separate component tree for different visual styles:
+Component tree (all customizable via `Box.components()`):
+```
+datagrid → content, topBar (globalFilter > stats, columnGroups > item), header > cell (contextMenu, resizer),
+  filter > row > cell, body > cell | row | groupRow | detailRow, bottomBar > pagination
+```
 
 ```tsx
 Box.components({
-  // Customize default datagrid
-  datagrid: {
-    children: {
-      body: { children: { detailRow: { styles: { bgColor: 'blue-50' } } } },
-      header: { children: { cell: { styles: { textTransform: 'uppercase' } } } },
-    },
-  },
-  // Extend datagrid styles for embedded grids — inherits all internal styles (pinning, sticky, etc.)
+  datagrid: { children: { header: { children: { cell: { styles: { textTransform: 'uppercase' } } } } } },
   subgrid: {
-    extends: 'datagrid',
-    styles: { b: 0, shadow: 'none', bgColor: 'transparent' },
+    extends: 'datagrid', // MUST use extends — inherits pinning, sticky, hover groups, filters, etc.
+    styles: { b: 0, shadow: 'none' },
+    children: { body: { children: { cell: { styles: { fontSize: 13 } } } } },
+  },
+});
+<DataGrid component="subgrid" data={data} def={def} />  {/* children resolve under subgrid.* */}
+```
+
+---
+
+## Dropdown Component
+
+```tsx
+import Dropdown from '@cronocode/react-box/components/dropdown';
+```
+
+### Usage
+
+```tsx
+// Single selection (uncontrolled)
+<Dropdown<string> defaultValue="apple" onChange={(value, values) => console.log(value)}>
+  <Dropdown.Unselect>Pick a fruit...</Dropdown.Unselect>
+  <Dropdown.Item value="apple">Apple</Dropdown.Item>
+  <Dropdown.Item value="banana">Banana</Dropdown.Item>
+</Dropdown>
+
+// Controlled
+<Dropdown<string> value={fruit} onChange={(value) => setFruit(value!)}>
+  <Dropdown.Item value="apple">Apple</Dropdown.Item>
+  <Dropdown.Item value="banana">Banana</Dropdown.Item>
+</Dropdown>
+
+// Multiple + search + checkboxes
+<Dropdown<string> multiple showCheckbox isSearchable searchPlaceholder="Search...">
+  <Dropdown.SelectAll>Select all</Dropdown.SelectAll>
+  <Dropdown.EmptyItem>No results</Dropdown.EmptyItem>
+  <Dropdown.Display>{(values) => values.length === 0 ? 'Pick...' : `${values.length} selected`}</Dropdown.Display>
+  <Dropdown.Item value="apple">Apple</Dropdown.Item>
+  <Dropdown.Item value="banana">Banana</Dropdown.Item>
+</Dropdown>
+
+// Form integration: name prop renders hidden inputs with JSON-stringified values
+<Dropdown<string> name="fruits" multiple defaultValue={['apple']}>...</Dropdown>
+```
+
+### Props
+
+| Prop | Type | Description |
+|---|---|---|
+| `value` / `defaultValue` | `TVal \| TVal[]` | Controlled / uncontrolled selected value(s) |
+| `multiple` | `boolean` | Multi-select mode |
+| `isSearchable` | `boolean` | Show search input when open |
+| `searchPlaceholder` | `string` | Search input placeholder |
+| `hideIcon` | `boolean` | Hide chevron icon |
+| `showCheckbox` | `boolean` | Show checkboxes in multiple mode |
+| `name` | `string` | Form field name (renders hidden `<input>` elements) |
+| `onChange` | `(value: TVal \| undefined, values: TVal[]) => void` | Selection callback |
+| `itemsProps` | `BoxStyleProps` | Style overrides for the opened items container (`dropdown.items`) |
+| `iconProps` | `BoxStyleProps` | Style overrides for the chevron icon container (`dropdown.icon`) |
+| `variant` | `ClassNameType` | Propagates to root **and all child sub-components** |
+
+Also accepts all `BoxProps` (styling props) which apply to the root button element.
+
+### Sub-Components
+
+All sub-components accept BoxProps for per-instance style overrides.
+
+| Sub-Component | Purpose |
+|---|---|
+| `Dropdown.Item<TVal>` | Selectable option. Requires `value` prop |
+| `Dropdown.Unselect` | Clear selection option (shown when items selected) |
+| `Dropdown.SelectAll` | Select all (shown in `multiple` when not all selected) |
+| `Dropdown.EmptyItem` | Shown when search yields no results |
+| `Dropdown.Display` | Custom display: static content or `(values: TVal[], isOpen: boolean) => ReactNode` |
+
+### Style Customization
+
+**Per-instance** — use `itemsProps`, `iconProps`, or BoxProps directly on sub-components:
+
+```tsx
+<Dropdown<string> itemsProps={{ width: 80, maxHeight: 50 }} iconProps={{ color: 'gray-400' }}>
+  <Dropdown.Item value="a" bgColor="blue-50" fontWeight={600}>Highlighted</Dropdown.Item>
+</Dropdown>
+```
+
+**Global** — override defaults via `Box.components()` (deep-merged):
+
+```tsx
+Box.components({
+  dropdown: {
+    styles: { borderRadius: 4, bgColor: 'gray-50' },
     children: {
-      header: { children: { cell: { styles: { fontSize: 12, py: 1 } } } },
-      body: { children: { cell: { styles: { fontSize: 13 } } } },
+      items: { styles: { shadow: 'large', borderRadius: 4 } },
+      item: { styles: { borderRadius: 2, hover: { bgColor: 'blue-50' } } },
     },
   },
 });
-
-// Use it — all children automatically resolve under "subgrid.*"
-<DataGrid component="subgrid" data={data} def={def} />
 ```
+
+**Custom variants** — `variant` propagates to all children. Define matching variants on each child:
+
+```tsx
+Box.components({
+  dropdown: {
+    variants: { dense: { p: 1, fontSize: 12 } },
+    children: {
+      items: { variants: { dense: { maxHeight: 40, gap: 0 } } },
+      item: { variants: { dense: { p: 1, lineHeight: 16 } } },
+      unselect: { variants: { dense: { p: 1 } } },
+      selectAll: { variants: { dense: { p: 1 } } },
+      emptyItem: { variants: { dense: { p: 1 } } },
+    },
+  },
+});
+<Dropdown variant="dense">...</Dropdown> // applies to root + all children
+```
+
+### Component Style Tree
+
+| Component Name | Description | Built-in Variants |
+|---|---|---|
+| `dropdown` | Root button trigger | `compact` |
+| `dropdown.items` | Opened items container (portal) | — |
+| `dropdown.item` | Selectable item | `compact`, `multiple` |
+| `dropdown.unselect` | Clear selection option | `compact` |
+| `dropdown.selectAll` | Select all option | `compact` |
+| `dropdown.emptyItem` | No results placeholder | `compact` |
+| `dropdown.icon` | Chevron arrow container | — |
+
+---
+
+## Select Component
+
+Data-driven dropdown — pass `data` + `def` instead of composing children. Wraps Dropdown internally, shares the same `dropdown.*` style tree.
+
+```tsx
+import Select from '@cronocode/react-box/components/select';
+
+// Basic
+<Select<User, number> data={users} def={{ valueKey: 'id', displayKey: 'name', placeholder: 'Pick...' }}
+  value={selected} onChange={(value) => setSelected(value!)} />
+
+// Multiple + search + custom display
+<Select<User, number> data={users} multiple showCheckbox isSearchable searchPlaceholder="Search..."
+  def={{
+    valueKey: 'id', displayKey: 'name', placeholder: 'Pick users...',
+    selectAllText: 'Select all', emptyText: 'No results',
+    display: (user) => `${user.name} — ${user.role}`,
+    selectedDisplay: (rows) => `${rows.length} selected`,
+  }} />
+```
+
+### SelectDef
+
+| Prop | Type | Description |
+|---|---|---|
+| `valueKey` | `keyof TRow` | Required — field used as option value |
+| `displayKey` | `keyof TRow` | Field to display (defaults to valueKey) |
+| `display` | `(row: TRow) => ReactNode` | Custom render per item |
+| `selectedDisplay` | `(rows: TRow[], isOpen: boolean) => ReactNode` | Custom trigger display (receives resolved row objects) |
+| `placeholder` | `string` | Unselect/placeholder text |
+| `selectAllText` | `string` | Select all option text (multiple mode) |
+| `emptyText` | `string` | Empty search results text |
+
+Also accepts: `data` (TRow[]), `value`/`defaultValue`, `multiple`, `isSearchable`, `searchPlaceholder`, `showCheckbox`, `hideIcon`, `name`, `onChange`, `itemsProps`, `iconProps`, `variant`, and all BoxProps. Same styling/variants as Dropdown.
 
 ---
 
 ## Debugging Tips
 
-1. **Inspect styles**: Look for `<style id="crono-box">` in document head
-2. **Check class names**: Elements get classes like `_b`, `_2a`, etc.
-3. **Verify variables**: CSS variables are in `:root` rules
+1. **Inspect styles**: `<style id="crono-box">` in document head
+2. **Class names**: Elements get classes like `_b`, `_2a`, etc.
+3. **CSS variables**: In `:root` rules
 4. **Theme issues**: Ensure `<Box.Theme>` wraps your app
 5. **Portal theming**: Tooltips/dropdowns use `#crono-box` container

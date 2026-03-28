@@ -130,10 +130,10 @@ export default function App() {
           <Sidebar toggleTheme={toggleTheme} onClose={() => setSidebarOpen(false)} />
         </Box>
 
-        {/* Main Content */}
-        <Box flex1 overflow="auto" minHeight="fit-screen">
-          <Box maxWidth={300} mx="auto" px={4} sm={{ px: 8 }} py={8} lg={{ py: 12 }}>
-            <PageContext.Provider value={{ rightSidebar, setRightSidebar }}>
+        {/* Main Content + Right Sidebar */}
+        <PageContext.Provider value={{ rightSidebar, setRightSidebar }}>
+          <Box flex1 minHeight="fit-screen">
+            <Box maxWidth={300} mx="auto" px={4} sm={{ px: 8 }} py={8} lg={{ py: 12 }}>
               <AnimatePresence mode="wait">
                 <motion.div
                   key={location.pathname}
@@ -164,9 +164,16 @@ export default function App() {
                   </Routes>
                 </motion.div>
               </AnimatePresence>
-            </PageContext.Provider>
+            </Box>
           </Box>
-        </Box>
+          {rightSidebar && (
+            <Box width={50} flexShrink={0} display="none" xl={{ display: 'block' }}>
+              <Box position="sticky" top={0} maxHeight="fit-screen" overflow="auto" py={8} pr={4}>
+                {rightSidebar}
+              </Box>
+            </Box>
+          )}
+        </PageContext.Provider>
       </Flex>
     </Box>
   );

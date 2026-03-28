@@ -1,0 +1,8 @@
+{
+  "name": "cronocode-react-box",
+  "version": "1.0.0",
+  "description": "@cronocode/react-box expert — runtime CSS-in-JS library with ~144 CSS props, component system, themes, Dropdown, Select, DataGrid",
+  "author": "CronoCode Solutions",
+  "homepage": "https://github.com/cronocodesolutions/react-box",
+  "skills": ["skills/cronocode-react-box"]
+}

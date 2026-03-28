@@ -2,10 +2,14 @@ import { motion } from 'framer-motion';
 import { Layers } from 'lucide-react';
 import Box from '../../src/box';
 import Flex from '../../src/components/flex';
+import { Link } from '../../src/components/semantics';
 import Code from '../components/code';
 import PageHeader from '../components/pageHeader';
+import usePageContext from '../hooks/usePageContext';
 
 export default function TextStylePage() {
+  usePageContext(<RightSidebar />);
+
   return (
     <Box>
       <PageHeader
@@ -18,6 +22,7 @@ export default function TextStylePage() {
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
         <Flex d="column" gap={8}>
           <Code
+            id="concept"
             label="The concept"
             language="jsx"
             codeOnly
@@ -42,6 +47,7 @@ export default function TextStylePage() {
           />
 
           <Code
+            id="generated-css"
             label="Generated CSS"
             language="jsx"
             codeOnly
@@ -57,6 +63,7 @@ export default function TextStylePage() {
           />
 
           <Code
+            id="full-example"
             label="Full example: typography presets"
             language="jsx"
             codeOnly
@@ -95,19 +102,19 @@ Box.extend(
 );`}
           />
 
-          <Code label="Live: display-lg" language="jsx">
+          <Code id="display-lg" label="Live: display-lg" language="jsx">
             <Box textStyle="display-lg" theme={{ dark: { color: 'white' }, light: { color: 'slate-900' } }}>
               The quick brown fox jumps over the lazy dog
             </Box>
           </Code>
 
-          <Code label="Live: display-sm" language="jsx">
+          <Code id="display-sm" label="Live: display-sm" language="jsx">
             <Box textStyle="display-sm" theme={{ dark: { color: 'white' }, light: { color: 'slate-900' } }}>
               The quick brown fox jumps over the lazy dog
             </Box>
           </Code>
 
-          <Code label="Composing with other Box props" language="jsx">
+          <Code id="composing" label="Composing with other Box props" language="jsx">
             <Flex d="column" gap={6}>
               <Box textStyle="display-lg" color="indigo-500">
                 Display Large in color
@@ -124,5 +131,38 @@ Box.extend(
         </Flex>
       </motion.div>
     </Box>
+  );
+}
+
+const sidebarLinks = [
+  { id: 'concept', label: 'The concept' },
+  { id: 'generated-css', label: 'Generated CSS' },
+  { id: 'full-example', label: 'Full example: typography presets' },
+  { id: 'display-lg', label: 'Live: display-lg' },
+  { id: 'display-sm', label: 'Live: display-sm' },
+  { id: 'composing', label: 'Composing with other Box props' },
+] as const;
+
+function RightSidebar() {
+  return (
+    <Flex d="column" gap={1} pt={10}>
+      {sidebarLinks.map((link) => (
+        <Link
+          key={link.id}
+          props={{ href: `#${link.id}` }}
+          fontSize={13}
+          py={1}
+          px={2}
+          borderRadius={1}
+          textDecoration="none"
+          theme={{
+            dark: { color: 'slate-400', hover: { color: 'white', bgColor: 'slate-800' } },
+            light: { color: 'slate-600', hover: { color: 'slate-900', bgColor: 'slate-100' } },
+          }}
+        >
+          {link.label}
+        </Link>
+      ))}
+    </Flex>
   );
 }

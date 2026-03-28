@@ -31,7 +31,7 @@
     "postbuild:pages": "cp ./dist/index.html ./dist/404.html",
     "preview": "vite preview",
     "build": "vite build",
-    "postbuild": "cp package.json dist && cp LICENSE dist && cp README.md dist && cp src/BOX_AI_CONTEXT.md dist",
+    "postbuild": "cp package.json dist && cp LICENSE dist && cp README.md dist && cp src/BOX_AI_CONTEXT.md dist && mkdir -p dist/.claude/skills/react-box dist/.claude/rules && cp .claude/skills/react-box/SKILL.md dist/.claude/skills/react-box/ && cp .claude/rules/react-box-rules.md dist/.claude/rules/",
     "build:dev": "vite build --mode dev",
     "compile": "tsc --noEmit --skipLibCheck",
     "test": "vitest run",
