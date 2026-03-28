@@ -2,10 +2,14 @@ import { motion } from 'framer-motion';
 import { Rows3 } from 'lucide-react';
 import Box from '../../src/box';
 import Flex from '../../src/components/flex';
+import { Link } from '../../src/components/semantics';
 import Code from '../components/code';
 import PageHeader from '../components/pageHeader';
+import usePageContext from '../hooks/usePageContext';
 
 export default function FlexPage() {
+  usePageContext(<RightSidebar />);
+
   return (
     <Box>
       <PageHeader icon={Rows3} title="Flex" description="A shortcut component for display: flex with alignment and spacing props." />
@@ -15,6 +19,7 @@ export default function FlexPage() {
           <Code label="Import" language="jsx" code="import Flex from '@cronocode/react-box/components/flex';" />
 
           <Code
+            id="basic"
             label="Basic Flex"
             language="jsx"
             code={`<Flex gap={4} ai="center">
@@ -37,6 +42,7 @@ export default function FlexPage() {
           </Code>
 
           <Code
+            id="column"
             label="Column Direction"
             language="jsx"
             code={`<Flex d="column" gap={4}>
@@ -59,6 +65,7 @@ export default function FlexPage() {
           </Code>
 
           <Code
+            id="justify"
             label="Justify Content"
             language="jsx"
             code={`<Flex jc="space-between" ai="center" p={4} bgColor="slate-100" borderRadius={1}>
@@ -81,6 +88,7 @@ export default function FlexPage() {
           </Code>
 
           <Code
+            id="wrap"
             label="Flex Wrap"
             language="jsx"
             code={`<Flex gap={4} flexWrap="wrap">
@@ -102,5 +110,36 @@ export default function FlexPage() {
         </Flex>
       </motion.div>
     </Box>
+  );
+}
+
+const sidebarLinks = [
+  { id: 'basic', label: 'Basic' },
+  { id: 'column', label: 'Column Direction' },
+  { id: 'justify', label: 'Justify Content' },
+  { id: 'wrap', label: 'Flex Wrap' },
+] as const;
+
+function RightSidebar() {
+  return (
+    <Flex d="column" gap={1} pt={10}>
+      {sidebarLinks.map((link) => (
+        <Link
+          key={link.id}
+          props={{ href: `#${link.id}` }}
+          fontSize={13}
+          py={1}
+          px={2}
+          borderRadius={1}
+          textDecoration="none"
+          theme={{
+            dark: { color: 'slate-400', hover: { color: 'white', bgColor: 'slate-800' } },
+            light: { color: 'slate-600', hover: { color: 'slate-900', bgColor: 'slate-100' } },
+          }}
+        >
+          {link.label}
+        </Link>
+      ))}
+    </Flex>
   );
 }

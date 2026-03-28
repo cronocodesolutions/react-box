@@ -5,7 +5,7 @@ import Box from '../../src/box';
 import Button from '../../src/components/button';
 import DataGrid from '../../src/components/dataGrid';
 import Flex from '../../src/components/flex';
-import { H3 } from '../../src/components/semantics';
+import { Link } from '../../src/components/semantics';
 import Code from '../components/code';
 import PageHeader from '../components/pageHeader';
 import Data from '../data/MOCK_DATA.json';
@@ -266,6 +266,7 @@ export default function DataGridPage() {
           <Code label="Import" language="jsx" code="import DataGrid from '@cronocode/react-box/components/dataGrid';" />
 
           <Code
+            id="full-featured"
             label="Full Featured DataGrid"
             language="jsx"
             code={`const filters = useMemo(() => {
@@ -363,6 +364,7 @@ export default function DataGridPage() {
           </Code>
 
           <Code
+            id="basic"
             label="Basic DataGrid"
             language="jsx"
             code={`<DataGrid
@@ -489,6 +491,7 @@ export default function DataGridPage() {
           </Code>
 
           <Code
+            id="filters"
             label="DataGrid with Global Filter and Column Filters"
             language="jsx"
             code={`<DataGrid
@@ -531,6 +534,7 @@ export default function DataGridPage() {
           </Code>
 
           <Code
+            id="grouped"
             label="Grouped Columns with Row Selection"
             language="jsx"
             code={`<DataGrid
@@ -611,6 +615,7 @@ export default function DataGridPage() {
           </Code>
 
           <Code
+            id="row-detail"
             label="Row Detail — Orders with Items"
             language="jsx"
             code={`<DataGrid
@@ -732,6 +737,7 @@ export default function DataGridPage() {
           <PaginatedDataGridDemo />
 
           <Code
+            id="disable-sort"
             label="Disable Sorting and Resizing"
             language="jsx"
             code={`<DataGrid
@@ -831,6 +837,7 @@ function PaginatedDataGridDemo() {
 
   return (
     <Code
+      id="pagination"
       label="Server-Side Pagination"
       language="jsx"
       code={`const [data, setData] = useState([]);
@@ -876,15 +883,36 @@ useEffect(() => { fetchData({ page: 1, pageSize }); }, []);
   );
 }
 
+const sidebarLinks = [
+  { id: 'full-featured', label: 'Full Featured' },
+  { id: 'basic', label: 'Basic' },
+  { id: 'filters', label: 'Filters' },
+  { id: 'grouped', label: 'Grouped Columns' },
+  { id: 'row-detail', label: 'Row Detail' },
+  { id: 'pagination', label: 'Pagination' },
+  { id: 'disable-sort', label: 'Disable Sort' },
+] as const;
+
 function RightSidebar() {
   return (
-    <Box pt={10}>
-      <H3 mb={2}>Columns</H3>
-      <Box pl={4}>
-        <Box>Column definition</Box>
-        <Box>Column definition</Box>
-        <Box>Column definition</Box>
-      </Box>
-    </Box>
+    <Flex d="column" gap={1} pt={10}>
+      {sidebarLinks.map((link) => (
+        <Link
+          key={link.id}
+          props={{ href: `#${link.id}` }}
+          fontSize={13}
+          py={1}
+          px={2}
+          borderRadius={1}
+          textDecoration="none"
+          theme={{
+            dark: { color: 'slate-400', hover: { color: 'white', bgColor: 'slate-800' } },
+            light: { color: 'slate-600', hover: { color: 'slate-900', bgColor: 'slate-100' } },
+          }}
+        >
+          {link.label}
+        </Link>
+      ))}
+    </Flex>
   );
 }

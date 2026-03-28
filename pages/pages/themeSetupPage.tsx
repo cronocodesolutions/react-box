@@ -3,10 +3,14 @@ import { Moon, Paintbrush, Sun } from 'lucide-react';
 import Box from '../../src/box';
 import Button from '../../src/components/button';
 import Flex from '../../src/components/flex';
+import { Link } from '../../src/components/semantics';
 import Code from '../components/code';
 import PageHeader from '../components/pageHeader';
+import usePageContext from '../hooks/usePageContext';
 
 export default function ThemeSetupPage() {
+  usePageContext(<RightSidebar />);
+
   return (
     <Box>
       <PageHeader
@@ -18,6 +22,7 @@ export default function ThemeSetupPage() {
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
         <Flex d="column" gap={8}>
           <Code
+            id="define-styles"
             label="Define Your Own Styles"
             language="jsx"
             code={`import Box from '@cronocode/react-box';
@@ -84,6 +89,7 @@ function App() {
           </Code>
 
           <Code
+            id="theme-switching"
             label="Theme Switching"
             language="jsx"
             code={`import Box from '@cronocode/react-box';
@@ -131,6 +137,35 @@ function Sample() {
         </Flex>
       </motion.div>
     </Box>
+  );
+}
+
+const sidebarLinks = [
+  { id: 'define-styles', label: 'Define Your Own Styles' },
+  { id: 'theme-switching', label: 'Theme Switching' },
+] as const;
+
+function RightSidebar() {
+  return (
+    <Flex d="column" gap={1} pt={10}>
+      {sidebarLinks.map((link) => (
+        <Link
+          key={link.id}
+          props={{ href: `#${link.id}` }}
+          fontSize={13}
+          py={1}
+          px={2}
+          borderRadius={1}
+          textDecoration="none"
+          theme={{
+            dark: { color: 'slate-400', hover: { color: 'white', bgColor: 'slate-800' } },
+            light: { color: 'slate-600', hover: { color: 'slate-900', bgColor: 'slate-100' } },
+          }}
+        >
+          {link.label}
+        </Link>
+      ))}
+    </Flex>
   );
 }
 

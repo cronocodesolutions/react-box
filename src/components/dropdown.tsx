@@ -1,13 +1,15 @@
 import { forwardRef, FunctionComponent, ReactElement, Ref, RefAttributes, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import Box, { BoxProps } from '../box';
+import { BoxProps } from '../box';
 import useVisibility from '../hooks/useVisibility';
-import { ComponentsAndVariants } from '../types';
+import { BoxStyleProps, ComponentsAndVariants } from '../types';
 import BaseSvg from './baseSvg';
 import Button from './button';
-import Checkbox from './checkbox';
+import DropdownContext, { DropdownItemProps } from './dropdown/dropdownContext';
+import DropdownItems from './dropdown/dropdownItems';
+import DropdownSearch from './dropdown/dropdownSearch';
+import { searchItemText } from './dropdown/utils';
 import Flex from './flex';
 import Textbox from './textbox';
-import Tooltip from './tooltip';
 
 interface Props<TVal, TKey extends keyof ComponentsAndVariants = 'dropdown'> extends Omit<BoxProps<'button', TKey>, 'ref' | 'tag'> {
   name?: string;
@@ -19,6 +21,10 @@ interface Props<TVal, TKey extends keyof ComponentsAndVariants = 'dropdown'> ext
   hideIcon?: boolean;
   /** Show checkbox for each item in multiple selection mode */
   showCheckbox?: boolean;
+  /** BoxProps applied to the opened items container (dropdown.items) */
+  itemsProps?: BoxStyleProps;
+  /** BoxProps applied to the chevron icon container (dropdown.icon) */
+  iconProps?: BoxStyleProps;
   onChange?: (value: TVal | undefined, values: TVal[]) => void;
 }
 
@@ -32,53 +38,49 @@ function DropdownImpl<TVal>(props: Props<TVal>, ref: Ref<HTMLInputElement>): Rea
     searchPlaceholder,
     children,
     hideIcon,
-    showCheckbox,
+    showCheckbox = false,
+    itemsProps,
+    iconProps,
     onChange,
     props: tagProps,
     ...restProps
   } = props;
 
-  const compact = restProps.variant === 'compact';
   const [selectedValues, setSelectedValues] = useState(Array.isArray(defaultValue) ? defaultValue : defaultValue ? [defaultValue] : []);
-  const valueToUse = 'value' in props ? (Array.isArray(value) ? value : value ? [value] : []) : selectedValues;
+  const isControlled = 'value' in props;
+  const valueToUse = useMemo(
+    () => (isControlled ? (Array.isArray(value) ? value : value ? [value] : []) : selectedValues),
+    [isControlled, value, selectedValues],
+  );
   const [search, setSearch] = useState<string>('');
 
   const [isOpen, setOpen, refToUse] = useVisibility<HTMLButtonElement>();
   const searchBoxRef = useRef<HTMLInputElement>(null);
-  const itemsRef = useRef<HTMLDivElement>(null);
-
-  const [optionsPosition, setOptionsPosition] = useState<{ top: number; scrollY: number }>({ top: 0, scrollY: 0 });
-  const openUp = useMemo(
-    () => optionsPosition.top - optionsPosition.scrollY > window.innerHeight / 2,
-    [optionsPosition.top, optionsPosition.scrollY],
-  );
-  const btnSize = useMemo(() => {
-    return refToUse.current?.getBoundingClientRect();
-  }, [refToUse.current]);
-
-  const translateY = useMemo(() => {
-    if (openUp) return 0;
-
-    return btnSize?.height ?? 0;
-  }, [openUp, btnSize]);
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const allKids = useMemo<ReactElement<any, FunctionComponent>[]>(
-    () => (Array.isArray(children) ? children : [children]).flatMap((x) => x),
+    () => (Array.isArray(children) ? children : [children]).flatMap((x) => x).filter(Boolean),
     [children],
   );
   const items = useMemo(() => allKids.filter((x) => x.type?.displayName === 'DropdownItem'), [allKids]);
+  const itemTextCache = useMemo(() => {
+    const cache = new Map<React.ReactElement, string>();
+    for (const item of items) {
+      cache.set(item, searchItemText(item));
+    }
+    return cache;
+  }, [items]);
+  const getItemText = useCallback((item: React.ReactElement) => itemTextCache.get(item) ?? searchItemText(item), [itemTextCache]);
+
   const filteredItems = useMemo<React.ReactElement<DropdownItemProps<TVal>>[]>(() => {
     return items.filter((x) => {
       if (isSearchable && search) {
-        const text = searchItemText(x);
-
-        return text.toLowerCase().includes(search.toLowerCase());
+        return getItemText(x).toLowerCase().includes(search.toLowerCase());
       }
 
       return true;
     });
-  }, [isSearchable, search, allKids]);
+  }, [isSearchable, search, items, getItemText]);
 
   const unselectItem = useMemo(() => allKids.find((x) => (x.type as FunctionComponent)?.displayName === 'DropdownUnselect'), [allKids]);
   const selectAllItem = useMemo(() => allKids.find((x) => (x.type as FunctionComponent)?.displayName === 'DropdownSelectAll'), [allKids]);
@@ -94,7 +96,7 @@ function DropdownImpl<TVal>(props: Props<TVal>, ref: Ref<HTMLInputElement>): Rea
     const selectedKids = filteredItems.filter((k) => valueToUse.includes(k.props.value));
 
     if (multiple && selectedKids.length > 1) {
-      return selectedKids.map((x) => searchItemText(x)).join(', ');
+      return selectedKids.map((x) => getItemText(x)).join(', ');
     }
 
     const selectedKid = selectedKids.at(0);
@@ -104,7 +106,7 @@ function DropdownImpl<TVal>(props: Props<TVal>, ref: Ref<HTMLInputElement>): Rea
       selectedKid?.props.value ??
       (multiple ? null : unselectItem?.props.children)
     );
-  }, [multiple, filteredItems, valueToUse, unselectItem, isOpen]);
+  }, [multiple, filteredItems, valueToUse, unselectItem, isOpen, isSearchable, displayItem, getItemText]);
 
   const itemSelectHandler = useCallback(
     (e: React.MouseEvent, ...kids: React.ReactElement<DropdownItemProps<TVal>>[]) => {
@@ -148,146 +150,76 @@ function DropdownImpl<TVal>(props: Props<TVal>, ref: Ref<HTMLInputElement>): Rea
         setTimeout(() => refToUse.current?.focus(), 0);
       }
     },
-    [multiple, valueToUse, setSelectedValues],
+    [multiple, valueToUse, setSelectedValues, onChange, setOpen, refToUse],
   );
 
   useEffect(() => {
     if (isOpen) {
       setTimeout(() => {
         searchBoxRef.current?.focus();
-        itemsRef.current?.querySelector('[aria-selected="true"]')?.scrollIntoView({ block: 'nearest' });
       }, 0);
     } else {
       setSearch('');
     }
   }, [isOpen]);
 
-  const showSelectAll = selectAllItem && multiple && filteredItems.length > valueToUse.length;
-  const showUnselect = unselectItem && filteredItems.length > 0 && !showSelectAll;
+  const toggleOpen = useCallback(() => setOpen((prev) => !prev), [setOpen]);
+
+  const showSelectAll = !!(selectAllItem && multiple && filteredItems.length > valueToUse.length);
+  const showUnselect = !!(unselectItem && filteredItems.length > 0 && !showSelectAll);
+
+  const contextValue = useMemo(
+    () => ({ valueToUse, multiple, variant: restProps.variant, showCheckbox, itemSelectHandler, getItemText }),
+    [valueToUse, multiple, restProps.variant, showCheckbox, itemSelectHandler, getItemText],
+  );
 
   return (
-    <Button
-      ref={refToUse}
-      onClick={() => setOpen((prev) => !prev)}
-      component="dropdown"
-      props={{ tabIndex: 0, ...tagProps }}
-      position="relative"
-      pr={!hideIcon ? 6 : undefined}
-      minWidth={isOpen && isSearchable ? 36 : undefined}
-      width="fit-content"
-      {...restProps}
-    >
-      {valueToUse.map((x) => (
-        <Textbox key={JSON.stringify(x)} ref={ref} name={name} type="hidden" value={JSON.stringify(x) ?? ''} />
-      ))}
-      {isSearchable && isOpen && (
-        <Flex ai="center" position="absolute" inset={0} p={3}>
-          <Textbox
-            clean
-            placeholder={searchPlaceholder}
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            ref={searchBoxRef}
-            color="currentColor"
-            width="fit"
-            props={{
-              onClick: (e) => {
-                if (isOpen && isSearchable) {
-                  e.stopPropagation();
-                }
-              },
-            }}
-          />
-        </Flex>
-      )}
-      {display ?? '\u00A0'}
-      {!hideIcon && (
-        <Flex component="dropdown.icon">
-          <BaseSvg viewBox="0 0 10 6" width="0.6rem" rotate={isOpen ? 180 : 0}>
-            <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 1 4 4 4-4" />
-          </BaseSvg>
-        </Flex>
-      )}
-      <Box position="absolute" inset={0}>
-        {isOpen && (
-          <Tooltip
-            ref={itemsRef}
-            minWidth="fit-content"
-            style={{ transform: openUp ? `translateY(calc(-100% - 2px))` : `translateY(${translateY}px)` }}
-            onPositionChange={(data) => setOptionsPosition({ top: data.top, scrollY: data.windowScrollY })}
-          >
-            {(filteredItems.length > 0 || emptyItem) && (
-              <Box component="dropdown.items">
-                {showUnselect && (
-                  <Box
-                    component="dropdown.unselect"
-                    variant={{ compact }}
-                    selected={valueToUse.length === 0}
-                    {...{ ...unselectItem.props, props: { ...unselectItem.props.props, onClick: (e) => itemSelectHandler(e) } }}
-                  />
-                )}
-                {showSelectAll && (
-                  <Box
-                    component="dropdown.selectAll"
-                    variant={{ compact }}
-                    {...{
-                      ...selectAllItem.props,
-                      props: { ...selectAllItem.props.props, onClick: (e) => itemSelectHandler(e, ...items) },
-                    }}
-                  />
-                )}
-                {filteredItems.map((item) => {
-                  const { value, onClick, children: itemChildren, ...itemProps } = item.props;
-                  const isSelected = valueToUse.includes(value);
-
-                  return (
-                    <Box
-                      key={value as React.Key}
-                      component="dropdown.item"
-                      variant={{ multiple, compact }}
-                      selected={isSelected}
-                      {...{
-                        ...itemProps,
-                        children:
-                          showCheckbox && multiple ? (
-                            <>
-                              <Checkbox readOnly checked={isSelected} mr={2} />
-                              {itemChildren}
-                            </>
-                          ) : (
-                            itemChildren
-                          ),
-                        props: {
-                          ...itemProps.props,
-                          'aria-selected': isSelected,
-                          onClick: (e) => {
-                            onClick?.(e);
-                            itemSelectHandler(e, item);
-                          },
-                        },
-                      }}
-                    />
-                  );
-                })}
-
-                {filteredItems.length === 0 && emptyItem && (
-                  <Box component="dropdown.emptyItem" variant={{ compact }} {...emptyItem.props} />
-                )}
-              </Box>
-            )}
-          </Tooltip>
+    <DropdownContext.Provider value={contextValue}>
+      <Button
+        ref={refToUse}
+        onClick={toggleOpen}
+        component="dropdown"
+        props={{ tabIndex: 0, ...tagProps }}
+        position="relative"
+        pr={!hideIcon ? 6 : undefined}
+        minWidth={isOpen && isSearchable ? 36 : undefined}
+        width="fit-content"
+        {...restProps}
+      >
+        {valueToUse.map((x) => {
+          const serialized = JSON.stringify(x);
+          return <Textbox key={serialized} ref={ref} name={name} type="hidden" value={serialized ?? ''} />;
+        })}
+        {isSearchable && isOpen && (
+          <DropdownSearch search={search} onSearchChange={setSearch} searchPlaceholder={searchPlaceholder} searchBoxRef={searchBoxRef} />
         )}
-      </Box>
-    </Button>
+        {display ?? '\u00A0'}
+        {!hideIcon && (
+          <Flex component="dropdown.icon" {...iconProps}>
+            <BaseSvg viewBox="0 0 10 6" width="0.6rem" rotate={isOpen ? 180 : 0}>
+              <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 1 4 4 4-4" />
+            </BaseSvg>
+          </Flex>
+        )}
+        {isOpen && (
+          <DropdownItems<TVal>
+            filteredItems={filteredItems}
+            items={items}
+            unselectItem={unselectItem}
+            selectAllItem={selectAllItem}
+            emptyItem={emptyItem}
+            showUnselect={showUnselect}
+            showSelectAll={showSelectAll}
+            buttonRef={refToUse}
+            itemsProps={itemsProps}
+          />
+        )}
+      </Button>
+    </DropdownContext.Provider>
   );
 }
 
 type ChildrenName = 'DropdownItem' | 'DropdownUnselect' | 'DropdownEmptyItem' | 'DropdownDisplay' | 'DropdownSelectAll';
-
-interface DropdownItemProps<TVal> extends BoxProps {
-  value: TVal;
-  onClick?(e: React.MouseEvent): void;
-}
 
 interface DropdownDisplayProps<TVal> extends Omit<BoxProps, 'children'> {
   children: ((selectedValues: TVal[], isOpen: boolean) => React.ReactNode) | React.ReactNode;
@@ -317,23 +249,3 @@ Dropdown.Display = withName('DropdownDisplay');
 (Dropdown as React.FunctionComponent).displayName = 'Dropdown';
 
 export default Dropdown;
-
-function searchItemText(item: React.ReactElement): string {
-  if (item === null || item === undefined) return '';
-
-  if (typeof item === 'object') {
-    const children = item.props?.children;
-
-    if (children === null || children === undefined) return '';
-
-    if (typeof children === 'object') {
-      const arr: React.ReactElement[] = Array.isArray(children) ? children : [children];
-
-      return arr.map((i) => searchItemText(i)).join('');
-    }
-
-    return children.toString();
-  }
-
-  return (item as string).toString();
-}

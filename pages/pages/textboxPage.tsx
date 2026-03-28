@@ -2,11 +2,15 @@ import { motion } from 'framer-motion';
 import { TextCursor } from 'lucide-react';
 import Box from '../../src/box';
 import Flex from '../../src/components/flex';
+import { Link } from '../../src/components/semantics';
 import Textbox from '../../src/components/textbox';
 import Code from '../components/code';
 import PageHeader from '../components/pageHeader';
+import usePageContext from '../hooks/usePageContext';
 
 export default function TextboxPage() {
+  usePageContext(<RightSidebar />);
+
   return (
     <Box>
       <PageHeader
@@ -19,11 +23,12 @@ export default function TextboxPage() {
         <Flex d="column" gap={8}>
           <Code label="Import" language="jsx" code="import Textbox from '@cronocode/react-box/components/textbox';" />
 
-          <Code label="Basic Textbox" language="jsx" code='<Textbox placeholder="Enter your name..." />'>
+          <Code id="basic" label="Basic Textbox" language="jsx" code='<Textbox placeholder="Enter your name..." />'>
             <Textbox placeholder="Enter your name..." theme={{ dark: { bgColor: 'slate-800', color: 'white' } }} />
           </Code>
 
           <Code
+            id="label"
             label="With Label"
             language="jsx"
             code={`<Flex d="column" gap={2}>
@@ -42,6 +47,7 @@ export default function TextboxPage() {
           </Code>
 
           <Code
+            id="states"
             label="States"
             language="jsx"
             code={`<Textbox placeholder="Default" />
@@ -55,6 +61,7 @@ export default function TextboxPage() {
           </Code>
 
           <Code
+            id="sizes"
             label="Sizes"
             language="jsx"
             code={`<Textbox py={2} px={3} fontSize={13} placeholder="Small" />
@@ -69,6 +76,7 @@ export default function TextboxPage() {
           </Code>
 
           <Code
+            id="custom"
             label="Custom Styling"
             language="jsx"
             code={`<Textbox
@@ -87,5 +95,37 @@ export default function TextboxPage() {
         </Flex>
       </motion.div>
     </Box>
+  );
+}
+
+const sidebarLinks = [
+  { id: 'basic', label: 'Basic Textbox' },
+  { id: 'label', label: 'With Label' },
+  { id: 'states', label: 'States' },
+  { id: 'sizes', label: 'Sizes' },
+  { id: 'custom', label: 'Custom Styling' },
+] as const;
+
+function RightSidebar() {
+  return (
+    <Flex d="column" gap={1} pt={10}>
+      {sidebarLinks.map((link) => (
+        <Link
+          key={link.id}
+          props={{ href: `#${link.id}` }}
+          fontSize={13}
+          py={1}
+          px={2}
+          borderRadius={1}
+          textDecoration="none"
+          theme={{
+            dark: { color: 'slate-400', hover: { color: 'white', bgColor: 'slate-800' } },
+            light: { color: 'slate-600', hover: { color: 'slate-900', bgColor: 'slate-100' } },
+          }}
+        >
+          {link.label}
+        </Link>
+      ))}
+    </Flex>
   );
 }

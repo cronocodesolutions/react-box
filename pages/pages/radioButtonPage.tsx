@@ -3,10 +3,14 @@ import { Circle } from 'lucide-react';
 import Box from '../../src/box';
 import Flex from '../../src/components/flex';
 import RadioButton from '../../src/components/radioButton';
+import { Link } from '../../src/components/semantics';
 import Code from '../components/code';
 import PageHeader from '../components/pageHeader';
+import usePageContext from '../hooks/usePageContext';
 
 export default function RadioButtonPage() {
+  usePageContext(<RightSidebar />);
+
   return (
     <Box>
       <PageHeader icon={Circle} title="Radio Button" description="Use RadioButton component to choose an option from a group." />
@@ -16,6 +20,7 @@ export default function RadioButtonPage() {
           <Code label="Import" language="jsx" code="import RadioButton from '@cronocode/react-box/components/radioButton';" />
 
           <Code
+            id="basic"
             label="Basic RadioButton"
             language="jsx"
             code={`<Flex gap={2}>
@@ -30,6 +35,7 @@ export default function RadioButtonPage() {
           </Code>
 
           <Code
+            id="disabled"
             label="Disabled RadioButton"
             language="jsx"
             code={`<Flex gap={2}>
@@ -44,6 +50,7 @@ export default function RadioButtonPage() {
           </Code>
 
           <Code
+            id="clean"
             label="Clean RadioButton"
             language="jsx"
             code={`<Flex gap={2}>
@@ -59,5 +66,35 @@ export default function RadioButtonPage() {
         </Flex>
       </motion.div>
     </Box>
+  );
+}
+
+const sidebarLinks = [
+  { id: 'basic', label: 'Basic' },
+  { id: 'disabled', label: 'Disabled' },
+  { id: 'clean', label: 'Clean' },
+] as const;
+
+function RightSidebar() {
+  return (
+    <Flex d="column" gap={1} pt={10}>
+      {sidebarLinks.map((link) => (
+        <Link
+          key={link.id}
+          props={{ href: `#${link.id}` }}
+          fontSize={13}
+          py={1}
+          px={2}
+          borderRadius={1}
+          textDecoration="none"
+          theme={{
+            dark: { color: 'slate-400', hover: { color: 'white', bgColor: 'slate-800' } },
+            light: { color: 'slate-600', hover: { color: 'slate-900', bgColor: 'slate-100' } },
+          }}
+        >
+          {link.label}
+        </Link>
+      ))}
+    </Flex>
   );
 }
