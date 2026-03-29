@@ -180,7 +180,6 @@ function ActionButton({ status, onAction }: { status: EnrollmentStatus; onAction
       fontSize={12}
       fontWeight={500}
       b={1}
-      transition="all"
       transitionDuration={150}
       bgColor={isEnrolled ? 'transparent' : 'cyan-950'}
       color={isEnrolled ? 'red-400' : 'cyan-400'}

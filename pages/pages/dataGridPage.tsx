@@ -5,7 +5,6 @@ import Box from '../../src/box';
 import Button from '../../src/components/button';
 import DataGrid from '../../src/components/dataGrid';
 import Flex from '../../src/components/flex';
-import { Link } from '../../src/components/semantics';
 import Code from '../components/code';
 import PageHeader from '../components/pageHeader';
 import Data from '../data/MOCK_DATA.json';
@@ -16,7 +15,7 @@ import Data4 from '../data/MOCK_DATA_4.json';
 import Data5 from '../data/MOCK_DATA_5.json';
 import Data6 from '../data/MOCK_DATA_6.json';
 import Data7 from '../data/MOCK_DATA_7.json';
-import usePageContext from '../hooks/usePageContext';
+import useTableOfContents from '../hooks/useTableOfContents';
 
 const allData = [...Data, ...Data1, ...Data2, ...Data3, ...Data4, ...Data5, ...Data6, ...Data7];
 
@@ -237,7 +236,7 @@ function CustomTopBarFilter({
 }
 
 export default function DataGridPage() {
-  usePageContext(<RightSidebar />);
+  useTableOfContents(sidebarLinks);
 
   // Custom filter state for the first DataGrid
   const [genderFilter, setGenderFilter] = useState<string | null>(null);
@@ -892,27 +891,3 @@ const sidebarLinks = [
   { id: 'pagination', label: 'Pagination' },
   { id: 'disable-sort', label: 'Disable Sort' },
 ] as const;
-
-function RightSidebar() {
-  return (
-    <Flex d="column" gap={1} pt={10}>
-      {sidebarLinks.map((link) => (
-        <Link
-          key={link.id}
-          props={{ href: `#${link.id}` }}
-          fontSize={13}
-          py={1}
-          px={2}
-          borderRadius={1}
-          textDecoration="none"
-          theme={{
-            dark: { color: 'slate-400', hover: { color: 'white', bgColor: 'slate-800' } },
-            light: { color: 'slate-600', hover: { color: 'slate-900', bgColor: 'slate-100' } },
-          }}
-        >
-          {link.label}
-        </Link>
-      ))}
-    </Flex>
-  );
-}

@@ -6,10 +6,10 @@ import Button from '../../src/components/button';
 import Dropdown from '../../src/components/dropdown';
 import Flex from '../../src/components/flex';
 import Select from '../../src/components/select';
-import { H3, Link } from '../../src/components/semantics';
+import { H3 } from '../../src/components/semantics';
 import Code from '../components/code';
 import PageHeader from '../components/pageHeader';
-import usePageContext from '../hooks/usePageContext';
+import useTableOfContents from '../hooks/useTableOfContents';
 
 Box.components({
   dropdown: {
@@ -55,7 +55,7 @@ const users: User[] = [
 ];
 
 export default function DropdownPage() {
-  usePageContext(<RightSidebar />);
+  useTableOfContents(sidebarLinks);
   const [selectedValue, setSelectedValue] = useState<number>(2);
 
   return (
@@ -345,42 +345,3 @@ const sidebarLinks = [
   { id: 'select-display', label: 'Custom Display' },
   { id: 'select-multiple', label: 'Multiple + Search' },
 ] as const;
-
-function RightSidebar() {
-  return (
-    <Flex d="column" gap={1} pt={10}>
-      {sidebarLinks.map((link) =>
-        'section' in link ? (
-          <Box
-            key={link.label}
-            fontSize={11}
-            fontWeight={600}
-            textTransform="uppercase"
-            letterSpacing={1}
-            mt={4}
-            mb={1}
-            theme={{ dark: { color: 'slate-500' }, light: { color: 'slate-400' } }}
-          >
-            {link.label}
-          </Box>
-        ) : (
-          <Link
-            key={link.id}
-            props={{ href: `#${link.id}` }}
-            fontSize={13}
-            py={1}
-            px={2}
-            borderRadius={1}
-            textDecoration="none"
-            theme={{
-              dark: { color: 'slate-400', hover: { color: 'white', bgColor: 'slate-800' } },
-              light: { color: 'slate-600', hover: { color: 'slate-900', bgColor: 'slate-100' } },
-            }}
-          >
-            {link.label}
-          </Link>
-        ),
-      )}
-    </Flex>
-  );
-}

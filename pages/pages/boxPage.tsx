@@ -693,7 +693,6 @@ function InteractionDemo() {
             b={1}
             borderRadius={1}
             cursor="pointer"
-            transition="all"
             transitionDuration={200}
             theme={{ dark: { borderColor: 'slate-600', color: 'slate-300' }, light: { borderColor: 'slate-300', color: 'slate-700' } }}
             hover={{ bgColor: 'violet-500', color: 'white', borderColor: 'violet-500' }}
@@ -706,7 +705,6 @@ function InteractionDemo() {
             b={1}
             borderRadius={1}
             cursor="pointer"
-            transition="all"
             transitionDuration={200}
             theme={{ dark: { borderColor: 'slate-600', color: 'slate-300' }, light: { borderColor: 'slate-300', color: 'slate-700' } }}
             hover={{ translateY: -1, shadow: 'large' }}
@@ -775,7 +773,6 @@ function InteractionDemo() {
             b={1}
             borderRadius={1}
             cursor="pointer"
-            transition="all"
             transitionDuration={100}
             theme={{ dark: { borderColor: 'slate-600', color: 'slate-300' }, light: { borderColor: 'slate-300', color: 'slate-700' } }}
             hover={{ bgColor: 'violet-500', color: 'white' }}
@@ -788,7 +785,6 @@ function InteractionDemo() {
             b={1}
             borderRadius={1}
             cursor="pointer"
-            transition="all"
             transitionDuration={300}
             theme={{ dark: { borderColor: 'slate-600', color: 'slate-300' }, light: { borderColor: 'slate-300', color: 'slate-700' } }}
             hover={{ bgColor: 'violet-500', color: 'white' }}
@@ -801,7 +797,6 @@ function InteractionDemo() {
             b={1}
             borderRadius={1}
             cursor="pointer"
-            transition="all"
             transitionDuration={500}
             theme={{ dark: { borderColor: 'slate-600', color: 'slate-300' }, light: { borderColor: 'slate-300', color: 'slate-700' } }}
             hover={{ bgColor: 'violet-500', color: 'white' }}
@@ -901,7 +896,6 @@ function MiscDemo() {
           b={1}
           borderRadius={1}
           cursor="pointer"
-          transition="all"
           transitionDuration={150}
           theme={{
             dark: { borderColor: 'slate-600', color: 'slate-300', bgColor: 'slate-800' },
@@ -973,7 +967,6 @@ export default function BoxPage() {
                       borderRadius={2}
                       cursor="pointer"
                       b={1}
-                      transition="all"
                       transitionDuration={150}
                       theme={{
                         dark: {

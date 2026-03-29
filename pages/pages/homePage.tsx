@@ -254,7 +254,6 @@ function FeatureCard({ icon, title, description }: FeatureCardProps) {
         b={1}
         borderRadius={3}
         height="fit"
-        transition="all"
         transitionDuration={200}
       >
         <Box width={11} height={11} display="flex" ai="center" jc="center" bgImage="gradient-primary" borderRadius={2} color="white" mb={4}>

@@ -1,12 +1,15 @@
-import React, { createContext } from 'react';
+import { createContext } from 'react';
+
+export type TocEntry = { id: string; label: string } | { label: string; section: true };
 
 interface PageContext {
-  rightSidebar?: React.ReactNode;
-  setRightSidebar(el: React.ReactNode): void;
+  tocEntries: TocEntry[];
+  setTocEntries(entries: TocEntry[]): void;
 }
 
 const PageContext = createContext<PageContext>({
-  setRightSidebar: (_el: React.ReactNode) => {},
+  tocEntries: [],
+  setTocEntries: () => {},
 });
 
 export default PageContext;
