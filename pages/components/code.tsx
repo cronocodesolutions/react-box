@@ -90,7 +90,6 @@ export default function Code(props: Props) {
                 hover={{ bgColor: copied ? 'emerald-500' : 'slate-600' }}
                 cursor={copied ? 'default' : 'pointer'}
                 onClick={() => !copied && copyHandler()}
-                transition="all"
                 transitionDuration={150}
               >
                 <Flex ai="center" gap={2} fontSize={12}>

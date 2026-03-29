@@ -61,7 +61,6 @@ function PaginationButton(props: { onClick: () => void; disabled: boolean; child
       opacity={disabled ? 0.3 : 0.7}
       hover={disabled ? undefined : { opacity: 1, bgColor: 'gray-100' }}
       theme={{ dark: { hover: disabled ? undefined : { bgColor: 'gray-700' } } }}
-      transition="all"
       transitionDuration={150}
     >
       {children}

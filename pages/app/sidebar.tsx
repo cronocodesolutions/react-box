@@ -69,7 +69,6 @@ export default function Sidebar({ toggleTheme, onClose }: SidebarProps) {
           clean
           p={2}
           borderRadius={2}
-          display="none"
           lg={{ display: 'none' }}
           theme={{ dark: { color: 'slate-400' }, light: { color: 'slate-500' } }}
           onClick={onClose}
@@ -228,7 +227,6 @@ export default function Sidebar({ toggleTheme, onClose }: SidebarProps) {
               light: { bgColor: 'slate-100', color: 'slate-600' },
             }}
             onClick={toggleTheme}
-            transition="all"
             transitionDuration={150}
           >
             <Flex ai="center" gap={2}>
@@ -261,7 +259,6 @@ function MenuSection({ label, children, defaultOpen = true }: MenuSectionProps) 
         cursor="pointer"
         borderRadius={2}
         props={{ onClick: () => setIsOpen(!isOpen) }}
-        transition="all"
         transitionDuration={150}
       >
         <Box

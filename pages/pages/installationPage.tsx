@@ -89,7 +89,6 @@ function StepCard({ icon, title, description }: StepCardProps) {
       }}
       b={1}
       borderRadius={2}
-      transition="all"
       transitionDuration={150}
     >
       <Box
