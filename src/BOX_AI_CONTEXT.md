@@ -474,11 +474,7 @@ import DataGrid from '@cronocode/react-box/components/dataGrid';
 
 ### Style Customization
 
-Component tree (all customizable via `Box.components()`):
-```
-datagrid → content, topBar (globalFilter > stats, columnGroups > item), header > cell (contextMenu, resizer),
-  filter > row > cell, body > cell | row | groupRow | detailRow, bottomBar > pagination
-```
+All sub-components are customizable via `Box.components()`:
 
 ```tsx
 Box.components({
@@ -491,6 +487,50 @@ Box.components({
 });
 <DataGrid component="subgrid" data={data} def={def} />  {/* children resolve under subgrid.* */}
 ```
+
+### Component Style Tree
+
+| Component Name | Description | Variants |
+|---|---|---|
+| `datagrid` | Root container | — |
+| `datagrid.content` | Scroll container for header + body | — |
+| `datagrid.topBar` | Top bar (title, filters, column groups) | — |
+| `datagrid.topBar.globalFilter` | Global search wrapper | — |
+| `datagrid.topBar.globalFilter.stats` | Filtered rows count badge | — |
+| `datagrid.topBar.columnGroups` | Column group chips container | — |
+| `datagrid.topBar.columnGroups.icon` | Column group icon | — |
+| `datagrid.topBar.columnGroups.separator` | Separator between groups | — |
+| `datagrid.topBar.columnGroups.item` | Column group chip | — |
+| `datagrid.topBar.columnGroups.item.icon` | Remove icon on chip | — |
+| `datagrid.topBar.columnVisibility` | Column visibility dropdown | — |
+| `datagrid.topBar.columnVisibility.badge` | Hidden columns count badge | — |
+| `datagrid.filter.cell` | Filter row cell | `isPinned`, `isFirstLeftPinned`, `isLastLeftPinned`, `isFirstRightPinned`, `isLastRightPinned` |
+| `datagrid.filter.cell.input` | Filter input container (text/number/multiselect) | — |
+| `datagrid.header` | Header grid container (sticky) | — |
+| `datagrid.header.cell` | Header cell | `isPinned`, `isFirstLeftPinned`, `isLastLeftPinned`, `isFirstRightPinned`, `isLastRightPinned`, `isSortable`, `isRowSelection`, `isRowNumber`, `isFirstLeaf`, `isLastLeaf`, `isEmptyCell` |
+| `datagrid.header.cell.contextMenu` | Column context menu button | — |
+| `datagrid.header.cell.contextMenu.icon` | Context menu icon | — |
+| `datagrid.header.cell.contextMenu.tooltip` | Context menu popup | — |
+| `datagrid.header.cell.contextMenu.tooltip.item` | Context menu action | — |
+| `datagrid.header.cell.contextMenu.tooltip.item.icon` | Action icon | — |
+| `datagrid.header.cell.contextMenu.tooltip.item.separator` | Menu separator line | — |
+| `datagrid.header.cell.resizer` | Column resize handle | — |
+| `datagrid.body` | Body grid container (virtualized rows) | — |
+| `datagrid.body.cell` | Body cell | `isPinned`, `isFirstLeftPinned`, `isLastLeftPinned`, `isFirstRightPinned`, `isLastRightPinned`, `isRowNumber`, `isRowSelection`, `isRowSelected`, `isFirstLeaf`, `isLastLeaf`, `isEmptyCell` |
+| `datagrid.body.cell.text` | Default cell text renderer | — |
+| `datagrid.body.cell.rowDetail` | Row detail expand/collapse button | — |
+| `datagrid.body.row` | Data row (display: contents) | — |
+| `datagrid.body.groupRow` | Group row (display: contents) | — |
+| `datagrid.body.groupRow.expandButton` | Group expand/collapse button | — |
+| `datagrid.body.detailRow` | Expanded detail row | — |
+| `datagrid.body.empty` | Empty state container | — |
+| `datagrid.emptyColumns` | No columns selected placeholder | — |
+| `datagrid.bottomBar` | Bottom bar (row count, pagination) | — |
+| `datagrid.bottomBar.info` | Status text ("Rows: ...", "Selected: ...") | — |
+| `datagrid.bottomBar.clearFilters` | "Clear filters" link | — |
+| `datagrid.bottomBar.pagination` | Pagination controls wrapper | — |
+| `datagrid.bottomBar.pagination.button` | Pagination nav button | — |
+| `datagrid.bottomBar.pagination.info` | Page info text ("1 of 5") | — |
 
 ---
 

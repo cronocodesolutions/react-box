@@ -16,7 +16,15 @@ export default function DataGridCellRowDetail<TRow>(props: Props<TRow>) {
   }, [cell.grid, cell.row.key]);
 
   return (
-    <Button clean onClick={toggleHandler} cursor="pointer" display="flex" ai="center" jc="center">
+    <Button
+      component={`${cell.grid.componentName}.body.cell.rowDetail` as never}
+      clean
+      onClick={toggleHandler}
+      cursor="pointer"
+      display="flex"
+      ai="center"
+      jc="center"
+    >
       <ExpandIcon fill="currentColor" width="14px" height="14px" rotate={expanded ? 0 : -90} />
     </Button>
   );

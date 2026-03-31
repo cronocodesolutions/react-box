@@ -89,6 +89,7 @@ export default function DataGridBody<TRow>(props: Props<TRow>) {
 
     return (
       <Flex
+        component={`${grid.componentName}.body.empty` as never}
         jc="center"
         ai="center"
         width="fit"

@@ -66,7 +66,7 @@ function TextFilter<TRow>({ column, grid }: Props<TRow>) {
   const config: ColumnFilterConfig = typeof column.def.filterable === 'object' ? column.def.filterable : { type: 'text' };
 
   return (
-    <Flex ai="center" position="relative" width="fit">
+    <Flex component={`${grid.componentName}.filter.cell.input` as never} ai="center" position="relative" width="fit">
       <Textbox width="fit" variant="compact" placeholder={config.placeholder ?? 'Filter...'} value={localValue} onChange={handleChange} />
       {localValue && (
         <Flex position="absolute" right={2} top="1/2" translateY="-1/2" cursor="pointer" props={{ onClick: handleClear }}>
@@ -187,7 +187,12 @@ function NumberFilter<TRow>({ column, grid }: Props<TRow>) {
   }, [grid, column.key]);
 
   return (
-    <Flex ai={operator === 'between' ? 'start' : 'center'} gap={1} width="fit">
+    <Flex
+      component={`${grid.componentName}.filter.cell.input` as never}
+      ai={operator === 'between' ? 'start' : 'center'}
+      gap={1}
+      width="fit"
+    >
       <Dropdown<NumberFilterValue['operator']>
         value={operator}
         variant="compact"
@@ -294,6 +299,7 @@ function MultiselectFilter<TRow>({ column, grid }: Props<TRow>) {
 
   return (
     <Dropdown<string | number | boolean | null>
+      component={`${grid.componentName}.filter.cell.input` as never}
       multiple
       showCheckbox
       isSearchable
