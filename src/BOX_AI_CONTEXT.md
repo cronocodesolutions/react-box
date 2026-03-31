@@ -27,6 +27,9 @@ Always use Box props. If a prop doesn't exist, create it with `Box.extend()` (se
 | `style={{ position: "relative" }}` | `position="relative"` |
 | `style={{ zIndex: 10 }}` | `zIndex={10}` |
 | `style={{ opacity: 0.5 }}` | `opacity={0.5}` |
+| `sm={{ style: { maxWidth: 600 } }}` | `sm={{ maxWidth: 150 }}` (150/4=37.5rem=600px) |
+
+**`style` is top-level only** — it is NOT supported inside breakpoints, pseudo-classes, or theme objects. Always use Box props for responsive/conditional styles.
 
 ### Rule #2: ALWAYS Use Component Shortcuts
 
@@ -69,6 +72,11 @@ fontSize={18} // 18px    fontSize={24} // 24px    fontSize={32} // 32px
 
 // Spacing: divider 4 → value/4 = rem
 p={1} // 4px    p={2} // 8px    p={3} // 12px    p={4} // 16px    p={6} // 24px    p={8} // 32px
+
+// Width/Height/min/max: divider 4 → value/4 = rem (NOT direct pixels)
+width={20} // 5rem = 80px      height={10} // 2.5rem = 40px     height={20} // 5rem = 80px
+maxWidth={300} // 75rem = 1200px    minHeight={50} // 12.5rem = 200px
+height="fit" // 100%    height="fit-screen" // 100vh    width="1/2" // 50%
 ```
 
 ---
@@ -363,6 +371,8 @@ resetStyles();                         // reset for next SSR request
 10. **HTML attributes go in `props` prop**: `<Link props={{ href: '/about' }}>` not `<Link href>`
 11. **Size shortcuts**: `width="fit"` = 100%, `width="fit-screen"` = 100vw, `width="1/2"` = 50%
 12. **Box is memoized** with `React.memo`
+13. **`style` is top-level only** — never inside breakpoints (`sm={{ style: ... }}`), pseudo-classes, or theme objects
+14. **All sizing props use divider 4** — `width`, `height`, `minWidth`, `maxWidth`, `minHeight`, `maxHeight` are NOT direct pixels. `height={10}` = 2.5rem = 40px
 
 ---
 
