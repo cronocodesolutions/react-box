@@ -18,8 +18,12 @@ export default function DataGridBottomBar<TRow>(props: Props<TRow>) {
 
     return (
       <Flex component={`${grid.componentName}.bottomBar` as never}>
-        <Box>Rows: {totalItems > 0 ? `${start}–${end} of ${totalItems}` : '0'}</Box>
-        {grid.props.def.rowSelection && <Box>Selected: {grid.selectedRows.size}</Box>}
+        <Box component={`${grid.componentName}.bottomBar.info` as never}>
+          Rows: {totalItems > 0 ? `${start}–${end} of ${totalItems}` : '0'}
+        </Box>
+        {grid.props.def.rowSelection && (
+          <Box component={`${grid.componentName}.bottomBar.info` as never}>Selected: {grid.selectedRows.size}</Box>
+        )}
         <DataGridPagination grid={grid} />
       </Flex>
     );
@@ -30,10 +34,18 @@ export default function DataGridBottomBar<TRow>(props: Props<TRow>) {
 
   return (
     <Flex component={`${grid.componentName}.bottomBar` as never}>
-      <Box>Rows: {filtered !== total ? `${filtered} / ${total}` : total}</Box>
-      {grid.props.def.rowSelection && <Box>Selected: {grid.selectedRows.size}</Box>}
+      <Box component={`${grid.componentName}.bottomBar.info` as never}>Rows: {filtered !== total ? `${filtered} / ${total}` : total}</Box>
+      {grid.props.def.rowSelection && (
+        <Box component={`${grid.componentName}.bottomBar.info` as never}>Selected: {grid.selectedRows.size}</Box>
+      )}
       {hasActiveFilters && (
-        <Box color="blue-600" cursor="pointer" hover={{ textDecoration: 'underline' }} props={{ onClick: grid.clearAllFilters }}>
+        <Box
+          component={`${grid.componentName}.bottomBar.clearFilters` as never}
+          color="blue-600"
+          cursor="pointer"
+          hover={{ textDecoration: 'underline' }}
+          props={{ onClick: grid.clearAllFilters }}
+        >
           Clear filters
         </Box>
       )}

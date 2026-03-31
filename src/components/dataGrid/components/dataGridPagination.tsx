@@ -27,19 +27,19 @@ export default function DataGridPagination<TRow>(props: Props<TRow>) {
 
   return (
     <Flex component={`${grid.componentName}.bottomBar.pagination` as never} gap={0.5} ai="center">
-      <PaginationButton onClick={goFirst} disabled={isFirst}>
+      <PaginationButton componentName={grid.componentName} onClick={goFirst} disabled={isFirst}>
         <ChevronDoubleLeft />
       </PaginationButton>
-      <PaginationButton onClick={goPrev} disabled={isFirst}>
+      <PaginationButton componentName={grid.componentName} onClick={goPrev} disabled={isFirst}>
         <ChevronLeft />
       </PaginationButton>
-      <Box fontSize={12} px={3} userSelect="none">
+      <Box component={`${grid.componentName}.bottomBar.pagination.info` as never} fontSize={12} px={3} userSelect="none">
         {page} of {totalPages}
       </Box>
-      <PaginationButton onClick={goNext} disabled={isLast}>
+      <PaginationButton componentName={grid.componentName} onClick={goNext} disabled={isLast}>
         <ChevronRight />
       </PaginationButton>
-      <PaginationButton onClick={goLast} disabled={isLast}>
+      <PaginationButton componentName={grid.componentName} onClick={goLast} disabled={isLast}>
         <ChevronDoubleRight />
       </PaginationButton>
     </Flex>
@@ -48,11 +48,12 @@ export default function DataGridPagination<TRow>(props: Props<TRow>) {
 
 (DataGridPagination as React.FunctionComponent).displayName = 'DataGridPagination';
 
-function PaginationButton(props: { onClick: () => void; disabled: boolean; children: React.ReactNode }) {
-  const { onClick, disabled, children } = props;
+function PaginationButton(props: { componentName: string; onClick: () => void; disabled: boolean; children: React.ReactNode }) {
+  const { componentName, onClick, disabled, children } = props;
 
   return (
     <Button
+      component={`${componentName}.bottomBar.pagination.button` as never}
       clean
       onClick={onClick}
       cursor={disabled ? 'default' : 'pointer'}

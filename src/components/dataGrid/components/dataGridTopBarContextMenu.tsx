@@ -43,6 +43,7 @@ export default function DataGridTopBarContextMenu<TRow>(props: Props<TRow>) {
 
   return (
     <Dropdown<string>
+      component={`${grid.componentName}.topBar.columnVisibility` as never}
       multiple
       showCheckbox
       hideIcon
@@ -67,6 +68,7 @@ export default function DataGridTopBarContextMenu<TRow>(props: Props<TRow>) {
               </BaseSvg>
               {hasHidden && (
                 <Box
+                  component={`${grid.componentName}.topBar.columnVisibility.badge` as never}
                   tag="span"
                   fontSize={11}
                   lineHeight={16}

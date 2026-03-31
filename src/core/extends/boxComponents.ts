@@ -775,6 +775,14 @@ const boxComponents = {
               },
             },
           },
+          columnVisibility: {
+            styles: {},
+            children: {
+              badge: {
+                styles: {},
+              },
+            },
+          },
         },
       },
       filter: {
@@ -831,6 +839,11 @@ const boxComponents = {
                 },
               },
               isLastRightPinned: {},
+            },
+            children: {
+              input: {
+                styles: {},
+              },
             },
           },
         },
@@ -1089,6 +1102,15 @@ const boxComponents = {
               isLastLeaf: {},
               isEmptyCell: {},
             },
+            children: {
+              text: {
+                styles: {},
+              },
+              rowDetail: {
+                clean: true,
+                styles: {},
+              },
+            },
           },
           detailRow: {
             styles: {},
@@ -1097,6 +1119,15 @@ const boxComponents = {
             styles: {},
           },
           groupRow: {
+            styles: {},
+            children: {
+              expandButton: {
+                clean: true,
+                styles: {},
+              },
+            },
+          },
+          empty: {
             styles: {},
           },
         },
@@ -1125,8 +1156,23 @@ const boxComponents = {
           },
         },
         children: {
+          info: {
+            styles: {},
+          },
+          clearFilters: {
+            styles: {},
+          },
           pagination: {
             styles: {},
+            children: {
+              button: {
+                clean: true,
+                styles: {},
+              },
+              info: {
+                styles: {},
+              },
+            },
           },
         },
       },

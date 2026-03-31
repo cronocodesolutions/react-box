@@ -237,7 +237,9 @@ import DataGrid from '@cronocode/react-box/components/dataGrid';
 
 **Server-side pagination**: `def={{ pagination: { totalCount, pageSize }, bottomBar: true }}` + `page={page}` + `onServerStateChange={(state) => refetch(state)}`.
 
-**Style tree**: `datagrid > content, topBar (globalFilter, columnGroups), header > cell (contextMenu, resizer), filter > row > cell, body > cell | row | groupRow | detailRow, bottomBar > pagination`. Customize via `Box.components()`. Use `extends: 'datagrid'` for variant grids (inherits pinning, sticky, etc.).
+**Style tree** (all customizable via `Box.components()`, use `extends: 'datagrid'` for variant grids):
+`datagrid` > `content`, `topBar` > (`globalFilter` > `stats`, `columnGroups` > `icon` | `separator` | `item` > `icon`, `columnVisibility` > `badge`), `filter` > `cell` > `input`, `header` > `cell` > (`contextMenu` > `icon` | `tooltip` > `item` > `icon` | `separator`, `resizer`), `body` > (`cell` > `text` | `rowDetail`, `row`, `groupRow` > `expandButton`, `detailRow`, `empty`), `emptyColumns`, `bottomBar` > (`info`, `clearFilters`, `pagination` > `button` | `info`).
+Cell variants: `isPinned`, `isFirstLeftPinned`, `isLastLeftPinned`, `isFirstRightPinned`, `isLastRightPinned`, `isRowNumber`, `isRowSelection`, `isRowSelected`, `isSortable`, `isFirstLeaf`, `isLastLeaf`, `isEmptyCell`.
 
 ## Common Patterns
 
