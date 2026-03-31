@@ -30,7 +30,7 @@ const boxComponents = {
     styles: { fontSize: 14 * 1 },
   },
   span: {
-    styles: { inline: true },
+    styles: { display: 'inline-block' },
   },
   button: {
     styles: {
