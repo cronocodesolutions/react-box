@@ -1,7 +1,7 @@
 import { describe, expect, it, suite, vi } from 'vitest';
 import { ignoreLogs } from '../../../../dev/tests';
 import { GridDefinition } from '../contracts/dataGridContract';
-import GridModel, { DEFAULT_ROW_NUMBER_COLUMN_WIDTH, ROW_NUMBER_CELL_KEY } from './gridModel';
+import GridModel, { DEFAULT_ROW_NUMBER_COLUMN_WIDTH, ROW_DETAIL_CELL_KEY, ROW_NUMBER_CELL_KEY } from './gridModel';
 import GroupRowModel from './groupRowModel';
 import RowModel from './rowModel';
 
@@ -321,6 +321,94 @@ describe('GridModel', () => {
 
       expect(rowNumberColumn?.inlineWidth).toEqual(129);
       expect(rowNumberColumn?.pin).toEqual('LEFT');
+    });
+  });
+
+  suite('when rowDetail', () => {
+    it('adds expand column with empty header by default', () => {
+      const grid = getGridModel({
+        gridDef: { columns: [{ key: 'firstName' }], rowDetail: { content: () => null } },
+      });
+
+      const expandColumn = grid.columns.value.visibleLeafs.find((x) => x.key === ROW_DETAIL_CELL_KEY);
+      expect(expandColumn).toBeDefined();
+      expect(expandColumn?.header).toBe('');
+    });
+
+    it('uses custom expandColumnHeader', () => {
+      const grid = getGridModel({
+        gridDef: { columns: [{ key: 'firstName' }], rowDetail: { content: () => null, expandColumnHeader: 'Details' } },
+      });
+
+      const expandColumn = grid.columns.value.visibleLeafs.find((x) => x.key === ROW_DETAIL_CELL_KEY);
+      expect(expandColumn?.header).toBe('Details');
+    });
+
+    it('expand column defaults to width 50', () => {
+      const grid = getGridModel({
+        gridDef: { columns: [{ key: 'firstName' }], rowDetail: { content: () => null } },
+      });
+
+      const expandColumn = grid.columns.value.visibleLeafs.find((x) => x.key === ROW_DETAIL_CELL_KEY);
+      expect(expandColumn?.inlineWidth).toBe(50);
+    });
+
+    it('expand column uses custom expandColumnWidth', () => {
+      const grid = getGridModel({
+        gridDef: { columns: [{ key: 'firstName' }], rowDetail: { content: () => null, expandColumnWidth: 80 } },
+      });
+
+      const expandColumn = grid.columns.value.visibleLeafs.find((x) => x.key === ROW_DETAIL_CELL_KEY);
+      expect(expandColumn?.inlineWidth).toBe(80);
+    });
+
+    it('expand column is excluded from userVisibleLeafs', () => {
+      const grid = getGridModel({
+        gridDef: { columns: [{ key: 'firstName' }], rowDetail: { content: () => null } },
+      });
+
+      expect(grid.columns.value.userVisibleLeafs.some((c) => c.key === ROW_DETAIL_CELL_KEY)).toBe(false);
+    });
+  });
+
+  suite('resizerStyle', () => {
+    it('defaults to visible', () => {
+      const grid = getGridModel();
+      expect(grid.resizerStyle).toBe('visible');
+    });
+
+    it('respects hover setting', () => {
+      const grid = getGridModel({ gridDef: { resizerStyle: 'hover' } });
+      expect(grid.resizerStyle).toBe('hover');
+    });
+
+    it('respects hidden setting', () => {
+      const grid = getGridModel({ gridDef: { resizerStyle: 'hidden' } });
+      expect(grid.resizerStyle).toBe('hidden');
+    });
+  });
+
+  suite('viewportWidth CSS variable', () => {
+    it('includes --viewport-width in sizes when container width is set', () => {
+      const grid = getGridModel({ gridDef: { columns: [{ key: 'firstName' }] } });
+      grid.setContainerWidth(800);
+
+      expect(grid.sizes.value['--viewport-width']).toBe('800px');
+    });
+
+    it('does not include --viewport-width when container width is 0', () => {
+      const grid = getGridModel({ gridDef: { columns: [{ key: 'firstName' }] } });
+
+      expect(grid.sizes.value['--viewport-width']).toBeUndefined();
+    });
+
+    it('updates --viewport-width when container is resized', () => {
+      const grid = getGridModel({ gridDef: { columns: [{ key: 'firstName' }] } });
+      grid.setContainerWidth(800);
+      expect(grid.sizes.value['--viewport-width']).toBe('800px');
+
+      grid.setContainerWidth(1200);
+      expect(grid.sizes.value['--viewport-width']).toBe('1200px');
     });
   });
 });

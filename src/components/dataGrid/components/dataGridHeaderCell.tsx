@@ -4,7 +4,7 @@ import SortIcon from '../../../icons/sortIcon';
 import Checkbox from '../../checkbox';
 import Flex from '../../flex';
 import ColumnModel from '../models/columnModel';
-import { EMPTY_CELL_KEY, GROUPING_CELL_KEY, ROW_NUMBER_CELL_KEY, ROW_SELECTION_CELL_KEY } from '../models/gridModel';
+import { EMPTY_CELL_KEY, GROUPING_CELL_KEY, ROW_DETAIL_CELL_KEY, ROW_NUMBER_CELL_KEY, ROW_SELECTION_CELL_KEY } from '../models/gridModel';
 import DataGridHeaderCellContextMenu from './dataGridHeaderCellContextMenu';
 import DataGridHeaderCellResizer from './dataGridHeaderCellResizer';
 
@@ -37,6 +37,7 @@ export default function DataGridHeaderCell<TRow>(props: Props<TRow>) {
   const isGroupingCell = key === GROUPING_CELL_KEY;
   const isRowNumber = key === ROW_NUMBER_CELL_KEY;
   const isRowSelection = key === ROW_SELECTION_CELL_KEY;
+  const isRowDetailCell = key === ROW_DETAIL_CELL_KEY;
 
   const isLeftPinned = pin === 'LEFT';
   const isRightPinned = pin === 'RIGHT';
@@ -45,12 +46,12 @@ export default function DataGridHeaderCell<TRow>(props: Props<TRow>) {
   const isLastLeftPinned = isLeftPinned && isEdge;
   const isFirstRightPinned = isRightPinned && isEdge;
   const isLastRightPinned = isRightPinned && right === 0;
-  const isSortable = isLeaf && !isEmptyCell && !isRowNumber && !isRowSelection && column.sortable;
+  const isSortable = isLeaf && !isEmptyCell && !isRowNumber && !isRowSelection && !isRowDetailCell && column.sortable;
 
   const gridColumn = isLeaf ? 1 : leafs.length;
 
-  const showResizer = !isRowNumber && !isRowSelection && column.resizable;
-  const showContextMenu = !isRowNumber && !isRowSelection;
+  const showResizer = !isRowNumber && !isRowSelection && !isRowDetailCell && column.resizable;
+  const showContextMenu = !isRowNumber && !isRowSelection && !isRowDetailCell && column.showContextMenu;
 
   const pl = isRowSelection ? undefined : column.align === 'right' ? 10 : 3;
   const pr = isRowSelection ? undefined : column.align === 'center' ? 3 : undefined;
@@ -83,6 +84,7 @@ export default function DataGridHeaderCell<TRow>(props: Props<TRow>) {
   return (
     <Flex
       props={{ role: 'columnheader' }}
+      className="header-cell"
       component={`${grid.componentName}.header.cell` as never}
       variant={
         {

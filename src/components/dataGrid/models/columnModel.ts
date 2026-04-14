@@ -1,5 +1,5 @@
 import FnUtils from '../../../utils/fn/fnUtils';
-import { ColumnType, PinPosition } from '../contracts/dataGridContract';
+import { ColumnType, ContextMenuConfig, PinPosition } from '../contracts/dataGridContract';
 import GridModel, { EMPTY_CELL_KEY } from './gridModel';
 
 export default class ColumnModel<TRow> {
@@ -68,6 +68,34 @@ export default class ColumnModel<TRow> {
       return this.def.resizable;
     }
     return this.grid.props.def.resizable !== false;
+  }
+
+  /** Resolved context menu configuration. Column-level takes priority over grid-level. Default: true. */
+  public get contextMenu(): boolean | ContextMenuConfig {
+    if (this.def.contextMenu !== undefined) {
+      return this.def.contextMenu;
+    }
+    return this.grid.props.def.contextMenu ?? true;
+  }
+
+  /** Whether the context menu button should be shown at all. */
+  public get showContextMenu(): boolean {
+    const config = this.contextMenu;
+    if (typeof config === 'boolean') return config;
+    return config.sort !== false || config.pin !== false || config.group !== false;
+  }
+
+  /** Resolved context menu sections visibility. */
+  public get contextMenuSections(): { sort: boolean; pin: boolean; group: boolean } {
+    const config = this.contextMenu;
+    if (typeof config === 'boolean') {
+      return { sort: config, pin: config, group: config };
+    }
+    return {
+      sort: config.sort !== false,
+      pin: config.pin !== false,
+      group: config.group !== false,
+    };
   }
 
   /** Whether column participates in flex distribution. Default true unless explicitly false. */

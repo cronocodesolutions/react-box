@@ -1113,7 +1113,15 @@ const boxComponents = {
             },
           },
           detailRow: {
-            styles: {},
+            styles: {
+              bb: 1,
+              borderColor: 'gray-200',
+              theme: {
+                dark: {
+                  borderColor: 'gray-800',
+                },
+              },
+            },
           },
           row: {
             styles: {},

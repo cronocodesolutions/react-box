@@ -38,6 +38,10 @@ export default class GridModel<TRow> {
     return (this.props.component || 'datagrid') as keyof ComponentsAndVariants;
   }
 
+  public get resizerStyle(): 'visible' | 'hover' | 'hidden' {
+    return this.props.def.resizerStyle ?? 'visible';
+  }
+
   public readonly sourceColumns = memo(() => {
     const { def } = this.props;
 
@@ -74,8 +78,11 @@ export default class GridModel<TRow> {
     if (def.rowDetail) {
       const pin: PinPosition | undefined = def.rowDetail.pinned ? 'LEFT' : undefined;
       const width = def.rowDetail.expandColumnWidth ?? 50;
+      const header = def.rowDetail.expandColumnHeader ?? '';
 
-      sourceColumns.unshift(new ColumnModel({ key: ROW_DETAIL_CELL_KEY, pin, width, align: 'center', Cell: DataGridCellRowDetail }, this));
+      sourceColumns.unshift(
+        new ColumnModel({ key: ROW_DETAIL_CELL_KEY, header, pin, width, align: 'center', Cell: DataGridCellRowDetail }, this),
+      );
     }
 
     return sourceColumns;
@@ -91,7 +98,8 @@ export default class GridModel<TRow> {
     const leafs = flat.filter((x) => x.isLeaf);
     const visibleLeafs = flat.filter((x) => x.isLeaf && x.isVisible);
     const userVisibleLeafs = visibleLeafs.filter(
-      (c) => ![EMPTY_CELL_KEY, ROW_NUMBER_CELL_KEY, ROW_SELECTION_CELL_KEY, GROUPING_CELL_KEY, ROW_DETAIL_CELL_KEY].includes(c.key),
+      (c) =>
+        !([EMPTY_CELL_KEY, ROW_NUMBER_CELL_KEY, ROW_SELECTION_CELL_KEY, GROUPING_CELL_KEY, ROW_DETAIL_CELL_KEY] as Key[]).includes(c.key),
     );
     const maxDeath = flat.maxBy((x) => x.death) + 1;
 
@@ -501,6 +509,9 @@ export default class GridModel<TRow> {
 
     size[this.rowHeightVarName] = `${this.rowHeight}px`;
     size[this.leftEdgeVarName] = `${this.leftEdge}px`;
+    if (this._containerWidth > 0) {
+      size[this.viewportWidthVarName] = `${this._containerWidth}px`;
+    }
 
     const { visibleLeafs } = this.columns.value;
     const groupingColumn = visibleLeafs.find((c) => c.key === GROUPING_CELL_KEY);
@@ -703,6 +714,7 @@ export default class GridModel<TRow> {
   }
   public readonly leftEdgeVarName = '--left-edge';
   public readonly rowHeightVarName = '--row-height';
+  public readonly viewportWidthVarName = '--viewport-width';
 
   private readonly _idMap = new WeakMap<WeakKey, Key>();
   public getRowKey(row: TRow): Key {

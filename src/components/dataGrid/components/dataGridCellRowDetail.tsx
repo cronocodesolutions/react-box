@@ -11,9 +11,13 @@ export default function DataGridCellRowDetail<TRow>(props: Props<TRow>) {
   const { cell } = props;
   const expanded = cell.grid.expandedDetailRows.has(cell.row.key);
 
-  const toggleHandler = useCallback(() => {
-    cell.grid.toggleDetailRow(cell.row.key);
-  }, [cell.grid, cell.row.key]);
+  const toggleHandler = useCallback(
+    (e: React.MouseEvent) => {
+      e.stopPropagation();
+      cell.grid.toggleDetailRow(cell.row.key);
+    },
+    [cell.grid, cell.row.key],
+  );
 
   return (
     <Button
@@ -24,6 +28,8 @@ export default function DataGridCellRowDetail<TRow>(props: Props<TRow>) {
       display="flex"
       ai="center"
       jc="center"
+      width="fit"
+      height="fit"
     >
       <ExpandIcon fill="currentColor" width="14px" height="14px" rotate={expanded ? 0 : -90} />
     </Button>

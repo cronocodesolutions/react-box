@@ -293,7 +293,6 @@ export default function DataGridPage() {
 />`}
           >
             <DataGrid
-              component="subgrid"
               data={allData}
               filters={filters}
               def={{
@@ -646,6 +645,7 @@ export default function DataGridPage() {
           }}
         />
       ),
+      expandColumnHeader: 'Details',
       pinned: true,
     },
   }}
@@ -696,10 +696,16 @@ export default function DataGridPage() {
                     header: 'Total',
                     width: 100,
                     align: 'right',
-                    Cell: ({ cell }) => <Box fontWeight={600}>${cell.row.data.total}</Box>,
+                    Cell: ({ cell }) => (
+                      <Box fontWeight={600} px={2}>
+                        ${cell.row.data.total}
+                      </Box>
+                    ),
                   },
                 ],
+                contextMenu: { pin: false },
                 rowDetail: {
+                  // expandColumnHeader: 'Details',
                   content: (order: (typeof ordersData)[0]) => (
                     <Box p={4}>
                       <Box fontSize={13} fontWeight={600} mb={2} color="gray-600" theme={{ dark: { color: 'gray-400' } }}>
@@ -718,7 +724,7 @@ export default function DataGridPage() {
                               header: 'Price',
                               width: 100,
                               align: 'right',
-                              Cell: ({ cell }) => <Box>${cell.row.data.price}</Box>,
+                              Cell: ({ cell }) => <Box px={2}>${cell.row.data.price}</Box>,
                             },
                           ],
                           visibleRowsCount: 'all',
@@ -728,6 +734,8 @@ export default function DataGridPage() {
                     </Box>
                   ),
                   pinned: true,
+                  expandOnRowClick: true,
+                  expandColumnWidth: 50,
                 },
               }}
             />
@@ -772,6 +780,85 @@ export default function DataGridPage() {
                 visibleRowsCount: 5,
                 sortable: false,
                 resizable: false,
+              }}
+            />
+          </Code>
+
+          <Code
+            id="context-menu"
+            label="Context Menu Control"
+            language="jsx"
+            code={`<DataGrid
+  data={data}
+  def={{
+    columns: [
+      { key: 'first_name', header: 'First name' },
+      { key: 'last_name', header: 'Last name' },
+      { key: 'age', header: 'Age', width: 100, contextMenu: false }, // No context menu
+      { key: 'email', header: 'Email', width: 300, contextMenu: { sort: true, pin: false, group: false } },
+      { key: 'country' },
+      { key: 'city' },
+    ],
+    rowHeight: 40,
+    visibleRowsCount: 5,
+    contextMenu: { sort: true, pin: true, group: false }, // Disable grouping globally
+  }}
+/>`}
+          >
+            <DataGrid
+              data={allData}
+              def={{
+                columns: [
+                  { key: 'first_name', header: 'First name' },
+                  { key: 'last_name', header: 'Last name' },
+                  { key: 'age', header: 'Age', width: 100, contextMenu: false },
+                  { key: 'email', header: 'Email', width: 300, contextMenu: { sort: true, pin: false, group: false } },
+                  { key: 'country' },
+                  { key: 'city' },
+                ],
+                rowHeight: 40,
+                visibleRowsCount: 5,
+                contextMenu: { sort: true, pin: true, group: false },
+              }}
+            />
+          </Code>
+
+          <Code
+            id="resizer-style"
+            label="Resizer Style"
+            language="jsx"
+            code={`// 'hover' — resizer appears only when hovering the header cell
+<DataGrid
+  data={data}
+  def={{
+    columns: [
+      { key: 'first_name', header: 'First name' },
+      { key: 'last_name', header: 'Last name' },
+      { key: 'age', header: 'Age', width: 100 },
+      { key: 'email', header: 'Email', width: 300 },
+      { key: 'country' },
+      { key: 'city' },
+    ],
+    rowHeight: 40,
+    visibleRowsCount: 5,
+    resizerStyle: 'hover', // 'visible' | 'hover' | 'hidden'
+  }}
+/>`}
+          >
+            <DataGrid
+              data={allData}
+              def={{
+                columns: [
+                  { key: 'first_name', header: 'First name' },
+                  { key: 'last_name', header: 'Last name' },
+                  { key: 'age', header: 'Age', width: 100 },
+                  { key: 'email', header: 'Email', width: 300 },
+                  { key: 'country' },
+                  { key: 'city' },
+                ],
+                rowHeight: 40,
+                visibleRowsCount: 5,
+                resizerStyle: 'hover',
               }}
             />
           </Code>
