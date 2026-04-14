@@ -402,7 +402,9 @@ import DataGrid from '@cronocode/react-box/components/dataGrid';
         Cell: ({ cell }) => <Button onClick={() => edit(cell.row.data)}>Edit</Button>,
       },
     ],
-    rowDetail: { content: (user) => <UserDetails user={user} />, height: 'auto', expandOnRowClick: true },
+    rowDetail: { content: (user) => <UserDetails user={user} />, height: 'auto', expandOnRowClick: true, expandColumnHeader: 'Details' },
+    contextMenu: { sort: true, pin: true, group: false },
+    resizerStyle: 'hover',
   }}
   onSelectionChange={(e) => console.log(e.selectedRowKeys)}
 />
@@ -435,13 +437,15 @@ import DataGrid from '@cronocode/react-box/components/dataGrid';
 | `visibleRowsCount` | `number \| 'all'` | `10` | Visible rows. `'all'` disables virtualization |
 | `showRowNumber` | `boolean \| { pinned?, width? }` | `false` | Row number column |
 | `rowSelection` | `boolean \| { pinned? }` | `false` | Checkbox selection column |
-| `rowDetail` | `{ content, height?, expandOnRowClick?, pinned? }` | — | Expandable detail panel. `height`: `'auto'`/number/`(row) => number` |
+| `rowDetail` | `RowDetailConfig` | — | Expandable detail panel (see below) |
 | `pagination` | `{ totalCount, pageSize? }` | — | Server-side pagination. Bypasses client-side filtering |
 | `topBar` / `bottomBar` | `boolean` | `false` | Show top/bottom bars |
 | `title` / `topBarContent` | `ReactNode` | — | Top bar content |
 | `globalFilter` | `boolean` | `false` | Enable global fuzzy search |
 | `globalFilterKeys` | `(keyof TRow)[]` | all | Limit global filter columns |
 | `sortable` / `resizable` | `boolean` | `true` | Enable sorting/resizing for all columns |
+| `contextMenu` | `boolean \| ContextMenuConfig` | `true` | Control column header context menu. `false` hides it. Object: `{ sort?, pin?, group? }` |
+| `resizerStyle` | `'visible' \| 'hover' \| 'hidden'` | `'visible'` | Resizer handle visibility. `'hover'`: shows on header cell hover. `'hidden'`: invisible but resize still works |
 | `noDataComponent` | `ReactNode` | `'empty'` | Custom empty state |
 
 ### ColumnType
@@ -458,6 +462,26 @@ import DataGrid from '@cronocode/react-box/components/dataGrid';
 | `sortable` / `resizable` | `boolean` | inherits | Override grid-level setting |
 | `flexible` | `boolean` | `true` | Participate in flex width distribution |
 | `filterable` | `boolean \| FilterConfig` | — | `true` (text), `{ type: 'number', min?, max? }`, `{ type: 'multiselect', options? }` |
+| `contextMenu` | `boolean \| ContextMenuConfig` | inherits | Override grid-level context menu. `false` hides entirely. `{ sort?, pin?, group? }` controls sections |
+
+### RowDetailConfig
+
+| Prop | Type | Default | Description |
+|---|---|---|---|
+| `content` | `(row: TRow) => ReactNode` | required | Render function for the detail panel |
+| `height` | `'auto' \| number \| (row) => number` | `'auto'` | Detail row height |
+| `expandOnRowClick` | `boolean` | `false` | Click anywhere on the row to toggle expansion |
+| `pinned` | `boolean` | `false` | Pin the expand column to LEFT |
+| `expandColumnWidth` | `number` | `50` | Width of the expand column in px |
+| `expandColumnHeader` | `string` | `''` | Header text for the expand column |
+
+### ContextMenuConfig
+
+| Prop | Type | Default | Description |
+|---|---|---|---|
+| `sort` | `boolean` | `true` | Show Sort Ascending / Sort Descending / Clear Sort |
+| `pin` | `boolean` | `true` | Show Pin Left / Pin Right / Unpin |
+| `group` | `boolean` | `true` | Show Group By / Un-Group All |
 
 ### Server-Side Pagination
 

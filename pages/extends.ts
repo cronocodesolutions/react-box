@@ -361,7 +361,7 @@ export const components = Box.components({
         children: {
           detailRow: {
             styles: {
-              theme: { dark: { bgColor: 'blue-950' } },
+              theme: { dark: { bgColor: 'gray-900' } },
             },
           },
         },
@@ -386,11 +386,10 @@ export const components = Box.components({
           cell: {
             styles: {
               fontSize: 12,
-              py: 1,
-              bgColor: 'transparent',
+              bgColor: 'gray-900',
               color: 'gray-100',
               fontWeight: 500,
-              theme: { dark: { bgColor: 'transparent', color: 'gray-500' } },
+              theme: { dark: { bgColor: 'gray-800', color: 'gray-500' } },
             },
           },
         },

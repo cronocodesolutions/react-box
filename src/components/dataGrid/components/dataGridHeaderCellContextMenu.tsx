@@ -23,14 +23,16 @@ export default function DataGridHeaderCellContextMenu<TRow>(props: Props<TRow>) 
   const [tooltipPosition, setTooltipPosition] = useState<{ top: number; left: number }>({ top: 0, left: 0 });
   const openLeft = useMemo(() => tooltipPosition.left > window.innerWidth / 2, [tooltipPosition.left]);
 
-  const isSortAscAvailable = isLeaf && column.sortable && (grid.sortColumn !== key || grid.sortDirection === 'DESC');
-  const isSortDescAvailable = isLeaf && column.sortable && (grid.sortColumn !== key || grid.sortDirection === 'ASC');
-  const isClearSortAvailable = isLeaf && column.sortable && grid.sortColumn === key;
-  const isPinLeftAvailable = pin !== 'LEFT';
-  const isPinRightAvailable = pin !== 'RIGHT';
-  const isUnpinAvailable = !!pin;
-  const isGroupByAvailable = isLeaf && key !== GROUPING_CELL_KEY;
-  const isUnGroupByAvailable = isLeaf && key === GROUPING_CELL_KEY;
+  const { sort: showSort, pin: showPin, group: showGroup } = column.contextMenuSections;
+
+  const isSortAscAvailable = showSort && isLeaf && column.sortable && (grid.sortColumn !== key || grid.sortDirection === 'DESC');
+  const isSortDescAvailable = showSort && isLeaf && column.sortable && (grid.sortColumn !== key || grid.sortDirection === 'ASC');
+  const isClearSortAvailable = showSort && isLeaf && column.sortable && grid.sortColumn === key;
+  const isPinLeftAvailable = showPin && pin !== 'LEFT';
+  const isPinRightAvailable = showPin && pin !== 'RIGHT';
+  const isUnpinAvailable = showPin && !!pin;
+  const isGroupByAvailable = showGroup && isLeaf && key !== GROUPING_CELL_KEY;
+  const isUnGroupByAvailable = showGroup && isLeaf && key === GROUPING_CELL_KEY;
 
   const isSortingAvailable = isSortAscAvailable || isSortDescAvailable || isClearSortAvailable;
   const isPiningAvailable = isPinLeftAvailable || isPinRightAvailable || isUnpinAvailable;

@@ -92,6 +92,20 @@ export interface RowDetailConfig<TRow> {
   pinned?: boolean;
   /** Width of the expand column. Default: 50 */
   expandColumnWidth?: number;
+  /** Header text for the expand column. Default: '' (empty) */
+  expandColumnHeader?: string;
+}
+
+// ========== Context Menu ==========
+
+/** Controls which sections appear in the column header context menu */
+export interface ContextMenuConfig {
+  /** Show sort actions (Sort Ascending, Sort Descending, Clear Sort). Default: true */
+  sort?: boolean;
+  /** Show pin actions (Pin Left, Pin Right, Unpin). Default: true */
+  pin?: boolean;
+  /** Show group actions (Group By, Un-Group All). Default: true */
+  group?: boolean;
 }
 
 // ========== Column Type ==========
@@ -112,6 +126,8 @@ export interface ColumnType<TRow> {
   resizable?: boolean;
   /** If false, column stays fixed at its width and doesn't participate in flex distribution. Default: true */
   flexible?: boolean;
+  /** Control the header context menu. false hides it entirely. Object controls individual sections. Inherits from GridDefinition.contextMenu if undefined. */
+  contextMenu?: boolean | ContextMenuConfig;
 }
 
 export interface GridDefinition<TRow> {
@@ -136,6 +152,10 @@ export interface GridDefinition<TRow> {
   sortable?: boolean;
   /** Enable resizing for all columns. Default is true. Individual column settings take priority. */
   resizable?: boolean;
+  /** Controls the visual style of column resizer handles. 'visible' (default): always shown. 'hover': visible on header cell hover. 'hidden': invisible but resize still works. */
+  resizerStyle?: 'visible' | 'hover' | 'hidden';
+  /** Control the header context menu for all columns. false hides it entirely. Object controls individual sections. Default: true. Individual column settings take priority. */
+  contextMenu?: boolean | ContextMenuConfig;
   /** Custom component to render when data is empty */
   noDataComponent?: React.ReactNode;
   /** Enable expandable row detail panel */

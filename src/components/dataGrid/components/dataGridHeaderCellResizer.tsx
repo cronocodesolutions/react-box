@@ -8,6 +8,7 @@ interface Props<TRow> {
 
 export default function DataGridHeaderCellResizer<TRow>(props: Props<TRow>) {
   const { column } = props;
+  const resizerStyle = column.grid.resizerStyle;
 
   return (
     <Flex
@@ -26,7 +27,11 @@ export default function DataGridHeaderCellResizer<TRow>(props: Props<TRow>) {
         height="fit"
         props={{ onMouseDown: column.resizeColumn, onTouchStart: column.resizeColumn }}
       >
-        <Box component={`${column.grid.componentName}.header.cell.resizer` as never} />
+        <Box
+          component={`${column.grid.componentName}.header.cell.resizer` as never}
+          opacity={resizerStyle !== 'visible' ? 0 : undefined}
+          hoverGroup={resizerStyle === 'hover' ? ({ 'header-cell': { opacity: 1 } } as never) : undefined}
+        />
       </Box>
     </Flex>
   );

@@ -129,6 +129,84 @@ describe('ColumnModel', () => {
     });
   });
 
+  describe('contextMenu', () => {
+    it('defaults to true when no flags are set', () => {
+      const grid = new GridModel<Person>({ data, def: { columns: [{ key: 'firstName' }] } }, () => {});
+      const col = grid.columns.value.leafs.findOrThrow((c) => c.key === 'firstName');
+      expect(col.contextMenu).toBe(true);
+      expect(col.showContextMenu).toBe(true);
+      expect(col.contextMenuSections).toEqual({ sort: true, pin: true, group: true });
+    });
+
+    it('respects global contextMenu: false', () => {
+      const grid = new GridModel<Person>({ data, def: { columns: [{ key: 'firstName' }], contextMenu: false } }, () => {});
+      const col = grid.columns.value.leafs.findOrThrow((c) => c.key === 'firstName');
+      expect(col.contextMenu).toBe(false);
+      expect(col.showContextMenu).toBe(false);
+      expect(col.contextMenuSections).toEqual({ sort: false, pin: false, group: false });
+    });
+
+    it('column-level contextMenu: false overrides global true', () => {
+      const grid = new GridModel<Person>(
+        { data, def: { columns: [{ key: 'firstName', contextMenu: false }], contextMenu: true } },
+        () => {},
+      );
+      const col = grid.columns.value.leafs.findOrThrow((c) => c.key === 'firstName');
+      expect(col.contextMenu).toBe(false);
+      expect(col.showContextMenu).toBe(false);
+    });
+
+    it('column-level contextMenu: true overrides global false', () => {
+      const grid = new GridModel<Person>(
+        { data, def: { columns: [{ key: 'firstName', contextMenu: true }], contextMenu: false } },
+        () => {},
+      );
+      const col = grid.columns.value.leafs.findOrThrow((c) => c.key === 'firstName');
+      expect(col.contextMenu).toBe(true);
+      expect(col.showContextMenu).toBe(true);
+    });
+
+    it('respects global ContextMenuConfig object', () => {
+      const grid = new GridModel<Person>(
+        { data, def: { columns: [{ key: 'firstName' }], contextMenu: { sort: true, pin: false, group: false } } },
+        () => {},
+      );
+      const col = grid.columns.value.leafs.findOrThrow((c) => c.key === 'firstName');
+      expect(col.contextMenuSections).toEqual({ sort: true, pin: false, group: false });
+      expect(col.showContextMenu).toBe(true);
+    });
+
+    it('column-level ContextMenuConfig overrides global', () => {
+      const grid = new GridModel<Person>(
+        {
+          data,
+          def: {
+            columns: [{ key: 'firstName', contextMenu: { sort: false, pin: true } }],
+            contextMenu: { sort: true, pin: false, group: false },
+          },
+        },
+        () => {},
+      );
+      const col = grid.columns.value.leafs.findOrThrow((c) => c.key === 'firstName');
+      expect(col.contextMenuSections).toEqual({ sort: false, pin: true, group: true });
+    });
+
+    it('showContextMenu returns false when all sections are disabled', () => {
+      const grid = new GridModel<Person>(
+        { data, def: { columns: [{ key: 'firstName', contextMenu: { sort: false, pin: false, group: false } }] } },
+        () => {},
+      );
+      const col = grid.columns.value.leafs.findOrThrow((c) => c.key === 'firstName');
+      expect(col.showContextMenu).toBe(false);
+    });
+
+    it('ContextMenuConfig defaults missing keys to true', () => {
+      const grid = new GridModel<Person>({ data, def: { columns: [{ key: 'firstName', contextMenu: { sort: false } }] } }, () => {});
+      const col = grid.columns.value.leafs.findOrThrow((c) => c.key === 'firstName');
+      expect(col.contextMenuSections).toEqual({ sort: false, pin: true, group: true });
+    });
+  });
+
   describe('flexible', () => {
     it('isFlexible defaults to true when flexible is undefined', () => {
       const grid = new GridModel<Person>({ data, def: { columns: [{ key: 'firstName' }] } }, () => {});
