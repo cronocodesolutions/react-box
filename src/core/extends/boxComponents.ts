@@ -1101,6 +1101,10 @@ const boxComponents = {
               isFirstLeaf: {},
               isLastLeaf: {},
               isEmptyCell: {},
+              isRowDetail: {},
+              isExpanded: {},
+              isExpandedFirstLeaf: {},
+              isExpandedLastLeaf: {},
             },
             children: {
               text: {
@@ -1109,6 +1113,9 @@ const boxComponents = {
               rowDetail: {
                 clean: true,
                 styles: {},
+                variants: {
+                  isExpanded: {},
+                },
               },
             },
           },
@@ -1120,6 +1127,11 @@ const boxComponents = {
                 dark: {
                   borderColor: 'gray-800',
                 },
+              },
+            },
+            children: {
+              content: {
+                styles: {},
               },
             },
           },
@@ -1185,6 +1197,9 @@ const boxComponents = {
         },
       },
     },
+  },
+  'orders-datagrid': {
+    extends: 'datagrid',
   },
 } satisfies Components;
 

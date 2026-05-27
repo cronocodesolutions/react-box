@@ -22,6 +22,7 @@ export default function DataGridCellRowDetail<TRow>(props: Props<TRow>) {
   return (
     <Button
       component={`${cell.grid.componentName}.body.cell.rowDetail` as never}
+      variant={{ isExpanded: expanded } as never}
       clean
       onClick={toggleHandler}
       cursor="pointer"

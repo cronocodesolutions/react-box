@@ -369,6 +369,72 @@ export const components = Box.components({
     },
   },
 
+  // Orders DataGrid — extends datagrid with 3px indigo border that visually joins expanded row + detail row
+  'orders-datagrid': {
+    extends: 'datagrid',
+    children: {
+      body: {
+        children: {
+          cell: {
+            variants: {
+              isExpanded: {
+                bt: 3,
+                bb: 0,
+                bgColor: 'indigo-50',
+                borderColor: 'indigo-300',
+                hoverGroup: { 'grid-row': { bgColor: 'indigo-100' } },
+                theme: {
+                  dark: {
+                    bgColor: 'indigo-950',
+                    borderColor: 'indigo-700',
+                    hoverGroup: { 'grid-row': { bgColor: 'indigo-900' } },
+                  },
+                },
+              },
+              isExpandedFirstLeaf: {
+                bl: 3,
+              },
+              isExpandedLastLeaf: {
+                br: 3,
+              },
+              isLastLeftPinned: {
+                br: 0,
+              },
+            },
+          },
+          detailRow: {
+            styles: {
+              bb: 3,
+              bt: 0,
+              bgColor: 'indigo-50',
+              borderColor: 'indigo-300',
+              theme: {
+                dark: {
+                  bgColor: 'indigo-950',
+                  borderColor: 'indigo-700',
+                },
+              },
+            },
+            children: {
+              content: {
+                styles: {
+                  bl: 3,
+                  br: 3,
+                  borderColor: 'indigo-300',
+                  theme: {
+                    dark: {
+                      borderColor: 'indigo-700',
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+  },
+
   // Subgrid — extends datagrid styles with visual overrides for embedded DataGrids
   subgrid: {
     extends: 'datagrid',

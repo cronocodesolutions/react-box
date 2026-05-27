@@ -22,7 +22,14 @@ export default function DataGridDetailRow<TRow>(props: Props<TRow>) {
         height: isAutoHeight ? 'auto' : `${row.height}px`,
       }}
     >
-      <Box position="sticky" left={0} overflowX="auto" overflowY="hidden" style={{ width: `var(${grid.viewportWidthVarName})` }}>
+      <Box
+        component={`${grid.componentName}.body.detailRow.content` as never}
+        position="sticky"
+        left={0}
+        overflowX="auto"
+        overflowY="hidden"
+        style={{ width: `var(${grid.viewportWidthVarName})` }}
+      >
         {config.content(parentRow.data)}
       </Box>
     </Flex>

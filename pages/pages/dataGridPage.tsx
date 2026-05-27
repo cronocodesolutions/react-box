@@ -616,7 +616,37 @@ export default function DataGridPage() {
             id="row-detail"
             label="Row Detail — Orders with Items"
             language="jsx"
-            code={`<DataGrid
+            code={`// Define a custom component style tree that extends 'datagrid'.
+// isExpanded/isExpandedFirstLeaf/isExpandedLastLeaf variants let you style
+// the expanded row's cells individually (e.g. top + side borders).
+// detailRow.content gets left/right borders without causing scroll overflow.
+Box.components({
+  'orders-datagrid': {
+    extends: 'datagrid',
+    children: {
+      body: {
+        children: {
+          cell: {
+            variants: {
+              isExpanded: { bt: 3, bb: 0, bgColor: 'indigo-50', borderColor: 'indigo-300' },
+              isExpandedFirstLeaf: { bl: 3 },
+              isExpandedLastLeaf:  { br: 3 },
+            },
+          },
+          detailRow: {
+            styles: { bb: 3, bt: 0, bgColor: 'indigo-50', borderColor: 'indigo-300' },
+            children: {
+              content: { styles: { bl: 3, br: 3, borderColor: 'indigo-300' } },
+            },
+          },
+        },
+      },
+    },
+  },
+});
+
+<DataGrid
+  component="orders-datagrid"
   data={orders}
   def={{
     rowKey: 'orderId',
@@ -633,6 +663,7 @@ export default function DataGridPage() {
     rowDetail: {
       content: (order) => (
         <DataGrid
+          component="subgrid"
           data={order.items}
           def={{
             columns: [
@@ -640,18 +671,19 @@ export default function DataGridPage() {
               { key: 'qty', header: 'Qty', width: 80, align: 'right' },
               { key: 'price', header: 'Price', width: 100, align: 'right' },
             ],
-            visibleRowsCount: 3,
+            visibleRowsCount: 'all',
             rowHeight: 36,
           }}
         />
       ),
-      expandColumnHeader: 'Details',
       pinned: true,
+      expandOnRowClick: true,
     },
   }}
 />`}
           >
             <DataGrid
+              component="orders-datagrid"
               data={ordersData}
               def={{
                 rowKey: 'orderId',
@@ -868,6 +900,17 @@ export default function DataGridPage() {
   );
 }
 
+type ServerStateArg = {
+  page: number;
+  pageSize: number;
+  sortColumn?: string | number;
+  sortDirection?: string;
+  globalFilterValue?: string;
+  columnFilters?: Partial<
+    Record<string, { type: string; value?: string | number; values?: (string | number | boolean | null)[]; operator?: string }>
+  >;
+};
+
 function PaginatedDataGridDemo() {
   const pageSize = 8;
   const [data, setData] = useState<(typeof allData)[0][]>([]);
@@ -875,11 +918,34 @@ function PaginatedDataGridDemo() {
   const [totalCount, setTotalCount] = useState(0);
   const [loading, setLoading] = useState(true);
 
-  const fetchData = useCallback((state: { page: number; pageSize: number; sortColumn?: string | number; sortDirection?: string }) => {
+  const fetchData = useCallback((state: ServerStateArg) => {
     setLoading(true);
-    // Simulate server response with 300ms delay
+    // Simulate server-side filtering, sorting and pagination
     setTimeout(() => {
-      const result = [...allData];
+      let result = [...allData];
+
+      // Global search
+      if (state.globalFilterValue?.trim()) {
+        const q = state.globalFilterValue.toLowerCase();
+        result = result.filter(
+          (r) => r.first_name.toLowerCase().includes(q) || r.last_name.toLowerCase().includes(q) || r.email.toLowerCase().includes(q),
+        );
+      }
+
+      // Column filters
+      const cf = state.columnFilters ?? {};
+      if (cf.first_name?.type === 'text' && cf.first_name.value) {
+        const q = String(cf.first_name.value).toLowerCase();
+        result = result.filter((r) => r.first_name.toLowerCase().includes(q));
+      }
+      if (cf.age?.type === 'number' && cf.age.value !== undefined) {
+        result = result.filter((r) => r.age >= (cf.age!.value as number));
+      }
+      if (cf.country?.type === 'multiselect' && (cf.country.values?.length ?? 0) > 0) {
+        result = result.filter((r) => cf.country!.values!.includes(r.country));
+      }
+
+      // Sort
       if (state.sortColumn && state.sortDirection) {
         const key = state.sortColumn as keyof (typeof allData)[0];
         result.sort((a, b) => {
@@ -889,6 +955,7 @@ function PaginatedDataGridDemo() {
           return state.sortDirection === 'DESC' ? -cmp : cmp;
         });
       }
+
       const start = (state.page - 1) * state.pageSize;
       setData(result.slice(start, start + state.pageSize));
       setTotalCount(result.length);
@@ -904,18 +971,25 @@ function PaginatedDataGridDemo() {
   const def = useMemo(
     () => ({
       columns: [
-        { key: 'first_name' as const, header: 'First Name' },
+        { key: 'first_name' as const, header: 'First Name', filterable: true },
         { key: 'last_name' as const, header: 'Last Name' },
-        { key: 'age' as const, header: 'Age', width: 100, align: 'right' as const },
+        {
+          key: 'age' as const,
+          header: 'Age',
+          width: 100,
+          align: 'right' as const,
+          filterable: { type: 'number' as const, placeholder: 'Min age' },
+        },
         { key: 'email' as const, header: 'Email', width: 280 },
-        { key: 'country' as const, header: 'Country' },
+        { key: 'country' as const, header: 'Country', filterable: { type: 'multiselect' as const } },
         { key: 'city' as const, header: 'City' },
       ],
       rowHeight: 40,
       visibleRowsCount: pageSize,
       topBar: true,
       bottomBar: true,
-      title: 'Server-Side Pagination',
+      globalFilter: true,
+      title: 'Server-Side Pagination & Filters',
       pagination: { totalCount },
     }),
     [totalCount, pageSize],
@@ -924,14 +998,16 @@ function PaginatedDataGridDemo() {
   return (
     <Code
       id="pagination"
-      label="Server-Side Pagination"
+      label="Server-Side Pagination & Filters"
       language="jsx"
       code={`const [data, setData] = useState([]);
 const [page, setPage] = useState(1);
 const [totalCount, setTotalCount] = useState(0);
-const [loading, setLoading] = useState(true);
 const pageSize = 8;
 
+// onServerStateChange fires on every page/sort/filter change.
+// state = { page, pageSize, sortColumn, sortDirection, globalFilterValue, columnFilters }
+// columnFilters example: { first_name: { type: 'text', value: 'Jo' }, age: { type: 'number', operator: 'gte', value: 30 }, country: { type: 'multiselect', values: ['Brazil'] } }
 const fetchData = useCallback((state) => {
   setLoading(true);
   api.getUsers({
@@ -955,11 +1031,16 @@ useEffect(() => { fetchData({ page: 1, pageSize }); }, []);
   page={page}
   onServerStateChange={fetchData}
   def={{
-    columns: [...],
+    columns: [
+      { key: 'first_name', header: 'First Name', filterable: true },
+      { key: 'age', header: 'Age', filterable: { type: 'number', placeholder: 'Min age' } },
+      { key: 'country', filterable: { type: 'multiselect' } },
+      ...
+    ],
+    globalFilter: true,
     visibleRowsCount: pageSize,
-    topBar: true,
-    bottomBar: true,
-    title: 'Server-Side Pagination',
+    topBar: true, bottomBar: true,
+    title: 'Server-Side Pagination & Filters',
     pagination: { totalCount },
   }}
 />`}
@@ -975,6 +1056,6 @@ const sidebarLinks = [
   { id: 'filters', label: 'Filters' },
   { id: 'grouped', label: 'Grouped Columns' },
   { id: 'row-detail', label: 'Row Detail' },
-  { id: 'pagination', label: 'Pagination' },
+  { id: 'pagination', label: 'Server Pagination & Filters' },
   { id: 'disable-sort', label: 'Disable Sort' },
 ] as const;

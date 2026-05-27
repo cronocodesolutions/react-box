@@ -1,8 +1,9 @@
-import { useCallback } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import Box from '../../../box';
 import BaseSvg from '../../baseSvg';
 import Button from '../../button';
 import Flex from '../../flex';
+import Textbox from '../../textbox';
 import GridModel from '../models/gridModel';
 
 interface Props<TRow> {
@@ -33,9 +34,12 @@ export default function DataGridPagination<TRow>(props: Props<TRow>) {
       <PaginationButton componentName={grid.componentName} onClick={goPrev} disabled={isFirst}>
         <ChevronLeft />
       </PaginationButton>
-      <Box component={`${grid.componentName}.bottomBar.pagination.info` as never} fontSize={12} px={3} userSelect="none">
-        {page} of {totalPages}
-      </Box>
+      <Flex ai="center" gap={1.5} px={2} userSelect="none">
+        <PageJumpInput grid={grid} page={page} totalPages={totalPages} />
+        <Box component={`${grid.componentName}.bottomBar.pagination.info` as never} fontSize={12} opacity={0.7}>
+          of {totalPages}
+        </Box>
+      </Flex>
       <PaginationButton componentName={grid.componentName} onClick={goNext} disabled={isLast}>
         <ChevronRight />
       </PaginationButton>
@@ -47,6 +51,45 @@ export default function DataGridPagination<TRow>(props: Props<TRow>) {
 }
 
 (DataGridPagination as React.FunctionComponent).displayName = 'DataGridPagination';
+
+function PageJumpInput<TRow>({ grid, page, totalPages }: { grid: GridModel<TRow>; page: number; totalPages: number }) {
+  const [value, setValue] = useState(String(page));
+
+  useEffect(() => {
+    setValue(String(page));
+  }, [page]);
+
+  const commit = useCallback(() => {
+    const n = parseInt(value, 10);
+    if (!isNaN(n)) {
+      const clamped = Math.max(1, Math.min(n, totalPages));
+      grid.changePage(clamped);
+      setValue(String(clamped));
+    } else {
+      setValue(String(page));
+    }
+  }, [grid, page, totalPages, value]);
+
+  const handleKeyDown = useCallback(
+    (e: React.KeyboardEvent<HTMLInputElement>) => {
+      if (e.key === 'Enter') commit();
+      else if (e.key === 'Escape') setValue(String(page));
+    },
+    [commit, page],
+  );
+
+  return (
+    <Textbox
+      type="number"
+      variant="compact"
+      value={value}
+      onChange={(e) => setValue(e.target.value)}
+      textAlign="center"
+      fontSize={12}
+      props={{ onKeyDown: handleKeyDown, onBlur: commit, min: 1, max: totalPages }}
+    />
+  );
+}
 
 function PaginationButton(props: { componentName: string; onClick: () => void; disabled: boolean; children: React.ReactNode }) {
   const { componentName, onClick, disabled, children } = props;
