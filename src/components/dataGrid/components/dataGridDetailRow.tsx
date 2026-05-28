@@ -11,7 +11,7 @@ export default function DataGridDetailRow<TRow>(props: Props<TRow>) {
   const { grid, parentRow } = row;
   const config = grid.props.def.rowDetail!;
 
-  const isAutoHeight = row.height === 'auto';
+  const isAutoHeight = row.isAutoHeight;
 
   return (
     <Flex

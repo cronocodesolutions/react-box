@@ -9,14 +9,14 @@ interface Props<TRow> {
 
 export default function DataGridCellRowDetail<TRow>(props: Props<TRow>) {
   const { cell } = props;
-  const expanded = cell.grid.expandedDetailRows.has(cell.row.key);
+  const expanded = cell.expanded;
 
   const toggleHandler = useCallback(
     (e: React.MouseEvent) => {
       e.stopPropagation();
-      cell.grid.toggleDetailRow(cell.row.key);
+      cell.toggleDetail();
     },
-    [cell.grid, cell.row.key],
+    [cell],
   );
 
   return (

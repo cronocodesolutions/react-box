@@ -1,6 +1,18 @@
-import FnUtils from '../../../utils/fn/fnUtils';
-import { ColumnType, ContextMenuConfig, PinPosition } from '../contracts/dataGridContract';
-import GridModel, { EMPTY_CELL_KEY } from './gridModel';
+import memo from '../../../utils/memo';
+import {
+  ColumnFilterConfig,
+  ColumnType,
+  ContextMenuConfig,
+  FilterValue,
+  Key,
+  NumberFilterValue,
+  PinPosition,
+} from '../contracts/dataGridContract';
+import GridModel, { GROUPING_CELL_KEY, ROW_DETAIL_CELL_KEY, ROW_NUMBER_CELL_KEY, ROW_SELECTION_CELL_KEY } from './gridModel';
+import HeaderCellModel from './headerCellModel';
+
+/** Discriminates the structural role of a column — replaces scattered `key === *_CELL_KEY` checks. */
+export type ColumnKind = 'data' | 'rowNumber' | 'rowSelection' | 'rowDetail' | 'grouping';
 
 export default class ColumnModel<TRow> {
   constructor(
@@ -13,12 +25,99 @@ export default class ColumnModel<TRow> {
     if (this.isLeaf) {
       // Use stored width if available (survives memo recreation), otherwise use def.width or default
       const storedWidth = this.grid.columnWidths.get(this.key);
-      this._inlineWidth = this.key == EMPTY_CELL_KEY ? undefined : (storedWidth ?? this.def.width ?? this.grid.DEFAULT_COLUMN_WIDTH_PX);
+      this._inlineWidth = storedWidth ?? this.def.width ?? this.grid.DEFAULT_COLUMN_WIDTH_PX;
       this._pin = def.pin;
     }
   }
 
   public columns: ColumnModel<TRow>[] = [];
+
+  // ========== Kind (replaces scattered `key === *_CELL_KEY` checks) ==========
+
+  public get kind(): ColumnKind {
+    switch (this.key) {
+      case ROW_NUMBER_CELL_KEY:
+        return 'rowNumber';
+      case ROW_SELECTION_CELL_KEY:
+        return 'rowSelection';
+      case ROW_DETAIL_CELL_KEY:
+        return 'rowDetail';
+      case GROUPING_CELL_KEY:
+        return 'grouping';
+      default:
+        return 'data';
+    }
+  }
+
+  public get isRowNumber(): boolean {
+    return this.kind === 'rowNumber';
+  }
+  public get isRowSelection(): boolean {
+    return this.kind === 'rowSelection';
+  }
+  public get isRowDetail(): boolean {
+    return this.kind === 'rowDetail';
+  }
+  public get isGrouping(): boolean {
+    return this.kind === 'grouping';
+  }
+  public get isData(): boolean {
+    return this.kind === 'data';
+  }
+
+  // ========== Precomputed cell layout (stable for the column's lifetime) ==========
+  // Pin flags depend only on column order/pinning/visibility — never on width — so they
+  // stay valid until `columns` is rebuilt (which produces fresh column instances). The
+  // memos have no deps: they just cache lazily per instance.
+
+  public readonly pinFlags = memo(() => {
+    const isLeftPinned = this.pin === 'LEFT';
+    const isRightPinned = this.pin === 'RIGHT';
+    return {
+      isLeftPinned,
+      isRightPinned,
+      isPinned: isLeftPinned || isRightPinned,
+      isFirstLeftPinned: isLeftPinned && this.left === 0,
+      isLastLeftPinned: isLeftPinned && this.isEdge,
+      isFirstRightPinned: isRightPinned && this.isEdge,
+      isLastRightPinned: isRightPinned && this.right === 0,
+    };
+  });
+
+  /** Variant flags for the body cell that depend only on the column (not the row). */
+  public readonly cellVariant = memo(() => {
+    const { isPinned, isFirstLeftPinned, isLastLeftPinned, isFirstRightPinned, isLastRightPinned } = this.pinFlags.value;
+    return {
+      isPinned,
+      isFirstLeftPinned,
+      isLastLeftPinned,
+      isFirstRightPinned,
+      isLastRightPinned,
+      isRowSelection: this.isRowSelection,
+      isRowNumber: this.isRowNumber,
+      isFirstLeaf: this.isFirstLeaf,
+      isLastLeaf: this.isLastLeaf,
+      isRowDetail: this.isRowDetail,
+    };
+  });
+
+  /** Static CSS-var references for the body/filter cell (stable string identity). */
+  public readonly cellStyleVars = memo(() => {
+    const { isLeftPinned, isRightPinned } = this.pinFlags.value;
+    return {
+      width: `var(${this.widthVarName})`,
+      height: `var(${this.grid.rowHeightVarName})`,
+      left: isLeftPinned ? `var(${this.leftVarName})` : undefined,
+      right: isRightPinned ? `var(${this.rightVarName})` : undefined,
+    };
+  });
+
+  /** Derived state for this column's header cell + context menu. */
+  private readonly _headerCell = memo(() => new HeaderCellModel(this));
+  public get headerCell(): HeaderCellModel<TRow> {
+    return this._headerCell.value;
+  }
+
   public get visibleColumns() {
     return this.columns.filter((c) => c.isVisible);
   }
@@ -44,6 +143,10 @@ export default class ColumnModel<TRow> {
   public get align() {
     return this.def.align;
   }
+  /** Whether an explicit `align` was provided (mirrors the original `'align' in def` check). */
+  public get hasAlign(): boolean {
+    return 'align' in this.def;
+  }
   public get isLeaf() {
     return this.columns.length === 0;
   }
@@ -52,6 +155,60 @@ export default class ColumnModel<TRow> {
   }
   public get filterable() {
     return this.def.filterable;
+  }
+
+  // ========== Column filtering (resolves config + parses/validates input) ==========
+
+  /** Resolved filter config, or undefined when this column isn't filterable. */
+  public get filterConfig(): ColumnFilterConfig | undefined {
+    const { filterable } = this.def;
+    if (!filterable) return undefined;
+    return typeof filterable === 'object' ? filterable : { type: 'text' };
+  }
+
+  /** The active filter on this column, if any. */
+  public get currentFilter(): FilterValue | undefined {
+    return this.grid.columnFilters[this.key as keyof TRow];
+  }
+
+  /** Options for a multiselect filter (config-provided, else unique values from data). */
+  public get filterOptions(): { label: string; value: string | number | boolean | null }[] {
+    const config = this.filterConfig;
+    if (config?.type === 'multiselect' && config.options) return config.options;
+
+    return this.grid.getColumnUniqueValues(this.key).map((value) => ({
+      label: value === null ? '(empty)' : String(value),
+      value,
+    }));
+  }
+
+  public setTextFilter(value: string): void {
+    this.grid.setColumnFilter(this.key, value.trim() ? { type: 'text', value } : undefined);
+  }
+
+  public setNumberFilter(operator: NumberFilterValue['operator'], value: string | number, valueTo?: string | number): void {
+    const numVal = typeof value === 'number' ? value : parseFloat(value);
+    if (isNaN(numVal) || value === '') {
+      this.grid.setColumnFilter(this.key, undefined);
+      return;
+    }
+
+    const filter: NumberFilterValue = { type: 'number', operator, value: numVal };
+
+    if (operator === 'between' && valueTo !== undefined && valueTo !== '') {
+      const numValTo = typeof valueTo === 'number' ? valueTo : parseFloat(String(valueTo));
+      if (!isNaN(numValTo)) filter.valueTo = numValTo;
+    }
+
+    this.grid.setColumnFilter(this.key, filter);
+  }
+
+  public setMultiselectFilter(values: (string | number | boolean | null)[]): void {
+    this.grid.setColumnFilter(this.key, values.length === 0 ? undefined : { type: 'multiselect', values });
+  }
+
+  public clearFilter(): void {
+    this.grid.setColumnFilter(this.key, undefined);
   }
 
   /** Whether sorting is enabled for this column. Column-level setting takes priority over grid-level. */
@@ -260,40 +417,45 @@ export default class ColumnModel<TRow> {
     return this.isLeaf ? this.grid.columns.value.maxDeath - this.death : 1;
   }
 
-  public resizeColumn = (e: unknown) => {
-    const startPageX = (e as MouseEvent).pageX;
-    const { MIN_COLUMN_WIDTH_PX: MIN_WIDTH_PX, update } = this.grid;
+  // ========== Resize (headless: pure coordinate math, DOM events live in the adapter) ==========
 
-    // Capture current visual widths (includes flex-calculated width) as starting point
-    const sizes = this.leafs.toRecord((leaf) => [leaf.key, leaf.inlineWidth ?? leaf.baseWidth]);
-    const totalWidth = this.leafs.sumBy((c) => sizes[c.key]) - this.leafs.length * MIN_WIDTH_PX;
+  private _resizeStartX = 0;
+  private _resizeSizes: Record<Key, number> = {};
+  private _resizeTotalWidth = 0;
 
-    const resize = FnUtils.throttle((e: MouseEvent) => {
-      const dragDistance = (e.pageX - startPageX) * (this.pin === 'RIGHT' ? -1 : 1);
+  /** Begin a resize drag from a pointer x-coordinate (page space). */
+  public beginResize = (startX: number): void => {
+    const { MIN_COLUMN_WIDTH_PX } = this.grid;
 
-      this.leafs.forEach((leaf) => {
-        const width = sizes[leaf.key];
-        const dragDistanceForCell =
-          totalWidth > 0 ? ((width - MIN_WIDTH_PX) / totalWidth) * dragDistance : dragDistance / this.leafs.length;
-        const newWidth = Math.round(width + dragDistanceForCell);
+    this._resizeStartX = startX;
+    // Capture current visual widths (includes flex-calculated width) as starting point.
+    this._resizeSizes = this.leafs.toRecord((leaf) => [leaf.key, leaf.inlineWidth ?? leaf.baseWidth]);
+    this._resizeTotalWidth = this.leafs.sumBy((c) => this._resizeSizes[c.key]) - this.leafs.length * MIN_COLUMN_WIDTH_PX;
+  };
 
-        leaf.setWidth(newWidth < MIN_WIDTH_PX ? MIN_WIDTH_PX : newWidth);
-      });
+  /** Apply the drag to a new pointer x-coordinate, distributing the delta across leafs. Notifies subscribers. */
+  public resizeTo = (currentX: number): void => {
+    const { MIN_COLUMN_WIDTH_PX } = this.grid;
+    const dragDistance = (currentX - this._resizeStartX) * (this.pin === 'RIGHT' ? -1 : 1);
 
-      this.grid.flexWidths.clear();
-      this.grid.sizes.clear();
-      update();
-    }, 40);
+    this.leafs.forEach((leaf) => {
+      const width = this._resizeSizes[leaf.key];
+      const dragDistanceForCell =
+        this._resizeTotalWidth > 0
+          ? ((width - MIN_COLUMN_WIDTH_PX) / this._resizeTotalWidth) * dragDistance
+          : dragDistance / this.leafs.length;
+      const newWidth = Math.round(width + dragDistanceForCell);
 
-    const controller = new AbortController();
+      leaf.setWidth(newWidth < MIN_COLUMN_WIDTH_PX ? MIN_COLUMN_WIDTH_PX : newWidth);
+    });
 
-    const stopResize = (_e: MouseEvent) => {
-      controller.abort();
-      update();
-    };
+    this.grid.flexWidths.clear(); // cascades to sizes
+    this.grid.notify();
+  };
 
-    window.addEventListener('mousemove', resize, controller);
-    window.addEventListener('mouseup', stopResize, controller);
+  /** End a resize drag. */
+  public endResize = (): void => {
+    this.grid.notify();
   };
 
   public pinColumn = (pin?: PinPosition) => {

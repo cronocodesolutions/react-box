@@ -9,7 +9,6 @@ import Flex from '../../flex';
 import { Span } from '../../semantics';
 import Tooltip from '../../tooltip';
 import ColumnModel from '../models/columnModel';
-import { EMPTY_CELL_KEY, GROUPING_CELL_KEY, ROW_NUMBER_CELL_KEY, ROW_SELECTION_CELL_KEY } from '../models/gridModel';
 
 interface Props<TRow> {
   column: ColumnModel<TRow>;
@@ -17,48 +16,22 @@ interface Props<TRow> {
 
 export default function DataGridHeaderCellContextMenu<TRow>(props: Props<TRow>) {
   const { column } = props;
-  const { key, pin, left, right, isEdge, isLeaf, align, header, grid } = column;
+  const { grid, align, header, key } = column;
+  const hc = column.headerCell;
 
   const [isOpen, setOpen, refToUse] = useVisibility({ hideOnScroll: true, event: 'mousedown' });
   const [tooltipPosition, setTooltipPosition] = useState<{ top: number; left: number }>({ top: 0, left: 0 });
   const openLeft = useMemo(() => tooltipPosition.left > window.innerWidth / 2, [tooltipPosition.left]);
 
-  const { sort: showSort, pin: showPin, group: showGroup } = column.contextMenuSections;
-
-  const isSortAscAvailable = showSort && isLeaf && column.sortable && (grid.sortColumn !== key || grid.sortDirection === 'DESC');
-  const isSortDescAvailable = showSort && isLeaf && column.sortable && (grid.sortColumn !== key || grid.sortDirection === 'ASC');
-  const isClearSortAvailable = showSort && isLeaf && column.sortable && grid.sortColumn === key;
-  const isPinLeftAvailable = showPin && pin !== 'LEFT';
-  const isPinRightAvailable = showPin && pin !== 'RIGHT';
-  const isUnpinAvailable = showPin && !!pin;
-  const isGroupByAvailable = showGroup && isLeaf && key !== GROUPING_CELL_KEY;
-  const isUnGroupByAvailable = showGroup && isLeaf && key === GROUPING_CELL_KEY;
-
-  const isSortingAvailable = isSortAscAvailable || isSortDescAvailable || isClearSortAvailable;
-  const isPiningAvailable = isPinLeftAvailable || isPinRightAvailable || isUnpinAvailable;
-
   const positionLeft = align === 'right' ? 2 : undefined;
-  const positionRight = align === 'right' ? undefined : pin === 'RIGHT' ? 2.5 : 4;
-
-  const isEmptyCell = key === EMPTY_CELL_KEY;
-  const isRowNumber = key === ROW_NUMBER_CELL_KEY;
-  const isRowSelection = key === ROW_SELECTION_CELL_KEY;
-
-  const isLeftPinned = pin === 'LEFT';
-  const isRightPinned = pin === 'RIGHT';
-  const isPinned = isLeftPinned || pin === 'RIGHT';
-  const isFirstLeftPinned = isLeftPinned && left === 0;
-  const isLastLeftPinned = isLeftPinned && isEdge;
-  const isFirstRightPinned = isRightPinned && isEdge;
-  const isLastRightPinned = isRightPinned && right === 0;
-  const isSortable = isLeaf && !isEmptyCell && !isRowNumber && !isRowSelection && column.sortable;
+  const positionRight = align === 'right' ? undefined : column.pin === 'RIGHT' ? 2.5 : 4;
 
   return (
     <Flex position="absolute" left={positionLeft} right={positionRight} top="1/2" translateY={-3} ai="center">
       <Button
         component={`${grid.componentName}.header.cell.contextMenu` as never}
         onClick={() => setOpen(!isOpen)}
-        variant={{ isPinned, isFirstLeftPinned, isLastLeftPinned, isFirstRightPinned, isLastRightPinned, isSortable, isRowNumber } as never}
+        variant={hc.contextMenuButtonVariant as never}
       >
         <Span component={`${grid.componentName}.header.cell.contextMenu.icon` as never}>
           <DotsIcon fill="currentColor" />
@@ -71,7 +44,7 @@ export default function DataGridHeaderCellContextMenu<TRow>(props: Props<TRow>) 
             adjustTranslateX={openLeft ? '-100%' : '-21px'}
             adjustTranslateY="16px"
           >
-            {isSortAscAvailable && (
+            {hc.canSortAsc && (
               <Button
                 component={`${grid.componentName}.header.cell.contextMenu.tooltip.item` as never}
                 onClick={() => column.sortColumn('ASC')}
@@ -82,7 +55,7 @@ export default function DataGridHeaderCellContextMenu<TRow>(props: Props<TRow>) 
                 Sort Ascending
               </Button>
             )}
-            {isSortDescAvailable && (
+            {hc.canSortDesc && (
               <Button
                 component={`${grid.componentName}.header.cell.contextMenu.tooltip.item` as never}
                 onClick={() => column.sortColumn('DESC')}
@@ -93,7 +66,7 @@ export default function DataGridHeaderCellContextMenu<TRow>(props: Props<TRow>) 
                 Sort Descending
               </Button>
             )}
-            {isClearSortAvailable && (
+            {hc.canClearSort && (
               <Button
                 component={`${grid.componentName}.header.cell.contextMenu.tooltip.item` as never}
                 onClick={() => column.sortColumn(undefined)}
@@ -102,7 +75,7 @@ export default function DataGridHeaderCellContextMenu<TRow>(props: Props<TRow>) 
                 Clear Sort
               </Button>
             )}
-            {isSortingAvailable && (isPiningAvailable || isGroupByAvailable || isUnGroupByAvailable) && (
+            {hc.hasSortSection && (hc.hasPinSection || hc.hasGroupSection) && (
               <Box
                 bb={1}
                 my={2}
@@ -110,7 +83,7 @@ export default function DataGridHeaderCellContextMenu<TRow>(props: Props<TRow>) 
                 component={`${grid.componentName}.header.cell.contextMenu.tooltip.item.separator` as never}
               />
             )}
-            {isPinLeftAvailable && (
+            {hc.canPinLeft && (
               <Button
                 component={`${grid.componentName}.header.cell.contextMenu.tooltip.item` as never}
                 onClick={() => column.pinColumn('LEFT')}
@@ -121,7 +94,7 @@ export default function DataGridHeaderCellContextMenu<TRow>(props: Props<TRow>) 
                 Pin Left
               </Button>
             )}
-            {isPinRightAvailable && (
+            {hc.canPinRight && (
               <Button
                 component={`${grid.componentName}.header.cell.contextMenu.tooltip.item` as never}
                 onClick={() => column.pinColumn('RIGHT')}
@@ -132,16 +105,16 @@ export default function DataGridHeaderCellContextMenu<TRow>(props: Props<TRow>) 
                 Pin Right
               </Button>
             )}
-            {isUnpinAvailable && (
+            {hc.canUnpin && (
               <Button component={`${grid.componentName}.header.cell.contextMenu.tooltip.item` as never} onClick={() => column.pinColumn()}>
                 <Box width={4} />
                 Unpin
               </Button>
             )}
-            {isSortingAvailable && isPiningAvailable && (isGroupByAvailable || isUnGroupByAvailable) && (
+            {hc.hasSortSection && hc.hasPinSection && hc.hasGroupSection && (
               <Box component={`${grid.componentName}.header.cell.contextMenu.tooltip.item.separator` as never} />
             )}
-            {isGroupByAvailable && (
+            {hc.canGroupBy && (
               <Button component={`${grid.componentName}.header.cell.contextMenu.tooltip.item` as never} onClick={column.toggleGrouping}>
                 <Span component={`${grid.componentName}.header.cell.contextMenu.tooltip.item.icon` as never}>
                   <GroupingIcon width="100%" fill="currentColor" />
@@ -149,7 +122,7 @@ export default function DataGridHeaderCellContextMenu<TRow>(props: Props<TRow>) 
                 <Box textWrap="nowrap">Group by {header ?? key}</Box>
               </Button>
             )}
-            {isUnGroupByAvailable && (
+            {hc.canUnGroupAll && (
               <Button component={`${grid.componentName}.header.cell.contextMenu.tooltip.item` as never} onClick={grid.unGroupAll}>
                 <Span component={`${grid.componentName}.header.cell.contextMenu.tooltip.item.icon` as never}>
                   <GroupingIcon width="100%" fill="currentColor" />

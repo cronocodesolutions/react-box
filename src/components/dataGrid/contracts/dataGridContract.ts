@@ -18,6 +18,8 @@ export interface PaginationConfig {
   totalCount: number;
   /** Page size override. If omitted, defaults to visibleRowsCount (or 10). */
   pageSize?: number;
+  /** Options shown in the page size selector dropdown. If omitted, no selector is shown. */
+  pageSizeOptions?: number[];
 }
 
 // ========== Server State ==========
@@ -189,6 +191,10 @@ export interface DataGridProps<TRow> {
   page?: number;
   /** Callback when page changes. Receives page (1-indexed) and pageSize. */
   onPageChange?: (page: number, pageSize: number) => void;
+  /** Controlled page size. Used with pagination and pageSizeOptions. */
+  pageSize?: number;
+  /** Callback when the user changes the page size. */
+  onPageSizeChange?: (pageSize: number) => void;
   /** Callback when sort changes. For server-side sorting with pagination. */
   onSortChange?: (columnKey: Key | undefined, direction: SortDirection | undefined) => void;
   /** Fires on any server-relevant state change (page, sort, filter). Provides full state snapshot for API calls. */

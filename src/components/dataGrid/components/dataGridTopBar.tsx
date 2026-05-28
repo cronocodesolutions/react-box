@@ -14,25 +14,25 @@ export default function DataGridTopBar<TRow>(props: Props<TRow>) {
   const { title, topBarContent, globalFilter } = grid.props.def;
 
   return (
-    <Flex component={`${grid.componentName}.topBar` as never} position="relative" ai="center" jc="space-between" gap={4} flexWrap="wrap">
-      {/* Left section: Title and grouping context */}
-      <Flex ai="center" gap={3} flexWrap="wrap" minWidth={0}>
-        <DataGridTopBarContextMenu grid={grid} />
-        {title && (
-          <Box fontWeight={600} fontSize={16} color="gray-800" theme={{ dark: { color: 'gray-100' } }}>
-            {title}
-          </Box>
-        )}
+    <Flex component={`${grid.componentName}.topBar` as never} position="relative" d="column" gap={3}>
+      {/* Row 1: Title/context menu on the left, global filter pinned to the right */}
+      <Flex ai="center" jc="space-between" gap={4} flexWrap="wrap" width="fit">
+        <Flex ai="center" gap={3} flexWrap="wrap" minWidth={0}>
+          <DataGridTopBarContextMenu grid={grid} />
+          {title && (
+            <Box fontWeight={600} fontSize={16} color="gray-800" theme={{ dark: { color: 'gray-100' } }}>
+              {title}
+            </Box>
+          )}
 
-        <DataGridColumnGroups grid={grid} />
-      </Flex>
-
-      {/* Right section: Actions */}
-      <Flex ai="center" gap={3} flexWrap="wrap" jc="flex-end" minWidth={0}>
-        {topBarContent && <Box>{topBarContent}</Box>}
+          <DataGridColumnGroups grid={grid} />
+        </Flex>
 
         {globalFilter && <DataGridGlobalFilter grid={grid} />}
       </Flex>
+
+      {/* Row 2: Custom top bar content spans the full topbar width */}
+      {topBarContent && <Box width="fit">{topBarContent}</Box>}
     </Flex>
   );
 }

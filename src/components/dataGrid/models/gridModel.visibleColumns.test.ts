@@ -1,7 +1,10 @@
 import { describe, expect, it } from 'vitest';
 import { ignoreLogs } from '../../../../dev/tests';
 import { GridDefinition } from '../contracts/dataGridContract';
-import GridModel, { EMPTY_CELL_KEY, GROUPING_CELL_KEY, ROW_NUMBER_CELL_KEY, ROW_SELECTION_CELL_KEY } from './gridModel';
+import GridModel, { GROUPING_CELL_KEY, ROW_NUMBER_CELL_KEY, ROW_SELECTION_CELL_KEY } from './gridModel';
+
+// Legacy key for the removed empty-spacer column; kept as a literal to assert it never appears.
+const EMPTY_CELL_KEY = 'empty-cell';
 
 interface Person {
   firstName: string;

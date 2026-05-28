@@ -19,6 +19,8 @@ import useTableOfContents from '../hooks/useTableOfContents';
 
 const allData = [...Data, ...Data1, ...Data2, ...Data3, ...Data4, ...Data5, ...Data6, ...Data7];
 
+const allCountryOptions = [...new Set(allData.map((r) => r.country))].sort().map((c) => ({ label: c, value: c }));
+
 const ordersData = [
   {
     orderId: 1001,
@@ -171,7 +173,7 @@ function CustomTopBarFilter({
   const hasFilters = genderFilter || ageFilter;
 
   return (
-    <Flex ai="center" gap={2} flexWrap="wrap">
+    <Flex gap={2} flexWrap="wrap" width="fit">
       <Flex ai="center" gap={1} color="gray-500" theme={{ dark: { color: 'gray-400' } }}>
         <Filter size={14} />
         <Box fontSize={13}>Quick filters:</Box>
@@ -981,7 +983,7 @@ function PaginatedDataGridDemo() {
           filterable: { type: 'number' as const, placeholder: 'Min age' },
         },
         { key: 'email' as const, header: 'Email', width: 280 },
-        { key: 'country' as const, header: 'Country', filterable: { type: 'multiselect' as const } },
+        { key: 'country' as const, header: 'Country', filterable: { type: 'multiselect' as const, options: allCountryOptions } },
         { key: 'city' as const, header: 'City' },
       ],
       rowHeight: 40,
@@ -1034,7 +1036,9 @@ useEffect(() => { fetchData({ page: 1, pageSize }); }, []);
     columns: [
       { key: 'first_name', header: 'First Name', filterable: true },
       { key: 'age', header: 'Age', filterable: { type: 'number', placeholder: 'Min age' } },
-      { key: 'country', filterable: { type: 'multiselect' } },
+      // In server-side mode the grid only has the current page, so provide
+      // all possible options explicitly (fetch them from your API once).
+      { key: 'country', filterable: { type: 'multiselect', options: countryOptions } },
       ...
     ],
     globalFilter: true,

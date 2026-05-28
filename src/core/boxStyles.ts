@@ -1285,6 +1285,21 @@ export const cssStyles = {
       styleName: 'backdrop-filter',
     },
   ],
+  scrollbarWidth: [
+    {
+      values: ['auto', 'thin', 'none'] as const,
+      styleName: 'scrollbar-width',
+    },
+  ],
+  /** The scrollbar-color CSS property sets the color of the scrollbar thumb and track. The value pair is [thumbColor, trackColor]. */
+  scrollbarColor: [
+    {
+      tuple: true,
+      values: [Variables.colorValues, Variables.colorValues] as const,
+      styleName: 'scrollbar-color',
+      valueFormat: (value, getVariableValue) => `${getVariableValue(value[0] as string)} ${getVariableValue(value[1] as string)}`,
+    },
+  ],
 } satisfies Record<string, BoxStyle[]>;
 
 export const pseudo1 = {

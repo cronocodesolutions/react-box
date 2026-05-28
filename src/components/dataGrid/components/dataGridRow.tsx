@@ -10,12 +10,11 @@ interface Props<TRow> {
 
 export default function DataGridRow<TRow>(props: Props<TRow>) {
   const { row } = props;
-  const { selected } = row;
-  const expandOnRowClick = row.grid.props.def.rowDetail?.expandOnRowClick;
+  const { selected, expandOnRowClick } = row;
 
   const handleRowClick = useCallback(() => {
-    row.grid.toggleDetailRow(row.key);
-  }, [row.grid, row.key]);
+    row.toggleDetail();
+  }, [row]);
 
   return (
     <Flex

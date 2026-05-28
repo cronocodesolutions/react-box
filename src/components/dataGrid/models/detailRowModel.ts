@@ -8,8 +8,14 @@ export default class DetailRowModel<TRow> {
     public readonly parentRow: RowModel<TRow>,
   ) {}
 
+  public readonly kind = 'detail' as const;
+
   public get key(): Key {
     return `detail-${this.parentRow.key}`;
+  }
+
+  public get isAutoHeight(): boolean {
+    return this.height === 'auto';
   }
 
   public static readonly AUTO_HEIGHT_ESTIMATE = 200;

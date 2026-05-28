@@ -50,4 +50,22 @@ export default tseslint.config(
       'prettier/prettier': 'error',
     },
   },
+  {
+    // The DataGrid engine must stay headless (framework-agnostic): no React, no DOM.
+    // Rendering/adapter logic belongs in the components layer.
+    files: ['src/components/dataGrid/models/**/*.ts'],
+    ignores: ['**/*.test.ts'],
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          paths: [
+            { name: 'react', message: 'DataGrid models must stay headless — keep React in the components/adapter layer.' },
+            { name: 'react-dom', message: 'DataGrid models must stay headless — keep React in the components/adapter layer.' },
+          ],
+          patterns: ['react/*', 'react-dom/*'],
+        },
+      ],
+    },
+  },
 );

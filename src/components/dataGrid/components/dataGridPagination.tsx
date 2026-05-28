@@ -12,38 +12,37 @@ interface Props<TRow> {
 
 export default function DataGridPagination<TRow>(props: Props<TRow>) {
   const { grid } = props;
-  const state = grid.paginationState;
+  const { pagination } = grid;
+  const state = pagination.state;
 
-  const page = state?.page ?? 1;
-  const totalPages = state?.totalPages ?? 1;
-  const isFirst = page <= 1;
-  const isLast = page >= totalPages;
-
-  const goFirst = useCallback(() => !isFirst && grid.changePage(1), [grid, isFirst]);
-  const goPrev = useCallback(() => !isFirst && grid.changePage(page - 1), [grid, page, isFirst]);
-  const goNext = useCallback(() => !isLast && grid.changePage(page + 1), [grid, page, isLast]);
-  const goLast = useCallback(() => !isLast && grid.changePage(totalPages), [grid, totalPages, isLast]);
+  const goFirst = useCallback(() => pagination.firstPage(), [pagination]);
+  const goPrev = useCallback(() => pagination.prevPage(), [pagination]);
+  const goNext = useCallback(() => pagination.nextPage(), [pagination]);
+  const goLast = useCallback(() => pagination.lastPage(), [pagination]);
 
   if (!state) return null;
 
+  const { canGoPrev, canGoNext, totalPages } = pagination;
+
   return (
     <Flex component={`${grid.componentName}.bottomBar.pagination` as never} gap={0.5} ai="center">
-      <PaginationButton componentName={grid.componentName} onClick={goFirst} disabled={isFirst}>
+      <PageSizeSelector grid={grid} pageSize={state.pageSize} />
+      <PaginationButton componentName={grid.componentName} onClick={goFirst} disabled={!canGoPrev}>
         <ChevronDoubleLeft />
       </PaginationButton>
-      <PaginationButton componentName={grid.componentName} onClick={goPrev} disabled={isFirst}>
+      <PaginationButton componentName={grid.componentName} onClick={goPrev} disabled={!canGoPrev}>
         <ChevronLeft />
       </PaginationButton>
       <Flex ai="center" gap={1.5} px={2} userSelect="none">
-        <PageJumpInput grid={grid} page={page} totalPages={totalPages} />
+        <PageJumpInput grid={grid} page={state.page} totalPages={totalPages} />
         <Box component={`${grid.componentName}.bottomBar.pagination.info` as never} fontSize={12} opacity={0.7}>
           of {totalPages}
         </Box>
       </Flex>
-      <PaginationButton componentName={grid.componentName} onClick={goNext} disabled={isLast}>
+      <PaginationButton componentName={grid.componentName} onClick={goNext} disabled={!canGoNext}>
         <ChevronRight />
       </PaginationButton>
-      <PaginationButton componentName={grid.componentName} onClick={goLast} disabled={isLast}>
+      <PaginationButton componentName={grid.componentName} onClick={goLast} disabled={!canGoNext}>
         <ChevronDoubleRight />
       </PaginationButton>
     </Flex>
@@ -51,6 +50,33 @@ export default function DataGridPagination<TRow>(props: Props<TRow>) {
 }
 
 (DataGridPagination as React.FunctionComponent).displayName = 'DataGridPagination';
+
+function PageSizeSelector<TRow>({ grid, pageSize }: { grid: GridModel<TRow>; pageSize: number }) {
+  const options = grid.pagination.pageSizeOptions;
+  if (!options || options.length === 0) return null;
+
+  return (
+    <Flex ai="center" gap={1} mr={1}>
+      <Box
+        component={`${grid.componentName}.bottomBar.pagination.pageSize` as never}
+        tag="select"
+        fontSize={12}
+        borderRadius={4}
+        cursor="pointer"
+        props={{
+          value: pageSize,
+          onChange: (e: React.ChangeEvent<HTMLSelectElement>) => grid.pagination.changePageSize(Number(e.target.value)),
+        }}
+      >
+        {options.map((size) => (
+          <option key={size} value={size}>
+            {size} / page
+          </option>
+        ))}
+      </Box>
+    </Flex>
+  );
+}
 
 function PageJumpInput<TRow>({ grid, page, totalPages }: { grid: GridModel<TRow>; page: number; totalPages: number }) {
   const [value, setValue] = useState(String(page));
@@ -60,15 +86,9 @@ function PageJumpInput<TRow>({ grid, page, totalPages }: { grid: GridModel<TRow>
   }, [page]);
 
   const commit = useCallback(() => {
-    const n = parseInt(value, 10);
-    if (!isNaN(n)) {
-      const clamped = Math.max(1, Math.min(n, totalPages));
-      grid.changePage(clamped);
-      setValue(String(clamped));
-    } else {
-      setValue(String(page));
-    }
-  }, [grid, page, totalPages, value]);
+    grid.pagination.jumpToPage(value);
+    setValue(String(grid.pagination.page));
+  }, [grid, value]);
 
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent<HTMLInputElement>) => {

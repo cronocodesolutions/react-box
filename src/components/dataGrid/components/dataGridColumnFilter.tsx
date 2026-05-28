@@ -1,9 +1,9 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import Box from '../../../box';
 import Dropdown from '../../dropdown';
 import Flex from '../../flex';
 import Textbox from '../../textbox';
-import { ColumnFilterConfig, NumberFilterValue } from '../contracts/dataGridContract';
+import { NumberFilterValue } from '../contracts/dataGridContract';
 import ColumnModel from '../models/columnModel';
 import GridModel from '../models/gridModel';
 
@@ -12,26 +12,19 @@ interface Props<TRow> {
   grid: GridModel<TRow>;
 }
 
-interface FilterOption {
-  label: string;
-  value: string | number | boolean | null;
-}
-
 /**
- * Text filter with fuzzy search support
+ * Text filter with fuzzy search support.
+ * Local input + debounce stay here; config/parsing/commit live on ColumnModel.
  */
 function TextFilter<TRow>({ column, grid }: Props<TRow>) {
-  const currentFilter = grid.columnFilters[column.key as keyof TRow];
+  const currentFilter = column.currentFilter;
   const initialValue = currentFilter?.type === 'text' ? currentFilter.value : '';
   const [localValue, setLocalValue] = useState(initialValue);
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // Cleanup timeout on unmount
   useEffect(() => {
     return () => {
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current);
-      }
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
     };
   }, []);
 
@@ -40,34 +33,33 @@ function TextFilter<TRow>({ column, grid }: Props<TRow>) {
       const value = e.target.value;
       setLocalValue(value);
 
-      // Clear previous timeout
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current);
-      }
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
 
-      // Debounced update
       timeoutRef.current = setTimeout(() => {
-        if (value.trim()) {
-          grid.setColumnFilter(column.key, { type: 'text', value });
-        } else {
-          grid.setColumnFilter(column.key, undefined);
-        }
+        column.setTextFilter(value);
         timeoutRef.current = null;
       }, 300);
     },
-    [grid, column.key],
+    [column],
   );
 
   const handleClear = useCallback(() => {
     setLocalValue('');
-    grid.setColumnFilter(column.key, undefined);
-  }, [grid, column.key]);
-
-  const config: ColumnFilterConfig = typeof column.def.filterable === 'object' ? column.def.filterable : { type: 'text' };
+    column.clearFilter();
+  }, [column]);
 
   return (
-    <Flex component={`${grid.componentName}.filter.cell.input` as never} ai="center" position="relative" width="fit">
-      <Textbox width="fit" variant="compact" placeholder={config.placeholder ?? 'Filter...'} value={localValue} onChange={handleChange} />
+    <Flex component={`${grid.componentName}.filter.cell.input` as never}>
+      <Textbox
+        width="fit"
+        variant="compact"
+        placeholder={column.filterConfig?.placeholder ?? 'Filter...'}
+        value={localValue}
+        onChange={handleChange}
+        b={0}
+        bgColor="transparent"
+        focus={{ outline: 0 }}
+      />
       {localValue && (
         <Flex position="absolute" right={2} top="1/2" translateY="-1/2" cursor="pointer" props={{ onClick: handleClear }}>
           <Box fontSize={10} color="gray-400" hover={{ color: 'gray-600' }}>
@@ -80,10 +72,10 @@ function TextFilter<TRow>({ column, grid }: Props<TRow>) {
 }
 
 /**
- * Number filter with comparison operators
+ * Number filter with comparison operators.
  */
 function NumberFilter<TRow>({ column, grid }: Props<TRow>) {
-  const currentFilter = grid.columnFilters[column.key as keyof TRow];
+  const currentFilter = column.currentFilter;
   const initialValue = currentFilter?.type === 'number' ? currentFilter.value : '';
   const initialOperator = currentFilter?.type === 'number' ? currentFilter.operator : 'eq';
   const initialValueTo = currentFilter?.type === 'number' ? currentFilter.valueTo : '';
@@ -94,71 +86,36 @@ function NumberFilter<TRow>({ column, grid }: Props<TRow>) {
   const valueTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const valueToTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // Cleanup timeouts on unmount
   useEffect(() => {
     return () => {
-      if (valueTimeoutRef.current) {
-        clearTimeout(valueTimeoutRef.current);
-      }
-      if (valueToTimeoutRef.current) {
-        clearTimeout(valueToTimeoutRef.current);
-      }
+      if (valueTimeoutRef.current) clearTimeout(valueTimeoutRef.current);
+      if (valueToTimeoutRef.current) clearTimeout(valueToTimeoutRef.current);
     };
   }, []);
 
-  const config: ColumnFilterConfig = typeof column.def.filterable === 'object' ? column.def.filterable : { type: 'number' };
-
-  const applyFilter = useCallback(
-    (op: NumberFilterValue['operator'], val: string | number, valTo?: string | number) => {
-      const numVal = typeof val === 'number' ? val : parseFloat(val);
-
-      if (isNaN(numVal) || val === '') {
-        grid.setColumnFilter(column.key, undefined);
-        return;
-      }
-
-      const filter: NumberFilterValue = {
-        type: 'number',
-        operator: op,
-        value: numVal,
-      };
-
-      if (op === 'between' && valTo !== undefined && valTo !== '') {
-        const numValTo = typeof valTo === 'number' ? valTo : parseFloat(String(valTo));
-        if (!isNaN(numValTo)) {
-          filter.valueTo = numValTo;
-        }
-      }
-
-      grid.setColumnFilter(column.key, filter);
-    },
-    [grid, column.key],
-  );
+  const config = column.filterConfig;
 
   const handleValueChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
       const value = e.target.value;
       setLocalValue(value);
 
-      // Clear previous timeout
-      if (valueTimeoutRef.current) {
-        clearTimeout(valueTimeoutRef.current);
-      }
+      if (valueTimeoutRef.current) clearTimeout(valueTimeoutRef.current);
 
       valueTimeoutRef.current = setTimeout(() => {
-        applyFilter(operator, value, valueTo);
+        column.setNumberFilter(operator, value, valueTo);
         valueTimeoutRef.current = null;
       }, 300);
     },
-    [operator, valueTo, applyFilter],
+    [column, operator, valueTo],
   );
 
   const handleOperatorChange = useCallback(
     (op: NumberFilterValue['operator']) => {
       setOperator(op);
-      applyFilter(op, localValue, valueTo);
+      column.setNumberFilter(op, localValue, valueTo);
     },
-    [localValue, valueTo, applyFilter],
+    [column, localValue, valueTo],
   );
 
   const handleValueToChange = useCallback(
@@ -166,39 +123,34 @@ function NumberFilter<TRow>({ column, grid }: Props<TRow>) {
       const value = e.target.value;
       setValueTo(value);
 
-      // Clear previous timeout
-      if (valueToTimeoutRef.current) {
-        clearTimeout(valueToTimeoutRef.current);
-      }
+      if (valueToTimeoutRef.current) clearTimeout(valueToTimeoutRef.current);
 
       valueToTimeoutRef.current = setTimeout(() => {
-        applyFilter(operator, localValue, value);
+        column.setNumberFilter(operator, localValue, value);
         valueToTimeoutRef.current = null;
       }, 300);
     },
-    [operator, localValue, applyFilter],
+    [column, operator, localValue],
   );
 
   const handleClear = useCallback(() => {
     setLocalValue('');
     setValueTo('');
     setOperator('eq');
-    grid.setColumnFilter(column.key, undefined);
-  }, [grid, column.key]);
+    column.clearFilter();
+  }, [column]);
 
   return (
-    <Flex
-      component={`${grid.componentName}.filter.cell.input` as never}
-      ai={operator === 'between' ? 'start' : 'center'}
-      gap={1}
-      width="fit"
-    >
+    <Flex component={`${grid.componentName}.filter.cell.input` as never} ai={operator === 'between' ? 'start' : 'center'} gap={1}>
       <Dropdown<NumberFilterValue['operator']>
         value={operator}
         variant="compact"
         onChange={(val) => val && handleOperatorChange(val)}
         minWidth={6}
         hideIcon
+        b={0}
+        bgColor="transparent"
+        focus={{ outline: 0 }}
       >
         <Dropdown.Item value="eq">=</Dropdown.Item>
         <Dropdown.Item value="ne">≠</Dropdown.Item>
@@ -214,11 +166,14 @@ function NumberFilter<TRow>({ column, grid }: Props<TRow>) {
             <Textbox
               type="number"
               variant="compact"
-              placeholder={config.placeholder ?? 'From'}
+              placeholder={config?.placeholder ?? 'From'}
               value={localValue}
               onChange={handleValueChange}
               width="fit"
-              step={config.step}
+              step={config?.step}
+              b={0}
+              bgColor="transparent"
+              focus={{ outline: 0 }}
             />
             {(localValue !== '' || valueTo !== '') && (
               <Flex position="absolute" right={2} top="1/2" translateY="-1/2" cursor="pointer" props={{ onClick: handleClear }}>
@@ -236,7 +191,10 @@ function NumberFilter<TRow>({ column, grid }: Props<TRow>) {
               value={valueTo}
               onChange={handleValueToChange}
               width="fit"
-              step={config.step}
+              step={config?.step}
+              b={0}
+              bgColor="transparent"
+              focus={{ outline: 0 }}
             />
           </Flex>
         </Flex>
@@ -245,11 +203,14 @@ function NumberFilter<TRow>({ column, grid }: Props<TRow>) {
           <Textbox
             type="number"
             variant="compact"
-            placeholder={config.placeholder ?? 'Value'}
+            placeholder={config?.placeholder ?? 'Value'}
             value={localValue}
             onChange={handleValueChange}
             width="fit"
-            step={config.step}
+            step={config?.step}
+            b={0}
+            bgColor="transparent"
+            focus={{ outline: 0 }}
           />
           {localValue !== '' && (
             <Flex position="absolute" right={2} top="1/2" translateY="-1/2" cursor="pointer" props={{ onClick: handleClear }}>
@@ -265,80 +226,78 @@ function NumberFilter<TRow>({ column, grid }: Props<TRow>) {
 }
 
 /**
- * Multi-select filter with checkbox list
+ * Multi-select filter with checkbox list.
  */
 function MultiselectFilter<TRow>({ column, grid }: Props<TRow>) {
-  const currentFilter = grid.columnFilters[column.key as keyof TRow];
+  const currentFilter = column.currentFilter;
   const selectedValues = currentFilter?.type === 'multiselect' ? currentFilter.values : [];
-
-  const config: ColumnFilterConfig = typeof column.def.filterable === 'object' ? column.def.filterable : { type: 'multiselect' };
-
-  // Get options from config or compute unique values
-  const options: FilterOption[] = useMemo(() => {
-    if (config.options) {
-      return config.options;
-    }
-
-    const uniqueValues = grid.getColumnUniqueValues(column.key);
-    return uniqueValues.map((value) => ({
-      label: value === null ? '(empty)' : String(value),
-      value,
-    }));
-  }, [config.options, grid, column.key]);
+  const options = column.filterOptions;
 
   const handleChange = useCallback(
     (_value: string | number | boolean | null | undefined, values: (string | number | boolean | null)[]) => {
-      if (values.length === 0) {
-        grid.setColumnFilter(column.key, undefined);
-      } else {
-        grid.setColumnFilter(column.key, { type: 'multiselect', values });
-      }
+      column.setMultiselectFilter(values);
     },
-    [grid, column.key],
+    [column],
   );
 
   return (
-    <Dropdown<string | number | boolean | null>
-      component={`${grid.componentName}.filter.cell.input` as never}
-      multiple
-      showCheckbox
-      isSearchable
-      searchPlaceholder="Search..."
-      value={selectedValues}
-      width="fit"
-      minWidth={0}
-      onChange={handleChange}
-      variant="compact"
-    >
-      <Dropdown.Unselect>Clear</Dropdown.Unselect>
-      <Dropdown.SelectAll>Select All</Dropdown.SelectAll>
-      {options.map((option) => (
-        <Dropdown.Item<string | number | boolean | null> key={String(option.value)} value={option.value} ai="center" gap={2}>
-          {option.label}
-        </Dropdown.Item>
-      ))}
-    </Dropdown>
+    <Flex component={`${grid.componentName}.filter.cell.input` as never}>
+      <Dropdown<string | number | boolean | null>
+        multiple
+        showCheckbox
+        isSearchable
+        searchPlaceholder="Search..."
+        value={selectedValues}
+        width="fit"
+        minWidth={0}
+        bgColor="transparent"
+        onChange={handleChange}
+        variant="compact"
+        b={0}
+        focus={{ outline: 0 }}
+      >
+        <Dropdown.Display>
+          {(vals: (string | number | boolean | null)[]) => {
+            if (vals.length === 0)
+              return (
+                <Box tag="span" color="gray-400">
+                  {column.filterConfig?.placeholder ?? 'Select...'}
+                </Box>
+              );
+            if (vals.length === 1) {
+              const opt = options.find((o) => o.value === vals[0]);
+              return opt?.label ?? String(vals[0]);
+            }
+            return `${vals.length} selected`;
+          }}
+        </Dropdown.Display>
+        <Dropdown.Unselect>Clear</Dropdown.Unselect>
+        <Dropdown.SelectAll>Select All</Dropdown.SelectAll>
+        {options.map((option) => (
+          <Dropdown.Item<string | number | boolean | null> key={String(option.value)} value={option.value} ai="center" gap={2}>
+            {option.label}
+          </Dropdown.Item>
+        ))}
+      </Dropdown>
+    </Flex>
   );
 }
 
 /**
- * Main column filter component that renders the appropriate filter type
+ * Renders the appropriate filter input for the column's resolved filter type.
  */
 export default function DataGridColumnFilter<TRow>(props: Props<TRow>) {
   const { column, grid } = props;
-  const { filterable } = column.def;
+  const config = column.filterConfig;
 
-  if (!filterable) return null;
-
-  const config: ColumnFilterConfig = typeof filterable === 'object' ? filterable : { type: 'text' };
+  if (!config) return null;
 
   switch (config.type) {
-    case 'text':
-      return <TextFilter column={column} grid={grid} />;
     case 'number':
       return <NumberFilter column={column} grid={grid} />;
     case 'multiselect':
       return <MultiselectFilter column={column} grid={grid} />;
+    case 'text':
     default:
       return <TextFilter column={column} grid={grid} />;
   }

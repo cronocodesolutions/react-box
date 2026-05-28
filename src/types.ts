@@ -3,7 +3,7 @@ export * from './array';
 
 import { breakpoints, cssStyles, pseudo1, pseudo2, pseudoClasses, pseudoGroupClasses, themeGroupClass } from './core/boxStyles';
 import { ClassNameType } from './core/classNames';
-import { BoxStyle, BoxStylesType, ExtractKeys } from './core/coreTypes';
+import { BoxStyle, BoxStylesType, ExtractKeys, ExtractTupleValues } from './core/coreTypes';
 import boxComponents from './core/extends/boxComponents';
 
 export type ArrayType<T> = T extends (infer U)[] ? U : T;
@@ -14,13 +14,19 @@ export namespace Augmented {
   export interface ComponentsTypes {}
 }
 
+type ExtractBoxStyleValue<T> = T extends { tuple: true; values: infer V }
+  ? ExtractTupleValues<V>
+  : T extends { values: infer V }
+    ? BoxStylesType<V>
+    : never;
+
 type ExtractBoxStylesInternal<T extends Record<string, BoxStyle[]>> = {
   [K in keyof T]?: K extends keyof Augmented.BoxPropTypes
-    ? BoxStylesType<ArrayType<T[K]>['values']> | Augmented.BoxPropTypes[K]
-    : BoxStylesType<ArrayType<T[K]>['values']>;
+    ? ExtractBoxStyleValue<ArrayType<T[K]>> | Augmented.BoxPropTypes[K]
+    : ExtractBoxStyleValue<ArrayType<T[K]>>;
 };
 export type ExtractBoxStyles<T extends Record<string, BoxStyle[]>> = {
-  [K in keyof T]?: BoxStylesType<ArrayType<T[K]>['values']>;
+  [K in keyof T]?: ExtractBoxStyleValue<ArrayType<T[K]>>;
 };
 
 export type PseudoClassesType = keyof typeof pseudoClasses;
@@ -98,3 +104,5 @@ export type BoxStyleProps<TKey extends keyof ComponentsAndVariants = never> = Si
 export type BoxComponentStyles = Simplify<
   BoxStylesWithPseudoClasses & BoxBreakpointsStyles & BoxPseudoGroupClassesStyles & BoxThemeGroupClassStyles
 >;
+
+type Test = ExtractBoxStylesInternal<typeof cssStyles>;

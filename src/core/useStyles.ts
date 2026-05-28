@@ -73,13 +73,13 @@ namespace StylesContextImpl {
       // key = weight of pseudo classes
       [key: number]: {
         // key = css style (box props)
-        [key: string]: Set<string | number | boolean>;
+        [key: string]: Set<string | number | boolean | readonly (string | number | boolean)[]>;
       } & {
         __parents?: {
           // key = parent name
           [key: string]: {
             // key = css style (box props)
-            [key: string]: Set<string | number | boolean>;
+            [key: string]: Set<string | number | boolean | readonly (string | number | boolean)[]>;
           };
         };
       };
@@ -241,7 +241,7 @@ namespace StylesContextImpl {
 
   function generateRule(
     key: string,
-    value: string | number | boolean,
+    value: string | number | boolean | readonly (string | number | boolean)[],
     weight: number,
     breakpoint: string,
     pseudoClassParentName?: string,
@@ -250,6 +250,13 @@ namespace StylesContextImpl {
 
     const itemValue = item.find((x) => {
       if (Array.isArray(x.values)) {
+        if (Array.isArray(value)) {
+          // Tuple definition: x.values is a tuple of allowed-value arrays; each position must contain value[i]
+          if (x.values.length > 0 && Array.isArray(x.values[0])) {
+            return x.values.length === value.length && (x.values as unknown[][]).every((allowed, i) => allowed.includes(value[i]));
+          }
+          return x.values.length === value.length && x.values.every((v, i) => typeof v === typeof value[i]);
+        }
         return x.values.includes(value);
       }
       return typeof value === typeof x.values;
@@ -349,13 +356,20 @@ namespace StylesContextImpl {
     const className = createClassName(key, value, weight, breakpoint, pseudoClassParentName);
 
     // Create a unique key to track if this rule has been generated
-    const ruleKey = `${breakpoint}-${weight}-${key}-${value}-${pseudoClassParentName ?? ''}`;
+    const serializedValue = Array.isArray(value) ? value.join('_') : value;
+    const ruleKey = `${breakpoint}-${weight}-${key}-${serializedValue}-${pseudoClassParentName ?? ''}`;
 
     // Only generate rule if it hasn't been generated before
     if (!generatedRules.has(ruleKey)) {
       generatedRules.add(ruleKey);
 
-      const result = generateRule(key, value as string | number | boolean, weight, breakpoint, pseudoClassParentName);
+      const result = generateRule(
+        key,
+        value as string | number | boolean | readonly (string | number | boolean)[],
+        weight,
+        breakpoint,
+        pseudoClassParentName,
+      );
       if (result) {
         pendingRules.push([result.sortIndex, result.breakpointOrder, result.rule]);
         requireFlush = true;
@@ -395,8 +409,9 @@ namespace StylesContextImpl {
     pseudoClassParentName?: string,
   ) {
     const pseudoClasses = pseudoClassesByWeight[weight];
+    const serializedValue = Array.isArray(value) ? value.join('_') : value;
 
-    const className = `${breakpoint === 'normal' ? '' : `${breakpoint}-`}${pseudoClasses.map((p) => `${p}-`).join('')}${pseudoClassParentName ? `${pseudoClassParentName}-` : ''}${key}-${value}`;
+    const className = `${breakpoint === 'normal' ? '' : `${breakpoint}-`}${pseudoClasses.map((p) => `${p}-`).join('')}${pseudoClassParentName ? `${pseudoClassParentName}-` : ''}${key}-${serializedValue}`;
 
     return isTestEnv ? className : identity.getIdentity(className);
   }
