@@ -1,3 +1,4 @@
+import memo from '../../../utils/memo';
 import { Key } from '../contracts/dataGridContract';
 import CellModel from './cellModel';
 import DetailRowModel from './detailRowModel';
@@ -18,9 +19,22 @@ export default class RowModel<TRow> {
   public readonly key: Key;
   public parentRow?: GroupRowModel<TRow>;
   public readonly count = 1;
+  public readonly kind = 'row' as const;
 
+  /** Whether clicking the row toggles its detail panel. */
+  public get expandOnRowClick(): boolean {
+    return this.grid.props.def.rowDetail?.expandOnRowClick ?? false;
+  }
+
+  public toggleDetail = (): void => {
+    this.grid.toggleDetailRow(this.key);
+  };
+
+  // Memoized per row instance: rows are rebuilt whenever columns/data/sort/filter change,
+  // so cached cells stay valid for the row's lifetime (stops per-render allocation).
+  private readonly _cells = memo(() => this.grid.columns.value.visibleLeafs.map((c) => new CellModel<TRow>(this.grid, this, c)));
   public get cells(): CellModel<TRow>[] {
-    return this.grid.columns.value.visibleLeafs.map((c) => new CellModel<TRow>(this.grid, this, c));
+    return this._cells.value;
   }
 
   public get selected() {

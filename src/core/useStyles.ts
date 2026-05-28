@@ -48,6 +48,17 @@ export default function useStyles(props: BoxStyleProps<any>, isSvg: boolean) {
   return classNames;
 }
 
+export function useGlobalStyles(props: BoxStyleProps<any> | undefined, selector: string) {
+  if (props) {
+    const throwawayClassNames: string[] = [];
+    StylesContextImpl.addClassNames(props, throwawayClassNames, [], undefined, undefined, selector);
+  }
+
+  useEff(() => {
+    StylesContextImpl.flush();
+  }, [props, selector]);
+}
+
 namespace StylesContextImpl {
   let requireFlush = true;
   let isInitialized = false;
@@ -73,13 +84,13 @@ namespace StylesContextImpl {
       // key = weight of pseudo classes
       [key: number]: {
         // key = css style (box props)
-        [key: string]: Set<string | number | boolean>;
+        [key: string]: Set<string | number | boolean | readonly (string | number | boolean)[]>;
       } & {
         __parents?: {
           // key = parent name
           [key: string]: {
             // key = css style (box props)
-            [key: string]: Set<string | number | boolean>;
+            [key: string]: Set<string | number | boolean | readonly (string | number | boolean)[]>;
           };
         };
       };
@@ -92,26 +103,41 @@ namespace StylesContextImpl {
     currentPseudoClasses: PseudoClassesType[],
     breakpoint?: string,
     pseudoClassParentName?: string,
+    rootSelector?: string,
   ) {
     Object.entries(props).forEach(([key, value]) => {
       if (value === undefined || value === null) return;
       if (ObjectUtils.isKeyOf(key, cssStyles)) {
-        addClassName(key, value, classNames, currentPseudoClasses, breakpoint, pseudoClassParentName);
+        addClassName(key, value, classNames, currentPseudoClasses, breakpoint, pseudoClassParentName, rootSelector);
       } else if (ObjectUtils.isKeyOf(key, pseudo1)) {
-        addClassNames(value as BoxStyleProps, classNames, [...currentPseudoClasses, key], breakpoint, pseudoClassParentName);
+        addClassNames(value as BoxStyleProps, classNames, [...currentPseudoClasses, key], breakpoint, pseudoClassParentName, rootSelector);
       } else if (ObjectUtils.isKeyOf(key, pseudo2)) {
         if (Array.isArray(value)) {
           const [_, styles] = value as [unknown, BoxStyleProps];
-          addClassNames(styles, classNames, [...currentPseudoClasses, key], breakpoint, pseudoClassParentName);
+          addClassNames(styles, classNames, [...currentPseudoClasses, key], breakpoint, pseudoClassParentName, rootSelector);
         }
         if (ObjectUtils.isObject(value)) {
-          addClassNames(value as BoxStyleProps, classNames, [...currentPseudoClasses, key], breakpoint, pseudoClassParentName);
+          addClassNames(
+            value as BoxStyleProps,
+            classNames,
+            [...currentPseudoClasses, key],
+            breakpoint,
+            pseudoClassParentName,
+            rootSelector,
+          );
         }
       } else if (ObjectUtils.isKeyOf(key, breakpoints)) {
-        addClassNames(value as BoxStyleProps, classNames, currentPseudoClasses, key, pseudoClassParentName);
+        addClassNames(value as BoxStyleProps, classNames, currentPseudoClasses, key, pseudoClassParentName, rootSelector);
       } else if (ObjectUtils.isKeyOf(key, pseudoGroupClasses)) {
         Object.entries(value).forEach(([name, pseudoClassProps]) => {
-          addClassNames(pseudoClassProps as BoxStyles, classNames, [...currentPseudoClasses, pseudoGroupClasses[key]], breakpoint, name);
+          addClassNames(
+            pseudoClassProps as BoxStyles,
+            classNames,
+            [...currentPseudoClasses, pseudoGroupClasses[key]],
+            breakpoint,
+            name,
+            rootSelector,
+          );
         });
       } else if (ObjectUtils.isKeyOf(key, themeGroupClass)) {
         Object.entries(value).forEach(([name, themeProps]) => {
@@ -127,10 +153,11 @@ namespace StylesContextImpl {
                   breakpoint,
                   // Use | as separator to distinguish theme from group name
                   `${name}|${groupName}`,
+                  rootSelector,
                 );
               });
             } else {
-              addClassNames({ [themeKey]: themeValue } as BoxStyles, classNames, themePseudoClasses, breakpoint, name);
+              addClassNames({ [themeKey]: themeValue } as BoxStyles, classNames, themePseudoClasses, breakpoint, name, rootSelector);
             }
           });
         });
@@ -241,15 +268,23 @@ namespace StylesContextImpl {
 
   function generateRule(
     key: string,
-    value: string | number | boolean,
+    value: string | number | boolean | readonly (string | number | boolean)[],
     weight: number,
     breakpoint: string,
     pseudoClassParentName?: string,
+    rootSelector?: string,
   ): { rule: string; sortIndex: number; breakpointOrder: number } | null {
     const item = cssStyles[key as keyof typeof cssStyles] as BoxStyle[];
 
     const itemValue = item.find((x) => {
       if (Array.isArray(x.values)) {
+        if (Array.isArray(value)) {
+          // Tuple definition: x.values is a tuple of allowed-value arrays; each position must contain value[i]
+          if (x.values.length > 0 && Array.isArray(x.values[0])) {
+            return x.values.length === value.length && (x.values as unknown[][]).every((allowed, i) => allowed.includes(value[i]));
+          }
+          return x.values.length === value.length && x.values.every((v, i) => typeof v === typeof value[i]);
+        }
         return x.values.includes(value);
       }
       return typeof value === typeof x.values;
@@ -278,7 +313,17 @@ namespace StylesContextImpl {
       const hasThemeAndGroup = pseudoClassParentName.includes('|');
       let defaultSelector: string;
 
-      if (hasThemeAndGroup) {
+      if (rootSelector) {
+        // Global mode: rules target the root selector (e.g. `html`) directly.
+        // Group selectors are not meaningful for the document root — skip them.
+        if (hasThemeAndGroup) return null;
+        if (hasTheme) {
+          // Theme on same element as rootSelector → compound selector
+          defaultSelector = `${rootSelector}.${pseudoClassParentName}${pseudoClassesToUse}`;
+        } else {
+          return null;
+        }
+      } else if (hasThemeAndGroup) {
         // Combined theme + group: .themeName .groupName:hover .className
         const [themeName, groupName] = pseudoClassParentName.split('|');
         defaultSelector = `.${themeName} .${groupName}${pseudoClassesToUse} .${className}`;
@@ -307,7 +352,8 @@ namespace StylesContextImpl {
       return { rule, sortIndex, breakpointOrder };
     } else {
       const pseudoClassesToUse = pseudoClassesByWeight[weight].map((p) => pseudoClasses[p]).join('');
-      const selector = itemValue.selector?.(`.${className}`, pseudoClassesToUse) ?? `.${className}${pseudoClassesToUse}`;
+      const baseSelector = rootSelector ?? `.${className}`;
+      const selector = itemValue.selector?.(baseSelector, pseudoClassesToUse) ?? `${baseSelector}${pseudoClassesToUse}`;
 
       const styleName = Array.isArray(itemValue.styleName) ? itemValue.styleName : [itemValue.styleName ?? key];
 
@@ -342,6 +388,7 @@ namespace StylesContextImpl {
     currentPseudoClasses: PseudoClassesType[],
     breakpoint: string = 'normal',
     pseudoClassParentName?: string,
+    rootSelector?: string,
   ) {
     if (value === undefined || value === null) return;
 
@@ -349,13 +396,21 @@ namespace StylesContextImpl {
     const className = createClassName(key, value, weight, breakpoint, pseudoClassParentName);
 
     // Create a unique key to track if this rule has been generated
-    const ruleKey = `${breakpoint}-${weight}-${key}-${value}-${pseudoClassParentName ?? ''}`;
+    const serializedValue = Array.isArray(value) ? value.join('_') : value;
+    const ruleKey = `${breakpoint}-${weight}-${key}-${serializedValue}-${pseudoClassParentName ?? ''}-${rootSelector ?? ''}`;
 
     // Only generate rule if it hasn't been generated before
     if (!generatedRules.has(ruleKey)) {
       generatedRules.add(ruleKey);
 
-      const result = generateRule(key, value as string | number | boolean, weight, breakpoint, pseudoClassParentName);
+      const result = generateRule(
+        key,
+        value as string | number | boolean | readonly (string | number | boolean)[],
+        weight,
+        breakpoint,
+        pseudoClassParentName,
+        rootSelector,
+      );
       if (result) {
         pendingRules.push([result.sortIndex, result.breakpointOrder, result.rule]);
         requireFlush = true;
@@ -395,8 +450,9 @@ namespace StylesContextImpl {
     pseudoClassParentName?: string,
   ) {
     const pseudoClasses = pseudoClassesByWeight[weight];
+    const serializedValue = Array.isArray(value) ? value.join('_') : value;
 
-    const className = `${breakpoint === 'normal' ? '' : `${breakpoint}-`}${pseudoClasses.map((p) => `${p}-`).join('')}${pseudoClassParentName ? `${pseudoClassParentName}-` : ''}${key}-${value}`;
+    const className = `${breakpoint === 'normal' ? '' : `${breakpoint}-`}${pseudoClasses.map((p) => `${p}-`).join('')}${pseudoClassParentName ? `${pseudoClassParentName}-` : ''}${key}-${serializedValue}`;
 
     return isTestEnv ? className : identity.getIdentity(className);
   }

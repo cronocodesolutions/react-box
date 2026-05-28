@@ -19,7 +19,7 @@ export default function useVisibility<T extends HTMLElement = HTMLDivElement>(
   useEffect(() => {
     function clickHandler(e: MouseEvent) {
       const el = node ?? visibilityRef.current;
-      const shouldHide = el?.contains(e.target as Node) === false;
+      const shouldHide = el ? !e.composedPath().includes(el) : false;
 
       if (shouldHide) {
         setVisibility(false);
@@ -32,7 +32,7 @@ export default function useVisibility<T extends HTMLElement = HTMLDivElement>(
 
     function scrollHandler(e: Event) {
       const el = node ?? visibilityRef.current;
-      const shouldHide = el?.contains(e.target as Node) === false;
+      const shouldHide = el ? !e.composedPath().includes(el) : false;
 
       if (shouldHide) {
         setVisibility(false);

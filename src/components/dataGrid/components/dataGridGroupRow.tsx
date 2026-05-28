@@ -4,7 +4,6 @@ import ExpandIcon from '../../../icons/expandIcon';
 import Button from '../../button';
 import Checkbox from '../../checkbox';
 import Flex from '../../flex';
-import { EMPTY_CELL_KEY, GROUPING_CELL_KEY, ROW_DETAIL_CELL_KEY, ROW_NUMBER_CELL_KEY, ROW_SELECTION_CELL_KEY } from '../models/gridModel';
 import GroupRowModel from '../models/groupRowModel';
 import DataGridCell from './dataGridCell';
 
@@ -14,11 +13,9 @@ interface Props<TRow> {
 
 export default function DataGridGroupRow<TRow>(props: Props<TRow>) {
   const { row } = props;
-  const { selected, indeterminate, cells, groupingColumn, groupingColumnGridColumn, depth, expanded } = row;
+  const { selected, indeterminate, cells, expanded } = row;
 
-  const selectAllHandler = useCallback(() => {
-    row.grid.toggleRowsSelection(row.allRows.map((x) => x.key));
-  }, []);
+  const selectAllHandler = useCallback(() => row.toggleSelectAll(), [row]);
 
   return (
     <Flex
@@ -29,55 +26,51 @@ export default function DataGridGroupRow<TRow>(props: Props<TRow>) {
       props={{ role: 'rowgroup' }}
     >
       {cells.map((cell) => {
-        const { key, pin, groupColumnWidthVarName } = cell.column;
-        const isRightPinned = pin === 'RIGHT';
+        switch (cell.cellKind) {
+          case 'grouping':
+            return (
+              <DataGridCell
+                key={cell.column.key}
+                column={cell.column}
+                style={{ width: cell.widthVar, right: cell.isRightPinned ? '0' : undefined }}
+                br={cell.hasGroupingBorder ? 1 : undefined}
+                gridColumn={cell.gridColumnSpan}
+                pl={cell.depthPadding}
+                overflow="auto"
+              >
+                <Box textWrap="nowrap" px={3}>
+                  <Button
+                    component={`${row.grid.componentName}.body.groupRow.expandButton` as never}
+                    clean
+                    onClick={() => row.toggleRow()}
+                    cursor="pointer"
+                    display="flex"
+                    gap={1}
+                    ai="center"
+                  >
+                    <ExpandIcon fill="currentColor" width="14px" height="14px" rotate={expanded ? 0 : -90} />
+                    {cell.value}
+                  </Button>
+                </Box>
+              </DataGridCell>
+            );
 
-        if (key === GROUPING_CELL_KEY) {
-          return (
-            <DataGridCell
-              key={key}
-              column={cell.column}
-              style={{
-                width: `var(${groupColumnWidthVarName})`,
-                right: isRightPinned ? '0' : undefined,
-              }}
-              br={groupingColumn.pin === 'LEFT' ? 1 : undefined}
-              gridColumn={groupingColumnGridColumn}
-              pl={4 * depth}
-              overflow="auto"
-            >
-              <Box textWrap="nowrap" px={3}>
-                <Button
-                  component={`${row.grid.componentName}.body.groupRow.expandButton` as never}
-                  clean
-                  onClick={() => row.toggleRow()}
-                  cursor="pointer"
-                  display="flex"
-                  gap={1}
-                  ai="center"
-                >
-                  <ExpandIcon fill="currentColor" width="14px" height="14px" rotate={expanded ? 0 : -90} />
-                  {cell.value}
-                </Button>
-              </Box>
-            </DataGridCell>
-          );
-        }
+          case 'selection':
+            return (
+              <DataGridCell key={cell.column.key} column={cell.column}>
+                <Checkbox variant="datagrid" m={1} checked={selected} indeterminate={indeterminate} onChange={selectAllHandler} />
+              </DataGridCell>
+            );
 
-        if (key === ROW_SELECTION_CELL_KEY) {
-          return (
-            <DataGridCell key={key} column={cell.column}>
-              <Checkbox variant="datagrid" m={1} checked={selected} indeterminate={indeterminate} onChange={selectAllHandler} />
-            </DataGridCell>
-          );
-        }
+          case 'spacer':
+            return (
+              <DataGridCell key={cell.column.key} column={cell.column} px={cell.column.isRowNumber ? 3 : undefined}>
+                {cell.value}
+              </DataGridCell>
+            );
 
-        if (pin !== groupingColumn.pin || key === ROW_NUMBER_CELL_KEY || key === EMPTY_CELL_KEY || key === ROW_DETAIL_CELL_KEY) {
-          return (
-            <DataGridCell key={key} column={cell.column} px={key === ROW_NUMBER_CELL_KEY ? 3 : undefined}>
-              {cell.value}
-            </DataGridCell>
-          );
+          default:
+            return null;
         }
       })}
     </Flex>

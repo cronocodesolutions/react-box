@@ -26,9 +26,7 @@ export default function DataGridContent<TRow>(props: Props<TRow>) {
     });
   }, []);
 
-  const hasVisibleColumns = grid.columns.value.userVisibleLeafs.length > 0;
-
-  if (!hasVisibleColumns) {
+  if (!grid.hasVisibleColumns) {
     return <DataGridEmptyColumns grid={grid} />;
   }
 

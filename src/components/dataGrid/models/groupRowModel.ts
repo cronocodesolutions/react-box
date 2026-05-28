@@ -1,13 +1,8 @@
+import memo from '../../../utils/memo';
 import { Key } from '../contracts/dataGridContract';
 import ColumnModel from './columnModel';
 import DetailRowModel from './detailRowModel';
-import GridModel, {
-  EMPTY_CELL_KEY,
-  GROUPING_CELL_KEY,
-  ROW_DETAIL_CELL_KEY,
-  ROW_NUMBER_CELL_KEY,
-  ROW_SELECTION_CELL_KEY,
-} from './gridModel';
+import GridModel, { GROUPING_CELL_KEY, ROW_DETAIL_CELL_KEY, ROW_NUMBER_CELL_KEY, ROW_SELECTION_CELL_KEY } from './gridModel';
 import GroupRowCellModel from './groupRowCellModel';
 import RowModel from './rowModel';
 
@@ -27,8 +22,9 @@ export default class GroupRowModel<TRow> {
   }
   public parentRow?: GroupRowModel<TRow>;
 
+  private readonly _cells = memo(() => this.grid.columns.value.visibleLeafs.map((c) => new GroupRowCellModel<TRow>(this.grid, this, c)));
   public get cells(): GroupRowCellModel<TRow>[] {
-    return this.grid.columns.value.visibleLeafs.map((c) => new GroupRowCellModel<TRow>(this.grid, this, c));
+    return this._cells.value;
   }
 
   public get selected() {
@@ -72,11 +68,7 @@ export default class GroupRowModel<TRow> {
     const { groupingColumn } = this;
 
     const gridColumn = visibleLeafs.sumBy((c) =>
-      c.pin === groupingColumn.pin &&
-      c.key !== EMPTY_CELL_KEY &&
-      c.key !== ROW_SELECTION_CELL_KEY &&
-      c.key !== ROW_NUMBER_CELL_KEY &&
-      c.key !== ROW_DETAIL_CELL_KEY
+      c.pin === groupingColumn.pin && c.key !== ROW_SELECTION_CELL_KEY && c.key !== ROW_NUMBER_CELL_KEY && c.key !== ROW_DETAIL_CELL_KEY
         ? 1
         : 0,
     );
@@ -84,7 +76,14 @@ export default class GroupRowModel<TRow> {
     return gridColumn;
   }
 
+  public readonly kind = 'group' as const;
+
   public toggleRow() {
     this.grid.toggleGroupRow(this.key);
   }
+
+  /** Select/deselect every leaf row under this group. */
+  public toggleSelectAll = (): void => {
+    this.grid.toggleRowsSelection(this.allRows.map((r) => r.key));
+  };
 }

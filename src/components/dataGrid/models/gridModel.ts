@@ -15,11 +15,14 @@ import {
   ServerState,
 } from '../contracts/dataGridContract';
 import ColumnModel from './columnModel';
+import ColumnVisibilityModel from './columnVisibilityModel';
 import DetailRowModel from './detailRowModel';
+import FilterModel from './filterModel';
 import GroupRowModel from './groupRowModel';
+import PaginationModel from './paginationModel';
 import RowModel from './rowModel';
+import ViewportModel from './viewportModel';
 
-export const EMPTY_CELL_KEY: Key = 'empty-cell';
 export const ROW_NUMBER_CELL_KEY: Key = 'row-number-cell';
 export const DEFAULT_ROW_NUMBER_COLUMN_WIDTH = 70;
 export const ROW_SELECTION_CELL_KEY: Key = 'row-selection-cell';
@@ -29,9 +32,65 @@ export const ROW_DETAIL_CELL_KEY: Key = 'row-detail-cell';
 export default class GridModel<TRow> {
   constructor(
     public props: DataGridProps<TRow>,
-    public readonly update: () => void,
+    onChange?: () => void,
   ) {
+    if (onChange) this.listeners.add(onChange);
     console.debug('\x1b[32m%s\x1b[0m', '[react-box]: DataGrid GridModel ctor');
+  }
+
+  // ========== Observable store (framework-agnostic) ==========
+  // The grid is a headless store: any framework binds by subscribing. React uses
+  // useSyncExternalStore(subscribe, getSnapshot). Mutations call notify() after
+  // updating state + clearing the affected memos.
+
+  private _version = 0;
+  private readonly listeners = new Set<() => void>();
+
+  /** Subscribe to changes; returns an unsubscribe function. */
+  public subscribe = (listener: () => void): (() => void) => {
+    this.listeners.add(listener);
+    return () => this.listeners.delete(listener);
+  };
+
+  /** Monotonic snapshot version — stable between changes, increments on notify(). */
+  public getSnapshot = (): number => this._version;
+
+  /** Signal subscribers that state changed and a re-render is needed. */
+  public notify = (): void => {
+    this._version++;
+    this.listeners.forEach((listener) => listener());
+  };
+
+  /**
+   * Sync incoming props. Called during render by the framework adapter — clears
+   * the affected memos but does NOT notify (no extra render cycle; memos recompute
+   * lazily on next access).
+   */
+  public setProps(props: DataGridProps<TRow>): void {
+    const prev = this.props;
+    if (prev === props) return;
+
+    this.props = props;
+
+    // Definition changed → column structure/layout changed; clearing sourceColumns
+    // cascades through columns → headers/layout/rows.
+    if (prev.def !== props.def) {
+      this.sourceColumns.clear();
+    }
+
+    // Any row-affecting prop changed → rebuild rows (cascades to flatRows/rowOffsets).
+    if (
+      prev.data !== props.data ||
+      prev.def !== props.def ||
+      prev.globalFilterValue !== props.globalFilterValue ||
+      prev.columnFilters !== props.columnFilters ||
+      prev.filters !== props.filters ||
+      prev.expandedRowKeys !== props.expandedRowKeys ||
+      prev.page !== props.page ||
+      prev.pageSize !== props.pageSize
+    ) {
+      this.rows.clear();
+    }
   }
 
   public get componentName(): keyof ComponentsAndVariants {
@@ -88,60 +147,68 @@ export default class GridModel<TRow> {
     return sourceColumns;
   });
 
-  public readonly columns = memo(() => {
-    console.debug('\x1b[36m%s\x1b[0m', '[react-box]: DataGrid columns memo');
+  public readonly columns = memo(
+    () => {
+      console.debug('\x1b[36m%s\x1b[0m', '[react-box]: DataGrid columns memo');
 
-    const left = this.sourceColumns.value.map((c) => c.getPinnedColumn('LEFT')).filter((c) => !!c);
-    const middle = this.sourceColumns.value.map((c) => c.getPinnedColumn()).filter((c) => !!c);
-    const right = this.sourceColumns.value.map((c) => c.getPinnedColumn('RIGHT')).filter((c) => !!c);
-    const flat = [...left, ...middle, ...right].flatMap((c) => c.flatColumns);
-    const leafs = flat.filter((x) => x.isLeaf);
-    const visibleLeafs = flat.filter((x) => x.isLeaf && x.isVisible);
-    const userVisibleLeafs = visibleLeafs.filter(
-      (c) =>
-        !([EMPTY_CELL_KEY, ROW_NUMBER_CELL_KEY, ROW_SELECTION_CELL_KEY, GROUPING_CELL_KEY, ROW_DETAIL_CELL_KEY] as Key[]).includes(c.key),
-    );
-    const maxDeath = flat.maxBy((x) => x.death) + 1;
+      const left = this.sourceColumns.value.map((c) => c.getPinnedColumn('LEFT')).filter((c) => !!c);
+      const middle = this.sourceColumns.value.map((c) => c.getPinnedColumn()).filter((c) => !!c);
+      const right = this.sourceColumns.value.map((c) => c.getPinnedColumn('RIGHT')).filter((c) => !!c);
+      const flat = [...left, ...middle, ...right].flatMap((c) => c.flatColumns);
+      const leafs = flat.filter((x) => x.isLeaf);
+      const visibleLeafs = flat.filter((x) => x.isLeaf && x.isVisible);
+      const userVisibleLeafs = visibleLeafs.filter(
+        (c) => !([ROW_NUMBER_CELL_KEY, ROW_SELECTION_CELL_KEY, GROUPING_CELL_KEY, ROW_DETAIL_CELL_KEY] as Key[]).includes(c.key),
+      );
+      const maxDeath = flat.maxBy((x) => x.death) + 1;
 
-    return {
-      left,
-      middle,
-      right,
-      flat,
-      leafs,
-      visibleLeafs,
-      userVisibleLeafs,
-      maxDeath,
-    };
-  });
+      return {
+        left,
+        middle,
+        right,
+        flat,
+        leafs,
+        visibleLeafs,
+        userVisibleLeafs,
+        maxDeath,
+      };
+    },
+    () => [this.sourceColumns],
+  );
 
-  public readonly headerRows = memo(() => {
-    console.debug('\x1b[36m%s\x1b[0m', '[react-box]: DataGrid headerRows memo');
-    const groupedByLevel = this.columns.value.flat.groupBy((c) => c.death).sortBy((x) => x.key);
+  public readonly headerRows = memo(
+    () => {
+      console.debug('\x1b[36m%s\x1b[0m', '[react-box]: DataGrid headerRows memo');
+      const groupedByLevel = this.columns.value.flat.groupBy((c) => c.death).sortBy((x) => x.key);
 
-    return groupedByLevel.map((x) => {
-      const cols = x.values.groupBy((c) => c.pin ?? NO_PIN).toRecord((c) => [c.key, c.values]);
+      return groupedByLevel.map((x) => {
+        const cols = x.values.groupBy((c) => c.pin ?? NO_PIN).toRecord((c) => [c.key, c.values]);
 
-      return [
-        ...(cols.LEFT?.filter((c) => c.isVisible) ?? []),
-        ...(cols.NO_PIN?.filter((c) => c.isVisible) ?? []),
-        ...(cols.RIGHT?.filter((c) => c.isVisible) ?? []),
-      ];
-    });
-  });
+        return [
+          ...(cols.LEFT?.filter((c) => c.isVisible) ?? []),
+          ...(cols.NO_PIN?.filter((c) => c.isVisible) ?? []),
+          ...(cols.RIGHT?.filter((c) => c.isVisible) ?? []),
+        ];
+      });
+    },
+    () => [this.columns],
+  );
 
-  public readonly gridTemplateColumns = memo(() => {
-    console.debug('\x1b[36m%s\x1b[0m', '[react-box]: DataGrid gridTemplateColumns memo');
-    const { visibleLeafs } = this.columns.value;
+  public readonly gridTemplateColumns = memo(
+    () => {
+      console.debug('\x1b[36m%s\x1b[0m', '[react-box]: DataGrid gridTemplateColumns memo');
+      const { visibleLeafs } = this.columns.value;
 
-    const rightPinnedColumnsCount = visibleLeafs.sumBy((x) => (x.pin === 'RIGHT' ? 1 : 0));
-    const leftAndMiddleCount = visibleLeafs.length - rightPinnedColumnsCount;
+      const rightPinnedColumnsCount = visibleLeafs.sumBy((x) => (x.pin === 'RIGHT' ? 1 : 0));
+      const leftAndMiddleCount = visibleLeafs.length - rightPinnedColumnsCount;
 
-    const left = leftAndMiddleCount > 0 ? `repeat(${leftAndMiddleCount}, max-content)` : '';
-    const right = rightPinnedColumnsCount > 0 ? `repeat(${rightPinnedColumnsCount}, max-content)` : '';
+      const left = leftAndMiddleCount > 0 ? `repeat(${leftAndMiddleCount}, max-content)` : '';
+      const right = rightPinnedColumnsCount > 0 ? `repeat(${rightPinnedColumnsCount}, max-content)` : '';
 
-    return `${left} ${right}`.trim();
-  });
+      return `${left} ${right}`.trim();
+    },
+    () => [this.columns],
+  );
 
   // ========== Filtering ==========
 
@@ -168,7 +235,6 @@ export default class GridModel<TRow> {
       this.columns.value.leafs
         .filter(
           (c) =>
-            c.key !== EMPTY_CELL_KEY &&
             c.key !== ROW_NUMBER_CELL_KEY &&
             c.key !== ROW_SELECTION_CELL_KEY &&
             c.key !== GROUPING_CELL_KEY &&
@@ -288,7 +354,7 @@ export default class GridModel<TRow> {
   private fireServerStateChange(overrides?: Partial<ServerState<TRow>>): void {
     this.props.onServerStateChange?.({
       page: overrides?.page ?? this.page,
-      pageSize: this.pageSize,
+      pageSize: overrides?.pageSize ?? this.pageSize,
       sortColumn: 'sortColumn' in (overrides ?? {}) ? overrides!.sortColumn : this._sortColumn,
       sortDirection: 'sortDirection' in (overrides ?? {}) ? overrides!.sortDirection : this._sortDirection,
       columnFilters: overrides?.columnFilters ?? this.columnFilters,
@@ -318,10 +384,8 @@ export default class GridModel<TRow> {
 
     this.fireServerStateChange({ globalFilterValue: value, page: nextPage });
 
-    this.rows.clear();
-    this.flatRows.clear();
-    this.rowOffsets.clear();
-    this.update();
+    this.rows.clear(); // cascades to flatRows/rowOffsets
+    this.notify();
   };
 
   /**
@@ -354,10 +418,8 @@ export default class GridModel<TRow> {
 
     this.fireServerStateChange({ columnFilters: newFilters, page: nextPage });
 
-    this.rows.clear();
-    this.flatRows.clear();
-    this.rowOffsets.clear();
-    this.update();
+    this.rows.clear(); // cascades to flatRows/rowOffsets
+    this.notify();
   };
 
   /**
@@ -372,10 +434,8 @@ export default class GridModel<TRow> {
 
     this.fireServerStateChange({ columnFilters: {} });
 
-    this.rows.clear();
-    this.flatRows.clear();
-    this.rowOffsets.clear();
-    this.update();
+    this.rows.clear(); // cascades to flatRows/rowOffsets
+    this.notify();
   };
 
   /**
@@ -429,111 +489,120 @@ export default class GridModel<TRow> {
     };
   }
 
-  public readonly rows = memo(() => {
-    console.debug('\x1b[36m%s\x1b[0m', '[react-box]: DataGrid rows memo');
-    let data = this.filteredData;
+  public readonly rows = memo(
+    () => {
+      console.debug('\x1b[36m%s\x1b[0m', '[react-box]: DataGrid rows memo');
+      let data = this.filteredData;
 
-    if (this._sortColumn && !this.isPaginated) {
-      data = data.sortBy((x) => x[this._sortColumn as keyof TRow], this._sortDirection);
-    }
+      if (this._sortColumn && !this.isPaginated) {
+        data = data.sortBy((x) => x[this._sortColumn as keyof TRow], this._sortDirection);
+      }
 
-    if (this.groupColumns.size > 0) {
-      const getRowsGroup = (dataToGroup: TRow[], groupColumns: Set<Key>, rowIndex: number): GroupRowModel<TRow>[] => {
-        const groupKey = groupColumns.values().next().value!;
-        groupColumns.delete(groupKey);
-        const column = this.columns.value.leafs.findOrThrow((c) => c.key === groupKey);
+      if (this.groupColumns.size > 0) {
+        const getRowsGroup = (dataToGroup: TRow[], groupColumns: Set<Key>, rowIndex: number): GroupRowModel<TRow>[] => {
+          const groupKey = groupColumns.values().next().value!;
+          groupColumns.delete(groupKey);
+          const column = this.columns.value.leafs.findOrThrow((c) => c.key === groupKey);
 
-        if (this._sortColumn === GROUPING_CELL_KEY) {
-          dataToGroup = dataToGroup.sortBy((x) => x[groupKey as keyof TRow], this._sortDirection);
-        }
+          if (this._sortColumn === GROUPING_CELL_KEY) {
+            dataToGroup = dataToGroup.sortBy((x) => x[groupKey as keyof TRow], this._sortDirection);
+          }
 
-        return dataToGroup
-          .groupBy((item) => item[groupKey as keyof TRow] as Key)
-          .map((group) => {
-            let rows: RowModel<TRow>[] | GroupRowModel<TRow>[];
+          return dataToGroup
+            .groupBy((item) => item[groupKey as keyof TRow] as Key)
+            .map((group) => {
+              let rows: RowModel<TRow>[] | GroupRowModel<TRow>[];
 
-            if (groupColumns.size > 0) {
-              rows = getRowsGroup(group.values, new Set(groupColumns), rowIndex + 1);
-            } else {
-              rows = group.values.map((dataRow, index) => new RowModel(this, dataRow, rowIndex + 1 + index));
-            }
+              if (groupColumns.size > 0) {
+                rows = getRowsGroup(group.values, new Set(groupColumns), rowIndex + 1);
+              } else {
+                rows = group.values.map((dataRow, index) => new RowModel(this, dataRow, rowIndex + 1 + index));
+              }
 
-            const groupRow = new GroupRowModel(this, column, rows, rowIndex, group.key);
-            rowIndex += 1;
+              const groupRow = new GroupRowModel(this, column, rows, rowIndex, group.key);
+              rowIndex += 1;
 
-            if (groupRow.expanded) {
-              rowIndex += rows.length;
-            }
+              if (groupRow.expanded) {
+                rowIndex += rows.length;
+              }
 
-            return groupRow;
-          });
-      };
+              return groupRow;
+            });
+        };
 
-      return getRowsGroup(data, new Set(this.groupColumns), 0);
-    }
+        return getRowsGroup(data, new Set(this.groupColumns), 0);
+      }
 
-    return data.map((dataRow, rowIndex) => new RowModel(this, dataRow, rowIndex));
-  });
+      return data.map((dataRow, rowIndex) => new RowModel(this, dataRow, rowIndex));
+    },
+    () => [this.columns],
+  );
 
-  public readonly flatRows = memo(() => {
-    console.debug('\x1b[36m%s\x1b[0m', '[react-box]: DataGrid flatRows memo');
+  public readonly flatRows = memo(
+    () => {
+      console.debug('\x1b[36m%s\x1b[0m', '[react-box]: DataGrid flatRows memo');
 
-    return this.rows.value.flatMap((row) => {
-      return row.flatRows as (RowModel<TRow> | GroupRowModel<TRow> | DetailRowModel<TRow>)[];
-    });
-  });
+      return this.rows.value.flatMap((row) => {
+        return row.flatRows as (RowModel<TRow> | GroupRowModel<TRow> | DetailRowModel<TRow>)[];
+      });
+    },
+    () => [this.rows],
+  );
 
   public get rowHeight() {
     return this.props.def.rowHeight ?? this.DEFAULT_ROW_HEIGHT_PX;
   }
 
-  public readonly sizes = memo(() => {
-    console.debug('\x1b[36m%s\x1b[0m', '[react-box]: DataGrid sizes memo');
+  public readonly sizes = memo(
+    () => {
+      console.debug('\x1b[36m%s\x1b[0m', '[react-box]: DataGrid sizes memo');
 
-    const size = this.columns.value.flat.reduce<Record<string, string>>((acc, c) => {
-      const { inlineWidth } = c;
-      if (typeof inlineWidth === 'number') {
-        acc[c.widthVarName] = `${c.inlineWidth}px`;
+      const size = this.columns.value.flat.reduce<Record<string, string>>((acc, c) => {
+        const { inlineWidth } = c;
+        if (typeof inlineWidth === 'number') {
+          acc[c.widthVarName] = `${c.inlineWidth}px`;
+        }
+
+        if (c.pin === 'LEFT') {
+          acc[c.leftVarName] = `${c.left}px`;
+        }
+
+        if (c.pin === 'RIGHT') {
+          acc[c.rightVarName] = `${c.right}px`;
+        }
+
+        return acc;
+      }, {});
+
+      size[this.rowHeightVarName] = `${this.rowHeight}px`;
+      size[this.leftEdgeVarName] = `${this.leftEdge}px`;
+      if (this._containerWidth > 0) {
+        size[this.viewportWidthVarName] = `${this._containerWidth}px`;
       }
 
-      if (c.pin === 'LEFT') {
-        acc[c.leftVarName] = `${c.left}px`;
+      const { visibleLeafs } = this.columns.value;
+      const groupingColumn = visibleLeafs.find((c) => c.key === GROUPING_CELL_KEY);
+      if (groupingColumn) {
+        const groupingColumnSize = visibleLeafs.sumBy((c) => {
+          return c.pin === groupingColumn.pin &&
+            c.key !== ROW_NUMBER_CELL_KEY &&
+            c.key !== ROW_SELECTION_CELL_KEY &&
+            c.key !== ROW_DETAIL_CELL_KEY
+            ? (c.inlineWidth ?? 0)
+            : 0;
+        });
+        size[groupingColumn.groupColumnWidthVarName] = `${groupingColumnSize}px`;
       }
 
-      if (c.pin === 'RIGHT') {
-        acc[c.rightVarName] = `${c.right}px`;
-      }
-
-      return acc;
-    }, {});
-
-    size[this.rowHeightVarName] = `${this.rowHeight}px`;
-    size[this.leftEdgeVarName] = `${this.leftEdge}px`;
-    if (this._containerWidth > 0) {
-      size[this.viewportWidthVarName] = `${this._containerWidth}px`;
-    }
-
-    const { visibleLeafs } = this.columns.value;
-    const groupingColumn = visibleLeafs.find((c) => c.key === GROUPING_CELL_KEY);
-    if (groupingColumn) {
-      const groupingColumnSize = visibleLeafs.sumBy((c) => {
-        return c.pin === groupingColumn.pin &&
-          c.key !== ROW_NUMBER_CELL_KEY &&
-          c.key !== ROW_SELECTION_CELL_KEY &&
-          c.key !== ROW_DETAIL_CELL_KEY
-          ? (c.inlineWidth ?? 0)
-          : 0;
+      this.groupColumns.forEach((key) => {
+        const col = this.columns.value.leafs.findOrThrow((c) => c.key === key);
+        size[col.groupColumnWidthVarName] = `${visibleLeafs.sumBy((c) => (c.pin === col.pin ? (c.inlineWidth ?? 0) : 0))}px`;
       });
-      size[groupingColumn.groupColumnWidthVarName] = `${groupingColumnSize}px`;
-    }
 
-    this.groupColumns.forEach((key) => {
-      const col = this.columns.value.leafs.findOrThrow((c) => c.key === key);
-      size[col.groupColumnWidthVarName] = `${visibleLeafs.sumBy((c) => (c.pin === col.pin ? (c.inlineWidth ?? 0) : 0))}px`;
-    });
-
-    return size;
-  });
+      return size;
+    },
+    () => [this.columns, this.flexWidths],
+  );
 
   // ========== Flexible Column Sizing ==========
 
@@ -545,56 +614,58 @@ export default class GridModel<TRow> {
   public setContainerWidth = (width: number) => {
     if (this._containerWidth !== width) {
       this._containerWidth = width;
-      this.flexWidths.clear();
-      this.sizes.clear();
-      this.update();
+      this.flexWidths.clear(); // cascades to sizes
+      this.notify();
     }
   };
 
-  public readonly flexWidths = memo(() => {
-    console.debug('\x1b[36m%s\x1b[0m', '[react-box]: DataGrid flexWidths memo');
+  public readonly flexWidths = memo(
+    () => {
+      console.debug('\x1b[36m%s\x1b[0m', '[react-box]: DataGrid flexWidths memo');
 
-    const containerWidth = this._containerWidth;
-    if (containerWidth <= 0) return {};
+      const containerWidth = this._containerWidth;
+      if (containerWidth <= 0) return {};
 
-    const visibleLeafs = this.columns.value.visibleLeafs.filter((c) => c.key !== EMPTY_CELL_KEY);
+      const visibleLeafs = this.columns.value.visibleLeafs;
 
-    // A column is "fixed" if: flexible: false OR it has been manually resized (in columnWidths)
-    const isColumnFixed = (c: ColumnModel<TRow>) => !c.isFlexible || this.columnWidths.has(c.key);
+      // A column is "fixed" if: flexible: false OR it has been manually resized (in columnWidths)
+      const isColumnFixed = (c: ColumnModel<TRow>) => !c.isFlexible || this.columnWidths.has(c.key);
 
-    // Sum of fixed column widths
-    const fixedWidth = visibleLeafs.filter(isColumnFixed).sumBy((c) => c.baseWidth);
+      // Sum of fixed column widths
+      const fixedWidth = visibleLeafs.filter(isColumnFixed).sumBy((c) => c.baseWidth);
 
-    // Flexible columns (not fixed and not manually resized)
-    const flexCols = visibleLeafs.filter((c) => !isColumnFixed(c));
-    const totalFlexBase = flexCols.sumBy((c) => c.baseWidth);
+      // Flexible columns (not fixed and not manually resized)
+      const flexCols = visibleLeafs.filter((c) => !isColumnFixed(c));
+      const totalFlexBase = flexCols.sumBy((c) => c.baseWidth);
 
-    // Available space for flex columns
-    const availableSpace = containerWidth - fixedWidth;
+      // Available space for flex columns
+      const availableSpace = containerWidth - fixedWidth;
 
-    // Distribute proportionally (never shrink below base width)
-    if (availableSpace <= totalFlexBase) {
-      // Not enough space - use base widths
-      return flexCols.toRecord((c) => [c.key, c.baseWidth]);
-    }
-
-    // Proportional distribution using floor to avoid exceeding available space
-    const result: Record<Key, number> = {};
-    let distributed = 0;
-
-    flexCols.forEach((c, index) => {
-      if (index === flexCols.length - 1) {
-        // Last column gets the remainder to avoid rounding issues
-        result[c.key] = availableSpace - distributed;
-      } else {
-        const width = Math.floor((c.baseWidth / totalFlexBase) * availableSpace);
-        result[c.key] = width;
-        distributed += width;
+      // Distribute proportionally (never shrink below base width)
+      if (availableSpace <= totalFlexBase) {
+        // Not enough space - use base widths
+        return flexCols.toRecord((c) => [c.key, c.baseWidth]);
       }
-    });
 
-    return result;
-  });
+      // Proportional distribution using floor to avoid exceeding available space
+      const result: Record<Key, number> = {};
+      let distributed = 0;
+
+      flexCols.forEach((c, index) => {
+        if (index === flexCols.length - 1) {
+          // Last column gets the remainder to avoid rounding issues
+          result[c.key] = availableSpace - distributed;
+        } else {
+          const width = Math.floor((c.baseWidth / totalFlexBase) * availableSpace);
+          result[c.key] = width;
+          distributed += width;
+        }
+      });
+
+      return result;
+    },
+    () => [this.columns],
+  );
 
   public getFlexWidth(key: Key): number | undefined {
     return this.flexWidths.value[key];
@@ -632,26 +703,31 @@ export default class GridModel<TRow> {
       this._expandedDetailRows = expandedKeys;
     }
 
-    this.rows.clear();
-    this.flatRows.clear();
-    this.rowOffsets.clear();
-    this.update();
+    this.rows.clear(); // cascades to flatRows/rowOffsets
+    this.notify();
   };
 
   // ========== Pagination ==========
 
   private _page = 1;
+  private _pageSize?: number;
 
   public get page(): number {
     return this.props.page ?? this._page;
   }
 
   public get pageSize(): number {
+    if (this.props.pageSize !== undefined) return this.props.pageSize;
+    if (this._pageSize !== undefined) return this._pageSize;
     const pagination = this.props.def.pagination;
     if (pagination?.pageSize) return pagination.pageSize;
     const vrc = this.props.def.visibleRowsCount;
     if (typeof vrc === 'number') return vrc;
     return 10;
+  }
+
+  public get pageSizeOptions(): number[] | undefined {
+    return this.props.def.pagination?.pageSizeOptions;
   }
 
   public get isPaginated(): boolean {
@@ -685,25 +761,81 @@ export default class GridModel<TRow> {
 
     this.fireServerStateChange({ page: clamped });
 
-    this.rows.clear();
-    this.flatRows.clear();
-    this.rowOffsets.clear();
-    this.update();
+    this.rows.clear(); // cascades to flatRows/rowOffsets
+    this.notify();
+  };
+
+  public changePageSize = (size: number): void => {
+    if (size === this.pageSize) return;
+
+    if (this.props.onPageSizeChange) {
+      this.props.onPageSizeChange(size);
+    } else {
+      this._pageSize = size;
+    }
+
+    if (this.props.onPageChange) {
+      this.props.onPageChange(1, size);
+    } else {
+      this._page = 1;
+    }
+
+    this.fireServerStateChange({ page: 1, pageSize: size });
+
+    this.rows.clear(); // cascades to flatRows/rowOffsets
+    this.notify();
   };
 
   // ========== Row Offsets (for variable-height virtualization) ==========
 
-  public readonly rowOffsets = memo(() => {
-    const offsets: number[] = [];
-    let cumulative = 0;
+  public readonly rowOffsets = memo(
+    () => {
+      const offsets: number[] = [];
+      let cumulative = 0;
 
-    for (const row of this.flatRows.value) {
-      offsets.push(cumulative);
-      cumulative += row instanceof DetailRowModel ? row.heightForOffset : this.rowHeight;
-    }
+      for (const row of this.flatRows.value) {
+        offsets.push(cumulative);
+        cumulative += row instanceof DetailRowModel ? row.heightForOffset : this.rowHeight;
+      }
 
-    return { offsets, totalHeight: cumulative };
-  });
+      return { offsets, totalHeight: cumulative };
+    },
+    () => [this.flatRows],
+  );
+
+  /** Headless virtualization (windowing math; scrollTop is owned by the adapter). */
+  public readonly viewport = new ViewportModel(this);
+
+  /** Backs the top-bar column-visibility menu. */
+  public readonly columnVisibility = new ColumnVisibilityModel(this);
+
+  /** Filtering concern (grid-level state + derived flags). */
+  public readonly filter = new FilterModel(this);
+
+  /** Pagination concern (navigation + row-range derivations). */
+  public readonly pagination = new PaginationModel(this);
+
+  /** Whether any user-facing column is currently visible (else the empty-columns state shows). */
+  public get hasVisibleColumns(): boolean {
+    return this.columns.value.userVisibleLeafs.length > 0;
+  }
+
+  public get isEmpty(): boolean {
+    return this.props.data.length === 0;
+  }
+
+  /** Header select-all checkbox state. */
+  public get allRowsSelected(): boolean {
+    return this.selectedRows.size === this.props.data.length;
+  }
+  public get someRowsSelected(): boolean {
+    return this.selectedRows.size > 0;
+  }
+
+  /** The columns currently grouped, resolved from groupColumns keys (backs the top-bar group chips). */
+  public get groupedColumns(): ColumnModel<TRow>[] {
+    return Array.from(this.groupColumns, (key) => this.columns.value.leafs.findOrThrow((c) => c.key === key));
+  }
 
   public selectedRows: Set<Key> = new Set();
   public get leftEdge() {
@@ -717,6 +849,13 @@ export default class GridModel<TRow> {
   public readonly viewportWidthVarName = '--viewport-width';
 
   private readonly _idMap = new WeakMap<WeakKey, Key>();
+  private _autoId = 0;
+  // No hard DOM/platform dependency: prefer crypto.randomUUID when available, else a counter.
+  private readonly _idFactory: () => Key =
+    typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function'
+      ? () => crypto.randomUUID()
+      : () => `auto-row-${this._autoId++}`;
+
   public getRowKey(row: TRow): Key {
     const { rowKey } = this.props.def;
 
@@ -725,7 +864,7 @@ export default class GridModel<TRow> {
     }
 
     if (!this._idMap.has(row as WeakKey)) {
-      this._idMap.set(row as WeakKey, crypto.randomUUID());
+      this._idMap.set(row as WeakKey, this._idFactory());
     }
 
     return this._idMap.get(row as WeakKey)!;
@@ -760,11 +899,8 @@ export default class GridModel<TRow> {
 
     this.fireServerStateChange({ sortColumn: this._sortColumn, sortDirection: this._sortDirection, page: nextPage });
 
-    this.headerRows.clear();
-    this.rows.clear();
-    this.flatRows.clear();
-    this.rowOffsets.clear();
-    this.update();
+    this.rows.clear(); // cascades to flatRows/rowOffsets (sort doesn't change column structure)
+    this.notify();
   };
 
   public pinColumn = (uniqueKey: string, pin?: PinPosition) => {
@@ -773,16 +909,9 @@ export default class GridModel<TRow> {
       column.pinColumn(pin);
     }
 
-    this.columns.clear();
-    this.headerRows.clear();
-    this.gridTemplateColumns.clear();
-    this.rows.clear();
-    this.flatRows.clear();
-    this.rowOffsets.clear();
-    this.flexWidths.clear();
-    this.sizes.clear();
+    this.columns.clear(); // cascades to headerRows/gridTemplateColumns/flexWidths/sizes/rows/flatRows/rowOffsets
 
-    this.update();
+    this.notify();
   };
 
   public toggleGrouping = (columnKey: Key) => {
@@ -797,17 +926,9 @@ export default class GridModel<TRow> {
       this.hiddenColumns.add(columnKey);
     }
 
-    this.sourceColumns.clear();
-    this.columns.clear();
-    this.headerRows.clear();
-    this.gridTemplateColumns.clear();
-    this.rows.clear();
-    this.flatRows.clear();
-    this.rowOffsets.clear();
-    this.flexWidths.clear();
-    this.sizes.clear();
+    this.sourceColumns.clear(); // cascades to columns → headerRows/gridTemplateColumns/flexWidths/sizes/rows/flatRows/rowOffsets
 
-    this.update();
+    this.notify();
   };
 
   public unGroupAll = () => {
@@ -816,16 +937,8 @@ export default class GridModel<TRow> {
     // Ensure previously grouped columns are made visible again
     this.hiddenColumns = new Set(Array.from(this.hiddenColumns).filter((key) => !prevGroupColumns.has(key)));
 
-    this.sourceColumns.clear();
-    this.columns.clear();
-    this.headerRows.clear();
-    this.gridTemplateColumns.clear();
-    this.rows.clear();
-    this.flatRows.clear();
-    this.rowOffsets.clear();
-    this.flexWidths.clear();
-    this.sizes.clear();
-    this.update();
+    this.sourceColumns.clear(); // cascades to columns → headerRows/gridTemplateColumns/flexWidths/sizes/rows/flatRows/rowOffsets
+    this.notify();
   };
 
   public toggleGroupRow = (groupRowKey: Key) => {
@@ -837,10 +950,8 @@ export default class GridModel<TRow> {
       this.expandedGroupRow.add(groupRowKey);
     }
 
-    this.rows.clear(); // this one is required in order to update rowIndex
-    this.flatRows.clear();
-    this.rowOffsets.clear();
-    this.update();
+    this.rows.clear(); // required to update rowIndex; cascades to flatRows/rowOffsets
+    this.notify();
   };
 
   public toggleRowSelection = (rowKey: Key) => {
@@ -858,9 +969,8 @@ export default class GridModel<TRow> {
       rowKeys.forEach((rowKey) => this.selectedRows.add(rowKey));
     }
 
-    this.flatRows.clear();
-    this.rowOffsets.clear();
-    this.update();
+    this.flatRows.clear(); // cascades to rowOffsets
+    this.notify();
 
     this.props.onSelectionChange?.({
       action: hasAllSelected ? 'deselect' : 'select',
@@ -883,16 +993,9 @@ export default class GridModel<TRow> {
       this.hiddenColumns.add(columnKey);
     }
 
-    this.columns.clear();
-    this.headerRows.clear();
-    this.gridTemplateColumns.clear();
-    this.rows.clear();
-    this.flatRows.clear();
-    this.rowOffsets.clear();
-    this.flexWidths.clear();
-    this.sizes.clear();
+    this.columns.clear(); // cascades to headerRows/gridTemplateColumns/flexWidths/sizes/rows/flatRows/rowOffsets
 
-    this.update();
+    this.notify();
   };
 
   public setWidth = (columnKey: Key, width: number) => {

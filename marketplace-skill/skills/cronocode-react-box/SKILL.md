@@ -80,9 +80,12 @@ Also: `Mark`, `Figure`, `Figcaption`, `Details`, `Summary`, `Menu`, `Time`. All 
 // Hook: const [theme, setTheme] = Box.useTheme();
 // setTheme('dark') | setTheme(null) resets to auto
 <Box bgColor="white" theme={{ dark: { bgColor: 'gray-900', hover: { bgColor: 'gray-700' } } }} />
+// App-wide styles on <html> (only with use="global"). Use for inheritable CSS (scrollbarColor, fontFamily, color):
+<Box.Theme use="global" globalStyles={{ scrollbarColor: ['violet-500','transparent'],
+  theme: { dark: { scrollbarColor: ['violet-700','gray-900'] } } }} />
 ```
 
-**Props**: `theme?` (string), `use?` (`'global'`|`'local'`), `storageKey?`. Sets `data-theme` attr + class.
+**Props**: `theme?` (string), `use?` (`'global'`|`'local'`), `storageKey?`, `globalStyles?` (BoxStyleProps — `<html>`, requires `use="global"`). Sets `data-theme` attr + class.
 
 ## Component System
 

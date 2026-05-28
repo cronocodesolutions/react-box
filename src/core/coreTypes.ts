@@ -1,3 +1,9 @@
+export type ExtractTupleValues<T> = T extends readonly unknown[]
+  ? {
+      -readonly [K in keyof T]: T[K] extends ReadonlyArray<infer U> ? U : never;
+    }
+  : never;
+
 export type BoxStylesType<T> = T extends ReadonlyArray<unknown> ? T[number] : T;
 
 export type ExtractElementType<T> =
@@ -30,7 +36,17 @@ interface BoxStyleString {
   valueFormat?: (value: string) => string;
 }
 
-export type BoxStyle = (BoxStyleArrayString | BoxStyleArrayBoolean | BoxStyleArrayNumber | BoxStyleNumber | BoxStyleString) & {
+interface BoxStyleTupleArrays {
+  tuple: true;
+  values: readonly ReadonlyArray<string | number | boolean>[];
+  valueFormat?: (value: readonly (string | number | boolean)[], getVariableValue: (name: string) => string, styleName?: string) => string;
+}
+
+type BoxStyleScalar = (BoxStyleArrayString | BoxStyleArrayBoolean | BoxStyleArrayNumber | BoxStyleNumber | BoxStyleString) & {
+  tuple?: never;
+};
+
+export type BoxStyle = (BoxStyleScalar | BoxStyleTupleArrays) & {
   styleName?: string | string[];
   selector?: (className: string, pseudoClass: string) => string;
 };

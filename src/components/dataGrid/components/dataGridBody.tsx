@@ -10,28 +10,6 @@ import DataGridDetailRow from './dataGridDetailRow';
 import DataGridGroupRow from './dataGridGroupRow';
 import DataGridRow from './dataGridRow';
 
-const DEFAULT_VISIBLE_ROWS_COUNT = 10;
-const ROWS_TO_PRELOAD = 20;
-
-/**
- * Binary search to find the first row index whose offset is <= scrollTop.
- */
-function findStartIndex(offsets: number[], scrollTop: number): number {
-  let lo = 0;
-  let hi = offsets.length - 1;
-
-  while (lo < hi) {
-    const mid = (lo + hi + 1) >>> 1;
-    if (offsets[mid] <= scrollTop) {
-      lo = mid;
-    } else {
-      hi = mid - 1;
-    }
-  }
-
-  return lo;
-}
-
 function renderRow<TRow>(row: RowModel<TRow> | GroupRowModel<TRow> | DetailRowModel<TRow>) {
   if (row instanceof DetailRowModel) {
     return <DataGridDetailRow key={row.key} row={row} />;
@@ -49,36 +27,20 @@ interface Props<TRow> {
 
 export default function DataGridBody<TRow>(props: Props<TRow>) {
   const { grid, scrollTop } = props;
+  const { viewport } = grid;
 
-  const showAll = grid.props.def.visibleRowsCount === 'all';
-  const { offsets, totalHeight } = grid.rowOffsets.value;
-  const hasDetailRows = !!grid.props.def.rowDetail;
-  const startIndex = showAll
-    ? 0
-    : hasDetailRows
-      ? Math.max(0, findStartIndex(offsets, scrollTop) - ROWS_TO_PRELOAD)
-      : Math.max(0, Math.floor(scrollTop / grid.rowHeight) - ROWS_TO_PRELOAD);
-  const translateY = showAll ? 0 : hasDetailRows ? (offsets[startIndex] ?? 0) : startIndex * grid.rowHeight;
-  const numericVisibleRowsCount = showAll
-    ? grid.flatRows.value.length
-    : ((grid.props.def.visibleRowsCount as number | undefined) ?? DEFAULT_VISIBLE_ROWS_COUNT);
-  const viewHeight = showAll ? undefined : grid.rowHeight * numericVisibleRowsCount + grid.rowHeight / 5;
-  const isEmpty = grid.props.data.length === 0;
+  const { startIndex, take, translateY, totalHeight, viewHeight } = viewport.window(scrollTop);
+  const showAll = viewport.showAll;
+  const isEmpty = viewport.isEmpty;
+  const flatRows = grid.flatRows.value;
 
   const rows = useMemo(() => {
     console.debug('\x1b[36m%s\x1b[0m', '[react-box]: DataGrid render rows');
 
-    if (isEmpty) {
-      return null;
-    }
+    if (isEmpty) return null;
 
-    if (showAll) {
-      return grid.flatRows.value.map(renderRow);
-    }
-
-    const take = numericVisibleRowsCount + ROWS_TO_PRELOAD * 2;
-    return grid.flatRows.value.take(take, startIndex).map(renderRow);
-  }, [grid.flatRows.value, isEmpty, showAll, startIndex, numericVisibleRowsCount]);
+    return flatRows.take(take, startIndex).map(renderRow);
+  }, [flatRows, isEmpty, take, startIndex]);
 
   console.debug('\x1b[36m%s\x1b[0m', '[react-box]: DataGrid render DataGridBody');
 
@@ -95,7 +57,7 @@ export default function DataGridBody<TRow>(props: Props<TRow>) {
         width="fit"
         position="sticky"
         left={0}
-        style={{ height: viewHeight ?? grid.rowHeight * DEFAULT_VISIBLE_ROWS_COUNT }}
+        style={{ height: viewport.emptyHeight }}
       >
         {noDataComponent ?? defaultEmpty}
       </Flex>
@@ -118,11 +80,7 @@ export default function DataGridBody<TRow>(props: Props<TRow>) {
 
   return (
     <Box style={{ height: viewHeight }}>
-      <Box
-        style={{
-          height: hasDetailRows ? `${totalHeight}px` : `${grid.flatRows.value.length * grid.rowHeight}px`,
-        }}
-      >
+      <Box style={{ height: `${totalHeight}px` }}>
         <Grid
           component={`${grid.componentName}.body` as never}
           width="max-content"

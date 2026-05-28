@@ -21,11 +21,9 @@ export default function DataGridColumnGroups<TRow>(props: Props<TRow>) {
       <Span component={`${grid.componentName}.topBar.columnGroups.icon` as never}>
         <GroupingIcon width="100%" fill="currentColor" />
       </Span>
-      {Array.from(grid.groupColumns, (groupColumn) => {
-        const column = grid.columns.value.leafs.findOrThrow((l) => l.key === groupColumn);
-
+      {grid.groupedColumns.map((column) => {
         return (
-          <React.Fragment key={groupColumn}>
+          <React.Fragment key={column.key}>
             <ExpandIcon fill="currentColor" width="14px" height="14px" rotate={-90} />
             <Flex component={`${grid.componentName}.topBar.columnGroups.item` as never}>
               {column.header ?? column.key}

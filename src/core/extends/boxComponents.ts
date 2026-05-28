@@ -842,7 +842,30 @@ const boxComponents = {
             },
             children: {
               input: {
-                styles: {},
+                styles: {
+                  display: 'flex',
+                  ai: 'center',
+                  b: 1,
+                  borderColor: 'gray-200',
+                  borderRadius: 1,
+                  position: 'relative',
+                  width: 'fit',
+                  focus: {
+                    borderColor: 'indigo-500',
+                    outline: 2,
+                    outlineOffset: 0,
+                    outlineColor: 'indigo-200',
+                  },
+                  theme: {
+                    dark: {
+                      borderColor: 'gray-700',
+                      focus: {
+                        borderColor: 'indigo-400',
+                        outlineColor: 'indigo-900',
+                      },
+                    },
+                  },
+                },
               },
             },
           },
@@ -1101,6 +1124,10 @@ const boxComponents = {
               isFirstLeaf: {},
               isLastLeaf: {},
               isEmptyCell: {},
+              isRowDetail: {},
+              isExpanded: {},
+              isExpandedFirstLeaf: {},
+              isExpandedLastLeaf: {},
             },
             children: {
               text: {
@@ -1109,6 +1136,9 @@ const boxComponents = {
               rowDetail: {
                 clean: true,
                 styles: {},
+                variants: {
+                  isExpanded: {},
+                },
               },
             },
           },
@@ -1120,6 +1150,11 @@ const boxComponents = {
                 dark: {
                   borderColor: 'gray-800',
                 },
+              },
+            },
+            children: {
+              content: {
+                styles: {},
               },
             },
           },
@@ -1185,6 +1220,9 @@ const boxComponents = {
         },
       },
     },
+  },
+  'orders-datagrid': {
+    extends: 'datagrid',
   },
 } satisfies Components;
 

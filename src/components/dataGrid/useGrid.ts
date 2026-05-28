@@ -1,47 +1,26 @@
-import { useRef, useState } from 'react';
+import { useRef, useSyncExternalStore } from 'react';
 import { DataGridProps } from './contracts/dataGridContract';
 import GridModel from './models/gridModel';
 
+/**
+ * React binding for the headless GridModel store.
+ *
+ * The model owns all state and behavior; React only subscribes. `setProps` syncs
+ * incoming props during render (clearing affected memos lazily), and
+ * `useSyncExternalStore` re-renders this component whenever the model calls notify().
+ */
 export default function useGrid<TRow>(props: DataGridProps<TRow>): GridModel<TRow> {
-  const [_, setUpdate] = useState(0);
-
   const gridRef = useRef<GridModel<TRow>>();
   if (!gridRef.current) {
-    gridRef.current = new GridModel(props, () => setUpdate((u) => u + 1));
+    gridRef.current = new GridModel(props);
   }
 
   const grid = gridRef.current;
-  const prev = grid.props;
 
-  // Sync props during render — no useEffect needed.
-  // Memos recompute lazily when accessed, so no extra render cycle is triggered.
-  if (prev !== props) {
-    grid.props = props;
+  // Sync props during render — memos recompute lazily, so no extra render is triggered.
+  grid.setProps(props);
 
-    // Definition changed — clear everything (columns, headers, layout, rows)
-    if (prev.def !== props.def) {
-      grid.sourceColumns.clear();
-      grid.columns.clear();
-      grid.headerRows.clear();
-      grid.gridTemplateColumns.clear();
-      grid.sizes.clear();
-    }
-
-    // Clear row-related memos when any row-affecting prop changes
-    if (
-      prev.data !== props.data ||
-      prev.def !== props.def ||
-      prev.globalFilterValue !== props.globalFilterValue ||
-      prev.columnFilters !== props.columnFilters ||
-      prev.filters !== props.filters ||
-      prev.expandedRowKeys !== props.expandedRowKeys ||
-      prev.page !== props.page
-    ) {
-      grid.rows.clear();
-      grid.flatRows.clear();
-      grid.rowOffsets.clear();
-    }
-  }
+  useSyncExternalStore(grid.subscribe, grid.getSnapshot, grid.getSnapshot);
 
   return grid;
 }

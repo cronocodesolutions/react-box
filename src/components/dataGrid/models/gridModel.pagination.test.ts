@@ -226,6 +226,73 @@ describe('GridModel Pagination', () => {
     expect(onPageChange).toHaveBeenCalledWith(1, 10);
   });
 
+  // ========== Page size change ==========
+
+  it('changePageSize updates internal pageSize (uncontrolled)', () => {
+    const grid = createGrid();
+    expect(grid.pageSize).toBe(10);
+
+    grid.changePageSize(25);
+    expect(grid.pageSize).toBe(25);
+  });
+
+  it('changePageSize resets page to 1 (uncontrolled)', () => {
+    const grid = createGrid();
+    grid.changePage(3);
+    expect(grid.page).toBe(3);
+
+    grid.changePageSize(25);
+    expect(grid.page).toBe(1);
+  });
+
+  it('changePageSize calls onPageSizeChange callback (controlled)', () => {
+    const onPageSizeChange = vi.fn();
+    const grid = createGrid({ onPageSizeChange });
+
+    grid.changePageSize(25);
+    expect(onPageSizeChange).toHaveBeenCalledWith(25);
+  });
+
+  it('changePageSize calls onPageChange with page 1 and new size (controlled)', () => {
+    const onPageChange = vi.fn();
+    const grid = createGrid({ page: 2, onPageChange });
+
+    grid.changePageSize(25);
+    expect(onPageChange).toHaveBeenCalledWith(1, 25);
+  });
+
+  it('changePageSize does not fire when size is unchanged', () => {
+    const onPageSizeChange = vi.fn();
+    const grid = createGrid({ onPageSizeChange });
+
+    grid.changePageSize(10); // same as default
+    expect(onPageSizeChange).not.toHaveBeenCalled();
+  });
+
+  it('controlled pageSize prop overrides internal state', () => {
+    const grid = createGrid({ pageSize: 25 });
+    expect(grid.pageSize).toBe(25);
+  });
+
+  it('pageSizeOptions returns options from pagination config', () => {
+    const grid = createGrid({ def: { ...baseDef, pagination: { totalCount: 50, pageSizeOptions: [10, 25, 50] } } });
+    expect(grid.pageSizeOptions).toEqual([10, 25, 50]);
+  });
+
+  it('pageSizeOptions returns undefined when not configured', () => {
+    const grid = createGrid();
+    expect(grid.pageSizeOptions).toBeUndefined();
+  });
+
+  it('changePageSize fires onServerStateChange with new pageSize and page 1', () => {
+    const onServerStateChange = vi.fn();
+    const grid = createGrid({ onServerStateChange });
+    grid.changePage(3);
+
+    grid.changePageSize(25);
+    expect(onServerStateChange).toHaveBeenLastCalledWith(expect.objectContaining({ page: 1, pageSize: 25 }));
+  });
+
   // ========== Column filter resets page ==========
 
   it('column filter change resets page to 1 (uncontrolled)', () => {

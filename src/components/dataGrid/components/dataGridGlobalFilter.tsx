@@ -36,7 +36,7 @@ export default function DataGridGlobalFilter<TRow>(props: Props<TRow>) {
 
       // Set new timeout
       timeoutRef.current = setTimeout(() => {
-        grid.setGlobalFilter(value);
+        grid.filter.setGlobalFilter(value);
         timeoutRef.current = null;
       }, 300);
     },
@@ -45,11 +45,11 @@ export default function DataGridGlobalFilter<TRow>(props: Props<TRow>) {
 
   const handleClear = useCallback(() => {
     setLocalValue('');
-    grid.setGlobalFilter('');
+    grid.filter.setGlobalFilter('');
   }, [grid]);
 
-  const { filtered, total } = grid.filterStats;
-  const showStats = grid.hasActiveFilters && filtered !== total;
+  const { filtered, total } = grid.filter.filterStats;
+  const showStats = grid.filter.hasActiveFilters && filtered !== total;
 
   return (
     <Flex component={`${grid.componentName}.topBar.globalFilter` as never}>

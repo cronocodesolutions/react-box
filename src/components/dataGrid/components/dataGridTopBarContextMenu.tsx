@@ -1,9 +1,8 @@
-import { useMemo } from 'react';
 import Box from '../../../box';
 import BaseSvg from '../../baseSvg';
 import Dropdown from '../../dropdown';
 import Flex from '../../flex';
-import GridModel, { EMPTY_CELL_KEY, GROUPING_CELL_KEY, ROW_NUMBER_CELL_KEY, ROW_SELECTION_CELL_KEY } from '../models/gridModel';
+import GridModel from '../models/gridModel';
 
 interface Props<TRow> {
   grid: GridModel<TRow>;
@@ -11,34 +10,11 @@ interface Props<TRow> {
 
 export default function DataGridTopBarContextMenu<TRow>(props: Props<TRow>) {
   const { grid } = props;
-
-  const leafsToHide = useMemo(
-    () =>
-      grid.columns.value.leafs.filter(
-        (l) => ![EMPTY_CELL_KEY, ROW_NUMBER_CELL_KEY, ROW_SELECTION_CELL_KEY, GROUPING_CELL_KEY].includes(l.key),
-      ),
-    [grid.columns.value.leafs],
-  );
-
-  const columnEntries = leafsToHide.map((leaf) => ({
-    id: String(leaf.key),
-    label: leaf.header ?? leaf.key,
-    leaf,
-  }));
-
-  const selectedEntries = columnEntries.filter((entry) => entry.leaf.isVisible).map((entry) => entry.id);
-  const totalColumns = columnEntries.length;
-  const hiddenCount = totalColumns - selectedEntries.length;
-  const hasHidden = hiddenCount > 0;
+  const { columnVisibility } = grid;
+  const { entries, selectedIds, total, hasHidden } = columnVisibility;
 
   const handleChange = (_value: string | undefined, values: string[]) => {
-    const nextValues = new Set(values);
-    columnEntries.forEach((entry) => {
-      const shouldBeVisible = nextValues.has(entry.id);
-      if (entry.leaf.isVisible !== shouldBeVisible) {
-        entry.leaf.toggleVisibility();
-      }
-    });
+    columnVisibility.setVisibility(values);
   };
 
   return (
@@ -48,9 +24,9 @@ export default function DataGridTopBarContextMenu<TRow>(props: Props<TRow>) {
       showCheckbox
       hideIcon
       variant="compact"
-      value={selectedEntries}
+      value={selectedIds}
       onChange={handleChange}
-      isSearchable={columnEntries.length > 6}
+      isSearchable={entries.length > 6}
       searchPlaceholder="Search columns..."
       display="inline-flex"
     >
@@ -85,7 +61,7 @@ export default function DataGridTopBarContextMenu<TRow>(props: Props<TRow>) {
                     },
                   }}
                 >
-                  {selected.length}/{totalColumns}
+                  {selected.length}/{total}
                 </Box>
               )}
             </Flex>
@@ -96,7 +72,7 @@ export default function DataGridTopBarContextMenu<TRow>(props: Props<TRow>) {
       <Dropdown.SelectAll>Show All</Dropdown.SelectAll>
       <Dropdown.Unselect>Hide All</Dropdown.Unselect>
 
-      {columnEntries.map((entry) => (
+      {entries.map((entry) => (
         <Dropdown.Item<string> key={entry.id} value={entry.id} textWrap="nowrap">
           {entry.label}
         </Dropdown.Item>
