@@ -1,5 +1,7 @@
 import React, { useCallback, useContext, useLayoutEffect, useRef, useState } from 'react';
 import Box from '../../box';
+import { BoxStyleProps } from '../../types';
+import { useGlobalStyles } from '../useStyles';
 import ThemeContext from './themeContext';
 
 interface ThemeProps {
@@ -8,10 +10,18 @@ interface ThemeProps {
   use?: 'global' | 'local';
   /** When provided, persists the user-selected theme to localStorage under this key. */
   storageKey?: string;
+  /**
+   * App-wide Box style props applied to the document root (`<html>`). Only takes effect when `use="global"`.
+   * Supports the same shape as Box props, including theme-keyed values:
+   * `globalStyles={{ scrollbarColor: ['violet-500', 'transparent'], theme: { dark: { scrollbarColor: [...] } } }}`.
+   */
+  globalStyles?: BoxStyleProps;
 }
 
 function Theme(props: ThemeProps) {
-  const { children, theme, use = 'local', storageKey } = props;
+  const { children, theme, use = 'local', storageKey, globalStyles } = props;
+
+  useGlobalStyles(use === 'global' ? globalStyles : undefined, 'html');
   // Initialize with 'light' for SSR consistency - actual system theme is set in useLayoutEffect
   const [themeName, setThemeName] = useState(theme ?? 'light');
   const [isUserOverride, setIsUserOverride] = useState(theme !== undefined);

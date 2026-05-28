@@ -661,9 +661,7 @@ const boxComponents = {
     },
     children: {
       content: {
-        styles: {
-          scrollbarColor: ['violet-500', 'transparent'],
-        },
+        styles: {},
       },
       topBar: {
         styles: {

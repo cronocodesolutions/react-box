@@ -174,8 +174,29 @@ setTheme(null);     // reset to system auto-detection (clears localStorage)
 />
 ```
 
-**Props**: `theme?` (string — explicit theme name), `use?` (`'global'`|`'local'`, default `'local'`), `storageKey?` (string — localStorage key for persistence).
+**Props**: `theme?` (string — explicit theme name), `use?` (`'global'`|`'local'`, default `'local'`), `storageKey?` (string — localStorage key for persistence), `globalStyles?` (BoxStyleProps — app-wide styles on `<html>`, only with `use="global"`).
 **DOM**: Sets `data-theme` attribute and theme class on wrapper (local) or `document.documentElement` (global). Cleaned up on unmount.
+
+#### globalStyles — App-wide styles on `<html>`
+
+```tsx
+// Style the root document scrollbar (and any other html-level CSS). Only takes effect when use="global".
+<Box.Theme
+  use="global"
+  globalStyles={{
+    scrollbarColor: ['violet-500', 'transparent'],
+    scrollbarWidth: 'thin',
+    theme: {
+      dark:  { scrollbarColor: ['violet-700', 'gray-900'] },
+      light: { scrollbarColor: ['violet-300', 'gray-100'] },
+    },
+  }}
+>
+  <App />
+</Box.Theme>
+```
+
+Accepts the same shape as Box style props (including theme-keyed values, pseudo-classes, breakpoints). Rules are emitted directly on `html` — useful for inheritable CSS like `scrollbar-color`/`scrollbar-width`/`fontFamily`/`color`. Group selectors (e.g. `hoverGroup`) are not supported here since `<html>` has no group parent.
 
 ---
 

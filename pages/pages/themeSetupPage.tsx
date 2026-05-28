@@ -88,6 +88,38 @@ function App() {
           </Code>
 
           <Code
+            id="global-styles"
+            label="App-wide Styles (globalStyles)"
+            language="jsx"
+            code={`import Box from '@cronocode/react-box';
+
+// Apply Box props to <html> for app-wide, inheritable CSS like scrollbar-color, fontFamily, color.
+// Only takes effect with use="global". Supports theme-keyed values.
+function App() {
+  return (
+    <Box.Theme
+      use="global"
+      globalStyles={{
+        scrollbarColor: ['violet-500', 'transparent'],
+        scrollbarWidth: 'thin',
+        theme: {
+          dark:  { scrollbarColor: ['violet-700', 'gray-900'] },
+          light: { scrollbarColor: ['violet-300', 'gray-100'] },
+        },
+      }}
+    >
+      <YourApp />
+    </Box.Theme>
+  );
+}
+
+// Emits rules directly on <html>:
+//   html              { scrollbar-color: var(--violet-500) var(--transparent); scrollbar-width: thin; }
+//   html.dark         { scrollbar-color: var(--violet-700) var(--gray-900); }
+//   html.light        { scrollbar-color: var(--violet-300) var(--gray-100); }`}
+          />
+
+          <Code
             id="theme-switching"
             label="Theme Switching"
             language="jsx"
@@ -141,6 +173,7 @@ function Sample() {
 
 const sidebarLinks = [
   { id: 'define-styles', label: 'Define Your Own Styles' },
+  { id: 'global-styles', label: 'App-wide Styles (globalStyles)' },
   { id: 'theme-switching', label: 'Theme Switching' },
 ] as const;
 

@@ -11,7 +11,14 @@ const root = ReactDOM.createRoot(document.getElementById('root')!);
 root.render(
   <React.StrictMode>
     <BrowserRouter>
-      <Box.Theme>
+      <Box.Theme
+        use="global"
+        globalStyles={{
+          scrollbarWidth: 'thin',
+          scrollbarColor: ['violet-500', 'transparent'],
+          theme: { dark: { scrollbarColor: ['violet-700', 'transparent'] } },
+        }}
+      >
         <App />
       </Box.Theme>
     </BrowserRouter>

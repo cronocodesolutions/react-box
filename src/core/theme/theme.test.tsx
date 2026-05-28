@@ -625,6 +625,52 @@ describe('Theme', () => {
     });
   });
 
+  describe('globalStyles', () => {
+    const getStyleSheet = () => document.getElementById('crono-styles') as unknown as HTMLStyleElement;
+
+    it('emits a rule targeting `html` when use="global"', () => {
+      render(
+        <Theme use="global" globalStyles={{ scrollbarColor: ['violet-500', 'transparent'] }}>
+          <Box id={testId}>Content</Box>
+        </Theme>,
+      );
+
+      expect(getStyleSheet().innerText).toContain('html{scrollbar-color:var(--violet-500) var(--transparent)}');
+    });
+
+    it('emits a compound selector `html.<theme>` for theme-keyed values', () => {
+      render(
+        <Theme theme="dark" use="global" globalStyles={{ theme: { dark: { scrollbarColor: ['violet-700', 'gray-900'] } } }}>
+          <Box id={testId}>Content</Box>
+        </Theme>,
+      );
+
+      expect(getStyleSheet().innerText).toContain('html.dark{scrollbar-color:var(--violet-700) var(--gray-900)}');
+    });
+
+    it('does NOT emit an `html` rule when use="local"', () => {
+      render(
+        <Theme use="local" globalStyles={{ scrollbarColor: ['fuchsia-500', 'transparent'] }}>
+          <Box id={testId}>Content</Box>
+        </Theme>,
+      );
+
+      expect(getStyleSheet().innerText).not.toContain('html{scrollbar-color:var(--fuchsia-500)');
+    });
+
+    it('emits multiple global props in a single Theme', () => {
+      render(
+        <Theme use="global" globalStyles={{ scrollbarColor: ['emerald-500', 'transparent'], scrollbarWidth: 'thin' }}>
+          <Box id={testId}>Content</Box>
+        </Theme>,
+      );
+
+      const sheet = getStyleSheet().innerText;
+      expect(sheet).toContain('html{scrollbar-color:var(--emerald-500) var(--transparent)}');
+      expect(sheet).toContain('html{scrollbar-width:thin}');
+    });
+  });
+
   describe('localStorage persistence', () => {
     const storageKey = 'test-theme';
 
