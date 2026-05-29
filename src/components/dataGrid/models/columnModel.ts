@@ -70,47 +70,56 @@ export default class ColumnModel<TRow> {
   // stay valid until `columns` is rebuilt (which produces fresh column instances). The
   // memos have no deps: they just cache lazily per instance.
 
-  public readonly pinFlags = memo(() => {
-    const isLeftPinned = this.pin === 'LEFT';
-    const isRightPinned = this.pin === 'RIGHT';
-    return {
-      isLeftPinned,
-      isRightPinned,
-      isPinned: isLeftPinned || isRightPinned,
-      isFirstLeftPinned: isLeftPinned && this.left === 0,
-      isLastLeftPinned: isLeftPinned && this.isEdge,
-      isFirstRightPinned: isRightPinned && this.isEdge,
-      isLastRightPinned: isRightPinned && this.right === 0,
-    };
-  });
+  public readonly pinFlags = memo(
+    () => {
+      const isLeftPinned = this.pin === 'LEFT';
+      const isRightPinned = this.pin === 'RIGHT';
+      return {
+        isLeftPinned,
+        isRightPinned,
+        isPinned: isLeftPinned || isRightPinned,
+        isFirstLeftPinned: isLeftPinned && this.left === 0,
+        isLastLeftPinned: isLeftPinned && this.isEdge,
+        isFirstRightPinned: isRightPinned && this.isEdge,
+        isLastRightPinned: isRightPinned && this.right === 0,
+      };
+    },
+    () => [this.grid.columns],
+  );
 
   /** Variant flags for the body cell that depend only on the column (not the row). */
-  public readonly cellVariant = memo(() => {
-    const { isPinned, isFirstLeftPinned, isLastLeftPinned, isFirstRightPinned, isLastRightPinned } = this.pinFlags.value;
-    return {
-      isPinned,
-      isFirstLeftPinned,
-      isLastLeftPinned,
-      isFirstRightPinned,
-      isLastRightPinned,
-      isRowSelection: this.isRowSelection,
-      isRowNumber: this.isRowNumber,
-      isFirstLeaf: this.isFirstLeaf,
-      isLastLeaf: this.isLastLeaf,
-      isRowDetail: this.isRowDetail,
-    };
-  });
+  public readonly cellVariant = memo(
+    () => {
+      const { isPinned, isFirstLeftPinned, isLastLeftPinned, isFirstRightPinned, isLastRightPinned } = this.pinFlags.value;
+      return {
+        isPinned,
+        isFirstLeftPinned,
+        isLastLeftPinned,
+        isFirstRightPinned,
+        isLastRightPinned,
+        isRowSelection: this.isRowSelection,
+        isRowNumber: this.isRowNumber,
+        isFirstLeaf: this.isFirstLeaf,
+        isLastLeaf: this.isLastLeaf,
+        isRowDetail: this.isRowDetail,
+      };
+    },
+    () => [this.pinFlags],
+  );
 
   /** Static CSS-var references for the body/filter cell (stable string identity). */
-  public readonly cellStyleVars = memo(() => {
-    const { isLeftPinned, isRightPinned } = this.pinFlags.value;
-    return {
-      width: `var(${this.widthVarName})`,
-      height: `var(${this.grid.rowHeightVarName})`,
-      left: isLeftPinned ? `var(${this.leftVarName})` : undefined,
-      right: isRightPinned ? `var(${this.rightVarName})` : undefined,
-    };
-  });
+  public readonly cellStyleVars = memo(
+    () => {
+      const { isLeftPinned, isRightPinned } = this.pinFlags.value;
+      return {
+        width: `var(${this.widthVarName})`,
+        height: `var(${this.grid.rowHeightVarName})`,
+        left: isLeftPinned ? `var(${this.leftVarName})` : undefined,
+        right: isRightPinned ? `var(${this.rightVarName})` : undefined,
+      };
+    },
+    () => [this.pinFlags],
+  );
 
   /** Derived state for this column's header cell + context menu. */
   private readonly _headerCell = memo(() => new HeaderCellModel(this));

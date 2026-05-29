@@ -31,7 +31,7 @@ export default function DataGridGroupRow<TRow>(props: Props<TRow>) {
             return (
               <DataGridCell
                 key={cell.column.key}
-                column={cell.column}
+                cell={cell}
                 style={{ width: cell.widthVar, right: cell.isRightPinned ? '0' : undefined }}
                 br={cell.hasGroupingBorder ? 1 : undefined}
                 gridColumn={cell.gridColumnSpan}
@@ -57,14 +57,14 @@ export default function DataGridGroupRow<TRow>(props: Props<TRow>) {
 
           case 'selection':
             return (
-              <DataGridCell key={cell.column.key} column={cell.column}>
+              <DataGridCell key={cell.column.key} cell={cell}>
                 <Checkbox variant="datagrid" m={1} checked={selected} indeterminate={indeterminate} onChange={selectAllHandler} />
               </DataGridCell>
             );
 
           case 'spacer':
             return (
-              <DataGridCell key={cell.column.key} column={cell.column} px={cell.column.isRowNumber ? 3 : undefined}>
+              <DataGridCell key={cell.column.key} cell={cell} px={cell.column.isRowNumber ? 3 : undefined}>
                 {cell.value}
               </DataGridCell>
             );

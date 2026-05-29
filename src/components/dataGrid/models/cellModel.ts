@@ -15,12 +15,21 @@ export default class CellModel<TRow> {
     return this.row.data[this.column.key as keyof TRow];
   }
 
-  public get expanded(): boolean {
+  public get isExpanded(): boolean {
     return this.row.expanded;
   }
 
   public get selected(): boolean {
     return this.row.selected;
+  }
+
+  public get isFirst(): boolean {
+    return this.row.cells[0] === this;
+  }
+
+  public get isLast(): boolean {
+    const cells = this.row.cells;
+    return cells[cells.length - 1] === this;
   }
 
   /** Toggle this row's detail panel (used by the row-detail expand cell). */

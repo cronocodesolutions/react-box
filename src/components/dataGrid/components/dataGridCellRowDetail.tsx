@@ -9,7 +9,7 @@ interface Props<TRow> {
 
 export default function DataGridCellRowDetail<TRow>(props: Props<TRow>) {
   const { cell } = props;
-  const expanded = cell.expanded;
+  const expanded = cell.isExpanded;
 
   const toggleHandler = useCallback(
     (e: React.MouseEvent) => {
