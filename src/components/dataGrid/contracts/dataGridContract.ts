@@ -156,6 +156,8 @@ export interface GridDefinition<TRow> {
   resizable?: boolean;
   /** Controls the visual style of column resizer handles. 'visible' (default): always shown. 'hover': visible on header cell hover. 'hidden': invisible but resize still works. */
   resizerStyle?: 'visible' | 'hover' | 'hidden';
+  /** How the column follows the pointer during a resize drag. 'smooth' (default): updates batched once per animation frame (~60fps, ~1 frame behind the cursor). 'instant': updates synchronously on every pointer move so the column tracks the cursor with no added latency. */
+  resizeMode?: 'smooth' | 'instant';
   /** Control the header context menu for all columns. false hides it entirely. Object controls individual sections. Default: true. Individual column settings take priority. */
   contextMenu?: boolean | ContextMenuConfig;
   /** Custom component to render when data is empty */

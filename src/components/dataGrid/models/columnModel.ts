@@ -442,8 +442,12 @@ export default class ColumnModel<TRow> {
     this._resizeTotalWidth = this.leafs.sumBy((c) => this._resizeSizes[c.key]) - this.leafs.length * MIN_COLUMN_WIDTH_PX;
   };
 
-  /** Apply the drag to a new pointer x-coordinate, distributing the delta across leafs. Notifies subscribers. */
-  public resizeTo = (currentX: number): void => {
+  /**
+   * Apply the drag to a new pointer x-coordinate, distributing the delta across leafs.
+   * Does NOT notify — the caller decides how to reflect the change (the React adapter
+   * writes the resulting width CSS variables straight to the DOM for a 60fps drag).
+   */
+  public applyResize = (currentX: number): void => {
     const { MIN_COLUMN_WIDTH_PX } = this.grid;
     const dragDistance = (currentX - this._resizeStartX) * (this.pin === 'RIGHT' ? -1 : 1);
 
@@ -459,6 +463,11 @@ export default class ColumnModel<TRow> {
     });
 
     this.grid.flexWidths.clear(); // cascades to sizes
+  };
+
+  /** Apply the drag and notify subscribers (headless API for non-DOM hosts). */
+  public resizeTo = (currentX: number): void => {
+    this.applyResize(currentX);
     this.grid.notify();
   };
 

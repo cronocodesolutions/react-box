@@ -1,6 +1,5 @@
 import { useCallback } from 'react';
 import Box from '../../../box';
-import FnUtils from '../../../utils/fn/fnUtils';
 import Flex from '../../flex';
 import ColumnModel from '../models/columnModel';
 
@@ -14,18 +13,52 @@ export default function DataGridHeaderCellResizer<TRow>(props: Props<TRow>) {
   const { column } = props;
   const resizerStyle = column.grid.resizerStyle;
 
-  // The model owns the resize math (beginResize/resizeTo/endResize); this adapter
-  // only wires the DOM drag and throttles pointer moves.
+  // The model owns the resize math (beginResize/applyResize/endResize). This adapter wires the
+  // DOM drag and, since column widths are driven entirely by CSS variables on the grid container,
+  // writes the updated vars straight to that element — bypassing React re-renders mid-drag.
+  // resizeMode 'smooth' batches the writes to one per animation frame; 'instant' writes on every
+  // pointer move. endResize() commits the final widths back into React state.
   const startResize = useCallback(
     (e: React.MouseEvent | React.TouchEvent) => {
+      const { grid } = column;
       column.beginResize(pageXOf(e.nativeEvent));
 
       const controller = new AbortController();
       const { signal } = controller;
-      const move = FnUtils.throttle((ev: MouseEvent | TouchEvent) => column.resizeTo(pageXOf(ev)), 40);
+
+      let frame = 0;
+      let latestX = pageXOf(e.nativeEvent);
+
+      const paint = () => {
+        column.applyResize(latestX);
+        const el = grid.sizingElement;
+        if (!el) return;
+        Object.entries(grid.sizes.value).forEach(([name, value]) => el.style.setProperty(name, value));
+      };
+
+      // 'instant': paint synchronously on every move so the column tracks the cursor with no
+      // added latency. 'smooth': coalesce moves to one paint per animation frame (~60fps).
+      const move =
+        grid.resizeMode === 'instant'
+          ? (ev: MouseEvent | TouchEvent) => {
+              latestX = pageXOf(ev);
+              paint();
+            }
+          : (ev: MouseEvent | TouchEvent) => {
+              latestX = pageXOf(ev);
+              if (!frame) {
+                frame = requestAnimationFrame(() => {
+                  frame = 0;
+                  paint();
+                });
+              }
+            };
+
       const end = () => {
         controller.abort();
-        column.endResize();
+        if (frame) cancelAnimationFrame(frame);
+        paint(); // flush the final pointer position
+        column.endResize(); // single notify → React reconciles to the committed widths
       };
 
       window.addEventListener('mousemove', move, { signal });
