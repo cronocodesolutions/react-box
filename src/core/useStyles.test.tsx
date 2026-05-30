@@ -4,6 +4,7 @@ import { afterEach, describe, expect, it, suite } from 'vitest';
 import { ignoreLogs } from '../../dev/tests';
 import Box from '../box';
 import { BoxStyleProps } from '../types';
+import { StylesContext } from './useStyles';
 
 const testElementId = 'testElementId';
 
@@ -700,6 +701,54 @@ describe('useStyles', () => {
       expect(element.classList).toContain('hover-theme-dark-p-3');
       expect(element.classList).toContain('active-theme-dark-p-4');
       expect(element.classList).toContain('focus-theme-dark-p-5');
+    });
+  });
+
+  // The style-signature cache memoizes class-name resolution per unique style signature so
+  // structurally-identical Boxes skip the merge + walk. These guard its correctness.
+  suite('style signature cache', () => {
+    it('distinguishes different values for the same prop', () => {
+      render(
+        <Box>
+          <Box id="cache-c1" p={4} />
+          <Box id="cache-c2" p={9} />
+        </Box>,
+      );
+      const styleElement = document.getElementById('crono-styles')! as unknown as HTMLStyleElement;
+      expect(styleElement.innerText).toContain('.p-4{padding:1rem}');
+      expect(styleElement.innerText).toContain('.p-9{padding:2.25rem}');
+      expect(document.getElementById('cache-c1')!.classList).toContain('p-4');
+      expect(document.getElementById('cache-c2')!.classList).toContain('p-9');
+    });
+
+    it('serves identical props from cache without dropping classes', () => {
+      // First mount registers + caches; a later mount of identical props is a cache hit and
+      // must still return the full class list.
+      const { unmount } = render(<Box id="cache-first" m={6} color="red-500" />);
+      const first = document.getElementById('cache-first')!;
+      expect(first.classList).toContain('m-6');
+      expect(first.classList).toContain('color-red-500');
+      unmount();
+
+      render(<Box id="cache-second" m={6} color="red-500" />);
+      const second = document.getElementById('cache-second')!;
+      expect(second.classList).toContain('m-6');
+      expect(second.classList).toContain('color-red-500');
+    });
+
+    // Keep last: clear() resets global style state (and the cache) like an SSG render boundary.
+    it('regenerates rules after StylesContext.clear() (SSG reset)', () => {
+      render(<Box id="cache-before" p={7} />);
+      expect((document.getElementById('crono-styles')! as unknown as HTMLStyleElement).innerText).toContain('.p-7{padding:1.75rem}');
+
+      // Simulate an SSG reset: a cached class list must NOT suppress rule regeneration.
+      StylesContext.clear();
+      cleanup();
+
+      render(<Box id="cache-after" p={7} />);
+      const styleElement = document.getElementById('crono-styles')! as unknown as HTMLStyleElement;
+      expect(styleElement.innerText).toContain('.p-7{padding:1.75rem}');
+      expect(document.getElementById('cache-after')!.classList).toContain('p-7');
     });
   });
 });

@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import IdentityFactory from '@cronocode/identity-factory';
-import { useEffect, useLayoutEffect, useMemo } from 'react';
+import { useEffect, useLayoutEffect } from 'react';
 import { BoxStyleProps, BoxStyles, PseudoClassesType } from '../types';
 import ObjectUtils from '../utils/object/objectUtils';
 import {
@@ -15,7 +15,7 @@ import {
   themeGroupClass,
 } from './boxStyles';
 import { BoxStyle } from './coreTypes';
-import useComponents from './extends/useComponents';
+import { resolveComponentStyles } from './extends/useComponents';
 import Variables from './variables';
 
 const identity = new IdentityFactory();
@@ -28,22 +28,75 @@ const useEff = isBrowser && !isTestEnv ? useLayoutEffect : useEffect;
 const boxClassName = '_b';
 const svgClassName = '_s';
 
+// Whether a prop key affects the class list — i.e. one of the keys `addClassNames` dispatches
+// on (style props + pseudo/breakpoint/group wrappers). Checked live (not snapshotted) because
+// `Box.extend()` adds keys to these maps at runtime; mirrors addClassNames exactly.
+function isStyleKey(key: string): boolean {
+  return (
+    ObjectUtils.isKeyOf(key, cssStyles) ||
+    ObjectUtils.isKeyOf(key, pseudo1) ||
+    ObjectUtils.isKeyOf(key, pseudo2) ||
+    ObjectUtils.isKeyOf(key, breakpoints) ||
+    ObjectUtils.isKeyOf(key, pseudoGroupClasses) ||
+    ObjectUtils.isKeyOf(key, themeGroupClass)
+  );
+}
+
+// Maps a style-signature → the resolved class names. A Box's class list is fully determined
+// by isSvg/clean/component/variant + its recognized style props, so structurally-identical
+// Boxes (e.g. every DataGrid cell) collapse to a single map lookup instead of re-running the
+// merge + walk + identity work. Rule generation is still deduped separately by `generatedRules`.
+const styleCache = new Map<string, string[]>();
+
+/**
+ * Build a stable cache key from the inputs that determine a Box's class list. Component
+ * defaults are keyed via component/variant/clean (they are immutable per name), and JSON is
+ * used for values so e.g. `p={4}` and `p="4"` never collide. Returns null if a value can't be
+ * serialized, in which case the caller falls back to the uncached path (today's behavior).
+ */
+function computeSignature(props: BoxStyleProps<any>, isSvg: boolean): string | null {
+  try {
+    let sig = `${isSvg ? 's' : 'b'}|${props.clean ? 'c' : ''}|${props.component ?? ''}|`;
+    if (props.variant !== undefined) sig += JSON.stringify(props.variant);
+    sig += '|';
+
+    for (const key in props) {
+      if (key === 'clean' || key === 'component' || key === 'variant') continue;
+      const value = (props as Record<string, unknown>)[key];
+      // Mirror addClassName's early return on null/undefined so they don't affect the key.
+      if (value === undefined || value === null) continue;
+      if (isStyleKey(key)) {
+        sig += `${key}:${JSON.stringify(value)};`;
+      }
+    }
+
+    return sig;
+  } catch {
+    return null;
+  }
+}
+
 export default function useStyles(props: BoxStyleProps<any>, isSvg: boolean) {
-  const componentsStyles = useComponents(props) as BoxStyleProps;
+  const sig = computeSignature(props, isSvg);
 
-  const propsToUse = useMemo(() => {
-    return componentsStyles ? ObjectUtils.mergeDeep(componentsStyles, props) : props;
-  }, [props, componentsStyles]);
+  let classNames = sig !== null ? styleCache.get(sig) : undefined;
 
-  // Generate classNames on every render to ensure all styles are registered
-  const classNames: string[] = [isSvg ? svgClassName : boxClassName];
-  StylesContextImpl.addClassNames(propsToUse, classNames, []);
+  if (!classNames) {
+    const componentsStyles = resolveComponentStyles(props) as BoxStyleProps;
+    const propsToUse = componentsStyles ? ObjectUtils.mergeDeep(componentsStyles, props) : props;
 
-  // Use useLayoutEffect to flush after DOM is ready
-  // Empty dependency array would only run once, so we use propsToUse to trigger on changes
+    classNames = [isSvg ? svgClassName : boxClassName];
+    StylesContextImpl.addClassNames(propsToUse, classNames, []);
+
+    if (sig !== null) styleCache.set(sig, classNames);
+  }
+
+  // Flush after DOM is ready. Keyed on the stable signature so it only re-runs when the class
+  // list changes; a cache hit added no rules, and a miss (new signature) fires the effect and
+  // flush() drains all pending rules globally. Falls back to `props` when the signature is null.
   useEff(() => {
     StylesContextImpl.flush();
-  }, [propsToUse]);
+  }, [sig ?? props]);
 
   return classNames;
 }
@@ -236,14 +289,20 @@ namespace StylesContextImpl {
         for (const [sortIndex, breakpointOrder, rule] of pendingRules) {
           const sortKey = breakpointOrder * 100000 + sortIndex;
 
-          // Find the correct insertion index among dynamic rules
-          let insertIndex = insertedRuleSortKeys.length;
-          for (let i = 0; i < insertedRuleSortKeys.length; i++) {
-            if (sortKey < insertedRuleSortKeys[i]) {
-              insertIndex = i;
-              break;
+          // Find the insertion index among dynamic rules. insertedRuleSortKeys stays sorted
+          // ascending, so binary-search for the first key strictly greater than sortKey
+          // (O(log n) instead of a linear scan — matters on heavy pages with many rules).
+          let lo = 0;
+          let hi = insertedRuleSortKeys.length;
+          while (lo < hi) {
+            const mid = (lo + hi) >>> 1;
+            if (sortKey < insertedRuleSortKeys[mid]) {
+              hi = mid;
+            } else {
+              lo = mid + 1;
             }
           }
+          const insertIndex = lo;
 
           try {
             // Offset by baseRulesCount to insert after default rules
@@ -379,6 +438,9 @@ namespace StylesContextImpl {
     insertedRuleSortKeys.length = 0;
     baseRulesCount = 0;
     isInitialized = false;
+    // Reset the per-Box class cache too: rules were cleared, so cached class lists must be
+    // recomputed (and re-registered) on the next render — otherwise SSG would drop styles.
+    styleCache.clear();
   }
 
   function addClassName<TKey extends keyof BoxStyles, TValue extends BoxStyles[TKey]>(
