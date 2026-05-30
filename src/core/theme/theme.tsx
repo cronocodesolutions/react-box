@@ -53,17 +53,22 @@ function Theme(props: ThemeProps) {
     [storageKey],
   );
 
-  // Sync with theme prop changes
-  useLayoutEffect(() => {
+  // Sync with theme prop changes (render-phase, no effect — initial state already covers mount).
+  const [prevTheme, setPrevTheme] = useState(theme);
+  if (theme !== prevTheme) {
+    setPrevTheme(theme);
     if (theme !== undefined) {
       setThemeName(theme);
       setIsUserOverride(true);
     } else {
       setIsUserOverride(false);
     }
-  }, [theme]);
+  }
 
-  // Detect system theme and listen for changes (client-only, prevents hydration mismatch)
+  // Detect system theme and listen for changes (client-only, prevents hydration mismatch).
+  // setState here is intentional: the actual system/persisted theme must be applied after
+  // hydration to keep SSR output deterministic, so this can't move to a render-phase derivation.
+  /* eslint-disable react-hooks/set-state-in-effect */
   useLayoutEffect(() => {
     if (isUserOverride) return;
 
@@ -93,6 +98,7 @@ function Theme(props: ThemeProps) {
     mediaQuery.addEventListener('change', handleChange);
     return () => mediaQuery.removeEventListener('change', handleChange);
   }, [isUserOverride, storageKey]);
+  /* eslint-enable react-hooks/set-state-in-effect */
 
   useLayoutEffect(() => {
     if (use === 'local') return;

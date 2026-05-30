@@ -104,5 +104,3 @@ export type BoxStyleProps<TKey extends keyof ComponentsAndVariants = never> = Si
 export type BoxComponentStyles = Simplify<
   BoxStylesWithPseudoClasses & BoxBreakpointsStyles & BoxPseudoGroupClassesStyles & BoxThemeGroupClassStyles
 >;
-
-type Test = ExtractBoxStylesInternal<typeof cssStyles>;

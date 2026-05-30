@@ -24,33 +24,27 @@ function TooltipImpl(props: Props, ref: Ref<HTMLDivElement>) {
   >();
   const portalContainer = usePortalContainer();
 
-  const observeScroll = useCallback(
-    (element: HTMLDivElement, callback: (el: HTMLDivElement) => void) => {
-      const listener = (e: Event) => {
-        if ((e.target as HTMLElement).contains(element)) {
-          callback(element);
-        }
-      };
-
-      const controller = new AbortController();
-      document.addEventListener('scroll', listener, { signal: controller.signal, capture: true });
-      return () => controller.abort();
-    },
-    [position],
-  );
-
-  const observeResize = useCallback(
-    (element: HTMLDivElement, callback: (el: HTMLDivElement) => void) => {
-      const listener = (_e: Event) => {
+  const observeScroll = useCallback((element: HTMLDivElement, callback: (el: HTMLDivElement) => void) => {
+    const listener = (e: Event) => {
+      if ((e.target as HTMLElement).contains(element)) {
         callback(element);
-      };
+      }
+    };
 
-      const controller = new AbortController();
-      window.addEventListener('resize', listener, { signal: controller.signal, capture: true });
-      return () => controller.abort();
-    },
-    [position],
-  );
+    const controller = new AbortController();
+    document.addEventListener('scroll', listener, { signal: controller.signal, capture: true });
+    return () => controller.abort();
+  }, []);
+
+  const observeResize = useCallback((element: HTMLDivElement, callback: (el: HTMLDivElement) => void) => {
+    const listener = (_e: Event) => {
+      callback(element);
+    };
+
+    const controller = new AbortController();
+    window.addEventListener('resize', listener, { signal: controller.signal, capture: true });
+    return () => controller.abort();
+  }, []);
 
   const positionHandler = useCallback(
     (el: HTMLDivElement) => {
@@ -71,7 +65,7 @@ function TooltipImpl(props: Props, ref: Ref<HTMLDivElement>) {
         setPosition({ top, left, width: rect.width > 0 ? rect.width : undefined, windowScrollX, windowScrollY });
       }
     },
-    [position],
+    [position, onPositionChange],
   );
 
   useLayoutEffect(() => {
@@ -85,7 +79,7 @@ function TooltipImpl(props: Props, ref: Ref<HTMLDivElement>) {
         resizeHandlerDispose();
       };
     }
-  }, [position]);
+  }, [positionHandler, observeScroll, observeResize]);
 
   return (
     <>

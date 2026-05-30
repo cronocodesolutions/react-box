@@ -966,7 +966,9 @@ function PaginatedDataGridDemo() {
     }, 300);
   }, []);
 
+  // Initial data fetch — fetching is a legitimate effect; the loading setState is part of it.
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchData({ page: 1, pageSize });
   }, [fetchData]);
 

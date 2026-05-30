@@ -49,8 +49,8 @@ export default function reactToJsx(node: ReactNode, options: Options = {}): stri
     tagName = 'Unknown';
   }
 
-  // Process props
-  const { children, ...restProps } = props;
+  // Process props — React 19 types ReactElement.props as `unknown`.
+  const { children, ...restProps } = props as { children?: ReactNode } & Record<string, unknown>;
   const propEntries = Object.entries(restProps).filter(([key]) => !key.startsWith('__'));
 
   const propsString = propEntries

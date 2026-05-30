@@ -1,4 +1,7 @@
-import { useRef, useSyncExternalStore } from 'react';
+import { useState } from 'react';
+// Shim delegates to React's native useSyncExternalStore on 18+, and provides a correct
+// userland implementation on React 16.14–17, so the DataGrid works across React 17–19.
+import { useSyncExternalStore } from 'use-sync-external-store/shim';
 import { DataGridProps } from './contracts/dataGridContract';
 import GridModel from './models/gridModel';
 
@@ -10,12 +13,8 @@ import GridModel from './models/gridModel';
  * `useSyncExternalStore` re-renders this component whenever the model calls notify().
  */
 export default function useGrid<TRow>(props: DataGridProps<TRow>): GridModel<TRow> {
-  const gridRef = useRef<GridModel<TRow>>();
-  if (!gridRef.current) {
-    gridRef.current = new GridModel(props);
-  }
-
-  const grid = gridRef.current;
+  // Lazy initializer creates the model once; the store instance stays stable across renders.
+  const [grid] = useState(() => new GridModel(props));
 
   // Sync props during render — memos recompute lazily, so no extra render is triggered.
   grid.setProps(props);

@@ -53,16 +53,18 @@ function BoxComponent<TTag extends keyof React.JSX.IntrinsicElements = 'div', TK
     ref && (propsToUse.ref = ref as React.RefObject<HTMLElement>);
 
     return propsToUse;
+    // Intentionally keyed on the whole props object — Box is memoized, so props is referentially
+    // stable unless something actually changed, and all derived values come from it.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [props]);
 
   const [isHover, setIsHover] = useState(false);
   const needsHoverState = typeof children === 'function';
-  if (needsHoverState) {
-    finalTagProps.onMouseEnter = () => setIsHover(true);
-    finalTagProps.onMouseLeave = () => setIsHover(false);
-  }
+  const elementProps = needsHoverState
+    ? { ...finalTagProps, onMouseEnter: () => setIsHover(true), onMouseLeave: () => setIsHover(false) }
+    : finalTagProps;
 
-  return React.createElement(tag, finalTagProps, needsHoverState ? children({ isHover }) : children);
+  return React.createElement(tag, elementProps, needsHoverState ? children({ isHover }) : children);
 }
 
 interface BoxType {

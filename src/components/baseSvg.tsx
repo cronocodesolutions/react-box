@@ -33,4 +33,4 @@ BaseSvg.displayName = 'BaseSvg';
 
 export default BaseSvg;
 
-export type BaseSvgProps = React.ComponentProps<typeof BaseSvgImpl>;
+export type BaseSvgProps = React.ComponentProps<typeof BaseSvg>;

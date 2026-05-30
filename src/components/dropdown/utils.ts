@@ -2,7 +2,8 @@ export function searchItemText(item: React.ReactElement): string {
   if (item === null || item === undefined) return '';
 
   if (typeof item === 'object') {
-    const children = item.props?.children;
+    // React 19 types ReactElement.props as `unknown`; these items carry React children.
+    const children = (item.props as { children?: React.ReactNode })?.children;
 
     if (children === null || children === undefined) return '';
 

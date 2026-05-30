@@ -21,10 +21,12 @@ export default function Layout({ children }: LayoutProps) {
 
   const toggleTheme = () => setTheme(theme === 'dark' ? 'light' : 'dark');
 
-  // Close sidebar on route change (mobile)
-  useEffect(() => {
+  // Close sidebar on route change (mobile) — render-phase sync, no effect needed.
+  const [prevPathname, setPrevPathname] = useState(location.pathname);
+  if (location.pathname !== prevPathname) {
+    setPrevPathname(location.pathname);
     setSidebarOpen(false);
-  }, [location.pathname]);
+  }
 
   return (
     <Box

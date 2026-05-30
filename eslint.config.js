@@ -1,5 +1,5 @@
 import js from '@eslint/js';
-import importPlugin from 'eslint-plugin-import';
+import importPlugin from 'eslint-plugin-import-x';
 import prettierPlugin from 'eslint-plugin-prettier';
 import reactHooks from 'eslint-plugin-react-hooks';
 import reactRefresh from 'eslint-plugin-react-refresh';
@@ -18,7 +18,7 @@ export default tseslint.config(
     plugins: {
       'react-hooks': reactHooks,
       'react-refresh': reactRefresh,
-      import: importPlugin,
+      'import-x': importPlugin,
       prettier: prettierPlugin,
     },
     rules: {
@@ -35,7 +35,7 @@ export default tseslint.config(
           allowTaggedTemplates: true,
         },
       ],
-      'import/order': [
+      'import-x/order': [
         'error',
         {
           groups: ['builtin', 'external', 'internal', 'parent', 'sibling', 'index'],

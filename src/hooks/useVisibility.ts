@@ -10,7 +10,7 @@ interface Props<T extends HTMLElement = HTMLDivElement> {
 
 export default function useVisibility<T extends HTMLElement = HTMLDivElement>(
   props?: Props<T>,
-): [boolean, React.Dispatch<React.SetStateAction<boolean>>, React.RefObject<T>] {
+): [boolean, React.Dispatch<React.SetStateAction<boolean>>, React.RefObject<T | null>] {
   const { node = null, event = 'click', hideOnScroll = false, hideOnResize = false, hideOnEscape = true } = props ?? {};
   const [isVisible, setVisibility] = useState(false);
 
@@ -56,7 +56,7 @@ export default function useVisibility<T extends HTMLElement = HTMLDivElement>(
     return () => {
       controller.abort();
     };
-  }, [node, isVisible]);
+  }, [node, isVisible, event, hideOnEscape, hideOnResize, hideOnScroll]);
 
   return [isVisible, setVisibility, visibilityRef];
 }

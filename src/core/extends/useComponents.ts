@@ -19,7 +19,7 @@ export default function useComponents<TKey extends keyof ComponentsAndVariants =
     // Resolve the base component styles via dot-notation
     const componentStyles = names.reduce<BoxComponent | undefined>((acc, item, index) => {
       if (index === 0) {
-        return BoxExtends.componentsStyles[item];
+        return BoxExtends.getComponentsStyles()[item];
       }
 
       return acc?.children?.[item];
