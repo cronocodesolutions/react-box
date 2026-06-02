@@ -27,7 +27,7 @@ export default function DataGridFilterCell<TRow>(props: Props<TRow>) {
         right: isRightPinned ? `var(${rightVarName})` : undefined,
       }}
     >
-      {!isSpecialCell && filterable && <DataGridColumnFilter column={column} grid={grid} />}
+      {!isSpecialCell && filterable && <DataGridColumnFilter column={column} />}
     </Flex>
   );
 }

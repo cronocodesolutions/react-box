@@ -25,6 +25,19 @@ export default class GroupRowCellModel<TRow> {
     return null;
   }
 
+  // Group cells never participate in the expanded-leaf variant, so positional flags are constant.
+  public get isExpanded(): boolean {
+    return false;
+  }
+
+  public get isFirst(): boolean {
+    return false;
+  }
+
+  public get isLast(): boolean {
+    return false;
+  }
+
   public get cellKind(): GroupRowCellKind {
     if (this.column.isGrouping) return 'grouping';
     if (this.column.isRowSelection) return 'selection';

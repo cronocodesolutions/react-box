@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useState } from 'react';
 import Box from '../../../box';
 import BaseSvg from '../../baseSvg';
 import Button from '../../button';
@@ -80,10 +80,13 @@ function PageSizeSelector<TRow>({ grid, pageSize }: { grid: GridModel<TRow>; pag
 
 function PageJumpInput<TRow>({ grid, page, totalPages }: { grid: GridModel<TRow>; page: number; totalPages: number }) {
   const [value, setValue] = useState(String(page));
+  const [prevPage, setPrevPage] = useState(page);
 
-  useEffect(() => {
+  // Reset the editable value when the page prop changes (render-phase sync, no effect needed).
+  if (page !== prevPage) {
+    setPrevPage(page);
     setValue(String(page));
-  }, [page]);
+  }
 
   const commit = useCallback(() => {
     grid.pagination.jumpToPage(value);

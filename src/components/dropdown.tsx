@@ -153,13 +153,18 @@ function DropdownImpl<TVal>(props: Props<TVal>, ref: Ref<HTMLInputElement>): Rea
     [multiple, valueToUse, setSelectedValues, onChange, setOpen, refToUse],
   );
 
+  const [prevOpen, setPrevOpen] = useState(isOpen);
+  // Clear the search box when the dropdown closes (render-phase sync, no effect needed).
+  if (isOpen !== prevOpen) {
+    setPrevOpen(isOpen);
+    if (!isOpen) setSearch('');
+  }
+
   useEffect(() => {
     if (isOpen) {
       setTimeout(() => {
         searchBoxRef.current?.focus();
       }, 0);
-    } else {
-      setSearch('');
     }
   }, [isOpen]);
 
@@ -241,11 +246,11 @@ function withName<TProps>(name: ChildrenName) {
 }
 
 const Dropdown = forwardRef(DropdownImpl) as unknown as DropdownType;
-Dropdown.Item = withName('DropdownItem');
-Dropdown.Unselect = withName('DropdownUnselect');
-Dropdown.SelectAll = withName('DropdownSelectAll');
-Dropdown.EmptyItem = withName('DropdownEmptyItem');
-Dropdown.Display = withName('DropdownDisplay');
+Dropdown.Item = withName('DropdownItem') as DropdownType['Item'];
+Dropdown.Unselect = withName('DropdownUnselect') as DropdownType['Unselect'];
+Dropdown.SelectAll = withName('DropdownSelectAll') as DropdownType['SelectAll'];
+Dropdown.EmptyItem = withName('DropdownEmptyItem') as DropdownType['EmptyItem'];
+Dropdown.Display = withName('DropdownDisplay') as DropdownType['Display'];
 (Dropdown as React.FunctionComponent).displayName = 'Dropdown';
 
 export default Dropdown;

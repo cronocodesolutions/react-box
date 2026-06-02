@@ -20,6 +20,10 @@ function resolveExtends(components: Components): Components {
   return resolved;
 }
 
+// Module-scoped mutable state. A namespace `export let` is rejected by Oxc (Vite/Vitest's
+// transformer), so the reassignable binding lives here and is read via getComponentsStyles().
+let componentsStyles: Components = boxComponents;
+
 namespace BoxExtends {
   export function extend<TProps extends Record<string, BoxStyle[]>, TPropTypes extends Record<string, BoxStyle[]>>(
     variables: Record<string, string>,
@@ -40,7 +44,9 @@ namespace BoxExtends {
     return { extendedProps, extendedPropTypes };
   }
 
-  export let componentsStyles: Components = boxComponents;
+  export function getComponentsStyles(): Components {
+    return componentsStyles;
+  }
 
   export function components<T extends Components>(components: T) {
     componentsStyles = resolveExtends(ObjectUtils.mergeDeep<Components>(boxComponents, components));

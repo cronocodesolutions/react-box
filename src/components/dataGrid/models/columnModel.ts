@@ -70,47 +70,56 @@ export default class ColumnModel<TRow> {
   // stay valid until `columns` is rebuilt (which produces fresh column instances). The
   // memos have no deps: they just cache lazily per instance.
 
-  public readonly pinFlags = memo(() => {
-    const isLeftPinned = this.pin === 'LEFT';
-    const isRightPinned = this.pin === 'RIGHT';
-    return {
-      isLeftPinned,
-      isRightPinned,
-      isPinned: isLeftPinned || isRightPinned,
-      isFirstLeftPinned: isLeftPinned && this.left === 0,
-      isLastLeftPinned: isLeftPinned && this.isEdge,
-      isFirstRightPinned: isRightPinned && this.isEdge,
-      isLastRightPinned: isRightPinned && this.right === 0,
-    };
-  });
+  public readonly pinFlags = memo(
+    () => {
+      const isLeftPinned = this.pin === 'LEFT';
+      const isRightPinned = this.pin === 'RIGHT';
+      return {
+        isLeftPinned,
+        isRightPinned,
+        isPinned: isLeftPinned || isRightPinned,
+        isFirstLeftPinned: isLeftPinned && this.left === 0,
+        isLastLeftPinned: isLeftPinned && this.isEdge,
+        isFirstRightPinned: isRightPinned && this.isEdge,
+        isLastRightPinned: isRightPinned && this.right === 0,
+      };
+    },
+    () => [this.grid.columns],
+  );
 
   /** Variant flags for the body cell that depend only on the column (not the row). */
-  public readonly cellVariant = memo(() => {
-    const { isPinned, isFirstLeftPinned, isLastLeftPinned, isFirstRightPinned, isLastRightPinned } = this.pinFlags.value;
-    return {
-      isPinned,
-      isFirstLeftPinned,
-      isLastLeftPinned,
-      isFirstRightPinned,
-      isLastRightPinned,
-      isRowSelection: this.isRowSelection,
-      isRowNumber: this.isRowNumber,
-      isFirstLeaf: this.isFirstLeaf,
-      isLastLeaf: this.isLastLeaf,
-      isRowDetail: this.isRowDetail,
-    };
-  });
+  public readonly cellVariant = memo(
+    () => {
+      const { isPinned, isFirstLeftPinned, isLastLeftPinned, isFirstRightPinned, isLastRightPinned } = this.pinFlags.value;
+      return {
+        isPinned,
+        isFirstLeftPinned,
+        isLastLeftPinned,
+        isFirstRightPinned,
+        isLastRightPinned,
+        isRowSelection: this.isRowSelection,
+        isRowNumber: this.isRowNumber,
+        isFirstLeaf: this.isFirstLeaf,
+        isLastLeaf: this.isLastLeaf,
+        isRowDetail: this.isRowDetail,
+      };
+    },
+    () => [this.pinFlags],
+  );
 
   /** Static CSS-var references for the body/filter cell (stable string identity). */
-  public readonly cellStyleVars = memo(() => {
-    const { isLeftPinned, isRightPinned } = this.pinFlags.value;
-    return {
-      width: `var(${this.widthVarName})`,
-      height: `var(${this.grid.rowHeightVarName})`,
-      left: isLeftPinned ? `var(${this.leftVarName})` : undefined,
-      right: isRightPinned ? `var(${this.rightVarName})` : undefined,
-    };
-  });
+  public readonly cellStyleVars = memo(
+    () => {
+      const { isLeftPinned, isRightPinned } = this.pinFlags.value;
+      return {
+        width: `var(${this.widthVarName})`,
+        height: `var(${this.grid.rowHeightVarName})`,
+        left: isLeftPinned ? `var(${this.leftVarName})` : undefined,
+        right: isRightPinned ? `var(${this.rightVarName})` : undefined,
+      };
+    },
+    () => [this.pinFlags],
+  );
 
   /** Derived state for this column's header cell + context menu. */
   private readonly _headerCell = memo(() => new HeaderCellModel(this));
@@ -433,8 +442,12 @@ export default class ColumnModel<TRow> {
     this._resizeTotalWidth = this.leafs.sumBy((c) => this._resizeSizes[c.key]) - this.leafs.length * MIN_COLUMN_WIDTH_PX;
   };
 
-  /** Apply the drag to a new pointer x-coordinate, distributing the delta across leafs. Notifies subscribers. */
-  public resizeTo = (currentX: number): void => {
+  /**
+   * Apply the drag to a new pointer x-coordinate, distributing the delta across leafs.
+   * Does NOT notify — the caller decides how to reflect the change (the React adapter
+   * writes the resulting width CSS variables straight to the DOM for a 60fps drag).
+   */
+  public applyResize = (currentX: number): void => {
     const { MIN_COLUMN_WIDTH_PX } = this.grid;
     const dragDistance = (currentX - this._resizeStartX) * (this.pin === 'RIGHT' ? -1 : 1);
 
@@ -450,6 +463,11 @@ export default class ColumnModel<TRow> {
     });
 
     this.grid.flexWidths.clear(); // cascades to sizes
+  };
+
+  /** Apply the drag and notify subscribers (headless API for non-DOM hosts). */
+  public resizeTo = (currentX: number): void => {
+    this.applyResize(currentX);
     this.grid.notify();
   };
 

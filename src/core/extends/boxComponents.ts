@@ -663,6 +663,53 @@ const boxComponents = {
       content: {
         styles: {},
       },
+      // Indeterminate linear progress bar shown at the top of the body (just below the header)
+      // while `loading` is true — e.g. server-side pagination first load / page change. The sticky
+      // wrapper is zero-height so toggling `loading` causes no layout shift; the 3px track overflows
+      // down over the first row and zIndex keeps it on top. sticky + left:0 + width:fit keeps the
+      // rail spanning the visible width during horizontal scroll.
+      loader: {
+        styles: {
+          position: 'sticky',
+          left: 0,
+          width: 'fit',
+          height: 0,
+          zIndex: 2,
+        },
+        children: {
+          track: {
+            styles: {
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              right: 0,
+              overflow: 'hidden',
+              bgColor: 'indigo-100',
+              theme: {
+                dark: {
+                  bgColor: 'indigo-950',
+                },
+              },
+            },
+            children: {
+              bar: {
+                styles: {
+                  position: 'absolute',
+                  top: 0,
+                  bottom: 0,
+                  left: 0,
+                  bgColor: 'indigo-500',
+                  theme: {
+                    dark: {
+                      bgColor: 'indigo-400',
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
       topBar: {
         styles: {
           py: 3,
@@ -1213,6 +1260,9 @@ const boxComponents = {
                 styles: {},
               },
               info: {
+                styles: {},
+              },
+              pageSize: {
                 styles: {},
               },
             },

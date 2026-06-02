@@ -5,19 +5,18 @@ import Flex from '../../flex';
 import Textbox from '../../textbox';
 import { NumberFilterValue } from '../contracts/dataGridContract';
 import ColumnModel from '../models/columnModel';
-import GridModel from '../models/gridModel';
 
 interface Props<TRow> {
   column: ColumnModel<TRow>;
-  grid: GridModel<TRow>;
 }
 
 /**
  * Text filter with fuzzy search support.
  * Local input + debounce stay here; config/parsing/commit live on ColumnModel.
  */
-function TextFilter<TRow>({ column, grid }: Props<TRow>) {
-  const currentFilter = column.currentFilter;
+function TextFilter<TRow>({ column }: Props<TRow>) {
+  const { currentFilter } = column;
+  const { componentName } = column.grid;
   const initialValue = currentFilter?.type === 'text' ? currentFilter.value : '';
   const [localValue, setLocalValue] = useState(initialValue);
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -49,7 +48,7 @@ function TextFilter<TRow>({ column, grid }: Props<TRow>) {
   }, [column]);
 
   return (
-    <Flex component={`${grid.componentName}.filter.cell.input` as never}>
+    <Flex component={`${componentName}.filter.cell.input` as never}>
       <Textbox
         width="fit"
         variant="compact"
@@ -74,8 +73,9 @@ function TextFilter<TRow>({ column, grid }: Props<TRow>) {
 /**
  * Number filter with comparison operators.
  */
-function NumberFilter<TRow>({ column, grid }: Props<TRow>) {
-  const currentFilter = column.currentFilter;
+function NumberFilter<TRow>({ column }: Props<TRow>) {
+  const { currentFilter } = column;
+  const { componentName } = column.grid;
   const initialValue = currentFilter?.type === 'number' ? currentFilter.value : '';
   const initialOperator = currentFilter?.type === 'number' ? currentFilter.operator : 'eq';
   const initialValueTo = currentFilter?.type === 'number' ? currentFilter.valueTo : '';
@@ -141,7 +141,7 @@ function NumberFilter<TRow>({ column, grid }: Props<TRow>) {
   }, [column]);
 
   return (
-    <Flex component={`${grid.componentName}.filter.cell.input` as never} ai={operator === 'between' ? 'start' : 'center'} gap={1}>
+    <Flex component={`${componentName}.filter.cell.input` as never} ai={operator === 'between' ? 'start' : 'center'} gap={1}>
       <Dropdown<NumberFilterValue['operator']>
         value={operator}
         variant="compact"
@@ -228,8 +228,9 @@ function NumberFilter<TRow>({ column, grid }: Props<TRow>) {
 /**
  * Multi-select filter with checkbox list.
  */
-function MultiselectFilter<TRow>({ column, grid }: Props<TRow>) {
-  const currentFilter = column.currentFilter;
+function MultiselectFilter<TRow>({ column }: Props<TRow>) {
+  const { currentFilter } = column;
+  const { componentName } = column.grid;
   const selectedValues = currentFilter?.type === 'multiselect' ? currentFilter.values : [];
   const options = column.filterOptions;
 
@@ -241,7 +242,7 @@ function MultiselectFilter<TRow>({ column, grid }: Props<TRow>) {
   );
 
   return (
-    <Flex component={`${grid.componentName}.filter.cell.input` as never}>
+    <Flex component={`${componentName}.filter.cell.input` as never}>
       <Dropdown<string | number | boolean | null>
         multiple
         showCheckbox
@@ -287,19 +288,19 @@ function MultiselectFilter<TRow>({ column, grid }: Props<TRow>) {
  * Renders the appropriate filter input for the column's resolved filter type.
  */
 export default function DataGridColumnFilter<TRow>(props: Props<TRow>) {
-  const { column, grid } = props;
+  const { column } = props;
   const config = column.filterConfig;
 
   if (!config) return null;
 
   switch (config.type) {
     case 'number':
-      return <NumberFilter column={column} grid={grid} />;
+      return <NumberFilter column={column} />;
     case 'multiselect':
-      return <MultiselectFilter column={column} grid={grid} />;
+      return <MultiselectFilter column={column} />;
     case 'text':
     default:
-      return <TextFilter column={column} grid={grid} />;
+      return <TextFilter column={column} />;
   }
 }
 

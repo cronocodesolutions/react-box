@@ -10,10 +10,13 @@ export default function DataGrid<TRow extends object>(props: DataGridProps<TRow>
   const grid = useGrid(props);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  // Track container width for flexible column sizing
+  // Track container width for flexible column sizing, and expose the container element so
+  // the resize drag can write width CSS variables straight to it (no React re-render per move).
   useLayoutEffect(() => {
     const el = containerRef.current;
     if (!el) return;
+
+    grid.setSizingElement(el);
 
     const observer = new ResizeObserver((entries) => {
       const width = entries[0]?.contentRect.width ?? 0;
@@ -21,7 +24,10 @@ export default function DataGrid<TRow extends object>(props: DataGridProps<TRow>
     });
 
     observer.observe(el);
-    return () => observer.disconnect();
+    return () => {
+      observer.disconnect();
+      grid.setSizingElement(null);
+    };
   }, [grid]);
 
   console.debug('\x1b[36m%s\x1b[0m', '[react-box]: DataGrid render');

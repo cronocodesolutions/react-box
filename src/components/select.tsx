@@ -20,8 +20,10 @@ interface SelectDef<TRow> {
   emptyText?: string;
 }
 
-interface Props<TRow, TVal extends TRow[keyof TRow], TKey extends keyof ComponentsAndVariants = 'dropdown'>
-  extends Omit<BoxProps<'button', TKey>, 'ref' | 'tag'> {
+interface Props<TRow, TVal extends TRow[keyof TRow], TKey extends keyof ComponentsAndVariants = 'dropdown'> extends Omit<
+  BoxProps<'button', TKey>,
+  'ref' | 'tag'
+> {
   data: TRow[];
   def: SelectDef<TRow>;
   name?: string;

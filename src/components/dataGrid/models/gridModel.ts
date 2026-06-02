@@ -101,6 +101,10 @@ export default class GridModel<TRow> {
     return this.props.def.resizerStyle ?? 'visible';
   }
 
+  public get resizeMode(): 'smooth' | 'instant' {
+    return this.props.def.resizeMode ?? 'smooth';
+  }
+
   public readonly sourceColumns = memo(() => {
     const { def } = this.props;
 
@@ -610,6 +614,19 @@ export default class GridModel<TRow> {
   public get containerWidth() {
     return this._containerWidth;
   }
+
+  /**
+   * The DOM element that carries the column-sizing CSS variables (the grid container).
+   * Set by the React adapter. During a resize drag the adapter writes the width vars
+   * here directly — bypassing React re-renders — and only commits to state on release.
+   */
+  private _sizingElement: HTMLElement | null = null;
+  public get sizingElement(): HTMLElement | null {
+    return this._sizingElement;
+  }
+  public setSizingElement = (el: HTMLElement | null): void => {
+    this._sizingElement = el;
+  };
 
   public setContainerWidth = (width: number) => {
     if (this._containerWidth !== width) {

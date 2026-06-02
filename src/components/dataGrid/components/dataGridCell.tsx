@@ -1,23 +1,22 @@
 import { BoxProps } from '../../../box';
 import Flex from '../../flex';
-import ColumnModel from '../models/columnModel';
+import CellModel from '../models/cellModel';
+import GroupRowCellModel from '../models/groupRowCellModel';
 
 interface Props<TRow> extends BoxProps {
   children: React.ReactNode;
-  column: ColumnModel<TRow>;
-  isExpanded?: boolean;
-  isFirstInRow?: boolean;
-  isLastInRow?: boolean;
+  cell: CellModel<TRow> | GroupRowCellModel<TRow>;
 }
 
 export default function DataGridCell<TRow>(props: Props<TRow>) {
-  const { children, column, isExpanded = false, isFirstInRow = false, isLastInRow = false, style, ...restProps } = props;
+  const { children, cell, style, ...restProps } = props;
+  const { column } = cell;
 
   if (column.hasAlign) restProps.jc = column.align;
 
   // Column-stable variant (precomputed once) merged with this row's expansion state.
-  const variant = isExpanded
-    ? { ...column.cellVariant.value, isExpanded, isExpandedFirstLeaf: isFirstInRow, isExpandedLastLeaf: isLastInRow }
+  const variant = cell.isExpanded
+    ? { ...column.cellVariant.value, isExpanded: true, isExpandedFirstLeaf: cell.isFirst, isExpandedLastLeaf: cell.isLast }
     : column.cellVariant.value;
 
   return (

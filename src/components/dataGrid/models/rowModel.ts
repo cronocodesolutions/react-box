@@ -10,13 +10,17 @@ export default class RowModel<TRow> {
     public readonly grid: GridModel<TRow>,
     public readonly data: TRow,
     public readonly rowIndex: number,
-  ) {
-    this.grid = grid;
-    this.data = data;
-    this.key = this.grid.getRowKey(data);
-  }
+  ) {}
 
-  public readonly key: Key;
+  private _key?: Key;
+  /**
+   * Resolved lazily: getRowKey() can call crypto.randomUUID(), so building a model for every
+   * row would generate a key for thousands of off-screen rows. Only rows that actually render
+   * (or are otherwise inspected) pay the cost. getRowKey itself is idempotent per row.
+   */
+  public get key(): Key {
+    return (this._key ??= this.grid.getRowKey(this.data));
+  }
   public parentRow?: GroupRowModel<TRow>;
   public readonly count = 1;
   public readonly kind = 'row' as const;

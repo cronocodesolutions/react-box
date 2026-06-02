@@ -896,9 +896,69 @@ Box.components({
               }}
             />
           </Code>
+
+          <Code
+            id="resize-mode"
+            label="Resize Mode"
+            language="jsx"
+            code={`// 'smooth' (default): width updates batched to one per animation frame (~60fps, ~1 frame
+// behind the cursor). 'instant': width updates synchronously on every pointer move, so the
+// column tracks the cursor with no added latency. Drag a column edge and toggle to compare.
+<DataGrid
+  data={data}
+  def={{
+    columns: [
+      { key: 'first_name', header: 'First name' },
+      { key: 'last_name', header: 'Last name' },
+      { key: 'age', header: 'Age', width: 100 },
+      { key: 'email', header: 'Email', width: 300 },
+      { key: 'country' },
+      { key: 'city' },
+    ],
+    rowHeight: 40,
+    visibleRowsCount: 5,
+    resizeMode, // 'smooth' | 'instant'
+  }}
+/>`}
+          >
+            <ResizeModeDemo />
+          </Code>
         </Flex>
       </motion.div>
     </Box>
+  );
+}
+
+function ResizeModeDemo() {
+  const [resizeMode, setResizeMode] = useState<'smooth' | 'instant'>('smooth');
+
+  return (
+    <Flex d="column" gap={4}>
+      <Flex gap={2} ai="center">
+        <Box fontSize={13} fontWeight={500} color="gray-600" theme={{ dark: { color: 'gray-400' } }}>
+          Resize mode:
+        </Box>
+        <FilterChip label="Smooth (rAF)" active={resizeMode === 'smooth'} onClick={() => setResizeMode('smooth')} />
+        <FilterChip label="Instant" active={resizeMode === 'instant'} onClick={() => setResizeMode('instant')} />
+      </Flex>
+
+      <DataGrid
+        data={allData}
+        def={{
+          columns: [
+            { key: 'first_name', header: 'First name' },
+            { key: 'last_name', header: 'Last name' },
+            { key: 'age', header: 'Age', width: 100 },
+            { key: 'email', header: 'Email', width: 300 },
+            { key: 'country' },
+            { key: 'city' },
+          ],
+          rowHeight: 40,
+          visibleRowsCount: 5,
+          resizeMode,
+        }}
+      />
+    </Flex>
   );
 }
 
@@ -966,7 +1026,9 @@ function PaginatedDataGridDemo() {
     }, 300);
   }, []);
 
+  // Initial data fetch — fetching is a legitimate effect; the loading setState is part of it.
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchData({ page: 1, pageSize });
   }, [fetchData]);
 
@@ -1062,4 +1124,7 @@ const sidebarLinks = [
   { id: 'row-detail', label: 'Row Detail' },
   { id: 'pagination', label: 'Server Pagination & Filters' },
   { id: 'disable-sort', label: 'Disable Sort' },
+  { id: 'context-menu', label: 'Context Menu' },
+  { id: 'resizer-style', label: 'Resizer Style' },
+  { id: 'resize-mode', label: 'Resize Mode' },
 ] as const;

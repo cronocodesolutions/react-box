@@ -8,7 +8,7 @@ describe('BoxExtends.components — extends', () => {
       testChild: { extends: 'testBase', styles: { p: 2 } },
     });
 
-    const child = BoxExtends.componentsStyles['testChild'];
+    const child = BoxExtends.getComponentsStyles()['testChild'];
     expect(child.styles).toEqual(expect.objectContaining({ bgColor: 'red-500', p: 2 }));
   });
 
@@ -30,7 +30,7 @@ describe('BoxExtends.components — extends', () => {
       },
     });
 
-    const child = BoxExtends.componentsStyles['testChild2'];
+    const child = BoxExtends.getComponentsStyles()['testChild2'];
     expect(child.styles?.bgColor).toBe('green-500');
     // header styles are merged
     expect(child.children?.header?.styles).toEqual(expect.objectContaining({ fontSize: 14, fontWeight: 600 }));
@@ -51,7 +51,7 @@ describe('BoxExtends.components — extends', () => {
       },
     });
 
-    const child = BoxExtends.componentsStyles['testChild3'];
+    const child = BoxExtends.getComponentsStyles()['testChild3'];
     expect(child.variants?.active).toEqual(expect.objectContaining({ bgColor: 'blue-500', color: 'white' }));
     expect(child.variants?.disabled).toEqual(expect.objectContaining({ bgColor: 'gray-300' }));
   });
@@ -61,7 +61,7 @@ describe('BoxExtends.components — extends', () => {
       testStandalone: { styles: { p: 4 } },
     });
 
-    const standalone = BoxExtends.componentsStyles['testStandalone'];
+    const standalone = BoxExtends.getComponentsStyles()['testStandalone'];
     expect(standalone.styles).toEqual(expect.objectContaining({ p: 4 }));
     expect(standalone.extends).toBeUndefined();
   });
@@ -71,7 +71,7 @@ describe('BoxExtends.components — extends', () => {
       testOrphan: { extends: 'nonExistent', styles: { p: 4 } },
     });
 
-    const orphan = BoxExtends.componentsStyles['testOrphan'];
+    const orphan = BoxExtends.getComponentsStyles()['testOrphan'];
     expect(orphan.styles?.p).toBe(4);
   });
 
@@ -81,7 +81,7 @@ describe('BoxExtends.components — extends', () => {
       testChild5: { extends: 'testBase5', styles: { p: 2 } },
     });
 
-    const child = BoxExtends.componentsStyles['testChild5'];
+    const child = BoxExtends.getComponentsStyles()['testChild5'];
     expect(child.extends).toBeUndefined();
   });
 
@@ -93,7 +93,7 @@ describe('BoxExtends.components — extends', () => {
       },
     });
 
-    const subgrid = BoxExtends.componentsStyles['testSubgrid'];
+    const subgrid = BoxExtends.getComponentsStyles()['testSubgrid'];
     // Should have overridden styles
     expect(subgrid.styles?.b).toBe(0);
     expect(subgrid.styles?.borderRadius).toBe(0);
@@ -123,7 +123,7 @@ describe('BoxExtends.components — extends', () => {
       },
     });
 
-    const child = BoxExtends.componentsStyles['testChild6'];
+    const child = BoxExtends.getComponentsStyles()['testChild6'];
     // clean:true replaces the entire header subtree
     expect(child.children?.header?.styles?.fontSize).toBe(12);
     expect(child.children?.header?.styles?.fontWeight).toBeUndefined();

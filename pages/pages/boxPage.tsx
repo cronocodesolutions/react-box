@@ -914,7 +914,7 @@ function MiscDemo() {
 }
 
 // Category content map
-const categoryContent: Record<CategoryId, () => JSX.Element> = {
+const categoryContent: Record<CategoryId, () => ReactNode> = {
   spacing: SpacingDemo,
   sizing: SizingDemo,
   layout: LayoutDemo,

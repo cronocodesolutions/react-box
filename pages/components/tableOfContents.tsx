@@ -23,11 +23,21 @@ export default function TableOfContents({ entries }: { entries: TocEntry[] }) {
         ) : (
           <Link
             key={entry.id}
-            props={{ href: `#${entry.id}` }}
+            props={{
+              href: `#${entry.id}`,
+              onClick: (e) => {
+                const target = document.getElementById(entry.id);
+                if (!target) return;
+                e.preventDefault();
+                target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                history.replaceState(null, '', `#${entry.id}`);
+              },
+            }}
             fontSize={13}
             py={1}
             px={2}
             borderRadius={1}
+            cursor="pointer"
             textDecoration="none"
             theme={{
               dark: { color: 'slate-400', hover: { color: 'white', bgColor: 'slate-800' } },

@@ -41,7 +41,7 @@ export default defineConfig(({ mode }) => {
         formats: ['es', 'cjs'],
       },
       rollupOptions: {
-        external: ['react', 'react-dom', 'react/jsx-runtime', 'react-dom/server'],
+        external: ['react', 'react-dom', 'react/jsx-runtime', 'react-dom/server', 'use-sync-external-store/shim'],
         output: {
           inlineDynamicImports: false,
           exports: 'named',

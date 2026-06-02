@@ -6,7 +6,7 @@ interface Props {
   search: string;
   onSearchChange: (value: string) => void;
   searchPlaceholder?: string;
-  searchBoxRef: React.RefObject<HTMLInputElement>;
+  searchBoxRef: React.RefObject<HTMLInputElement | null>;
 }
 
 export default function DropdownSearch({ search, onSearchChange, searchPlaceholder, searchBoxRef }: Props) {
