@@ -4,6 +4,7 @@ import GridModel from '../models/gridModel';
 import DataGridBody from './dataGridBody';
 import DataGridEmptyColumns from './dataGridEmptyColumns';
 import DataGridHeader from './dataGridHeader';
+import DataGridLoader from './dataGridLoader';
 
 interface Props<TRow> {
   grid: GridModel<TRow>;
@@ -38,6 +39,8 @@ export default function DataGridContent<TRow>(props: Props<TRow>) {
       props={{ onScroll: handleScroll }}
     >
       <DataGridHeader grid={grid} />
+
+      {grid.props.loading && <DataGridLoader grid={grid} />}
 
       <DataGridBody grid={grid} scrollTop={scrollTop} />
     </Box>

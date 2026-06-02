@@ -1124,4 +1124,7 @@ const sidebarLinks = [
   { id: 'row-detail', label: 'Row Detail' },
   { id: 'pagination', label: 'Server Pagination & Filters' },
   { id: 'disable-sort', label: 'Disable Sort' },
+  { id: 'context-menu', label: 'Context Menu' },
+  { id: 'resizer-style', label: 'Resizer Style' },
+  { id: 'resize-mode', label: 'Resize Mode' },
 ] as const;
