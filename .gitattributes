@@ -1,0 +1,20 @@
+# Enforce consistent LF line endings across macOS, Linux, and Windows.
+#
+# `text=auto` lets Git auto-detect text vs. binary; `eol=lf` normalizes
+# every text file to LF in the repository and checks it out as LF on all
+# platforms. This overrides each developer's local core.autocrlf / core.eol,
+# so line endings are authoritative here and no longer OS-dependent.
+* text=auto eol=lf
+
+# Binary files — never apply line-ending conversion.
+*.png  binary
+*.jpg  binary
+*.jpeg binary
+*.gif  binary
+*.ico  binary
+*.webp binary
+*.ttf  binary
+*.otf  binary
+*.eot  binary
+*.woff binary
+*.woff2 binary

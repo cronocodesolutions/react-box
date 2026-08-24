@@ -3,6 +3,5 @@
   "trailingComma": "all",
   "printWidth": 140,
   "tabWidth": 2,
-  "importOrderSortSpecifiers": true,
-  "importOrderGroupNamespaceSpecifiers": true
+  "endOfLine": "lf"
 }

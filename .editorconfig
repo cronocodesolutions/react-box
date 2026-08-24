@@ -1,0 +1,16 @@
+# EditorConfig — consistent formatting across editors and OSes.
+# https://editorconfig.org
+# Backstop for editors that don't run Prettier (keeps new files LF on Windows).
+root = true
+
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+indent_style = space
+indent_size = 2
+
+# Trailing whitespace is significant in Markdown (two spaces = hard break).
+[*.md]
+trim_trailing_whitespace = false

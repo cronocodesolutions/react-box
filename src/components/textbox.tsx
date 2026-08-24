@@ -23,19 +23,7 @@ type TextareaProps<TKey extends keyof ComponentsAndVariants> = Omit<BoxProps<'in
 type TextboxTagProps = Omit<BoxTagProps<'input'>, TagPropsType>;
 
 type TextboxType =
-  | 'date'
-  | 'datetime-local'
-  | 'email'
-  | 'hidden'
-  | 'month'
-  | 'number'
-  | 'password'
-  | 'search'
-  | 'tel'
-  | 'text'
-  | 'time'
-  | 'url'
-  | 'week';
+  'date' | 'datetime-local' | 'email' | 'hidden' | 'month' | 'number' | 'password' | 'search' | 'tel' | 'text' | 'time' | 'url' | 'week';
 
 interface Props<TKey extends keyof ComponentsAndVariants> extends TextareaProps<TKey> {
   name?: string;
