@@ -62,8 +62,7 @@ type ExtractChildrenVariants<T> = T extends { children?: infer Children }
 type ExtractChildrenNames<T, Prefix extends string = ''> = T extends { children?: infer Children }
   ? {
       [K in keyof Children & string]:
-        | `${Prefix}${Prefix extends '' ? '' : '.'}${K}`
-        | ExtractChildrenNames<Children[K], `${Prefix}${Prefix extends '' ? '' : '.'}${K}`>;
+        `${Prefix}${Prefix extends '' ? '' : '.'}${K}` | ExtractChildrenNames<Children[K], `${Prefix}${Prefix extends '' ? '' : '.'}${K}`>;
     }[keyof Children & string]
   : never;
 
