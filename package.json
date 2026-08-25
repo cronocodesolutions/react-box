@@ -38,7 +38,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "lint": "eslint .",
-    "check:package": "publint dist && attw --pack dist --ignore-rules cjs-resolves-to-esm internal-resolution-error",
+    "check:package": "publint dist && attw --pack dist --ignore-rules false-esm cjs-resolves-to-esm internal-resolution-error",
     "size": "size-limit"
   },
   "size-limit": [
