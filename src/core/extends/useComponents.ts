@@ -1,4 +1,3 @@
-import { useMemo } from 'react';
 import { BoxComponentStyles, BoxStyleProps, ComponentsAndVariants } from '../../types';
 import ObjectUtils from '../../utils/object/objectUtils';
 import { classNames } from '../classNames';
@@ -42,13 +41,4 @@ export function resolveComponentStyles<TKey extends keyof ComponentsAndVariants 
   if (!componentStyles.styles) return variantStyles;
 
   return ObjectUtils.mergeDeep<BoxComponentStyles>(componentStyles.styles, variantStyles);
-}
-
-export default function useComponents<TKey extends keyof ComponentsAndVariants = never>(
-  props: BoxStyleProps<TKey>,
-): BoxComponentStyles | undefined {
-  const { clean, component, variant } = props;
-
-  // eslint-disable-next-line react-hooks/exhaustive-deps -- result is fully determined by clean/component/variant
-  return useMemo(() => resolveComponentStyles(props), [clean, component, variant]);
 }

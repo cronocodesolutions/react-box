@@ -3,9 +3,8 @@ import { classNames, ClassNameType } from './core/classNames';
 import { ExtractElementFromTag } from './core/coreTypes';
 import BoxExtends from './core/extends/boxExtends';
 import Theme from './core/theme/theme';
-import useStyles from './core/useStyles';
+import useStyles, { StylesContext } from './core/useStyles';
 import Variables from './core/variables';
-import './array';
 import useVisibility from './hooks/useVisibility';
 import { BoxStyleProps, ComponentsAndVariants } from './types';
 import BoxUtils from './utils/box/boxUtils';
@@ -76,6 +75,8 @@ interface BoxType {
   Theme: typeof Theme;
   useTheme: typeof Theme.useTheme;
   getVariableValue: typeof Variables.getVariableValue;
+  /** Explicit engine configuration (class-name hashing, style sink). Call once, before the first render. */
+  configure: typeof StylesContext.configure;
 }
 
 const Box = memo(forwardRef(BoxComponent)) as unknown as BoxType;
@@ -86,6 +87,7 @@ Box.components = BoxExtends.components;
 Box.Theme = Theme;
 Box.useTheme = Theme.useTheme;
 Box.getVariableValue = Variables.getVariableValue;
+Box.configure = StylesContext.configure;
 
 export default Box;
 

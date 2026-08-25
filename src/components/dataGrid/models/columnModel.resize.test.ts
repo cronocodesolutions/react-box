@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { ignoreLogs } from '../../../../dev/tests';
+import ArrayUtils from '../../../utils/array/arrayUtils';
 import { GridDefinition } from '../contracts/dataGridContract';
 import GridModel from './gridModel';
 
@@ -19,7 +20,7 @@ describe('ColumnModel resize (headless)', () => {
 
   it('widens a column as the pointer drags right', () => {
     const grid = getGrid({ columns: [{ key: 'firstName', width: 200 }] });
-    const col = grid.columns.value.leafs.findOrThrow((c) => c.key === 'firstName');
+    const col = ArrayUtils.findOrThrow(grid.columns.value.leafs, (c) => c.key === 'firstName');
 
     col.beginResize(100);
     col.resizeTo(160); // +60px
@@ -29,7 +30,7 @@ describe('ColumnModel resize (headless)', () => {
 
   it('narrows a column as the pointer drags left, clamped to MIN_COLUMN_WIDTH_PX', () => {
     const grid = getGrid({ columns: [{ key: 'firstName', width: 200 }] });
-    const col = grid.columns.value.leafs.findOrThrow((c) => c.key === 'firstName');
+    const col = ArrayUtils.findOrThrow(grid.columns.value.leafs, (c) => c.key === 'firstName');
 
     col.beginResize(100);
     col.resizeTo(-1000); // far past the minimum
@@ -39,7 +40,7 @@ describe('ColumnModel resize (headless)', () => {
 
   it('inverts drag direction for RIGHT-pinned columns', () => {
     const grid = getGrid({ columns: [{ key: 'firstName', width: 200, pin: 'RIGHT' }] });
-    const col = grid.columns.value.leafs.findOrThrow((c) => c.key === 'firstName');
+    const col = ArrayUtils.findOrThrow(grid.columns.value.leafs, (c) => c.key === 'firstName');
 
     col.beginResize(100);
     col.resizeTo(160); // pointer moves right → right-pinned column shrinks
@@ -49,7 +50,7 @@ describe('ColumnModel resize (headless)', () => {
 
   it('notifies subscribers on each resizeTo and on endResize', () => {
     const grid = getGrid({ columns: [{ key: 'firstName', width: 200 }] });
-    const col = grid.columns.value.leafs.findOrThrow((c) => c.key === 'firstName');
+    const col = ArrayUtils.findOrThrow(grid.columns.value.leafs, (c) => c.key === 'firstName');
 
     const before = grid.getSnapshot();
     col.beginResize(100);

@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { ignoreLogs } from '../../../../dev/tests';
+import ArrayUtils from '../../../utils/array/arrayUtils';
 import { GridDefinition } from '../contracts/dataGridContract';
 import GridModel from './gridModel';
 import GroupRowCellModel from './groupRowCellModel';
@@ -32,7 +33,7 @@ describe('GroupRowCellModel', () => {
     const grid = getGrid();
     grid.toggleGrouping('day');
     const groupRow = grid.rows.value[0] as GroupRowModel<Person>;
-    const groupingLeaf = grid.columns.value.visibleLeafs.findOrThrow((c) => c.key === 'grouping-cell');
+    const groupingLeaf = ArrayUtils.findOrThrow(grid.columns.value.visibleLeafs, (c) => c.key === 'grouping-cell');
     const cell = new GroupRowCellModel(grid, groupRow, groupingLeaf);
     expect(cell.value).toEqual(`${groupRow.groupValue} (${groupRow.count})`);
   });
@@ -41,7 +42,7 @@ describe('GroupRowCellModel', () => {
     const grid = getGrid();
     grid.toggleGrouping('day');
     const groupRow = grid.rows.value[0] as GroupRowModel<Person>;
-    const rowNumberLeaf = grid.columns.value.visibleLeafs.findOrThrow((c) => c.key === 'row-number-cell');
+    const rowNumberLeaf = ArrayUtils.findOrThrow(grid.columns.value.visibleLeafs, (c) => c.key === 'row-number-cell');
     const cell = new GroupRowCellModel(grid, groupRow, rowNumberLeaf);
     expect(cell.value).toEqual(groupRow.rowIndex + 1);
   });

@@ -1,5 +1,6 @@
 import { useMemo } from 'react';
 import Box from '../../../box';
+import ArrayUtils from '../../../utils/array/arrayUtils';
 import Flex from '../../flex';
 import Grid from '../../grid';
 import DetailRowModel from '../models/detailRowModel';
@@ -35,14 +36,10 @@ export default function DataGridBody<TRow>(props: Props<TRow>) {
   const flatRows = grid.flatRows.value;
 
   const rows = useMemo(() => {
-    console.debug('\x1b[36m%s\x1b[0m', '[react-box]: DataGrid render rows');
-
     if (isEmpty) return null;
 
-    return flatRows.take(take, startIndex).map(renderRow);
+    return ArrayUtils.take(flatRows, take, startIndex).map(renderRow);
   }, [flatRows, isEmpty, take, startIndex]);
-
-  console.debug('\x1b[36m%s\x1b[0m', '[react-box]: DataGrid render DataGridBody');
 
   // Render empty state outside the CSS Grid to ensure full width
   if (isEmpty) {

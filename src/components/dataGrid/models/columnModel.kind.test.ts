@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { ignoreLogs } from '../../../../dev/tests';
+import ArrayUtils from '../../../utils/array/arrayUtils';
 import { GridDefinition } from '../contracts/dataGridContract';
 import GridModel, { ROW_DETAIL_CELL_KEY, ROW_NUMBER_CELL_KEY, ROW_SELECTION_CELL_KEY } from './gridModel';
 
@@ -19,7 +20,7 @@ function getGrid(def?: Partial<GridDefinition<Person>>) {
   return new GridModel<Person>({ data, def: { columns: [{ key: 'firstName' }, { key: 'age' }, { key: 'country' }], ...def } });
 }
 
-const leaf = (grid: GridModel<Person>, key: string | number) => grid.columns.value.leafs.findOrThrow((c) => c.key === key);
+const leaf = (grid: GridModel<Person>, key: string | number) => ArrayUtils.findOrThrow(grid.columns.value.leafs, (c) => c.key === key);
 
 describe('ColumnModel kind + layout', () => {
   ignoreLogs();
@@ -32,7 +33,7 @@ describe('ColumnModel kind + layout', () => {
     expect(leaf(grid, ROW_DETAIL_CELL_KEY).kind).toBe('rowDetail');
 
     grid.toggleGrouping('firstName');
-    expect(grid.columns.value.leafs.findOrThrow((c) => c.isGrouping).kind).toBe('grouping');
+    expect(ArrayUtils.findOrThrow(grid.columns.value.leafs, (c) => c.isGrouping).kind).toBe('grouping');
   });
 
   it('convenience flags match the kind', () => {

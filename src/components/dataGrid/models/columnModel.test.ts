@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { ignoreLogs } from '../../../../dev/tests';
+import ArrayUtils from '../../../utils/array/arrayUtils';
 import { GridDefinition } from '../contracts/dataGridContract';
 import GridModel from './gridModel';
 
@@ -28,8 +29,8 @@ describe('ColumnModel', () => {
 
   it('propagates pin from parent to leafs', () => {
     const grid = getGrid();
-    const firstName = grid.columns.value.flat.findOrThrow((c) => c.key === 'firstName');
-    const lastName = grid.columns.value.flat.findOrThrow((c) => c.key === 'lastName');
+    const firstName = ArrayUtils.findOrThrow(grid.columns.value.flat, (c) => c.key === 'firstName');
+    const lastName = ArrayUtils.findOrThrow(grid.columns.value.flat, (c) => c.key === 'lastName');
 
     expect(firstName.pin).toEqual('LEFT');
     expect(lastName.pin).toEqual('LEFT');
@@ -37,13 +38,13 @@ describe('ColumnModel', () => {
 
   it('initializes inline width for leafs', () => {
     const grid = getGrid();
-    const leaf = grid.columns.value.leafs.findOrThrow((c) => c.key === 'firstName');
+    const leaf = ArrayUtils.findOrThrow(grid.columns.value.leafs, (c) => c.key === 'firstName');
     expect(leaf.inlineWidth).toEqual(grid.DEFAULT_COLUMN_WIDTH_PX);
   });
 
   it('computes edge for pinned columns', () => {
     const grid = getGrid();
-    const parent = grid.columns.value.flat.findOrThrow((c) => c.key === 'parent');
+    const parent = ArrayUtils.findOrThrow(grid.columns.value.flat, (c) => c.key === 'parent');
     const leafs = parent.visibleColumns;
     const lastLeft = leafs.at(-1)!;
     expect(lastLeft.isEdge).toBe(true);
@@ -51,7 +52,7 @@ describe('ColumnModel', () => {
 
   it('toggleVisibility hides and shows a column', () => {
     const grid = getGrid();
-    const firstName = grid.columns.value.leafs.findOrThrow((c) => c.key === 'firstName');
+    const firstName = ArrayUtils.findOrThrow(grid.columns.value.leafs, (c) => c.key === 'firstName');
     expect(firstName.isVisible).toBe(true);
     firstName.toggleVisibility();
     expect(grid.hiddenColumns.has('firstName')).toBe(true);
@@ -60,7 +61,7 @@ describe('ColumnModel', () => {
 
   it('setWidth updates leaf inlineWidth', () => {
     const grid = getGrid();
-    const leaf = grid.columns.value.leafs.findOrThrow((c) => c.key === 'firstName');
+    const leaf = ArrayUtils.findOrThrow(grid.columns.value.leafs, (c) => c.key === 'firstName');
     leaf.setWidth(300);
     expect(leaf.inlineWidth).toEqual(300);
   });
@@ -68,31 +69,31 @@ describe('ColumnModel', () => {
   describe('sortable', () => {
     it('defaults to true when no flags are set', () => {
       const grid = new GridModel<Person>({ data, def: { columns: [{ key: 'firstName' }] } }, () => {});
-      const col = grid.columns.value.leafs.findOrThrow((c) => c.key === 'firstName');
+      const col = ArrayUtils.findOrThrow(grid.columns.value.leafs, (c) => c.key === 'firstName');
       expect(col.sortable).toBe(true);
     });
 
     it('respects global sortable: false', () => {
       const grid = new GridModel<Person>({ data, def: { columns: [{ key: 'firstName' }], sortable: false } }, () => {});
-      const col = grid.columns.value.leafs.findOrThrow((c) => c.key === 'firstName');
+      const col = ArrayUtils.findOrThrow(grid.columns.value.leafs, (c) => c.key === 'firstName');
       expect(col.sortable).toBe(false);
     });
 
     it('column-level sortable: true overrides global sortable: false', () => {
       const grid = new GridModel<Person>({ data, def: { columns: [{ key: 'firstName', sortable: true }], sortable: false } }, () => {});
-      const col = grid.columns.value.leafs.findOrThrow((c) => c.key === 'firstName');
+      const col = ArrayUtils.findOrThrow(grid.columns.value.leafs, (c) => c.key === 'firstName');
       expect(col.sortable).toBe(true);
     });
 
     it('column-level sortable: false overrides global sortable: true', () => {
       const grid = new GridModel<Person>({ data, def: { columns: [{ key: 'firstName', sortable: false }], sortable: true } }, () => {});
-      const col = grid.columns.value.leafs.findOrThrow((c) => c.key === 'firstName');
+      const col = ArrayUtils.findOrThrow(grid.columns.value.leafs, (c) => c.key === 'firstName');
       expect(col.sortable).toBe(false);
     });
 
     it('column-level sortable: false works when global is undefined', () => {
       const grid = new GridModel<Person>({ data, def: { columns: [{ key: 'firstName', sortable: false }] } }, () => {});
-      const col = grid.columns.value.leafs.findOrThrow((c) => c.key === 'firstName');
+      const col = ArrayUtils.findOrThrow(grid.columns.value.leafs, (c) => c.key === 'firstName');
       expect(col.sortable).toBe(false);
     });
   });
@@ -100,31 +101,31 @@ describe('ColumnModel', () => {
   describe('resizable', () => {
     it('defaults to true when no flags are set', () => {
       const grid = new GridModel<Person>({ data, def: { columns: [{ key: 'firstName' }] } }, () => {});
-      const col = grid.columns.value.leafs.findOrThrow((c) => c.key === 'firstName');
+      const col = ArrayUtils.findOrThrow(grid.columns.value.leafs, (c) => c.key === 'firstName');
       expect(col.resizable).toBe(true);
     });
 
     it('respects global resizable: false', () => {
       const grid = new GridModel<Person>({ data, def: { columns: [{ key: 'firstName' }], resizable: false } }, () => {});
-      const col = grid.columns.value.leafs.findOrThrow((c) => c.key === 'firstName');
+      const col = ArrayUtils.findOrThrow(grid.columns.value.leafs, (c) => c.key === 'firstName');
       expect(col.resizable).toBe(false);
     });
 
     it('column-level resizable: true overrides global resizable: false', () => {
       const grid = new GridModel<Person>({ data, def: { columns: [{ key: 'firstName', resizable: true }], resizable: false } }, () => {});
-      const col = grid.columns.value.leafs.findOrThrow((c) => c.key === 'firstName');
+      const col = ArrayUtils.findOrThrow(grid.columns.value.leafs, (c) => c.key === 'firstName');
       expect(col.resizable).toBe(true);
     });
 
     it('column-level resizable: false overrides global resizable: true', () => {
       const grid = new GridModel<Person>({ data, def: { columns: [{ key: 'firstName', resizable: false }], resizable: true } }, () => {});
-      const col = grid.columns.value.leafs.findOrThrow((c) => c.key === 'firstName');
+      const col = ArrayUtils.findOrThrow(grid.columns.value.leafs, (c) => c.key === 'firstName');
       expect(col.resizable).toBe(false);
     });
 
     it('column-level resizable: false works when global is undefined', () => {
       const grid = new GridModel<Person>({ data, def: { columns: [{ key: 'firstName', resizable: false }] } }, () => {});
-      const col = grid.columns.value.leafs.findOrThrow((c) => c.key === 'firstName');
+      const col = ArrayUtils.findOrThrow(grid.columns.value.leafs, (c) => c.key === 'firstName');
       expect(col.resizable).toBe(false);
     });
   });
@@ -132,7 +133,7 @@ describe('ColumnModel', () => {
   describe('contextMenu', () => {
     it('defaults to true when no flags are set', () => {
       const grid = new GridModel<Person>({ data, def: { columns: [{ key: 'firstName' }] } }, () => {});
-      const col = grid.columns.value.leafs.findOrThrow((c) => c.key === 'firstName');
+      const col = ArrayUtils.findOrThrow(grid.columns.value.leafs, (c) => c.key === 'firstName');
       expect(col.contextMenu).toBe(true);
       expect(col.showContextMenu).toBe(true);
       expect(col.contextMenuSections).toEqual({ sort: true, pin: true, group: true });
@@ -140,7 +141,7 @@ describe('ColumnModel', () => {
 
     it('respects global contextMenu: false', () => {
       const grid = new GridModel<Person>({ data, def: { columns: [{ key: 'firstName' }], contextMenu: false } }, () => {});
-      const col = grid.columns.value.leafs.findOrThrow((c) => c.key === 'firstName');
+      const col = ArrayUtils.findOrThrow(grid.columns.value.leafs, (c) => c.key === 'firstName');
       expect(col.contextMenu).toBe(false);
       expect(col.showContextMenu).toBe(false);
       expect(col.contextMenuSections).toEqual({ sort: false, pin: false, group: false });
@@ -151,7 +152,7 @@ describe('ColumnModel', () => {
         { data, def: { columns: [{ key: 'firstName', contextMenu: false }], contextMenu: true } },
         () => {},
       );
-      const col = grid.columns.value.leafs.findOrThrow((c) => c.key === 'firstName');
+      const col = ArrayUtils.findOrThrow(grid.columns.value.leafs, (c) => c.key === 'firstName');
       expect(col.contextMenu).toBe(false);
       expect(col.showContextMenu).toBe(false);
     });
@@ -161,7 +162,7 @@ describe('ColumnModel', () => {
         { data, def: { columns: [{ key: 'firstName', contextMenu: true }], contextMenu: false } },
         () => {},
       );
-      const col = grid.columns.value.leafs.findOrThrow((c) => c.key === 'firstName');
+      const col = ArrayUtils.findOrThrow(grid.columns.value.leafs, (c) => c.key === 'firstName');
       expect(col.contextMenu).toBe(true);
       expect(col.showContextMenu).toBe(true);
     });
@@ -171,7 +172,7 @@ describe('ColumnModel', () => {
         { data, def: { columns: [{ key: 'firstName' }], contextMenu: { sort: true, pin: false, group: false } } },
         () => {},
       );
-      const col = grid.columns.value.leafs.findOrThrow((c) => c.key === 'firstName');
+      const col = ArrayUtils.findOrThrow(grid.columns.value.leafs, (c) => c.key === 'firstName');
       expect(col.contextMenuSections).toEqual({ sort: true, pin: false, group: false });
       expect(col.showContextMenu).toBe(true);
     });
@@ -187,7 +188,7 @@ describe('ColumnModel', () => {
         },
         () => {},
       );
-      const col = grid.columns.value.leafs.findOrThrow((c) => c.key === 'firstName');
+      const col = ArrayUtils.findOrThrow(grid.columns.value.leafs, (c) => c.key === 'firstName');
       expect(col.contextMenuSections).toEqual({ sort: false, pin: true, group: true });
     });
 
@@ -196,13 +197,13 @@ describe('ColumnModel', () => {
         { data, def: { columns: [{ key: 'firstName', contextMenu: { sort: false, pin: false, group: false } }] } },
         () => {},
       );
-      const col = grid.columns.value.leafs.findOrThrow((c) => c.key === 'firstName');
+      const col = ArrayUtils.findOrThrow(grid.columns.value.leafs, (c) => c.key === 'firstName');
       expect(col.showContextMenu).toBe(false);
     });
 
     it('ContextMenuConfig defaults missing keys to true', () => {
       const grid = new GridModel<Person>({ data, def: { columns: [{ key: 'firstName', contextMenu: { sort: false } }] } }, () => {});
-      const col = grid.columns.value.leafs.findOrThrow((c) => c.key === 'firstName');
+      const col = ArrayUtils.findOrThrow(grid.columns.value.leafs, (c) => c.key === 'firstName');
       expect(col.contextMenuSections).toEqual({ sort: false, pin: true, group: true });
     });
   });
@@ -210,31 +211,31 @@ describe('ColumnModel', () => {
   describe('flexible', () => {
     it('isFlexible defaults to true when flexible is undefined', () => {
       const grid = new GridModel<Person>({ data, def: { columns: [{ key: 'firstName' }] } }, () => {});
-      const col = grid.columns.value.leafs.findOrThrow((c) => c.key === 'firstName');
+      const col = ArrayUtils.findOrThrow(grid.columns.value.leafs, (c) => c.key === 'firstName');
       expect(col.isFlexible).toBe(true);
     });
 
     it('isFlexible returns false when flexible: false', () => {
       const grid = new GridModel<Person>({ data, def: { columns: [{ key: 'firstName', flexible: false }] } }, () => {});
-      const col = grid.columns.value.leafs.findOrThrow((c) => c.key === 'firstName');
+      const col = ArrayUtils.findOrThrow(grid.columns.value.leafs, (c) => c.key === 'firstName');
       expect(col.isFlexible).toBe(false);
     });
 
     it('isFlexible returns true when flexible: true', () => {
       const grid = new GridModel<Person>({ data, def: { columns: [{ key: 'firstName', flexible: true }] } }, () => {});
-      const col = grid.columns.value.leafs.findOrThrow((c) => c.key === 'firstName');
+      const col = ArrayUtils.findOrThrow(grid.columns.value.leafs, (c) => c.key === 'firstName');
       expect(col.isFlexible).toBe(true);
     });
 
     it('baseWidth returns the column base width', () => {
       const grid = new GridModel<Person>({ data, def: { columns: [{ key: 'firstName', width: 150 }] } }, () => {});
-      const col = grid.columns.value.leafs.findOrThrow((c) => c.key === 'firstName');
+      const col = ArrayUtils.findOrThrow(grid.columns.value.leafs, (c) => c.key === 'firstName');
       expect(col.baseWidth).toBe(150);
     });
 
     it('baseWidth returns DEFAULT_COLUMN_WIDTH_PX when no width specified', () => {
       const grid = new GridModel<Person>({ data, def: { columns: [{ key: 'firstName' }] } }, () => {});
-      const col = grid.columns.value.leafs.findOrThrow((c) => c.key === 'firstName');
+      const col = ArrayUtils.findOrThrow(grid.columns.value.leafs, (c) => c.key === 'firstName');
       expect(col.baseWidth).toBe(grid.DEFAULT_COLUMN_WIDTH_PX);
     });
   });
@@ -328,8 +329,8 @@ describe('ColumnModel', () => {
 
       grid.setContainerWidth(400);
 
-      const firstName = grid.columns.value.leafs.findOrThrow((c) => c.key === 'firstName');
-      const lastName = grid.columns.value.leafs.findOrThrow((c) => c.key === 'lastName');
+      const firstName = ArrayUtils.findOrThrow(grid.columns.value.leafs, (c) => c.key === 'firstName');
+      const lastName = ArrayUtils.findOrThrow(grid.columns.value.leafs, (c) => c.key === 'lastName');
 
       // Both should get 200 (400 / 2)
       expect(firstName.inlineWidth).toBe(200);
