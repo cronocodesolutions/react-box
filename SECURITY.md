@@ -13,7 +13,7 @@ Security fixes are applied to the latest minor of the current major version.
 
 Please **do not open a public issue** for security problems.
 
-Use GitHub's private vulnerability reporting: [Report a vulnerability](https://github.com/cronocodesolutions/react-box/security/advisories/new). You should receive an acknowledgement within 7 days.
+Use GitHub's private vulnerability reporting: [Report a vulnerability](https://github.com/box-kite/box-kite/security/advisories/new). You should receive an acknowledgement within 7 days.
 
 Once a fix is available we will publish a patched release and credit the reporter in the release notes (unless you prefer to stay anonymous).
 

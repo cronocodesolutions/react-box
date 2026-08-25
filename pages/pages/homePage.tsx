@@ -86,7 +86,7 @@ export default function HomePage() {
                   </Flex>
                 </Button>
               </NavLink>
-              <a href="https://github.com/cronocodesolutions/react-box" target="_blank" rel="noopener noreferrer">
+              <a href="https://github.com/box-kite/box-kite" target="_blank" rel="noopener noreferrer">
                 <Button
                   variant="secondary"
                   px={6}

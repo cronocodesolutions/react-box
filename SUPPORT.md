@@ -12,7 +12,7 @@ Breaking changes are batched: we would rather ship one well-documented major tha
 
 ## Release cadence
 
-We aim for **at least one release every month**. Every release has generated notes on the [GitHub Releases page](https://github.com/cronocodesolutions/react-box/releases).
+We aim for **at least one release every month**. Every release has generated notes on the [GitHub Releases page](https://github.com/box-kite/box-kite/releases).
 
 ## Supported environments
 
@@ -22,8 +22,8 @@ We aim for **at least one release every month**. Every release has generated not
 
 ## Getting help
 
-- **Bug reports & feature requests** — [GitHub issues](https://github.com/cronocodesolutions/react-box/issues). Please use the templates.
-- **Questions** — [GitHub discussions](https://github.com/cronocodesolutions/react-box/discussions) if enabled, otherwise open an issue with the question label.
+- **Bug reports & feature requests** — [GitHub issues](https://github.com/box-kite/box-kite/issues). Please use the templates.
+- **Questions** — [GitHub discussions](https://github.com/box-kite/box-kite/discussions) if enabled, otherwise open an issue with the question label.
 - **Security issues** — see [SECURITY.md](SECURITY.md). Please do not open public issues for vulnerabilities.
 
 ## Continuity ("bus factor")

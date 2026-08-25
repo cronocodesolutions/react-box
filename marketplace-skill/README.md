@@ -1,6 +1,6 @@
 # @cronocode/react-box — Claude Code Plugin
 
-AI skill for the [@cronocode/react-box](https://github.com/cronocodesolutions/react-box) runtime CSS-in-JS library. Helps AI assistants correctly use Box props, component shortcuts, numeric formatters, themes, Dropdown, Select, DataGrid, and the full extension system.
+AI skill for the [@cronocode/react-box](https://github.com/box-kite/box-kite) runtime CSS-in-JS library. Helps AI assistants correctly use Box props, component shortcuts, numeric formatters, themes, Dropdown, Select, DataGrid, and the full extension system.
 
 ## Install
 
