@@ -4,19 +4,19 @@ import dts from 'vite-plugin-dts';
 import { defineConfig } from 'vitest/config';
 
 const files = fs
-  .readdirSync(path.resolve(__dirname, './src/components'))
+  .readdirSync(path.resolve(import.meta.dirname, './src/components'))
   .filter((fileName) => fileName.includes('.test') === false)
   .filter((fileName) => !fileName.startsWith('.'));
 
 const componentsEntry = files.reduce((acc, fileName) => {
-  acc[`components/${path.parse(fileName).name}`] = path.resolve(__dirname, 'src/components', fileName);
+  acc[`components/${path.parse(fileName).name}`] = path.resolve(import.meta.dirname, 'src/components', fileName);
 
   return acc;
 }, {});
 
 const entry = {
-  box: path.resolve(__dirname, './src/box.ts'),
-  ssg: path.resolve(__dirname, './src/ssg.ts'),
+  box: path.resolve(import.meta.dirname, './src/box.ts'),
+  ssg: path.resolve(import.meta.dirname, './src/ssg.ts'),
   ...componentsEntry,
 };
 

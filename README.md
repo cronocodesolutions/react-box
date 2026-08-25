@@ -1,5 +1,10 @@
 # React box
 
+[![npm](https://img.shields.io/npm/v/@cronocode/react-box)](https://www.npmjs.com/package/@cronocode/react-box)
+[![bundle size](https://img.shields.io/bundlephobia/minzip/@cronocode/react-box)](https://bundlephobia.com/package/@cronocode/react-box)
+[![Tests](https://github.com/cronocodesolutions/react-box/actions/workflows/test.yml/badge.svg)](https://github.com/cronocodesolutions/react-box/actions/workflows/test.yml)
+[![license](https://img.shields.io/npm/l/@cronocode/react-box)](LICENSE)
+
 This is a react base component which will reduce considerably necessity to write css code.
 
 ## Getting Started
