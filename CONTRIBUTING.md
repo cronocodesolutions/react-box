@@ -539,8 +539,8 @@ This ensures portal content inherits correct theme colors.
 
 ```bash
 # Clone and install
-git clone https://github.com/cronocodesolutions/react-box.git
-cd react-box
+git clone https://github.com/box-kite/box-kite.git
+cd box-kite
 npm install
 
 # Start dev server (pages)
@@ -970,6 +970,6 @@ npm publish --access public
 
 ## Questions?
 
-- GitHub Issues: https://github.com/cronocodesolutions/react-box/issues
+- GitHub Issues: https://github.com/box-kite/box-kite/issues
 - Review existing code patterns before adding new features
 - Follow the established type extraction patterns for type safety

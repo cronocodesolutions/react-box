@@ -61,7 +61,7 @@ One or two sentence summary of the most notable changes in this release.
 
 ---
 
-**Full Changelog**: https://github.com/cronocodesolutions/react-box/compare/<previous-tag>...<new-tag>
+**Full Changelog**: https://github.com/box-kite/box-kite/compare/<previous-tag>...<new-tag>
 ```
 
 ## Format Rules
