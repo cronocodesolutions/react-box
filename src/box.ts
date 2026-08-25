@@ -1,10 +1,10 @@
 import React, { forwardRef, memo, Ref, RefAttributes, useMemo, useState } from 'react';
 import { classNames, ClassNameType } from './core/classNames';
 import { ExtractElementFromTag } from './core/coreTypes';
+import getDefaultEngine from './core/engine/defaultEngine';
 import BoxExtends from './core/extends/boxExtends';
 import Theme from './core/theme/theme';
 import useStyles, { StylesContext } from './core/useStyles';
-import Variables from './core/variables';
 import useVisibility from './hooks/useVisibility';
 import { BoxStyleProps, ComponentsAndVariants } from './types';
 import BoxUtils from './utils/box/boxUtils';
@@ -74,7 +74,7 @@ interface BoxType {
   components: typeof BoxExtends.components;
   Theme: typeof Theme;
   useTheme: typeof Theme.useTheme;
-  getVariableValue: typeof Variables.getVariableValue;
+  getVariableValue: (name: string) => string;
   /** Explicit engine configuration (class-name hashing, style sink). Call once, before the first render. */
   configure: typeof StylesContext.configure;
 }
@@ -86,7 +86,7 @@ Box.extend = BoxExtends.extend;
 Box.components = BoxExtends.components;
 Box.Theme = Theme;
 Box.useTheme = Theme.useTheme;
-Box.getVariableValue = Variables.getVariableValue;
+Box.getVariableValue = (name: string) => getDefaultEngine().getVariableValue(name);
 Box.configure = StylesContext.configure;
 
 export default Box;
