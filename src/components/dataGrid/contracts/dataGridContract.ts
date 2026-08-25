@@ -1,6 +1,8 @@
 import { ComponentsAndVariants } from '../../../types';
+import type { SortDirection } from '../../../utils/array/arrayUtils';
 import CellModel from '../models/cellModel';
 
+export type { SortDirection };
 export type Key = string | number;
 export type PinPosition = 'LEFT' | 'RIGHT';
 export const NO_PIN = 'NO_PIN';

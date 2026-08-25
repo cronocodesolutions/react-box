@@ -21,9 +21,24 @@ import Variables from './variables';
 const identity = new IdentityFactory();
 
 const isBrowser = typeof window !== 'undefined' && typeof window.document !== 'undefined';
-const isTestEnv = typeof process === 'object' && process.env?.NODE_ENV === 'test';
 
-const useEff = isBrowser && !isTestEnv ? useLayoutEffect : useEffect;
+const useEff = isBrowser ? useLayoutEffect : useEffect;
+
+/** Explicit engine configuration — replaces the previous NODE_ENV-based sniffing. */
+export interface StylesConfiguration {
+  /**
+   * How generated class names are emitted.
+   * - `'hashed'` (default): names go through the identity factory (short, stable hashes).
+   * - `'readable'`: the descriptive name is kept as-is (useful for tests and debugging).
+   */
+  classNames?: 'hashed' | 'readable';
+  /**
+   * How generated rules reach the document.
+   * - `'cssom'` (default): `CSSStyleSheet.insertRule` when a stylesheet is available.
+   * - `'textContent'`: rule text is appended to the style element (readable in tests; always used when no stylesheet exists, e.g. SSR).
+   */
+  sink?: 'cssom' | 'textContent';
+}
 
 const boxClassName = '_b';
 const svgClassName = '_s';
@@ -115,6 +130,17 @@ export function useGlobalStyles(props: BoxStyleProps<any> | undefined, selector:
 namespace StylesContextImpl {
   let requireFlush = true;
   let isInitialized = false;
+
+  let classNamesMode: NonNullable<StylesConfiguration['classNames']> = 'hashed';
+  let sinkMode: NonNullable<StylesConfiguration['sink']> = 'cssom';
+
+  /** Apply explicit engine configuration. Call before the first render — cached class names are dropped when the configuration changes. */
+  export function configure(config: StylesConfiguration) {
+    if (config.classNames) classNamesMode = config.classNames;
+    if (config.sink) sinkMode = config.sink;
+    // Cached class lists may have been resolved under a different naming mode.
+    styleCache.clear();
+  }
 
   // Track already generated CSS rules to avoid re-generating
   const generatedRules = new Set<string>();
@@ -222,10 +248,8 @@ namespace StylesContextImpl {
     const hasPendingVars = Variables.hasPendingVariables();
     if (!requireFlush && !hasPendingVars) return;
 
-    console.debug('\x1b[36m%s\x1b[0m', '[react-box]: flush');
-
     const el = getElement();
-    const stylesheet = el.sheet as CSSStyleSheet | null;
+    const stylesheet = sinkMode === 'cssom' ? (el.sheet as CSSStyleSheet | null) : null;
 
     // Initialize base styles only once
     if (!isInitialized) {
@@ -244,7 +268,7 @@ namespace StylesContextImpl {
         `.${svgClassName} path,.${svgClassName} circle,.${svgClassName} rect,.${svgClassName} line {transition: all var(--svgTransitionTime);}`,
       ];
 
-      if (stylesheet && !isTestEnv) {
+      if (stylesheet) {
         // Insert default rules at the beginning of the stylesheet
         for (const rule of defaultRules) {
           try {
@@ -266,7 +290,7 @@ namespace StylesContextImpl {
         .map(([key, val]) => `--${key}: ${val};`)
         .join('')}}`;
 
-      if (stylesheet && !isTestEnv) {
+      if (stylesheet) {
         try {
           // Insert new variables rule at the start (after existing base rules)
           stylesheet.insertRule(varsRule, 0);
@@ -284,8 +308,8 @@ namespace StylesContextImpl {
       // Sort pending rules by breakpoint order first, then by cssStyles index
       pendingRules.sort((a, b) => a[1] - b[1] || a[0] - b[0]);
 
-      // Use insertRule in browser for correct ordering, textContent in tests
-      if (stylesheet && !isTestEnv) {
+      // Use insertRule in browser for correct ordering, textContent otherwise
+      if (stylesheet) {
         for (const [sortIndex, breakpointOrder, rule] of pendingRules) {
           const sortKey = breakpointOrder * 100000 + sortIndex;
 
@@ -315,7 +339,7 @@ namespace StylesContextImpl {
           }
         }
       } else {
-        // Test environment or no sheet access: use textContent (already sorted)
+        // textContent sink or no sheet access: append rule text (already sorted)
         el.textContent += pendingRules.map((r) => r[2]).join('');
       }
 
@@ -516,7 +540,7 @@ namespace StylesContextImpl {
 
     const className = `${breakpoint === 'normal' ? '' : `${breakpoint}-`}${pseudoClasses.map((p) => `${p}-`).join('')}${pseudoClassParentName ? `${pseudoClassParentName}-` : ''}${key}-${serializedValue}`;
 
-    return isTestEnv ? className : identity.getIdentity(className);
+    return classNamesMode === 'readable' ? className : identity.getIdentity(className);
   }
 
   const cronoStylesElementId = 'crono-styles';
@@ -538,4 +562,5 @@ namespace StylesContextImpl {
 export namespace StylesContext {
   export const flush = StylesContextImpl.flush;
   export const clear = StylesContextImpl.clear;
+  export const configure = StylesContextImpl.configure;
 }

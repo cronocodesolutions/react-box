@@ -1,3 +1,5 @@
+import ArrayUtils from '../../../utils/array/arrayUtils';
+import type { SortDirection } from '../contracts/dataGridContract';
 import type ColumnModel from './columnModel';
 import type GridModel from './gridModel';
 
@@ -19,7 +21,7 @@ export default class HeaderCellModel<TRow> {
     if (c.isGrouping) {
       if (this.grid.groupColumns.size === 1) {
         const groupedKey = this.grid.groupColumns.values().next().value!;
-        const col = this.grid.columns.value.leafs.findOrThrow((l) => l.key === groupedKey);
+        const col = ArrayUtils.findOrThrow(this.grid.columns.value.leafs, (l) => l.key === groupedKey);
         return col.header ?? col.key;
       }
       return 'Group';

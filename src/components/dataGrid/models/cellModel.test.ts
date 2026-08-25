@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { ignoreLogs } from '../../../../dev/tests';
+import ArrayUtils from '../../../utils/array/arrayUtils';
 import { GridDefinition } from '../contracts/dataGridContract';
 import GridModel from './gridModel';
 
@@ -24,7 +25,7 @@ describe('CellModel', () => {
   it('returns data value for regular columns', () => {
     const grid = getGrid();
     const row = grid.rows.value[0];
-    const firstNameLeaf = grid.columns.value.visibleLeafs.findOrThrow((c) => c.key === 'firstName');
+    const firstNameLeaf = ArrayUtils.findOrThrow(grid.columns.value.visibleLeafs, (c) => c.key === 'firstName');
     const cell = row.cells.find((c) => c.column.key === firstNameLeaf.key)!;
     expect(cell.value).toEqual('A');
   });
@@ -32,7 +33,7 @@ describe('CellModel', () => {
   it('returns row index + 1 for row-number column', () => {
     const grid = getGrid();
     const row = grid.rows.value[0];
-    const rowNumberLeaf = grid.columns.value.visibleLeafs.findOrThrow((c) => c.key === 'row-number-cell');
+    const rowNumberLeaf = ArrayUtils.findOrThrow(grid.columns.value.visibleLeafs, (c) => c.key === 'row-number-cell');
     const rowNumberCell = row.cells.find((c) => c.column.key === rowNumberLeaf.key)!;
     expect(rowNumberCell.value).toEqual(row.rowIndex + 1);
   });

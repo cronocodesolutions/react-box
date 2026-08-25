@@ -1,3 +1,4 @@
+import ArrayUtils from '../../../utils/array/arrayUtils';
 import memo from '../../../utils/memo';
 import {
   ColumnFilterConfig,
@@ -7,6 +8,7 @@ import {
   Key,
   NumberFilterValue,
   PinPosition,
+  SortDirection,
 } from '../contracts/dataGridContract';
 import GridModel, { GROUPING_CELL_KEY, ROW_DETAIL_CELL_KEY, ROW_NUMBER_CELL_KEY, ROW_SELECTION_CELL_KEY } from './gridModel';
 import HeaderCellModel from './headerCellModel';
@@ -334,7 +336,7 @@ export default class ColumnModel<TRow> {
 
     if (sizes.length === 0) return undefined;
 
-    return sizes.sumBy((s) => s);
+    return ArrayUtils.sumBy(sizes, (s) => s);
   }
 
   public get left() {
@@ -344,14 +346,14 @@ export default class ColumnModel<TRow> {
       const { visibleColumns, left: parentLeft } = this.parent;
 
       const colIndex = visibleColumns.findIndex((c) => c === this);
-      sum += visibleColumns.sumBy((c, index) => (index < colIndex ? (c.inlineWidth ?? 0) : 0));
+      sum += ArrayUtils.sumBy(visibleColumns, (c, index) => (index < colIndex ? (c.inlineWidth ?? 0) : 0));
 
       sum += parentLeft;
     } else {
       const leftVisibleColumns = this.grid.columns.value.left.filter((c) => c.isVisible);
 
       const colIndex = leftVisibleColumns.findIndex((c) => c === this);
-      sum += leftVisibleColumns.sumBy((c, index) => (index < colIndex ? (c.inlineWidth ?? 0) : 0));
+      sum += ArrayUtils.sumBy(leftVisibleColumns, (c, index) => (index < colIndex ? (c.inlineWidth ?? 0) : 0));
     }
 
     return sum;
@@ -364,7 +366,7 @@ export default class ColumnModel<TRow> {
       const { visibleColumns } = this.parent;
       const reverse = visibleColumns.reverse();
       const colIndex = reverse.findIndex((c) => c === this);
-      sum += reverse.sumBy((c, index) => (index < colIndex ? (c.inlineWidth ?? 0) : 0));
+      sum += ArrayUtils.sumBy(reverse, (c, index) => (index < colIndex ? (c.inlineWidth ?? 0) : 0));
 
       sum += this.parent.right;
     } else {
@@ -372,7 +374,7 @@ export default class ColumnModel<TRow> {
 
       const reverse = rightVisibleColumns.reverse();
       const colIndex = reverse.findIndex((c) => c === this);
-      sum += reverse.sumBy((c, index) => (index < colIndex ? (c.inlineWidth ?? 0) : 0));
+      sum += ArrayUtils.sumBy(reverse, (c, index) => (index < colIndex ? (c.inlineWidth ?? 0) : 0));
     }
 
     return sum;
@@ -438,8 +440,8 @@ export default class ColumnModel<TRow> {
 
     this._resizeStartX = startX;
     // Capture current visual widths (includes flex-calculated width) as starting point.
-    this._resizeSizes = this.leafs.toRecord((leaf) => [leaf.key, leaf.inlineWidth ?? leaf.baseWidth]);
-    this._resizeTotalWidth = this.leafs.sumBy((c) => this._resizeSizes[c.key]) - this.leafs.length * MIN_COLUMN_WIDTH_PX;
+    this._resizeSizes = ArrayUtils.toRecord(this.leafs, (leaf) => [leaf.key, leaf.inlineWidth ?? leaf.baseWidth]);
+    this._resizeTotalWidth = ArrayUtils.sumBy(this.leafs, (c) => this._resizeSizes[c.key]) - this.leafs.length * MIN_COLUMN_WIDTH_PX;
   };
 
   /**

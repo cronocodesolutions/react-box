@@ -1,6 +1,4 @@
 /* eslint-disable @typescript-eslint/no-empty-object-type */
-export * from './array';
-
 import { breakpoints, cssStyles, pseudo1, pseudo2, pseudoClasses, pseudoGroupClasses, themeGroupClass } from './core/boxStyles';
 import { ClassNameType } from './core/classNames';
 import { BoxStyle, BoxStylesType, ExtractKeys, ExtractTupleValues } from './core/coreTypes';

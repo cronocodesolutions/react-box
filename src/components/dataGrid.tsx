@@ -30,8 +30,6 @@ export default function DataGrid<TRow extends object>(props: DataGridProps<TRow>
     };
   }, [grid]);
 
-  console.debug('\x1b[36m%s\x1b[0m', '[react-box]: DataGrid render');
-
   return (
     <Box ref={containerRef} component={grid.componentName as never} style={grid.sizes.value} props={{ role: 'presentation' }}>
       {grid.props.def.topBar && <DataGridTopBar grid={grid} />}

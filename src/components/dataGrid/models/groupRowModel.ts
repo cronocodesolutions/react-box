@@ -1,3 +1,4 @@
+import ArrayUtils from '../../../utils/array/arrayUtils';
 import memo from '../../../utils/memo';
 import { Key } from '../contracts/dataGridContract';
 import ColumnModel from './columnModel';
@@ -44,7 +45,7 @@ export default class GroupRowModel<TRow> {
   }
 
   public get count(): number {
-    return this.rows.sumBy((row) => row.count, 0);
+    return ArrayUtils.sumBy<RowModel<TRow> | GroupRowModel<TRow>>(this.rows, (row) => row.count, 0);
   }
 
   public get flatRows(): (RowModel<TRow> | GroupRowModel<TRow> | DetailRowModel<TRow>)[] {
@@ -60,14 +61,14 @@ export default class GroupRowModel<TRow> {
   }
 
   public get groupingColumn() {
-    return this.grid.columns.value.leafs.findOrThrow((c) => c.key === GROUPING_CELL_KEY);
+    return ArrayUtils.findOrThrow(this.grid.columns.value.leafs, (c) => c.key === GROUPING_CELL_KEY);
   }
 
   public get groupingColumnGridColumn() {
     const { visibleLeafs } = this.grid.columns.value;
     const { groupingColumn } = this;
 
-    const gridColumn = visibleLeafs.sumBy((c) =>
+    const gridColumn = ArrayUtils.sumBy(visibleLeafs, (c) =>
       c.pin === groupingColumn.pin && c.key !== ROW_SELECTION_CELL_KEY && c.key !== ROW_NUMBER_CELL_KEY && c.key !== ROW_DETAIL_CELL_KEY
         ? 1
         : 0,

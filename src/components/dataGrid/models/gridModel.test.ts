@@ -1,5 +1,6 @@
 import { describe, expect, it, suite, vi } from 'vitest';
 import { ignoreLogs } from '../../../../dev/tests';
+import ArrayUtils from '../../../utils/array/arrayUtils';
 import { GridDefinition } from '../contracts/dataGridContract';
 import GridModel, { DEFAULT_ROW_NUMBER_COLUMN_WIDTH, ROW_DETAIL_CELL_KEY, ROW_NUMBER_CELL_KEY } from './gridModel';
 import GroupRowModel from './groupRowModel';
@@ -93,8 +94,8 @@ describe('GridModel', () => {
     it('calculates correct left distance', () => {
       const grid = getGridModel();
 
-      const yearColumn = grid.columns.value.flat.findOrThrow((c) => c.key === 'year');
-      const firstNameColumn = grid.columns.value.flat.findOrThrow((c) => c.key === 'firstName');
+      const yearColumn = ArrayUtils.findOrThrow(grid.columns.value.flat, (c) => c.key === 'year');
+      const firstNameColumn = ArrayUtils.findOrThrow(grid.columns.value.flat, (c) => c.key === 'firstName');
 
       expect(yearColumn.left).to.eq(400);
       expect(firstNameColumn.left).to.eq(600);
@@ -103,8 +104,8 @@ describe('GridModel', () => {
     it('calculates correct right distance', () => {
       const grid = getGridModel();
 
-      const firstNameColumn = grid.columns.value.flat.findOrThrow((c) => c.key === 'firstName');
-      const monthColumn = grid.columns.value.flat.findOrThrow((c) => c.key === 'month');
+      const firstNameColumn = ArrayUtils.findOrThrow(grid.columns.value.flat, (c) => c.key === 'firstName');
+      const monthColumn = ArrayUtils.findOrThrow(grid.columns.value.flat, (c) => c.key === 'month');
 
       expect(firstNameColumn.right).to.eq(grid.DEFAULT_COLUMN_WIDTH_PX * 1); // lastName
       expect(monthColumn.right).to.eq(grid.DEFAULT_COLUMN_WIDTH_PX * 3); // year, firstName, lastName
@@ -124,7 +125,7 @@ describe('GridModel', () => {
       grid.pinColumn('parent', 'LEFT');
       grid.pinColumn('firstNameLEFT');
 
-      const parentColumn = grid.columns.value.flat.findOrThrow((c) => c.key === 'parent');
+      const parentColumn = ArrayUtils.findOrThrow(grid.columns.value.flat, (c) => c.key === 'parent');
       expect(parentColumn.pin).toBeUndefined();
 
       const parentColumns = grid.columns.value.flat.filter((c) => c.key === 'parent');
