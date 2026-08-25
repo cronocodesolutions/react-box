@@ -1,0 +1,23 @@
+name: Feature request
+description: A new prop, component, or capability
+title: '[feature]: '
+labels: ['enhancement']
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: What problem does this solve?
+      description: Describe the use case first — the CSS you can't express, the component you keep rebuilding, etc.
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed API
+      description: What would using it look like?
+      placeholder: |
+        <Box animation="fade-in" ... />
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Workarounds you use today
