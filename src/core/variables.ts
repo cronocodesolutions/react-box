@@ -354,47 +354,67 @@ namespace Variables {
 
   const internalVariables = { ...rootVariables, ...colors, ...bgImages, ...shadows };
 
-  const _usedVariables: Record<string, string> = {};
-  const _pendingVariables: Record<string, string> = {};
-  let _userVariables: Record<string, string> = {};
-
-  export function getVariableValue(name: string) {
-    // Only track as pending if it's a new variable
-    if (!(name in _usedVariables)) {
-      if (name in _userVariables) {
-        _pendingVariables[name] = _userVariables[name];
-        _usedVariables[name] = _userVariables[name];
-      } else if (name in internalVariables) {
-        _pendingVariables[name] = internalVariables[name as keyof typeof internalVariables];
-        _usedVariables[name] = internalVariables[name as keyof typeof internalVariables];
-      } else {
-        _pendingVariables[name] = name;
-        _usedVariables[name] = name;
-      }
-    }
-
-    return `var(--${name})`;
+  /** The mutable variable state of a single style engine. */
+  export interface VariablesRegistry {
+    /** Record `name` as used (so it reaches `:root`) and return the `var(--name)` reference. */
+    getVariableValue(name: string): string;
+    /** Every variable used so far, as `:root` declarations. */
+    generateVariables(): string;
+    /** Variables used since the last call — returns and clears them. */
+    getPendingVariables(): Record<string, string>;
+    hasPendingVariables(): boolean;
+    setUserVariables(variables: Record<string, string>): void;
   }
 
-  export function generateVariables() {
-    return Object.entries(_usedVariables)
-      .map(([key, val]) => `--${key}: ${val};`)
-      .join('');
-  }
+  /**
+   * Per-engine variable state. Kept out of module scope so two engines (iframes, shadow roots,
+   * parallel SSR requests) never share a `:root` block or a pending queue.
+   */
+  export function createRegistry(): VariablesRegistry {
+    const _usedVariables: Record<string, string> = {};
+    const _pendingVariables: Record<string, string> = {};
+    let _userVariables: Record<string, string> = {};
 
-  export function getPendingVariables() {
-    const pending = { ..._pendingVariables };
-    // Clear pending after returning
-    Object.keys(_pendingVariables).forEach((key) => delete _pendingVariables[key]);
-    return pending;
-  }
+    return {
+      getVariableValue(name: string) {
+        // Only track as pending if it's a new variable
+        if (!(name in _usedVariables)) {
+          if (name in _userVariables) {
+            _pendingVariables[name] = _userVariables[name];
+            _usedVariables[name] = _userVariables[name];
+          } else if (name in internalVariables) {
+            _pendingVariables[name] = internalVariables[name as keyof typeof internalVariables];
+            _usedVariables[name] = internalVariables[name as keyof typeof internalVariables];
+          } else {
+            _pendingVariables[name] = name;
+            _usedVariables[name] = name;
+          }
+        }
 
-  export function hasPendingVariables() {
-    return Object.keys(_pendingVariables).length > 0;
-  }
+        return `var(--${name})`;
+      },
 
-  export function setUserVariables(variables: Record<string, string>) {
-    _userVariables = variables;
+      generateVariables() {
+        return Object.entries(_usedVariables)
+          .map(([key, val]) => `--${key}: ${val};`)
+          .join('');
+      },
+
+      getPendingVariables() {
+        const pending = { ..._pendingVariables };
+        // Clear pending after returning
+        Object.keys(_pendingVariables).forEach((key) => delete _pendingVariables[key]);
+        return pending;
+      },
+
+      hasPendingVariables() {
+        return Object.keys(_pendingVariables).length > 0;
+      },
+
+      setUserVariables(variables: Record<string, string>) {
+        _userVariables = variables;
+      },
+    };
   }
 }
 

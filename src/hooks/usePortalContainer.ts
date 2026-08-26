@@ -1,8 +1,21 @@
 import { useLayoutEffect, useMemo } from 'react';
 import Theme from '../core/theme/theme';
 
-// Reference counter for theme classes to handle multiple hook instances
-const themeRefCounts = new Map<string, number>();
+// Reference counts for theme classes, scoped to the portal container they apply to. Keyed by
+// element (not process-global) so containers in different documents/roots cannot decrement each
+// other's counts, and so the counts are collected with the container itself.
+const themeRefCounts = new WeakMap<Element, Map<string, number>>();
+
+function getThemeRefCounts(container: Element) {
+  let counts = themeRefCounts.get(container);
+
+  if (!counts) {
+    counts = new Map<string, number>();
+    themeRefCounts.set(container, counts);
+  }
+
+  return counts;
+}
 
 export default function usePortalContainer() {
   const [theme] = Theme.useTheme();
@@ -24,22 +37,23 @@ export default function usePortalContainer() {
   useLayoutEffect(() => {
     if (!theme) return;
 
-    const count = themeRefCounts.get(theme) ?? 0;
-    themeRefCounts.set(theme, count + 1);
+    const counts = getThemeRefCounts(portalContainer);
+    const count = counts.get(theme) ?? 0;
+    counts.set(theme, count + 1);
 
     if (count === 0) {
       portalContainer.classList.add(theme);
     }
 
     return () => {
-      const currentCount = themeRefCounts.get(theme) ?? 1;
+      const currentCount = counts.get(theme) ?? 1;
       const newCount = currentCount - 1;
 
       if (newCount <= 0) {
-        themeRefCounts.delete(theme);
+        counts.delete(theme);
         portalContainer.classList.remove(theme);
       } else {
-        themeRefCounts.set(theme, newCount);
+        counts.set(theme, newCount);
       }
     };
   }, [portalContainer, theme]);
