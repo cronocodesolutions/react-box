@@ -22,7 +22,7 @@ A comprehensive guide for senior software engineers contributing to this runtime
 
 React-Box is a **runtime CSS generation library** that converts React component props into CSS classes. Key architectural decisions:
 
-- **No CSS files**: All styles are generated at runtime and injected into `<style id="crono-box">` in `document.head`
+- **No CSS files**: All styles are generated at runtime and injected into `<style id="crono-styles">` in `document.head` (`#crono-box` is the portal container, a different element)
 - **Single class per value**: If the same prop value (e.g., `p={3}`) is used in multiple components, only ONE CSS class is generated
 - **TypeScript-first**: Deep type extraction provides full IDE autocomplete for all valid prop combinations
 - **Memoized rendering**: Box component uses `React.memo` and `forwardRef` for optimal performance
@@ -324,15 +324,17 @@ accept it. The merge semantics are pinned down in `src/core/engine/mergeSemantic
 
 ## CSS Generation Engine
 
-### Incremental CSS Injection (useStyles.ts)
+### Incremental CSS Injection (core/engine/)
 
-The library uses **incremental CSS generation** via `CSSStyleSheet.insertRule()` for optimal performance:
+All engine state lives on an instance built by `createStyleEngine()` (`src/core/engine/styleEngine.ts`);
+`useStyles` and the public API delegate to one lazily-created default instance
+(`src/core/engine/defaultEngine.ts`). Rules are generated incrementally, never by replacing the
+whole stylesheet:
 
 ```typescript
-// src/core/useStyles.ts
-
-// CSS rules are inserted incrementally, not by replacing innerHTML
-stylesheet.insertRule(cssRule, insertIndex);
+// src/core/engine/styleEngine.ts
+const { classNames } = engine.resolveClassNames(props, isSvg); // during render
+engine.flush(); // in a layout effect: pending rules → the sink
 ```
 
 Key mechanisms:
@@ -341,6 +343,24 @@ Key mechanisms:
 2. **Deduplication**: Same prop values across components share the same CSS class
 3. **Batched insertion**: Styles accumulated during render, flushed in `useLayoutEffect`
 4. **Weight-based ordering**: Rules sorted by pseudo-class weight for correct specificity
+5. **Selector escaping**: A class name is used verbatim as a selector, so characters a CSS
+   identifier cannot hold are escaped (`width="1/2"` → class `width-1/2`, selector `.width-1/2`)
+
+### Style Sinks (core/engine/styleSink.ts)
+
+`flush()` decides *what* to write and in which order; a **sink** decides *how*. Three of them:
+
+| Sink | Writes to | Used when |
+|------|-----------|-----------|
+| `cssom` | `CSSStyleSheet.insertRule` | the browser default |
+| `textContent` | the `<style>` element's text | tests and debugging (`Box.configure`) |
+| `string` | memory, read back with `getStyles()` | server rendering (no `document` in the process) |
+
+With no explicit `sink` the engine follows its environment, which is why server rendering needs no
+DOM and no fake `document`. Every sink places a rule at the position its **sort key** gives it
+(breakpoint order first, then prop declaration order) no matter which flush it arrived in, so the
+CSS a server produces and the sheet a browser builds agree rule for rule — `styleSink.test.ts` and
+`ssr.roundtrip.test.tsx` pin that down.
 
 ### Default Base Styles
 
@@ -364,27 +384,34 @@ const defaultRules = [
 CSS variables are loaded lazily. When a new color/variable is used for the first time:
 
 ```typescript
-// src/core/variables.ts
-const _pendingVariables: Record<string, string> = {};
-
-export function hasPendingVariables(): boolean;
-export function getPendingVariables(): Record<string, string>; // Returns and clears pending
+// src/core/variables.ts — one registry per engine instance
+interface VariablesRegistry {
+  hasPendingVariables(): boolean;
+  getPendingVariables(): Record<string, string>; // returns and clears pending
+  reset(): void; // forget what has been used, so the next `:root` block is built from scratch
+}
 ```
 
-The `flush()` function in useStyles checks for pending variables and inserts a new `:root` rule:
+The engine's `flush()` writes the variables used so far into the base `:root` block, and anything
+first used later into its own block ahead of it:
 
 ```typescript
 // In flush()
-if (Variables.hasPendingVariables()) {
-  const pendingVars = Variables.getPendingVariables();
-  const rootRule = `:root{${Object.entries(pendingVars)
-    .map(([k, v]) => `--${k}:${v}`)
-    .join(';')}}`;
-  stylesheet.insertRule(rootRule, baseRulesCount);
+} else if (hasPendingVars) {
+  const pendingVars = variables.getPendingVariables();
+  target.writeVariables(`:root{...}`);
 }
 ```
 
 This ensures variables are defined before they're used in CSS rules, even when navigating between pages.
+
+### Server Rendering
+
+`src/ssg.ts` is the public SSR entry (`@cronocode/react-box/ssg`): `getStyles()` flushes and returns
+the CSS for what was rendered, `resetStyles()` drops it — rules, cached class lists, the class-name
+counter and the resolved variables — so the next request starts blank and identical markup produces
+identical class names. `renderToStaticMarkup()` does the whole cycle in one call. Registration
+(`Box.extend()`, `Box.components()`) survives a reset; it is configuration, not request state.
 
 ### Navigation/Route Change Handling
 
@@ -948,12 +975,12 @@ npm publish --access public
 
 1. Check `useStyles.ts` for class generation logic
 2. Check `boxStyles.ts` for property definition
-3. Verify CSS output in browser DevTools (`<style id="crono-box">`)
+3. Verify CSS output in browser DevTools (`<style id="crono-styles">`)
 4. Add test case
 
 ### Debug CSS Generation Issues
 
-1. **Inspect generated styles**: Open DevTools → Elements → find `<style id="crono-box">`
+1. **Inspect generated styles**: Open DevTools → Elements → find `<style id="crono-styles">`
 2. **Check class names**: Inspect element to see generated class names (e.g., `_b`, `_2a`, etc.)
 3. **Verify CSS variables**: Check `:root` rules in the style tag for variable definitions
 4. **Navigation issues**: If styles don't apply after route change, check:

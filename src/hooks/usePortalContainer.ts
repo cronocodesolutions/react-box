@@ -21,6 +21,11 @@ export default function usePortalContainer() {
   const [theme] = Theme.useTheme();
 
   const portalContainer = useMemo(() => {
+    // Runs during render, so it has to survive a server render: no document, no container, and
+    // the caller renders no portal. (This used to work only because `ssg` installed a fake
+    // `document` whose `getElementById` answered every id with its own style element.)
+    if (typeof document === 'undefined') return null;
+
     const elId = 'crono-box';
     let container = document.getElementById(elId);
 
@@ -35,7 +40,7 @@ export default function usePortalContainer() {
 
   // Update theme class when theme changes (with ref counting)
   useLayoutEffect(() => {
-    if (!theme) return;
+    if (!theme || !portalContainer) return;
 
     const counts = getThemeRefCounts(portalContainer);
     const count = counts.get(theme) ?? 0;

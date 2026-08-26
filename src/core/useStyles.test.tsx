@@ -67,8 +67,8 @@ describe('useStyles', () => {
       active: { opacity: 0.8 },
       disabled: [true, { opacity: 0.4 }],
     });
-    expect(styleElement.innerText).toContain('.active-opacity-0.8:active{opacity:0.8}');
-    expect(styleElement.innerText).toContain('.disabled-opacity-0.4[disabled]{opacity:0.4}');
+    expect(styleElement.innerText).toContain('.active-opacity-0\\.8:active{opacity:0.8}');
+    expect(styleElement.innerText).toContain('.disabled-opacity-0\\.4[disabled]{opacity:0.4}');
     expect(element.classList).toContain('active-opacity-0.8');
     expect(element.classList).toContain('disabled-opacity-0.4');
   });
@@ -235,7 +235,7 @@ describe('useStyles', () => {
 
     it('applies opacity as a direct numeric value', () => {
       const { element, styleElement } = act({ opacity: 0.5 });
-      expect(styleElement.innerText).toContain('.opacity-0.5{opacity:0.5}');
+      expect(styleElement.innerText).toContain('.opacity-0\\.5{opacity:0.5}');
       expect(element.classList).toContain('opacity-0.5');
     });
 
@@ -313,7 +313,7 @@ describe('useStyles', () => {
 
     it('applies height with fraction value', () => {
       const { element, styleElement } = act({ height: '1/2' });
-      expect(styleElement.innerText).toContain('.height-1/2{height:50%}');
+      expect(styleElement.innerText).toContain('.height-1\\/2{height:50%}');
       expect(element.classList).toContain('height-1/2');
     });
 
@@ -374,32 +374,32 @@ describe('useStyles', () => {
   suite('breakpoint styles', () => {
     it('applies sm breakpoint styles', () => {
       const { element, styleElement } = act({ sm: { p: 4 } });
-      expect(styleElement.innerText).toContain('@media(min-width: 640px){.sm-p-4{padding:1rem}}');
+      expect(styleElement.innerText).toContain('@media (min-width: 640px){.sm-p-4{padding:1rem}}');
       expect(element.classList).toContain('sm-p-4');
     });
 
     it('applies md breakpoint styles', () => {
       const { element, styleElement } = act({ md: { p: 6 } });
-      expect(styleElement.innerText).toContain('@media(min-width: 768px){.md-p-6{padding:1.5rem}}');
+      expect(styleElement.innerText).toContain('@media (min-width: 768px){.md-p-6{padding:1.5rem}}');
       expect(element.classList).toContain('md-p-6');
     });
 
     it('applies lg breakpoint styles', () => {
       const { element, styleElement } = act({ lg: { p: 8 } });
-      expect(styleElement.innerText).toContain('@media(min-width: 1024px){.lg-p-8{padding:2rem}}');
+      expect(styleElement.innerText).toContain('@media (min-width: 1024px){.lg-p-8{padding:2rem}}');
       expect(element.classList).toContain('lg-p-8');
     });
 
     it('applies xl breakpoint styles', () => {
       const { element, styleElement } = act({ xl: { display: 'flex' } });
-      expect(styleElement.innerText).toContain('@media(min-width: 1280px){.xl-display-flex{display:flex}}');
+      expect(styleElement.innerText).toContain('@media (min-width: 1280px){.xl-display-flex{display:flex}}');
       expect(element.classList).toContain('xl-display-flex');
     });
 
     it('applies breakpoint with hover pseudo class', () => {
       const { element, styleElement } = act({ sm: { hover: { bgColor: 'gray-100' } } });
       expect(styleElement.innerText).toContain(
-        '@media(min-width: 640px){.sm-hover-bgColor-gray-100:hover{background-color:var(--gray-100)}}',
+        '@media (min-width: 640px){.sm-hover-bgColor-gray-100:hover{background-color:var(--gray-100)}}',
       );
       expect(element.classList).toContain('sm-hover-bgColor-gray-100');
     });
@@ -407,9 +407,9 @@ describe('useStyles', () => {
     it('applies multiple breakpoints on same element', () => {
       const { element, styleElement } = act({ p: 2, sm: { p: 4 }, md: { p: 6 }, lg: { p: 8 } });
       expect(styleElement.innerText).toContain('.p-2{padding:0.5rem}');
-      expect(styleElement.innerText).toContain('@media(min-width: 640px){.sm-p-4{padding:1rem}}');
-      expect(styleElement.innerText).toContain('@media(min-width: 768px){.md-p-6{padding:1.5rem}}');
-      expect(styleElement.innerText).toContain('@media(min-width: 1024px){.lg-p-8{padding:2rem}}');
+      expect(styleElement.innerText).toContain('@media (min-width: 640px){.sm-p-4{padding:1rem}}');
+      expect(styleElement.innerText).toContain('@media (min-width: 768px){.md-p-6{padding:1.5rem}}');
+      expect(styleElement.innerText).toContain('@media (min-width: 1024px){.lg-p-8{padding:2rem}}');
       expect(element.classList).toContain('p-2');
       expect(element.classList).toContain('sm-p-4');
       expect(element.classList).toContain('md-p-6');
@@ -422,14 +422,14 @@ describe('useStyles', () => {
       // Object form works at runtime via ObjectUtils.isObject check, though types only expose array form at top level
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const { element, styleElement } = act({ disabled: { opacity: 0.4 } } as any);
-      expect(styleElement.innerText).toContain('.disabled-opacity-0.4[disabled]{opacity:0.4}');
+      expect(styleElement.innerText).toContain('.disabled-opacity-0\\.4[disabled]{opacity:0.4}');
       expect(element.classList).toContain('disabled-opacity-0.4');
     });
 
     it('applies indeterminate styles', () => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const { element, styleElement } = act({ indeterminate: { opacity: 0.6 } } as any);
-      expect(styleElement.innerText).toContain('.indeterminate-opacity-0.6:indeterminate{opacity:0.6}');
+      expect(styleElement.innerText).toContain('.indeterminate-opacity-0\\.6:indeterminate{opacity:0.6}');
       expect(element.classList).toContain('indeterminate-opacity-0.6');
     });
   });
@@ -465,7 +465,7 @@ describe('useStyles', () => {
           },
         },
       });
-      expect(styleElement.innerText).toContain('.parent[disabled] .disabled-parent-opacity-0.4{opacity:0.4}');
+      expect(styleElement.innerText).toContain('.parent[disabled] .disabled-parent-opacity-0\\.4{opacity:0.4}');
       expect(element.classList).toContain('disabled-parent-opacity-0.4');
     });
   });
@@ -509,7 +509,7 @@ describe('useStyles', () => {
     it('applies borderRadiusTop inside a breakpoint', () => {
       const { element, styleElement } = act({ sm: { borderRadiusTop: 4 } });
       expect(styleElement.innerText).toContain(
-        '@media(min-width: 640px){.sm-borderRadiusTop-4{border-top-left-radius:1rem;border-top-right-radius:1rem}}',
+        '@media (min-width: 640px){.sm-borderRadiusTop-4{border-top-left-radius:1rem;border-top-right-radius:1rem}}',
       );
       expect(element.classList).toContain('sm-borderRadiusTop-4');
     });
@@ -546,7 +546,7 @@ describe('useStyles', () => {
       const styleElement = document.getElementById('crono-styles')! as unknown as HTMLStyleElement;
 
       expect(styleElement.innerText).toContain(
-        '.dark .parent:hover .hover-theme-dark|parent-bgColor-gray-100{background-color:var(--gray-100)}',
+        '.dark .parent:hover .hover-theme-dark\\|parent-bgColor-gray-100{background-color:var(--gray-100)}',
       );
       expect(element.classList).toContain('hover-theme-dark|parent-bgColor-gray-100');
     });

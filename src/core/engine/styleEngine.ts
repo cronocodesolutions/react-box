@@ -17,6 +17,7 @@ import { BoxStyle } from '../coreTypes';
 import defaultBoxComponents, { BoxComponent, Components } from '../extends/boxComponents';
 import { resolveComponentStyles } from '../extends/useComponents';
 import Variables from '../variables';
+import { createSink, SinkMode, SortedRule, StyleSink } from './styleSink';
 
 /** Explicit engine configuration — replaces the previous NODE_ENV-based sniffing. */
 export interface StylesConfiguration {
@@ -27,11 +28,16 @@ export interface StylesConfiguration {
    */
   classNames?: 'hashed' | 'readable';
   /**
-   * How generated rules reach the document.
-   * - `'cssom'` (default): `CSSStyleSheet.insertRule` when a stylesheet is available.
-   * - `'textContent'`: rule text is appended to the style element (readable in tests; always used when no stylesheet exists, e.g. SSR).
+   * Where generated rules are written. Defaults to the environment: a stylesheet in the browser,
+   * a string on the server — so server rendering needs no DOM at all.
+   * - `'cssom'`: `CSSStyleSheet.insertRule` (falls back to rule text when the element has no stylesheet).
+   * - `'textContent'`: the style element's text (readable in tests and DevTools).
+   * - `'string'`: kept in memory only, read back with `getStyles()` — the server-rendering sink.
+   *
+   * Changing the sink of an engine that has already emitted CSS starts a fresh stylesheet: those
+   * rules live in the old sink, so the engine forgets them and re-emits them on the next render.
    */
-  sink?: 'cssom' | 'textContent';
+  sink?: SinkMode;
 }
 
 export interface StyleEngineOptions extends StylesConfiguration {
@@ -54,9 +60,18 @@ export interface StyleEngine {
   resolveClassNames(props: BoxStyleProps<any>, isSvg: boolean): { classNames: string[]; signature: string | null };
   /** Register rules that target a root selector (e.g. `html`) rather than a generated class. */
   addGlobalStyles(props: BoxStyleProps<any>, selector: string): void;
-  /** Write every pending rule to this engine's style element. */
+  /** Write every pending rule to this engine's sink. */
   flush(): void;
-  /** Drop all generated rules and cached class lists (used between SSG renders). */
+  /**
+   * The CSS this engine has emitted, as text. Flushes first, so a server render — where no effect
+   * ever runs — still gets every rule its markup refers to.
+   */
+  getStyles(): string;
+  /**
+   * Drop everything this engine has emitted: generated rules, cached class lists, the class-name
+   * counter, the variables it has resolved, and the contents of its sink. What survives is
+   * registration — extended props, components and declared variables. Call it between SSR requests.
+   */
   clear(): void;
   /** Apply explicit configuration. Cached class names are dropped when the configuration changes. */
   configure(config: StylesConfiguration): void;
@@ -81,6 +96,17 @@ const variableBackedValues: ReadonlySet<unknown> = new Set([Variables.colorValue
 // an id sequence, not engine state — instances share nothing else.
 let engineSequence = 0;
 
+// Every character a CSS identifier cannot hold. Class names are used verbatim as selectors, so a
+// readable name for a value like `1/2`, `50%` or `1.5` would otherwise build a selector the CSS
+// parser rejects (`.width-1/2`) and the rule would be dropped. Hashed names are alphanumeric, so
+// escaping is a no-op in the default mode. Non-ASCII is legal in an identifier and stays as-is.
+const invalidInCssIdentifier = /[^\w\u00A0-\uFFFF-]/g;
+
+/** A class name escaped for use inside a CSS selector: `width-1/2` becomes `width-1\/2`. */
+function escapeClassName(className: string): string {
+  return className.replace(invalidInCssIdentifier, (char) => `\\${char}`);
+}
+
 function resolveExtends(components: Components): Components {
   const resolved = { ...components };
 
@@ -100,11 +126,22 @@ function resolveExtends(components: Components): Components {
 export function createStyleEngine(options: StyleEngineOptions = {}): StyleEngine {
   const styleElementId = options.styleElementId ?? `${DEFAULT_STYLE_ELEMENT_ID}-${++engineSequence}`;
 
-  const identity = new IdentityFactory();
+  // Recreated by clear(): class names are derived from a counter, so a long-lived server would
+  // otherwise hand request 2 different names than request 1 for the very same props.
+  let identity = new IdentityFactory();
   const variables = Variables.createRegistry();
 
   let classNamesMode: NonNullable<StylesConfiguration['classNames']> = options.classNames ?? 'hashed';
-  let sinkMode: NonNullable<StylesConfiguration['sink']> = options.sink ?? 'cssom';
+  // Undefined means "follow the environment" — resolved when the sink is first needed, not at
+  // construction, so importing the library still touches no DOM.
+  let sinkMode: SinkMode | undefined = options.sink;
+  let sink: StyleSink | undefined;
+
+  function getSink(): StyleSink {
+    if (!sink) sink = createSink(styleElementId, sinkMode);
+
+    return sink;
+  }
 
   // The prop registry. Copied per engine so `extend()` on one engine cannot leak into another.
   const cssStyles = { ...defaultCssStyles };
@@ -136,10 +173,6 @@ export function createStyleEngine(options: StyleEngineOptions = {}): StyleEngine
   const unsupportedRules = new Set<string>();
   // Pending rules to be flushed: [sortIndex, breakpointOrder, rule]
   const pendingRules: [number, number, string][] = [];
-  // Track the sort keys of rules already in the stylesheet for insertion ordering
-  const insertedRuleSortKeys: number[] = [];
-  // Number of default/base rules at the start of the stylesheet
-  let baseRulesCount = 0;
   let requireFlush = true;
   let isInitialized = false;
 
@@ -336,12 +369,8 @@ export function createStyleEngine(options: StyleEngineOptions = {}): StyleEngine
     const sortIndex = cssStylesIndex[key] ?? 0;
     const breakpointOrder = breakpoints[breakpoint as keyof typeof breakpoints] ?? 0;
 
-    const className = createClassName(
-      key as keyof BoxStyles,
-      value as BoxStyles[keyof BoxStyles],
-      weight,
-      breakpoint,
-      pseudoClassParentName,
+    const className = escapeClassName(
+      createClassName(key as keyof BoxStyles, value as BoxStyles[keyof BoxStyles], weight, breakpoint, pseudoClassParentName),
     );
 
     if (pseudoClassParentName) {
@@ -360,20 +389,20 @@ export function createStyleEngine(options: StyleEngineOptions = {}): StyleEngine
         if (hasThemeAndGroup) return null;
         if (hasTheme) {
           // Theme on same element as rootSelector → compound selector
-          defaultSelector = `${rootSelector}.${pseudoClassParentName}${pseudoClassesToUse}`;
+          defaultSelector = `${rootSelector}.${escapeClassName(pseudoClassParentName)}${pseudoClassesToUse}`;
         } else {
           return null;
         }
       } else if (hasThemeAndGroup) {
         // Combined theme + group: .themeName .groupName:hover .className
         const [themeName, groupName] = pseudoClassParentName.split('|');
-        defaultSelector = `.${themeName} .${groupName}${pseudoClassesToUse} .${className}`;
+        defaultSelector = `.${escapeClassName(themeName)} .${escapeClassName(groupName)}${pseudoClassesToUse} .${className}`;
       } else if (hasTheme) {
         // Theme only: .themeName .className:hover
-        defaultSelector = `.${pseudoClassParentName} .${className}${pseudoClassesToUse}`;
+        defaultSelector = `.${escapeClassName(pseudoClassParentName)} .${className}${pseudoClassesToUse}`;
       } else {
         // Group only: .groupName:hover .className
-        defaultSelector = `.${pseudoClassParentName}${pseudoClassesToUse} .${className}`;
+        defaultSelector = `.${escapeClassName(pseudoClassParentName)}${pseudoClassesToUse} .${className}`;
       }
       const selector = itemValue.selector?.(defaultSelector, '') ?? defaultSelector;
 
@@ -386,9 +415,15 @@ export function createStyleEngine(options: StyleEngineOptions = {}): StyleEngine
         })
         .join(';')}}`;
 
-      // Wrap in media query if needed
+      // Wrap in media query if needed. The space after `@media` matters: browsers accept
+      // `@media(...)` but the CSS parsers in happy-dom and jsdom reject the rule outright, so
+      // without it every breakpoint rule silently vanishes from a consumer's test DOM.
       if (breakpoint !== 'normal') {
-        return { rule: `@media(min-width: ${breakpoints[breakpoint as keyof typeof breakpoints]}px){${rule}}`, sortIndex, breakpointOrder };
+        return {
+          rule: `@media (min-width: ${breakpoints[breakpoint as keyof typeof breakpoints]}px){${rule}}`,
+          sortIndex,
+          breakpointOrder,
+        };
       }
       return { rule, sortIndex, breakpointOrder };
     } else {
@@ -405,9 +440,15 @@ export function createStyleEngine(options: StyleEngineOptions = {}): StyleEngine
         })
         .join(';')}}`;
 
-      // Wrap in media query if needed
+      // Wrap in media query if needed. The space after `@media` matters: browsers accept
+      // `@media(...)` but the CSS parsers in happy-dom and jsdom reject the rule outright, so
+      // without it every breakpoint rule silently vanishes from a consumer's test DOM.
       if (breakpoint !== 'normal') {
-        return { rule: `@media(min-width: ${breakpoints[breakpoint as keyof typeof breakpoints]}px){${rule}}`, sortIndex, breakpointOrder };
+        return {
+          rule: `@media (min-width: ${breakpoints[breakpoint as keyof typeof breakpoints]}px){${rule}}`,
+          sortIndex,
+          breakpointOrder,
+        };
       }
       return { rule, sortIndex, breakpointOrder };
     }
@@ -428,125 +469,84 @@ export function createStyleEngine(options: StyleEngineOptions = {}): StyleEngine
     return classNamesMode === 'readable' ? className : identity.getIdentity(className);
   }
 
-  function getElement() {
-    let stylesElement = document.getElementById(styleElementId) as HTMLStyleElement | null;
+  /** The reset + `:root` block every engine writes before its first generated rule. */
+  function baseRules(): string[] {
+    return [
+      `:root{${variables.generateVariables()}}`,
+      `:root{--borderColor: black;--outlineColor: black;--lineHeight: 1.2;--fontSize: 14px;--transitionTime: 0.25s;--svgTransitionTime: 0.3s;}`,
+      `#crono-box {position: absolute;top: 0;left: 0;height: 0;z-index:99999;}`,
+      `html{font-size: 16px;font-family: Arial, sans-serif;}`,
+      `body{margin: 0;line-height: var(--lineHeight);font-size: var(--fontSize);}`,
+      `a,ul{all: unset;}`,
+      `button{color: inherit;}`,
+      `input[type="number"]{-moz-appearance: textfield;}`,
+      `input[type="number"]::-webkit-outer-spin-button,input[type="number"]::-webkit-inner-spin-button{-webkit-appearance: none;margin: 0;}`,
+      `.${boxClassName}{display: block;border: 0 solid var(--borderColor);outline: 0px solid var(--outlineColor);margin: 0;padding: 0;background-color: initial;transition: all var(--transitionTime);box-sizing: border-box;font-family: inherit;font-size: inherit;}`,
+      `.${svgClassName}{display: block;border: 0 solid var(--borderColor);outline: 0px solid var(--outlineColor);margin: 0;padding: 0;transition: all var(--svgTransitionTime);}`,
+      `.${svgClassName} path,.${svgClassName} circle,.${svgClassName} rect,.${svgClassName} line {transition: all var(--svgTransitionTime);}`,
+    ];
+  }
 
-    if (!stylesElement) {
-      stylesElement = document.createElement('style');
-      stylesElement.setAttribute('id', styleElementId);
-      stylesElement.setAttribute('type', 'text/css');
-      document.head.insertBefore(stylesElement, document.head.firstChild);
-    }
+  /**
+   * Empty the pending queue into a sorted batch. Pure rule bookkeeping — no sink, no DOM: the
+   * sort key (breakpoint first, then prop declaration order) is the cascade position a rule must
+   * end up at, whichever flush it happens to arrive in.
+   */
+  function drainPendingRules(): SortedRule[] {
+    if (pendingRules.length === 0) return [];
 
-    return stylesElement;
+    pendingRules.sort((a, b) => a[1] - b[1] || a[0] - b[0]);
+
+    const drained = pendingRules.map(([sortIndex, breakpointOrder, rule]) => ({ sortKey: breakpointOrder * 100000 + sortIndex, rule }));
+    pendingRules.length = 0;
+
+    return drained;
   }
 
   function flush() {
     const hasPendingVars = variables.hasPendingVariables();
     if (!requireFlush && !hasPendingVars) return;
 
-    const el = getElement();
-    const stylesheet = sinkMode === 'cssom' ? (el.sheet as CSSStyleSheet | null) : null;
+    const target = getSink();
 
-    // Initialize base styles only once
     if (!isInitialized) {
-      const defaultRules = [
-        `:root{${variables.generateVariables()}}`,
-        `:root{--borderColor: black;--outlineColor: black;--lineHeight: 1.2;--fontSize: 14px;--transitionTime: 0.25s;--svgTransitionTime: 0.3s;}`,
-        `#crono-box {position: absolute;top: 0;left: 0;height: 0;z-index:99999;}`,
-        `html{font-size: 16px;font-family: Arial, sans-serif;}`,
-        `body{margin: 0;line-height: var(--lineHeight);font-size: var(--fontSize);}`,
-        `a,ul{all: unset;}`,
-        `button{color: inherit;}`,
-        `input[type="number"]{-moz-appearance: textfield;}`,
-        `input[type="number"]::-webkit-outer-spin-button,input[type="number"]::-webkit-inner-spin-button{-webkit-appearance: none;margin: 0;}`,
-        `.${boxClassName}{display: block;border: 0 solid var(--borderColor);outline: 0px solid var(--outlineColor);margin: 0;padding: 0;background-color: initial;transition: all var(--transitionTime);box-sizing: border-box;font-family: inherit;font-size: inherit;}`,
-        `.${svgClassName}{display: block;border: 0 solid var(--borderColor);outline: 0px solid var(--outlineColor);margin: 0;padding: 0;transition: all var(--svgTransitionTime);}`,
-        `.${svgClassName} path,.${svgClassName} circle,.${svgClassName} rect,.${svgClassName} line {transition: all var(--svgTransitionTime);}`,
-      ];
-
-      if (stylesheet) {
-        // Insert default rules at the beginning of the stylesheet
-        for (const rule of defaultRules) {
-          try {
-            stylesheet.insertRule(rule, baseRulesCount);
-            baseRulesCount++;
-          } catch {
-            // Skip invalid rules
-          }
-        }
-      } else {
-        el.textContent = defaultRules.join('\n');
-      }
-
+      target.writeBase(baseRules());
       // The base `:root` block above already carries every variable used so far; dropping them
       // from the pending queue keeps the next flush from emitting a second, identical block.
       variables.getPendingVariables();
       isInitialized = true;
-    } else if (variables.hasPendingVariables()) {
-      // Add new variables that were used after initialization
+    } else if (hasPendingVars) {
       const pendingVars = variables.getPendingVariables();
-      const varsRule = `:root{${Object.entries(pendingVars)
-        .map(([key, val]) => `--${key}: ${val};`)
-        .join('')}}`;
-
-      if (stylesheet) {
-        try {
-          // Insert new variables rule at the start (after existing base rules)
-          stylesheet.insertRule(varsRule, 0);
-          baseRulesCount++;
-        } catch {
-          // Skip if invalid
-        }
-      } else {
-        el.textContent = varsRule + '\n' + el.textContent;
-      }
+      target.writeVariables(
+        `:root{${Object.entries(pendingVars)
+          .map(([key, val]) => `--${key}: ${val};`)
+          .join('')}}`,
+      );
     }
 
-    // Process only pending rules (new styles that haven't been generated yet)
-    if (pendingRules.length > 0) {
-      // Sort pending rules by breakpoint order first, then by cssStyles index
-      pendingRules.sort((a, b) => a[1] - b[1] || a[0] - b[0]);
-
-      // Use insertRule in browser for correct ordering, textContent otherwise
-      if (stylesheet) {
-        for (const [sortIndex, breakpointOrder, rule] of pendingRules) {
-          const sortKey = breakpointOrder * 100000 + sortIndex;
-
-          // Find the insertion index among dynamic rules. insertedRuleSortKeys stays sorted
-          // ascending, so binary-search for the first key strictly greater than sortKey
-          // (O(log n) instead of a linear scan — matters on heavy pages with many rules).
-          let lo = 0;
-          let hi = insertedRuleSortKeys.length;
-          while (lo < hi) {
-            const mid = (lo + hi) >>> 1;
-            if (sortKey < insertedRuleSortKeys[mid]) {
-              hi = mid;
-            } else {
-              lo = mid + 1;
-            }
-          }
-          const insertIndex = lo;
-
-          try {
-            // Offset by baseRulesCount to insert after default rules
-            stylesheet.insertRule(rule, baseRulesCount + insertIndex);
-            insertedRuleSortKeys.splice(insertIndex, 0, sortKey);
-          } catch {
-            // Fallback: append if insertRule fails
-            stylesheet.insertRule(rule, stylesheet.cssRules.length);
-            insertedRuleSortKeys.push(sortKey);
-          }
-        }
-      } else {
-        // textContent sink or no sheet access: append rule text (already sorted)
-        el.textContent += pendingRules.map((r) => r[2]).join('');
-      }
-
-      pendingRules.length = 0;
-    }
+    const drained = drainPendingRules();
+    if (drained.length > 0) target.writeRules(drained);
 
     requireFlush = false;
+  }
+
+  /** Forget everything emitted so far, in the sink and in the engine's own bookkeeping. */
+  function clear() {
+    generatedRules.clear();
+    unsupportedRules.clear();
+    pendingRules.length = 0;
+    isInitialized = false;
+    // The next flush has to write the base rules again — the sink no longer holds them.
+    requireFlush = true;
+    // Reset the per-Box class cache too: rules were cleared, so cached class lists must be
+    // recomputed (and re-registered) on the next render — otherwise SSG would drop styles.
+    styleCache.clear();
+    // Class names come from a counter and variables accumulate into `:root`. Without resetting
+    // both, request N of a long-lived server gets different names and a fatter `:root` block than
+    // request 1 for identical markup. Registered user variables survive — they are configuration.
+    identity = new IdentityFactory();
+    variables.reset();
+    sink?.reset();
   }
 
   return {
@@ -577,21 +577,27 @@ export function createStyleEngine(options: StyleEngineOptions = {}): StyleEngine
 
     flush,
 
-    clear() {
-      generatedRules.clear();
-      unsupportedRules.clear();
-      pendingRules.length = 0;
-      insertedRuleSortKeys.length = 0;
-      baseRulesCount = 0;
-      isInitialized = false;
-      // Reset the per-Box class cache too: rules were cleared, so cached class lists must be
-      // recomputed (and re-registered) on the next render — otherwise SSG would drop styles.
-      styleCache.clear();
+    getStyles() {
+      // A server render leaves everything pending — nothing schedules a flush without effects.
+      flush();
+
+      return getSink().getStyles();
     },
+
+    clear,
 
     configure(config: StylesConfiguration) {
       if (config.classNames) classNamesMode = config.classNames;
-      if (config.sink) sinkMode = config.sink;
+
+      if (config.sink && config.sink !== (sink?.mode ?? sinkMode)) {
+        // Rules already written live in the old sink. The new one starts empty, so the engine has
+        // to forget them as well — otherwise every rule rendered so far would be missing with no
+        // way to get it back. Nothing has been written yet on the first configure, the common case.
+        if (sink) clear();
+        sink = undefined;
+        sinkMode = config.sink;
+      }
+
       // Cached class lists may have been resolved under a different naming mode.
       styleCache.clear();
     },

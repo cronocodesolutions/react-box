@@ -85,6 +85,7 @@ function TooltipImpl(props: Props, ref: Ref<HTMLDivElement>) {
     <>
       <Box ref={positionRef} />
       {position &&
+        portalContainer &&
         createPortal(
           <Box
             ref={ref}

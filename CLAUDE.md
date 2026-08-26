@@ -29,7 +29,10 @@ Node version: v24 (pinned in .nvmrc).
 - `src/box.ts` — Main Box component (memoized, forwardRef, polymorphic via `tag` prop)
 - `src/core/boxStyles.ts` — All CSS property definitions (~144 props). Types auto-generate from these definitions
 - `src/core/boxStylesFormatters.ts` — Value formatters that convert prop values to CSS (rem, px, fractions, etc.)
-- `src/core/useStyles.ts` — Style processing hook: generates class names via IdentityFactory, injects CSS rules incrementally with `CSSStyleSheet.insertRule()`, batches flushes in `useLayoutEffect`
+- `src/core/engine/styleEngine.ts` — `createStyleEngine()`: all engine state (class-name cache, rule registry, identity factory, variables, prop and component registries) on an instance; generates class names and rules
+- `src/core/engine/styleSink.ts` — Where the CSS goes: `cssom` (`insertRule`), `textContent`, or `string` (server rendering, no DOM). Every sink places a rule by its sort key, so all three produce the same cascade
+- `src/core/engine/defaultEngine.ts` — The lazily-created default instance every public API delegates to
+- `src/core/useStyles.ts` — The React binding: resolves class names during render, batches flushes in `useLayoutEffect`
 - `src/core/variables.ts` — CSS variables (200+ Tailwind-like colors), lazy-loaded via pending variables system
 - `src/core/classNames.ts` — Conditional className utility
 
@@ -65,7 +68,7 @@ Pre-built components wrap Box with the correct HTML tag. Each is a separate entr
 
 ### SSR/SSG
 
-- `src/ssg.ts` — `getStyles()` and `resetStyles()` for server-side rendering
+- `src/ssg.ts` — `getStyles()`, `resetStyles()` and `renderToStaticMarkup()`. Needs no DOM: with no `document` in the process the engine collects CSS in memory
 
 ### Demo Site
 

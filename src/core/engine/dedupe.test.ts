@@ -18,7 +18,9 @@ describe('atomic rules', () => {
     expect(first).toEqual(['_b', 'p-4']);
     expect(second).toEqual(['_b', 'p-4', 'm-2']);
     expect(third).toEqual(first);
-    expect(ruleList(engine)).toEqual(['.p-4{padding:1rem}', '.m-2{margin:0.5rem}']);
+    // `m` is declared before `p` in the registry, so it sorts first even though `.p-4` was
+    // written a flush earlier — position follows declaration order, not arrival order.
+    expect(ruleList(engine)).toEqual(['.m-2{margin:0.5rem}', '.p-4{padding:1rem}']);
   });
 
   it('keeps one declaration per rule so classes compose instead of overwriting', () => {
@@ -51,7 +53,7 @@ describe('atomic rules', () => {
     expect(ruleList(engine)).toEqual([
       '.p-4{padding:1rem}',
       '.hover-p-4:hover{padding:1rem}',
-      '@media(min-width: 640px){.sm-p-4{padding:1rem}}',
+      '@media (min-width: 640px){.sm-p-4{padding:1rem}}',
     ]);
   });
 
@@ -102,8 +104,8 @@ describe('rule ordering', () => {
   });
 
   it('inserts a later rule at its declaration position in the stylesheet (cssom sink)', () => {
-    // The textContent sink can only append, so cross-flush ordering is a cssom-only guarantee —
-    // it is what a browser actually uses, and the binary-search insertion has no other test.
+    // Every sink has to place a rule by its sort key rather than append it (see styleSink.test.ts);
+    // this is the same guarantee checked against a real stylesheet, which is what a browser uses.
     const engine = createStyleEngine({ classNames: 'readable', sink: 'cssom', styleElementId: 'order-cssom' });
 
     engine.resolveClassNames({ p: 4 }, false);
@@ -128,8 +130,8 @@ describe('rule ordering', () => {
 
     expect(ruleList(engine)).toEqual([
       '.p-1{padding:0.25rem}',
-      '@media(min-width: 640px){.sm-p-2{padding:0.5rem}}',
-      '@media(min-width: 1280px){.xl-p-4{padding:1rem}}',
+      '@media (min-width: 640px){.sm-p-2{padding:0.5rem}}',
+      '@media (min-width: 1280px){.xl-p-4{padding:1rem}}',
     ]);
   });
 
@@ -139,10 +141,10 @@ describe('rule ordering', () => {
     renderStyles(engine, { sm: { p: 1 }, md: { p: 1 }, lg: { p: 1 }, xl: { p: 1 } });
 
     expect(ruleList(engine)).toEqual([
-      '@media(min-width: 640px){.sm-p-1{padding:0.25rem}}',
-      '@media(min-width: 768px){.md-p-1{padding:0.25rem}}',
-      '@media(min-width: 1024px){.lg-p-1{padding:0.25rem}}',
-      '@media(min-width: 1280px){.xl-p-1{padding:0.25rem}}',
+      '@media (min-width: 640px){.sm-p-1{padding:0.25rem}}',
+      '@media (min-width: 768px){.md-p-1{padding:0.25rem}}',
+      '@media (min-width: 1024px){.lg-p-1{padding:0.25rem}}',
+      '@media (min-width: 1280px){.xl-p-1{padding:0.25rem}}',
     ]);
   });
 

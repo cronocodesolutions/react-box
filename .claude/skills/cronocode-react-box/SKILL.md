@@ -191,5 +191,5 @@ import DataGrid from '@cronocode/react-box/components/dataGrid';
 ```
 
 **Group hover**: `<Box hoverGroup={{ 'parent-class': { opacity: 1 } }}>`
-**SSR**: `import { getStyles, resetStyles } from '@cronocode/react-box/ssg'`
+**SSR**: `import { getStyles, resetStyles } from '@cronocode/react-box/ssg'` — render, read `getStyles()` into `<style id="crono-styles">`, then `resetStyles()`. Needs no DOM.
 **Portals**: Tooltip for escaping `overflow: hidden` (renders into `#crono-box`)
