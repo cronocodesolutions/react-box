@@ -43,6 +43,16 @@ export namespace StylesContext {
     getDefaultEngine().clear();
   }
 
+  /** The CSS emitted so far, as text. Flushes first — see `StyleEngine.getStyles`. */
+  export function getStyles() {
+    return getDefaultEngine().getStyles();
+  }
+
+  /** The id of the `<style>` element the default engine writes to. */
+  export function styleElementId() {
+    return getDefaultEngine().styleElementId;
+  }
+
   /** Apply explicit engine configuration. Call before the first render — cached class names are dropped when the configuration changes. */
   export function configure(config: StylesConfiguration) {
     getDefaultEngine().configure(config);

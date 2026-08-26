@@ -371,10 +371,23 @@ import Textbox from '@cronocode/react-box/components/textbox';
 
 ```tsx
 import { getStyles, resetStyles } from '@cronocode/react-box/ssg';
-const cssString = getStyles();        // after rendering, get CSS string
-<style id="crono-box">{cssString}</style>
-resetStyles();                         // reset for next SSR request
+
+const html = renderToString(<App />);  // any React server renderer
+const cssString = getStyles();         // the CSS for what was just rendered
+// <style id="crono-styles">{cssString}</style> in the document head
+resetStyles();                         // reset before the next request
 ```
+
+Or in one call, which injects the styles into the rendered `<head>` and resets afterwards:
+
+```tsx
+import { renderToStaticMarkup } from '@cronocode/react-box/ssg';
+
+const { html, styles } = renderToStaticMarkup(<App />);
+```
+
+No DOM is needed: with no `document` in the process the engine collects CSS in memory. Sequential
+requests are independent and identical markup gets identical class names.
 
 ---
 
@@ -739,7 +752,7 @@ Also accepts: `data` (TRow[]), `value`/`defaultValue`, `multiple`, `isSearchable
 
 ## Debugging Tips
 
-1. **Inspect styles**: `<style id="crono-box">` in document head
+1. **Inspect styles**: `<style id="crono-styles">` in document head
 2. **Class names**: Elements get classes like `_b`, `_2a`, etc.
 3. **CSS variables**: In `:root` rules
 4. **Theme issues**: Ensure `<Box.Theme>` wraps your app

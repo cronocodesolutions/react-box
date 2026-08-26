@@ -4,6 +4,7 @@ import Box from './box';
 import Flex from './components/flex';
 import { DEFAULT_STYLE_ELEMENT_ID } from './core/engine/styleEngine';
 import { StylesContext } from './core/useStyles';
+import { renderToStaticMarkup } from './ssg';
 
 /**
  * The server and the client run the same engine but write through different sinks: the server
@@ -33,22 +34,19 @@ function splitRules(css: string): string[] {
   return rules;
 }
 
-// `ssg` installs its own minimal document as an import-time side effect, so it only happens once
-// per module registry. Later renders have to put that document back themselves.
-let ssgDocument: Document | undefined;
-
-/** Render through `ssg`, with its document swapped in, then hand the real one back. */
-async function renderOnServer(element: React.ReactElement) {
-  const realDocument = globalThis.document;
+/**
+ * Render the way a server does: through the string sink, the one an engine picks by itself in a
+ * process with no DOM. (`src/ssg.node.test.tsx` runs the same path with no `document` at all.)
+ */
+function renderOnServer(element: React.ReactElement) {
+  StylesContext.configure({ sink: 'string' });
 
   try {
-    const { renderToStaticMarkup } = await import('./ssg');
-    ssgDocument ??= globalThis.document;
-    globalThis.document = ssgDocument;
-
     return renderToStaticMarkup(element, false);
   } finally {
-    globalThis.document = realDocument;
+    // Back to the sink the rest of the suite is configured for, which also drops what the server
+    // render put in the string sink.
+    StylesContext.configure({ sink: 'textContent' });
   }
 }
 
@@ -59,8 +57,8 @@ function renderOnClient(element: React.ReactElement) {
   return { html: container.innerHTML, styles: styleElement?.textContent ?? '' };
 }
 
-async function roundTrip(element: React.ReactElement) {
-  const server = await renderOnServer(element);
+function roundTrip(element: React.ReactElement) {
+  const server = renderOnServer(element);
   // `renderToStaticMarkup` clears the engine when it is done, so the client render starts from the
   // same blank slate a browser would.
   const client = renderOnClient(element);
@@ -71,12 +69,10 @@ async function roundTrip(element: React.ReactElement) {
 describe('SSR round-trip', () => {
   afterEach(() => {
     StylesContext.clear();
-    const styleElement = document.getElementById(DEFAULT_STYLE_ELEMENT_ID);
-    if (styleElement) styleElement.textContent = '';
   });
 
-  it('produces the same markup and the same CSS for a simple tree', async () => {
-    const { server, client } = await roundTrip(
+  it('produces the same markup and the same CSS for a simple tree', () => {
+    const { server, client } = roundTrip(
       <Box p={4} bgColor="red-500">
         hello
       </Box>,
@@ -86,8 +82,8 @@ describe('SSR round-trip', () => {
     expect(splitRules(client.styles)).toEqual(splitRules(server.styles));
   });
 
-  it('agrees on breakpoints, pseudo classes and groups', async () => {
-    const { server, client } = await roundTrip(
+  it('agrees on breakpoints, pseudo classes and groups', () => {
+    const { server, client } = roundTrip(
       <Flex className="parent" d="column" gap={2} hover={{ bgColor: 'blue-500' }} sm={{ gap: 4 }}>
         <Box hoverGroup={{ parent: { display: 'grid' } }} focus={{ b: 1 }}>
           child
@@ -97,12 +93,12 @@ describe('SSR round-trip', () => {
 
     expect(client.html).toBe(server.html);
     expect(splitRules(client.styles)).toEqual(splitRules(server.styles));
-    expect(client.styles).toContain('@media(min-width: 640px)');
+    expect(client.styles).toContain('@media (min-width: 640px)');
     expect(client.styles).toContain('.parent:hover .hover-parent-display-grid{display:grid}');
   });
 
-  it('agrees on theme-scoped rules', async () => {
-    const { server, client } = await roundTrip(
+  it('agrees on theme-scoped rules', () => {
+    const { server, client } = roundTrip(
       <Box theme={{ dark: { bgColor: 'gray-900', hover: { bgColor: 'gray-800' } } }} bgColor="white">
         themed
       </Box>,
@@ -113,8 +109,8 @@ describe('SSR round-trip', () => {
     expect(client.styles).toContain('.dark .theme-dark-bgColor-gray-900{background-color:var(--gray-900)}');
   });
 
-  it('declares the same :root variables on both sides', async () => {
-    const { server, client } = await roundTrip(
+  it('declares the same :root variables on both sides', () => {
+    const { server, client } = roundTrip(
       <Box color="violet-500" bgColor="violet-50" shadow="medium">
         tokens
       </Box>,
@@ -127,9 +123,34 @@ describe('SSR round-trip', () => {
     expect(client.styles).toContain('--medium:');
   });
 
-  it('does not carry rules from one server render into the next', async () => {
-    const first = await renderOnServer(<Box p={4}>first</Box>);
-    const second = await renderOnServer(<Box m={4}>second</Box>);
+  it('gives the browser the same cascade when the client writes to a real stylesheet', () => {
+    const element = (
+      <Flex d="column" gap={2} p={4} hover={{ bgColor: 'blue-500' }} sm={{ gap: 4 }}>
+        <Box b={1} color="red-500">
+          child
+        </Box>
+      </Flex>
+    );
+    const server = renderOnServer(element);
+
+    StylesContext.configure({ sink: 'cssom' });
+
+    try {
+      render(element);
+      const sheet = (document.getElementById(DEFAULT_STYLE_ELEMENT_ID) as unknown as HTMLStyleElement | null)?.sheet;
+      // A stylesheet re-serializes what it is given, so the comparison is selector by selector,
+      // in order — the part that decides which declaration wins.
+      const selectorsIn = (rules: string[]) => rules.map((rule) => rule.slice(0, rule.indexOf('{')).replace(/\s+/g, ' ').trim());
+
+      expect(selectorsIn([...(sheet?.cssRules ?? [])].map((rule) => rule.cssText))).toEqual(selectorsIn(splitRules(server.styles)));
+    } finally {
+      StylesContext.configure({ sink: 'textContent' });
+    }
+  });
+
+  it('does not carry rules from one server render into the next', () => {
+    const first = renderOnServer(<Box p={4}>first</Box>);
+    const second = renderOnServer(<Box m={4}>second</Box>);
 
     expect(first.styles).toContain('.p-4{padding:1rem}');
     expect(second.styles).toContain('.m-4{margin:1rem}');

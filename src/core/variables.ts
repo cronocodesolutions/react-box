@@ -365,6 +365,12 @@ namespace Variables {
     hasPendingVariables(): boolean;
     /** Whether `name` was declared through `Box.extend({ variables })`. */
     isUserVariable(name: string): boolean;
+    /**
+     * Forget which variables have been used, so the next `:root` block is built from scratch.
+     * Variables declared through `Box.extend({ variables })` are registration, not per-render
+     * state, and survive.
+     */
+    reset(): void;
     /** Add user variables. Merged into the ones already declared, so sequential `extend()` calls accumulate. */
     setUserVariables(variables: Record<string, string>): void;
   }
@@ -416,6 +422,11 @@ namespace Variables {
 
       isUserVariable(name: string) {
         return name in _userVariables;
+      },
+
+      reset() {
+        Object.keys(_usedVariables).forEach((key) => delete _usedVariables[key]);
+        Object.keys(_pendingVariables).forEach((key) => delete _pendingVariables[key]);
       },
 
       setUserVariables(variables: Record<string, string>) {
