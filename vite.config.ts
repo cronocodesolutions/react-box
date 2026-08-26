@@ -75,6 +75,19 @@ export default defineConfig(({ mode }) => {
       environment: 'happy-dom',
       globals: true,
       setupFiles: ['./dev/vitest.setup.ts'],
+      coverage: {
+        provider: 'v8',
+        // The engine is what every other roadmap item builds on, so it is the only thing under a
+        // budget. Components are covered by their own tests without a number attached.
+        include: ['src/core/**'],
+        reporter: ['text', 'json-summary'],
+        thresholds: {
+          statements: 90,
+          branches: 85,
+          functions: 90,
+          lines: 90,
+        },
+      },
     },
   };
 });

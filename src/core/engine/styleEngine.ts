@@ -72,6 +72,11 @@ export interface StyleEngine {
 
 export const DEFAULT_STYLE_ELEMENT_ID = 'crono-styles';
 
+// The `values` arrays that hold variable-backed tokens (colours, background images, shadows).
+// A value declared through `Box.extend({ variables })` is accepted wherever one of these lists
+// is declared, so a user token works on every prop that resolves its value to `var(--token)`.
+const variableBackedValues: ReadonlySet<unknown> = new Set([Variables.colorValues, Variables.bgImageValues, Variables.shadowValues]);
+
 // Only used to give engines distinct style elements when the caller does not name one. This is
 // an id sequence, not engine state — instances share nothing else.
 let engineSequence = 0;
@@ -125,6 +130,10 @@ export function createStyleEngine(options: StyleEngineOptions = {}): StyleEngine
   const styleCache = new Map<string, string[]>();
   // Track already generated CSS rules to avoid re-generating
   const generatedRules = new Set<string>();
+  // Rule keys that matched no value definition. Remembered because `generatedRules` short-circuits
+  // the second occurrence of a prop/value pair: without this, the first Box would (correctly) get
+  // no class name and every later one would get a class with no rule behind it.
+  const unsupportedRules = new Set<string>();
   // Pending rules to be flushed: [sortIndex, breakpointOrder, rule]
   const pendingRules: [number, number, string][] = [];
   // Track the sort keys of rules already in the stylesheet for insertion ordering
@@ -280,8 +289,14 @@ export function createStyleEngine(options: StyleEngineOptions = {}): StyleEngine
       if (result) {
         pendingRules.push([result.sortIndex, result.breakpointOrder, result.rule]);
         requireFlush = true;
+      } else {
+        unsupportedRules.add(ruleKey);
       }
     }
+
+    // A value the prop does not declare produces no rule, so it must not produce a class either —
+    // an unmatched value used to leave a dangling class name in the markup.
+    if (unsupportedRules.has(ruleKey)) return;
 
     classNames.push(className);
   }
@@ -296,7 +311,7 @@ export function createStyleEngine(options: StyleEngineOptions = {}): StyleEngine
   ): { rule: string; sortIndex: number; breakpointOrder: number } | null {
     const item = cssStyles[key as keyof typeof cssStyles] as BoxStyle[];
 
-    const itemValue = item.find((x) => {
+    let itemValue = item.find((x) => {
       if (Array.isArray(x.values)) {
         if (Array.isArray(value)) {
           // Tuple definition: x.values is a tuple of allowed-value arrays; each position must contain value[i]
@@ -309,6 +324,12 @@ export function createStyleEngine(options: StyleEngineOptions = {}): StyleEngine
       }
       return typeof value === typeof x.values;
     });
+
+    if (!itemValue && typeof value === 'string' && variables.isUserVariable(value)) {
+      // `Box.extend({ variables })` declares tokens the built-in value lists cannot know about.
+      // Accept them on the props whose values are resolved through `var(--token)` anyway.
+      itemValue = item.find((x) => variableBackedValues.has(x.values));
+    }
 
     if (!itemValue) return null;
 
@@ -458,6 +479,9 @@ export function createStyleEngine(options: StyleEngineOptions = {}): StyleEngine
         el.textContent = defaultRules.join('\n');
       }
 
+      // The base `:root` block above already carries every variable used so far; dropping them
+      // from the pending queue keeps the next flush from emitting a second, identical block.
+      variables.getPendingVariables();
       isInitialized = true;
     } else if (variables.hasPendingVariables()) {
       // Add new variables that were used after initialization
@@ -555,6 +579,7 @@ export function createStyleEngine(options: StyleEngineOptions = {}): StyleEngine
 
     clear() {
       generatedRules.clear();
+      unsupportedRules.clear();
       pendingRules.length = 0;
       insertedRuleSortKeys.length = 0;
       baseRulesCount = 0;
@@ -584,15 +609,20 @@ export function createStyleEngine(options: StyleEngineOptions = {}): StyleEngine
       });
 
       // New props change both what counts as a style key and the rule sort order, so the
-      // signature cache and the derived index are no longer valid.
+      // signature cache and the derived index are no longer valid. New variables can likewise
+      // turn a value that matched nothing into a supported one.
       rebuildCssStylesIndex();
+      unsupportedRules.forEach((ruleKey) => generatedRules.delete(ruleKey));
+      unsupportedRules.clear();
       styleCache.clear();
 
       return { extendedProps, extendedPropTypes };
     },
 
     components(components) {
-      componentsStyles = resolveExtends(ObjectUtils.mergeDeep<Components>(defaultBoxComponents, components));
+      // Merge into what this engine already holds, not into the pristine defaults: sequential
+      // calls (one per feature module, say) used to drop every component registered before them.
+      componentsStyles = resolveExtends(ObjectUtils.mergeDeep<Components>(componentsStyles, components));
       // Cached class lists were resolved against the previous component defaults.
       styleCache.clear();
 

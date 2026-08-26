@@ -313,6 +313,13 @@ Box.components({
 });
 ```
 
+Both calls **accumulate**: an app can call them once per feature module and a later call keeps
+everything the earlier ones registered (a later call still wins on the same key). Variables declared
+through `Box.extend()` are usable as values on every prop whose values resolve to a CSS variable —
+colours, background images and shadows — so `bgColor="brand-primary"` works from the declaration
+alone. Declaring the value on the prop as well (the third argument above) is what makes TypeScript
+accept it. The merge semantics are pinned down in `src/core/engine/mergeSemantics.test.ts`.
+
 ---
 
 ## CSS Generation Engine

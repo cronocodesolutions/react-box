@@ -15,6 +15,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 | `npm run build:dev` | Build library without minification |
 | `npm run compile` | TypeScript type check (no emit) |
 | `npm test` | Run all tests (Vitest) |
+| `npm run test:coverage` | Run all tests and enforce the coverage budget on `src/core/` |
 | `npm run test:watch` | Run tests in watch mode |
 | `npx vitest run src/path/to/file.test.tsx` | Run a single test file |
 | `npm run lint` | ESLint check |
@@ -38,7 +39,7 @@ Different props have different dividers — this is the #1 source of bugs:
 - **Spacing** (`p`, `m`, `gap`, `px`, `py`, etc.): divider 4 → `p={4}` = 1rem = 16px
 - **fontSize**: divider **16** → `fontSize={14}` = 0.875rem ≈ 14px
 - **Border width** (`b`, `bx`, `by`): direct px → `b={1}` = 1px
-- **borderRadius**: direct px → `borderRadius={8}` = 8px
+- **borderRadius**: divider 4, same scale as spacing → `borderRadius={2}` = 0.5rem = 8px
 - **lineHeight**: direct px → `lineHeight={24}` = 24px
 
 ### Extension & Component System
@@ -76,6 +77,7 @@ Pre-built components wrap Box with the correct HTML tag. Each is a separate entr
 - **Always use component shortcuts** — `<Flex>` not `<Box display="flex">`, `<Button>` not `<Box tag="button">`, `<H1>` not `<Box tag="h1">`
 - **HTML attributes go in `props` prop** — `<Link props={{ href: '/about' }}>` not `<Link href="/about">`
 - Tests are colocated with source files (`*.test.tsx` next to `*.tsx`)
+- Engine-level tests build their own isolated engine via `dev/engineHarness.ts` (readable class names + `textContent` sink) instead of the default instance, so they can assert exact rule text without interfering with each other
 - One component per file, PascalCase component names, camelCase prop names
 - Prettier: 140 char width, single quotes, trailing commas
 - Import order enforced by ESLint: builtin → external → internal → parent → sibling → index (no blank lines between groups, alphabetized)
@@ -87,7 +89,9 @@ After any code change, all of the following must pass before considering the wor
 1. `npm run compile` — TypeScript type check
 2. `npm run lint` — ESLint check
 3. `npm run build` — Library build
-4. `npm test` — All tests
+4. `npm test` — All tests (or `npm run test:coverage` when touching `src/core/`, which is what CI runs)
+
+CI runs the test suite against React 18 and React 19 — both are in the supported peer range and the engine leans on layout effects, hydration and server rendering, which is exactly what changed between them.
 
 ## Adding New CSS Properties
 

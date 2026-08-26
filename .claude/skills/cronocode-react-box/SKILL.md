@@ -35,7 +35,8 @@ Check latest: `npm view @cronocode/react-box version`
 | fontSize | **16** | `fontSize={14}` → 0.875rem (14px) |
 | width/height/min/max (numeric) | 4 | `width={20}` → 5rem (80px) |
 | Border (`b`,`bx`,`by`…) | px | `b={1}` → 1px |
-| borderRadius / lineHeight | px | `borderRadius={8}` → 8px |
+| borderRadius | 4 | `borderRadius={2}` → 0.5rem (8px) |
+| lineHeight / letterSpacing | px | `lineHeight={24}` → 24px |
 
 ## Component Shortcuts
 
@@ -56,7 +57,7 @@ Also: `Mark`, `Figure`, `Figcaption`, `Details`, `Summary`, `Menu`, `Time`. All 
 **Layout**: `display`, `d` (flex-direction), `wrap`, `ai` (align-items), `jc` (justify-content), `flex`/`grow`/`shrink`
 **Sizing**: `width`/`height` — number (÷4=rem), `'auto'`, `'fit'` (100%), `'fit-screen'` (100vw/vh), fractions (`'1/2'`…), `'33%'`. `minWidth`/`maxWidth`/`minHeight`/`maxHeight` same. All accept `"5%"`.
 **Colors**: `bgColor`/`color`/`borderColor` — Tailwind palette `'gray-50'`..`'gray-900'`, red/orange/yellow/green/teal/blue/indigo/purple/pink/violet, `'white'`/`'black'`/`'transparent'`/`'currentColor'`
-**Borders**: `b`/`bx`/`by`/`bt`/`br`/`bb`/`bl` (px), `borderRadius` (px), `borderStyle`
+**Borders**: `b`/`bx`/`by`/`bt`/`br`/`bb`/`bl` (px), `borderRadius` (÷4), `borderStyle`
 **Text**: `fontSize` (÷16), `fontWeight`, `lineHeight` (px), `textAlign`/`textDecoration`/`textTransform`/`whiteSpace`/`textOverflow`, `textWrap`
 **Position**: `position`, `top`/`right`/`bottom`/`left`/`inset`, `zIndex`
 **Effects**: `shadow` (`'small'`/`'medium'`/`'large'`/`'xl'`/`'none'`), `opacity`, `cursor`, `pointerEvents`, `transition`, `transform`, `userSelect`, `overflow`

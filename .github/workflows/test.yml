@@ -6,7 +6,8 @@ on:
     branches: ['main']
 
 jobs:
-  build:
+  checks:
+    name: Compile, lint, build, package health
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -21,11 +22,35 @@ jobs:
         run: npm run compile
       - name: Check linting 🔧
         run: npm run lint
-      - name: Check testing 🔧
-        run: npm run test
       - name: Check build 🔧
         run: npm run build
       - name: Check package health (publint + attw) 🔧
         run: npm run check:package
       - name: Check size budgets 🔧
         run: npm run size
+
+  test:
+    # The peer range spans React 16.14 to 19, and the engine touches the parts React changed most
+    # (layout effects, hydration, server rendering). Testing one version proves nothing about the
+    # other, so every supported major runs the whole suite.
+    name: Tests (React ${{ matrix.react }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        react: ['18', '19']
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: '.nvmrc'
+      - name: Install dependencies 🔧
+        run: npm ci
+      - name: Pin React ${{ matrix.react }} 🔧
+        run: npm install --no-save react@${{ matrix.react }} react-dom@${{ matrix.react }} @types/react@${{ matrix.react }} @types/react-dom@${{ matrix.react }}
+      - name: Check React version 🔧
+        run: node -e "const v=require('react/package.json').version; console.log('react', v); if (!v.startsWith('${{ matrix.react }}.')) process.exit(1)"
+      - name: Check testing and coverage budget 🔧
+        run: npm run test:coverage
