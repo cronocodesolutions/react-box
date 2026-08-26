@@ -1,61 +1,25 @@
 import { DEFAULT_REM_DIVIDER } from './boxConstants';
 
+/**
+ * Value formatters shared by the prop definitions in `boxStyles.ts`. A `valueFormat` is called as
+ * `valueFormat(value, getVariableValue, styleName)`, so every formatter here takes the prop value
+ * first. Formatters that took `(key, value)` were unreachable dead code and have been removed —
+ * see `boxStylesFormatters.test.ts` for the behaviour each one guarantees.
+ */
 export namespace BoxStylesFormatters {
-  export namespace ClassName {
-    export function fraction(key: string, value: string) {
-      return `${key}${value.replace('/', '-')}`;
-    }
-
-    export function svg(selector: string) {
-      return [`${selector} path`, `${selector} circle`, `${selector} rect`, `${selector} line`];
-    }
-  }
-
   export namespace Value {
+    /** Spacing scale: divides by 4, so `p={4}` is `1rem`. */
     export function rem(value: number) {
       return `${value / DEFAULT_REM_DIVIDER}rem`;
     }
+    /** Direct pixels: `b={1}` is `1px`. */
     export function px(value: number) {
       return `${value}px`;
     }
+    /** Fraction token: `'1/2'` becomes `'50%'`. */
     export function fraction(value: string) {
       const [a, b] = value.split('/');
       return `${(+a / +b) * 100}%`;
-    }
-    export function widthHeight(key: string, value: string) {
-      switch (value) {
-        case 'fit':
-          return '100%';
-        case 'fit-screen':
-          return key.toLocaleLowerCase().includes('height') ? '100vh' : '100vw';
-        default:
-          return value;
-      }
-    }
-    export function variables(prefix: string) {
-      return (key: string, value: string) => `var(--${prefix}${value});`;
-    }
-    export function svgVariables(prefix: string) {
-      return (key: string, value: string) => `var(--${prefix}${value});`;
-    }
-    export function gridColumns(key: string, value: number) {
-      return `repeat(${value},minmax(0,1fr))`;
-    }
-    export function gridColumn(key: string, value: string | number) {
-      if (value === 'full-row') {
-        return '1/-1';
-      }
-
-      return `span ${value}/span ${value}`;
-    }
-    export function ms(key: string, value: number) {
-      return `${value}ms`;
-    }
-    export function rotate(key: string, value: number) {
-      return `${value}deg`;
-    }
-    export function flip(key: string, value: string) {
-      return value === 'xAxis' ? '-1 1' : '1 -1';
     }
   }
 }

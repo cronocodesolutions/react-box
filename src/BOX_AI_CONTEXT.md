@@ -62,7 +62,7 @@ All imports from `@cronocode/react-box/components/...`. Semantics also export: `
 | Font size (`fontSize`) | **16** | `fontSize={14}` | `font-size: 0.875rem` (14px) |
 | Width/Height (numeric) | 4 | `width={20}` | `width: 5rem` (80px) |
 | Border width (`b`, `bx`, `by`, `bt`, `br`, `bb`, `bl`) | none | `b={1}` | `border-width: 1px` |
-| Border radius (`borderRadius`) | none | `borderRadius={8}` | `border-radius: 8px` |
+| Border radius (`borderRadius`, `borderRadiusTop`, …) | 4 | `borderRadius={2}` | `border-radius: 0.5rem` (8px) |
 | Line height (`lineHeight`) | none | `lineHeight={24}` | `line-height: 24px` |
 
 ```tsx
@@ -117,7 +117,7 @@ All sizing, spacing, and positioning props also accept percentage strings: `p="5
 |---|---|---|
 | `bgColor` / `color` / `borderColor` | background-color / color / border-color | Tailwind palette: `'gray-50'`..`'gray-900'`, same for red/orange/yellow/green/teal/blue/indigo/purple/pink/violet. Also `'white'`, `'black'`, `'transparent'`, `'currentColor'` |
 | `b` / `bx` / `by` / `bt` / `br` / `bb` / `bl` | border-width | direct px |
-| `borderRadius` | border-radius | direct px |
+| `borderRadius` | border-radius | divider 4 (spacing scale) |
 | `borderStyle` | border-style | `'solid'`, `'dashed'`, `'dotted'`, `'none'` |
 | `fontSize` | font-size | divider 16 |
 | `fontWeight` | font-weight | `400`, `500`, `600`, `700`, etc. |
@@ -385,7 +385,7 @@ resetStyles();                         // reset for next SSR request
 3. **NEVER `<Box display="flex/grid">`** — use `<Flex>` / `<Grid>`
 4. **fontSize divider is 16** (not 4). `fontSize={14}` → 14px
 5. **Spacing divider is 4**. `p={4}` → 16px (1rem)
-6. **Border/borderRadius/lineHeight are direct px**. `b={1}` → 1px
+6. **Border width and lineHeight are direct px**. `b={1}` → 1px. **borderRadius uses divider 4**: `borderRadius={2}` → 8px
 7. **Colors are Tailwind-like**: `'gray-500'`, `'blue-600'`
 8. **Breakpoints are mobile-first**: base → sm → md → lg → xl → xxl
 9. **Theme styles nest**: `theme={{ dark: { hover: { ... } } }}`

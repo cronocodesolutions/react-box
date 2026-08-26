@@ -363,6 +363,9 @@ namespace Variables {
     /** Variables used since the last call — returns and clears them. */
     getPendingVariables(): Record<string, string>;
     hasPendingVariables(): boolean;
+    /** Whether `name` was declared through `Box.extend({ variables })`. */
+    isUserVariable(name: string): boolean;
+    /** Add user variables. Merged into the ones already declared, so sequential `extend()` calls accumulate. */
     setUserVariables(variables: Record<string, string>): void;
   }
 
@@ -411,8 +414,15 @@ namespace Variables {
         return Object.keys(_pendingVariables).length > 0;
       },
 
+      isUserVariable(name: string) {
+        return name in _userVariables;
+      },
+
       setUserVariables(variables: Record<string, string>) {
-        _userVariables = variables;
+        // Merge, never replace: `Box.extend()` may be called from several modules and each call
+        // used to drop the previous call's variables. A name already resolved keeps the value it
+        // resolved to, so variables must be declared before the first render that uses them.
+        _userVariables = { ..._userVariables, ...variables };
       },
     };
   }
