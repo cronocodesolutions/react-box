@@ -23,20 +23,26 @@ describe('Box for Server Components', () => {
 
     expect(html).toContain('<section class="_b p-4"></section>');
     expect(html).toContain('.p-4{padding:1rem}');
-    expect(html).toContain('data-precedence="rb-base"');
   });
 
-  it('lets React hoist the CSS into the head of a document', () => {
-    const html = renderToStaticMarkup(
-      <html>
-        <head />
-        <body>
-          <RscBox m={2} />
-        </body>
-      </html>,
-    );
+  // Hoisting is React 19; the 18 lane of the CI matrix renders the same elements inline, which is
+  // why element mode is documented as React 19 only.
+  describe.skipIf(parseInt(React.version, 10) < 19)('with React 19', () => {
+    it('lets React hoist the CSS into the head of a document', () => {
+      const html = renderToStaticMarkup(
+        <html>
+          <head />
+          <body>
+            <RscBox m={2} />
+          </body>
+        </html>,
+      );
 
-    expect(html.slice(html.indexOf('<head>'), html.indexOf('</head>'))).toContain('.m-2{margin:0.5rem}');
+      const head = html.slice(html.indexOf('<head>'), html.indexOf('</head>'));
+
+      expect(head).toContain('data-precedence="rb-base"');
+      expect(head).toContain('.m-2{margin:0.5rem}');
+    });
   });
 
   it('resolves the same classes as the client Box', () => {
