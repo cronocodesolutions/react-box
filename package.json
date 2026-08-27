@@ -39,6 +39,7 @@
     "test:coverage": "vitest run --coverage",
     "test:watch": "vitest",
     "lint": "eslint .",
+    "check:boundaries": "node scripts/check-core-boundary.mjs",
     "check:package": "publint dist && attw --pack dist --ignore-rules false-esm cjs-resolves-to-esm internal-resolution-error",
     "size": "size-limit"
   },
@@ -46,21 +47,30 @@
     {
       "name": "Box core (main entry)",
       "path": "dist/box.mjs",
-      "ignore": ["react", "react-dom"],
+      "ignore": [
+        "react",
+        "react-dom"
+      ],
       "gzip": true,
       "limit": "14.5 KB"
     },
     {
       "name": "DataGrid",
       "path": "dist/components/dataGrid.mjs",
-      "ignore": ["react", "react-dom"],
+      "ignore": [
+        "react",
+        "react-dom"
+      ],
       "gzip": true,
       "limit": "40 KB"
     },
     {
       "name": "Full library (Box + ssg + every component)",
       "path": "dev/size-full.mjs",
-      "ignore": ["react", "react-dom"],
+      "ignore": [
+        "react",
+        "react-dom"
+      ],
       "gzip": true,
       "limit": "40 KB"
     }

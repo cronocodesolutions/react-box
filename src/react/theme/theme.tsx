@@ -1,5 +1,16 @@
 import React, { useCallback, useContext, useLayoutEffect, useRef, useState } from 'react';
 import Box from '../../box';
+import {
+  applyThemeToElement,
+  clearStoredTheme,
+  defaultThemeName,
+  documentRoot,
+  getSystemTheme,
+  readStoredTheme,
+  setThemeAttribute,
+  watchSystemTheme,
+  writeStoredTheme,
+} from '../../core/theme/themeRuntime';
 import { BoxStyleProps } from '../../types';
 import { useGlobalStyles } from '../useStyles';
 import ThemeContext from './themeContext';
@@ -18,34 +29,28 @@ interface ThemeProps {
   globalStyles?: BoxStyleProps;
 }
 
+/**
+ * The React binding for the theme system. Everything that actually touches the platform — reading
+ * and watching `prefers-color-scheme`, persisting the choice, writing the theme onto an element —
+ * lives in the framework-free `core/theme/themeRuntime`; this component only holds the React state
+ * and context around it.
+ */
 function Theme(props: ThemeProps) {
   const { children, theme, use = 'local', storageKey, globalStyles } = props;
 
   useGlobalStyles(use === 'global' ? globalStyles : undefined, 'html');
-  // Initialize with 'light' for SSR consistency - actual system theme is set in useLayoutEffect
-  const [themeName, setThemeName] = useState(theme ?? 'light');
+  // Initialize with the default for SSR consistency - actual system theme is set in useLayoutEffect
+  const [themeName, setThemeName] = useState(theme ?? defaultThemeName);
   const [isUserOverride, setIsUserOverride] = useState(theme !== undefined);
   const localRef = useRef<HTMLDivElement>(null);
 
   const handleSetTheme = useCallback(
     (value: string | null) => {
       if (value === null) {
-        if (storageKey) {
-          try {
-            localStorage.removeItem(storageKey);
-          } catch {
-            // localStorage may be unavailable (SSR, privacy mode)
-          }
-        }
+        if (storageKey) clearStoredTheme(storageKey);
         setIsUserOverride(false);
       } else {
-        if (storageKey) {
-          try {
-            localStorage.setItem(storageKey, value);
-          } catch {
-            // localStorage may be unavailable (SSR, privacy mode)
-          }
-        }
+        if (storageKey) writeStoredTheme(storageKey, value);
         setThemeName(value);
         setIsUserOverride(true);
       }
@@ -73,50 +78,33 @@ function Theme(props: ThemeProps) {
     if (isUserOverride) return;
 
     // Restore persisted theme from localStorage before falling back to system detection
-    if (storageKey) {
-      try {
-        const stored = localStorage.getItem(storageKey);
-        if (stored) {
-          setThemeName(stored);
-          setIsUserOverride(true);
-          return;
-        }
-      } catch {
-        // localStorage may be unavailable (SSR, privacy mode)
-      }
+    const stored = storageKey ? readStoredTheme(storageKey) : null;
+    if (stored) {
+      setThemeName(stored);
+      setIsUserOverride(true);
+      return;
     }
 
-    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+    // Set actual system theme after hydration, then follow it
+    setThemeName(getSystemTheme());
 
-    // Set actual system theme after hydration
-    setThemeName(mediaQuery.matches ? 'dark' : 'light');
-
-    const handleChange = (e: MediaQueryListEvent) => {
-      setThemeName(e.matches ? 'dark' : 'light');
-    };
-
-    mediaQuery.addEventListener('change', handleChange);
-    return () => mediaQuery.removeEventListener('change', handleChange);
+    return watchSystemTheme(setThemeName);
   }, [isUserOverride, storageKey]);
   /* eslint-enable react-hooks/set-state-in-effect */
 
   useLayoutEffect(() => {
     if (use === 'local') return;
 
-    const root = document.documentElement;
-    root.classList.add(themeName);
-    root.setAttribute('data-theme', themeName);
+    const root = documentRoot();
+    if (!root) return;
 
-    return () => {
-      root.classList.remove(themeName);
-      root.removeAttribute('data-theme');
-    };
+    return applyThemeToElement(root, themeName);
   }, [themeName, use]);
 
   // Set data-theme on the local wrapper element
   useLayoutEffect(() => {
     if (use !== 'local' || !localRef.current) return;
-    localRef.current.setAttribute('data-theme', themeName);
+    setThemeAttribute(localRef.current, themeName);
   }, [themeName, use]);
 
   if (use === 'local') {

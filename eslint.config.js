@@ -51,6 +51,25 @@ export default tseslint.config(
     },
   },
   {
+    // The styling engine is the future `@box-kite/core` package: framework-free by construction.
+    // React belongs in the adapter (`src/react/**`) — see CONTRIBUTING.md, "The core boundary".
+    // `npm run check:boundaries` enforces the same rule outside ESLint (JSX, React globals).
+    files: ['src/core/**/*.{ts,tsx}'],
+    ignores: ['**/*.test.{ts,tsx}'],
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          paths: [
+            { name: 'react', message: 'src/core must stay framework-free — put React code in src/react/.' },
+            { name: 'react-dom', message: 'src/core must stay framework-free — put React code in src/react/.' },
+          ],
+          patterns: ['react/*', 'react-dom/*'],
+        },
+      ],
+    },
+  },
+  {
     // The DataGrid engine must stay headless (framework-agnostic): no React, no DOM.
     // Rendering/adapter logic belongs in the components layer.
     files: ['src/components/dataGrid/models/**/*.ts'],

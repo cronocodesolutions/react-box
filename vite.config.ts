@@ -77,9 +77,11 @@ export default defineConfig(({ mode }) => {
       setupFiles: ['./dev/vitest.setup.ts'],
       coverage: {
         provider: 'v8',
-        // The engine is what every other roadmap item builds on, so it is the only thing under a
-        // budget. Components are covered by their own tests without a number attached.
-        include: ['src/core/**'],
+        // The engine and its React binding are what every other roadmap item builds on, so they
+        // are the only things under a budget. Components — and the helper hooks they share — are
+        // covered by their own tests without a number attached.
+        include: ['src/core/**', 'src/react/**'],
+        exclude: ['src/react/hooks/**'],
         reporter: ['text', 'json-summary'],
         thresholds: {
           statements: 90,

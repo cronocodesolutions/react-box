@@ -22,6 +22,8 @@ jobs:
         run: npm run compile
       - name: Check linting 🔧
         run: npm run lint
+      - name: Check core stays framework-free 🔧
+        run: npm run check:boundaries
       - name: Check build 🔧
         run: npm run build
       - name: Check package health (publint + attw) 🔧

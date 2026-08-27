@@ -1,8 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useEffect, useLayoutEffect } from 'react';
+import getDefaultEngine from '../core/engine/defaultEngine';
+import { StylesConfiguration } from '../core/engine/styleEngine';
 import { BoxStyleProps } from '../types';
-import getDefaultEngine from './engine/defaultEngine';
-import { StylesConfiguration } from './engine/styleEngine';
 
 const isBrowser = typeof window !== 'undefined' && typeof window.document !== 'undefined';
 

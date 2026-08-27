@@ -1,6 +1,6 @@
 import React from 'react';
 import ReactDOMServer from 'react-dom/server';
-import { StylesContext } from './core/useStyles';
+import { StylesContext } from './react/useStyles';
 
 /**
  * Server rendering. There is no DOM here and the engine does not pretend there is one: with no

@@ -6,7 +6,7 @@ import { afterEach, beforeEach, describe, expect, it, MockInstance, vi } from 'v
 import Box from './box';
 import Flex from './components/flex';
 import { DEFAULT_STYLE_ELEMENT_ID } from './core/engine/styleEngine';
-import { StylesContext } from './core/useStyles';
+import { StylesContext } from './react/useStyles';
 
 /**
  * Class names are generated, so a mismatch between the server pass and the hydration pass shows up
