@@ -1,5 +1,6 @@
 import { cleanup, render } from '@testing-library/react';
 import { HTMLDivElement, HTMLStyleElement } from 'happy-dom';
+import { StrictMode, useLayoutEffect } from 'react';
 import { afterEach, describe, expect, it, suite } from 'vitest';
 import { ignoreLogs } from '../../dev/tests';
 import Box from '../box';
@@ -701,6 +702,73 @@ describe('useStyles', () => {
       expect(element.classList).toContain('hover-theme-dark-p-3');
       expect(element.classList).toContain('active-theme-dark-p-4');
       expect(element.classList).toContain('focus-theme-dark-p-5');
+    });
+  });
+
+  // When the rules reach the sheet. The React binding flushes from an insertion effect, which
+  // React runs during the commit ahead of every layout effect — so anything that measures or
+  // reads styles in a layout effect sees the CSS of the whole commit, not just of the Boxes that
+  // happened to commit before it.
+  suite('flush scheduling', () => {
+    function styleText(): string {
+      return (document.getElementById('crono-styles') as unknown as HTMLStyleElement | null)?.innerText ?? '';
+    }
+
+    function countOccurrences(text: string, needle: string): number {
+      return text.split(needle).length - 1;
+    }
+
+    it('has the rules of the whole commit in the sheet before any layout effect runs', () => {
+      let cssInLayoutEffect = '';
+
+      // Deliberately mounted *before* the Box that needs the rule: with the previous
+      // layout-effect flush, tree order decided whether this saw `.p-13` or an empty sheet.
+      function Probe() {
+        useLayoutEffect(() => {
+          cssInLayoutEffect = styleText();
+        }, []);
+
+        return null;
+      }
+
+      render(
+        <>
+          <Probe />
+          <Box p={13} />
+        </>,
+      );
+
+      expect(cssInLayoutEffect).toContain('.p-13{padding:3.25rem}');
+    });
+
+    it('writes a rule once under StrictMode double rendering', () => {
+      render(
+        <StrictMode>
+          <Box id={testElementId} p={17} />
+        </StrictMode>,
+      );
+
+      expect(document.getElementById(testElementId)!.classList).toContain('p-17');
+      expect(countOccurrences(styleText(), '.p-17{padding:4.25rem}')).toBe(1);
+    });
+
+    it('declares a variable read outside of any render', async () => {
+      // Nothing renders here, so no effect can flush: the engine's own microtask scheduler is
+      // what gets the declaration into `:root`.
+      expect(Box.getVariableValue('rose-500')).toBe('var(--rose-500)');
+
+      await new Promise((resolve) => setTimeout(resolve, 0));
+
+      expect(styleText()).toContain('--rose-500:');
+    });
+
+    it('writes pending rules immediately on demand', () => {
+      // The escape hatch for code that queues rules outside React and cannot wait for a microtask.
+      expect(Box.getVariableValue('lime-500')).toBe('var(--lime-500)');
+
+      StylesContext.flushSync();
+
+      expect(styleText()).toContain('--lime-500:');
     });
   });
 

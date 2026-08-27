@@ -333,18 +333,41 @@ whole stylesheet:
 
 ```typescript
 // src/core/engine/styleEngine.ts
-const { classNames } = engine.resolveClassNames(props, isSvg); // during render
-engine.flush(); // in a layout effect: pending rules → the sink
+const { classNames } = engine.resolveClassNames(props, isSvg); // during render — queues rules
+engine.flushSync(); // pending rules → the sink, now
 ```
 
 Key mechanisms:
 
 1. **Rule tracking**: Each unique prop combination generates a class name via `IdentityFactory`
 2. **Deduplication**: Same prop values across components share the same CSS class
-3. **Batched insertion**: Styles accumulated during render, flushed in `useLayoutEffect`
+3. **Batched insertion**: Styles accumulated during render, flushed once per commit
 4. **Weight-based ordering**: Rules sorted by pseudo-class weight for correct specificity
 5. **Selector escaping**: A class name is used verbatim as a selector, so characters a CSS
    identifier cannot hold are escaped (`width="1/2"` → class `width-1/2`, selector `.width-1/2`)
+
+### Flush Scheduling (core/engine/flushScheduler.ts)
+
+Resolving class names only *queues* the rules behind them; a **`FlushScheduler`** decides when the
+queue is drained. The engine calls `scheduleFlush()` itself whenever it queues something (a rule, or
+a variable read through `Box.getVariableValue()`), so no caller can leave CSS unflushed, and
+`flushSync()` always writes on the spot. The coordinator coalesces: any number of `scheduleFlush()`
+calls in one turn produce a single flush.
+
+| Adapter | Policy |
+|---------|--------|
+| React (`useStyles`) | `flushSync()` from `useInsertionEffect` (falls back to `useLayoutEffect` on React 16/17) |
+| Vanilla DOM, no commit phase | the default `microtaskScheduler` — nothing can paint before the microtask queue drains |
+| A framework without concurrent rendering (Vue) | `syncScheduler` |
+| Server rendering | no scheduler arrives in time; `getStyles()` flushes itself |
+| Tests wanting full control | `manualScheduler` + `flushSync()` |
+
+React's insertion effects run during the commit ahead of *every* layout effect in it, which is why
+the React binding uses them (React's own recommendation for CSS-in-JS): a component that measures
+its DOM in `useLayoutEffect` sees the CSS of the whole commit, not just of the Boxes that happened
+to commit before it. The scheduled microtask stays as the safety net for rules queued outside a
+commit. `flushScheduler.test.ts` pins the contract; the ordering guarantee is covered in
+`useStyles.test.tsx`.
 
 ### Style Sinks (core/engine/styleSink.ts)
 
@@ -418,10 +441,10 @@ identical class names. `renderToStaticMarkup()` does the whole cycle in one call
 When navigating between pages in a SPA, components may re-render with styles that were already generated but need to be re-applied. The `useStyles` hook handles this via:
 
 ```typescript
-// propsToUse triggers effect when component styles change
-useLayoutEffect(() => {
-  flush();
-}, [propsToUse]);
+// The signature changes whenever the class list does, so every new rule gets a flush
+useFlushEffect(() => {
+  getDefaultEngine().flushSync();
+}, [signature ?? props]);
 ```
 
 ---
@@ -995,7 +1018,7 @@ npm publish --access public
 1. **Styles are cached**: Same prop values generate same class names (via IdentityFactory)
 2. **Lazy generation**: CSS only generated when props are used
 3. **Incremental insertion**: CSS rules added via `insertRule()` not innerHTML replacement
-4. **Single flush**: Styles batched and flushed together with `useLayoutEffect`
+4. **Single flush**: Styles batched and flushed together, once per commit
 5. **Component memoization**: Box uses `React.memo` to prevent unnecessary renders
 6. **Deep merge optimization**: Component styles merged efficiently
 7. **Pending variables**: New CSS variables added incrementally, not regenerating all
