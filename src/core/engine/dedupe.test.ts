@@ -109,9 +109,9 @@ describe('rule ordering', () => {
     const engine = createStyleEngine({ classNames: 'readable', sink: 'cssom', styleElementId: 'order-cssom' });
 
     engine.resolveClassNames({ p: 4 }, false);
-    engine.flush();
+    engine.flushSync();
     engine.resolveClassNames({ b: 1 }, false);
-    engine.flush();
+    engine.flushSync();
 
     const sheet = (document.getElementById('order-cssom') as HTMLStyleElement).sheet;
     const generated = [...(sheet?.cssRules ?? [])]

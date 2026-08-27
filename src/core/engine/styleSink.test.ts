@@ -45,7 +45,7 @@ describe('style sinks', () => {
       const engine = makeEngine(mode, `sink-order-${mode}`);
 
       engine.resolveClassNames({ p: 4 }, false);
-      engine.flush();
+      engine.flushSync();
       engine.resolveClassNames({ b: 1 }, false);
 
       expect(selectorsOf(engine.getStyles()), mode).toEqual(['.b-1', '.p-4']);
@@ -57,7 +57,7 @@ describe('style sinks', () => {
       const engine = makeEngine(mode, `sink-tie-${mode}`);
 
       engine.resolveClassNames({ p: 4 }, false);
-      engine.flush();
+      engine.flushSync();
       engine.resolveClassNames({ p: 8 }, false);
 
       expect(selectorsOf(engine.getStyles()), mode).toEqual(['.p-4', '.p-8']);
@@ -71,7 +71,7 @@ describe('style sinks', () => {
       // Split over two flushes on purpose: breakpoints, pseudo classes and plain props have to
       // interleave by sort key, not by the flush they happened to arrive in.
       engine.resolveClassNames({ p: 4, sm: { p: 2 }, hover: { bgColor: 'red-500' } }, false);
-      engine.flush();
+      engine.flushSync();
       engine.resolveClassNames({ b: 1, xl: { m: 8 }, color: 'blue-500' }, false);
 
       return selectorsOf(engine.getStyles());
@@ -97,7 +97,7 @@ describe('style sinks', () => {
       const engine = makeEngine(mode, `sink-base-${mode}`);
 
       engine.resolveClassNames({ p: 4 }, false);
-      engine.flush();
+      engine.flushSync();
       engine.resolveClassNames({ m: 4 }, false);
 
       const css = engine.getStyles();
@@ -113,7 +113,7 @@ describe('style sinks', () => {
       const engine = makeEngine(mode, `sink-vars-${mode}`);
 
       engine.resolveClassNames({ bgColor: 'red-500' }, false);
-      engine.flush();
+      engine.flushSync();
       engine.resolveClassNames({ color: 'blue-500' }, false);
 
       const css = engine.getStyles();
@@ -128,7 +128,7 @@ describe('style sinks', () => {
       const engine = makeEngine(mode, `sink-reset-${mode}`);
 
       engine.resolveClassNames({ p: 4 }, false);
-      engine.flush();
+      engine.flushSync();
       engine.clear();
 
       // Nothing generated survives; the base reset is rewritten, so the sheet is never invalid.
@@ -175,7 +175,7 @@ describe('style sinks', () => {
       const engine = makeEngine(mode, `sink-dedupe-${mode}`);
 
       engine.resolveClassNames({ p: 4 }, false);
-      engine.flush();
+      engine.flushSync();
       engine.resolveClassNames({ p: 4 }, false);
 
       expect(countSelector(engine.getStyles(), '.p-4'), mode).toBe(1);
@@ -218,7 +218,7 @@ describe('style sinks', () => {
     const engine = makeEngine('textContent', 'sink-switch');
 
     engine.resolveClassNames({ p: 4 }, false);
-    engine.flush();
+    engine.flushSync();
     expect(hasSelector(engine.getStyles(), '.p-4')).toBe(true);
 
     engine.configure({ sink: 'string' });

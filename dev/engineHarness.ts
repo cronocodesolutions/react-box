@@ -1,5 +1,5 @@
 import { HTMLStyleElement } from 'happy-dom';
-import { createStyleEngine, StyleEngine } from '../src/core/engine/styleEngine';
+import { createStyleEngine, StyleEngine, StyleEngineOptions } from '../src/core/engine/styleEngine';
 import { BoxStyleProps } from '../src/types';
 
 /**
@@ -11,8 +11,8 @@ import { BoxStyleProps } from '../src/types';
 /** The last rule the engine writes when it initializes — everything after it is generated CSS. */
 export const LAST_BASE_RULE = '._s path,._s circle,._s rect,._s line {transition: all var(--svgTransitionTime);}';
 
-export function makeEngine(styleElementId: string): StyleEngine {
-  return createStyleEngine({ classNames: 'readable', sink: 'textContent', styleElementId });
+export function makeEngine(styleElementId: string, options: StyleEngineOptions = {}): StyleEngine {
+  return createStyleEngine({ classNames: 'readable', sink: 'textContent', styleElementId, ...options });
 }
 
 /** Everything in the engine's style element, base rules included. */
@@ -37,7 +37,7 @@ export function generatedRulesOf(engine: StyleEngine): string {
 /** Resolve a Box's class names and flush, the way a render would. */
 export function renderStyles(engine: StyleEngine, props: BoxStyleProps, isSvg = false): string[] {
   const { classNames } = engine.resolveClassNames(props, isSvg);
-  engine.flush();
+  engine.flushSync();
 
   return classNames;
 }

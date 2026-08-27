@@ -31,8 +31,9 @@ Node version: v24 (pinned in .nvmrc).
 - `src/core/boxStylesFormatters.ts` — Value formatters that convert prop values to CSS (rem, px, fractions, etc.)
 - `src/core/engine/styleEngine.ts` — `createStyleEngine()`: all engine state (class-name cache, rule registry, identity factory, variables, prop and component registries) on an instance; generates class names and rules
 - `src/core/engine/styleSink.ts` — Where the CSS goes: `cssom` (`insertRule`), `textContent`, or `string` (server rendering, no DOM). Every sink places a rule by its sort key, so all three produce the same cascade
+- `src/core/engine/flushScheduler.ts` — *When* pending rules reach the sink: an injectable `FlushScheduler` (microtask by default) plus `flushSync()`, so an adapter without effects still gets its CSS
 - `src/core/engine/defaultEngine.ts` — The lazily-created default instance every public API delegates to
-- `src/core/useStyles.ts` — The React binding: resolves class names during render, batches flushes in `useLayoutEffect`
+- `src/core/useStyles.ts` — The React binding: resolves class names during render, flushes from `useInsertionEffect` (ahead of every layout effect in the commit)
 - `src/core/variables.ts` — CSS variables (200+ Tailwind-like colors), lazy-loaded via pending variables system
 - `src/core/classNames.ts` — Conditional className utility
 

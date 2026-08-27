@@ -17,6 +17,7 @@ import { BoxStyle } from '../coreTypes';
 import defaultBoxComponents, { BoxComponent, Components } from '../extends/boxComponents';
 import { resolveComponentStyles } from '../extends/useComponents';
 import Variables from '../variables';
+import { createFlushCoordinator, FlushScheduler, microtaskScheduler } from './flushScheduler';
 import { createSink, SinkMode, SortedRule, StyleSink } from './styleSink';
 
 /** Explicit engine configuration — replaces the previous NODE_ENV-based sniffing. */
@@ -46,6 +47,11 @@ export interface StyleEngineOptions extends StylesConfiguration {
    * instances never corrupt each other's rule ordering. Defaults to a unique id per engine.
    */
   styleElementId?: string;
+  /**
+   * When pending rules reach the sink. Defaults to a microtask — see `FlushScheduler` for the
+   * contract and what each adapter passes. `flushSync()` works regardless of this.
+   */
+  scheduler?: FlushScheduler;
 }
 
 /**
@@ -60,8 +66,15 @@ export interface StyleEngine {
   resolveClassNames(props: BoxStyleProps<any>, isSvg: boolean): { classNames: string[]; signature: string | null };
   /** Register rules that target a root selector (e.g. `html`) rather than a generated class. */
   addGlobalStyles(props: BoxStyleProps<any>, selector: string): void;
-  /** Write every pending rule to this engine's sink. */
-  flush(): void;
+  /** Write every pending rule to this engine's sink, now. */
+  flushSync(): void;
+  /**
+   * Say that rules are pending and let this engine's `FlushScheduler` decide when they are
+   * written; many calls in one turn produce one flush. The engine calls this itself whenever it
+   * queues something, so nothing is ever left unflushed — an adapter needs it only for rules it
+   * queued behind the engine's back.
+   */
+  scheduleFlush(): void;
   /**
    * The CSS this engine has emitted, as text. Flushes first, so a server render — where no effect
    * ever runs — still gets every rule its markup refers to.
@@ -322,6 +335,9 @@ export function createStyleEngine(options: StyleEngineOptions = {}): StyleEngine
       if (result) {
         pendingRules.push([result.sortIndex, result.breakpointOrder, result.rule]);
         requireFlush = true;
+        // The engine, not the caller, owns "something is pending" — an adapter that never flushes
+        // (vanilla DOM, a framework with no commit phase) still gets its CSS.
+        scheduleFlush();
       } else {
         unsupportedRules.add(ruleKey);
       }
@@ -530,6 +546,8 @@ export function createStyleEngine(options: StyleEngineOptions = {}): StyleEngine
     requireFlush = false;
   }
 
+  const scheduleFlush = createFlushCoordinator(flush, options.scheduler ?? microtaskScheduler);
+
   /** Forget everything emitted so far, in the sink and in the engine's own bookkeeping. */
   function clear() {
     generatedRules.clear();
@@ -575,10 +593,13 @@ export function createStyleEngine(options: StyleEngineOptions = {}): StyleEngine
       addClassNames(props, throwawayClassNames, [], undefined, undefined, selector);
     },
 
-    flush,
+    flushSync: flush,
+
+    scheduleFlush,
 
     getStyles() {
-      // A server render leaves everything pending — nothing schedules a flush without effects.
+      // A server render is synchronous and finishes before any scheduled flush can run, so the
+      // queue is still full at this point — draining it here is what makes the CSS complete.
       flush();
 
       return getSink().getStyles();
@@ -639,6 +660,13 @@ export function createStyleEngine(options: StyleEngineOptions = {}): StyleEngine
       return componentsStyles;
     },
 
-    getVariableValue: variables.getVariableValue,
+    getVariableValue(name: string) {
+      const value = variables.getVariableValue(name);
+      // Reading a variable is enough to make it pending: it has to reach `:root` even when no
+      // rule was generated alongside it.
+      scheduleFlush();
+
+      return value;
+    },
   };
 }

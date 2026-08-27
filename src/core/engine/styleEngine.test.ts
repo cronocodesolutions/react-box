@@ -15,7 +15,7 @@ function rulesOf(engine: StyleEngine) {
 
 function renderStyles(engine: StyleEngine, props: Parameters<StyleEngine['resolveClassNames']>[0]) {
   const { classNames } = engine.resolveClassNames(props, false);
-  engine.flush();
+  engine.flushSync();
 
   return classNames;
 }
@@ -120,8 +120,8 @@ describe('createStyleEngine', () => {
     const b = makeEngine('engine-vars-b');
 
     a.getVariableValue('red-500');
-    a.flush();
-    b.flush();
+    a.flushSync();
+    b.flushSync();
 
     expect(rulesOf(a)).toContain('--red-500');
     expect(rulesOf(b)).not.toContain('--red-500');

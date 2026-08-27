@@ -1,23 +1,33 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { useEffect, useLayoutEffect } from 'react';
+import React, { useEffect, useLayoutEffect } from 'react';
 import { BoxStyleProps } from '../types';
 import getDefaultEngine from './engine/defaultEngine';
 import { StylesConfiguration } from './engine/styleEngine';
 
 const isBrowser = typeof window !== 'undefined' && typeof window.document !== 'undefined';
 
-const useEff = isBrowser ? useLayoutEffect : useEffect;
+// React's own recommendation for injecting CSS-in-JS rules. Insertion effects run during the
+// commit, ahead of *every* layout effect in it, so a component that measures its DOM in
+// `useLayoutEffect` already sees the styles — with a layout-effect flush it saw them only if the
+// Box happened to commit earlier in the tree. Added in React 18, and the peer range starts at
+// 16.14, so fall back to a layout effect there. Off the browser no flush effect can help: nothing
+// paints and `getStyles()` flushes for itself (see `ssg.ts`), so `useEffect` keeps React quiet.
+const useInsertionEffect: typeof useLayoutEffect =
+  (React as { useInsertionEffect?: typeof useLayoutEffect }).useInsertionEffect ?? useLayoutEffect;
+const useFlushEffect = isBrowser ? useInsertionEffect : useEffect;
 
 export type { StylesConfiguration };
 
 export default function useStyles(props: BoxStyleProps<any>, isSvg: boolean) {
   const { classNames, signature } = getDefaultEngine().resolveClassNames(props, isSvg);
 
-  // Flush after DOM is ready. Keyed on the stable signature so it only re-runs when the class
-  // list changes; a cache hit added no rules, and a miss (new signature) fires the effect and
-  // flush() drains all pending rules globally. Falls back to `props` when the signature is null.
-  useEff(() => {
-    getDefaultEngine().flush();
+  // Flush during the commit, before anything can paint or measure. Keyed on the stable signature
+  // so it only re-runs when the class list changes; a cache hit added no rules, and a miss (new
+  // signature) fires the effect and the flush drains all pending rules globally. Falls back to
+  // `props` when the signature is null. Rules queued by a render that never commits are not lost
+  // either — the engine schedules a microtask flush of its own when it queues them.
+  useFlushEffect(() => {
+    getDefaultEngine().flushSync();
   }, [signature ?? props]);
 
   return classNames;
@@ -28,15 +38,16 @@ export function useGlobalStyles(props: BoxStyleProps<any> | undefined, selector:
     getDefaultEngine().addGlobalStyles(props, selector);
   }
 
-  useEff(() => {
-    getDefaultEngine().flush();
+  useFlushEffect(() => {
+    getDefaultEngine().flushSync();
   }, [props, selector]);
 }
 
 /** Engine controls for the default instance. For an isolated engine use `createStyleEngine()`. */
 export namespace StylesContext {
-  export function flush() {
-    getDefaultEngine().flush();
+  /** Write every pending rule now. The React binding calls this from an insertion effect. */
+  export function flushSync() {
+    getDefaultEngine().flushSync();
   }
 
   export function clear() {
