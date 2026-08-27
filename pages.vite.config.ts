@@ -7,9 +7,10 @@ export default defineConfig(({ mode }) => {
     build: {
       emptyOutDir: true,
       minify: mode !== 'dev',
-      rollupOptions: {
-        input: 'pages/index.html',
-      },
+      // No explicit input: both scripts pass `./pages` as the root, so Vite's default
+      // `<root>/index.html` is the entry. Naming it `pages/index.html` resolved against the root
+      // (`pages/pages/index.html`), which made the dev server's dependency scan fail and skip
+      // pre-bundling entirely.
     },
   };
 });
