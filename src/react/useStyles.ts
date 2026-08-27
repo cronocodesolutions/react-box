@@ -3,6 +3,8 @@ import React, { useEffect, useLayoutEffect } from 'react';
 import getDefaultEngine from '../core/engine/defaultEngine';
 import { StylesConfiguration } from '../core/engine/styleEngine';
 import { BoxStyleProps } from '../types';
+import resolveStyles, { ResolvedBoxStyles } from './resolveStyles';
+import styleElementsOf from './styleElements';
 
 const isBrowser = typeof window !== 'undefined' && typeof window.document !== 'undefined';
 
@@ -18,8 +20,8 @@ const useFlushEffect = isBrowser ? useInsertionEffect : useEffect;
 
 export type { StylesConfiguration };
 
-export default function useStyles(props: BoxStyleProps<any>, isSvg: boolean) {
-  const { classNames, signature } = getDefaultEngine().resolveClassNames(props, isSvg);
+export default function useStyles(props: BoxStyleProps<any>, isSvg: boolean): ResolvedBoxStyles {
+  const { classNames, signature, styleElements } = resolveStyles(props, isSvg);
 
   // Flush during the commit, before anything can paint or measure. Keyed on the stable signature
   // so it only re-runs when the class list changes; a cache hit added no rules, and a miss (new
@@ -30,17 +32,21 @@ export default function useStyles(props: BoxStyleProps<any>, isSvg: boolean) {
     getDefaultEngine().flushSync();
   }, [signature ?? props]);
 
-  return classNames;
+  return { classNames, styleElements };
 }
 
-export function useGlobalStyles(props: BoxStyleProps<any> | undefined, selector: string) {
-  if (props) {
-    getDefaultEngine().addGlobalStyles(props, selector);
-  }
+/**
+ * Rules that target a root selector (`html`) instead of a class. Returns their style elements in
+ * element mode — global styles belong to no Box, so the caller has to render them itself.
+ */
+export function useGlobalStyles(props: BoxStyleProps<any> | undefined, selector: string): React.ReactElement[] | undefined {
+  const descriptors = props ? getDefaultEngine().addGlobalStyles(props, selector) : undefined;
 
   useFlushEffect(() => {
     getDefaultEngine().flushSync();
   }, [props, selector]);
+
+  return styleElementsOf(descriptors);
 }
 
 /** Engine controls for the default instance. For an isolated engine use `createStyleEngine()`. */

@@ -7,6 +7,7 @@
  * generated rule sits at the position its `sortKey` gives it, whichever flush it arrived in, so
  * an app rendered on the server gets the same cascade the browser builds.
  */
+import { stableHash } from '../hash';
 
 /** A generated rule plus the sort key that fixes its position in the cascade. */
 export interface SortedRule {
@@ -14,7 +15,27 @@ export interface SortedRule {
   rule: string;
 }
 
-export type SinkMode = 'cssom' | 'textContent' | 'string';
+/**
+ * One hoistable `<style>` element: the CSS it carries, the `href` React 19 dedupes it by, and the
+ * precedence group it belongs to. Element mode writes nowhere — it hands these to the adapter, and
+ * the adapter renders them, which is what makes the mode work inside Server Components and
+ * streaming SSR where no effect (and no DOM) is available.
+ */
+export interface StyleElementDescriptor {
+  /** Content-addressed: the same CSS always produces the same href, in every process. */
+  href: string;
+  css: string;
+  precedence: string;
+  /** Cascade position, so a list of descriptors can be kept in rule order. */
+  sortKey: number;
+}
+
+/** The precedence group of the engine's base element (reset, `:root`, the cascade-layer order). */
+export const BASE_PRECEDENCE = 'rb-base';
+/** The precedence group every generated rule element belongs to. */
+export const RULE_PRECEDENCE = 'rb';
+
+export type SinkMode = 'cssom' | 'textContent' | 'string' | 'element';
 
 export interface StyleSink {
   /** Which implementation this is. */
@@ -29,6 +50,12 @@ export interface StyleSink {
   getStyles(): string;
   /** Drop everything written so far. */
   reset(): void;
+  /**
+   * Element mode only: the base rules (reset, `:root` variables, the cascade-layer order) as one
+   * hoistable element — null before anything has been written. The href follows the content, so a
+   * later, longer version of the block is a new element and not a silently-dropped duplicate.
+   */
+  baseElement?(): StyleElementDescriptor | null;
 }
 
 /** First index whose key is strictly greater than `key` — so equal keys keep insertion order. */
@@ -73,6 +100,10 @@ function createRuleBuffer() {
         rules.splice(index, 0, rule);
       }
     },
+    /** The base rules only: the reset, the `:root` blocks, and in element mode the layer order. */
+    getBaseStyles() {
+      return [...variableRules, ...baseRules].join('\n');
+    },
     getStyles() {
       // Base rules stay newline-separated and generated rules are concatenated, the way the
       // engine has always written them — the output is what SSR ships and tests read.
@@ -89,7 +120,52 @@ function createRuleBuffer() {
 
 /** Collects CSS in memory. The server-rendering sink, and the fallback wherever there is no DOM. */
 export function createStringSink(): StyleSink {
-  return { mode: 'string', ...createRuleBuffer() };
+  const { getBaseStyles: _, ...buffer } = createRuleBuffer();
+
+  return { mode: 'string', ...buffer };
+}
+
+/**
+ * Element mode: nothing is written anywhere. The engine turns each generated rule into a
+ * `StyleElementDescriptor` and the adapter renders it as `<style href precedence>`; React 19
+ * hoists those into `<head>` and dedupes them by href. This sink only keeps the same in-memory
+ * rule model the string sink does — so `getStyles()` still returns the full stylesheet — plus the
+ * base rules as the one descriptor no single Box owns.
+ */
+export function createElementSink(): StyleSink {
+  const buffer = createRuleBuffer();
+  let base: StyleElementDescriptor | null = null;
+  // Hashing the base block (a few kB) on every Box render would be wasteful, so it is recomputed
+  // only after something actually changed it — a new variable, or the very first flush.
+  let baseChanged = true;
+
+  return {
+    mode: 'element',
+    writeBase(rules) {
+      buffer.writeBase(rules);
+      baseChanged = true;
+    },
+    writeVariables(rule) {
+      buffer.writeVariables(rule);
+      baseChanged = true;
+    },
+    writeRules: buffer.writeRules,
+    getStyles: buffer.getStyles,
+    reset() {
+      buffer.reset();
+      base = null;
+      baseChanged = true;
+    },
+    baseElement() {
+      if (baseChanged) {
+        const css = buffer.getBaseStyles();
+        base = css ? { href: `${BASE_PRECEDENCE}-${stableHash(css)}`, css, precedence: BASE_PRECEDENCE, sortKey: -1 } : null;
+        baseChanged = false;
+      }
+
+      return base;
+    },
+  };
 }
 
 /** Writes the whole rule model into the style element's text on every change. */
@@ -224,6 +300,9 @@ export function resolveStyleElement(styleElementId: string): HTMLStyleElement {
  * the browser, a string on the server — which is why server rendering needs no fake `document`.
  */
 export function createSink(styleElementId: string, mode?: SinkMode): StyleSink {
+  // Element mode has to be asked for: it changes what the adapter renders, not just where CSS
+  // goes, so it can never be inferred from the environment.
+  if (mode === 'element') return createElementSink();
   if (mode === 'string' || !canUseDom()) return createStringSink();
 
   const getElement = () => resolveStyleElement(styleElementId);

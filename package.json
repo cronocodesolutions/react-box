@@ -8,9 +8,19 @@
   "types": "./box.d.ts",
   "exports": {
     ".": {
+      "react-server": {
+        "types": "./rsc.d.ts",
+        "import": "./rsc.mjs",
+        "require": "./rsc.cjs"
+      },
       "types": "./box.d.ts",
       "import": "./box.mjs",
       "require": "./box.cjs"
+    },
+    "./rsc": {
+      "types": "./rsc.d.ts",
+      "import": "./rsc.mjs",
+      "require": "./rsc.cjs"
     },
     "./ssg": {
       "types": "./ssg.d.ts",
@@ -39,7 +49,7 @@
     "test:coverage": "vitest run --coverage",
     "test:watch": "vitest",
     "lint": "eslint .",
-    "check:boundaries": "node scripts/check-core-boundary.mjs",
+    "check:boundaries": "node scripts/check-core-boundary.mjs && node scripts/check-rsc-boundary.mjs",
     "check:package": "publint dist && attw --pack dist --ignore-rules false-esm cjs-resolves-to-esm internal-resolution-error",
     "size": "size-limit"
   },
@@ -52,7 +62,17 @@
         "react-dom"
       ],
       "gzip": true,
-      "limit": "14.5 KB"
+      "limit": "16.5 KB"
+    },
+    {
+      "name": "Box in a Server Component (react-server entry)",
+      "path": "dist/rsc.mjs",
+      "ignore": [
+        "react",
+        "react-dom"
+      ],
+      "gzip": true,
+      "limit": "15 KB"
     },
     {
       "name": "DataGrid",

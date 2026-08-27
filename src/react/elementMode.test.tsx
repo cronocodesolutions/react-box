@@ -1,0 +1,139 @@
+import { act, cleanup, render } from '@testing-library/react';
+import React from 'react';
+import { hydrateRoot } from 'react-dom/client';
+import { renderToStaticMarkup, renderToString } from 'react-dom/server';
+import { afterEach, describe, expect, it, vi } from 'vitest';
+import Box from '../box';
+import { StylesContext } from './useStyles';
+
+/**
+ * Element mode through the React binding: Box renders its CSS as `<style href precedence>` siblings
+ * and React 19 hoists them into `<head>`, dedupes them by href and keeps the precedence groups in
+ * order. This is the emission path that needs no effect, and therefore no client runtime — the
+ * reason it works in a Server Component and in streaming SSR.
+ *
+ * Configured for the whole file: the sink is a property of the engine, and Vitest gives every test
+ * file its own module registry, so no other suite sees this.
+ */
+StylesContext.configure({ sink: 'element' });
+
+// Hoisting is React 19. The 18 lane of the CI matrix runs the fallback expectations at the bottom.
+const canHoist = parseInt(React.version, 10) >= 19;
+
+/** The hoisted style elements, in document order. */
+function hoisted() {
+  return [...document.head.querySelectorAll('style[data-precedence]')] as unknown as HTMLStyleElement[];
+}
+
+function hrefsIn(elements: HTMLStyleElement[]) {
+  return elements.map((element) => element.getAttribute('data-href'));
+}
+
+describe('element mode', () => {
+  afterEach(cleanup);
+
+  describe.skipIf(!canHoist)('with React 19', () => {
+    it('hoists the CSS into the head and leaves the markup alone', () => {
+      const { container } = render(<Box p={4} lineHeight={24} />);
+
+      expect(container.innerHTML).toBe('<div class="_b p-4 lineHeight-24"></div>');
+
+      const elements = hoisted();
+      const css = elements.map((element) => element.textContent).join('');
+
+      expect(css).toContain('.p-4{padding:1rem}');
+      // The base element carries the layer order, so it has to be the first one in the head.
+      expect(elements[0].getAttribute('data-precedence')).toBe('rb-base');
+      expect(elements[0].textContent!.startsWith('@layer rb,')).toBe(true);
+      expect(elements.at(-1)!.getAttribute('data-precedence')).toBe('rb');
+    });
+
+    it('keeps one element per rule however many Boxes need it', () => {
+      render(
+        <>
+          <Box b={1} />
+          <Box b={1} />
+          <Box b={1} mt={3} />
+        </>,
+      );
+
+      const hrefs = hrefsIn(hoisted());
+
+      expect(hrefs.length).toBe(new Set(hrefs).size);
+      expect(hoisted().filter((element) => element.textContent!.includes('.b-1{border-width:1px}')).length).toBe(1);
+    });
+
+    it('renders the elements as siblings, so a void tag still works', () => {
+      // Children would be a hard React error on `input`; hoisted siblings are fine.
+      const { container } = render(<Box tag="input" p={2} />);
+
+      expect(container.innerHTML).toBe('<input class="_b p-2">');
+      expect(hoisted().some((element) => element.textContent!.includes('.p-2{padding:0.5rem}'))).toBe(true);
+    });
+
+    it('puts the CSS in the head of a server-rendered document', () => {
+      const html = renderToStaticMarkup(
+        <html>
+          <head />
+          <body>
+            <Box gap={6} />
+          </body>
+        </html>,
+      );
+
+      const head = html.slice(html.indexOf('<head>'), html.indexOf('</head>'));
+
+      expect(head).toContain('data-precedence="rb-base"');
+      expect(head).toContain('.gap-6{gap:1.5rem}');
+      expect(html).toContain('<div class="_b gap-6"></div>');
+    });
+
+    it('hydrates server output without a mismatch', async () => {
+      const tree = (
+        <Box p={5} theme={{ dark: { p: 7 } }}>
+          <Box tag="span" fontSize={14} />
+        </Box>
+      );
+      const container = document.createElement('div');
+      document.body.appendChild(container);
+      container.innerHTML = renderToString(tree);
+
+      const errors = vi.spyOn(console, 'error').mockImplementation(() => {});
+      let root: ReturnType<typeof hydrateRoot>;
+      await act(async () => {
+        root = hydrateRoot(container, tree);
+      });
+
+      const mismatches = errors.mock.calls
+        .map((args) => args.map(String).join(' '))
+        .filter((message) => /hydration failed|did not match|didn't match|expected server html/i.test(message));
+
+      errors.mockRestore();
+      expect(mismatches).toEqual([]);
+      expect(container.innerHTML).toContain(`class="_b p-5 theme-dark-p-7"`);
+
+      await act(async () => root.unmount());
+      container.remove();
+    });
+
+    it('carries the global styles of a global theme', () => {
+      render(
+        <Box.Theme use="global" globalStyles={{ overflow: 'hidden' }}>
+          <Box />
+        </Box.Theme>,
+      );
+
+      expect(hoisted().some((element) => element.textContent!.includes('html{overflow:hidden}'))).toBe(true);
+    });
+  });
+
+  describe.skipIf(canHoist)('with React 18, which cannot hoist', () => {
+    it('renders the style elements inline instead', () => {
+      const { container } = render(<Box p={4} />);
+
+      expect(container.querySelectorAll('style').length).toBeGreaterThan(0);
+      expect(container.innerHTML).toContain('.p-4{padding:1rem}');
+      expect(container.innerHTML).toContain('<div class="_b p-4"></div>');
+    });
+  });
+});

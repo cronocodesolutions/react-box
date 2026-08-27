@@ -97,7 +97,7 @@ const reactFiles = walk('src/react');
 const isHook = (path) => path.startsWith('src/react/hooks/');
 
 const core = measure(coreFiles);
-const binding = measure([...reactFiles.filter((p) => !isHook(p)), 'src/box.ts', 'src/ssg.ts']);
+const binding = measure([...reactFiles.filter((p) => !isHook(p)), 'src/box.ts', 'src/rsc.ts', 'src/ssg.ts']);
 const helpers = measure(reactFiles.filter(isHook));
 const share = ((binding.lines / (core.lines + binding.lines)) * 100).toFixed(1);
 

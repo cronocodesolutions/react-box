@@ -38,7 +38,9 @@ interface ThemeProps {
 function Theme(props: ThemeProps) {
   const { children, theme, use = 'local', storageKey, globalStyles } = props;
 
-  useGlobalStyles(use === 'global' ? globalStyles : undefined, 'html');
+  // In element mode the global rules come back as `<style>` elements to render: they target `html`,
+  // so no Box owns them and nothing else would put them in the document.
+  const globalStyleElements = useGlobalStyles(use === 'global' ? globalStyles : undefined, 'html');
   // Initialize with the default for SSR consistency - actual system theme is set in useLayoutEffect
   const [themeName, setThemeName] = useState(theme ?? defaultThemeName);
   const [isUserOverride, setIsUserOverride] = useState(theme !== undefined);
@@ -110,6 +112,7 @@ function Theme(props: ThemeProps) {
   if (use === 'local') {
     return (
       <ThemeContext.Provider value={{ theme: themeName, setTheme: handleSetTheme }}>
+        {globalStyleElements}
         <Box ref={localRef} className={themeName}>
           {children}
         </Box>
@@ -117,7 +120,12 @@ function Theme(props: ThemeProps) {
     );
   }
 
-  return <ThemeContext.Provider value={{ theme: themeName, setTheme: handleSetTheme }}>{children}</ThemeContext.Provider>;
+  return (
+    <ThemeContext.Provider value={{ theme: themeName, setTheme: handleSetTheme }}>
+      {globalStyleElements}
+      {children}
+    </ThemeContext.Provider>
+  );
 }
 
 namespace Theme {

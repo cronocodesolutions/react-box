@@ -1,57 +1,27 @@
 import React, { forwardRef, memo, Ref, RefAttributes, useMemo, useState } from 'react';
-import { classNames, ClassNameType } from './core/classNames';
 import getDefaultEngine from './core/engine/defaultEngine';
 import BoxExtends from './core/extends/boxExtends';
+import { BoxCoreProps } from './react/boxProps';
+import buildTagProps from './react/boxTagProps';
 import useVisibility from './react/hooks/useVisibility';
 import { ExtractElementFromTag } from './react/reactTypes';
 import Theme from './react/theme/theme';
 import useStyles, { StylesContext } from './react/useStyles';
-import { BoxStyleProps, ComponentsAndVariants } from './types';
-import BoxUtils from './utils/box/boxUtils';
-
-type AllProps<TTag extends keyof React.JSX.IntrinsicElements> = React.ComponentProps<TTag>;
-type TagPropsType<TTag extends keyof React.JSX.IntrinsicElements> = Omit<
-  AllProps<TTag>,
-  'className' | 'style' | 'ref' | 'disabled' | 'required' | 'checked' | 'id'
->;
-
-interface Props<TTag extends keyof React.JSX.IntrinsicElements, TKey extends keyof ComponentsAndVariants> extends BoxStyleProps<TKey> {
-  children?: React.ReactNode | ((props: { isHover: boolean }) => React.ReactNode);
-  /** html tag element */
-  tag?: TTag;
-  /** props (attributes) related to html tag */
-  props?: TagPropsType<TTag>;
-  /** classNames. supports conditional classNames. */
-  className?: ClassNameType;
-  /** CSSProperties */
-  style?: React.ComponentProps<TTag>['style'];
-  /** The HTML id attribute is used to specify a unique id for an HTML element. */
-  id?: string;
-}
+import { ComponentsAndVariants } from './types';
 
 function BoxComponent<TTag extends keyof React.JSX.IntrinsicElements = 'div', TKey extends keyof ComponentsAndVariants = never>(
-  props: Props<TTag, TKey>,
+  props: BoxCoreProps<TTag, TKey>,
   ref: Ref<ExtractElementFromTag<TTag>>,
 ) {
-  const { tag = 'div', children, props: tagProps, className: userClassName, disabled, required, checked, selected } = props;
+  const { tag = 'div', children } = props;
 
-  const styleClasses = useStyles(props, tag === 'svg');
+  const { classNames: styleClasses, styleElements } = useStyles(props, tag === 'svg');
 
   const finalTagProps = useMemo(() => {
-    const className = classNames(styleClasses, userClassName).join(' ');
-    const propsToUse = {
-      ...tagProps,
-      className,
-    } as AllProps<TTag>;
-    BoxUtils.assignBooleanProp(disabled, 'disabled', propsToUse);
-    BoxUtils.assignBooleanProp(required, 'required', propsToUse);
-    BoxUtils.assignBooleanProp(checked, 'checked', propsToUse);
-    BoxUtils.assignBooleanProp(selected, 'selected', propsToUse);
-    'style' in props && (propsToUse.style = props.style);
-    'id' in props && (propsToUse.id = props.id);
+    const propsToUse = buildTagProps(props, styleClasses);
     ref && (propsToUse.ref = ref as React.RefObject<HTMLElement>);
 
-    return propsToUse;
+    return propsToUse as React.ComponentProps<TTag>;
     // Intentionally keyed on the whole props object — Box is memoized, so props is referentially
     // stable unless something actually changed, and all derived values come from it.
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -63,12 +33,17 @@ function BoxComponent<TTag extends keyof React.JSX.IntrinsicElements = 'div', TK
     ? { ...finalTagProps, onMouseEnter: () => setIsHover(true), onMouseLeave: () => setIsHover(false) }
     : finalTagProps;
 
-  return React.createElement(tag, elementProps, needsHoverState ? children({ isHover }) : children);
+  const element = React.createElement(tag, elementProps, needsHoverState ? children({ isHover }) : children);
+
+  // Element mode: the CSS travels with the markup. The style elements are siblings rather than
+  // children — a void tag (`input`, `img`) cannot have children — and React 19 hoists them out of
+  // the tree into `<head>` anyway, so nothing of them is left where they were rendered.
+  return styleElements ? React.createElement(React.Fragment, null, styleElements, element) : element;
 }
 
 interface BoxType {
   <TTag extends keyof React.JSX.IntrinsicElements = 'div', TKey extends keyof ComponentsAndVariants = never>(
-    props: Props<TTag, TKey> & RefAttributes<ExtractElementFromTag<TTag>>,
+    props: BoxCoreProps<TTag, TKey> & RefAttributes<ExtractElementFromTag<TTag>>,
   ): React.ReactNode;
   extend: typeof BoxExtends.extend;
   components: typeof BoxExtends.components;
