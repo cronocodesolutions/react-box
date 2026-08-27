@@ -8,18 +8,18 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Commands
 
-| Command                                    | Purpose                                                                          |
-| ------------------------------------------ | -------------------------------------------------------------------------------- |
-| `npm run dev`                              | Start Vite dev server for the demo pages                                         |
-| `npm run build`                            | Build library (ESM + CJS output to dist/)                                        |
-| `npm run build:dev`                        | Build library without minification                                               |
-| `npm run compile`                          | TypeScript type check (no emit)                                                  |
-| `npm test`                                 | Run all tests (Vitest)                                                           |
-| `npm run test:coverage`                    | Run all tests and enforce the coverage budget on `src/core/`                     |
-| `npm run test:watch`                       | Run tests in watch mode                                                          |
-| `npx vitest run src/path/to/file.test.tsx` | Run a single test file                                                           |
-| `npm run lint`                             | ESLint check                                                                     |
-| `npm run check:boundaries`                 | Fail if anything under `src/core/` imports React (also prints the adapter ratio) |
+| Command                                    | Purpose                                                                                                  |
+| ------------------------------------------ | -------------------------------------------------------------------------------------------------------- |
+| `npm run dev`                              | Start Vite dev server for the demo pages                                                                 |
+| `npm run build`                            | Build library (ESM + CJS output to dist/)                                                                |
+| `npm run build:dev`                        | Build library without minification                                                                       |
+| `npm run compile`                          | TypeScript type check (no emit)                                                                          |
+| `npm test`                                 | Run all tests (Vitest)                                                                                   |
+| `npm run test:coverage`                    | Run all tests and enforce the coverage budget on `src/core/`                                             |
+| `npm run test:watch`                       | Run tests in watch mode                                                                                  |
+| `npx vitest run src/path/to/file.test.tsx` | Run a single test file                                                                                   |
+| `npm run lint`                             | ESLint check                                                                                             |
+| `npm run check:boundaries`                 | Fail if `src/core/` imports React or the RSC entry reaches a client hook (also prints the adapter ratio) |
 
 Node version: v24 (pinned in .nvmrc).
 
@@ -27,16 +27,21 @@ Node version: v24 (pinned in .nvmrc).
 
 ### Core Styling Engine
 
-`src/core/**` imports **no React** — ESLint and `npm run check:boundaries` both fail if it ever does. React lives in `src/react/**` (the binding, the theme provider, the shared hooks) plus the two entry modules `src/box.ts` and `src/ssg.ts`. When a core module seems to need a hook, give it an injectable policy instead — that is what `flushScheduler.ts` is. See CONTRIBUTING.md, "The core boundary".
+`src/core/**` imports **no React** — ESLint and `npm run check:boundaries` both fail if it ever does. React lives in `src/react/**` (the binding, the theme provider, the shared hooks) plus the entry modules `src/box.ts`, `src/rsc.ts` and `src/ssg.ts`. When a core module seems to need a hook, give it an injectable policy instead — that is what `flushScheduler.ts` is. See CONTRIBUTING.md, "The core boundary".
 
 - `src/box.ts` — Main Box component (memoized, forwardRef, polymorphic via `tag` prop)
+- `src/rsc.ts` — The `react-server` build of Box: same props, no hook, no effect, no DOM. Element mode is switched on when it loads, so a Server Component needs no configuration. Enforced by `scripts/check-rsc-boundary.mjs`
 - `src/core/boxStyles.ts` — All CSS property definitions (~144 props). Types auto-generate from these definitions
 - `src/core/boxStylesFormatters.ts` — Value formatters that convert prop values to CSS (rem, px, fractions, etc.)
 - `src/core/engine/styleEngine.ts` — `createStyleEngine()`: all engine state (class-name cache, rule registry, identity factory, variables, prop and component registries) on an instance; generates class names and rules
-- `src/core/engine/styleSink.ts` — Where the CSS goes: `cssom` (`insertRule`), `textContent`, or `string` (server rendering, no DOM). Every sink places a rule by its sort key, so all three produce the same cascade
+- `src/core/engine/styleSink.ts` — Where the CSS goes: `cssom` (`insertRule`), `textContent`, `string` (server rendering, no DOM), or `element` (nowhere — the rules come back as `<style href precedence>` descriptors for the adapter to render). Every sink places a rule by its sort key, so they all produce the same cascade
+- `src/core/hash.ts` — `stableHash()`: content-addressed identity for a rule (its `href`) and for a class name in element mode, where a counter cannot be shared between processes
 - `src/core/engine/flushScheduler.ts` — _When_ pending rules reach the sink: an injectable `FlushScheduler` (microtask by default) plus `flushSync()`, so an adapter without effects still gets its CSS
 - `src/core/engine/defaultEngine.ts` — The lazily-created default instance every public API delegates to
 - `src/react/useStyles.ts` — The React binding: resolves class names during render, flushes from `useInsertionEffect` (ahead of every layout effect in the commit). Lives outside `src/core/` because core is React-free
+- `src/react/resolveStyles.ts` — The same resolution with no hook at all, so a Server Component can render Box; `useStyles` is this plus the flush effect
+- `src/react/styleElements.ts` — Descriptors → `<style href precedence>` elements (React 19 hoists and dedupes them)
+- `src/react/boxProps.ts` / `src/react/boxTagProps.ts` — The prop shape and the tag-props assembly both Box builds share
 - `src/core/variables.ts` — CSS variables (200+ Tailwind-like colors), lazy-loaded via pending variables system
 - `src/core/classNames.ts` — Conditional className utility
 

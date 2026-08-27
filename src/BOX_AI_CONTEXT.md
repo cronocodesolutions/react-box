@@ -10,24 +10,24 @@ Runtime CSS-in-JS library. `Box` component accepts ~144 CSS props and generates 
 
 Always use Box props. If a prop doesn't exist, create it with `Box.extend()` (see Extension System).
 
-| Inline Style (WRONG) | Box Prop (CORRECT) |
-|---|---|
-| `style={{ width: "100%" }}` | `width="fit"` |
-| `style={{ width: "100vw" }}` | `width="fit-screen"` |
-| `style={{ height: "100%" }}` | `height="fit"` |
-| `style={{ height: "100vh" }}` | `height="fit-screen"` |
-| `style={{ minHeight: "100vh" }}` | `minHeight="fit-screen"` |
-| `style={{ maxWidth: "1200px" }}` | `maxWidth={300}` (300/4=75rem=1200px) |
-| `style={{ alignItems: "center" }}` | `ai="center"` |
-| `style={{ justifyContent: "space-between" }}` | `jc="between"` |
-| `style={{ flexDirection: "column" }}` | `d="column"` |
-| `style={{ pointerEvents: "none" }}` | `pointerEvents="none"` |
-| `style={{ cursor: "pointer" }}` | `cursor="pointer"` |
-| `style={{ overflow: "hidden" }}` | `overflow="hidden"` |
-| `style={{ position: "relative" }}` | `position="relative"` |
-| `style={{ zIndex: 10 }}` | `zIndex={10}` |
-| `style={{ opacity: 0.5 }}` | `opacity={0.5}` |
-| `sm={{ style: { maxWidth: 600 } }}` | `sm={{ maxWidth: 150 }}` (150/4=37.5rem=600px) |
+| Inline Style (WRONG)                          | Box Prop (CORRECT)                             |
+| --------------------------------------------- | ---------------------------------------------- |
+| `style={{ width: "100%" }}`                   | `width="fit"`                                  |
+| `style={{ width: "100vw" }}`                  | `width="fit-screen"`                           |
+| `style={{ height: "100%" }}`                  | `height="fit"`                                 |
+| `style={{ height: "100vh" }}`                 | `height="fit-screen"`                          |
+| `style={{ minHeight: "100vh" }}`              | `minHeight="fit-screen"`                       |
+| `style={{ maxWidth: "1200px" }}`              | `maxWidth={300}` (300/4=75rem=1200px)          |
+| `style={{ alignItems: "center" }}`            | `ai="center"`                                  |
+| `style={{ justifyContent: "space-between" }}` | `jc="between"`                                 |
+| `style={{ flexDirection: "column" }}`         | `d="column"`                                   |
+| `style={{ pointerEvents: "none" }}`           | `pointerEvents="none"`                         |
+| `style={{ cursor: "pointer" }}`               | `cursor="pointer"`                             |
+| `style={{ overflow: "hidden" }}`              | `overflow="hidden"`                            |
+| `style={{ position: "relative" }}`            | `position="relative"`                          |
+| `style={{ zIndex: 10 }}`                      | `zIndex={10}`                                  |
+| `style={{ opacity: 0.5 }}`                    | `opacity={0.5}`                                |
+| `sm={{ style: { maxWidth: 600 } }}`           | `sm={{ maxWidth: 150 }}` (150/4=37.5rem=600px) |
 
 **`style` is top-level only** — it is NOT supported inside breakpoints, pseudo-classes, or theme objects. Always use Box props for responsive/conditional styles.
 
@@ -35,18 +35,18 @@ Always use Box props. If a prop doesn't exist, create it with `Box.extend()` (se
 
 NEVER use `<Box tag="...">` when a component exists. NEVER use `<Box display="flex/grid">`.
 
-| Instead of... | Use... | Import from |
-|---|---|---|
-| `<Box display="flex">` | `<Flex>` | `components/flex` |
-| `<Box display="grid">` | `<Grid>` | `components/grid` |
-| `<Box tag="button">` | `<Button>` | `components/button` |
-| `<Box tag="input">` | `<Textbox>` | `components/textbox` |
-| `<Box tag="textarea">` | `<Textarea>` | `components/textarea` |
-| `<Box tag="a/img/label">` | `<Link>/<Img>/<Label>` | `components/semantics` |
-| `<Box tag="h1/h2/h3/h4/h5/h6">` | `<H1>/<H2>/.../<H6>` | `components/semantics` |
-| `<Box tag="p/span">` | `<P>/<Span>` | `components/semantics` |
+| Instead of...                        | Use...                           | Import from            |
+| ------------------------------------ | -------------------------------- | ---------------------- |
+| `<Box display="flex">`               | `<Flex>`                         | `components/flex`      |
+| `<Box display="grid">`               | `<Grid>`                         | `components/grid`      |
+| `<Box tag="button">`                 | `<Button>`                       | `components/button`    |
+| `<Box tag="input">`                  | `<Textbox>`                      | `components/textbox`   |
+| `<Box tag="textarea">`               | `<Textarea>`                     | `components/textarea`  |
+| `<Box tag="a/img/label">`            | `<Link>/<Img>/<Label>`           | `components/semantics` |
+| `<Box tag="h1/h2/h3/h4/h5/h6">`      | `<H1>/<H2>/.../<H6>`             | `components/semantics` |
+| `<Box tag="p/span">`                 | `<P>/<Span>`                     | `components/semantics` |
 | `<Box tag="nav/header/footer/main">` | `<Nav>/<Header>/<Footer>/<Main>` | `components/semantics` |
-| `<Box tag="section/article/aside">` | `<Section>/<Article>/<Aside>` | `components/semantics` |
+| `<Box tag="section/article/aside">`  | `<Section>/<Article>/<Aside>`    | `components/semantics` |
 
 All imports from `@cronocode/react-box/components/...`. Semantics also export: `Mark`, `Figure`, `Figcaption`, `Details`, `Summary`, `Menu`, `Time`.
 
@@ -56,14 +56,14 @@ All imports from `@cronocode/react-box/components/...`. Semantics also export: `
 
 **#1 source of confusion.** Different props have different dividers:
 
-| Prop Category | Divider | Example | CSS Output |
-|---|---|---|---|
-| Spacing (`p`, `m`, `gap`, `px`, `py`, `mx`, `my`, etc.) | 4 | `p={4}` | `padding: 1rem` (16px) |
-| Font size (`fontSize`) | **16** | `fontSize={14}` | `font-size: 0.875rem` (14px) |
-| Width/Height (numeric) | 4 | `width={20}` | `width: 5rem` (80px) |
-| Border width (`b`, `bx`, `by`, `bt`, `br`, `bb`, `bl`) | none | `b={1}` | `border-width: 1px` |
-| Border radius (`borderRadius`, `borderRadiusTop`, …) | 4 | `borderRadius={2}` | `border-radius: 0.5rem` (8px) |
-| Line height (`lineHeight`) | none | `lineHeight={24}` | `line-height: 24px` |
+| Prop Category                                           | Divider | Example            | CSS Output                    |
+| ------------------------------------------------------- | ------- | ------------------ | ----------------------------- |
+| Spacing (`p`, `m`, `gap`, `px`, `py`, `mx`, `my`, etc.) | 4       | `p={4}`            | `padding: 1rem` (16px)        |
+| Font size (`fontSize`)                                  | **16**  | `fontSize={14}`    | `font-size: 0.875rem` (14px)  |
+| Width/Height (numeric)                                  | 4       | `width={20}`       | `width: 5rem` (80px)          |
+| Border width (`b`, `bx`, `by`, `bt`, `br`, `bb`, `bl`)  | none    | `b={1}`            | `border-width: 1px`           |
+| Border radius (`borderRadius`, `borderRadiusTop`, …)    | 4       | `borderRadius={2}` | `border-radius: 0.5rem` (8px) |
+| Line height (`lineHeight`)                              | none    | `lineHeight={24}`  | `line-height: 24px`           |
 
 ```tsx
 // fontSize: divider 16 → value maps directly to px
@@ -85,51 +85,51 @@ height="fit" // 100%    height="fit-screen" // 100vh    width="1/2" // 50%
 
 ### Spacing
 
-| Prop | CSS Property |
-|---|---|
+| Prop                                          | CSS Property                                       |
+| --------------------------------------------- | -------------------------------------------------- |
 | `p` / `px` / `py` / `pt` / `pr` / `pb` / `pl` | padding (all / horizontal / vertical / individual) |
-| `m` / `mx` / `my` / `mt` / `mr` / `mb` / `ml` | margin (all / horizontal / vertical / individual) |
-| `gap` | gap (flexbox/grid) |
+| `m` / `mx` / `my` / `mt` / `mr` / `mb` / `ml` | margin (all / horizontal / vertical / individual)  |
+| `gap`                                         | gap (flexbox/grid)                                 |
 
 ### Layout
 
-| Prop | CSS Property | Values |
-|---|---|---|
-| `display` | display | `'flex'`, `'block'`, `'inline'`, `'grid'`, `'none'`, `'inline-flex'`, etc. |
-| `d` | flex-direction | `'row'`, `'column'`, `'row-reverse'`, `'column-reverse'` |
-| `wrap` | flex-wrap | `'wrap'`, `'nowrap'`, `'wrap-reverse'` |
-| `ai` | align-items | `'center'`, `'start'`, `'end'`, `'stretch'`, `'baseline'` |
-| `jc` | justify-content | `'center'`, `'start'`, `'end'`, `'between'`, `'around'`, `'evenly'` |
-| `flex` / `grow` / `shrink` | flex / flex-grow / flex-shrink | number or string |
+| Prop                       | CSS Property                   | Values                                                                     |
+| -------------------------- | ------------------------------ | -------------------------------------------------------------------------- |
+| `display`                  | display                        | `'flex'`, `'block'`, `'inline'`, `'grid'`, `'none'`, `'inline-flex'`, etc. |
+| `d`                        | flex-direction                 | `'row'`, `'column'`, `'row-reverse'`, `'column-reverse'`                   |
+| `wrap`                     | flex-wrap                      | `'wrap'`, `'nowrap'`, `'wrap-reverse'`                                     |
+| `ai`                       | align-items                    | `'center'`, `'start'`, `'end'`, `'stretch'`, `'baseline'`                  |
+| `jc`                       | justify-content                | `'center'`, `'start'`, `'end'`, `'between'`, `'around'`, `'evenly'`        |
+| `flex` / `grow` / `shrink` | flex / flex-grow / flex-shrink | number or string                                                           |
 
 ### Sizing
 
-| Prop | CSS Property | Accepts |
-|---|---|---|
-| `width` / `height` | width / height | number (rem/4), `'auto'`, `'fit'` (100%), `'fit-screen'` (100vw/vh), fractions (`'1/2'`, `'1/3'`, `'2/3'`, `'1/4'`, `'3/4'`), percentages (`'33%'`) |
-| `minWidth` / `maxWidth` / `minHeight` / `maxHeight` | min/max sizing | number or string |
+| Prop                                                | CSS Property   | Accepts                                                                                                                                             |
+| --------------------------------------------------- | -------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `width` / `height`                                  | width / height | number (rem/4), `'auto'`, `'fit'` (100%), `'fit-screen'` (100vw/vh), fractions (`'1/2'`, `'1/3'`, `'2/3'`, `'1/4'`, `'3/4'`), percentages (`'33%'`) |
+| `minWidth` / `maxWidth` / `minHeight` / `maxHeight` | min/max sizing | number or string                                                                                                                                    |
 
 All sizing, spacing, and positioning props also accept percentage strings: `p="5%"`, `top="10%"`, `gap="2%"`.
 
 ### Visual
 
-| Prop | CSS Property | Notes |
-|---|---|---|
-| `bgColor` / `color` / `borderColor` | background-color / color / border-color | Tailwind palette: `'gray-50'`..`'gray-900'`, same for red/orange/yellow/green/teal/blue/indigo/purple/pink/violet. Also `'white'`, `'black'`, `'transparent'`, `'currentColor'` |
-| `b` / `bx` / `by` / `bt` / `br` / `bb` / `bl` | border-width | direct px |
-| `borderRadius` | border-radius | divider 4 (spacing scale) |
-| `borderStyle` | border-style | `'solid'`, `'dashed'`, `'dotted'`, `'none'` |
-| `fontSize` | font-size | divider 16 |
-| `fontWeight` | font-weight | `400`, `500`, `600`, `700`, etc. |
-| `lineHeight` | line-height | direct px |
-| `textAlign` / `textDecoration` / `textTransform` / `whiteSpace` / `textOverflow` | text properties | string values |
-| `overflow` | overflow | `'hidden'`, `'auto'`, `'scroll'`, `'visible'` |
-| `position` | position | `'relative'`, `'absolute'`, `'fixed'`, `'sticky'` |
-| `top` / `right` / `bottom` / `left` / `inset` | positioning offsets | number or string |
-| `zIndex` | z-index | number |
-| `shadow` | box-shadow | `'small'`, `'medium'`, `'large'`, `'xl'`, `'none'` |
-| `opacity` | opacity | number |
-| `cursor` / `pointerEvents` / `transition` / `transform` / `userSelect` | misc | string values |
+| Prop                                                                             | CSS Property                            | Notes                                                                                                                                                                           |
+| -------------------------------------------------------------------------------- | --------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `bgColor` / `color` / `borderColor`                                              | background-color / color / border-color | Tailwind palette: `'gray-50'`..`'gray-900'`, same for red/orange/yellow/green/teal/blue/indigo/purple/pink/violet. Also `'white'`, `'black'`, `'transparent'`, `'currentColor'` |
+| `b` / `bx` / `by` / `bt` / `br` / `bb` / `bl`                                    | border-width                            | direct px                                                                                                                                                                       |
+| `borderRadius`                                                                   | border-radius                           | divider 4 (spacing scale)                                                                                                                                                       |
+| `borderStyle`                                                                    | border-style                            | `'solid'`, `'dashed'`, `'dotted'`, `'none'`                                                                                                                                     |
+| `fontSize`                                                                       | font-size                               | divider 16                                                                                                                                                                      |
+| `fontWeight`                                                                     | font-weight                             | `400`, `500`, `600`, `700`, etc.                                                                                                                                                |
+| `lineHeight`                                                                     | line-height                             | direct px                                                                                                                                                                       |
+| `textAlign` / `textDecoration` / `textTransform` / `whiteSpace` / `textOverflow` | text properties                         | string values                                                                                                                                                                   |
+| `overflow`                                                                       | overflow                                | `'hidden'`, `'auto'`, `'scroll'`, `'visible'`                                                                                                                                   |
+| `position`                                                                       | position                                | `'relative'`, `'absolute'`, `'fixed'`, `'sticky'`                                                                                                                               |
+| `top` / `right` / `bottom` / `left` / `inset`                                    | positioning offsets                     | number or string                                                                                                                                                                |
+| `zIndex`                                                                         | z-index                                 | number                                                                                                                                                                          |
+| `shadow`                                                                         | box-shadow                              | `'small'`, `'medium'`, `'large'`, `'xl'`, `'none'`                                                                                                                              |
+| `opacity`                                                                        | opacity                                 | number                                                                                                                                                                          |
+| `cursor` / `pointerEvents` / `transition` / `transform` / `userSelect`           | misc                                    | string values                                                                                                                                                                   |
 
 ---
 
@@ -187,7 +187,7 @@ setTheme(null);     // reset to system auto-detection (clears localStorage)
     scrollbarColor: ['violet-500', 'transparent'],
     scrollbarWidth: 'thin',
     theme: {
-      dark:  { scrollbarColor: ['violet-700', 'gray-900'] },
+      dark: { scrollbarColor: ['violet-700', 'gray-900'] },
       light: { scrollbarColor: ['violet-300', 'gray-100'] },
     },
   }}
@@ -251,24 +251,32 @@ import Box from '@cronocode/react-box';
 
 export const { extendedProps, extendedPropTypes } = Box.extend(
   { 'brand-primary': '#ff6600', 'brand-secondary': '#0066ff' }, // CSS variables
-  { // New props
-    aspectRatio: [{
-      values: ['auto', '1/1', '16/9', '4/3'] as const,
-      styleName: 'aspect-ratio',
-      valueFormat: (value) => value,
-    }],
+  {
+    // New props
+    aspectRatio: [
+      {
+        values: ['auto', '1/1', '16/9', '4/3'] as const,
+        styleName: 'aspect-ratio',
+        valueFormat: (value) => value,
+      },
+    ],
   },
-  { // Extend existing props with new values
-    bgColor: [{
-      values: ['brand-primary', 'brand-secondary'] as const,
-      styleName: 'background-color',
-      valueFormat: (value, getVariable) => getVariable(value),
-    }],
-    color: [{
-      values: ['brand-primary', 'brand-secondary'] as const,
-      styleName: 'color',
-      valueFormat: (value, getVariable) => getVariable(value),
-    }],
+  {
+    // Extend existing props with new values
+    bgColor: [
+      {
+        values: ['brand-primary', 'brand-secondary'] as const,
+        styleName: 'background-color',
+        valueFormat: (value, getVariable) => getVariable(value),
+      },
+    ],
+    color: [
+      {
+        values: ['brand-primary', 'brand-secondary'] as const,
+        styleName: 'color',
+        valueFormat: (value, getVariable) => getVariable(value),
+      },
+    ],
   },
 );
 ```
@@ -279,16 +287,24 @@ When `styleName` is an array, `valueFormat` is called once per CSS property with
 
 ```tsx
 Box.extend(
-  { 'text-display-lg-size': '36px', 'text-display-lg-weight': '700',
-    'text-display-lg-line-height': '1.2', 'text-display-lg-letter-spacing': '-0.02em' },
-  { textStyle: [{
-      values: ['display-lg', 'display-sm'] as const,
-      styleName: ['font-size', 'font-weight', 'line-height', 'letter-spacing'],
-      valueFormat: (value, getVariable, styleName) => {
-        const suffix = { 'font-size': 'size', 'font-weight': 'weight', 'line-height': 'line-height', 'letter-spacing': 'letter-spacing' };
-        return getVariable(`text-${value}-${suffix[styleName!]}`);
+  {
+    'text-display-lg-size': '36px',
+    'text-display-lg-weight': '700',
+    'text-display-lg-line-height': '1.2',
+    'text-display-lg-letter-spacing': '-0.02em',
+  },
+  {
+    textStyle: [
+      {
+        values: ['display-lg', 'display-sm'] as const,
+        styleName: ['font-size', 'font-weight', 'line-height', 'letter-spacing'],
+        valueFormat: (value, getVariable, styleName) => {
+          const suffix = { 'font-size': 'size', 'font-weight': 'weight', 'line-height': 'line-height', 'letter-spacing': 'letter-spacing' };
+          return getVariable(`text-${value}-${suffix[styleName!]}`);
+        },
       },
-  }] },
+    ],
+  },
   {},
 );
 // <Box textStyle="display-lg" /> → sets all 4 CSS properties
@@ -313,8 +329,12 @@ declare module '@cronocode/react-box/types' {
 // Manual approach (simple cases):
 declare module '@cronocode/react-box/types' {
   namespace Augmented {
-    interface BoxPropTypes { bgColor: 'brand-primary' | 'brand-secondary' }
-    interface ComponentsTypes { card: 'bordered' | 'elevated' }
+    interface BoxPropTypes {
+      bgColor: 'brand-primary' | 'brand-secondary';
+    }
+    interface ComponentsTypes {
+      card: 'bordered' | 'elevated';
+    }
   }
 }
 ```
@@ -363,7 +383,9 @@ import Textbox from '@cronocode/react-box/components/textbox';
 
 ```tsx
 <Flex className="card-row" gap={2}>
-  <Box opacity={0} hoverGroup={{ 'card-row': { opacity: 1 } }}>Actions</Box>
+  <Box opacity={0} hoverGroup={{ 'card-row': { opacity: 1 } }}>
+    Actions
+  </Box>
 </Flex>
 ```
 
@@ -372,10 +394,10 @@ import Textbox from '@cronocode/react-box/components/textbox';
 ```tsx
 import { getStyles, resetStyles } from '@cronocode/react-box/ssg';
 
-const html = renderToString(<App />);  // any React server renderer
-const cssString = getStyles();         // the CSS for what was just rendered
+const html = renderToString(<App />); // any React server renderer
+const cssString = getStyles(); // the CSS for what was just rendered
 // <style id="crono-styles">{cssString}</style> in the document head
-resetStyles();                         // reset before the next request
+resetStyles(); // reset before the next request
 ```
 
 Or in one call, which injects the styles into the rendered `<head>` and resets afterwards:
@@ -388,6 +410,44 @@ const { html, styles } = renderToStaticMarkup(<App />);
 
 No DOM is needed: with no `document` in the process the engine collects CSS in memory. Sequential
 requests are independent and identical markup gets identical class names.
+
+---
+
+## React Server Components (React 19)
+
+Box renders in a Server Component with no `'use client'` and no configuration — the `react-server`
+export condition resolves to a build that calls no hook and touches no DOM. Its CSS travels with its
+markup as `<style href precedence>` elements, which React 19 hoists into `<head>` and dedupes.
+
+```tsx
+// app/page.tsx — a Server Component
+import Box from '@cronocode/react-box';
+
+export default function Page() {
+  return <Box p={6} bgColor="slate-50" sm={{ p: 8 }} />;
+}
+```
+
+Client components in the same app should use the same path, so their CSS is in the HTML too — one
+call, in a module the root layout imports:
+
+```tsx
+'use client';
+import Box from '@cronocode/react-box';
+
+Box.configure({ sink: 'element' }); // React 19 only
+```
+
+- `Box.configure({ sink, classNames })` — `sink`: `'cssom'` (browser default), `'textContent'`
+  (tests, readable rules), `'string'` (server), `'element'` (React 19 style elements);
+  `classNames`: `'hashed'` (default), `'readable'`, `'stable'` (content-hashed — the default in
+  element mode so server and client agree). Call it before the first render.
+- In element mode rules live in CSS cascade layers, so **your own unlayered CSS always wins** over
+  Box props, and declaring `Box.extend()` props before the first render matters.
+- Client-only, so use them inside `'use client'`: hover-callback children
+  (`{({ isHover }) => …}`), `Box.Theme`, and the pre-built components. Theme _styles_
+  (`theme={{ dark: { … } }}`) work in a server component — put the theme class on `<html>`.
+- React 18 cannot hoist these elements; keep the default sink there.
 
 ---
 
@@ -420,11 +480,13 @@ import DataGrid from '@cronocode/react-box/components/dataGrid';
   def={{
     rowKey: 'id',
     title: 'Users',
-    topBar: true, bottomBar: true, globalFilter: true,
+    topBar: true,
+    bottomBar: true,
+    globalFilter: true,
     rowSelection: { pinned: true },
     showRowNumber: { pinned: true },
     rowHeight: 40,
-    visibleRowsCount: 15,         // or 'all' to disable virtualization
+    visibleRowsCount: 15, // or 'all' to disable virtualization
     columns: [
       { key: 'name', header: 'Name', filterable: true },
       { key: 'age', header: 'Age', width: 80, align: 'right', filterable: { type: 'number' } },
@@ -432,7 +494,12 @@ import DataGrid from '@cronocode/react-box/components/dataGrid';
       { key: 'status', header: 'Status', filterable: { type: 'multiselect' } },
       { key: 'country', header: 'Country', pin: 'RIGHT' },
       {
-        key: 'actions', header: '', pin: 'RIGHT', width: 80, sortable: false, resizable: false,
+        key: 'actions',
+        header: '',
+        pin: 'RIGHT',
+        width: 80,
+        sortable: false,
+        resizable: false,
         Cell: ({ cell }) => <Button onClick={() => edit(cell.row.data)}>Edit</Button>,
       },
     ],
@@ -441,81 +508,81 @@ import DataGrid from '@cronocode/react-box/components/dataGrid';
     resizerStyle: 'hover',
   }}
   onSelectionChange={(e) => console.log(e.selectedRowKeys)}
-/>
+/>;
 ```
 
 ### DataGridProps
 
-| Prop | Type | Description |
-|---|---|---|
-| `data` | `TRow[]` | Row data (required) |
-| `def` | `GridDefinition` | Grid config (required) |
-| `component` | `string` | Style tree name (default: `'datagrid'`) |
-| `loading` | `boolean` | Loading state |
-| `filters` | `((row) => boolean)[]` | External predicate filters (applied before column/global filters) |
-| `page` / `onPageChange` | `number` / `(page, size) => void` | Controlled pagination (1-indexed) |
-| `onSortChange` | `(columnKey, direction) => void` | Sort callback (`direction`: `'ASC'`/`'DESC'`/`undefined`) |
-| `onServerStateChange` | `(state) => void` | Unified: `{ page, pageSize, sortColumn, sortDirection, columnFilters, globalFilterValue }` |
-| `onSelectionChange` | `(event) => void` | `event`: `{ action, selectedRowKeys, affectedRowKeys, isAllSelected }` |
-| `expandedRowKeys` / `onExpandedRowKeysChange` | `Key[]` / `(keys) => void` | Controlled expanded rows |
-| `globalFilterValue` / `onGlobalFilterChange` | `string` / `(value) => void` | Controlled global filter |
-| `columnFilters` / `onColumnFiltersChange` | `ColumnFilters` / `(filters) => void` | Controlled column filters |
+| Prop                                          | Type                                  | Description                                                                                |
+| --------------------------------------------- | ------------------------------------- | ------------------------------------------------------------------------------------------ |
+| `data`                                        | `TRow[]`                              | Row data (required)                                                                        |
+| `def`                                         | `GridDefinition`                      | Grid config (required)                                                                     |
+| `component`                                   | `string`                              | Style tree name (default: `'datagrid'`)                                                    |
+| `loading`                                     | `boolean`                             | Loading state                                                                              |
+| `filters`                                     | `((row) => boolean)[]`                | External predicate filters (applied before column/global filters)                          |
+| `page` / `onPageChange`                       | `number` / `(page, size) => void`     | Controlled pagination (1-indexed)                                                          |
+| `onSortChange`                                | `(columnKey, direction) => void`      | Sort callback (`direction`: `'ASC'`/`'DESC'`/`undefined`)                                  |
+| `onServerStateChange`                         | `(state) => void`                     | Unified: `{ page, pageSize, sortColumn, sortDirection, columnFilters, globalFilterValue }` |
+| `onSelectionChange`                           | `(event) => void`                     | `event`: `{ action, selectedRowKeys, affectedRowKeys, isAllSelected }`                     |
+| `expandedRowKeys` / `onExpandedRowKeysChange` | `Key[]` / `(keys) => void`            | Controlled expanded rows                                                                   |
+| `globalFilterValue` / `onGlobalFilterChange`  | `string` / `(value) => void`          | Controlled global filter                                                                   |
+| `columnFilters` / `onColumnFiltersChange`     | `ColumnFilters` / `(filters) => void` | Controlled column filters                                                                  |
 
 ### GridDefinition
 
-| Prop | Type | Default | Description |
-|---|---|---|---|
-| `columns` | `ColumnType[]` | required | Column definitions |
-| `rowKey` | `keyof TRow \| (row) => Key` | auto | Unique row identifier |
-| `rowHeight` | `number` | `48` | Row height in px |
-| `visibleRowsCount` | `number \| 'all'` | `10` | Visible rows. `'all'` disables virtualization |
-| `showRowNumber` | `boolean \| { pinned?, width? }` | `false` | Row number column |
-| `rowSelection` | `boolean \| { pinned? }` | `false` | Checkbox selection column |
-| `rowDetail` | `RowDetailConfig` | — | Expandable detail panel (see below) |
-| `pagination` | `{ totalCount, pageSize? }` | — | Server-side pagination. Bypasses client-side filtering |
-| `topBar` / `bottomBar` | `boolean` | `false` | Show top/bottom bars |
-| `title` / `topBarContent` | `ReactNode` | — | Top bar content |
-| `globalFilter` | `boolean` | `false` | Enable global fuzzy search |
-| `globalFilterKeys` | `(keyof TRow)[]` | all | Limit global filter columns |
-| `sortable` / `resizable` | `boolean` | `true` | Enable sorting/resizing for all columns |
-| `contextMenu` | `boolean \| ContextMenuConfig` | `true` | Control column header context menu. `false` hides it. Object: `{ sort?, pin?, group? }` |
-| `resizerStyle` | `'visible' \| 'hover' \| 'hidden'` | `'visible'` | Resizer handle visibility. `'hover'`: shows on header cell hover. `'hidden'`: invisible but resize still works |
-| `noDataComponent` | `ReactNode` | `'empty'` | Custom empty state |
+| Prop                      | Type                               | Default     | Description                                                                                                    |
+| ------------------------- | ---------------------------------- | ----------- | -------------------------------------------------------------------------------------------------------------- |
+| `columns`                 | `ColumnType[]`                     | required    | Column definitions                                                                                             |
+| `rowKey`                  | `keyof TRow \| (row) => Key`       | auto        | Unique row identifier                                                                                          |
+| `rowHeight`               | `number`                           | `48`        | Row height in px                                                                                               |
+| `visibleRowsCount`        | `number \| 'all'`                  | `10`        | Visible rows. `'all'` disables virtualization                                                                  |
+| `showRowNumber`           | `boolean \| { pinned?, width? }`   | `false`     | Row number column                                                                                              |
+| `rowSelection`            | `boolean \| { pinned? }`           | `false`     | Checkbox selection column                                                                                      |
+| `rowDetail`               | `RowDetailConfig`                  | —           | Expandable detail panel (see below)                                                                            |
+| `pagination`              | `{ totalCount, pageSize? }`        | —           | Server-side pagination. Bypasses client-side filtering                                                         |
+| `topBar` / `bottomBar`    | `boolean`                          | `false`     | Show top/bottom bars                                                                                           |
+| `title` / `topBarContent` | `ReactNode`                        | —           | Top bar content                                                                                                |
+| `globalFilter`            | `boolean`                          | `false`     | Enable global fuzzy search                                                                                     |
+| `globalFilterKeys`        | `(keyof TRow)[]`                   | all         | Limit global filter columns                                                                                    |
+| `sortable` / `resizable`  | `boolean`                          | `true`      | Enable sorting/resizing for all columns                                                                        |
+| `contextMenu`             | `boolean \| ContextMenuConfig`     | `true`      | Control column header context menu. `false` hides it. Object: `{ sort?, pin?, group? }`                        |
+| `resizerStyle`            | `'visible' \| 'hover' \| 'hidden'` | `'visible'` | Resizer handle visibility. `'hover'`: shows on header cell hover. `'hidden'`: invisible but resize still works |
+| `noDataComponent`         | `ReactNode`                        | `'empty'`   | Custom empty state                                                                                             |
 
 ### ColumnType
 
-| Prop | Type | Default | Description |
-|---|---|---|---|
-| `key` | `Key` | required | Column identifier (maps to TRow property) |
-| `header` | `string` | — | Header text |
-| `width` | `number` | `200` | Base width in px |
-| `align` | `'left' \| 'right' \| 'center'` | `'left'` | Cell alignment |
-| `pin` | `'LEFT' \| 'RIGHT'` | — | Pin to edge (sticky on scroll) |
-| `columns` | `ColumnType[]` | — | Nested columns (grouped header) |
-| `Cell` | `({ cell }) => ReactNode` | — | Custom renderer. `cell`: `{ value, row, column, grid }` |
-| `sortable` / `resizable` | `boolean` | inherits | Override grid-level setting |
-| `flexible` | `boolean` | `true` | Participate in flex width distribution |
-| `filterable` | `boolean \| FilterConfig` | — | `true` (text), `{ type: 'number', min?, max? }`, `{ type: 'multiselect', options? }` |
-| `contextMenu` | `boolean \| ContextMenuConfig` | inherits | Override grid-level context menu. `false` hides entirely. `{ sort?, pin?, group? }` controls sections |
+| Prop                     | Type                            | Default  | Description                                                                                           |
+| ------------------------ | ------------------------------- | -------- | ----------------------------------------------------------------------------------------------------- |
+| `key`                    | `Key`                           | required | Column identifier (maps to TRow property)                                                             |
+| `header`                 | `string`                        | —        | Header text                                                                                           |
+| `width`                  | `number`                        | `200`    | Base width in px                                                                                      |
+| `align`                  | `'left' \| 'right' \| 'center'` | `'left'` | Cell alignment                                                                                        |
+| `pin`                    | `'LEFT' \| 'RIGHT'`             | —        | Pin to edge (sticky on scroll)                                                                        |
+| `columns`                | `ColumnType[]`                  | —        | Nested columns (grouped header)                                                                       |
+| `Cell`                   | `({ cell }) => ReactNode`       | —        | Custom renderer. `cell`: `{ value, row, column, grid }`                                               |
+| `sortable` / `resizable` | `boolean`                       | inherits | Override grid-level setting                                                                           |
+| `flexible`               | `boolean`                       | `true`   | Participate in flex width distribution                                                                |
+| `filterable`             | `boolean \| FilterConfig`       | —        | `true` (text), `{ type: 'number', min?, max? }`, `{ type: 'multiselect', options? }`                  |
+| `contextMenu`            | `boolean \| ContextMenuConfig`  | inherits | Override grid-level context menu. `false` hides entirely. `{ sort?, pin?, group? }` controls sections |
 
 ### RowDetailConfig
 
-| Prop | Type | Default | Description |
-|---|---|---|---|
-| `content` | `(row: TRow) => ReactNode` | required | Render function for the detail panel |
-| `height` | `'auto' \| number \| (row) => number` | `'auto'` | Detail row height |
-| `expandOnRowClick` | `boolean` | `false` | Click anywhere on the row to toggle expansion |
-| `pinned` | `boolean` | `false` | Pin the expand column to LEFT |
-| `expandColumnWidth` | `number` | `50` | Width of the expand column in px |
-| `expandColumnHeader` | `string` | `''` | Header text for the expand column |
+| Prop                 | Type                                  | Default  | Description                                   |
+| -------------------- | ------------------------------------- | -------- | --------------------------------------------- |
+| `content`            | `(row: TRow) => ReactNode`            | required | Render function for the detail panel          |
+| `height`             | `'auto' \| number \| (row) => number` | `'auto'` | Detail row height                             |
+| `expandOnRowClick`   | `boolean`                             | `false`  | Click anywhere on the row to toggle expansion |
+| `pinned`             | `boolean`                             | `false`  | Pin the expand column to LEFT                 |
+| `expandColumnWidth`  | `number`                              | `50`     | Width of the expand column in px              |
+| `expandColumnHeader` | `string`                              | `''`     | Header text for the expand column             |
 
 ### ContextMenuConfig
 
-| Prop | Type | Default | Description |
-|---|---|---|---|
-| `sort` | `boolean` | `true` | Show Sort Ascending / Sort Descending / Clear Sort |
-| `pin` | `boolean` | `true` | Show Pin Left / Pin Right / Unpin |
-| `group` | `boolean` | `true` | Show Group By / Un-Group All |
+| Prop    | Type      | Default | Description                                        |
+| ------- | --------- | ------- | -------------------------------------------------- |
+| `sort`  | `boolean` | `true`  | Show Sort Ascending / Sort Descending / Clear Sort |
+| `pin`   | `boolean` | `true`  | Show Pin Left / Pin Right / Unpin                  |
+| `group` | `boolean` | `true`  | Show Group By / Un-Group All                       |
 
 ### Server-Side Pagination
 
@@ -548,47 +615,47 @@ Box.components({
 
 ### Component Style Tree
 
-| Component Name | Description | Variants |
-|---|---|---|
-| `datagrid` | Root container | — |
-| `datagrid.content` | Scroll container for header + body | — |
-| `datagrid.topBar` | Top bar (title, filters, column groups) | — |
-| `datagrid.topBar.globalFilter` | Global search wrapper | — |
-| `datagrid.topBar.globalFilter.stats` | Filtered rows count badge | — |
-| `datagrid.topBar.columnGroups` | Column group chips container | — |
-| `datagrid.topBar.columnGroups.icon` | Column group icon | — |
-| `datagrid.topBar.columnGroups.separator` | Separator between groups | — |
-| `datagrid.topBar.columnGroups.item` | Column group chip | — |
-| `datagrid.topBar.columnGroups.item.icon` | Remove icon on chip | — |
-| `datagrid.topBar.columnVisibility` | Column visibility dropdown | — |
-| `datagrid.topBar.columnVisibility.badge` | Hidden columns count badge | — |
-| `datagrid.filter.cell` | Filter row cell | `isPinned`, `isFirstLeftPinned`, `isLastLeftPinned`, `isFirstRightPinned`, `isLastRightPinned` |
-| `datagrid.filter.cell.input` | Filter input container (text/number/multiselect) | — |
-| `datagrid.header` | Header grid container (sticky) | — |
-| `datagrid.header.cell` | Header cell | `isPinned`, `isFirstLeftPinned`, `isLastLeftPinned`, `isFirstRightPinned`, `isLastRightPinned`, `isSortable`, `isRowSelection`, `isRowNumber`, `isFirstLeaf`, `isLastLeaf`, `isEmptyCell` |
-| `datagrid.header.cell.contextMenu` | Column context menu button | — |
-| `datagrid.header.cell.contextMenu.icon` | Context menu icon | — |
-| `datagrid.header.cell.contextMenu.tooltip` | Context menu popup | — |
-| `datagrid.header.cell.contextMenu.tooltip.item` | Context menu action | — |
-| `datagrid.header.cell.contextMenu.tooltip.item.icon` | Action icon | — |
-| `datagrid.header.cell.contextMenu.tooltip.item.separator` | Menu separator line | — |
-| `datagrid.header.cell.resizer` | Column resize handle | — |
-| `datagrid.body` | Body grid container (virtualized rows) | — |
-| `datagrid.body.cell` | Body cell | `isPinned`, `isFirstLeftPinned`, `isLastLeftPinned`, `isFirstRightPinned`, `isLastRightPinned`, `isRowNumber`, `isRowSelection`, `isRowSelected`, `isFirstLeaf`, `isLastLeaf`, `isEmptyCell` |
-| `datagrid.body.cell.text` | Default cell text renderer | — |
-| `datagrid.body.cell.rowDetail` | Row detail expand/collapse button | — |
-| `datagrid.body.row` | Data row (display: contents) | — |
-| `datagrid.body.groupRow` | Group row (display: contents) | — |
-| `datagrid.body.groupRow.expandButton` | Group expand/collapse button | — |
-| `datagrid.body.detailRow` | Expanded detail row | — |
-| `datagrid.body.empty` | Empty state container | — |
-| `datagrid.emptyColumns` | No columns selected placeholder | — |
-| `datagrid.bottomBar` | Bottom bar (row count, pagination) | — |
-| `datagrid.bottomBar.info` | Status text ("Rows: ...", "Selected: ...") | — |
-| `datagrid.bottomBar.clearFilters` | "Clear filters" link | — |
-| `datagrid.bottomBar.pagination` | Pagination controls wrapper | — |
-| `datagrid.bottomBar.pagination.button` | Pagination nav button | — |
-| `datagrid.bottomBar.pagination.info` | Page info text ("1 of 5") | — |
+| Component Name                                            | Description                                      | Variants                                                                                                                                                                                     |
+| --------------------------------------------------------- | ------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `datagrid`                                                | Root container                                   | —                                                                                                                                                                                            |
+| `datagrid.content`                                        | Scroll container for header + body               | —                                                                                                                                                                                            |
+| `datagrid.topBar`                                         | Top bar (title, filters, column groups)          | —                                                                                                                                                                                            |
+| `datagrid.topBar.globalFilter`                            | Global search wrapper                            | —                                                                                                                                                                                            |
+| `datagrid.topBar.globalFilter.stats`                      | Filtered rows count badge                        | —                                                                                                                                                                                            |
+| `datagrid.topBar.columnGroups`                            | Column group chips container                     | —                                                                                                                                                                                            |
+| `datagrid.topBar.columnGroups.icon`                       | Column group icon                                | —                                                                                                                                                                                            |
+| `datagrid.topBar.columnGroups.separator`                  | Separator between groups                         | —                                                                                                                                                                                            |
+| `datagrid.topBar.columnGroups.item`                       | Column group chip                                | —                                                                                                                                                                                            |
+| `datagrid.topBar.columnGroups.item.icon`                  | Remove icon on chip                              | —                                                                                                                                                                                            |
+| `datagrid.topBar.columnVisibility`                        | Column visibility dropdown                       | —                                                                                                                                                                                            |
+| `datagrid.topBar.columnVisibility.badge`                  | Hidden columns count badge                       | —                                                                                                                                                                                            |
+| `datagrid.filter.cell`                                    | Filter row cell                                  | `isPinned`, `isFirstLeftPinned`, `isLastLeftPinned`, `isFirstRightPinned`, `isLastRightPinned`                                                                                               |
+| `datagrid.filter.cell.input`                              | Filter input container (text/number/multiselect) | —                                                                                                                                                                                            |
+| `datagrid.header`                                         | Header grid container (sticky)                   | —                                                                                                                                                                                            |
+| `datagrid.header.cell`                                    | Header cell                                      | `isPinned`, `isFirstLeftPinned`, `isLastLeftPinned`, `isFirstRightPinned`, `isLastRightPinned`, `isSortable`, `isRowSelection`, `isRowNumber`, `isFirstLeaf`, `isLastLeaf`, `isEmptyCell`    |
+| `datagrid.header.cell.contextMenu`                        | Column context menu button                       | —                                                                                                                                                                                            |
+| `datagrid.header.cell.contextMenu.icon`                   | Context menu icon                                | —                                                                                                                                                                                            |
+| `datagrid.header.cell.contextMenu.tooltip`                | Context menu popup                               | —                                                                                                                                                                                            |
+| `datagrid.header.cell.contextMenu.tooltip.item`           | Context menu action                              | —                                                                                                                                                                                            |
+| `datagrid.header.cell.contextMenu.tooltip.item.icon`      | Action icon                                      | —                                                                                                                                                                                            |
+| `datagrid.header.cell.contextMenu.tooltip.item.separator` | Menu separator line                              | —                                                                                                                                                                                            |
+| `datagrid.header.cell.resizer`                            | Column resize handle                             | —                                                                                                                                                                                            |
+| `datagrid.body`                                           | Body grid container (virtualized rows)           | —                                                                                                                                                                                            |
+| `datagrid.body.cell`                                      | Body cell                                        | `isPinned`, `isFirstLeftPinned`, `isLastLeftPinned`, `isFirstRightPinned`, `isLastRightPinned`, `isRowNumber`, `isRowSelection`, `isRowSelected`, `isFirstLeaf`, `isLastLeaf`, `isEmptyCell` |
+| `datagrid.body.cell.text`                                 | Default cell text renderer                       | —                                                                                                                                                                                            |
+| `datagrid.body.cell.rowDetail`                            | Row detail expand/collapse button                | —                                                                                                                                                                                            |
+| `datagrid.body.row`                                       | Data row (display: contents)                     | —                                                                                                                                                                                            |
+| `datagrid.body.groupRow`                                  | Group row (display: contents)                    | —                                                                                                                                                                                            |
+| `datagrid.body.groupRow.expandButton`                     | Group expand/collapse button                     | —                                                                                                                                                                                            |
+| `datagrid.body.detailRow`                                 | Expanded detail row                              | —                                                                                                                                                                                            |
+| `datagrid.body.empty`                                     | Empty state container                            | —                                                                                                                                                                                            |
+| `datagrid.emptyColumns`                                   | No columns selected placeholder                  | —                                                                                                                                                                                            |
+| `datagrid.bottomBar`                                      | Bottom bar (row count, pagination)               | —                                                                                                                                                                                            |
+| `datagrid.bottomBar.info`                                 | Status text ("Rows: ...", "Selected: ...")       | —                                                                                                                                                                                            |
+| `datagrid.bottomBar.clearFilters`                         | "Clear filters" link                             | —                                                                                                                                                                                            |
+| `datagrid.bottomBar.pagination`                           | Pagination controls wrapper                      | —                                                                                                                                                                                            |
+| `datagrid.bottomBar.pagination.button`                    | Pagination nav button                            | —                                                                                                                                                                                            |
+| `datagrid.bottomBar.pagination.info`                      | Page info text ("1 of 5")                        | —                                                                                                                                                                                            |
 
 ---
 
@@ -629,19 +696,19 @@ import Dropdown from '@cronocode/react-box/components/dropdown';
 
 ### Props
 
-| Prop | Type | Description |
-|---|---|---|
-| `value` / `defaultValue` | `TVal \| TVal[]` | Controlled / uncontrolled selected value(s) |
-| `multiple` | `boolean` | Multi-select mode |
-| `isSearchable` | `boolean` | Show search input when open |
-| `searchPlaceholder` | `string` | Search input placeholder |
-| `hideIcon` | `boolean` | Hide chevron icon |
-| `showCheckbox` | `boolean` | Show checkboxes in multiple mode |
-| `name` | `string` | Form field name (renders hidden `<input>` elements) |
-| `onChange` | `(value: TVal \| undefined, values: TVal[]) => void` | Selection callback |
-| `itemsProps` | `BoxStyleProps` | Style overrides for the opened items container (`dropdown.items`) |
-| `iconProps` | `BoxStyleProps` | Style overrides for the chevron icon container (`dropdown.icon`) |
-| `variant` | `ClassNameType` | Propagates to root **and all child sub-components** |
+| Prop                     | Type                                                 | Description                                                       |
+| ------------------------ | ---------------------------------------------------- | ----------------------------------------------------------------- |
+| `value` / `defaultValue` | `TVal \| TVal[]`                                     | Controlled / uncontrolled selected value(s)                       |
+| `multiple`               | `boolean`                                            | Multi-select mode                                                 |
+| `isSearchable`           | `boolean`                                            | Show search input when open                                       |
+| `searchPlaceholder`      | `string`                                             | Search input placeholder                                          |
+| `hideIcon`               | `boolean`                                            | Hide chevron icon                                                 |
+| `showCheckbox`           | `boolean`                                            | Show checkboxes in multiple mode                                  |
+| `name`                   | `string`                                             | Form field name (renders hidden `<input>` elements)               |
+| `onChange`               | `(value: TVal \| undefined, values: TVal[]) => void` | Selection callback                                                |
+| `itemsProps`             | `BoxStyleProps`                                      | Style overrides for the opened items container (`dropdown.items`) |
+| `iconProps`              | `BoxStyleProps`                                      | Style overrides for the chevron icon container (`dropdown.icon`)  |
+| `variant`                | `ClassNameType`                                      | Propagates to root **and all child sub-components**               |
 
 Also accepts all `BoxProps` (styling props) which apply to the root button element.
 
@@ -649,13 +716,13 @@ Also accepts all `BoxProps` (styling props) which apply to the root button eleme
 
 All sub-components accept BoxProps for per-instance style overrides.
 
-| Sub-Component | Purpose |
-|---|---|
-| `Dropdown.Item<TVal>` | Selectable option. Requires `value` prop |
-| `Dropdown.Unselect` | Clear selection option (shown when items selected) |
-| `Dropdown.SelectAll` | Select all (shown in `multiple` when not all selected) |
-| `Dropdown.EmptyItem` | Shown when search yields no results |
-| `Dropdown.Display` | Custom display: static content or `(values: TVal[], isOpen: boolean) => ReactNode` |
+| Sub-Component         | Purpose                                                                            |
+| --------------------- | ---------------------------------------------------------------------------------- |
+| `Dropdown.Item<TVal>` | Selectable option. Requires `value` prop                                           |
+| `Dropdown.Unselect`   | Clear selection option (shown when items selected)                                 |
+| `Dropdown.SelectAll`  | Select all (shown in `multiple` when not all selected)                             |
+| `Dropdown.EmptyItem`  | Shown when search yields no results                                                |
+| `Dropdown.Display`    | Custom display: static content or `(values: TVal[], isOpen: boolean) => ReactNode` |
 
 ### Style Customization
 
@@ -663,7 +730,9 @@ All sub-components accept BoxProps for per-instance style overrides.
 
 ```tsx
 <Dropdown<string> itemsProps={{ width: 80, maxHeight: 50 }} iconProps={{ color: 'gray-400' }}>
-  <Dropdown.Item value="a" bgColor="blue-50" fontWeight={600}>Highlighted</Dropdown.Item>
+  <Dropdown.Item value="a" bgColor="blue-50" fontWeight={600}>
+    Highlighted
+  </Dropdown.Item>
 </Dropdown>
 ```
 
@@ -696,20 +765,20 @@ Box.components({
     },
   },
 });
-<Dropdown variant="dense">...</Dropdown> // applies to root + all children
+<Dropdown variant="dense">...</Dropdown>; // applies to root + all children
 ```
 
 ### Component Style Tree
 
-| Component Name | Description | Built-in Variants |
-|---|---|---|
-| `dropdown` | Root button trigger | `compact` |
-| `dropdown.items` | Opened items container (portal) | — |
-| `dropdown.item` | Selectable item | `compact`, `multiple` |
-| `dropdown.unselect` | Clear selection option | `compact` |
-| `dropdown.selectAll` | Select all option | `compact` |
-| `dropdown.emptyItem` | No results placeholder | `compact` |
-| `dropdown.icon` | Chevron arrow container | — |
+| Component Name       | Description                     | Built-in Variants     |
+| -------------------- | ------------------------------- | --------------------- |
+| `dropdown`           | Root button trigger             | `compact`             |
+| `dropdown.items`     | Opened items container (portal) | —                     |
+| `dropdown.item`      | Selectable item                 | `compact`, `multiple` |
+| `dropdown.unselect`  | Clear selection option          | `compact`             |
+| `dropdown.selectAll` | Select all option               | `compact`             |
+| `dropdown.emptyItem` | No results placeholder          | `compact`             |
+| `dropdown.icon`      | Chevron arrow container         | —                     |
 
 ---
 
@@ -736,15 +805,15 @@ import Select from '@cronocode/react-box/components/select';
 
 ### SelectDef
 
-| Prop | Type | Description |
-|---|---|---|
-| `valueKey` | `keyof TRow` | Required — field used as option value |
-| `displayKey` | `keyof TRow` | Field to display (defaults to valueKey) |
-| `display` | `(row: TRow) => ReactNode` | Custom render per item |
+| Prop              | Type                                           | Description                                            |
+| ----------------- | ---------------------------------------------- | ------------------------------------------------------ |
+| `valueKey`        | `keyof TRow`                                   | Required — field used as option value                  |
+| `displayKey`      | `keyof TRow`                                   | Field to display (defaults to valueKey)                |
+| `display`         | `(row: TRow) => ReactNode`                     | Custom render per item                                 |
 | `selectedDisplay` | `(rows: TRow[], isOpen: boolean) => ReactNode` | Custom trigger display (receives resolved row objects) |
-| `placeholder` | `string` | Unselect/placeholder text |
-| `selectAllText` | `string` | Select all option text (multiple mode) |
-| `emptyText` | `string` | Empty search results text |
+| `placeholder`     | `string`                                       | Unselect/placeholder text                              |
+| `selectAllText`   | `string`                                       | Select all option text (multiple mode)                 |
+| `emptyText`       | `string`                                       | Empty search results text                              |
 
 Also accepts: `data` (TRow[]), `value`/`defaultValue`, `multiple`, `isSearchable`, `searchPlaceholder`, `showCheckbox`, `hideIcon`, `name`, `onChange`, `itemsProps`, `iconProps`, `variant`, and all BoxProps. Same styling/variants as Dropdown.
 

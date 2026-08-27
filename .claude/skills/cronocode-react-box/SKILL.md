@@ -1,6 +1,6 @@
 ---
 name: cronocode-react-box
-description: "@cronocode/react-box expert — runtime CSS-in-JS library. Use when working with react-box Box component, CSS props, Flex/Grid/Button/Dropdown/DataGrid components, Box.extend(), Box.components(), or theme system. Also handles installation, updates, and package manager detection."
+description: '@cronocode/react-box expert — runtime CSS-in-JS library. Use when working with react-box Box component, CSS props, Flex/Grid/Button/Dropdown/DataGrid components, Box.extend(), Box.components(), or theme system. Also handles installation, updates, and package manager detection.'
 ---
 
 # @cronocode/react-box AI Skill
@@ -11,12 +11,12 @@ Runtime CSS-in-JS library. `Box` accepts ~144 CSS props → generates CSS classe
 
 Detect package manager via lock files: `pnpm-lock.yaml` → pnpm, `yarn.lock` → yarn, `bun.lockb` → bun, else npm.
 
-| Manager | Install | Update |
-|---|---|---|
-| npm | `npm install @cronocode/react-box` | `npm update @cronocode/react-box` |
-| yarn | `yarn add @cronocode/react-box` | `yarn upgrade @cronocode/react-box` |
-| pnpm | `pnpm add @cronocode/react-box` | `pnpm update @cronocode/react-box` |
-| bun | `bun add @cronocode/react-box` | `bun update @cronocode/react-box` |
+| Manager | Install                            | Update                              |
+| ------- | ---------------------------------- | ----------------------------------- |
+| npm     | `npm install @cronocode/react-box` | `npm update @cronocode/react-box`   |
+| yarn    | `yarn add @cronocode/react-box`    | `yarn upgrade @cronocode/react-box` |
+| pnpm    | `pnpm add @cronocode/react-box`    | `pnpm update @cronocode/react-box`  |
+| bun     | `bun add @cronocode/react-box`     | `bun update @cronocode/react-box`   |
 
 Check latest: `npm view @cronocode/react-box version`
 
@@ -29,25 +29,25 @@ Check latest: `npm view @cronocode/react-box version`
 
 ## Numeric Value Formatters
 
-| Category | Divider | Example → CSS |
-|---|---|---|
-| Spacing (`p`,`m`,`gap`,`px`,`py`…) | 4 | `p={4}` → 1rem (16px) |
-| fontSize | **16** | `fontSize={14}` → 0.875rem (14px) |
-| width/height/min/max (numeric) | 4 | `width={20}` → 5rem (80px) |
-| Border (`b`,`bx`,`by`…) | px | `b={1}` → 1px |
-| borderRadius | 4 | `borderRadius={2}` → 0.5rem (8px) |
-| lineHeight / letterSpacing | px | `lineHeight={24}` → 24px |
+| Category                           | Divider | Example → CSS                     |
+| ---------------------------------- | ------- | --------------------------------- |
+| Spacing (`p`,`m`,`gap`,`px`,`py`…) | 4       | `p={4}` → 1rem (16px)             |
+| fontSize                           | **16**  | `fontSize={14}` → 0.875rem (14px) |
+| width/height/min/max (numeric)     | 4       | `width={20}` → 5rem (80px)        |
+| Border (`b`,`bx`,`by`…)            | px      | `b={1}` → 1px                     |
+| borderRadius                       | 4       | `borderRadius={2}` → 0.5rem (8px) |
+| lineHeight / letterSpacing         | px      | `lineHeight={24}` → 24px          |
 
 ## Component Shortcuts
 
-| Instead of… | Use | Import |
-|---|---|---|
-| `<Box display="flex/grid">` | `<Flex>`/`<Grid>` | `components/flex`, `components/grid` |
-| `<Box tag="button/input/textarea">` | `<Button>`/`<Textbox>`/`<Textarea>` | `components/button`, `components/textbox`, `components/textarea` |
-| `<Box tag="a/img/label">` | `<Link>`/`<Img>`/`<Label>` | `components/semantics` |
-| `<Box tag="h1..h6/p/span">` | `<H1>..<H6>`/`<P>`/`<Span>` | `components/semantics` |
-| `<Box tag="nav/header/footer/main">` | `<Nav>`/`<Header>`/`<Footer>`/`<Main>` | `components/semantics` |
-| `<Box tag="section/article/aside">` | `<Section>`/`<Article>`/`<Aside>` | `components/semantics` |
+| Instead of…                          | Use                                    | Import                                                           |
+| ------------------------------------ | -------------------------------------- | ---------------------------------------------------------------- |
+| `<Box display="flex/grid">`          | `<Flex>`/`<Grid>`                      | `components/flex`, `components/grid`                             |
+| `<Box tag="button/input/textarea">`  | `<Button>`/`<Textbox>`/`<Textarea>`    | `components/button`, `components/textbox`, `components/textarea` |
+| `<Box tag="a/img/label">`            | `<Link>`/`<Img>`/`<Label>`             | `components/semantics`                                           |
+| `<Box tag="h1..h6/p/span">`          | `<H1>..<H6>`/`<P>`/`<Span>`            | `components/semantics`                                           |
+| `<Box tag="nav/header/footer/main">` | `<Nav>`/`<Header>`/`<Footer>`/`<Main>` | `components/semantics`                                           |
+| `<Box tag="section/article/aside">`  | `<Section>`/`<Article>`/`<Aside>`      | `components/semantics`                                           |
 
 Also: `Mark`, `Figure`, `Figcaption`, `Details`, `Summary`, `Menu`, `Time`. All from `@cronocode/react-box/components/...`.
 
@@ -91,7 +91,9 @@ Also: `Mark`, `Figure`, `Figcaption`, `Details`, `Summary`, `Menu`, `Time`. All 
 ## Component System
 
 ```tsx
-<Box component="card" variant="bordered"><Box component="card.header">Title</Box></Box>
+<Box component="card" variant="bordered">
+  <Box component="card.header">Title</Box>
+</Box>;
 
 export const components = Box.components({
   card: {
@@ -99,19 +101,25 @@ export const components = Box.components({
     variants: { bordered: { b: 1, borderColor: 'gray-200', shadow: 'none' } },
     children: { header: { styles: { fontSize: 18, fontWeight: 600 } } },
   },
-  subgrid: { extends: 'datagrid', styles: { b: 0, shadow: 'none' } }
+  subgrid: { extends: 'datagrid', styles: { b: 0, shadow: 'none' } },
 });
-
 ```
 
 ## Extension System
 
 ```tsx
 export const { extendedProps, extendedPropTypes } = Box.extend(
-  { 'brand-primary': '#ff6600' },                                                          // CSS variables
-  { aspectRatio: [{ values: ['16/9'] as const, styleName: 'aspect-ratio', valueFormat: (v) => v }] },  // New props
-  { bgColor: [{ values: ['brand-primary'] as const, styleName: 'background-color',         // Extend existing
-    valueFormat: (v, getVar) => getVar(v) }] },
+  { 'brand-primary': '#ff6600' }, // CSS variables
+  { aspectRatio: [{ values: ['16/9'] as const, styleName: 'aspect-ratio', valueFormat: (v) => v }] }, // New props
+  {
+    bgColor: [
+      {
+        values: ['brand-primary'] as const,
+        styleName: 'background-color', // Extend existing
+        valueFormat: (v, getVar) => getVar(v),
+      },
+    ],
+  },
 );
 // TypeScript: declare module '@cronocode/react-box/types' { namespace Augmented {
 //   interface BoxProps extends ExtractBoxStyles<typeof extendedProps> {}
@@ -126,7 +134,7 @@ import Dropdown from '@cronocode/react-box/components/dropdown';
 <Dropdown<string> defaultValue="a" onChange={(value, values) => {}}>
   <Dropdown.Unselect>Pick...</Dropdown.Unselect>
   <Dropdown.Item value="a">Alpha</Dropdown.Item>
-</Dropdown>
+</Dropdown>;
 // Multiple: <Dropdown multiple showCheckbox isSearchable searchPlaceholder="Search...">
 //   <Dropdown.SelectAll>All</Dropdown.SelectAll> <Dropdown.EmptyItem>No results</Dropdown.EmptyItem>
 //   <Dropdown.Display>{(values) => `${values.length} selected`}</Dropdown.Display>
@@ -142,8 +150,12 @@ Data-driven dropdown — `data` + `def` instead of children. Shares `dropdown.*`
 
 ```tsx
 import Select from '@cronocode/react-box/components/select';
-<Select<User, number> data={users} def={{ valueKey: 'id', displayKey: 'name', placeholder: 'Pick...' }}
-  value={selected} onChange={(value) => setSelected(value!)} />
+<Select<User, number>
+  data={users}
+  def={{ valueKey: 'id', displayKey: 'name', placeholder: 'Pick...' }}
+  value={selected}
+  onChange={(value) => setSelected(value!)}
+/>;
 ```
 
 **SelectDef**: `valueKey` (required), `displayKey`, `display` (`(row) => ReactNode`), `selectedDisplay` (`(rows, isOpen) => ReactNode`), `placeholder`, `selectAllText`, `emptyText`.
@@ -153,21 +165,37 @@ Also: `data`, `value`/`defaultValue`, `multiple`, `isSearchable`, `searchPlaceho
 
 ```tsx
 import DataGrid from '@cronocode/react-box/components/dataGrid';
-<DataGrid data={users} def={{
-  rowKey: 'id', topBar: true, bottomBar: true, globalFilter: true,
-  rowSelection: { pinned: true }, showRowNumber: { pinned: true },
-  rowHeight: 40, visibleRowsCount: 15,
-  columns: [
-    { key: 'name', header: 'Name', filterable: true },
-    { key: 'age', header: 'Age', width: 80, align: 'right', filterable: { type: 'number' } },
-    { key: 'status', header: 'Status', filterable: { type: 'multiselect' } },
-    { key: 'country', header: 'Country', pin: 'RIGHT' },
-    { key: 'actions', header: '', width: 80, sortable: false, contextMenu: false,
-      Cell: ({ cell }) => <Button onClick={() => edit(cell.row.data)}>Edit</Button> },
-  ],
-  rowDetail: { content: (row) => <Details row={row} />, expandOnRowClick: true, expandColumnHeader: 'Details' },
-  contextMenu: { sort: true, pin: true, group: false }, resizerStyle: 'hover',
-}} onSelectionChange={(e) => console.log(e.selectedRowKeys)} />
+<DataGrid
+  data={users}
+  def={{
+    rowKey: 'id',
+    topBar: true,
+    bottomBar: true,
+    globalFilter: true,
+    rowSelection: { pinned: true },
+    showRowNumber: { pinned: true },
+    rowHeight: 40,
+    visibleRowsCount: 15,
+    columns: [
+      { key: 'name', header: 'Name', filterable: true },
+      { key: 'age', header: 'Age', width: 80, align: 'right', filterable: { type: 'number' } },
+      { key: 'status', header: 'Status', filterable: { type: 'multiselect' } },
+      { key: 'country', header: 'Country', pin: 'RIGHT' },
+      {
+        key: 'actions',
+        header: '',
+        width: 80,
+        sortable: false,
+        contextMenu: false,
+        Cell: ({ cell }) => <Button onClick={() => edit(cell.row.data)}>Edit</Button>,
+      },
+    ],
+    rowDetail: { content: (row) => <Details row={row} />, expandOnRowClick: true, expandColumnHeader: 'Details' },
+    contextMenu: { sort: true, pin: true, group: false },
+    resizerStyle: 'hover',
+  }}
+  onSelectionChange={(e) => console.log(e.selectedRowKeys)}
+/>;
 ```
 
 **DataGridProps**: `data`, `def`, `component` (default `'datagrid'`), `loading`, `filters` (predicate[]), `page`/`onPageChange`, `onSortChange`, `onServerStateChange` (`{ page, pageSize, sortColumn, sortDirection, columnFilters, globalFilterValue }`), `onSelectionChange` (`{ action, selectedRowKeys, affectedRowKeys, isAllSelected }`), `expandedRowKeys`/`onExpandedRowKeysChange`, `globalFilterValue`/`onGlobalFilterChange`, `columnFilters`/`onColumnFiltersChange`.
@@ -192,4 +220,6 @@ import DataGrid from '@cronocode/react-box/components/dataGrid';
 
 **Group hover**: `<Box hoverGroup={{ 'parent-class': { opacity: 1 } }}>`
 **SSR**: `import { getStyles, resetStyles } from '@cronocode/react-box/ssg'` — render, read `getStyles()` into `<style id="crono-styles">`, then `resetStyles()`. Needs no DOM.
+**Server Components (React 19)**: works with no `'use client'` and no setup — the `react-server` entry renders Box hook-free and its CSS ships as `<style href precedence>` elements React hoists into `<head>`. Client components in the same app: `Box.configure({ sink: 'element' })` once in a `'use client'` module. Client-only: hover-callback children, `Box.Theme`, pre-built components — but `theme={{ dark: {...} }}` styles work server-side (set the theme class on `<html>`). Element-mode rules are in `@layer`, so your own unlayered CSS wins. React 18: keep the default sink.
+**Config**: `Box.configure({ sink: 'cssom' | 'textContent' | 'string' | 'element', classNames: 'hashed' | 'readable' | 'stable' })` — before the first render.
 **Portals**: Tooltip for escaping `overflow: hidden` (renders into `#crono-box`)

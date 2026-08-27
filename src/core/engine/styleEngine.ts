@@ -16,9 +16,10 @@ import {
 import { BoxStyle } from '../coreTypes';
 import defaultBoxComponents, { BoxComponent, Components } from '../extends/boxComponents';
 import { resolveComponentStyles } from '../extends/useComponents';
+import { stableHash } from '../hash';
 import Variables from '../variables';
 import { createFlushCoordinator, FlushScheduler, microtaskScheduler } from './flushScheduler';
-import { createSink, SinkMode, SortedRule, StyleSink } from './styleSink';
+import { createSink, RULE_PRECEDENCE, SinkMode, SortedRule, StyleElementDescriptor, StyleSink } from './styleSink';
 
 /** Explicit engine configuration — replaces the previous NODE_ENV-based sniffing. */
 export interface StylesConfiguration {
@@ -26,14 +27,22 @@ export interface StylesConfiguration {
    * How generated class names are emitted.
    * - `'hashed'` (default): names go through the identity factory (short, stable hashes).
    * - `'readable'`: the descriptive name is kept as-is (useful for tests and debugging).
+   * - `'stable'`: the descriptive name is hashed, so identical props produce the same class name in
+   *   every process — the default in element mode, where a class generated in a Server Component
+   *   has to match the one the client bundle generates for the same props.
    */
-  classNames?: 'hashed' | 'readable';
+  classNames?: 'hashed' | 'readable' | 'stable';
   /**
    * Where generated rules are written. Defaults to the environment: a stylesheet in the browser,
    * a string on the server — so server rendering needs no DOM at all.
    * - `'cssom'`: `CSSStyleSheet.insertRule` (falls back to rule text when the element has no stylesheet).
    * - `'textContent'`: the style element's text (readable in tests and DevTools).
    * - `'string'`: kept in memory only, read back with `getStyles()` — the server-rendering sink.
+   * - `'element'`: nowhere. Rules come back from `resolveClassNames()` as style-element
+   *   descriptors for the adapter to render — `<style href precedence>`, which React 19 hoists
+   *   into `<head>` and dedupes. This is the mode that works in Server Components and streaming
+   *   SSR, where no effect ever runs. Rules are wrapped in cascade layers, so the order React
+   *   happens to insert the elements in cannot change the cascade.
    *
    * Changing the sink of an engine that has already emitted CSS starts a fresh stylesheet: those
    * rules live in the old sink, so the engine forgets them and re-emits them on the next render.
@@ -62,10 +71,20 @@ export interface StyleEngineOptions extends StylesConfiguration {
 export interface StyleEngine {
   /** The id of the `<style>` element this engine writes to. */
   readonly styleElementId: string;
-  /** Resolve (and cache) the class list for a Box's props. `signature` is null when the props could not be serialized. */
-  resolveClassNames(props: BoxStyleProps<any>, isSvg: boolean): { classNames: string[]; signature: string | null };
-  /** Register rules that target a root selector (e.g. `html`) rather than a generated class. */
-  addGlobalStyles(props: BoxStyleProps<any>, selector: string): void;
+  /**
+   * Resolve (and cache) the class list for a Box's props. `signature` is null when the props could
+   * not be serialized. `styleElements` is set in element mode only: the hoistable `<style>`
+   * elements this Box's classes need, the engine's base element first.
+   */
+  resolveClassNames(
+    props: BoxStyleProps<any>,
+    isSvg: boolean,
+  ): { classNames: string[]; signature: string | null; styleElements?: StyleElementDescriptor[] };
+  /**
+   * Register rules that target a root selector (e.g. `html`) rather than a generated class.
+   * Returns the style elements they need in element mode, exactly like `resolveClassNames`.
+   */
+  addGlobalStyles(props: BoxStyleProps<any>, selector: string): StyleElementDescriptor[] | undefined;
   /** Write every pending rule to this engine's sink, now. */
   flushSync(): void;
   /**
@@ -120,6 +139,30 @@ function escapeClassName(className: string): string {
   return className.replace(invalidInCssIdentifier, (char) => `\\${char}`);
 }
 
+// `normal` first, then the breakpoints in ascending order: the major half of the cascade order, so
+// a responsive rule always overrides the base one.
+const breakpointRank: Record<string, number> = Object.keys(breakpoints).reduce<Record<string, number>>(
+  (acc, key, index) => {
+    acc[key] = index + 1;
+    return acc;
+  },
+  { normal: 0 },
+);
+
+/** The layer the base rules live in — the reset has to lose against every generated rule. */
+const BASE_LAYER = 'rb';
+
+/** The cascade layer of one generated rule: breakpoint-major, then prop declaration order. */
+function layerName(breakpoint: string, sortIndex: number): string {
+  return `${BASE_LAYER}${breakpointRank[breakpoint] ?? 0}${sortIndex.toString(36)}`;
+}
+
+/** What the class-name cache holds per style signature. `elements` is null outside element mode. */
+interface ResolvedStyles {
+  classNames: string[];
+  elements: StyleElementDescriptor[] | null;
+}
+
 function resolveExtends(components: Components): Components {
   const resolved = { ...components };
 
@@ -144,7 +187,9 @@ export function createStyleEngine(options: StyleEngineOptions = {}): StyleEngine
   let identity = new IdentityFactory();
   const variables = Variables.createRegistry();
 
-  let classNamesMode: NonNullable<StylesConfiguration['classNames']> = options.classNames ?? 'hashed';
+  // Undefined means "follow the sink": counter-hashed names normally, content-hashed in element
+  // mode, where a class name resolved in one process has to match the one another resolves.
+  let classNamesMode: StylesConfiguration['classNames'] = options.classNames;
   // Undefined means "follow the environment" — resolved when the sink is first needed, not at
   // construction, so importing the library still touches no DOM.
   let sinkMode: SinkMode | undefined = options.sink;
@@ -154,6 +199,19 @@ export function createStyleEngine(options: StyleEngineOptions = {}): StyleEngine
     if (!sink) sink = createSink(styleElementId, sinkMode);
 
     return sink;
+  }
+
+  /**
+   * Element mode: rules are handed to the adapter as `<style>` descriptors instead of being
+   * written anywhere. It also turns on cascade layers and content-hashed class names, because a
+   * hoisted element's position in `<head>` is render order, not cascade order.
+   */
+  function isElementMode(): boolean {
+    return sinkMode === 'element';
+  }
+
+  function namingMode(): NonNullable<StylesConfiguration['classNames']> {
+    return classNamesMode ?? (isElementMode() ? 'stable' : 'hashed');
   }
 
   // The prop registry. Copied per engine so `extend()` on one engine cannot leak into another.
@@ -177,9 +235,16 @@ export function createStyleEngine(options: StyleEngineOptions = {}): StyleEngine
   // by isSvg/clean/component/variant + its recognized style props, so structurally-identical
   // Boxes (e.g. every DataGrid cell) collapse to a single map lookup instead of re-running the
   // merge + walk + identity work. Rule generation is still deduped separately by `generatedRules`.
-  const styleCache = new Map<string, string[]>();
+  const styleCache = new Map<string, ResolvedStyles>();
   // Track already generated CSS rules to avoid re-generating
   const generatedRules = new Set<string>();
+  // Element mode: the descriptor of every rule generated so far, by rule key. A Box that renders
+  // a rule some earlier Box already generated still has to render its `<style>` element — React
+  // dedupes them by href — so descriptors are kept, not consumed.
+  const ruleElements = new Map<string, StyleElementDescriptor>();
+  // The descriptors the resolve currently in progress walked over. Non-null only for the duration
+  // of one resolveClassNames/addGlobalStyles call, and only in element mode.
+  let collecting: StyleElementDescriptor[] | null = null;
   // Rule keys that matched no value definition. Remembered because `generatedRules` short-circuits
   // the second occurrence of a prop/value pair: without this, the first Box would (correctly) get
   // no class name and every later one would get a class with no rule behind it.
@@ -335,6 +400,14 @@ export function createStyleEngine(options: StyleEngineOptions = {}): StyleEngine
       if (result) {
         pendingRules.push([result.sortIndex, result.breakpointOrder, result.rule]);
         requireFlush = true;
+        if (isElementMode()) {
+          ruleElements.set(ruleKey, {
+            href: `${RULE_PRECEDENCE}-${stableHash(result.rule)}`,
+            css: result.rule,
+            precedence: RULE_PRECEDENCE,
+            sortKey: sortKeyOf(result.sortIndex, result.breakpointOrder),
+          });
+        }
         // The engine, not the caller, owns "something is pending" — an adapter that never flushes
         // (vanilla DOM, a framework with no commit phase) still gets its CSS.
         scheduleFlush();
@@ -346,6 +419,11 @@ export function createStyleEngine(options: StyleEngineOptions = {}): StyleEngine
     // A value the prop does not declare produces no rule, so it must not produce a class either —
     // an unmatched value used to leave a dangling class name in the markup.
     if (unsupportedRules.has(ruleKey)) return;
+
+    if (collecting) {
+      const element = ruleElements.get(ruleKey);
+      if (element) collecting.push(element);
+    }
 
     classNames.push(className);
   }
@@ -384,6 +462,23 @@ export function createStyleEngine(options: StyleEngineOptions = {}): StyleEngine
 
     const sortIndex = cssStylesIndex[key] ?? 0;
     const breakpointOrder = breakpoints[breakpoint as keyof typeof breakpoints] ?? 0;
+
+    /**
+     * The finished rule: wrapped in its media query, and in element mode in its cascade layer.
+     *
+     * The space after `@media` matters: browsers accept `@media(...)` but the CSS parsers in
+     * happy-dom and jsdom reject the rule outright, so without it every breakpoint rule silently
+     * vanishes from a consumer's test DOM.
+     */
+    function finish(rule: string) {
+      const media = breakpoint === 'normal' ? rule : `@media (min-width: ${breakpointOrder}px){${rule}}`;
+
+      return {
+        rule: isElementMode() ? `@layer ${layerName(breakpoint, sortIndex)}{${media}}` : media,
+        sortIndex,
+        breakpointOrder,
+      };
+    }
 
     const className = escapeClassName(
       createClassName(key as keyof BoxStyles, value as BoxStyles[keyof BoxStyles], weight, breakpoint, pseudoClassParentName),
@@ -431,17 +526,7 @@ export function createStyleEngine(options: StyleEngineOptions = {}): StyleEngine
         })
         .join(';')}}`;
 
-      // Wrap in media query if needed. The space after `@media` matters: browsers accept
-      // `@media(...)` but the CSS parsers in happy-dom and jsdom reject the rule outright, so
-      // without it every breakpoint rule silently vanishes from a consumer's test DOM.
-      if (breakpoint !== 'normal') {
-        return {
-          rule: `@media (min-width: ${breakpoints[breakpoint as keyof typeof breakpoints]}px){${rule}}`,
-          sortIndex,
-          breakpointOrder,
-        };
-      }
-      return { rule, sortIndex, breakpointOrder };
+      return finish(rule);
     } else {
       const pseudoClassesToUse = pseudoClassesByWeight[weight].map((p) => pseudoClasses[p]).join('');
       const baseSelector = rootSelector ?? `.${className}`;
@@ -456,17 +541,7 @@ export function createStyleEngine(options: StyleEngineOptions = {}): StyleEngine
         })
         .join(';')}}`;
 
-      // Wrap in media query if needed. The space after `@media` matters: browsers accept
-      // `@media(...)` but the CSS parsers in happy-dom and jsdom reject the rule outright, so
-      // without it every breakpoint rule silently vanishes from a consumer's test DOM.
-      if (breakpoint !== 'normal') {
-        return {
-          rule: `@media (min-width: ${breakpoints[breakpoint as keyof typeof breakpoints]}px){${rule}}`,
-          sortIndex,
-          breakpointOrder,
-        };
-      }
-      return { rule, sortIndex, breakpointOrder };
+      return finish(rule);
     }
   }
 
@@ -482,12 +557,46 @@ export function createStyleEngine(options: StyleEngineOptions = {}): StyleEngine
 
     const className = `${breakpoint === 'normal' ? '' : `${breakpoint}-`}${pseudoClassList.map((p) => `${p}-`).join('')}${pseudoClassParentName ? `${pseudoClassParentName}-` : ''}${key}-${serializedValue}`;
 
-    return classNamesMode === 'readable' ? className : identity.getIdentity(className);
+    switch (namingMode()) {
+      case 'readable':
+        return className;
+      case 'stable':
+        return `_${stableHash(className)}`;
+      default:
+        return identity.getIdentity(className);
+    }
+  }
+
+  /**
+   * Every cascade layer, in cascade order, declared in one statement.
+   *
+   * Element mode gives up control of where a rule lands in `<head>`: React hoists the elements in
+   * the order it discovers them, which is render order — a Box that only uses `md={{ p: 4 }}` can
+   * put its rule in front of the `p={2}` rule another Box already needed, and a plain reading of
+   * the cascade would then apply them the wrong way round. One layer per (breakpoint, prop) makes
+   * element order irrelevant: this statement, which travels with the base element and therefore
+   * reaches the document first, is what fixes the order.
+   *
+   * Props registered by `Box.extend()` after the first render are the one gap — CSS appends layers
+   * it meets for the first time after every layer already named, so an extended prop's layer ends
+   * up after the built-in ones. Declare extended props before the first render (which is where
+   * they belong anyway) and the order is exact.
+   */
+  function layerOrder(): string {
+    const names = [BASE_LAYER];
+
+    for (const breakpoint of Object.keys(breakpointRank)) {
+      for (let index = 0; index < Object.keys(cssStyles).length; index++) {
+        names.push(layerName(breakpoint, index));
+      }
+    }
+
+    return `@layer ${names.join(',')};`;
   }
 
   /** The reset + `:root` block every engine writes before its first generated rule. */
   function baseRules(): string[] {
-    return [
+    const rules = [
       `:root{${variables.generateVariables()}}`,
       `:root{--borderColor: black;--outlineColor: black;--lineHeight: 1.2;--fontSize: 14px;--transitionTime: 0.25s;--svgTransitionTime: 0.3s;}`,
       `#crono-box {position: absolute;top: 0;left: 0;height: 0;z-index:99999;}`,
@@ -501,6 +610,17 @@ export function createStyleEngine(options: StyleEngineOptions = {}): StyleEngine
       `.${svgClassName}{display: block;border: 0 solid var(--borderColor);outline: 0px solid var(--outlineColor);margin: 0;padding: 0;transition: all var(--svgTransitionTime);}`,
       `.${svgClassName} path,.${svgClassName} circle,.${svgClassName} rect,.${svgClassName} line {transition: all var(--svgTransitionTime);}`,
     ];
+
+    if (!isElementMode()) return rules;
+
+    // Unlayered CSS beats every layer, so the moment generated rules are layered the reset has to
+    // be as well — otherwise `._b{padding:0}` would win against `.p-4{padding:1rem}`.
+    return [layerOrder(), `@layer ${BASE_LAYER}{${rules.join('')}}`];
+  }
+
+  /** A rule's position in the cascade: breakpoint first, then prop declaration order. */
+  function sortKeyOf(sortIndex: number, breakpointOrder: number): number {
+    return breakpointOrder * 100000 + sortIndex;
   }
 
   /**
@@ -513,7 +633,7 @@ export function createStyleEngine(options: StyleEngineOptions = {}): StyleEngine
 
     pendingRules.sort((a, b) => a[1] - b[1] || a[0] - b[0]);
 
-    const drained = pendingRules.map(([sortIndex, breakpointOrder, rule]) => ({ sortKey: breakpointOrder * 100000 + sortIndex, rule }));
+    const drained = pendingRules.map(([sortIndex, breakpointOrder, rule]) => ({ sortKey: sortKeyOf(sortIndex, breakpointOrder), rule }));
     pendingRules.length = 0;
 
     return drained;
@@ -548,10 +668,59 @@ export function createStyleEngine(options: StyleEngineOptions = {}): StyleEngine
 
   const scheduleFlush = createFlushCoordinator(flush, options.scheduler ?? microtaskScheduler);
 
+  /**
+   * Run a class-name walk and collect the style elements the rules it touched need. Returns null
+   * outside element mode: nothing would render them there, so nothing pays for building the list.
+   */
+  function collect(walk: () => void): StyleElementDescriptor[] | null {
+    if (!isElementMode()) {
+      walk();
+
+      return null;
+    }
+
+    const elements: StyleElementDescriptor[] = [];
+    collecting = elements;
+
+    try {
+      walk();
+    } finally {
+      collecting = null;
+    }
+
+    // Deduped, because a Box can reach the same rule twice (a component default and its own prop
+    // resolving to the same value), and kept in cascade order so the list reads like a stylesheet.
+    const seen = new Set<string>();
+    const unique = elements.filter((element) => {
+      if (seen.has(element.href)) return false;
+
+      seen.add(element.href);
+
+      return true;
+    });
+
+    return unique.sort((a, b) => a.sortKey - b.sortKey);
+  }
+
+  /**
+   * A Box's elements with the engine's base element in front. The base block — the reset, `:root`,
+   * the cascade-layer order — belongs to no single Box, so every Box carries it: whichever one
+   * React renders first establishes the layer order, and every copy after that is deduped by href.
+   */
+  function withBaseElement(elements: StyleElementDescriptor[]): StyleElementDescriptor[] {
+    // Nothing else would move the base rules — or a variable resolved a moment ago — out of the
+    // pending queue: in element mode there is no effect, and on a server there is no commit.
+    flush();
+    const base = getSink().baseElement?.() ?? null;
+
+    return base ? [base, ...elements] : elements;
+  }
+
   /** Forget everything emitted so far, in the sink and in the engine's own bookkeeping. */
   function clear() {
     generatedRules.clear();
     unsupportedRules.clear();
+    ruleElements.clear();
     pendingRules.length = 0;
     isInitialized = false;
     // The next flush has to write the base rules again — the sink no longer holds them.
@@ -573,24 +742,28 @@ export function createStyleEngine(options: StyleEngineOptions = {}): StyleEngine
     resolveClassNames(props: BoxStyleProps<any>, isSvg: boolean) {
       const signature = computeSignature(props, isSvg);
 
-      let classNames = signature !== null ? styleCache.get(signature) : undefined;
+      let resolved = signature !== null ? styleCache.get(signature) : undefined;
 
-      if (!classNames) {
+      if (!resolved) {
         const componentStyles = resolveComponentStyles(props, componentsStyles) as BoxStyleProps;
         const propsToUse = componentStyles ? ObjectUtils.mergeDeep(componentStyles, props) : props;
 
-        classNames = [isSvg ? svgClassName : boxClassName];
-        addClassNames(propsToUse, classNames, []);
+        const classNames = [isSvg ? svgClassName : boxClassName];
+        resolved = { classNames, elements: collect(() => addClassNames(propsToUse, classNames, [])) };
 
-        if (signature !== null) styleCache.set(signature, classNames);
+        if (signature !== null) styleCache.set(signature, resolved);
       }
 
-      return { classNames, signature };
+      const { classNames, elements } = resolved;
+
+      return elements ? { classNames, signature, styleElements: withBaseElement(elements) } : { classNames, signature };
     },
 
     addGlobalStyles(props: BoxStyleProps<any>, selector: string) {
       const throwawayClassNames: string[] = [];
-      addClassNames(props, throwawayClassNames, [], undefined, undefined, selector);
+      const elements = collect(() => addClassNames(props, throwawayClassNames, [], undefined, undefined, selector));
+
+      return elements ? withBaseElement(elements) : undefined;
     },
 
     flushSync: flush,

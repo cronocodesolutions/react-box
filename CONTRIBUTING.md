@@ -50,6 +50,7 @@ Box props → useStyles() → useComponents() → StylesContext → CSS injectio
 react-box/
 ├── src/                          # Library source (published to npm)
 │   ├── box.ts                    # Main Box component (entry point)
+│   ├── rsc.ts                    # Box for Server Components (the `react-server` entry, hook-free)
 │   ├── types.ts                  # TypeScript type exports
 │   ├── ssg.ts                    # Server-side rendering support (entry point)
 │   │
@@ -60,10 +61,11 @@ react-box/
 │   │   ├── classNames.ts         # Conditional className utility
 │   │   ├── coreTypes.ts          # Core TypeScript types (framework-free)
 │   │   ├── boxConstants.ts       # Constants (REM divider, etc.)
+│   │   ├── hash.ts               # stableHash(): content-addressed class names and style hrefs
 │   │   │
 │   │   ├── engine/               # The engine instance
 │   │   │   ├── styleEngine.ts    # createStyleEngine(): all engine state
-│   │   │   ├── styleSink.ts      # Where the CSS goes (cssom/textContent/string)
+│   │   │   ├── styleSink.ts      # Where the CSS goes (cssom/textContent/string/element)
 │   │   │   ├── flushScheduler.ts # When pending rules reach the sink
 │   │   │   └── defaultEngine.ts  # The lazily-created default instance
 │   │   │
@@ -77,6 +79,10 @@ react-box/
 │   │
 │   ├── react/                    # The React adapter — everything React-specific
 │   │   ├── useStyles.ts          # The binding: class names in render, flush in an effect
+│   │   ├── resolveStyles.ts      # The same resolution with no hook (what src/rsc.ts renders with)
+│   │   ├── styleElements.ts      # Descriptors → <style href precedence> elements (React 19)
+│   │   ├── boxProps.ts           # The prop shape both Box builds share
+│   │   ├── boxTagProps.ts        # Props → HTML tag attributes (hook-free)
 │   │   ├── reactTypes.ts         # React-only type helpers (ExtractElementFromTag)
 │   │   │
 │   │   ├── theme/                # Theme system, React half
@@ -133,14 +139,14 @@ component tree exists. It is the future `@box-kite/core` package, and it is what
 embeddable in places React is not: a vanilla-DOM page, an iframe widget, another framework's
 adapter, a build-time compiler.
 
-| Layer               | Path                                       | May import React?              |
-| ------------------- | ------------------------------------------ | ------------------------------ |
-| Core engine         | `src/core/**`                              | **No** — enforced              |
-| React binding       | `src/react/**`, `src/box.ts`, `src/ssg.ts` | Yes                            |
-| Components, icons   | `src/components/**`, `src/icons/**`        | Yes                            |
-| Shared utils, types | `src/utils/**`, `src/types.ts`             | No (they simply don't need it) |
+| Layer               | Path                                                     | May import React?                        |
+| ------------------- | -------------------------------------------------------- | ---------------------------------------- |
+| Core engine         | `src/core/**`                                            | **No** — enforced                        |
+| React binding       | `src/react/**`, `src/box.ts`, `src/rsc.ts`, `src/ssg.ts` | Yes (`src/rsc.ts`: no hooks — see below) |
+| Components, icons   | `src/components/**`, `src/icons/**`                      | Yes                                      |
+| Shared utils, types | `src/utils/**`, `src/types.ts`                           | No (they simply don't need it)           |
 
-Two things enforce it, because one is not enough:
+Three things enforce it, because one is not enough:
 
 1. **ESLint** — a `no-restricted-imports` block scoped to `src/core/**` (see `eslint.config.js`,
    next to the identical rule that keeps the DataGrid models headless).
@@ -149,13 +155,17 @@ Two things enforce it, because one is not enough:
    one is the reason this script exists: `React.JSX.IntrinsicElements` needs no import at all, so
    `ExtractElementFromTag` sat in `core/coreTypes.ts` for years without a single lint error. It now
    lives in `src/react/reactTypes.ts`.
+3. **`scripts/check-rsc-boundary.mjs`**, run by the same command — the mirror image of the rule
+   above: the `react-server` entry (`src/rsc.ts`) may import React, but nothing in its graph may
+   call a _client_ hook. See "Element mode and cascade layers".
 
 The same command prints the adapter ratio published in the README:
 
 ```
-✔ src/core is framework-free (14 files, 4134 lines, zero React references)
-  React binding: 6 files, 327 lines — 7.3% of core + binding
+✔ src/core is framework-free (15 files, 4377 lines, zero React references)
+  React binding: 11 files, 478 lines — 9.8% of core + binding
   React helper hooks: 3 files, 212 lines (shared by components, outside the binding)
+✔ src/rsc.ts renders with no client hooks (22 modules in its graph)
 ```
 
 ### Where does my new code go?
@@ -165,6 +175,9 @@ The same command prints the adapter ratio published in the README:
   `src/core/`; DOM is not React. Guard for its absence so a server render can call it (see
   `core/theme/themeRuntime.ts`, `core/engine/styleSink.ts`).
 - Hooks, context, JSX, anything typed in React's own types → `src/react/`.
+- Something the Server-Component Box also needs → `src/react/`, in a module that calls no hook
+  (`resolveStyles.ts`, `styleElements.ts`, `boxTagProps.ts`). Hook-using code stays in a module
+  `src/rsc.ts` never reaches.
 - If a core module seems to _need_ a hook, it needs an injectable policy instead. That is how
   flushing works: core owns `scheduleFlush()`, and the React binding supplies the timing from
   `useInsertionEffect` (`core/engine/flushScheduler.ts`).
@@ -432,19 +445,52 @@ commit. `flushScheduler.test.ts` pins the contract; the ordering guarantee is co
 
 ### Style Sinks (core/engine/styleSink.ts)
 
-`flush()` decides _what_ to write and in which order; a **sink** decides _how_. Three of them:
+`flush()` decides _what_ to write and in which order; a **sink** decides _how_. Four of them:
 
-| Sink          | Writes to                            | Used when                                       |
-| ------------- | ------------------------------------ | ----------------------------------------------- |
-| `cssom`       | `CSSStyleSheet.insertRule`           | the browser default                             |
-| `textContent` | the `<style>` element's text         | tests and debugging (`Box.configure`)           |
-| `string`      | memory, read back with `getStyles()` | server rendering (no `document` in the process) |
+| Sink          | Writes to                            | Used when                                        |
+| ------------- | ------------------------------------ | ------------------------------------------------ |
+| `cssom`       | `CSSStyleSheet.insertRule`           | the browser default                              |
+| `textContent` | the `<style>` element's text         | tests and debugging (`Box.configure`)            |
+| `string`      | memory, read back with `getStyles()` | server rendering (no `document` in the process)  |
+| `element`     | nothing — the adapter renders it     | React 19 / Server Components (`sink: 'element'`) |
 
 With no explicit `sink` the engine follows its environment, which is why server rendering needs no
 DOM and no fake `document`. Every sink places a rule at the position its **sort key** gives it
 (breakpoint order first, then prop declaration order) no matter which flush it arrived in, so the
 CSS a server produces and the sheet a browser builds agree rule for rule — `styleSink.test.ts` and
 `ssr.roundtrip.test.tsx` pin that down.
+
+### Element mode and cascade layers (core/engine + src/rsc.ts)
+
+Element mode is the odd one out: it writes nowhere. `resolveClassNames()` returns a
+`StyleElementDescriptor` per rule (`{ href, css, precedence, sortKey }`), the adapter renders each
+as `<style href precedence>`, and React 19 hoists them into `<head>` and keeps one copy per `href`.
+No effect is involved, which is why this is the path that works in a Server Component and under
+streaming SSR — and why `src/rsc.ts` can render Box without a single hook.
+
+Three consequences shape the implementation:
+
+- **Element order is render order, not cascade order.** A Box that only uses `md={{ p: 4 }}` can put
+  its rule in `<head>` ahead of the `p={2}` rule another Box needed, and atomic classes are shared
+  between Boxes, so no per-Box grouping can fix it either. So every rule is wrapped in a cascade
+  layer — `@layer rb<breakpointIndex><propIndex base36>` — and the **base element declares the whole
+  layer order in one statement** (~700 names, 1.3 KB gzipped). Layer order beats source order, so
+  where React inserts an element no longer matters. The reset goes into the first layer (`rb`),
+  because unlayered CSS would otherwise beat every generated rule.
+- **The base element belongs to no Box**, so every Box renders it first in its list: whichever Box
+  React sees first establishes the layer order, and the rest are deduped by href. Its href follows
+  its content, so a `:root` block that grew a variable becomes a new element rather than a silently
+  ignored duplicate.
+- **Class names cannot come from a counter.** The server graph, the client bundle and the next
+  request are different processes; `classNames: 'stable'` (the default in this mode) hashes the
+  descriptive name instead, so they all agree. `core/hash.ts` is that hash, and the same hash is the
+  rule's href — dedupe by href is therefore dedupe by content.
+
+`npm run check:boundaries` runs `scripts/check-rsc-boundary.mjs` next to the core check: it walks
+the import graph of `src/rsc.ts` and fails on any client hook (`useState`, effects, `useContext`,
+`createContext`, …) or `react-dom` import. Vitest renders with the client React, so nothing else
+would catch a hook slipping into that graph — and for a consumer it would turn every server render
+into a hard React error.
 
 ### Default Base Styles
 
@@ -930,8 +976,13 @@ dist/
 ├── box.mjs          # ESM entry
 ├── box.cjs          # CommonJS entry
 ├── box.d.ts         # Type declarations
-├── core.mjs         # Core chunk (shared code)
+├── rsc.mjs          # The `react-server` entry (Box for Server Components)
+├── rsc.cjs
+├── rsc.d.ts
+├── core.mjs         # Engine chunk — no client hook reaches it, so rsc.mjs can import it
 ├── core.cjs
+├── client.mjs       # The client binding: flush effect, theme provider, shared hooks
+├── client.cjs
 ├── ssg.mjs          # SSR support
 ├── ssg.cjs
 ├── ssg.d.ts
@@ -943,6 +994,14 @@ dist/
 └── types.d.ts       # Type exports
 ```
 
+The `core`/`client` split is not cosmetic: `rsc.mjs` must not import a chunk that names `useState`
+or an effect, because the `react-server` build of React does not export them. The split is derived
+from the entry's own module graph (`scripts/rscGraph.mjs`, shared with the boundary check), and
+`scripts/postbuild.mjs` then loads the built package under `--conditions=react-server` in both
+formats — the same resolution a Next.js server build performs — so a regression fails the build
+instead of a consumer's. Note that rolldown ignores Rollup's `manualChunks`; the split is declared
+through `output.codeSplitting.groups`.
+
 ### Vite Build Configuration
 
 ```typescript
@@ -952,6 +1011,7 @@ export default defineConfig({
     lib: {
       entry: {
         box: 'src/box.ts',
+        rsc: 'src/rsc.ts',
         ssg: 'src/ssg.ts',
         'components/button': 'src/components/button.tsx',
         // ...
@@ -960,9 +1020,12 @@ export default defineConfig({
     },
     rollupOptions: {
       external: ['react', 'react-dom', 'react/jsx-runtime', 'react-dom/server'],
+      preserveEntrySignatures: 'allow-extension',
       output: {
-        manualChunks: (id) => {
-          // Chunk strategy for optimal tree-shaking
+        codeSplitting: {
+          includeDependenciesRecursively: false,
+          // 'core' for whatever the react-server entry reaches, 'client' for the rest
+          groups: [{ name: (id) => /* ... */ null }],
         },
       },
     },

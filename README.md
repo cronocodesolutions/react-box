@@ -185,22 +185,84 @@ In CSS file is possible to override default values for:
   --transitionTime: 0.25s;
 ```
 
+## React Server Components (React 19)
+
+Box renders inside a Server Component with no `'use client'` — the styles travel with the markup
+instead of being injected by an effect. A server component just imports the package as usual:
+
+```tsx
+// app/page.tsx — a Server Component. No 'use client', no provider, no CSS import.
+import Box from '@cronocode/react-box';
+import { H1, P } from '@cronocode/react-box/components/semantics';
+
+export default function Page() {
+  return (
+    <Box p={6} bgColor="slate-50" borderRadius={2}>
+      <H1 fontSize={24}>Rendered on the server</H1>
+      <P mt={2} color="slate-600" sm={{ fontSize: 16 }}>
+        Its CSS was hoisted into &lt;head&gt; by React, not inserted by a client runtime.
+      </P>
+    </Box>
+  );
+}
+```
+
+The `react-server` export condition resolves to a build of Box that calls no hook, schedules no
+effect and never touches the DOM: each generated rule comes back as a `<style href precedence>`
+element rendered next to the markup, which React 19 hoists into `<head>` and dedupes by `href`.
+That is also what makes it stream-safe — nothing has to wait for a commit that Suspense may split.
+
+**Client components** (anything with `'use client'`) can use the same emission path, and should in an
+RSC app, so their CSS is in the HTML too. One line, in a module the root layout imports:
+
+```tsx
+'use client';
+import Box from '@cronocode/react-box';
+
+Box.configure({ sink: 'element' }); // React 19 only — see below
+```
+
+Notes and limits:
+
+- **The cascade comes from `@layer`, not from element order.** React hoists elements in render
+  order, so a responsive rule could otherwise land ahead of the base rule it has to override. In
+  this mode every rule is wrapped in a cascade layer (one per breakpoint × prop) and the base
+  element declares the layer order once, up front — the order the elements end up in cannot change
+  the result. The consequence worth knowing: **unlayered CSS of your own always wins** over Box
+  props here, which matches where the library puts its `<style>` element in the other modes.
+- **Declare `Box.extend()` props before the first render.** CSS appends a layer it meets for the
+  first time after every layer already named, so a prop registered mid-render sorts after the
+  built-ins.
+- **Class names are content-hashed** in this mode instead of counted, so a class resolved on the
+  server matches the one the client bundle resolves for the same props.
+- **Still client-only:** hover-callback children (`{({ isHover }) => …}`) and `Box.Theme`, which
+  needs state, storage and a media-query listener. Theme _styles_ are unaffected: a `theme` prop
+  generates ancestor-scoped rules, so setting the theme class on `<html>` in a server component is
+  enough. The pre-built components (`Flex`, `Button`, `Dropdown`, `DataGrid`, …) are client
+  components today.
+- **React 19 only.** On React 18 the elements cannot be hoisted and render inline; keep the default
+  sink there (a documented App Router fallback for React 18 is still to come).
+- **Cost:** one base element per page (the reset, `:root`, and the layer order — ~1.8 KB gzipped)
+  plus one `<style>` element per distinct rule, deduped across every Box that uses it.
+
 ## Architecture
 
 The styling engine is framework-free. Everything that generates CSS — the ~144 prop definitions,
 the value formatters, class-name generation, rule ordering, the style sinks (CSSOM, `textContent`,
-string for SSR), the flush scheduler, CSS variables and the theme runtime — lives in `src/core/`
-and imports no React at all. CI fails the build if it ever does (`npm run check:boundaries`).
+string for SSR, style elements for React 19), the flush scheduler, CSS variables and the theme
+runtime — lives in `src/core/` and imports no React at all. CI fails the build if it ever does
+(`npm run check:boundaries`).
 
 React is a thin adapter on top of it:
 
-|                                                  | Files | Lines | Share    |
-| ------------------------------------------------ | ----- | ----- | -------- |
-| Core engine (`src/core/`)                        | 14    | 4,134 | 92.7%    |
-| React binding (`src/react/`, `box.ts`, `ssg.ts`) | 6     | 327   | **7.3%** |
+|                                                            | Files | Lines | Share    |
+| ---------------------------------------------------------- | ----- | ----- | -------- |
+| Core engine (`src/core/`)                                  | 15    | 4,377 | 90.2%    |
+| React binding (`src/react/`, `box.ts`, `rsc.ts`, `ssg.ts`) | 11    | 478   | **9.8%** |
 
 The binding is the whole React-specific surface: resolve class names during render, flush the
-pending rules from `useInsertionEffect`, and hold the theme state. Three shared React hooks
+pending rules from `useInsertionEffect`, render the style elements of the Server-Component path,
+and hold the theme state. Three shared React hooks
 (`useVisibility`, `usePortalContainer`, `useVirtualization`, 212 lines) sit alongside it for the
 pre-built components to use.
 
