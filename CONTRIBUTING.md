@@ -6,15 +6,16 @@ A comprehensive guide for senior software engineers contributing to this runtime
 
 1. [Architecture Overview](#architecture-overview)
 2. [Project Structure](#project-structure)
-3. [Core Concepts](#core-concepts)
-4. [CSS Generation Engine](#css-generation-engine)
-5. [Theme System](#theme-system)
-6. [Development Workflow](#development-workflow)
-7. [Adding New CSS Properties](#adding-new-css-properties)
-8. [Creating Components](#creating-components)
-9. [Type System](#type-system)
-10. [Testing](#testing)
-11. [Build & Publishing](#build--publishing)
+3. [The core boundary](#the-core-boundary)
+4. [Core Concepts](#core-concepts)
+5. [CSS Generation Engine](#css-generation-engine)
+6. [Theme System](#theme-system)
+7. [Development Workflow](#development-workflow)
+8. [Adding New CSS Properties](#adding-new-css-properties)
+9. [Creating Components](#creating-components)
+10. [Type System](#type-system)
+11. [Testing](#testing)
+12. [Build & Publishing](#build--publishing)
 
 ---
 
@@ -48,28 +49,44 @@ Box props → useStyles() → useComponents() → StylesContext → CSS injectio
 ```
 react-box/
 ├── src/                          # Library source (published to npm)
-│   ├── box.ts                    # Main Box component
+│   ├── box.ts                    # Main Box component (entry point)
 │   ├── types.ts                  # TypeScript type exports
-│   ├── ssg.ts                    # Server-side rendering support
-│   ├── array.ts                  # Array prototype extensions
+│   ├── ssg.ts                    # Server-side rendering support (entry point)
 │   │
-│   ├── core/                     # Core styling engine
+│   ├── core/                     # Core styling engine — ZERO react imports (enforced)
 │   │   ├── boxStyles.ts          # CSS property definitions (~144 props)
 │   │   ├── boxStylesFormatters.ts # Value formatters (px, rem, etc.)
-│   │   ├── useStyles.ts          # Main hook for style processing
 │   │   ├── variables.ts          # CSS variables (colors, sizes)
 │   │   ├── classNames.ts         # Conditional className utility
-│   │   ├── coreTypes.ts          # Core TypeScript types
+│   │   ├── coreTypes.ts          # Core TypeScript types (framework-free)
 │   │   ├── boxConstants.ts       # Constants (REM divider, etc.)
+│   │   │
+│   │   ├── engine/               # The engine instance
+│   │   │   ├── styleEngine.ts    # createStyleEngine(): all engine state
+│   │   │   ├── styleSink.ts      # Where the CSS goes (cssom/textContent/string)
+│   │   │   ├── flushScheduler.ts # When pending rules reach the sink
+│   │   │   └── defaultEngine.ts  # The lazily-created default instance
 │   │   │
 │   │   ├── extends/              # Extension system
 │   │   │   ├── boxExtends.ts     # Box.extend() and Box.components()
 │   │   │   ├── boxComponents.ts  # Default component styles
-│   │   │   └── useComponents.ts  # Component style resolution hook
+│   │   │   └── useComponents.ts  # Component style resolution (pure, no hooks)
 │   │   │
-│   │   └── theme/                # Theme system
-│   │       ├── theme.tsx         # Theme provider component
-│   │       └── themeContext.ts   # React context
+│   │   └── theme/                # Theme system, platform half
+│   │       └── themeRuntime.ts   # prefers-color-scheme, storage, DOM writes
+│   │
+│   ├── react/                    # The React adapter — everything React-specific
+│   │   ├── useStyles.ts          # The binding: class names in render, flush in an effect
+│   │   ├── reactTypes.ts         # React-only type helpers (ExtractElementFromTag)
+│   │   │
+│   │   ├── theme/                # Theme system, React half
+│   │   │   ├── theme.tsx         # Box.Theme provider component
+│   │   │   └── themeContext.ts   # React context
+│   │   │
+│   │   └── hooks/                # React hooks shared by components
+│   │       ├── useVisibility.ts
+│   │       ├── usePortalContainer.ts
+│   │       └── useVirtualization.ts
 │   │
 │   ├── components/               # Pre-built components
 │   │   ├── button.tsx
@@ -85,10 +102,6 @@ react-box/
 │   │   ├── semantics.tsx         # Semantic HTML components
 │   │   ├── baseSvg.tsx
 │   │   └── dataGrid/             # Complex DataGrid component
-│   │
-│   ├── hooks/                    # React hooks
-│   │   ├── useVisibility.ts
-│   │   └── usePortalContainer.ts
 │   │
 │   ├── icons/                    # SVG icon components
 │   │
@@ -107,6 +120,54 @@ react-box/
 ├── tsconfig.json                 # TypeScript config
 └── eslint.config.js              # ESLint config
 ```
+
+---
+
+## The core boundary
+
+`src/core/**` contains **zero** `react` imports, and CI fails if that ever stops being true.
+
+The split is not cosmetic. The engine — prop definitions, formatters, class-name generation, the
+rule registry, the sinks, the flush scheduler, the variables, the theme runtime — has no idea a
+component tree exists. It is the future `@box-kite/core` package, and it is what makes the library
+embeddable in places React is not: a vanilla-DOM page, an iframe widget, another framework's
+adapter, a build-time compiler.
+
+| Layer               | Path                                       | May import React?              |
+| ------------------- | ------------------------------------------ | ------------------------------ |
+| Core engine         | `src/core/**`                              | **No** — enforced              |
+| React binding       | `src/react/**`, `src/box.ts`, `src/ssg.ts` | Yes                            |
+| Components, icons   | `src/components/**`, `src/icons/**`        | Yes                            |
+| Shared utils, types | `src/utils/**`, `src/types.ts`             | No (they simply don't need it) |
+
+Two things enforce it, because one is not enough:
+
+1. **ESLint** — a `no-restricted-imports` block scoped to `src/core/**` (see `eslint.config.js`,
+   next to the identical rule that keeps the DataGrid models headless).
+2. **`npm run check:boundaries`** (`scripts/check-core-boundary.mjs`) — catches what ESLint cannot
+   see: `require()`, dynamic `import()`, a `.tsx` file, and React's _global_ namespace. That last
+   one is the reason this script exists: `React.JSX.IntrinsicElements` needs no import at all, so
+   `ExtractElementFromTag` sat in `core/coreTypes.ts` for years without a single lint error. It now
+   lives in `src/react/reactTypes.ts`.
+
+The same command prints the adapter ratio published in the README:
+
+```
+✔ src/core is framework-free (14 files, 4134 lines, zero React references)
+  React binding: 6 files, 327 lines — 7.3% of core + binding
+  React helper hooks: 3 files, 212 lines (shared by components, outside the binding)
+```
+
+### Where does my new code go?
+
+- Generating CSS, naming a class, ordering a rule, formatting a value → `src/core/`.
+- Touching the DOM without a component (`document`, `matchMedia`, `localStorage`) → still
+  `src/core/`; DOM is not React. Guard for its absence so a server render can call it (see
+  `core/theme/themeRuntime.ts`, `core/engine/styleSink.ts`).
+- Hooks, context, JSX, anything typed in React's own types → `src/react/`.
+- If a core module seems to _need_ a hook, it needs an injectable policy instead. That is how
+  flushing works: core owns `scheduleFlush()`, and the React binding supplies the timing from
+  `useInsertionEffect` (`core/engine/flushScheduler.ts`).
 
 ---
 
@@ -348,21 +409,21 @@ Key mechanisms:
 
 ### Flush Scheduling (core/engine/flushScheduler.ts)
 
-Resolving class names only *queues* the rules behind them; a **`FlushScheduler`** decides when the
+Resolving class names only _queues_ the rules behind them; a **`FlushScheduler`** decides when the
 queue is drained. The engine calls `scheduleFlush()` itself whenever it queues something (a rule, or
 a variable read through `Box.getVariableValue()`), so no caller can leave CSS unflushed, and
 `flushSync()` always writes on the spot. The coordinator coalesces: any number of `scheduleFlush()`
 calls in one turn produce a single flush.
 
-| Adapter | Policy |
-|---------|--------|
-| React (`useStyles`) | `flushSync()` from `useInsertionEffect` (falls back to `useLayoutEffect` on React 16/17) |
-| Vanilla DOM, no commit phase | the default `microtaskScheduler` — nothing can paint before the microtask queue drains |
-| A framework without concurrent rendering (Vue) | `syncScheduler` |
-| Server rendering | no scheduler arrives in time; `getStyles()` flushes itself |
-| Tests wanting full control | `manualScheduler` + `flushSync()` |
+| Adapter                                        | Policy                                                                                   |
+| ---------------------------------------------- | ---------------------------------------------------------------------------------------- |
+| React (`useStyles`)                            | `flushSync()` from `useInsertionEffect` (falls back to `useLayoutEffect` on React 16/17) |
+| Vanilla DOM, no commit phase                   | the default `microtaskScheduler` — nothing can paint before the microtask queue drains   |
+| A framework without concurrent rendering (Vue) | `syncScheduler`                                                                          |
+| Server rendering                               | no scheduler arrives in time; `getStyles()` flushes itself                               |
+| Tests wanting full control                     | `manualScheduler` + `flushSync()`                                                        |
 
-React's insertion effects run during the commit ahead of *every* layout effect in it, which is why
+React's insertion effects run during the commit ahead of _every_ layout effect in it, which is why
 the React binding uses them (React's own recommendation for CSS-in-JS): a component that measures
 its DOM in `useLayoutEffect` sees the CSS of the whole commit, not just of the Boxes that happened
 to commit before it. The scheduled microtask stays as the safety net for rules queued outside a
@@ -371,13 +432,13 @@ commit. `flushScheduler.test.ts` pins the contract; the ordering guarantee is co
 
 ### Style Sinks (core/engine/styleSink.ts)
 
-`flush()` decides *what* to write and in which order; a **sink** decides *how*. Three of them:
+`flush()` decides _what_ to write and in which order; a **sink** decides _how_. Three of them:
 
-| Sink | Writes to | Used when |
-|------|-----------|-----------|
-| `cssom` | `CSSStyleSheet.insertRule` | the browser default |
-| `textContent` | the `<style>` element's text | tests and debugging (`Box.configure`) |
-| `string` | memory, read back with `getStyles()` | server rendering (no `document` in the process) |
+| Sink          | Writes to                            | Used when                                       |
+| ------------- | ------------------------------------ | ----------------------------------------------- |
+| `cssom`       | `CSSStyleSheet.insertRule`           | the browser default                             |
+| `textContent` | the `<style>` element's text         | tests and debugging (`Box.configure`)           |
+| `string`      | memory, read back with `getStyles()` | server rendering (no `document` in the process) |
 
 With no explicit `sink` the engine follows its environment, which is why server rendering needs no
 DOM and no fake `document`. Every sink places a rule at the position its **sort key** gives it
@@ -577,7 +638,7 @@ Generates:
 Components rendered in portals (tooltips, dropdowns) need theme awareness. The `usePortalContainer` hook automatically applies the current theme class:
 
 ```typescript
-// src/hooks/usePortalContainer.ts
+// src/react/hooks/usePortalContainer.ts
 export default function usePortalContainer() {
   const theme = Theme.useTheme(); // Get current theme from context
 
@@ -759,8 +820,9 @@ entry: {
 ### Key Type Files
 
 1. **types.ts** - Public type exports
-2. **coreTypes.ts** - Internal utility types
-3. **box.d.ts** - Generated declaration file
+2. **core/coreTypes.ts** - Internal utility types (framework-free)
+3. **react/reactTypes.ts** - React-only type helpers
+4. **box.d.ts** - Generated declaration file
 
 ### Type Augmentation (for user extensions)
 
@@ -805,8 +867,7 @@ type ExtractVariants<T> = T extends { variants?: infer Variants }
 type ExtractChildrenNames<T, Prefix extends string = ''> = T extends { children?: infer Children }
   ? {
       [K in keyof Children & string]:
-        | `${Prefix}${Prefix extends '' ? '' : '.'}${K}`
-        | ExtractChildrenNames<Children[K], `${Prefix}${Prefix extends '' ? '' : '.'}${K}`>;
+        `${Prefix}${Prefix extends '' ? '' : '.'}${K}` | ExtractChildrenNames<Children[K], `${Prefix}${Prefix extends '' ? '' : '.'}${K}`>;
     }[keyof Children & string]
   : never;
 ```
@@ -996,7 +1057,7 @@ npm publish --access public
 
 ### Fix Styling Bug
 
-1. Check `useStyles.ts` for class generation logic
+1. Check `core/engine/styleEngine.ts` for class generation logic
 2. Check `boxStyles.ts` for property definition
 3. Verify CSS output in browser DevTools (`<style id="crono-styles">`)
 4. Add test case

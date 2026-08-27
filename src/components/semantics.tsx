@@ -1,6 +1,6 @@
 import { forwardRef, Ref, RefAttributes } from 'react';
 import Box, { BoxProps } from '../box';
-import { ExtractElementFromTag } from '../core/coreTypes';
+import { ExtractElementFromTag } from '../react/reactTypes';
 import { ComponentsAndVariants } from '../types';
 import StringUtils from '../utils/string/stringUtils';
 

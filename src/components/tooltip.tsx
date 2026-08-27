@@ -1,8 +1,8 @@
 import { forwardRef, Ref, RefAttributes, useCallback, useLayoutEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import Box, { BoxProps } from '../box';
-import { ExtractElementFromTag } from '../core/coreTypes';
-import usePortalContainer from '../hooks/usePortalContainer';
+import usePortalContainer from '../react/hooks/usePortalContainer';
+import { ExtractElementFromTag } from '../react/reactTypes';
 import { ComponentsAndVariants } from '../types';
 
 const positionDigitsAfterComma = 2;

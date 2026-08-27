@@ -3,7 +3,7 @@ import { afterEach, describe, expect, it } from 'vitest';
 import Box from './box';
 import Flex from './components/flex';
 import { DEFAULT_STYLE_ELEMENT_ID } from './core/engine/styleEngine';
-import { StylesContext } from './core/useStyles';
+import { StylesContext } from './react/useStyles';
 import { renderToStaticMarkup } from './ssg';
 
 /**

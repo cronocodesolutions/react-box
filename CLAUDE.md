@@ -8,17 +8,18 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Commands
 
-| Command | Purpose |
-|---------|---------|
-| `npm run dev` | Start Vite dev server for the demo pages |
-| `npm run build` | Build library (ESM + CJS output to dist/) |
-| `npm run build:dev` | Build library without minification |
-| `npm run compile` | TypeScript type check (no emit) |
-| `npm test` | Run all tests (Vitest) |
-| `npm run test:coverage` | Run all tests and enforce the coverage budget on `src/core/` |
-| `npm run test:watch` | Run tests in watch mode |
-| `npx vitest run src/path/to/file.test.tsx` | Run a single test file |
-| `npm run lint` | ESLint check |
+| Command                                    | Purpose                                                                          |
+| ------------------------------------------ | -------------------------------------------------------------------------------- |
+| `npm run dev`                              | Start Vite dev server for the demo pages                                         |
+| `npm run build`                            | Build library (ESM + CJS output to dist/)                                        |
+| `npm run build:dev`                        | Build library without minification                                               |
+| `npm run compile`                          | TypeScript type check (no emit)                                                  |
+| `npm test`                                 | Run all tests (Vitest)                                                           |
+| `npm run test:coverage`                    | Run all tests and enforce the coverage budget on `src/core/`                     |
+| `npm run test:watch`                       | Run tests in watch mode                                                          |
+| `npx vitest run src/path/to/file.test.tsx` | Run a single test file                                                           |
+| `npm run lint`                             | ESLint check                                                                     |
+| `npm run check:boundaries`                 | Fail if anything under `src/core/` imports React (also prints the adapter ratio) |
 
 Node version: v24 (pinned in .nvmrc).
 
@@ -26,20 +27,23 @@ Node version: v24 (pinned in .nvmrc).
 
 ### Core Styling Engine
 
+`src/core/**` imports **no React** — ESLint and `npm run check:boundaries` both fail if it ever does. React lives in `src/react/**` (the binding, the theme provider, the shared hooks) plus the two entry modules `src/box.ts` and `src/ssg.ts`. When a core module seems to need a hook, give it an injectable policy instead — that is what `flushScheduler.ts` is. See CONTRIBUTING.md, "The core boundary".
+
 - `src/box.ts` — Main Box component (memoized, forwardRef, polymorphic via `tag` prop)
 - `src/core/boxStyles.ts` — All CSS property definitions (~144 props). Types auto-generate from these definitions
 - `src/core/boxStylesFormatters.ts` — Value formatters that convert prop values to CSS (rem, px, fractions, etc.)
 - `src/core/engine/styleEngine.ts` — `createStyleEngine()`: all engine state (class-name cache, rule registry, identity factory, variables, prop and component registries) on an instance; generates class names and rules
 - `src/core/engine/styleSink.ts` — Where the CSS goes: `cssom` (`insertRule`), `textContent`, or `string` (server rendering, no DOM). Every sink places a rule by its sort key, so all three produce the same cascade
-- `src/core/engine/flushScheduler.ts` — *When* pending rules reach the sink: an injectable `FlushScheduler` (microtask by default) plus `flushSync()`, so an adapter without effects still gets its CSS
+- `src/core/engine/flushScheduler.ts` — _When_ pending rules reach the sink: an injectable `FlushScheduler` (microtask by default) plus `flushSync()`, so an adapter without effects still gets its CSS
 - `src/core/engine/defaultEngine.ts` — The lazily-created default instance every public API delegates to
-- `src/core/useStyles.ts` — The React binding: resolves class names during render, flushes from `useInsertionEffect` (ahead of every layout effect in the commit)
+- `src/react/useStyles.ts` — The React binding: resolves class names during render, flushes from `useInsertionEffect` (ahead of every layout effect in the commit). Lives outside `src/core/` because core is React-free
 - `src/core/variables.ts` — CSS variables (200+ Tailwind-like colors), lazy-loaded via pending variables system
 - `src/core/classNames.ts` — Conditional className utility
 
 ### Numeric Value Formatters (critical)
 
 Different props have different dividers — this is the #1 source of bugs:
+
 - **Spacing** (`p`, `m`, `gap`, `px`, `py`, etc.): divider 4 → `p={4}` = 1rem = 16px
 - **fontSize**: divider **16** → `fontSize={14}` = 0.875rem ≈ 14px
 - **Border width** (`b`, `bx`, `by`): direct px → `b={1}` = 1px
@@ -54,13 +58,15 @@ Different props have different dividers — this is the #1 source of bugs:
 
 ### Theme System
 
-- `src/core/theme/theme.tsx` — `Box.Theme` provider component (auto-detects system preference, supports `use="global"|"local"`)
+- `src/core/theme/themeRuntime.ts` — The framework-free half: reads/watches `prefers-color-scheme`, persists the choice, writes the theme class + `data-theme` onto an element
+- `src/react/theme/theme.tsx` — `Box.Theme` provider component (auto-detects system preference, supports `use="global"|"local"`); React state and context over `themeRuntime`
 - Theme styles generate ancestor-scoped selectors (`.dark .className`)
 - Themes nest with pseudo-classes: `theme={{ dark: { hover: { ... } } }}`
 
 ### Components (src/components/)
 
 Pre-built components wrap Box with the correct HTML tag. Each is a separate entry point (`@cronocode/react-box/components/...`):
+
 - `flex.tsx` / `grid.tsx` — Layout (display flex/grid)
 - `button.tsx`, `textbox.tsx`, `checkbox.tsx`, `radioButton.tsx`, `textarea.tsx` — Form elements
 - `dropdown.tsx`, `tooltip.tsx` — Overlays (use portals via `usePortalContainer`)
@@ -80,6 +86,7 @@ Pre-built components wrap Box with the correct HTML tag. Each is a separate entr
 - **Never use inline `style` attributes** — always use Box props. If a prop doesn't exist, create it with `Box.extend()`
 - **Always use component shortcuts** — `<Flex>` not `<Box display="flex">`, `<Button>` not `<Box tag="button">`, `<H1>` not `<Box tag="h1">`
 - **HTML attributes go in `props` prop** — `<Link props={{ href: '/about' }}>` not `<Link href="/about">`
+- **`src/core/` is framework-free** — no `react` import, no JSX, not even a `React.*` global type. New React code goes in `src/react/`
 - Tests are colocated with source files (`*.test.tsx` next to `*.tsx`)
 - Engine-level tests build their own isolated engine via `dev/engineHarness.ts` (readable class names + `textContent` sink) instead of the default instance, so they can assert exact rule text without interfering with each other
 - One component per file, PascalCase component names, camelCase prop names
@@ -92,8 +99,9 @@ After any code change, all of the following must pass before considering the wor
 
 1. `npm run compile` — TypeScript type check
 2. `npm run lint` — ESLint check
-3. `npm run build` — Library build
-4. `npm test` — All tests (or `npm run test:coverage` when touching `src/core/`, which is what CI runs)
+3. `npm run check:boundaries` — `src/core/` must stay React-free
+4. `npm run build` — Library build
+5. `npm test` — All tests (or `npm run test:coverage` when touching `src/core/` or `src/react/`, which is what CI runs)
 
 CI runs the test suite against React 18 and React 19 — both are in the supported peer range and the engine leans on layout effects, hydration and server rendering, which is exactly what changed between them.
 

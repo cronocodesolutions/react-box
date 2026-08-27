@@ -1,5 +1,5 @@
 import { useLayoutEffect, useMemo } from 'react';
-import Theme from '../core/theme/theme';
+import Theme from '../theme/theme';
 
 // Reference counts for theme classes, scoped to the portal container they apply to. Keyed by
 // element (not process-global) so containers in different documents/roots cannot decrement each

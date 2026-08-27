@@ -1,11 +1,11 @@
 import React, { forwardRef, memo, Ref, RefAttributes, useMemo, useState } from 'react';
 import { classNames, ClassNameType } from './core/classNames';
-import { ExtractElementFromTag } from './core/coreTypes';
 import getDefaultEngine from './core/engine/defaultEngine';
 import BoxExtends from './core/extends/boxExtends';
-import Theme from './core/theme/theme';
-import useStyles, { StylesContext } from './core/useStyles';
-import useVisibility from './hooks/useVisibility';
+import useVisibility from './react/hooks/useVisibility';
+import { ExtractElementFromTag } from './react/reactTypes';
+import Theme from './react/theme/theme';
+import useStyles, { StylesContext } from './react/useStyles';
 import { BoxStyleProps, ComponentsAndVariants } from './types';
 import BoxUtils from './utils/box/boxUtils';
 

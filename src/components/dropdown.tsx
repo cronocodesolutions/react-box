@@ -1,6 +1,6 @@
 import { forwardRef, FunctionComponent, ReactElement, Ref, RefAttributes, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { BoxProps } from '../box';
-import useVisibility from '../hooks/useVisibility';
+import useVisibility from '../react/hooks/useVisibility';
 import { BoxStyleProps, ComponentsAndVariants } from '../types';
 import BaseSvg from './baseSvg';
 import Button from './button';

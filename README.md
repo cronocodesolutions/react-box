@@ -184,3 +184,29 @@ In CSS file is possible to override default values for:
   --fontSize: 14px;
   --transitionTime: 0.25s;
 ```
+
+## Architecture
+
+The styling engine is framework-free. Everything that generates CSS — the ~144 prop definitions,
+the value formatters, class-name generation, rule ordering, the style sinks (CSSOM, `textContent`,
+string for SSR), the flush scheduler, CSS variables and the theme runtime — lives in `src/core/`
+and imports no React at all. CI fails the build if it ever does (`npm run check:boundaries`).
+
+React is a thin adapter on top of it:
+
+|                                                  | Files | Lines | Share    |
+| ------------------------------------------------ | ----- | ----- | -------- |
+| Core engine (`src/core/`)                        | 14    | 4,134 | 92.7%    |
+| React binding (`src/react/`, `box.ts`, `ssg.ts`) | 6     | 327   | **7.3%** |
+
+The binding is the whole React-specific surface: resolve class names during render, flush the
+pending rules from `useInsertionEffect`, and hold the theme state. Three shared React hooks
+(`useVisibility`, `usePortalContainer`, `useVirtualization`, 212 lines) sit alongside it for the
+pre-built components to use.
+
+That ratio is what makes a non-React target realistic rather than theoretical — the engine can be
+driven straight from the DOM, from a server with no `document`, or from another framework's adapter.
+Numbers are printed by `npm run check:boundaries` and refreshed with the code.
+
+See [CONTRIBUTING.md](CONTRIBUTING.md#the-core-boundary) for the boundary rules and where new code
+belongs.
