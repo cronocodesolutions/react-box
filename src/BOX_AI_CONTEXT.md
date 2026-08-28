@@ -463,6 +463,41 @@ Box.configure({ sink: 'element' }); // React 19 only
 
 ---
 
+## Behaviour primitives (`@cronocode/react-box/a11y`)
+
+Five client hooks for building accessible components — the mechanics, not the ARIA. 2.2 KB gzipped
+and no styling engine behind them.
+
+```tsx
+import { useControllableState, useDismiss, useFocusReturn, useIdentifier, useRovingFocus } from '@cronocode/react-box/a11y';
+import VisuallyHidden from '@cronocode/react-box/components/visuallyHidden';
+
+const id = useIdentifier('menu'); // stable id: `${id}-trigger`, `${id}-listbox`
+const [open, setOpen] = useControllableState({ value: props.open, defaultValue: false, onChange: props.onOpenChange });
+
+const roving = useRovingFocus({ count: items.length, textOf: (i) => items[i].label, onSelect: (i) => choose(i) });
+// roving.activeIndex · roving.onKeyDown (on the focused element) · roving.itemProps(i) · roving.activeItem()
+
+useDismiss({ enabled: open, inside: [triggerRef, popupRef], onDismiss: (reason, event) => setOpen(false, { reason, event }) });
+useFocusReturn({ enabled: open, returnTo: triggerRef });
+```
+
+- Every change carries a reason: `onChange(value, { reason, event })` — `'escape'`,
+  `'outside-pointer'`, or one you name. The setter takes an updater and its identity is stable.
+- `useDismiss`: pass the **trigger** in `inside` as well as the popup, or pressing the trigger of an
+  open popup dismisses and reopens in one gesture. Escape reaches the innermost layer only.
+- `useRovingFocus`: arrows per `orientation` (`'vertical'` default), Home/End, typeahead when
+  `textOf` is given, Enter/Space to select, disabled items skipped. `focusItems: false` keeps DOM
+  focus where it is for an `aria-activedescendant` pattern.
+- `useIdentifier`: React's `useId` without the punctuation, so the id also works as a CSS selector.
+- `VisuallyHidden`: screen-reader-only content — clipped, so it stays in the accessibility tree
+  (`display: none` would not). It is a Box: `tag`, `component` and every style prop work.
+- The entry is client-only (`'use client'`); `visuallyHidden` renders on a server.
+
+Full reference: `docs/a11y-primitives.md`.
+
+---
+
 ## Key Reminders for AI Assistants
 
 1. **NEVER `style={{ }}`** — use Box props. Missing prop? Use `Box.extend()`

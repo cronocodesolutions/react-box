@@ -2,7 +2,14 @@ import fs from 'fs';
 import path from 'path';
 import dts from 'vite-plugin-dts';
 import { defineConfig } from 'vitest/config';
-import { CLIENT_ONLY_COMPONENTS, PACKAGE_NAME, SERVER_SAFE_COMPONENTS, coreGraph, serverSafeModules } from './scripts/moduleGraph.mjs';
+import {
+  CLIENT_ONLY_COMPONENTS,
+  CLIENT_ONLY_ENTRIES,
+  PACKAGE_NAME,
+  SERVER_SAFE_COMPONENTS,
+  coreGraph,
+  serverSafeModules,
+} from './scripts/moduleGraph.mjs';
 
 const files = fs
   .readdirSync(path.resolve(import.meta.dirname, './src/components'))
@@ -17,6 +24,8 @@ const componentsEntry = files.reduce((acc, fileName) => {
 
 const entry = {
   box: path.resolve(import.meta.dirname, './src/box.ts'),
+  // The behaviour primitives the accessible components are built from — see src/a11y.ts.
+  a11y: path.resolve(import.meta.dirname, './src/a11y.ts'),
   // The engine on its own, for consumers with no React at all — see src/core.ts.
   core: path.resolve(import.meta.dirname, './src/core.ts'),
   // The `react-server` condition of the main entry: the hook-free Box a Server Component gets.
@@ -70,19 +79,20 @@ const boxSelfReference = {
 };
 
 /**
- * `'use client'` on the components that cannot render on a server, so importing one from a Server
- * Component opens a client boundary instead of failing to resolve `useState`. It goes on at
- * render time rather than in the source: a directive in a source file makes rolldown (and every
- * consumer's Rollup) warn about module-level directives on every build, and the sources are also
- * what the demo site and the tests import, where the directive means nothing.
+ * `'use client'` on the components — and the entries — that cannot render on a server, so importing
+ * one from a Server Component opens a client boundary instead of failing to resolve `useState`. It
+ * goes on at render time rather than in the source: a directive in a source file makes rolldown
+ * (and every consumer's Rollup) warn about module-level directives on every build, and the sources
+ * are also what the demo site and the tests import, where the directive means nothing.
  */
 const useClientBanner = {
   name: 'use-client-banner',
   apply: 'build' as const,
   renderChunk(code: string, chunk: { name: string }) {
     const component = chunk.name.startsWith('components/') && chunk.name.slice('components/'.length);
+    const isClientEntry = CLIENT_ONLY_ENTRIES.includes(chunk.name);
 
-    if (!component || !CLIENT_ONLY_COMPONENTS.includes(component)) return null;
+    if (!isClientEntry && (!component || !CLIENT_ONLY_COMPONENTS.includes(component))) return null;
 
     // No sourcemap to shift — this build emits none.
     return { code: `'use client';\n${code}`, map: null };
@@ -138,13 +148,19 @@ export default defineConfig(({ mode }) => {
 
                   // Entry modules stay their own chunks — grouping them would drag one entry's
                   // imports (`react-dom/server`, say) into every other entry that shares the group.
-                  if (!source.includes('/src/') || /^src\/(box|core|rsc|ssg)\.ts$/.test(module)) return null;
+                  if (!source.includes('/src/') || /^src\/(a11y|box|core|rsc|ssg)\.ts$/.test(module)) return null;
                   // Component entries keep the chunks rolldown gives them, one per component.
                   if (module.startsWith('src/components/')) return null;
 
                   // 'engine', not 'core': `core` is an entry name now (src/core.ts), and a chunk
                   // sharing it would fight the entry for `core.mjs`.
                   if (frameworkFree.has(module)) return 'engine';
+
+                  // The behaviour primitives reach nothing but React and each other. Left in the
+                  // `client` group they would be correct and useless: `@cronocode/react-box/a11y`
+                  // would import the chunk holding the styling binding and the theme provider, so
+                  // a consumer who wanted `useDismiss` alone would bundle the whole engine with it.
+                  if (module.startsWith('src/react/a11y/')) return 'behavior';
 
                   return serverSafe.has(module) ? 'react-shared' : 'client';
                 },

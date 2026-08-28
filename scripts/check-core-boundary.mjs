@@ -105,14 +105,17 @@ if (violations.length) {
 }
 
 // Informational: the numbers published in the README architecture section. The binding is what a
-// non-React adapter would have to reimplement; the helper hooks are React feature code that
-// components happen to share, so they are counted separately rather than inflating the ratio.
+// non-React adapter would have to reimplement to render Box — the engine's React half and nothing
+// else. React feature code that ships alongside it (the shared component hooks, the behaviour
+// primitives in `src/react/a11y`) is counted separately: a Vue adapter would need its own
+// arrow-key navigation for the same reason it would need its own components, which says nothing
+// about how much of *this* library is framework-specific.
 const reactFiles = walk('src/react');
-const isHook = (path) => path.startsWith('src/react/hooks/');
+const isFeature = (path) => path.startsWith('src/react/hooks/') || path.startsWith('src/react/a11y/');
 
 const core = measure(coreFiles);
-const binding = measure([...reactFiles.filter((p) => !isHook(p)), 'src/box.ts', 'src/rsc.ts', 'src/ssg.ts']);
-const helpers = measure(reactFiles.filter(isHook));
+const binding = measure([...reactFiles.filter((p) => !isFeature(p)), 'src/box.ts', 'src/rsc.ts', 'src/ssg.ts']);
+const helpers = measure(reactFiles.filter(isFeature));
 const share = ((binding.lines / (core.lines + binding.lines)) * 100).toFixed(1);
 
 console.log(
@@ -120,4 +123,4 @@ console.log(
     `(${core.files} files, ${core.lines} lines, zero React references)`,
 );
 console.log(`  React binding: ${binding.files} files, ${binding.lines} lines — ${share}% of core + binding`);
-console.log(`  React helper hooks: ${helpers.files} files, ${helpers.lines} lines (shared by components, outside the binding)`);
+console.log(`  React feature hooks: ${helpers.files} files, ${helpers.lines} lines (shared by components, outside the binding)`);

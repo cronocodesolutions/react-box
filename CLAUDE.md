@@ -33,6 +33,7 @@ Node version: v24 (pinned in .nvmrc).
 
 - `src/box.ts` — Main Box component (memoized, forwardRef, polymorphic via `tag` prop)
 - `src/rsc.ts` — The `react-server` build of Box: same props, no hook, no effect, no DOM. Element mode is switched on when it loads, so a Server Component needs no configuration. Enforced by `scripts/check-rsc-boundary.mjs`
+- `src/a11y.ts` — The behaviour primitives (`@cronocode/react-box/a11y`): `useControllableState` (change reasons), `useDismiss` (Escape + outside pointer, layered), `useFocusReturn`, `useRovingFocus` (arrows/Home/End/typeahead, DOM focus or `aria-activedescendant`), `useIdentifier`. Sources in `src/react/a11y/**`, their own `behavior` chunk so the entry pulls in no engine; client-only, so the entry gets a `'use client'` banner. See `docs/a11y-primitives.md`
 - `src/core.ts` — The engine with no React at all (`@cronocode/react-box/core`): `createStyleEngine()`, `engine.classNames(props)`, `createThemeController()`. `examples/vanilla` is a whole page built on it. Both the sources it reaches and the chunks it imports are checked for React
 - `src/core/boxStyles.ts` — All CSS property definitions (~144 props). Types auto-generate from these definitions
 - `src/core/boxStylesFormatters.ts` — Value formatters that convert prop values to CSS (rem, px, fractions, etc.)
@@ -80,6 +81,7 @@ Pre-built components wrap Box with the correct HTML tag. Each is a separate entr
 - `button.tsx`, `textbox.tsx`, `checkbox.tsx`, `radioButton.tsx`, `textarea.tsx` — Form elements
 - `dropdown.tsx`, `tooltip.tsx` — Overlays (use portals via `usePortalContainer`)
 - `semantics.tsx` — Semantic HTML wrappers (H1-H6, P, Span, Link, Img, Nav, Header, Footer, etc.) via factory function
+- `visuallyHidden.tsx` — Screen-reader-only content: clipped away rather than hidden, so it stays in the accessibility tree
 - `dataGrid/` — Complex data grid with sorting, filtering, grouping, virtualization
 
 ### SSR/SSG
@@ -98,6 +100,7 @@ Pre-built components wrap Box with the correct HTML tag. Each is a separate entr
 - **`src/core/` is framework-free** — no `react` import, no JSX, not even a `React.*` global type. New React code goes in `src/react/`
 - Tests are colocated with source files (`*.test.tsx` next to `*.tsx`)
 - Accessibility tests: `src/components/a11y.test.tsx` sweeps every component with axe against the fixtures in `dev/a11y/fixtures.tsx`, whose `knownViolations` ledger fails both on a new violation and on a listed one that stopped firing; `*.a11y.test.tsx` files hold the APG keyboard map, driven by `dev/a11y/keyboard.ts`. See `docs/a11y-testing.md`
+- **Accessible behavior belongs in `src/react/a11y/`, not in a component** — focus return, list navigation, dismissal and controlled state are shared primitives (`docs/a11y-primitives.md`). A component supplies the roles and the ARIA; the hooks supply the mechanics
 - Engine-level tests build their own isolated engine via `dev/engineHarness.ts` (readable class names + `textContent` sink) instead of the default instance, so they can assert exact rule text without interfering with each other
 - One component per file, PascalCase component names, camelCase prop names
 - Prettier: 140 char width, single quotes, trailing commas

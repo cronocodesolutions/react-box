@@ -50,6 +50,7 @@ Box props → useStyles() → useComponents() → StylesContext → CSS injectio
 react-box/
 ├── src/                          # Library source (published to npm)
 │   ├── box.ts                    # Main Box component (entry point)
+│   ├── a11y.ts                   # Behaviour primitives (`@cronocode/react-box/a11y`)
 │   ├── core.ts                   # The engine with no React (`@cronocode/react-box/core`)
 │   ├── rsc.ts                    # Box for Server Components (the `react-server` entry, hook-free)
 │   ├── types.ts                  # TypeScript type exports
@@ -91,10 +92,18 @@ react-box/
 │   │   │   ├── theme.tsx         # Box.Theme provider component
 │   │   │   └── themeContext.ts   # React context
 │   │   │
-│   │   └── hooks/                # React hooks shared by components
-│   │       ├── useVisibility.ts
-│   │       ├── usePortalContainer.ts
-│   │       └── useVirtualization.ts
+│   │   ├── hooks/                # React hooks shared by components
+│   │   │   ├── useVisibility.ts
+│   │   │   ├── usePortalContainer.ts
+│   │   │   └── useVirtualization.ts
+│   │   │
+│   │   └── a11y/                 # Behaviour primitives — see docs/a11y-primitives.md
+│   │       ├── useControllableState.ts # Controlled/uncontrolled state with change reasons
+│   │       ├── useDismiss.ts     # Escape + outside pointer, composable layers
+│   │       ├── useFocusReturn.ts # Focus back to the invoker when a layer closes
+│   │       ├── useRovingFocus.ts # Arrow keys, Home/End, typeahead; DOM or virtual focus
+│   │       ├── useIdentifier.ts  # Stable ids for aria-labelledby/-controls wiring
+│   │       └── effects.ts        # Isomorphic layout effect, latest-value helpers
 │   │
 │   ├── components/               # Pre-built components
 │   │   ├── button.tsx
@@ -107,6 +116,7 @@ react-box/
 │   │   ├── form.tsx
 │   │   ├── flex.tsx
 │   │   ├── grid.tsx
+│   │   ├── visuallyHidden.tsx    # Screen-reader-only content (clipped, not hidden)
 │   │   ├── semantics.tsx         # Semantic HTML components
 │   │   ├── baseSvg.tsx
 │   │   └── dataGrid/             # Complex DataGrid component
@@ -189,11 +199,11 @@ Five things enforce it, because one is not enough:
 The same command prints the adapter ratio published in the README:
 
 ```
-✔ src/core and everything src/core.ts reaches are framework-free (19 files, 4687 lines, zero React references)
+✔ src/core and everything src/core.ts reaches are framework-free (19 files, 4694 lines, zero React references)
   React binding: 12 files, 505 lines — 9.7% of core + binding
-  React helper hooks: 3 files, 212 lines (shared by components, outside the binding)
+  React feature hooks: 9 files, 727 lines (shared by components, outside the binding)
 ✔ src/rsc.ts renders with no client hooks (22 modules in its graph)
-✔ 8 pre-built components render on a server; 6 are client-only and say so
+✔ 9 pre-built components render on a server; 6 are client-only and say so
 ```
 
 ### The chunk split
@@ -201,16 +211,23 @@ The same command prints the adapter ratio published in the README:
 `vite.config.ts` derives three shared chunks from those same two graph walks, so a new module
 cannot be classified one way by the checks and another by the bundler:
 
-| Chunk          | What is in it                                                        | Who imports it                    |
-| -------------- | -------------------------------------------------------------------- | --------------------------------- |
-| `engine`       | everything `src/core.ts` reaches — framework-free                    | every entry                       |
-| `react-shared` | hook-free React modules, plus what only a server-safe component uses | `box`, `rsc`, components          |
-| `client`       | hooks, effects, the theme provider                                   | `box`, the client-only components |
+| Chunk          | What is in it                                                        | Who imports it                               |
+| -------------- | -------------------------------------------------------------------- | -------------------------------------------- |
+| `engine`       | everything `src/core.ts` reaches — framework-free                    | every entry                                  |
+| `react-shared` | hook-free React modules, plus what only a server-safe component uses | `box`, `rsc`, components                     |
+| `behavior`     | `src/react/a11y/**` — the primitives, React and nothing else         | `a11y`, and the components A3+ build on them |
+| `client`       | hooks, effects, the theme provider                                   | `box`, the client-only components            |
 
 `core.mjs` imports `engine` and nothing else; `rsc.mjs` may not import `client`, and neither may a
 server-safe component — which is why `serverSafeModules()`, not the `react-server` walk alone,
 decides what `react-shared` holds. (`StringUtils`, which only `semantics` reaches, is the module
 that made the difference.)
+
+`behavior` is a group for a different reason — not correctness but weight. The primitives are
+client code and were correct inside `client`, but that made `@cronocode/react-box/a11y` import the
+chunk holding the styling binding and the theme provider: 17.8 KB gzipped for a consumer who wanted
+`useDismiss` alone. Split out, the entry is 2.2 KB and reaches no engine at all. `npm run size` is
+what notices this; the budget is per entry for exactly that reason.
 
 ### How a component reaches Box
 
@@ -228,8 +245,10 @@ graph walk mirrors this: `componentGraph()` stops at `src/box.ts` and records th
 because what lies beyond that edge is not ours to decide.
 
 The client-only components keep the relative path — their `'use client'` banner pins them to the
-client graph, where it is already correct. The banner is added at `renderChunk` rather than written
-in the source: a directive in a `.tsx` file makes rolldown, and every consumer's Rollup, warn about
+client graph, where it is already correct. `CLIENT_ONLY_ENTRIES` in the same file says which whole
+_entries_ get the banner for the same reason: `a11y` is hooks and effects from top to bottom, so a
+Server Component importing `useDismiss` should open a client boundary rather than fail to resolve
+`useRef`. The banner is added at `renderChunk` rather than written in the source: a directive in a `.tsx` file makes rolldown, and every consumer's Rollup, warn about
 module-level directives on every build, and the sources are also what the demo site and the tests
 import, where the directive means nothing.
 
@@ -1078,6 +1097,11 @@ dist/
 ├── rsc.mjs          # The `react-server` entry (Box for Server Components)
 ├── rsc.cjs
 ├── rsc.d.ts
+├── a11y.mjs         # The behaviour primitives (hooks only, 'use client')
+├── a11y.cjs
+├── a11y.d.ts
+├── behavior.mjs     # Their shared chunk — React and nothing else, no engine
+├── behavior.cjs
 ├── core.mjs         # Engine chunk — no client hook reaches it, so rsc.mjs can import it
 ├── core.cjs
 ├── client.mjs       # The client binding: flush effect, theme provider, shared hooks
@@ -1094,7 +1118,7 @@ dist/
 └── types.d.ts       # Type exports
 ```
 
-The `engine`/`react-shared`/`client` split is not cosmetic: `core.mjs` must not import a chunk that
+The `engine`/`react-shared`/`behavior`/`client` split is not cosmetic: `core.mjs` must not import a chunk that
 names `react` at all, and `rsc.mjs` must not import one that names `useState` or an effect, because
 the `react-server` build of React does not export them. Both splits are derived from the entries'
 own module graphs (`scripts/moduleGraph.mjs`, shared with the boundary checks), and

@@ -57,6 +57,17 @@ The helpers are in `dev/a11y/`:
 
 [jest-dom](https://github.com/testing-library/jest-dom) matchers (`toBeChecked`, `toHaveFocus`, `toHaveAccessibleName`, `toHaveAttribute`) are registered globally in `dev/vitest.setup.ts`.
 
+### 3. The behaviour primitives — `src/react/a11y/*.test.tsx`
+
+The mechanics the components are built from are tested on their own, away from any component:
+arrow-key movement and typeahead, dismissal layers, focus return, controlled state with change
+reasons ([docs/a11y-primitives.md](a11y-primitives.md)). `primitives.a11y.test.tsx` then assembles
+all five into a select-only combobox and drives it from the keyboard, because the failures that
+matter for a set of hooks are the ones that only appear in combination — a dismissal firing while
+the list is still taking focus, focus returning to a trigger a roving index has moved away from.
+
+`npm run test:a11y` runs all three groups (`vitest run a11y` matches the paths).
+
 ---
 
 ## What the automated checks cannot prove
