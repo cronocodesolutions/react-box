@@ -1,6 +1,10 @@
 // Types for the plain-ESM helper shared by the boundary checks and `vite.config.ts`.
 export const RSC_ENTRY: string;
 export const CORE_ENTRY: string;
+export const BOX_ENTRY: string;
+export const PACKAGE_NAME: string;
+export const SERVER_SAFE_COMPONENTS: readonly string[];
+export const CLIENT_ONLY_COMPONENTS: readonly string[];
 export const CLIENT_APIS: readonly string[];
 export const BANNED_SPECIFIER: RegExp;
 
@@ -11,6 +15,9 @@ export interface ModuleGraph {
   unresolved: { path: string; specifier: string }[];
 }
 
-export function moduleGraph(entry: string): ModuleGraph;
+export function moduleGraph(entry: string, stopAt?: ReadonlySet<string>): ModuleGraph;
 export function rscGraph(): ModuleGraph;
 export function coreGraph(): ModuleGraph;
+export function componentGraph(name: string): ModuleGraph;
+export function serverSafeModules(): Set<string>;
+export function componentEntries(): string[];

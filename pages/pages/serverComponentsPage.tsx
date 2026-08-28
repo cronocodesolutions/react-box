@@ -45,18 +45,17 @@ export default function ServerComponentsPage() {
             label="A page with no 'use client'"
             language="jsx"
             code={`// app/page.tsx — a Server Component.
-import Box from '@cronocode/react-box';
+import Flex from '@cronocode/react-box/components/flex';
+import { H1, P } from '@cronocode/react-box/components/semantics';
 
 export default function Page() {
   return (
-    <Box p={6} bgColor="slate-50" borderRadius={2} theme={{ dark: { bgColor: 'slate-900' } }}>
-      <Box tag="h1" fontSize={24} fontWeight={600}>
-        Rendered on the server
-      </Box>
-      <Box tag="p" mt={2} color="slate-600" md={{ fontSize: 16 }} hover={{ color: 'sky-500' }}>
+    <Flex d="column" gap={2} p={6} bgColor="slate-50" borderRadius={2} theme={{ dark: { bgColor: 'slate-900' } }}>
+      <H1 fontSize={24} fontWeight={600}>Rendered on the server</H1>
+      <P color="slate-600" md={{ fontSize: 16 }} hover={{ color: 'sky-500' }}>
         Pseudo-classes, breakpoints and themes all work — they are just more rules.
-      </Box>
-    </Box>
+      </P>
+    </Flex>
   );
 }`}
           />
@@ -136,9 +135,10 @@ export default function ThemeToggle() {
                 <Mono>Box.Theme</Mono>, for the same reason. Theme <em>styles</em> are unaffected.
               </Bullet>
               <Bullet>
-                The pre-built components (<Mono>Flex</Mono>, <Mono>Button</Mono>, <Mono>Dropdown</Mono>, <Mono>DataGrid</Mono>, …) are
-                client components today: import them from a <Mono>'use client'</Mono> module and use <Mono>Box</Mono> with a{' '}
-                <Mono>tag</Mono> in server components.
+                The pre-built components that hold state — <Mono>Dropdown</Mono>, <Mono>Tooltip</Mono>, <Mono>DataGrid</Mono>,{' '}
+                <Mono>Checkbox</Mono>, <Mono>Select</Mono>, <Mono>Form</Mono>. Their chunks ship a <Mono>'use client'</Mono> banner, so a
+                Server Component can still import one — it just becomes a client boundary. The hook-free ones (<Mono>Flex</Mono>,{' '}
+                <Mono>Grid</Mono>, <Mono>Button</Mono>, <Mono>Textbox</Mono>, <Mono>H1</Mono>, …) render on the server like Box does.
               </Bullet>
               <Bullet>React 19 only. On React 18 the elements cannot be hoisted; keep the default sink there.</Bullet>
             </Flex>
@@ -147,9 +147,9 @@ export default function ThemeToggle() {
           <Section id="example" title="The example app">
             <Box>
               <Mono>examples/next-app</Mono> in the repository is a Next.js App Router app whose pages are Server Components, with a
-              streamed Suspense boundary, a client island and the theme toggle above. Its smoke test starts the production server and
-              asserts on the HTML that the base element was hoisted, that every class in the markup has its rule in the response, and that
-              the streamed section brought its own CSS with it.
+              streamed Suspense boundary, a client island, the theme toggle above and a page of pre-built components rendered by the server.
+              Its smoke test starts the production server and asserts on the HTML that the base element was hoisted, that every class in the
+              markup has its rule in the response, and that the streamed section brought its own CSS with it.
             </Box>
             <Box mt={5}>
               <Code
@@ -157,7 +157,7 @@ export default function ThemeToggle() {
                 codeOnly
                 code={`npm run build            # the library itself
 npm run build:next-app   # packs dist/, installs it, builds the app
-npm run smoke:next-app   # 10 assertions against the served HTML`}
+npm run smoke:next-app   # 13 assertions against the served HTML`}
               />
             </Box>
           </Section>

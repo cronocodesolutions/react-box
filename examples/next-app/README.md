@@ -27,7 +27,8 @@ symlinked and resolve its own copy of React from the repository root.
 | `app/elementMode.ts`      | The one line a client bundle needs: `Box.configure({ sink: 'element' })`                         |
 | `app/counter.tsx`         | A client island using `Flex`/`Button`, server-rendered with its CSS in the HTML                  |
 | `app/themeToggle.tsx`     | `createThemeController()` from `@cronocode/react-box/core` — theme switching with no provider    |
-| `smoke.mjs`               | The CI check: 10 assertions against the served HTML                                              |
+| `app/components/page.tsx` | Server Component. The pre-built components imported straight into it, hook-free and stateful     |
+| `smoke.mjs`               | The CI check: 13 assertions against the served HTML                                              |
 
 ## What the smoke test proves
 
@@ -40,15 +41,29 @@ server build:
 - class names are content hashes, so the server and the browser bundle resolve the same strings;
 - a Suspense boundary streams its markup **and** its CSS, including a variable first used there;
 - a client island's CSS is server-rendered too;
-- the theme class on `<html>` selects real, ancestor-scoped rules.
+- the theme class on `<html>` selects real, ancestor-scoped rules;
+- `Flex`, `Button`, `Textbox` and the semantic tags render **on the server**, CSS included, when a
+  Server Component imports them;
+- `Checkbox` — which needs a client runtime — can be imported by a Server Component without failing
+  the build.
 
 Two details worth knowing when reading the HTML: React merges every style element of one precedence
 group into a single `<style>` tag and lists what it merged in `data-href`, and styles that arrive
 after the shell are streamed as `<style media="not all">` and enabled by React on the client.
 
-## Limits this example runs into
+## The two kinds of pre-built component
 
-The pre-built components (`Flex`, `Button`, `H1`, …) are client components, and the published chunks
-carry no `'use client'` directive — so importing one **directly from a Server Component fails the
-build**. Server components here use `Box` with a `tag` prop instead, and the islands import the
-components normally. `Box.Theme` and hover-callback children are client-only for the same reason.
+`/components` is a Server Component that imports both kinds, which is the whole difference:
+
+- **`Flex`, `Grid`, `Button`, `Textbox`, `Textarea`, `RadioButton`, `BaseSvg` and the semantic tags**
+  are hook-free wrappers around Box. Their published chunks import `@cronocode/react-box` by name
+  rather than by a relative path, so the `react-server` condition reaches them and they resolve the
+  same hook-free Box the page did. They render on the server, CSS in the HTML, no JavaScript behind
+  them.
+- **`Dropdown`, `Tooltip`, `DataGrid`, `Checkbox`, `Select` and `Form`** hold state or measure the
+  DOM. Their chunks ship a `'use client'` banner, so importing one here opens a client boundary
+  instead of compiling `useState` into the server graph. Their markup is server-rendered like any
+  client component's; their _rules_ come with the client bundle, unless a client module of the app
+  has already run `Box.configure({ sink: 'element' })` — which is what `app/elementMode.ts` is for.
+
+`Box.Theme` and hover-callback children (`{({ isHover }) => …}`) stay client-only: they need state.

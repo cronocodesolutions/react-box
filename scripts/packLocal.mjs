@@ -38,4 +38,10 @@ const tarball = join(target, 'react-box.tgz');
 rmSync(tarball, { force: true });
 renameSync(join(target, filename), tarball);
 
+// And drop the copy npm already unpacked. The tarball's path and the package's version are both
+// stable across rebuilds, so npm sees an installed dependency that matches what is asked for and
+// keeps it — leaving the example testing whatever `dist/` looked like the first time. Every check
+// downstream (the Next build, the smoke test, CI) would be reading a stale library.
+rmSync(resolve('examples', 'next-app', 'node_modules', '@cronocode', 'react-box'), { recursive: true, force: true });
+
 console.log(`✔ packed ${filename} → ${tarball}`);

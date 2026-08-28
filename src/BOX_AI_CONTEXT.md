@@ -421,10 +421,15 @@ markup as `<style href precedence>` elements, which React 19 hoists into `<head>
 
 ```tsx
 // app/page.tsx — a Server Component
-import Box from '@cronocode/react-box';
+import Flex from '@cronocode/react-box/components/flex';
+import { H1 } from '@cronocode/react-box/components/semantics';
 
 export default function Page() {
-  return <Box p={6} bgColor="slate-50" sm={{ p: 8 }} />;
+  return (
+    <Flex d="column" gap={2} p={6} bgColor="slate-50" sm={{ p: 8 }}>
+      <H1 fontSize={24}>Rendered on the server</H1>
+    </Flex>
+  );
 }
 ```
 
@@ -444,9 +449,16 @@ Box.configure({ sink: 'element' }); // React 19 only
   element mode so server and client agree). Call it before the first render.
 - In element mode rules live in CSS cascade layers, so **your own unlayered CSS always wins** over
   Box props, and declaring `Box.extend()` props before the first render matters.
+- The hook-free pre-built components render on the server too: `Flex`, `Grid`, `Button`,
+  `Textbox`, `Textarea`, `RadioButton`, `BaseSvg` and the semantic tags (`H1`, `P`, `Link`, …).
+  Import them straight into a Server Component.
+- `Dropdown`, `Tooltip`, `DataGrid`, `Checkbox`, `Select` and `Form` hold state, so their chunks
+  ship a `'use client'` banner: a Server Component may import one, but it becomes a client
+  boundary and its CSS is in the HTML only if a client module already ran
+  `Box.configure({ sink: 'element' })`.
 - Client-only, so use them inside `'use client'`: hover-callback children
-  (`{({ isHover }) => …}`), `Box.Theme`, and the pre-built components. Theme _styles_
-  (`theme={{ dark: { … } }}`) work in a server component — put the theme class on `<html>`.
+  (`{({ isHover }) => …}`) and `Box.Theme`. Theme _styles_ (`theme={{ dark: { … } }}`) work in a
+  server component — put the theme class on `<html>`.
 - React 18 cannot hoist these elements; keep the default sink there.
 
 ---

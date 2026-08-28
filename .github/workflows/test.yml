@@ -37,8 +37,9 @@ jobs:
 
   next-app:
     # The RSC claim, end to end. The unit tests render with the client React, so only a real Next.js
-    # server build can prove that the `react-server` condition resolves, that React hoists the style
-    # elements into <head>, and that a Suspense boundary's CSS streams with its markup.
+    # server build can prove that the `react-server` condition resolves — for the entry and for the
+    # pre-built components a Server Component imports — that React hoists the style elements into
+    # <head>, and that a Suspense boundary's CSS streams with its markup.
     name: Box in a Server Component (Next.js)
     runs-on: ubuntu-latest
     env:
