@@ -40,7 +40,17 @@ export const PACKAGE_NAME = '@cronocode/react-box';
  * Box — which is the whole point: `<H1>` in a Server Component must not drag a client runtime in
  * behind it. Enforced by `check-rsc-boundary.mjs`, and loaded for real by `postbuild.mjs`.
  */
-export const SERVER_SAFE_COMPONENTS = ['baseSvg', 'button', 'flex', 'grid', 'radioButton', 'semantics', 'textarea', 'textbox'];
+export const SERVER_SAFE_COMPONENTS = [
+  'baseSvg',
+  'button',
+  'flex',
+  'grid',
+  'radioButton',
+  'semantics',
+  'textarea',
+  'textbox',
+  'visuallyHidden',
+];
 
 /**
  * The rest: they hold state, measure the DOM or portal into it. A Server Component may still
@@ -48,6 +58,13 @@ export const SERVER_SAFE_COMPONENTS = ['baseSvg', 'button', 'flex', 'grid', 'rad
  * instead of failing to resolve `useState`. Nothing here renders *on* the server.
  */
 export const CLIENT_ONLY_COMPONENTS = ['checkbox', 'dataGrid', 'dropdown', 'form', 'select', 'tooltip'];
+
+/**
+ * Entries that are hooks all the way down and so can only run on the client. They carry the same
+ * `'use client'` banner the stateful components do: a Server Component importing `useDismiss`
+ * should open a client boundary, not fail to resolve `useRef`.
+ */
+export const CLIENT_ONLY_ENTRIES = ['a11y'];
 
 // Hooks and APIs React's server renderer has no dispatcher for. `useMemo`, `useCallback`, `useId`,
 // `useDebugValue` and `use` are the ones it does support, so they are deliberately absent here.

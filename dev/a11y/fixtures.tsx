@@ -13,6 +13,7 @@ import { H1, Img, Link, Nav, P } from '../../src/components/semantics';
 import Textarea from '../../src/components/textarea';
 import Textbox from '../../src/components/textbox';
 import Tooltip from '../../src/components/tooltip';
+import VisuallyHidden from '../../src/components/visuallyHidden';
 
 /**
  * One render per shipped component, in the smallest form its docs show — the thing a consumer
@@ -114,6 +115,17 @@ export const fixtures: A11yFixture[] = [
         <Link props={{ href: '/about' }}>About</Link>
         <Img props={{ src: 'logo.png', alt: 'Box Kite' }} />
       </Nav>
+    ),
+  },
+  {
+    // The component exists to be *read* and not seen, so the sweep checks the thing that makes it
+    // worth having: the button's accessible name comes from content axe can still find.
+    name: 'VisuallyHidden',
+    render: () => (
+      <Button>
+        <VisuallyHidden tag="span">Delete the invoice</VisuallyHidden>
+        <span aria-hidden>x</span>
+      </Button>
     ),
   },
   {

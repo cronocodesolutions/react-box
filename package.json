@@ -22,6 +22,11 @@
       "import": "./rsc.mjs",
       "require": "./rsc.cjs"
     },
+    "./a11y": {
+      "types": "./a11y.d.ts",
+      "import": "./a11y.mjs",
+      "require": "./a11y.cjs"
+    },
     "./core": {
       "types": "./core.d.ts",
       "import": "./core.mjs",
@@ -88,6 +93,16 @@
       "limit": "15 KB"
     },
     {
+      "name": "Behavior primitives (a11y entry)",
+      "path": "dist/a11y.mjs",
+      "ignore": [
+        "react",
+        "react-dom"
+      ],
+      "gzip": true,
+      "limit": "2.5 KB"
+    },
+    {
       "name": "Core engine (no React)",
       "path": "dist/core.mjs",
       "gzip": true,
@@ -111,7 +126,7 @@
         "react-dom"
       ],
       "gzip": true,
-      "limit": "40 KB"
+      "limit": "41 KB"
     }
   ],
   "repository": {

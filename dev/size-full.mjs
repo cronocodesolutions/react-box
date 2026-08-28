@@ -2,6 +2,7 @@
 // counted once (listing the entries directly in size-limit sums the shared core per file).
 // Add a line here when a new component entry is added to the build.
 import * as box from '../dist/box.mjs';
+import * as a11y from '../dist/a11y.mjs';
 import * as core from '../dist/core.mjs';
 import * as ssg from '../dist/ssg.mjs';
 import * as baseSvg from '../dist/components/baseSvg.mjs';
@@ -18,9 +19,11 @@ import * as semantics from '../dist/components/semantics.mjs';
 import * as textarea from '../dist/components/textarea.mjs';
 import * as textbox from '../dist/components/textbox.mjs';
 import * as tooltip from '../dist/components/tooltip.mjs';
+import * as visuallyHidden from '../dist/components/visuallyHidden.mjs';
 
 console.log(
   box,
+  a11y,
   core,
   ssg,
   baseSvg,
@@ -37,4 +40,5 @@ console.log(
   textarea,
   textbox,
   tooltip,
+  visuallyHidden,
 );

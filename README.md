@@ -259,6 +259,37 @@ toggle, and a page of pre-built components rendered on the server — is in
 [`examples/next-app`](examples/next-app): `npm run build:next-app` and `npm run smoke:next-app`,
 which starts the production server and asserts on the HTML it serves.
 
+## Behaviour primitives for your own components
+
+Every accessible widget needs the same mechanics, and none of them are visible in the markup:
+return focus to whatever opened a layer, move through a list with the arrow keys, close on Escape
+or a press outside, hold a value the consumer may or may not own, generate ids that wire one
+element to another. They are what this library's components are built from, and they ship on their
+own for the patterns it does not cover:
+
+```tsx
+import { useControllableState, useDismiss, useFocusReturn, useIdentifier, useRovingFocus } from '@cronocode/react-box/a11y';
+import VisuallyHidden from '@cronocode/react-box/components/visuallyHidden';
+
+function Menu({ open, onOpenChange, items }) {
+  const trigger = useRef(null);
+  const popup = useRef(null);
+
+  const roving = useRovingFocus({ count: items.length, textOf: (index) => items[index].label });
+
+  useDismiss({ enabled: open, inside: [trigger, popup], onDismiss: (reason, event) => onOpenChange(false, { reason, event }) });
+  useFocusReturn({ enabled: open, returnTo: trigger });
+}
+```
+
+2.2 KB gzipped for all five hooks, and they pull in no styling engine — you can use them next to
+any CSS you like. Changes are **event-sourced**: `onChange(value, { reason, event })` tells you
+_why_ something closed (`'escape'`, `'outside-pointer'`, a reason of your own), which is what makes
+a controlled component controllable in practice. Roles and ARIA are deliberately left to you: a
+listbox and a menu navigate identically and are named completely differently.
+
+Full reference: [docs/a11y-primitives.md](docs/a11y-primitives.md).
+
 ## Using the core without React
 
 The engine that turns props into CSS has no framework in it, and it is published on its own:
@@ -340,14 +371,17 @@ React is a thin adapter on top of it:
 
 |                                                            | Files | Lines | Share    |
 | ---------------------------------------------------------- | ----- | ----- | -------- |
-| Core engine (`src/core/`, `core.ts`)                       | 19    | 4,687 | 90.3%    |
+| Core engine (`src/core/`, `core.ts`)                       | 19    | 4,694 | 90.3%    |
 | React binding (`src/react/`, `box.ts`, `rsc.ts`, `ssg.ts`) | 12    | 505   | **9.7%** |
 
 The binding is the whole React-specific surface: resolve class names during render, flush the
 pending rules from `useInsertionEffect`, render the style elements of the Server-Component path,
-and hold the theme state. Three shared React hooks
-(`useVisibility`, `usePortalContainer`, `useVirtualization`, 212 lines) sit alongside it for the
-pre-built components to use.
+and hold the theme state. React feature code the components share sits alongside it and is counted
+separately — three helper hooks (`useVisibility`, `usePortalContainer`, `useVirtualization`) and
+the six modules behind [`@cronocode/react-box/a11y`](#behaviour-primitives-for-your-own-components),
+727 lines together. A Vue adapter would need its own arrow-key navigation for the same reason it
+would need its own components, which says nothing about how much of the styling engine is
+React-specific.
 
 That ratio is not theoretical: the same engine is driven straight from the DOM in
 [`examples/vanilla`](examples/vanilla) with no framework loaded, and from a server with no

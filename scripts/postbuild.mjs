@@ -5,7 +5,7 @@
 import { spawnSync } from 'node:child_process';
 import { cpSync, mkdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { CLIENT_ONLY_COMPONENTS, SERVER_SAFE_COMPONENTS } from './moduleGraph.mjs';
+import { CLIENT_ONLY_COMPONENTS, CLIENT_ONLY_ENTRIES, SERVER_SAFE_COMPONENTS } from './moduleGraph.mjs';
 
 // Ensure target directories exist (recursive = cross-platform `mkdir -p`).
 mkdirSync('dist/.claude/skills/cronocode-react-box', { recursive: true });
@@ -71,13 +71,16 @@ const DIRECTIVE = /^["']use client["'];/;
 
 const bannerViolations = [];
 
-for (const [names, wanted] of [
-  [CLIENT_ONLY_COMPONENTS, true],
-  [SERVER_SAFE_COMPONENTS, false],
+for (const [names, wanted, directory] of [
+  [CLIENT_ONLY_COMPONENTS, true, 'components/'],
+  [SERVER_SAFE_COMPONENTS, false, 'components/'],
+  // The hooks entry is client-only for the same reason, one level up: `@cronocode/react-box/a11y`
+  // is `useRef` and effects from top to bottom.
+  [CLIENT_ONLY_ENTRIES, true, ''],
 ]) {
   for (const name of names) {
     for (const extension of ['mjs', 'cjs']) {
-      const file = `components/${name}.${extension}`;
+      const file = `${directory}${name}.${extension}`;
       const has = DIRECTIVE.test(readFileSync(join('dist', file), 'utf8'));
 
       if (has !== wanted) bannerViolations.push(`${file} ${has ? 'has' : 'is missing'} the 'use client' banner`);
@@ -92,7 +95,10 @@ if (bannerViolations.length) {
   process.exit(1);
 }
 
-console.log(`✔ ${CLIENT_ONLY_COMPONENTS.length} client-only components carry a 'use client' banner; the server-safe ones do not`);
+console.log(
+  `✔ ${CLIENT_ONLY_COMPONENTS.length} client-only components and ${CLIENT_ONLY_ENTRIES.length} client-only entry ` +
+    `carry a 'use client' banner; the server-safe ones do not`,
+);
 
 // The other half of the boundary, on the built output this time. `npm run check:boundaries` proves
 // `src/core` names no React; this proves the bundler did not hand the framework-free entry a chunk

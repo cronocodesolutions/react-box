@@ -247,6 +247,13 @@ export const cssStyles = {
       styleName: 'content-visibility',
     },
   ],
+  /** The clip-path CSS property creates a clipping region that sets what part of an element should be shown. Parts that are inside the region are shown, while those outside are hidden. `inset(50%)` clips an element away entirely without removing it from the accessibility tree — the visually-hidden recipe. */
+  clipPath: [
+    {
+      values: ['inset(50%)', 'none'] as const,
+      styleName: 'clip-path',
+    },
+  ],
   /** The cursor CSS property sets the mouse cursor, if any, to show when the mouse pointer is over an element. */
   cursor: [
     {
