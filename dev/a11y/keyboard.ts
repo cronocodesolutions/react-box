@@ -16,6 +16,13 @@ export interface Keyboard {
   type(text: string): Promise<void>;
   /** A real pointer click, for the "open it with the mouse, then drive it with the keyboard" case. */
   click(element: Element): Promise<void>;
+  /**
+   * Move the pointer onto an element, firing the whole `pointerover`/`pointerenter`/`mouseover`
+   * sequence React synthesizes `onPointerEnter` from — a bare `pointerenter` never reaches it.
+   */
+  hover(element: Element): Promise<void>;
+  /** Move the pointer off an element. Paired with `hover` this is what WCAG 1.4.13 is about. */
+  unhover(element: Element): Promise<void>;
 }
 
 /**
@@ -37,6 +44,8 @@ export function keyboard(): Keyboard {
     press: (key) => user.keyboard(`{${key}}`),
     type: (text) => user.keyboard(text),
     click: (element) => user.click(element),
+    hover: (element) => user.hover(element),
+    unhover: (element) => user.unhover(element),
   };
 }
 

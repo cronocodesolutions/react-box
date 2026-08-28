@@ -82,7 +82,9 @@ Pre-built components wrap Box with the correct HTML tag. Each is a separate entr
 
 - `flex.tsx` / `grid.tsx` — Layout (display flex/grid)
 - `button.tsx`, `textbox.tsx`, `checkbox.tsx`, `radioButton.tsx`, `textarea.tsx` — Form elements
-- `dropdown.tsx`, `tooltip.tsx` — Overlays (use portals via `usePortalContainer`)
+- `overlay.tsx` — The positioning primitive: a portal rendered at the place it is declared (via `usePortalContainer`), no ARIA and no open state. `Dropdown` and the DataGrid menu stand on it
+- `tooltip.tsx` — The APG tooltip on top of `Overlay`: `role="tooltip"` + `aria-describedby`, hover and focus with delays, Escape, and the WCAG 1.4.13 rules (dismissible, hoverable, persistent). Trigger is a render prop
+- `dropdown.tsx` — Select-only dropdown (A5 owns its ARIA)
 - `semantics.tsx` — Semantic HTML wrappers (H1-H6, P, Span, Link, Img, Nav, Header, Footer, etc.) via factory function
 - `visuallyHidden.tsx` — Screen-reader-only content: clipped away rather than hidden, so it stays in the accessibility tree
 - `dataGrid/` — Complex data grid with sorting, filtering, grouping, virtualization

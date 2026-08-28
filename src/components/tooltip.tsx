@@ -1,115 +1,245 @@
-import { forwardRef, Ref, RefAttributes, useCallback, useLayoutEffect, useRef, useState } from 'react';
-import { createPortal } from 'react-dom';
-import Box, { BoxProps } from '../box';
-import usePortalContainer from '../react/hooks/usePortalContainer';
-import { ExtractElementFromTag } from '../react/reactTypes';
+import { FunctionComponent, useCallback, useEffect, useMemo, useRef } from 'react';
+import { BoxProps } from '../box';
+import { useEventCallback } from '../react/a11y/callbacks';
+import useControllableState, { ChangeHandler } from '../react/a11y/useControllableState';
+import useDismiss from '../react/a11y/useDismiss';
+import useIdentifier from '../react/a11y/useIdentifier';
 import { ComponentsAndVariants } from '../types';
+import Overlay from './overlay';
 
-const positionDigitsAfterComma = 2;
+/** Why the tooltip opened or closed — `onOpenChange` gets this alongside the event that did it. */
+export type TooltipReason = 'hover' | 'focus' | 'pointer-leave' | 'blur' | 'escape';
 
-interface TooltipProps {
-  onPositionChange?(position: { top: number; left: number; windowScrollX: number; windowScrollY: number }): void;
+/**
+ * What the trigger has to carry for the pattern to work. Spread it into the `props` bag of the
+ * control the tooltip describes — the control itself, not a wrapper around it, because
+ * `aria-describedby` only means something on the element the user actually lands on.
+ */
+export interface TooltipTriggerProps {
+  'aria-describedby'?: string;
+  onPointerEnter(event: React.PointerEvent): void;
+  onPointerLeave(event: React.PointerEvent): void;
+  onFocus(event: React.FocusEvent): void;
+  onBlur(event: React.FocusEvent): void;
+}
+
+// `content` shadows the CSS prop of the same name, which is the right trade: the CSS one is for
+// generated content on a pseudo-element, and the tooltip has no pseudo-element to generate onto.
+type TooltipBoxProps<TKey extends keyof ComponentsAndVariants> = Omit<BoxProps<'div', TKey>, 'children' | 'content'>;
+
+interface Props<TKey extends keyof ComponentsAndVariants> extends TooltipBoxProps<TKey> {
+  /** The description itself. Nothing renders while this is empty. */
+  content?: React.ReactNode;
+  /** The trigger, handed the props that wire it to the tooltip. */
+  children: (trigger: TooltipTriggerProps) => React.ReactNode;
+  /** Controlled open state. Leave it out and the tooltip owns it. */
+  open?: boolean;
+  defaultOpen?: boolean;
+  onOpenChange?: ChangeHandler<boolean, TooltipReason>;
+  /**
+   * How long the pointer has to rest on the trigger before the tooltip appears, in ms. Default
+   * 500. Focus ignores it: a keyboard user asked for the tooltip by arriving, and APG shows it
+   * straight away.
+   */
+  openDelay?: number;
+  /**
+   * The grace period after the pointer leaves, in ms. Default 150 — long enough to move the
+   * pointer onto the tooltip itself, which WCAG 1.4.13 requires.
+   */
+  closeDelay?: number;
   adjustTranslateX?: string;
   adjustTranslateY?: string;
 }
 
-type Props = TooltipProps & BoxProps;
+/**
+ * The APG tooltip: a description that appears on hover and on focus, and stays until the user is
+ * done with it. Pattern: https://www.w3.org/WAI/ARIA/apg/patterns/tooltip/
+ *
+ * ```tsx
+ * <Tooltip content="Deletes the row for good">{(trigger) => <Button props={trigger}>Delete</Button>}</Tooltip>
+ * ```
+ *
+ * The trigger is a render prop rather than a cloned child. Cloning would have to guess where a
+ * given child wants its DOM attributes — Box takes them in a `props` bag, a plain `<button>` takes
+ * them at the top level — and guessing wrong on `aria-describedby` costs exactly the thing the
+ * pattern is for. Handing the props over says which element is the trigger, and works for either.
+ *
+ * What the component owns, so its consumer does not have to know the pattern: `role="tooltip"` and
+ * the `aria-describedby` pointing at it, opening on hover *and* on focus, and the three WCAG
+ * 1.4.13 obligations — dismissible with Escape while focus stays put, hoverable (the pointer can
+ * travel onto the tooltip without it vanishing), and persistent (nothing closes it on a timer).
+ *
+ * Focus never moves into the tooltip and it is never in the tab order, which is why nothing here
+ * returns focus: a tooltip that can be focused is a dialog wearing the wrong role.
+ */
+function Tooltip<TKey extends keyof ComponentsAndVariants = 'tooltip'>(props: Props<TKey>) {
+  const {
+    content,
+    children,
+    open,
+    defaultOpen = false,
+    onOpenChange,
+    openDelay = 500,
+    closeDelay = 150,
+    adjustTranslateX,
+    adjustTranslateY,
+    props: contentProps,
+    ...restProps
+  } = props;
 
-function TooltipImpl(props: Props, ref: Ref<HTMLDivElement>) {
-  const { onPositionChange, adjustTranslateX = '0px', adjustTranslateY = '0px', ...restProps } = props;
+  const generatedId = useIdentifier('tooltip');
+  // A consumer id wins over the generated one, and `aria-describedby` has to name whichever won:
+  // pointing at an id nothing carries is the same as having no tooltip at all.
+  const tooltipId = restProps.id ?? generatedId;
+  const [isOpen, setOpen] = useControllableState<boolean, TooltipReason>({
+    value: open,
+    defaultValue: defaultOpen,
+    onChange: onOpenChange,
+  });
 
-  const positionRef = useRef<HTMLDivElement>(null);
-  const [position, setPosition] = useState<
-    { top: number; left: number; width?: number; windowScrollX: number; windowScrollY: number } | undefined
-  >();
-  const portalContainer = usePortalContainer();
+  const overlayRef = useRef<HTMLDivElement>(null);
+  const timer = useRef<ReturnType<typeof setTimeout>>(undefined);
+  // Why the tooltip should still be showing, read when a scheduled close finally runs: the pointer
+  // may have left the trigger for the tooltip itself, or the trigger may still hold focus.
+  const overTrigger = useRef(false);
+  const overContent = useRef(false);
+  const focused = useRef(false);
+  // Set by Escape. WCAG 1.4.13 asks for a dismissal that lasts — re-showing the tooltip because
+  // the pointer never moved would put the user straight back where they were, with no way out.
+  const dismissed = useRef(false);
 
-  const observeScroll = useCallback((element: HTMLDivElement, callback: (el: HTMLDivElement) => void) => {
-    const listener = (e: Event) => {
-      if ((e.target as HTMLElement).contains(element)) {
-        callback(element);
-      }
-    };
-
-    const controller = new AbortController();
-    document.addEventListener('scroll', listener, { signal: controller.signal, capture: true });
-    return () => controller.abort();
+  const cancel = useCallback(() => {
+    clearTimeout(timer.current);
+    timer.current = undefined;
   }, []);
 
-  const observeResize = useCallback((element: HTMLDivElement, callback: (el: HTMLDivElement) => void) => {
-    const listener = (_e: Event) => {
-      callback(element);
-    };
+  const schedule = useCallback(
+    (delay: number, run: () => void) => {
+      cancel();
 
-    const controller = new AbortController();
-    window.addEventListener('resize', listener, { signal: controller.signal, capture: true });
-    return () => controller.abort();
-  }, []);
-
-  const positionHandler = useCallback(
-    (el: HTMLDivElement) => {
-      const rect = el.getBoundingClientRect();
-
-      const top = Math.round((rect.top + window.scrollY) * positionDigitsAfterComma) / positionDigitsAfterComma;
-      const left = Math.round((rect.left + window.scrollX) * positionDigitsAfterComma) / positionDigitsAfterComma;
-      const windowScrollX = window.scrollX;
-      const windowScrollY = window.scrollY;
-
-      if (
-        position?.top !== top ||
-        position?.left !== left ||
-        position?.windowScrollX !== windowScrollX ||
-        position?.windowScrollY !== windowScrollY
-      ) {
-        onPositionChange?.({ top, left, windowScrollX, windowScrollY });
-        setPosition({ top, left, width: rect.width > 0 ? rect.width : undefined, windowScrollX, windowScrollY });
+      // A zero delay runs inside the event that asked for it rather than a tick later: the
+      // difference is visible to a test, and to a screen reader reading the trigger it just left.
+      if (delay <= 0) {
+        run();
+        return;
       }
+
+      timer.current = setTimeout(() => {
+        timer.current = undefined;
+        run();
+      }, delay);
     },
-    [position, onPositionChange],
+    [cancel],
   );
 
-  useLayoutEffect(() => {
-    if (positionRef.current) {
-      positionHandler(positionRef.current);
-      const scrollHandlerDispose = observeScroll(positionRef.current, positionHandler);
-      const resizeHandlerDispose = observeResize(positionRef.current, positionHandler);
+  const scheduleClose = useCallback(
+    (reason: TooltipReason, event: React.SyntheticEvent) => {
+      schedule(closeDelay, () => {
+        if (overTrigger.current || overContent.current || focused.current) return;
 
-      return () => {
-        scrollHandlerDispose();
-        resizeHandlerDispose();
-      };
-    }
-  }, [positionHandler, observeScroll, observeResize]);
+        setOpen(false, { reason, event });
+      });
+    },
+    [closeDelay, schedule, setOpen],
+  );
+
+  // Escape only. An outside press needs no handling of its own: it moves focus off the trigger and
+  // the pointer with it, and a tooltip holds no other state to dismiss.
+  useDismiss({
+    enabled: isOpen,
+    outsidePointer: false,
+    inside: [overlayRef],
+    onDismiss: (reason, event) => {
+      cancel();
+      dismissed.current = true;
+      setOpen(false, { reason: reason as TooltipReason, event });
+    },
+  });
+
+  useEffect(() => cancel, [cancel]);
+
+  // Open *and* something to say. `aria-describedby` follows this rather than `isOpen`, or an empty
+  // `content` would leave the trigger pointing at an element that was never rendered.
+  const showTooltip = isOpen && content !== undefined && content !== null;
+
+  // Every handler goes through `useEventCallback`, which is also what keeps them out of the render
+  // pass: `children(trigger)` is a call, and a function literal here that reads `overTrigger.current`
+  // would make the whole bag a value the React Compiler rules will not let a render invoke.
+  const handleTriggerEnter = useEventCallback((event: React.PointerEvent) => {
+    overTrigger.current = true;
+    if (dismissed.current) return;
+
+    schedule(openDelay, () => setOpen(true, { reason: 'hover', event }));
+  });
+
+  const handleTriggerLeave = useEventCallback((event: React.PointerEvent) => {
+    overTrigger.current = false;
+    dismissed.current = false;
+    scheduleClose('pointer-leave', event);
+  });
+
+  const handleTriggerFocus = useEventCallback((event: React.FocusEvent) => {
+    focused.current = true;
+    cancel();
+    setOpen(true, { reason: 'focus', event });
+  });
+
+  const handleTriggerBlur = useEventCallback((event: React.FocusEvent) => {
+    focused.current = false;
+    dismissed.current = false;
+    scheduleClose('blur', event);
+  });
+
+  const handleContentEnter = useEventCallback(() => {
+    overContent.current = true;
+    cancel();
+  });
+
+  const handleContentLeave = useEventCallback((event: React.PointerEvent) => {
+    overContent.current = false;
+    scheduleClose('pointer-leave', event);
+  });
+
+  const trigger = useMemo<TooltipTriggerProps>(
+    () => ({
+      'aria-describedby': showTooltip ? tooltipId : undefined,
+      onPointerEnter: handleTriggerEnter,
+      onPointerLeave: handleTriggerLeave,
+      onFocus: handleTriggerFocus,
+      onBlur: handleTriggerBlur,
+    }),
+    [handleTriggerBlur, handleTriggerEnter, handleTriggerFocus, handleTriggerLeave, showTooltip, tooltipId],
+  );
 
   return (
     <>
-      <Box ref={positionRef} />
-      {position &&
-        portalContainer &&
-        createPortal(
-          <Box
-            ref={ref}
-            position="absolute"
-            top={0}
-            left={0}
-            transition="none"
-            style={{
-              transform: `translate3d(calc(${position.left}px + ${adjustTranslateX}),calc(${position.top}px + ${adjustTranslateY}), 0)`,
-              willChange: 'transform',
-              width: position.width,
-            }}
-          >
-            <Box {...restProps} />
-          </Box>,
-          portalContainer,
-        )}
+      {children(trigger)}
+      {showTooltip && (
+        <Overlay
+          ref={overlayRef}
+          matchWidth={false}
+          adjustTranslateX={adjustTranslateX}
+          adjustTranslateY={adjustTranslateY}
+          component={'tooltip' as TKey}
+          {...(restProps as TooltipBoxProps<TKey>)}
+          id={tooltipId}
+          props={{
+            role: 'tooltip',
+            ...contentProps,
+            // Last, and deliberately not merged with whatever the consumer passed: these two are
+            // what makes the tooltip hoverable, and WCAG 1.4.13 is not a default to override by
+            // accident while adding an unrelated handler.
+            onPointerEnter: handleContentEnter,
+            onPointerLeave: handleContentLeave,
+          }}
+        >
+          {content}
+        </Overlay>
+      )}
     </>
   );
 }
 
-const Tooltip = forwardRef(TooltipImpl);
-Tooltip.displayName = 'Tooltip';
+(Tooltip as FunctionComponent).displayName = 'Tooltip';
 
-export default Tooltip as <TTag extends keyof React.JSX.IntrinsicElements = 'div', TKey extends keyof ComponentsAndVariants = never>(
-  props: BoxProps<TTag, TKey> & RefAttributes<ExtractElementFromTag<TTag>> & TooltipProps,
-) => React.ReactNode;
+export default Tooltip;

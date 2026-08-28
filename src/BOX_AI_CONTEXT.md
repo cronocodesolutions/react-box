@@ -377,7 +377,10 @@ import Textbox from '@cronocode/react-box/components/textbox';
 <Box position="fixed" top={0} left={0} right={0} bottom={0} bgColor="black" opacity={0.5} zIndex={50} />
 ```
 
-**Portals**: For tooltips/dropdowns that need to escape `overflow: hidden`, use `Tooltip` component (renders via React portal into `#crono-box` container).
+**Portals**: `Overlay` (`components/overlay`) renders its children into `#crono-box` at the place it
+is declared, so they escape `overflow: hidden` and clipped ancestors. No ARIA, no open state — it is
+positioning only. For a _description of a control_, use `Tooltip` instead (below): it is the same
+layer with the APG pattern on it.
 
 ### Group Hover (hoverGroup)
 
@@ -452,7 +455,7 @@ Box.configure({ sink: 'element' }); // React 19 only
 - The hook-free pre-built components render on the server too: `Flex`, `Grid`, `Button`,
   `Textbox`, `Textarea`, `RadioButton`, `BaseSvg` and the semantic tags (`H1`, `P`, `Link`, …).
   Import them straight into a Server Component.
-- `Dropdown`, `Tooltip`, `DataGrid`, `Checkbox`, `Select` and `Form` hold state, so their chunks
+- `Dropdown`, `Tooltip`, `Overlay`, `DataGrid`, `Checkbox`, `Select` and `Form` hold state, so their chunks
   ship a `'use client'` banner: a Server Component may import one, but it becomes a client
   boundary and its CSS is in the HTML only if a client module already ran
   `Box.configure({ sink: 'element' })`.
@@ -495,6 +498,35 @@ useFocusReturn({ enabled: open, returnTo: triggerRef });
 - The entry is client-only (`'use client'`); `visuallyHidden` renders on a server.
 
 Full reference: `docs/a11y-primitives.md`.
+
+---
+
+## Tooltip Component
+
+```tsx
+import Tooltip from '@cronocode/react-box/components/tooltip';
+
+<Tooltip content="Deletes the row for good">{(trigger) => <Button props={trigger}>Delete</Button>}</Tooltip>;
+```
+
+The child is a **render prop**, not an element: the bag it receives (`aria-describedby` plus the
+pointer and focus handlers) has to land on the control itself. Put it in `props` on a Box component,
+or spread it on a plain element — `<button {...trigger}>`.
+
+| Prop                      | Default | What it does                                                                       |
+| ------------------------- | ------- | ---------------------------------------------------------------------------------- |
+| `content`                 | —       | The description. Nothing renders while it is empty.                                |
+| `open` / `defaultOpen`    | —       | Controlled / uncontrolled open state.                                              |
+| `onOpenChange`            | —       | `(open, { reason, event })` — `hover`, `focus`, `pointer-leave`, `blur`, `escape`. |
+| `openDelay`               | `500`   | Hover dwell before it appears. Focus ignores it and shows immediately.             |
+| `closeDelay`              | `150`   | Grace period after the pointer leaves, so it can travel onto the tooltip.          |
+| `adjustTranslateX` / `…Y` | `0px`   | Nudge where the bubble lands.                                                      |
+
+Every other Box prop styles the bubble, over the built-in `tooltip` component style. What the
+component guarantees, so you do not wire it: `role="tooltip"`, `aria-describedby` on the trigger only
+while it is open, opening on hover **and** focus, Escape to dismiss with focus left where it is (and
+no re-show until the pointer leaves and returns), the pointer able to move onto the tooltip, and no
+auto-hide timer — the three WCAG 1.4.13 rules.
 
 ---
 

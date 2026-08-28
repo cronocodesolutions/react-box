@@ -67,10 +67,22 @@ import Button from "@cronocode/react-box/components/button";
 import Textbox from "@cronocode/react-box/components/textbox";
 ```
 
-- **Tooltip** - this is useful when you need a position absolute and the parent has overflow hidden.
+- **Tooltip** - the APG tooltip: a description on hover _and_ on focus, wired to its trigger with
+  `aria-describedby`, dismissed with Escape, and hoverable so the pointer can travel onto it
+  (WCAG 1.4.13). The trigger is a render prop, so the ARIA lands on the control itself.
 
 ```JS
 import Tooltip from "@cronocode/react-box/components/tooltip";
+
+<Tooltip content="Deletes the row for good">{(trigger) => <Button props={trigger}>Delete</Button>}</Tooltip>;
+```
+
+- **Overlay** - the positioning half on its own: renders its children into a portal at the place it
+  is declared, so they escape `overflow: hidden` and clipped ancestors. No ARIA, no open state, no
+  dismissal. This is what `Tooltip` was before it became the pattern.
+
+```JS
+import Overlay from "@cronocode/react-box/components/overlay";
 ```
 
 ## Extend props
@@ -244,8 +256,8 @@ Notes and limits:
   hook-free wrappers around Box, and their published chunks import the package by name — so the
   `react-server` condition reaches them and they resolve the same hook-free Box. Import them
   straight into a Server Component.
-- **The stateful ones become client boundaries.** `Dropdown`, `Tooltip`, `DataGrid`, `Checkbox`,
-  `Select` and `Form` hold state or measure the DOM, so their chunks ship a `'use client'` banner.
+- **The stateful ones become client boundaries.** `Dropdown`, `Tooltip`, `Overlay`, `DataGrid`,
+  `Checkbox`, `Select` and `Form` hold state or measure the DOM, so their chunks ship a `'use client'` banner.
   A Server Component may still import one — the bundler opens the boundary for you — but it is
   hydrated like any client component, and its CSS is in the server-rendered HTML only if a client
   module of yours has already called `Box.configure({ sink: 'element' })`.

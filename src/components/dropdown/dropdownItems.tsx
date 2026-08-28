@@ -1,7 +1,7 @@
 import { FunctionComponent, useCallback, useRef, useState } from 'react';
 import Box from '../../box';
 import { BoxStyleProps } from '../../types';
-import Tooltip from '../tooltip';
+import Overlay from '../overlay';
 import { DropdownItemProps, useDropdownContext } from './dropdownContext';
 import DropdownItemRenderer from './dropdownItemRenderer';
 
@@ -27,7 +27,7 @@ export default function DropdownItems<TVal>(props: Props<TVal>) {
 
   const itemsRef = useRef<HTMLDivElement>(null);
   const [openUp, setOpenUp] = useState(false);
-  // Read the button height synchronously for the initial downward offset before the Tooltip
+  // Read the button height synchronously for the initial downward offset before the Overlay
   // reports its measured position via onPositionChange; a deferred read would flash at the wrong spot.
   // eslint-disable-next-line react-hooks/refs
   const translateY = openUp ? 0 : (buttonRef.current?.getBoundingClientRect().height ?? 0);
@@ -39,7 +39,7 @@ export default function DropdownItems<TVal>(props: Props<TVal>) {
 
   return (
     <Box position="absolute" inset={0}>
-      <Tooltip
+      <Overlay
         ref={itemsRef}
         minWidth="fit-content"
         style={{ transform: openUp ? `translateY(calc(-100% - 2px))` : `translateY(${translateY}px)` }}
@@ -84,7 +84,7 @@ export default function DropdownItems<TVal>(props: Props<TVal>) {
             )}
           </Box>
         )}
-      </Tooltip>
+      </Overlay>
     </Box>
   );
 }

@@ -1,21 +1,19 @@
-import { cleanup, render, screen } from '@testing-library/react';
-import { useState } from 'react';
-import { afterEach, describe, expect, it } from 'vitest';
+import { act, cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { expectNoAxeViolations } from '../../dev/a11y/axe';
 import { expectFocusOn, keyboard } from '../../dev/a11y/keyboard';
 import { ignoreLogs } from '../../dev/tests';
-import Box from '../box';
 import Button from './button';
 import Tooltip from './tooltip';
 
 /**
- * The second keyboard template — the hard case, and the honest one.
+ * The APG tooltip, end to end — the contract A1 wrote down as `it.todo` while the component was
+ * still only a positioning primitive, now that A3 has made it the pattern.
  *
- * Tooltip today is a *positioning* primitive: it puts a portal where its anchor is, and leaves
- * every part of the tooltip pattern (the trigger, when to show, the role, the description wiring,
- * Escape) to the consumer. So the tests that pass here assert only what the component actually
- * promises, and the rest of the APG pattern is written down as `it.todo` — the contract A3 has to
- * satisfy — plus one test that pins today's gap so it cannot be closed silently.
+ * Three of these tests exist because of WCAG 1.4.13 (Content on Hover or Focus) rather than APG:
+ * dismissible, hoverable, persistent. They are the ones that fail on almost every hand-rolled
+ * tooltip, and none of them is visible to axe — a tooltip that vanishes when you reach for it has
+ * perfect markup right up to the moment it disappears.
  *
  * Pattern: https://www.w3.org/WAI/ARIA/apg/patterns/tooltip/
  */
@@ -23,52 +21,122 @@ describe('Tooltip accessibility', () => {
   ignoreLogs();
 
   afterEach(() => {
+    vi.useRealTimers();
     cleanup();
   });
 
-  // How the docs show it: the consumer owns the trigger and the open state.
-  function TooltipExample() {
-    const [open, setOpen] = useState(false);
+  // Instant open/close, so the tests that are about the *pattern* are not also about the clock.
+  // The delays get their own tests below, on fake timers.
+  function TooltipExample(props: { openDelay?: number; closeDelay?: number }) {
+    const { openDelay = 0, closeDelay = 0 } = props;
 
     return (
       <>
-        <Box>
-          <Button onClick={() => setOpen((value) => !value)}>Delete</Button>
-          {open && <Tooltip p={2}>Deletes the row</Tooltip>}
-        </Box>
+        <Tooltip content="Deletes the row for good" openDelay={openDelay} closeDelay={closeDelay}>
+          {(trigger) => <Button props={trigger}>Delete</Button>}
+        </Tooltip>
         <Button>After</Button>
       </>
     );
   }
 
   const trigger = () => screen.getByRole('button', { name: 'Delete' });
+  const tooltip = () => screen.queryByRole('tooltip');
 
-  describe('Keyboard', () => {
-    it('opens from the keyboard when the trigger is a button', async () => {
+  describe('Semantics', () => {
+    it('renders role="tooltip" and points the trigger at it with aria-describedby', async () => {
       const user = keyboard();
       render(<TooltipExample />);
+      await user.hover(trigger());
 
-      await user.pressTab();
-      expectFocusOn(trigger());
-      await user.press('Enter');
-
-      expect(screen.getByText('Deletes the row')).toBeInTheDocument();
+      const bubble = screen.getByRole('tooltip');
+      expect(bubble).toHaveTextContent('Deletes the row for good');
+      expect(trigger()).toHaveAttribute('aria-describedby', bubble.id);
+      // What the whole wiring is for: the trigger reads as "Delete, Deletes the row for good".
+      expect(trigger()).toHaveAccessibleDescription('Deletes the row for good');
     });
 
-    it('leaves focus on the trigger — the portal never steals it', async () => {
+    it('describes nothing while it is closed', () => {
+      render(<TooltipExample />);
+
+      expect(tooltip()).toBeNull();
+      expect(trigger()).not.toHaveAttribute('aria-describedby');
+    });
+
+    it('renders its content into the portal container, outside the trigger', async () => {
+      const user = keyboard();
+      const { container } = render(<TooltipExample />);
+      await user.hover(trigger());
+
+      const bubble = screen.getByRole('tooltip');
+      expect(document.getElementById('crono-box')).toContainElement(bubble);
+      expect(container).not.toContainElement(bubble);
+    });
+
+    it('has no axe violations, open or closed', async () => {
+      const user = keyboard();
+      render(<TooltipExample />);
+
+      await expectNoAxeViolations(document.body);
+
+      await user.hover(trigger());
+      await expectNoAxeViolations(document.body);
+    });
+  });
+
+  describe('Keyboard', () => {
+    it('shows on trigger focus as well as hover, and without waiting for the delay', async () => {
+      const user = keyboard();
+      render(<TooltipExample openDelay={10_000} />);
+
+      await user.pressTab();
+
+      expectFocusOn(trigger());
+      expect(tooltip()).not.toBeNull();
+    });
+
+    it('dismisses on Escape while the trigger keeps focus', async () => {
       const user = keyboard();
       render(<TooltipExample />);
       await user.pressTab();
-      await user.press('Enter');
 
+      await user.press('Escape');
+
+      expect(tooltip()).toBeNull();
       expectFocusOn(trigger());
+    });
+
+    it('stays dismissed while the pointer sits still, and comes back once it leaves and returns', async () => {
+      const user = keyboard();
+      render(<TooltipExample />);
+      await user.hover(trigger());
+
+      await user.press('Escape');
+      expect(tooltip()).toBeNull();
+
+      // Still hovering: re-showing here would trap the user in the tooltip they just dismissed.
+      await user.hover(trigger());
+      expect(tooltip()).toBeNull();
+
+      await user.unhover(trigger());
+      await user.hover(trigger());
+      expect(tooltip()).not.toBeNull();
+    });
+
+    it('closes when focus moves on', async () => {
+      const user = keyboard();
+      render(<TooltipExample />);
+      await user.pressTab();
+
+      await user.pressTab();
+
+      expect(tooltip()).toBeNull();
     });
 
     it('adds nothing to the tab order, so Tab still reaches the next control', async () => {
       const user = keyboard();
       render(<TooltipExample />);
       await user.pressTab();
-      await user.press('Enter');
 
       await user.pressTab();
 
@@ -76,43 +144,65 @@ describe('Tooltip accessibility', () => {
     });
   });
 
-  describe('Semantics', () => {
-    it('renders its content into the portal container, outside the trigger', async () => {
-      const user = keyboard();
-      const { container } = render(<TooltipExample />);
-      await user.click(trigger());
+  describe('Pointer (WCAG 1.4.13)', () => {
+    // fireEvent, not user-event: user-event schedules its own work on timers, and these three
+    // tests are precisely about what the clock does. React synthesizes `onPointerEnter` from
+    // `pointerover`, which is why these are `pointerOver`/`pointerOut` and not `pointerEnter`.
+    const advance = (ms: number) => act(() => void vi.advanceTimersByTime(ms));
 
-      const content = screen.getByText('Deletes the row');
-      expect(document.getElementById('crono-box')).toContainElement(content);
-      expect(container).not.toContainElement(content);
+    function renderWithFakeTimers(ui: React.ReactElement) {
+      vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] });
+
+      return render(ui);
+    }
+
+    it('opens on hover only after the delay has passed', () => {
+      renderWithFakeTimers(<TooltipExample openDelay={500} closeDelay={150} />);
+
+      fireEvent.pointerOver(trigger());
+      advance(499);
+      expect(tooltip()).toBeNull();
+
+      advance(1);
+      expect(tooltip()).not.toBeNull();
     });
 
-    it('has no axe violations', async () => {
-      const user = keyboard();
-      render(<TooltipExample />);
-      await user.click(trigger());
+    it('never opens when the pointer passes straight over the trigger', () => {
+      renderWithFakeTimers(<TooltipExample openDelay={500} closeDelay={150} />);
 
-      await expectNoAxeViolations(document.body);
+      fireEvent.pointerOver(trigger());
+      advance(200);
+      fireEvent.pointerOut(trigger());
+      advance(1000);
+
+      expect(tooltip()).toBeNull();
     });
 
-    /**
-     * Deliberately asserts the *absence* of the pattern. axe cannot see a missing role, so without
-     * this the gap would be invisible to CI; when A3 wires the tooltip up, this test fails and is
-     * replaced by the todos below. Same self-cleaning contract as the known-violations ledger.
-     */
-    it('does not implement the tooltip pattern yet (A3 owns this)', async () => {
-      const user = keyboard();
-      render(<TooltipExample />);
-      await user.click(trigger());
+    it('stays open while the pointer moves onto the tooltip itself', () => {
+      renderWithFakeTimers(<TooltipExample openDelay={0} closeDelay={150} />);
+      fireEvent.pointerOver(trigger());
 
-      expect(screen.queryByRole('tooltip')).toBeNull();
-      expect(trigger()).not.toHaveAttribute('aria-describedby');
+      // The gap between the trigger and the bubble is what the grace period is for: leaving the
+      // trigger starts a close that arriving on the bubble has to cancel.
+      fireEvent.pointerOut(trigger());
+      advance(100);
+      fireEvent.pointerOver(screen.getByRole('tooltip'));
+      advance(1000);
+
+      expect(tooltip()).not.toBeNull();
+
+      fireEvent.pointerOut(screen.getByRole('tooltip'));
+      advance(150);
+      expect(tooltip()).toBeNull();
     });
 
-    // A3 — the APG contract this component has to meet.
-    it.todo('renders role="tooltip" and points the trigger at it with aria-describedby');
-    it.todo('shows on trigger focus as well as hover, after the delay');
-    it.todo('dismisses on Escape while the trigger keeps focus');
-    it.todo('stays open while the pointer moves onto the tooltip itself (WCAG 1.4.13)');
+    it('is persistent — it never hides itself on a timer', () => {
+      renderWithFakeTimers(<TooltipExample openDelay={0} closeDelay={150} />);
+      fireEvent.pointerOver(trigger());
+
+      advance(60_000);
+
+      expect(tooltip()).not.toBeNull();
+    });
   });
 });
