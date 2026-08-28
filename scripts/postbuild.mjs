@@ -3,7 +3,8 @@
 // reach a client hook through any chunk it imports.
 // Uses Node's fs (not shell cp/mkdir) so it runs identically on macOS, Linux, and Windows.
 import { spawnSync } from 'node:child_process';
-import { cpSync, mkdirSync } from 'node:fs';
+import { cpSync, mkdirSync, readFileSync } from 'node:fs';
+import { join } from 'node:path';
 
 // Ensure target directories exist (recursive = cross-platform `mkdir -p`).
 mkdirSync('dist/.claude/skills/cronocode-react-box', { recursive: true });
@@ -49,3 +50,45 @@ for (const [format, inputType, code] of loads) {
 }
 
 console.log('✔ dist loads under the react-server condition (ESM and CJS)');
+
+// The other half of the boundary, on the built output this time. `npm run check:boundaries` proves
+// `src/core` names no React; this proves the bundler did not hand the framework-free entry a chunk
+// that does. It is the same failure the react-server check catches, one entry over: the split used
+// to be derived from the react-server module graph alone, and everything outside it — the theme
+// runtime included — went to the client chunk, which `/core` then imported.
+const REACT_SPECIFIER = /(?:from\s*|require\(\s*)["'](react(?:-dom)?(?:\/[^"']*)?)["']/g;
+
+/** The chunk, plus every chunk it imports, as `[path, source]`. */
+function chunkGraph(entry) {
+  const seen = new Map();
+  const queue = [entry];
+
+  while (queue.length) {
+    const file = queue.shift();
+    if (seen.has(file)) continue;
+
+    const code = readFileSync(join('dist', file), 'utf8');
+    seen.set(file, code);
+
+    for (const [, specifier] of code.matchAll(/(?:from\s*|require\(\s*)["'](\.\/[^"']+)["']/g)) {
+      queue.push(specifier.slice(2));
+    }
+  }
+
+  return seen;
+}
+
+for (const entry of ['core.mjs', 'core.cjs']) {
+  const offenders = [...chunkGraph(entry)]
+    .flatMap(([file, code]) => [...code.matchAll(REACT_SPECIFIER)].map(([, specifier]) => `${file} imports '${specifier}'`))
+    .filter((value, index, all) => all.indexOf(value) === index);
+
+  if (offenders.length) {
+    console.error(`\n✖ the framework-free entry (${entry}) reaches React through its chunks:\n`);
+    for (const offender of offenders) console.error(`  ${offender}`);
+    console.error('\nFix the chunk split in vite.config.ts (codeSplitting.groups). See CONTRIBUTING.md, "The core boundary".\n');
+    process.exit(1);
+  }
+}
+
+console.log('✔ the /core entry bundles no React (ESM and CJS)');

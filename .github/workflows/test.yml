@@ -26,6 +26,10 @@ jobs:
         run: npm run check:boundaries
       - name: Check build 🔧
         run: npm run build
+      # The existence proof for the core boundary: a page with no framework, built against the
+      # same sources. If the engine ever needs React again, this is what stops compiling.
+      - name: Check the framework-free example builds 🔧
+        run: npm run build:vanilla
       - name: Check package health (publint + attw) 🔧
         run: npm run check:package
       - name: Check size budgets 🔧

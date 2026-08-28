@@ -81,6 +81,16 @@ export interface StyleEngine {
     isSvg: boolean,
   ): { classNames: string[]; signature: string | null; styleElements?: StyleElementDescriptor[] };
   /**
+   * The class list for a set of Box props as a `class` attribute value — the whole API a
+   * non-React adapter needs: `el.className = engine.classNames({ p: 4, bgColor: 'blue-500' })`.
+   * The CSS those classes need is written to this engine's sink on its own schedule, so there is
+   * nothing to flush; call `flushSync()` first only when reading computed styles in the same tick.
+   *
+   * Throws in element mode, where the rules go to no sink at all and the caller has to render the
+   * `styleElements` that `resolveClassNames` returns instead.
+   */
+  classNames(props: BoxStyleProps<any>, options?: { svg?: boolean }): string;
+  /**
    * Register rules that target a root selector (e.g. `html`) rather than a generated class.
    * Returns the style elements they need in element mode, exactly like `resolveClassNames`.
    */
@@ -596,8 +606,12 @@ export function createStyleEngine(options: StyleEngineOptions = {}): StyleEngine
 
   /** The reset + `:root` block every engine writes before its first generated rule. */
   function baseRules(): string[] {
+    // Variables used before the first flush. Skipped entirely when there are none — an empty
+    // `:root{}` is valid CSS but it is noise in every SSR payload and every base style element.
+    const usedVariables = variables.generateVariables();
+
     const rules = [
-      `:root{${variables.generateVariables()}}`,
+      ...(usedVariables ? [`:root{${usedVariables}}`] : []),
       `:root{--borderColor: black;--outlineColor: black;--lineHeight: 1.2;--fontSize: 14px;--transitionTime: 0.25s;--svgTransitionTime: 0.3s;}`,
       `#crono-box {position: absolute;top: 0;left: 0;height: 0;z-index:99999;}`,
       `html{font-size: 16px;font-family: Arial, sans-serif;}`,
@@ -736,27 +750,39 @@ export function createStyleEngine(options: StyleEngineOptions = {}): StyleEngine
     sink?.reset();
   }
 
+  function resolveClassNames(props: BoxStyleProps<any>, isSvg: boolean) {
+    const signature = computeSignature(props, isSvg);
+
+    let resolved = signature !== null ? styleCache.get(signature) : undefined;
+
+    if (!resolved) {
+      const componentStyles = resolveComponentStyles(props, componentsStyles) as BoxStyleProps;
+      const propsToUse = componentStyles ? ObjectUtils.mergeDeep(componentStyles, props) : props;
+
+      const classNames = [isSvg ? svgClassName : boxClassName];
+      resolved = { classNames, elements: collect(() => addClassNames(propsToUse, classNames, [])) };
+
+      if (signature !== null) styleCache.set(signature, resolved);
+    }
+
+    const { classNames, elements } = resolved;
+
+    return elements ? { classNames, signature, styleElements: withBaseElement(elements) } : { classNames, signature };
+  }
+
   return {
     styleElementId,
 
-    resolveClassNames(props: BoxStyleProps<any>, isSvg: boolean) {
-      const signature = computeSignature(props, isSvg);
+    resolveClassNames,
 
-      let resolved = signature !== null ? styleCache.get(signature) : undefined;
-
-      if (!resolved) {
-        const componentStyles = resolveComponentStyles(props, componentsStyles) as BoxStyleProps;
-        const propsToUse = componentStyles ? ObjectUtils.mergeDeep(componentStyles, props) : props;
-
-        const classNames = [isSvg ? svgClassName : boxClassName];
-        resolved = { classNames, elements: collect(() => addClassNames(propsToUse, classNames, [])) };
-
-        if (signature !== null) styleCache.set(signature, resolved);
+    classNames(props: BoxStyleProps<any>, options?: { svg?: boolean }) {
+      if (isElementMode()) {
+        throw new Error(
+          '[react-box] classNames() has nowhere to put its CSS in element mode: the rules come back from resolveClassNames() as style elements for the adapter to render.',
+        );
       }
 
-      const { classNames, elements } = resolved;
-
-      return elements ? { classNames, signature, styleElements: withBaseElement(elements) } : { classNames, signature };
+      return resolveClassNames(props, options?.svg ?? false).classNames.join(' ');
     },
 
     addGlobalStyles(props: BoxStyleProps<any>, selector: string) {

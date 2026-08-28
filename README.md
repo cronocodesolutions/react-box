@@ -245,20 +245,89 @@ Notes and limits:
 - **Cost:** one base element per page (the reset, `:root`, and the layer order — ~1.8 KB gzipped)
   plus one `<style>` element per distinct rule, deduped across every Box that uses it.
 
+## Using the core without React
+
+The engine that turns props into CSS has no framework in it, and it is published on its own:
+
+```js
+import { createStyleEngine } from '@cronocode/react-box/core';
+
+const engine = createStyleEngine();
+
+document.querySelector('#card').className = engine.classNames({
+  p: 4,
+  bgColor: 'blue-500',
+  borderRadius: 2,
+  hover: { bgColor: 'blue-600' },
+  md: { p: 8 },
+});
+```
+
+That is the whole runtime. The props are the ones `<Box>` takes — pseudo-classes, breakpoints,
+themes, `component`/`variant` — and the CSS behind them is written to a `<style>` element the
+engine creates, on its own microtask. Nothing has to be flushed, mounted or provided.
+
+```js
+const engine = createStyleEngine();
+
+// Custom variables and props, the vanilla form of Box.extend()
+engine.extend(
+  { brand: '#6d28d9' },
+  {},
+  { bgColor: [{ styleName: 'background-color', values: ['brand'], valueFormat: (v, get) => get(v) }] },
+);
+
+// Component defaults with variants, the vanilla form of Box.components()
+engine.components({ panel: { styles: { p: 6, borderRadius: 3 }, variants: { accent: { b: 2, borderColor: 'brand' } } } });
+
+engine.classNames({ component: 'panel', variant: 'accent' });
+engine.flushSync(); // only when computed styles are read in the same tick
+engine.getStyles(); // the stylesheet as text, for static output
+```
+
+Theming is the same state machine `<Box.Theme>` runs, as a plain object:
+
+```js
+import { createThemeController } from '@cronocode/react-box/core';
+
+// Reads prefers-color-scheme, restores a stored choice, writes the theme onto <html>, and follows
+// the system preference until something overrides it. Theme rules are ancestor-scoped (`.dark .p-4`),
+// so that one class name restyles everything inside.
+const theme = createThemeController({ storageKey: 'theme' });
+
+theme.subscribe((name) => console.log('theme is now', name));
+theme.set('dark'); // theme.set(null) hands control back to the system
+```
+
+Notes:
+
+- **The engine is explicit here.** The React entries share one lazily-created default instance so
+  `Box` and `Box.extend()` agree with no configuration; a vanilla app has no such ambient thing to
+  agree with, and separate instances are what keeps a widget independent of its host page.
+- **No React reaches this entry**, in the sources or in the bundle — both are checked in CI. It is
+  14 KB gzipped, all engine.
+- `sink: 'string'` collects CSS in memory with no DOM (`getStyles()` reads it back), which is how
+  server rendering works; `sink: 'element'` is the React 19 mode above and has no meaning here, so
+  `classNames()` refuses to run in it.
+
+A complete page — props, pseudo-classes, breakpoints, themes, `extend`, `components`, no framework
+— is in [`examples/vanilla`](examples/vanilla): `npm run dev:vanilla`.
+
 ## Architecture
 
 The styling engine is framework-free. Everything that generates CSS — the ~144 prop definitions,
 the value formatters, class-name generation, rule ordering, the style sinks (CSSOM, `textContent`,
 string for SSR, style elements for React 19), the flush scheduler, CSS variables and the theme
 runtime — lives in `src/core/` and imports no React at all. CI fails the build if it ever does
-(`npm run check:boundaries`).
+(`npm run check:boundaries`), and it ships on its own as
+[`@cronocode/react-box/core`](#using-the-core-without-react).
 
 React is a thin adapter on top of it:
 
 |                                                            | Files | Lines | Share    |
 | ---------------------------------------------------------- | ----- | ----- | -------- |
-| Core engine (`src/core/`)                                  | 15    | 4,377 | 90.2%    |
-| React binding (`src/react/`, `box.ts`, `rsc.ts`, `ssg.ts`) | 11    | 478   | **9.8%** |
+| Core engine (`src/core/`, `core.ts`)                       | 19    | 4,687 | 90.7%    |
+| React binding (`src/react/`, `box.ts`, `rsc.ts`, `ssg.ts`) | 11    | 478   | **9.3%** |
 
 The binding is the whole React-specific surface: resolve class names during render, flush the
 pending rules from `useInsertionEffect`, render the style elements of the Server-Component path,
@@ -266,9 +335,10 @@ and hold the theme state. Three shared React hooks
 (`useVisibility`, `usePortalContainer`, `useVirtualization`, 212 lines) sit alongside it for the
 pre-built components to use.
 
-That ratio is what makes a non-React target realistic rather than theoretical — the engine can be
-driven straight from the DOM, from a server with no `document`, or from another framework's adapter.
-Numbers are printed by `npm run check:boundaries` and refreshed with the code.
+That ratio is not theoretical: the same engine is driven straight from the DOM in
+[`examples/vanilla`](examples/vanilla) with no framework loaded, and from a server with no
+`document` in `ssg.ts`. Numbers are printed by `npm run check:boundaries` and refreshed with the
+code.
 
 See [CONTRIBUTING.md](CONTRIBUTING.md#the-core-boundary) for the boundary rules and where new code
 belongs.

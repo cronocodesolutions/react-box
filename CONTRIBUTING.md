@@ -50,6 +50,7 @@ Box props → useStyles() → useComponents() → StylesContext → CSS injectio
 react-box/
 ├── src/                          # Library source (published to npm)
 │   ├── box.ts                    # Main Box component (entry point)
+│   ├── core.ts                   # The engine with no React (`@cronocode/react-box/core`)
 │   ├── rsc.ts                    # Box for Server Components (the `react-server` entry, hook-free)
 │   ├── types.ts                  # TypeScript type exports
 │   ├── ssg.ts                    # Server-side rendering support (entry point)
@@ -75,7 +76,8 @@ react-box/
 │   │   │   └── useComponents.ts  # Component style resolution (pure, no hooks)
 │   │   │
 │   │   └── theme/                # Theme system, platform half
-│   │       └── themeRuntime.ts   # prefers-color-scheme, storage, DOM writes
+│   │       ├── themeRuntime.ts   # prefers-color-scheme, storage, DOM writes
+│   │       └── themeController.ts # The provider's state machine, with no framework
 │   │
 │   ├── react/                    # The React adapter — everything React-specific
 │   │   ├── useStyles.ts          # The binding: class names in render, flush in an effect
@@ -135,18 +137,19 @@ react-box/
 
 The split is not cosmetic. The engine — prop definitions, formatters, class-name generation, the
 rule registry, the sinks, the flush scheduler, the variables, the theme runtime — has no idea a
-component tree exists. It is the future `@box-kite/core` package, and it is what makes the library
-embeddable in places React is not: a vanilla-DOM page, an iframe widget, another framework's
-adapter, a build-time compiler.
+component tree exists. It is the future `@box-kite/core` package, it already ships as the
+`@cronocode/react-box/core` entry (`src/core.ts`), and it is what makes the library embeddable in
+places React is not: a vanilla-DOM page, an iframe widget, another framework's adapter, a
+build-time compiler. `examples/vanilla` is that claim as a running page.
 
-| Layer               | Path                                                     | May import React?                        |
-| ------------------- | -------------------------------------------------------- | ---------------------------------------- |
-| Core engine         | `src/core/**`                                            | **No** — enforced                        |
-| React binding       | `src/react/**`, `src/box.ts`, `src/rsc.ts`, `src/ssg.ts` | Yes (`src/rsc.ts`: no hooks — see below) |
-| Components, icons   | `src/components/**`, `src/icons/**`                      | Yes                                      |
-| Shared utils, types | `src/utils/**`, `src/types.ts`                           | No (they simply don't need it)           |
+| Layer               | Path                                                     | May import React?                         |
+| ------------------- | -------------------------------------------------------- | ----------------------------------------- |
+| Core engine         | `src/core/**`, `src/core.ts`                             | **No** — enforced                         |
+| React binding       | `src/react/**`, `src/box.ts`, `src/rsc.ts`, `src/ssg.ts` | Yes (`src/rsc.ts`: no hooks — see below)  |
+| Components, icons   | `src/components/**`, `src/icons/**`                      | Yes                                       |
+| Shared utils, types | `src/utils/**`, `src/types.ts`                           | No — the engine reaches them, so enforced |
 
-Three things enforce it, because one is not enough:
+Four things enforce it, because one is not enough:
 
 1. **ESLint** — a `no-restricted-imports` block scoped to `src/core/**` (see `eslint.config.js`,
    next to the identical rule that keeps the DataGrid models headless).
@@ -154,23 +157,44 @@ Three things enforce it, because one is not enough:
    see: `require()`, dynamic `import()`, a `.tsx` file, and React's _global_ namespace. That last
    one is the reason this script exists: `React.JSX.IntrinsicElements` needs no import at all, so
    `ExtractElementFromTag` sat in `core/coreTypes.ts` for years without a single lint error. It now
-   lives in `src/react/reactTypes.ts`.
+   lives in `src/react/reactTypes.ts`. It checks the directory _and_ everything `src/core.ts`
+   actually reaches (`scripts/moduleGraph.mjs`), which is how `src/utils/**` and `src/types.ts`
+   come under the rule — they are outside `src/core/` but the engine imports them.
 3. **`scripts/check-rsc-boundary.mjs`**, run by the same command — the mirror image of the rule
    above: the `react-server` entry (`src/rsc.ts`) may import React, but nothing in its graph may
    call a _client_ hook. See "Element mode and cascade layers".
+4. **`scripts/postbuild.mjs`** — the same two rules on the built output, which is where a bundler
+   can quietly undo them. It loads `dist` under `--conditions=react-server`, and it walks the
+   chunks `core.mjs`/`core.cjs` import and fails if any of them names `react`. Both have happened:
+   the chunk split was once derived from the `react-server` graph alone, so the theme runtime —
+   which no Box reaches — landed in the client chunk that `/core` then imported.
 
 The same command prints the adapter ratio published in the README:
 
 ```
-✔ src/core is framework-free (15 files, 4377 lines, zero React references)
-  React binding: 11 files, 478 lines — 9.8% of core + binding
+✔ src/core and everything src/core.ts reaches are framework-free (19 files, 4687 lines, zero React references)
+  React binding: 11 files, 478 lines — 9.3% of core + binding
   React helper hooks: 3 files, 212 lines (shared by components, outside the binding)
 ✔ src/rsc.ts renders with no client hooks (22 modules in its graph)
 ```
 
+### The chunk split
+
+`vite.config.ts` derives three shared chunks from those same two graph walks, so a new module
+cannot be classified one way by the checks and another by the bundler:
+
+| Chunk          | What is in it                                                     | Who imports it           |
+| -------------- | ----------------------------------------------------------------- | ------------------------ |
+| `engine`       | everything `src/core.ts` reaches — framework-free                 | every entry              |
+| `react-shared` | hook-free React modules (prop assembly, the element-mode resolve) | `box`, `rsc`, components |
+| `client`       | hooks, effects, the theme provider                                | `box`, components        |
+
+`core.mjs` imports `engine` and nothing else; `rsc.mjs` may not import `client`.
+
 ### Where does my new code go?
 
-- Generating CSS, naming a class, ordering a rule, formatting a value → `src/core/`.
+- Generating CSS, naming a class, ordering a rule, formatting a value → `src/core/`. If it is
+  something a non-React consumer should be able to call, export it from `src/core.ts` too.
 - Touching the DOM without a component (`document`, `matchMedia`, `localStorage`) → still
   `src/core/`; DOM is not React. Guard for its absence so a server render can call it (see
   `core/theme/themeRuntime.ts`, `core/engine/styleSink.ts`).
@@ -994,13 +1018,15 @@ dist/
 └── types.d.ts       # Type exports
 ```
 
-The `core`/`client` split is not cosmetic: `rsc.mjs` must not import a chunk that names `useState`
-or an effect, because the `react-server` build of React does not export them. The split is derived
-from the entry's own module graph (`scripts/rscGraph.mjs`, shared with the boundary check), and
+The `engine`/`react-shared`/`client` split is not cosmetic: `core.mjs` must not import a chunk that
+names `react` at all, and `rsc.mjs` must not import one that names `useState` or an effect, because
+the `react-server` build of React does not export them. Both splits are derived from the entries'
+own module graphs (`scripts/moduleGraph.mjs`, shared with the boundary checks), and
 `scripts/postbuild.mjs` then loads the built package under `--conditions=react-server` in both
-formats — the same resolution a Next.js server build performs — so a regression fails the build
-instead of a consumer's. Note that rolldown ignores Rollup's `manualChunks`; the split is declared
-through `output.codeSplitting.groups`.
+formats — the same resolution a Next.js server build performs — and walks the `/core` entry's
+chunks looking for React, so a regression fails the build instead of a consumer's. Note that
+rolldown ignores Rollup's `manualChunks`; the split is declared through
+`output.codeSplitting.groups`.
 
 ### Vite Build Configuration
 

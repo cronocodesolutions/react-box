@@ -1,4 +1,4 @@
-// Fails the build if anything under src/core reaches for React.
+// Fails the build if anything under src/core — or its published entry, src/core.ts — reaches for React.
 //
 // `src/core` is the future `@box-kite/core` package: the style engine, the prop definitions, the
 // formatters, the variables and the framework-free runtime helpers. It must be usable with no
@@ -12,6 +12,7 @@
 // Run: npm run check:boundaries
 import { readFileSync, readdirSync, statSync } from 'node:fs';
 import { join } from 'node:path';
+import { BANNED_SPECIFIER as REACT_PACKAGE, CORE_ENTRY, coreGraph } from './moduleGraph.mjs';
 
 const root = join(import.meta.dirname, '..');
 const CORE = 'src/core';
@@ -80,8 +81,21 @@ function measure(paths) {
   return { files: files.length, lines };
 }
 
-const coreFiles = walk(CORE);
+// The published entry (`@cronocode/react-box/core`) and everything it reaches, which is the real
+// framework-free boundary: the engine also uses `src/utils/**` and `src/types.ts`, and a React
+// import there would ship to a consumer who installed the library precisely to avoid one. The
+// directory walk stays alongside it, because a core module no entry imports yet is still core.
+const entryGraph = coreGraph();
+const coreFiles = [...new Set([...entryGraph.modules.keys(), ...walk(CORE)])];
 const violations = coreFiles.flatMap(checkFile);
+
+for (const { path, specifier } of entryGraph.bare) {
+  if (REACT_PACKAGE.test(specifier)) violations.push(`${path}: reached from ${CORE_ENTRY} and imports '${specifier}'`);
+}
+
+for (const { path, specifier } of entryGraph.unresolved) {
+  violations.push(`${path}: cannot resolve '${specifier}'`);
+}
 
 if (violations.length) {
   console.error(`\n✖ ${CORE} must stay framework-free — ${violations.length} violation(s):\n`);
@@ -101,6 +115,9 @@ const binding = measure([...reactFiles.filter((p) => !isHook(p)), 'src/box.ts', 
 const helpers = measure(reactFiles.filter(isHook));
 const share = ((binding.lines / (core.lines + binding.lines)) * 100).toFixed(1);
 
-console.log(`✔ ${CORE} is framework-free (${core.files} files, ${core.lines} lines, zero React references)`);
+console.log(
+  `✔ ${CORE} and everything ${CORE_ENTRY} reaches are framework-free ` +
+    `(${core.files} files, ${core.lines} lines, zero React references)`,
+);
 console.log(`  React binding: ${binding.files} files, ${binding.lines} lines — ${share}% of core + binding`);
 console.log(`  React helper hooks: ${helpers.files} files, ${helpers.lines} lines (shared by components, outside the binding)`);

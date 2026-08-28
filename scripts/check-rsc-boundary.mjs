@@ -9,7 +9,7 @@
 // The same graph decides the chunk split in `vite.config.ts`, so the built `rsc.mjs` inherits it.
 //
 // Run: npm run check:boundaries
-import { BANNED_SPECIFIER, CLIENT_APIS, RSC_ENTRY, rscGraph } from './rscGraph.mjs';
+import { BANNED_SPECIFIER, CLIENT_APIS, RSC_ENTRY, rscGraph } from './moduleGraph.mjs';
 
 const violations = [];
 const { modules, bare, unresolved } = rscGraph();
