@@ -2,7 +2,7 @@ import fs from 'fs';
 import path from 'path';
 import dts from 'vite-plugin-dts';
 import { defineConfig } from 'vitest/config';
-import { coreGraph, rscGraph } from './scripts/moduleGraph.mjs';
+import { CLIENT_ONLY_COMPONENTS, PACKAGE_NAME, SERVER_SAFE_COMPONENTS, coreGraph, serverSafeModules } from './scripts/moduleGraph.mjs';
 
 const files = fs
   .readdirSync(path.resolve(import.meta.dirname, './src/components'))
@@ -35,13 +35,65 @@ const extensions = {
 // `src/core.ts` reaches only framework-free modules; `src/rsc.ts` reaches those plus the hook-free
 // React ones; everything else (the flush effect, the theme provider, the shared hooks) is client.
 const frameworkFree = new Set(coreGraph().modules.keys());
-const serverSafe = new Set(rscGraph().modules.keys());
+const serverSafe = serverSafeModules();
+
+const componentFile = (name: string) => path.resolve(import.meta.dirname, 'src/components', `${name}.tsx`);
+const serverSafeFiles = new Set(SERVER_SAFE_COMPONENTS.map(componentFile));
+
+/**
+ * The pre-built components resolve Box through the package's own name, not `../box.mjs`.
+ *
+ * A relative import in a published chunk bypasses the `exports` map, so the `react-server`
+ * condition never gets a chance to apply and a Server Component importing `Flex` was handed the
+ * *client* Box — a module that calls `createContext` at import time, which the server build of
+ * React does not export. The build failed with `createContext is not a function`, naming neither
+ * the component nor the fix (bug #43).
+ *
+ * Emitting the package name instead puts the decision back where it belongs: the consumer's
+ * bundler resolves it under its own conditions, so the same `flex.mjs` gets the hook-free Box in
+ * a server graph and the client Box in a client one. Only the components that can render on a
+ * server get this — the rest are pinned to the client graph by their `'use client'` banner, where
+ * the relative path is already correct.
+ */
+const boxSelfReference = {
+  name: 'box-self-reference',
+  // Ahead of Vite's own resolver, which resolves `../box` to a file before a plugin can object.
+  enforce: 'pre' as const,
+  // Build only. A Vitest run imports the sources directly, with no package to resolve a name
+  // against, and the same is true of the demo site's dev server.
+  apply: 'build' as const,
+  resolveId(source: string, importer?: string) {
+    if (source !== '../box' || !importer) return null;
+
+    return serverSafeFiles.has(path.resolve(importer)) ? { id: PACKAGE_NAME, external: true } : null;
+  },
+};
+
+/**
+ * `'use client'` on the components that cannot render on a server, so importing one from a Server
+ * Component opens a client boundary instead of failing to resolve `useState`. It goes on at
+ * render time rather than in the source: a directive in a source file makes rolldown (and every
+ * consumer's Rollup) warn about module-level directives on every build, and the sources are also
+ * what the demo site and the tests import, where the directive means nothing.
+ */
+const useClientBanner = {
+  name: 'use-client-banner',
+  apply: 'build' as const,
+  renderChunk(code: string, chunk: { name: string }) {
+    const component = chunk.name.startsWith('components/') && chunk.name.slice('components/'.length);
+
+    if (!component || !CLIENT_ONLY_COMPONENTS.includes(component)) return null;
+
+    // No sourcemap to shift — this build emits none.
+    return { code: `'use client';\n${code}`, map: null };
+  },
+};
 
 let currentFormat;
 
 export default defineConfig(({ mode }) => {
   return {
-    plugins: [dts({ entryRoot: './src', exclude: ['./pages/**', './src/**/*.test.*', './dev/**'] })],
+    plugins: [dts({ entryRoot: './src', exclude: ['./pages/**', './src/**/*.test.*', './dev/**'] }), boxSelfReference, useClientBanner],
     build: {
       minify: mode !== 'dev',
       lib: {
@@ -53,7 +105,7 @@ export default defineConfig(({ mode }) => {
         formats: ['es', 'cjs'],
       },
       rollupOptions: {
-        external: ['react', 'react-dom', 'react/jsx-runtime', 'react-dom/server', 'use-sync-external-store/shim'],
+        external: [PACKAGE_NAME, 'react', 'react-dom', 'react/jsx-runtime', 'react-dom/server', 'use-sync-external-store/shim'],
         // Required by `codeSplitting.includeDependenciesRecursively: false` below. Entry exports are
         // unaffected — an entry chunk is merely allowed to carry more than the entry declares.
         preserveEntrySignatures: 'allow-extension',
@@ -64,8 +116,10 @@ export default defineConfig(({ mode }) => {
           //   engine       — src/core/**, framework-free. The `/core` entry imports this and
           //                  nothing else, so a consumer with no React bundles no React.
           //   react-shared — the hook-free React modules both Boxes use (prop assembly, the
-          //                  element-mode resolve). Server-safe, so the `react-server` entry may
-          //                  import it, but it does name `react` — hence not part of `engine`.
+          //                  element-mode resolve) and the ones only a server-safe component
+          //                  reaches. Server-safe, so the `react-server` entry and those
+          //                  components may import it, but it does name `react` — hence not part
+          //                  of `engine`.
           //   client       — hooks, effects, the theme provider. Under the `react-server`
           //                  condition `react` exports no `useState` and no effects at all, so a
           //                  chunk naming them would not even resolve for a consumer bundling a

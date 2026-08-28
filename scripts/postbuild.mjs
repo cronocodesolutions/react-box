@@ -5,6 +5,7 @@
 import { spawnSync } from 'node:child_process';
 import { cpSync, mkdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
+import { CLIENT_ONLY_COMPONENTS, SERVER_SAFE_COMPONENTS } from './moduleGraph.mjs';
 
 // Ensure target directories exist (recursive = cross-platform `mkdir -p`).
 mkdirSync('dist/.claude/skills/cronocode-react-box', { recursive: true });
@@ -29,27 +30,69 @@ for (const [from, to] of copies) {
 // Node applies `--conditions=react-server` to `react` as well, and that build of React exports no
 // `useState` and no effects at all — so a chunk naming one fails to load right here, exactly as it
 // would fail in a consumer's build.
+// The same specifiers a consumer writes, so the `exports` map is exercised too — and for the
+// components that is the whole of the fix: their chunks import the package by name rather than
+// `../box.mjs`, so this resolution is what decides they get the hook-free Box instead of the
+// client one, whose `createContext` at import time is what used to fail the consumer's build.
+const specifiers = ['@cronocode/react-box', ...SERVER_SAFE_COMPONENTS.map((name) => `@cronocode/react-box/components/${name}`)];
+
 const loads = [
-  ['ESM', 'module', `const box = (await import('@cronocode/react-box')).default; assert(typeof box === 'function');`],
-  ['CJS', 'commonjs', `const box = require('@cronocode/react-box').default; assert(typeof box === 'function');`],
+  ['ESM', 'module', (specifier) => `assert(Object.keys(await import('${specifier}')).length > 0, '${specifier}');`],
+  ['CJS', 'commonjs', (specifier) => `assert(Object.keys(require('${specifier}')).length > 0, '${specifier}');`],
 ];
 
-for (const [format, inputType, code] of loads) {
-  const script = `const assert = (ok) => { if (!ok) throw new Error('the entry did not export a component'); };\n${code}`;
+for (const [format, inputType, statement] of loads) {
+  const script = [
+    `const assert = (ok, what) => { if (!ok) throw new Error(what + ' exported nothing'); };`,
+    ...specifiers.map(statement),
+  ].join('\n');
+
   const result = spawnSync(process.execPath, ['--conditions=react-server', `--input-type=${inputType}`, '-e', script], {
     cwd: 'dist',
     encoding: 'utf8',
   });
 
   if (result.status !== 0) {
-    console.error(`\n✖ the react-server entry does not load as ${format} — a client-only React API reached its chunk:\n`);
+    console.error(`\n✖ the react-server entry or a server-safe component does not load as ${format}:\n`);
     console.error(result.stderr?.trim());
     console.error('\nFix the chunk split in vite.config.ts (codeSplitting.groups). See CONTRIBUTING.md, "The core boundary".\n');
     process.exit(1);
   }
 }
 
-console.log('✔ dist loads under the react-server condition (ESM and CJS)');
+console.log(`✔ the entry and ${SERVER_SAFE_COMPONENTS.length} components load under the react-server condition (ESM and CJS)`);
+
+// The components that cannot render on a server say so in the one place a bundler looks. Without
+// the banner a Server Component importing `Dropdown` gets it compiled into the server graph, where
+// `useState` does not exist. With it, the bundler opens a client boundary instead. The inverse
+// matters just as much: a banner on a server-safe component would quietly undo the loads above,
+// putting a client runtime behind every `<H1>`.
+const DIRECTIVE = /^["']use client["'];/;
+
+const bannerViolations = [];
+
+for (const [names, wanted] of [
+  [CLIENT_ONLY_COMPONENTS, true],
+  [SERVER_SAFE_COMPONENTS, false],
+]) {
+  for (const name of names) {
+    for (const extension of ['mjs', 'cjs']) {
+      const file = `components/${name}.${extension}`;
+      const has = DIRECTIVE.test(readFileSync(join('dist', file), 'utf8'));
+
+      if (has !== wanted) bannerViolations.push(`${file} ${has ? 'has' : 'is missing'} the 'use client' banner`);
+    }
+  }
+}
+
+if (bannerViolations.length) {
+  console.error(`\n✖ the 'use client' banners are wrong:\n`);
+  for (const violation of bannerViolations) console.error(`  ${violation}`);
+  console.error('\nFix the component lists in scripts/moduleGraph.mjs. See CONTRIBUTING.md, "The core boundary".\n');
+  process.exit(1);
+}
+
+console.log(`✔ ${CLIENT_ONLY_COMPONENTS.length} client-only components carry a 'use client' banner; the server-safe ones do not`);
 
 // The other half of the boundary, on the built output this time. `npm run check:boundaries` proves
 // `src/core` names no React; this proves the bundler did not hand the framework-free entry a chunk

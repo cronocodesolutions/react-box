@@ -166,25 +166,34 @@ Five things enforce it, because one is not enough:
    come under the rule — they are outside `src/core/` but the engine imports them.
 3. **`scripts/check-rsc-boundary.mjs`**, run by the same command — the mirror image of the rule
    above: the `react-server` entry (`src/rsc.ts`) may import React, but nothing in its graph may
-   call a _client_ hook. See "Element mode and cascade layers".
-4. **`scripts/postbuild.mjs`** — the same two rules on the built output, which is where a bundler
-   can quietly undo them. It loads `dist` under `--conditions=react-server`, and it walks the
-   chunks `core.mjs`/`core.cjs` import and fails if any of them names `react`. Both have happened:
-   the chunk split was once derived from the `react-server` graph alone, so the theme runtime —
-   which no Box reaches — landed in the client chunk that `/core` then imported.
+   call a _client_ hook. See "Element mode and cascade layers". It checks the pre-built components
+   the same way, one list at a time (`SERVER_SAFE_COMPONENTS` / `CLIENT_ONLY_COMPONENTS` in
+   `scripts/moduleGraph.mjs`), and in both directions: a server-safe component that grows a hook
+   fails, and so does a client-only one that no longer needs its banner. A component in neither
+   list fails too — being in neither is how bug #43 shipped.
+4. **`scripts/postbuild.mjs`** — the same rules on the built output, which is where a bundler can
+   quietly undo them. It loads `dist` under `--conditions=react-server` — the main entry _and_
+   every server-safe component, by the specifier a consumer writes, so the `exports` map is part of
+   the test; it checks that the client-only components carry a `'use client'` banner and that the
+   server-safe ones do not; and it walks the chunks `core.mjs`/`core.cjs` import and fails if any
+   of them names `react`. All of it has been needed: the chunk split was once derived from the
+   `react-server` graph alone, so the theme runtime — which no Box reaches — landed in the client
+   chunk that `/core` then imported.
 5. **The two example apps**, both built by CI. `examples/vanilla` compiles the engine with no
    framework loaded at all (`npm run build:vanilla`); `examples/next-app` installs the packed
    tarball into a real Next.js App Router app, so a hook in the `react-server` graph — or an export
    condition that stopped resolving — fails `next build`, and `npm run smoke:next-app` then asserts
-   on the HTML that server actually serves.
+   on the HTML that server actually serves. Its `/components` route is a Server Component that
+   imports the pre-built components directly; `app/page.tsx` is the same claim for Box itself.
 
 The same command prints the adapter ratio published in the README:
 
 ```
 ✔ src/core and everything src/core.ts reaches are framework-free (19 files, 4687 lines, zero React references)
-  React binding: 11 files, 478 lines — 9.3% of core + binding
+  React binding: 12 files, 505 lines — 9.7% of core + binding
   React helper hooks: 3 files, 212 lines (shared by components, outside the binding)
 ✔ src/rsc.ts renders with no client hooks (22 modules in its graph)
+✔ 8 pre-built components render on a server; 6 are client-only and say so
 ```
 
 ### The chunk split
@@ -192,13 +201,41 @@ The same command prints the adapter ratio published in the README:
 `vite.config.ts` derives three shared chunks from those same two graph walks, so a new module
 cannot be classified one way by the checks and another by the bundler:
 
-| Chunk          | What is in it                                                     | Who imports it           |
-| -------------- | ----------------------------------------------------------------- | ------------------------ |
-| `engine`       | everything `src/core.ts` reaches — framework-free                 | every entry              |
-| `react-shared` | hook-free React modules (prop assembly, the element-mode resolve) | `box`, `rsc`, components |
-| `client`       | hooks, effects, the theme provider                                | `box`, components        |
+| Chunk          | What is in it                                                        | Who imports it                    |
+| -------------- | -------------------------------------------------------------------- | --------------------------------- |
+| `engine`       | everything `src/core.ts` reaches — framework-free                    | every entry                       |
+| `react-shared` | hook-free React modules, plus what only a server-safe component uses | `box`, `rsc`, components          |
+| `client`       | hooks, effects, the theme provider                                   | `box`, the client-only components |
 
-`core.mjs` imports `engine` and nothing else; `rsc.mjs` may not import `client`.
+`core.mjs` imports `engine` and nothing else; `rsc.mjs` may not import `client`, and neither may a
+server-safe component — which is why `serverSafeModules()`, not the `react-server` walk alone,
+decides what `react-shared` holds. (`StringUtils`, which only `semantics` reaches, is the module
+that made the difference.)
+
+### How a component reaches Box
+
+A published component chunk cannot import `../box.mjs`. A relative path bypasses the `exports`
+map, so the `react-server` condition never applies and a Server Component importing `Flex` was
+handed the _client_ Box — which calls `createContext` at import time, an export the server build
+of React does not have. `next build` died with `createContext is not a function`, naming neither
+the component nor the fix (bug #43).
+
+So the server-safe components import the package by its own name instead: `vite.config.ts` has a
+`resolveId` plugin (`box-self-reference`) that turns their `../box` edge into an external
+`@cronocode/react-box`. The consumer's bundler then resolves it under its own conditions, and the
+same `flex.mjs` gets the hook-free Box in a server graph and the client Box in a client one. The
+graph walk mirrors this: `componentGraph()` stops at `src/box.ts` and records the package name,
+because what lies beyond that edge is not ours to decide.
+
+The client-only components keep the relative path — their `'use client'` banner pins them to the
+client graph, where it is already correct. The banner is added at `renderChunk` rather than written
+in the source: a directive in a `.tsx` file makes rolldown, and every consumer's Rollup, warn about
+module-level directives on every build, and the sources are also what the demo site and the tests
+import, where the directive means nothing.
+
+If the client build ends up in a server graph anyway — a deep import, a bundler without the
+condition — `src/react/clientRuntime.ts` turns it into a sentence naming the cause and the fix,
+from the first client-only API the entry touches (`createContext`, in `themeContext.ts`).
 
 ### Where does my new code go?
 
@@ -530,7 +567,9 @@ whose pages are Server Components, depending on the **packed tarball** rather th
 published `exports` map is what chooses the Box its server graph gets. `npm run smoke:next-app`
 starts `next start` and asserts on the served HTML — the base element hoisted into `<head>`, a rule
 for every class in the markup, content-hashed class names, a Suspense boundary that streams its CSS
-along with its markup, and a client island whose styles are in the HTML too. That is where React's
+along with its markup, a client island whose styles are in the HTML too, and a `/components` route
+whose pre-built `Flex`, `Button`, `Textbox` and semantic tags were all rendered by the server. That
+is where React's
 own behaviour becomes visible: it merges every style element of one precedence group into a single
 `<style>` tag (listing what it merged in `data-href`) and streams post-shell styles as
 `<style media="not all">`, enabling them on the client.
@@ -1029,7 +1068,8 @@ dist/
 ├── ssg.mjs          # SSR support
 ├── ssg.cjs
 ├── ssg.d.ts
-├── components/      # Individual component chunks
+├── components/      # Individual component chunks. The hook-free ones import the package by
+│   │                #   name so a server graph resolves the RSC Box; the rest carry 'use client'
 │   ├── button.mjs
 │   ├── button.cjs
 │   ├── button.d.ts

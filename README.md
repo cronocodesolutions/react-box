@@ -192,18 +192,17 @@ instead of being injected by an effect. A server component just imports the pack
 
 ```tsx
 // app/page.tsx — a Server Component. No 'use client', no provider, no CSS import.
-import Box from '@cronocode/react-box';
+import Flex from '@cronocode/react-box/components/flex';
+import { H1, P } from '@cronocode/react-box/components/semantics';
 
 export default function Page() {
   return (
-    <Box p={6} bgColor="slate-50" borderRadius={2}>
-      <Box tag="h1" fontSize={24}>
-        Rendered on the server
-      </Box>
-      <Box tag="p" mt={2} color="slate-600" sm={{ fontSize: 16 }}>
+    <Flex d="column" gap={2} p={6} bgColor="slate-50" borderRadius={2}>
+      <H1 fontSize={24}>Rendered on the server</H1>
+      <P color="slate-600" sm={{ fontSize: 16 }}>
         Its CSS was hoisted into &lt;head&gt; by React, not inserted by a client runtime.
-      </Box>
-    </Box>
+      </P>
+    </Flex>
   );
 }
 ```
@@ -240,18 +239,25 @@ Notes and limits:
   needs state, storage and a media-query listener. Theme _styles_ are unaffected: a `theme` prop
   generates ancestor-scoped rules, so setting the theme class on `<html>` in a server component is
   enough.
-- **The pre-built components stay in client modules.** `Flex`, `Button`, `H1`, `Dropdown`,
-  `DataGrid` … are client components and the published chunks carry no `'use client'` directive, so
-  importing one _directly_ from a Server Component fails the build. Use `Box` with a `tag` prop in
-  server components, and import the components from your own `'use client'` modules.
+- **Most pre-built components render on the server too.** `Flex`, `Grid`, `Button`, `Textbox`,
+  `Textarea`, `RadioButton`, `BaseSvg` and the semantic tags (`H1`, `P`, `Link`, `Nav` …) are
+  hook-free wrappers around Box, and their published chunks import the package by name — so the
+  `react-server` condition reaches them and they resolve the same hook-free Box. Import them
+  straight into a Server Component.
+- **The stateful ones become client boundaries.** `Dropdown`, `Tooltip`, `DataGrid`, `Checkbox`,
+  `Select` and `Form` hold state or measure the DOM, so their chunks ship a `'use client'` banner.
+  A Server Component may still import one — the bundler opens the boundary for you — but it is
+  hydrated like any client component, and its CSS is in the server-rendered HTML only if a client
+  module of yours has already called `Box.configure({ sink: 'element' })`.
 - **React 19 only.** On React 18 the elements cannot be hoisted and render inline; keep the default
   sink there (a documented App Router fallback for React 18 is still to come).
 - **Cost:** one base element per page (the reset, `:root`, and the layer order — ~1.8 KB gzipped)
   plus one `<style>` element per distinct rule, deduped across every Box that uses it.
 
 A whole Next.js App Router app built this way — streamed Suspense boundary, client island, theme
-toggle and all — is in [`examples/next-app`](examples/next-app): `npm run build:next-app` and
-`npm run smoke:next-app`, which starts the production server and asserts on the HTML it serves.
+toggle, and a page of pre-built components rendered on the server — is in
+[`examples/next-app`](examples/next-app): `npm run build:next-app` and `npm run smoke:next-app`,
+which starts the production server and asserts on the HTML it serves.
 
 ## Using the core without React
 
@@ -334,8 +340,8 @@ React is a thin adapter on top of it:
 
 |                                                            | Files | Lines | Share    |
 | ---------------------------------------------------------- | ----- | ----- | -------- |
-| Core engine (`src/core/`, `core.ts`)                       | 19    | 4,687 | 90.7%    |
-| React binding (`src/react/`, `box.ts`, `rsc.ts`, `ssg.ts`) | 11    | 478   | **9.3%** |
+| Core engine (`src/core/`, `core.ts`)                       | 19    | 4,687 | 90.3%    |
+| React binding (`src/react/`, `box.ts`, `rsc.ts`, `ssg.ts`) | 12    | 505   | **9.7%** |
 
 The binding is the whole React-specific surface: resolve class names during render, flush the
 pending rules from `useInsertionEffect`, render the style elements of the Server-Component path,

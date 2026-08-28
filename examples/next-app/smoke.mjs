@@ -11,6 +11,7 @@ import { join } from 'node:path';
 const root = import.meta.dirname;
 const port = Number(process.env.PORT ?? 3010);
 const url = `http://127.0.0.1:${port}/`;
+const componentsUrl = `${url}components`;
 
 const results = [];
 
@@ -83,7 +84,7 @@ function stop(child) {
 
 // 1. The claim that needs no server: the pages this app renders are Server Components. Only a
 //    directive at the top of a file counts — two of them also *talk* about the directive.
-const serverFiles = ['app/layout.tsx', 'app/page.tsx', 'app/streamedSection.tsx'];
+const serverFiles = ['app/layout.tsx', 'app/page.tsx', 'app/streamedSection.tsx', 'app/components/page.tsx'];
 const clientDirectives = serverFiles.filter((file) => /^\s*(['"])use client\1/.test(readFileSync(join(root, file), 'utf8')));
 
 check(
@@ -102,10 +103,12 @@ server.stdout.on('data', (chunk) => (serverLog += chunk));
 server.stderr.on('data', (chunk) => (serverLog += chunk));
 
 let html = '';
+let componentsHtml = '';
 
 try {
   await waitForServer(server);
   html = await (await fetch(url)).text();
+  componentsHtml = await (await fetch(componentsUrl)).text();
 } catch (error) {
   stop(server);
   console.error(`\n✖ ${error.message}\n`);
@@ -178,6 +181,51 @@ check(
   'the server-rendered theme class selects real rules',
   /<html[^>]*class="dark"/.test(html) && /\.dark ?\._/.test(css),
   'class="dark" on <html>, with `.dark ._…` rules in the CSS',
+);
+
+// 10. The second page: the pre-built components, imported by a Server Component. Before the
+//     `exports` map reached them their chunks imported `../box.mjs` relatively, which handed the
+//     server graph the *client* Box and failed the build with `createContext is not a function`.
+//     So the first thing worth asserting is simply that the route rendered at all.
+const componentsCss = styleText(componentsHtml);
+const componentsClasses = generatedClasses(componentsHtml);
+
+check(
+  'a Server Component renders the pre-built components',
+  componentsHtml.includes('Server-rendered components') && componentsClasses.length > 0,
+  `${componentsClasses.length} generated classes in the response`,
+);
+
+// 11. And that they went down the same path Box did: their CSS is in the HTML, not waiting for a
+//     client runtime. That is what the package-name import buys — `Flex` resolved the same
+//     hook-free Box the page did, rather than a client one it would have had to hydrate.
+const serverRendered = [
+  ['Flex', /<div[^>]*class="([^"]*)"/],
+  ['Textbox', /<input[^>]*type="email"[^>]*class="([^"]*)"/],
+  ['Button', /<button[^>]*type="submit"[^>]*class="([^"]*)"/],
+  ['a semantic tag', /<h2[^>]*class="([^"]*)"/],
+];
+
+const unstyled = serverRendered.filter(([, pattern]) => {
+  const names = (componentsHtml.match(pattern)?.[1] ?? '').split(/\s+/).filter((name) => name.startsWith('_'));
+
+  return names.length === 0 || !names.every((name) => hasRuleFor(componentsCss, name));
+});
+
+check(
+  'their markup and their CSS are both server-rendered',
+  unstyled.length === 0,
+  unstyled.length ? `no rules for: ${unstyled.map(([name]) => name).join(', ')}` : `${serverRendered.length} components checked`,
+);
+
+// 12. The other half of the fix: a component that genuinely needs a client runtime carries a
+//     `'use client'` banner, so importing it from a Server Component opens a boundary instead of
+//     compiling `useRef` into the server graph. Its markup is server-rendered like any client
+//     component's; its rules arrive with the client bundle, which is why they are not asserted.
+check(
+  'a client-only component can be imported by a Server Component',
+  /<input[^>]*type="checkbox"/.test(componentsHtml),
+  'Checkbox rendered from a page with no directive of its own',
 );
 
 const failed = results.filter((result) => !result.ok);
