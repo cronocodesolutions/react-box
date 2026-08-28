@@ -2,7 +2,7 @@ import fs from 'fs';
 import path from 'path';
 import dts from 'vite-plugin-dts';
 import { defineConfig } from 'vitest/config';
-import { rscGraph } from './scripts/rscGraph.mjs';
+import { coreGraph, rscGraph } from './scripts/moduleGraph.mjs';
 
 const files = fs
   .readdirSync(path.resolve(import.meta.dirname, './src/components'))
@@ -17,6 +17,8 @@ const componentsEntry = files.reduce((acc, fileName) => {
 
 const entry = {
   box: path.resolve(import.meta.dirname, './src/box.ts'),
+  // The engine on its own, for consumers with no React at all — see src/core.ts.
+  core: path.resolve(import.meta.dirname, './src/core.ts'),
   // The `react-server` condition of the main entry: the hook-free Box a Server Component gets.
   rsc: path.resolve(import.meta.dirname, './src/rsc.ts'),
   ssg: path.resolve(import.meta.dirname, './src/ssg.ts'),
@@ -28,12 +30,11 @@ const extensions = {
   cjs: 'cjs',
 };
 
-// The chunk split is derived from the `react-server` entry's own module graph — the same walk
-// `npm run check:boundaries` uses. Whatever `src/rsc.ts` reaches goes into the chunk it imports;
-// everything else React-facing (the flush effect, the theme provider, the shared hooks) goes into a
-// client chunk it does not. Under the `react-server` condition `react` exports no `useState` and no
-// effects at all, so a shared chunk that named them would not even resolve for a consumer bundling
-// a Server Component — and deriving the split means a new hook-free module cannot be forgotten.
+// The chunk split is derived from what the entries actually reach — the same walks
+// `npm run check:boundaries` uses, so a new module cannot be forgotten by one and not the other.
+// `src/core.ts` reaches only framework-free modules; `src/rsc.ts` reaches those plus the hook-free
+// React ones; everything else (the flush effect, the theme provider, the shared hooks) is client.
+const frameworkFree = new Set(coreGraph().modules.keys());
 const serverSafe = new Set(rscGraph().modules.keys());
 
 let currentFormat;
@@ -59,11 +60,17 @@ export default defineConfig(({ mode }) => {
         output: {
           exports: 'named',
           // Rolldown ignores `manualChunks` (it is Rollup's option), so the split is declared here.
-          // The one split that matters: the client binding — hooks, effects, the theme provider —
-          // must stay out of the chunk the `react-server` entry imports. Under that condition
-          // `react` exports no `useState` and no effects at all, so a shared chunk naming them
-          // fails to resolve for a consumer bundling a Server Component. Everything else is left to
-          // rolldown, which already gives each component entry its own chunk.
+          // Three groups, each answering a constraint an entry has:
+          //   engine       — src/core/**, framework-free. The `/core` entry imports this and
+          //                  nothing else, so a consumer with no React bundles no React.
+          //   react-shared — the hook-free React modules both Boxes use (prop assembly, the
+          //                  element-mode resolve). Server-safe, so the `react-server` entry may
+          //                  import it, but it does name `react` — hence not part of `engine`.
+          //   client       — hooks, effects, the theme provider. Under the `react-server`
+          //                  condition `react` exports no `useState` and no effects at all, so a
+          //                  chunk naming them would not even resolve for a consumer bundling a
+          //                  Server Component. Nothing `src/rsc.ts` reaches may land here.
+          // Everything else is left to rolldown, which already gives each component its own chunk.
           codeSplitting: {
             // Each module lands where the group says and nowhere else; without this a group also
             // swallows everything its modules import, which is how the core engine ended up inside
@@ -77,11 +84,15 @@ export default defineConfig(({ mode }) => {
 
                   // Entry modules stay their own chunks — grouping them would drag one entry's
                   // imports (`react-dom/server`, say) into every other entry that shares the group.
-                  if (!source.includes('/src/') || /^src\/(box|rsc|ssg)\.ts$/.test(module)) return null;
+                  if (!source.includes('/src/') || /^src\/(box|core|rsc|ssg)\.ts$/.test(module)) return null;
                   // Component entries keep the chunks rolldown gives them, one per component.
                   if (module.startsWith('src/components/')) return null;
 
-                  return serverSafe.has(module) ? 'core' : 'client';
+                  // 'engine', not 'core': `core` is an entry name now (src/core.ts), and a chunk
+                  // sharing it would fight the entry for `core.mjs`.
+                  if (frameworkFree.has(module)) return 'engine';
+
+                  return serverSafe.has(module) ? 'react-shared' : 'client';
                 },
               },
             ],
@@ -99,7 +110,7 @@ export default defineConfig(({ mode }) => {
         // The engine and its React binding are what every other roadmap item builds on, so they
         // are the only things under a budget. Components — and the helper hooks they share — are
         // covered by their own tests without a number attached.
-        include: ['src/core/**', 'src/react/**'],
+        include: ['src/core.ts', 'src/core/**', 'src/react/**'],
         exclude: ['src/react/hooks/**'],
         reporter: ['text', 'json-summary'],
         thresholds: {

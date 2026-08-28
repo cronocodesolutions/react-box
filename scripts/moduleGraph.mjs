@@ -1,21 +1,27 @@
-// The module graph of the React Server Components entry, and the React APIs it may not reach.
+// What an entry module actually reaches, by walking its imports — and the React APIs some entries
+// may not reach at all. Two entries are checked and chunked by this walk:
 //
-// `src/rsc.ts` is what the `react-server` export condition resolves to: the Box a Server Component
-// gets when it imports the package. It renders with no hook, no effect and no DOM — its CSS leaves
-// as `<style href precedence>` elements instead.
+//   `src/core.ts` — the framework-free engine (`@cronocode/react-box/core`). It must reach no
+//   React whatsoever, and its graph is what the `engine` chunk is built from, so a consumer with
+//   no framework bundles none. A directory rule would not do: the engine reaches `src/utils/**`
+//   and `src/types.ts`, which sit outside `src/core/` and were landing in a React chunk.
 //
-// Two consumers share this walk, and they need the same answer:
-//   - `check-rsc-boundary.mjs` fails the build if any module in the graph calls a client hook.
-//   - `vite.config.ts` puts exactly these modules in the chunk the entry imports, so the built
-//     `rsc.mjs` cannot reach a client hook either. Under the `react-server` condition `react`
-//     exports no `useState` and no effects at all, so a shared chunk that names them does not even
-//     resolve for a consumer bundling a Server Component.
+//   `src/rsc.ts` — what the `react-server` export condition resolves to: the Box a Server
+//   Component gets. It renders with no hook, no effect and no DOM, its CSS leaving as
+//   `<style href precedence>` elements. Under that condition `react` exports no `useState` and no
+//   effects at all, so a chunk naming them would not even resolve for a consumer bundling a
+//   Server Component.
+//
+// The checks (`check-core-boundary.mjs`, `check-rsc-boundary.mjs`) and the chunk split in
+// `vite.config.ts` share the walk so they cannot disagree about what an entry reaches.
 import { existsSync, readFileSync, statSync } from 'node:fs';
 import { dirname, join, relative, resolve } from 'node:path';
 
 const root = join(import.meta.dirname, '..');
 
 export const RSC_ENTRY = 'src/rsc.ts';
+
+export const CORE_ENTRY = 'src/core.ts';
 
 // Hooks and APIs React's server renderer has no dispatcher for. `useMemo`, `useCallback`, `useId`,
 // `useDebugValue` and `use` are the ones it does support, so they are deliberately absent here.
@@ -59,15 +65,15 @@ function resolveSpecifier(fromFile, specifier) {
 }
 
 /**
- * Walk the entry's imports. Returns every module it reaches — repo-relative POSIX paths, mapped to
+ * Walk an entry's imports. Returns every module it reaches — repo-relative POSIX paths, mapped to
  * their comment-free source — plus the bare specifiers it pulls in and anything that would not
  * resolve.
  */
-export function rscGraph() {
+export function moduleGraph(entry) {
   const modules = new Map();
   const bare = [];
   const unresolved = [];
-  const queue = [RSC_ENTRY];
+  const queue = [entry];
 
   while (queue.length) {
     const path = queue.shift();
@@ -89,4 +95,14 @@ export function rscGraph() {
   }
 
   return { modules, bare, unresolved };
+}
+
+/** The `react-server` entry's graph. */
+export function rscGraph() {
+  return moduleGraph(RSC_ENTRY);
+}
+
+/** The framework-free entry's graph. */
+export function coreGraph() {
+  return moduleGraph(CORE_ENTRY);
 }

@@ -4,3 +4,4 @@ dist
 .claude/plans
 .claude/settings.local.json
 coverage
+examples/vanilla/dist

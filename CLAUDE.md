@@ -8,18 +8,19 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Commands
 
-| Command                                    | Purpose                                                                                                  |
-| ------------------------------------------ | -------------------------------------------------------------------------------------------------------- |
-| `npm run dev`                              | Start Vite dev server for the demo pages                                                                 |
-| `npm run build`                            | Build library (ESM + CJS output to dist/)                                                                |
-| `npm run build:dev`                        | Build library without minification                                                                       |
-| `npm run compile`                          | TypeScript type check (no emit)                                                                          |
-| `npm test`                                 | Run all tests (Vitest)                                                                                   |
-| `npm run test:coverage`                    | Run all tests and enforce the coverage budget on `src/core/`                                             |
-| `npm run test:watch`                       | Run tests in watch mode                                                                                  |
-| `npx vitest run src/path/to/file.test.tsx` | Run a single test file                                                                                   |
-| `npm run lint`                             | ESLint check                                                                                             |
-| `npm run check:boundaries`                 | Fail if `src/core/` imports React or the RSC entry reaches a client hook (also prints the adapter ratio) |
+| Command                                    | Purpose                                                                                                      |
+| ------------------------------------------ | ------------------------------------------------------------------------------------------------------------ |
+| `npm run dev`                              | Start Vite dev server for the demo pages                                                                     |
+| `npm run dev:vanilla`                      | Start the framework-free example (`examples/vanilla`) — the core engine with no React                        |
+| `npm run build`                            | Build library (ESM + CJS output to dist/)                                                                    |
+| `npm run build:dev`                        | Build library without minification                                                                           |
+| `npm run compile`                          | TypeScript type check (no emit)                                                                              |
+| `npm test`                                 | Run all tests (Vitest)                                                                                       |
+| `npm run test:coverage`                    | Run all tests and enforce the coverage budget on `src/core/`                                                 |
+| `npm run test:watch`                       | Run tests in watch mode                                                                                      |
+| `npx vitest run src/path/to/file.test.tsx` | Run a single test file                                                                                       |
+| `npm run lint`                             | ESLint check                                                                                                 |
+| `npm run check:boundaries`                 | Fail if the core engine imports React or the RSC entry reaches a client hook (also prints the adapter ratio) |
 
 Node version: v24 (pinned in .nvmrc).
 
@@ -31,6 +32,7 @@ Node version: v24 (pinned in .nvmrc).
 
 - `src/box.ts` — Main Box component (memoized, forwardRef, polymorphic via `tag` prop)
 - `src/rsc.ts` — The `react-server` build of Box: same props, no hook, no effect, no DOM. Element mode is switched on when it loads, so a Server Component needs no configuration. Enforced by `scripts/check-rsc-boundary.mjs`
+- `src/core.ts` — The engine with no React at all (`@cronocode/react-box/core`): `createStyleEngine()`, `engine.classNames(props)`, `createThemeController()`. `examples/vanilla` is a whole page built on it. Both the sources it reaches and the chunks it imports are checked for React
 - `src/core/boxStyles.ts` — All CSS property definitions (~144 props). Types auto-generate from these definitions
 - `src/core/boxStylesFormatters.ts` — Value formatters that convert prop values to CSS (rem, px, fractions, etc.)
 - `src/core/engine/styleEngine.ts` — `createStyleEngine()`: all engine state (class-name cache, rule registry, identity factory, variables, prop and component registries) on an instance; generates class names and rules
@@ -64,6 +66,7 @@ Different props have different dividers — this is the #1 source of bugs:
 ### Theme System
 
 - `src/core/theme/themeRuntime.ts` — The framework-free half: reads/watches `prefers-color-scheme`, persists the choice, writes the theme class + `data-theme` onto an element
+- `src/core/theme/themeController.ts` — The provider's state machine (explicit > stored > system, followed live) as a plain object, for consumers with no React
 - `src/react/theme/theme.tsx` — `Box.Theme` provider component (auto-detects system preference, supports `use="global"|"local"`); React state and context over `themeRuntime`
 - Theme styles generate ancestor-scoped selectors (`.dark .className`)
 - Themes nest with pseudo-classes: `theme={{ dark: { hover: { ... } } }}`

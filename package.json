@@ -22,6 +22,11 @@
       "import": "./rsc.mjs",
       "require": "./rsc.cjs"
     },
+    "./core": {
+      "types": "./core.d.ts",
+      "import": "./core.mjs",
+      "require": "./core.cjs"
+    },
     "./ssg": {
       "types": "./ssg.d.ts",
       "import": "./ssg.mjs",
@@ -38,6 +43,8 @@
   },
   "scripts": {
     "dev": "vite ./pages --config ./pages.vite.config.ts --mode dev",
+    "dev:vanilla": "vite ./examples/vanilla --config ./examples/vanilla/vite.config.ts",
+    "build:vanilla": "vite build ./examples/vanilla --config ./examples/vanilla/vite.config.ts",
     "build:pages": "vite build ./pages --config ./pages.vite.config.ts --outDir ../dist --mode production",
     "postbuild:pages": "node -e \"require('fs').copyFileSync('dist/index.html','dist/404.html')\"",
     "preview": "vite preview",
@@ -73,6 +80,12 @@
       ],
       "gzip": true,
       "limit": "15 KB"
+    },
+    {
+      "name": "Core engine (no React)",
+      "path": "dist/core.mjs",
+      "gzip": true,
+      "limit": "14 KB"
     },
     {
       "name": "DataGrid",
