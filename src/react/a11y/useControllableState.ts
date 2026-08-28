@@ -1,5 +1,5 @@
 import { useCallback, useState } from 'react';
-import { useEventCallback, useLatest } from './effects';
+import { useEventCallback, useLatest } from './callbacks';
 
 /**
  * Why a change happened, and the event that caused it.

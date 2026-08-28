@@ -1,9 +1,10 @@
-import { useEventCallback, useIsomorphicLayoutEffect, useLatest } from './effects';
+import { ElementLike, elementOf, isEventInside } from '../../utils/dom/domUtils';
+import { useIsomorphicLayoutEffect } from '../effects';
+import { useEventCallback, useLatest } from './callbacks';
 
 export type DismissReason = 'escape' | 'outside-pointer';
 
-/** A ref or the element itself — whichever the caller happens to be holding. */
-export type ElementLike = React.RefObject<Element | null> | Element | null | undefined;
+export type { ElementLike };
 
 export interface DismissOptions {
   /** Usually the open state: listeners exist only while this is true. */
@@ -36,12 +37,6 @@ interface Layer {
  */
 const layers: Layer[] = [];
 
-function elementOf(value: ElementLike): Element | null {
-  if (!value) return null;
-
-  return 'current' in value ? value.current : value;
-}
-
 /** Whether any element of `outer` contains any element of `inner`. */
 function wraps(outer: Layer, inner: Layer): boolean {
   const inside = inner.elements();
@@ -63,18 +58,6 @@ function innermost(): Layer | undefined {
   const candidates = layers.filter((layer) => !layers.some((other) => other !== layer && wraps(layer, other)));
 
   return candidates[candidates.length - 1];
-}
-
-/** Whether an event happened inside one of the given elements, shadow DOM included. */
-function isInside(event: Event, elements: ReadonlyArray<ElementLike>): boolean {
-  const path = typeof event.composedPath === 'function' ? event.composedPath() : [];
-
-  return elements.some((value) => {
-    const element = elementOf(value);
-    if (!element) return false;
-
-    return path.includes(element) || (event.target instanceof Node && element.contains(event.target));
-  });
 }
 
 /**
@@ -101,7 +84,7 @@ export default function useDismiss(options: DismissOptions): void {
     if (!enabled) return;
 
     const layer: Layer = {
-      elements: () => (insideRef.current ?? []).map(elementOf).filter((element): element is Element => element !== null),
+      elements: () => (insideRef.current ?? []).map((value) => elementOf(value)).filter((element): element is Element => element !== null),
     };
     layers.push(layer);
 
@@ -122,7 +105,7 @@ export default function useDismiss(options: DismissOptions): void {
 
     if (outsidePointer) {
       listen('pointerdown', (event) => {
-        if (isInside(event, insideRef.current ?? [])) return;
+        if (isEventInside(event, insideRef.current ?? [])) return;
 
         dismiss('outside-pointer', event);
       });

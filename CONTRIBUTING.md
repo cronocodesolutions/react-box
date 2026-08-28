@@ -82,6 +82,7 @@ react-box/
 │   │
 │   ├── react/                    # The React adapter — everything React-specific
 │   │   ├── useStyles.ts          # The binding: class names in render, flush in an effect
+│   │   ├── effects.ts            # Which effect runs where (insertion/layout/passive)
 │   │   ├── resolveStyles.ts      # The same resolution with no hook (what src/rsc.ts renders with)
 │   │   ├── styleElements.ts      # Descriptors → <style href precedence> elements (React 19)
 │   │   ├── boxProps.ts           # The prop shape both Box builds share
@@ -103,7 +104,7 @@ react-box/
 │   │       ├── useFocusReturn.ts # Focus back to the invoker when a layer closes
 │   │       ├── useRovingFocus.ts # Arrow keys, Home/End, typeahead; DOM or virtual focus
 │   │       ├── useIdentifier.ts  # Stable ids for aria-labelledby/-controls wiring
-│   │       └── effects.ts        # Isomorphic layout effect, latest-value helpers
+│   │       └── callbacks.ts      # Stable handler identity (useLatest, useEventCallback)
 │   │
 │   ├── components/               # Pre-built components
 │   │   ├── button.tsx
@@ -124,6 +125,8 @@ react-box/
 │   ├── icons/                    # SVG icon components
 │   │
 │   └── utils/                    # Utility functions
+│       ├── environment/          # Is there a DOM, and what may I touch? (framework-free)
+│       ├── dom/                  # Ref/element unwrapping, "did this event happen inside that"
 │       ├── box/boxUtils.ts
 │       ├── object/objectUtils.ts
 │       ├── form/
@@ -199,10 +202,10 @@ Five things enforce it, because one is not enough:
 The same command prints the adapter ratio published in the README:
 
 ```
-✔ src/core and everything src/core.ts reaches are framework-free (19 files, 4694 lines, zero React references)
-  React binding: 12 files, 505 lines — 9.7% of core + binding
-  React feature hooks: 9 files, 727 lines (shared by components, outside the binding)
-✔ src/rsc.ts renders with no client hooks (22 modules in its graph)
+✔ src/core and everything src/core.ts reaches are framework-free (20 files, 4738 lines, zero React references)
+  React binding: 13 files, 524 lines — 10.0% of core + binding
+  React feature hooks: 9 files, 697 lines (shared by components, outside the binding)
+✔ src/rsc.ts renders with no client hooks (23 modules in its graph)
 ✔ 9 pre-built components render on a server; 6 are client-only and say so
 ```
 
@@ -211,17 +214,28 @@ The same command prints the adapter ratio published in the README:
 `vite.config.ts` derives three shared chunks from those same two graph walks, so a new module
 cannot be classified one way by the checks and another by the bundler:
 
-| Chunk          | What is in it                                                        | Who imports it                               |
-| -------------- | -------------------------------------------------------------------- | -------------------------------------------- |
-| `engine`       | everything `src/core.ts` reaches — framework-free                    | every entry                                  |
-| `react-shared` | hook-free React modules, plus what only a server-safe component uses | `box`, `rsc`, components                     |
-| `behavior`     | `src/react/a11y/**` — the primitives, React and nothing else         | `a11y`, and the components A3+ build on them |
-| `client`       | hooks, effects, the theme provider                                   | `box`, the client-only components            |
+| Chunk          | What is in it                                                                                          | Who imports it                               |
+| -------------- | ------------------------------------------------------------------------------------------------------ | -------------------------------------------- |
+| `engine`       | everything `src/core.ts` reaches — framework-free                                                      | every entry                                  |
+| `react-shared` | hook-free React modules, plus what only a server-safe component uses                                   | `box`, `rsc`, components                     |
+| `behavior`     | `src/react/a11y/**` — the primitives, React and nothing else                                           | `a11y`, and the components A3+ build on them |
+| `platform`     | `src/utils/environment/**`, `src/utils/dom/**` — is there a DOM, and did this event happen inside that | every group, engine included                 |
+| `effects`      | `src/react/effects.ts` — which effect to use in this environment                                       | `client`, `behavior`                         |
+| `client`       | hooks, effects, the theme provider                                                                     | `box`, the client-only components            |
 
 `core.mjs` imports `engine` and nothing else; `rsc.mjs` may not import `client`, and neither may a
 server-safe component — which is why `serverSafeModules()`, not the `react-server` walk alone,
 decides what `react-shared` holds. (`StringUtils`, which only `semantics` reaches, is the module
 that made the difference.)
+
+`platform` and `effects` are the leaves everything else shares: the environment guards
+("is there a `document`?"), the DOM containment check behind every click-outside, and the choice
+between an insertion, layout and passive effect. A module lives in exactly one chunk, so leaving
+them to fall where they would — `platform` is framework-free, so `engine`; `effects` names React,
+so `client` — would mean `behavior` importing the whole engine to ask whether there is a document.
+They are split for the same reason `behavior` is, one level down. `platform` must stay React-free
+(the `/core` entry reaches it), which is why the effect helpers cannot share its chunk. The cost is
+visible and small: two extra chunk boundaries put ~0.2 KB gz back onto the main entry.
 
 `behavior` is a group for a different reason — not correctness but weight. The primitives are
 client code and were correct inside `client`, but that made `@cronocode/react-box/a11y` import the
@@ -1102,6 +1116,10 @@ dist/
 ├── a11y.d.ts
 ├── behavior.mjs     # Their shared chunk — React and nothing else, no engine
 ├── behavior.cjs
+├── platform.mjs     # DOM guards and containment checks — framework-free, shared by every chunk
+├── platform.cjs
+├── effects.mjs      # Which React effect runs where — shared by the binding and the primitives
+├── effects.cjs
 ├── core.mjs         # Engine chunk — no client hook reaches it, so rsc.mjs can import it
 ├── core.cjs
 ├── client.mjs       # The client binding: flush effect, theme provider, shared hooks

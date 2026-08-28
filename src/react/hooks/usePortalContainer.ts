@@ -1,4 +1,5 @@
 import { useLayoutEffect, useMemo } from 'react';
+import { documentOrNull } from '../../utils/environment/environmentUtils';
 import Theme from '../theme/theme';
 
 // Reference counts for theme classes, scoped to the portal container they apply to. Keyed by
@@ -24,10 +25,11 @@ export default function usePortalContainer() {
     // Runs during render, so it has to survive a server render: no document, no container, and
     // the caller renders no portal. (This used to work only because `ssg` installed a fake
     // `document` whose `getElementById` answered every id with its own style element.)
-    if (typeof document === 'undefined') return null;
+    const doc = documentOrNull();
+    if (!doc) return null;
 
     const elId = 'crono-box';
-    let container = document.getElementById(elId);
+    let container = doc.getElementById(elId);
 
     if (!container) {
       container = document.createElement('div');

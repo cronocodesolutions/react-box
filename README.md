@@ -369,17 +369,17 @@ runtime — lives in `src/core/` and imports no React at all. CI fails the build
 
 React is a thin adapter on top of it:
 
-|                                                            | Files | Lines | Share    |
-| ---------------------------------------------------------- | ----- | ----- | -------- |
-| Core engine (`src/core/`, `core.ts`)                       | 19    | 4,694 | 90.3%    |
-| React binding (`src/react/`, `box.ts`, `rsc.ts`, `ssg.ts`) | 12    | 505   | **9.7%** |
+|                                                            | Files | Lines | Share     |
+| ---------------------------------------------------------- | ----- | ----- | --------- |
+| Core engine (`src/core/`, `core.ts`)                       | 20    | 4,738 | 90.0%     |
+| React binding (`src/react/`, `box.ts`, `rsc.ts`, `ssg.ts`) | 13    | 524   | **10.0%** |
 
 The binding is the whole React-specific surface: resolve class names during render, flush the
 pending rules from `useInsertionEffect`, render the style elements of the Server-Component path,
 and hold the theme state. React feature code the components share sits alongside it and is counted
 separately — three helper hooks (`useVisibility`, `usePortalContainer`, `useVirtualization`) and
-the six modules behind [`@cronocode/react-box/a11y`](#behaviour-primitives-for-your-own-components),
-727 lines together. A Vue adapter would need its own arrow-key navigation for the same reason it
+the modules behind [`@cronocode/react-box/a11y`](#behaviour-primitives-for-your-own-components),
+697 lines together. A Vue adapter would need its own arrow-key navigation for the same reason it
 would need its own components, which says nothing about how much of the styling engine is
 React-specific.
 

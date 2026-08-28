@@ -10,8 +10,8 @@ import { useControllableState, useDismiss, useFocusReturn, useIdentifier, useRov
 import VisuallyHidden from '@cronocode/react-box/components/visuallyHidden';
 ```
 
-2.2 KB gzipped for the whole entry, and it pulls in no styling engine: the hooks reach nothing but
-React. They are client hooks — the entry carries a `'use client'` banner, so importing it from a
+2.2 KB gzipped for the whole entry, and it pulls in no styling engine: the hooks reach React, two
+leaf modules of DOM helpers, and each other. They are client hooks — the entry carries a `'use client'` banner, so importing it from a
 Server Component opens a client boundary. `VisuallyHidden` is a component and ships separately,
 where it can still render on a server.
 

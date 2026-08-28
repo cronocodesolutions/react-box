@@ -1,22 +1,14 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import React, { useEffect, useLayoutEffect } from 'react';
 import getDefaultEngine from '../core/engine/defaultEngine';
 import { StylesConfiguration } from '../core/engine/styleEngine';
 import { BoxStyleProps } from '../types';
+import { useIsomorphicInsertionEffect } from './effects';
 import resolveStyles, { ResolvedBoxStyles } from './resolveStyles';
 import styleElementsOf from './styleElements';
 
-const isBrowser = typeof window !== 'undefined' && typeof window.document !== 'undefined';
-
-// React's own recommendation for injecting CSS-in-JS rules. Insertion effects run during the
-// commit, ahead of *every* layout effect in it, so a component that measures its DOM in
-// `useLayoutEffect` already sees the styles — with a layout-effect flush it saw them only if the
-// Box happened to commit earlier in the tree. Added in React 18, and the peer range starts at
-// 16.14, so fall back to a layout effect there. Off the browser no flush effect can help: nothing
-// paints and `getStyles()` flushes for itself (see `ssg.ts`), so `useEffect` keeps React quiet.
-const useInsertionEffect: typeof useLayoutEffect =
-  (React as { useInsertionEffect?: typeof useLayoutEffect }).useInsertionEffect ?? useLayoutEffect;
-const useFlushEffect = isBrowser ? useInsertionEffect : useEffect;
+// React's own recommendation for injecting CSS-in-JS rules — see `useIsomorphicInsertionEffect`
+// for why an insertion effect rather than a layout one, and what happens off the browser.
+const useFlushEffect = useIsomorphicInsertionEffect;
 
 export type { StylesConfiguration };
 
