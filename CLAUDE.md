@@ -18,6 +18,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 | `npm test`                                 | Run all tests (Vitest)                                                                                       |
 | `npm run test:coverage`                    | Run all tests and enforce the coverage budget on `src/core/`                                                 |
 | `npm run test:watch`                       | Run tests in watch mode                                                                                      |
+| `npm run test:a11y`                        | Run the axe sweep and the APG keyboard tests only                                                            |
 | `npx vitest run src/path/to/file.test.tsx` | Run a single test file                                                                                       |
 | `npm run lint`                             | ESLint check                                                                                                 |
 | `npm run check:boundaries`                 | Fail if the core engine imports React or the RSC entry reaches a client hook (also prints the adapter ratio) |
@@ -96,6 +97,7 @@ Pre-built components wrap Box with the correct HTML tag. Each is a separate entr
 - **HTML attributes go in `props` prop** — `<Link props={{ href: '/about' }}>` not `<Link href="/about">`
 - **`src/core/` is framework-free** — no `react` import, no JSX, not even a `React.*` global type. New React code goes in `src/react/`
 - Tests are colocated with source files (`*.test.tsx` next to `*.tsx`)
+- Accessibility tests: `src/components/a11y.test.tsx` sweeps every component with axe against the fixtures in `dev/a11y/fixtures.tsx`, whose `knownViolations` ledger fails both on a new violation and on a listed one that stopped firing; `*.a11y.test.tsx` files hold the APG keyboard map, driven by `dev/a11y/keyboard.ts`. See `docs/a11y-testing.md`
 - Engine-level tests build their own isolated engine via `dev/engineHarness.ts` (readable class names + `textContent` sink) instead of the default instance, so they can assert exact rule text without interfering with each other
 - One component per file, PascalCase component names, camelCase prop names
 - Prettier: 140 char width, single quotes, trailing commas

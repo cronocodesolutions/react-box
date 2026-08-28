@@ -1014,7 +1014,8 @@ This enables autocomplete for:
 
 - **Framework**: Vitest
 - **DOM**: happy-dom
-- **Utils**: @testing-library/react
+- **Utils**: @testing-library/react, @testing-library/user-event (real focus movement), jest-dom
+  matchers (registered globally in `dev/vitest.setup.ts`), axe-core
 
 ### Example Test
 
@@ -1046,6 +1047,22 @@ npm test
 # With coverage
 npm test -- --coverage
 ```
+
+### Accessibility tests
+
+Two things run on every push, both inside `npm test`:
+
+- **`src/components/a11y.test.tsx`** — every component, rendered as its docs show it
+  (`dev/a11y/fixtures.tsx`), put through axe. A rule that fires and is not in that fixture's
+  `knownViolations` fails the build; so does a listed rule that has stopped firing, so the ledger
+  has to shrink as the accessibility work lands rather than quietly growing.
+- **`*.a11y.test.tsx`** — the APG keyboard map as tests, driven with a real keyboard
+  (`dev/a11y/keyboard.ts`), because "where does focus go" is most of what the spec says and no
+  static check can see it. `checkbox.a11y.test.tsx` and `tooltip.a11y.test.tsx` are the templates.
+
+**axe cannot see semantics that are missing** — a listbox of bare `<div>`s looks clean to it — so a
+green sweep is a floor, not a claim that a pattern is implemented. What is covered, what is not, and
+the manual screen-reader matrix are in [docs/a11y-testing.md](docs/a11y-testing.md).
 
 ---
 
