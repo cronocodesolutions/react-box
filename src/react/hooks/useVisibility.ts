@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { isEventInside } from '../../utils/dom/domUtils';
 
 interface Props<T extends HTMLElement = HTMLDivElement> {
   node?: T | null;
@@ -17,26 +18,17 @@ export default function useVisibility<T extends HTMLElement = HTMLDivElement>(
   const visibilityRef = useRef<T>(null);
 
   useEffect(() => {
-    function clickHandler(e: MouseEvent) {
+    /** A click or a scroll that happened outside the tracked element hides it; one inside does not. */
+    function hideIfOutside(e: Event) {
       const el = node ?? visibilityRef.current;
-      const shouldHide = el ? !e.composedPath().includes(el) : false;
 
-      if (shouldHide) {
+      if (el && !isEventInside(e, [el])) {
         setVisibility(false);
       }
     }
 
     function resizeHandler() {
       setVisibility(false);
-    }
-
-    function scrollHandler(e: Event) {
-      const el = node ?? visibilityRef.current;
-      const shouldHide = el ? !e.composedPath().includes(el) : false;
-
-      if (shouldHide) {
-        setVisibility(false);
-      }
     }
 
     function hideVisibilityKeyboardHandler(e: KeyboardEvent) {
@@ -46,11 +38,11 @@ export default function useVisibility<T extends HTMLElement = HTMLDivElement>(
     const controller = new AbortController();
 
     if (isVisible) {
-      window.addEventListener(event, clickHandler, controller);
+      window.addEventListener(event, hideIfOutside, controller);
 
       hideOnEscape && window.addEventListener('keydown', hideVisibilityKeyboardHandler, controller);
       hideOnResize && window.addEventListener('resize', resizeHandler, controller);
-      hideOnScroll && window.addEventListener('scroll', scrollHandler, { signal: controller.signal, capture: true });
+      hideOnScroll && window.addEventListener('scroll', hideIfOutside, { signal: controller.signal, capture: true });
     }
 
     return () => {

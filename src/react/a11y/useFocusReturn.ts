@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
-import { useEventCallback } from './effects';
-import { ElementLike } from './useDismiss';
+import { ElementLike, htmlElementOf } from '../../utils/dom/domUtils';
+import { documentOrNull } from '../../utils/environment/environmentUtils';
+import { useEventCallback } from './callbacks';
 
 export interface FocusReturnOptions {
   /** Usually the open state. The invoker is remembered the moment this becomes true. */
@@ -11,19 +12,11 @@ export interface FocusReturnOptions {
   preventScroll?: boolean;
 }
 
-function elementOf(value: ElementLike): HTMLElement | null {
-  const element = !value ? null : 'current' in value ? value.current : value;
-
-  return element instanceof HTMLElement ? element : null;
-}
-
 /** Whatever holds focus right now, or null when that is the body — or when there is no document. */
 function focused(): HTMLElement | null {
-  if (typeof document === 'undefined') return null;
+  const activeElement = documentOrNull()?.activeElement;
 
-  const active = document.activeElement;
-
-  return active && active !== document.body ? (active as HTMLElement) : null;
+  return activeElement && activeElement !== document.body ? (activeElement as HTMLElement) : null;
 }
 
 /**
@@ -53,7 +46,7 @@ export default function useFocusReturn(options: FocusReturnOptions = {}): { retu
   }
 
   const returnFocus = useEventCallback(() => {
-    const target = elementOf(returnTo) ?? invoker;
+    const target = htmlElementOf(returnTo) ?? invoker;
 
     target?.focus({ preventScroll });
   });

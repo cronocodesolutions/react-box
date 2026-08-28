@@ -1,5 +1,6 @@
 import { useLayoutEffect } from 'react';
 import Box from '../../../box';
+import { documentOrNull } from '../../../utils/environment/environmentUtils';
 import GridModel from '../models/gridModel';
 
 const ANIMATION_NAME = 'rb-datagrid-loader';
@@ -9,11 +10,13 @@ const STYLE_ID = 'rb-datagrid-loader-keyframes';
 // once in a dedicated <style>. The bar (40% wide) slides from off the left edge to off
 // the right edge and repeats, giving a continuous progress sweep.
 function ensureKeyframes() {
-  if (typeof document === 'undefined' || document.getElementById(STYLE_ID)) return;
-  const style = document.createElement('style');
+  const doc = documentOrNull();
+  if (!doc || doc.getElementById(STYLE_ID)) return;
+
+  const style = doc.createElement('style');
   style.id = STYLE_ID;
   style.textContent = `@keyframes ${ANIMATION_NAME}{0%{transform:translateX(-100%)}100%{transform:translateX(250%)}}`;
-  document.head.appendChild(style);
+  doc.head.appendChild(style);
 }
 
 interface Props<TRow> {

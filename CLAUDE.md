@@ -46,6 +46,9 @@ Node version: v24 (pinned in .nvmrc).
 - `src/react/resolveStyles.ts` — The same resolution with no hook at all, so a Server Component can render Box; `useStyles` is this plus the flush effect
 - `src/react/styleElements.ts` — Descriptors → `<style href precedence>` elements (React 19 hoists and dedupes them)
 - `src/react/boxProps.ts` / `src/react/boxTagProps.ts` — The prop shape and the tag-props assembly both Box builds share
+- `src/react/effects.ts` — Which effect runs where: `useIsomorphicInsertionEffect` (the binding's flush) and `useIsomorphicLayoutEffect` (the primitives). Never hand-roll the `useInsertionEffect ?? useLayoutEffect` fallback again
+- `src/utils/environment/environmentUtils.ts` — `isBrowser()`, `hasDocument()`, `documentOrNull()`, `documentRoot()`, `documentHead()`, `matchMedia()`. **Framework-free: use these instead of writing `typeof document === 'undefined'` anywhere**
+- `src/utils/dom/domUtils.ts` — `elementOf()`/`htmlElementOf()` (ref or element) and `isEventInside()` (the click-outside check, composed path with a `contains` fallback)
 - `src/core/variables.ts` — CSS variables (200+ Tailwind-like colors), lazy-loaded via pending variables system
 - `src/core/classNames.ts` — Conditional className utility
 

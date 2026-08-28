@@ -6,6 +6,7 @@
  *
  * Every function degrades to a no-op without a DOM, so a server render can call them safely.
  */
+import { documentRoot as environmentDocumentRoot, matchMedia } from '../../utils/environment/environmentUtils';
 
 const DARK_QUERY = '(prefers-color-scheme: dark)';
 
@@ -13,14 +14,12 @@ const DARK_QUERY = '(prefers-color-scheme: dark)';
 export const defaultThemeName = 'light';
 
 function mediaQuery(): MediaQueryList | null {
-  if (typeof window === 'undefined' || typeof window.matchMedia !== 'function') return null;
-
-  return window.matchMedia(DARK_QUERY);
+  return matchMedia(DARK_QUERY);
 }
 
 /** The document root (`<html>`), or `null` when there is no DOM. */
 export function documentRoot(): Element | null {
-  return typeof document === 'undefined' ? null : document.documentElement;
+  return environmentDocumentRoot();
 }
 
 /** `'dark'` or `'light'` from `prefers-color-scheme`; `'light'` when the preference is unreadable. */

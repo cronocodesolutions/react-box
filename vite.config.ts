@@ -152,6 +152,15 @@ export default defineConfig(({ mode }) => {
                   // Component entries keep the chunks rolldown gives them, one per component.
                   if (module.startsWith('src/components/')) return null;
 
+                  // Two leaves that several groups need. Pulled out rather than left to fall into
+                  // `engine` (framework-free, which is where the environment helpers would land)
+                  // or `client`, because a module can only live in one chunk and both of those are
+                  // large: `behavior` would import the whole engine to ask whether there is a
+                  // `document`. `platform` must stay React-free — the `/core` entry reaches it —
+                  // which is why the React effect helpers are a second group rather than the same.
+                  if (module.startsWith('src/utils/environment/') || module.startsWith('src/utils/dom/')) return 'platform';
+                  if (module === 'src/react/effects.ts') return 'effects';
+
                   // 'engine', not 'core': `core` is an entry name now (src/core.ts), and a chunk
                   // sharing it would fight the entry for `core.mjs`.
                   if (frameworkFree.has(module)) return 'engine';

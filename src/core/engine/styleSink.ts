@@ -7,6 +7,7 @@
  * generated rule sits at the position its `sortKey` gives it, whichever flush it arrived in, so
  * an app rendered on the server gets the same cascade the browser builds.
  */
+import { documentHead } from '../../utils/environment/environmentUtils';
 import { stableHash } from '../hash';
 
 /** A generated rule plus the sort key that fixes its position in the cascade. */
@@ -278,7 +279,7 @@ export function createCssomSink(getElement: () => HTMLStyleElement): StyleSink {
 }
 
 function canUseDom(): boolean {
-  return typeof document !== 'undefined' && !!document.head;
+  return !!documentHead();
 }
 
 /** The engine's `<style>` element, created (at the top of `<head>`) the first time it is needed. */
