@@ -123,6 +123,10 @@ react-box/
 │
 ├── pages/                        # Demo/documentation website
 │
+├── examples/
+│   ├── vanilla/                  # The engine with no framework (npm run dev:vanilla)
+│   └── next-app/                 # Box in a Server Component (npm run build:next-app)
+│
 ├── vite.config.ts                # Library build config
 ├── pages.vite.config.ts          # Pages build config
 ├── tsconfig.json                 # TypeScript config
@@ -149,7 +153,7 @@ build-time compiler. `examples/vanilla` is that claim as a running page.
 | Components, icons   | `src/components/**`, `src/icons/**`                      | Yes                                       |
 | Shared utils, types | `src/utils/**`, `src/types.ts`                           | No — the engine reaches them, so enforced |
 
-Four things enforce it, because one is not enough:
+Five things enforce it, because one is not enough:
 
 1. **ESLint** — a `no-restricted-imports` block scoped to `src/core/**` (see `eslint.config.js`,
    next to the identical rule that keeps the DataGrid models headless).
@@ -168,6 +172,11 @@ Four things enforce it, because one is not enough:
    chunks `core.mjs`/`core.cjs` import and fails if any of them names `react`. Both have happened:
    the chunk split was once derived from the `react-server` graph alone, so the theme runtime —
    which no Box reaches — landed in the client chunk that `/core` then imported.
+5. **The two example apps**, both built by CI. `examples/vanilla` compiles the engine with no
+   framework loaded at all (`npm run build:vanilla`); `examples/next-app` installs the packed
+   tarball into a real Next.js App Router app, so a hook in the `react-server` graph — or an export
+   condition that stopped resolving — fails `next build`, and `npm run smoke:next-app` then asserts
+   on the HTML that server actually serves.
 
 The same command prints the adapter ratio published in the README:
 
@@ -515,6 +524,16 @@ the import graph of `src/rsc.ts` and fails on any client hook (`useState`, effec
 `createContext`, …) or `react-dom` import. Vitest renders with the client React, so nothing else
 would catch a hook slipping into that graph — and for a consumer it would turn every server render
 into a hard React error.
+
+Beyond the static checks, `examples/next-app` is this mode end to end: a Next.js App Router app
+whose pages are Server Components, depending on the **packed tarball** rather than on `src`, so the
+published `exports` map is what chooses the Box its server graph gets. `npm run smoke:next-app`
+starts `next start` and asserts on the served HTML — the base element hoisted into `<head>`, a rule
+for every class in the markup, content-hashed class names, a Suspense boundary that streams its CSS
+along with its markup, and a client island whose styles are in the HTML too. That is where React's
+own behaviour becomes visible: it merges every style element of one precedence group into a single
+`<style>` tag (listing what it merged in `data-href`) and streams post-shell styles as
+`<style media="not all">`, enabling them on the client.
 
 ### Default Base Styles
 

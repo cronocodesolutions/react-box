@@ -15,6 +15,7 @@ import {
   Paintbrush,
   Palette,
   Rows3,
+  Server,
   Sun,
   Table,
   TextCursor,
@@ -89,6 +90,9 @@ export default function Sidebar({ toggleTheme, onClose }: SidebarProps) {
           </MenuItem>
           <MenuItem to="/theme-setup" icon={<Paintbrush size={16} />}>
             Theme Setup
+          </MenuItem>
+          <MenuItem to="/server-components" icon={<Server size={16} />}>
+            Server Components
           </MenuItem>
         </MenuSection>
 
