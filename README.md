@@ -193,15 +193,16 @@ instead of being injected by an effect. A server component just imports the pack
 ```tsx
 // app/page.tsx — a Server Component. No 'use client', no provider, no CSS import.
 import Box from '@cronocode/react-box';
-import { H1, P } from '@cronocode/react-box/components/semantics';
 
 export default function Page() {
   return (
     <Box p={6} bgColor="slate-50" borderRadius={2}>
-      <H1 fontSize={24}>Rendered on the server</H1>
-      <P mt={2} color="slate-600" sm={{ fontSize: 16 }}>
+      <Box tag="h1" fontSize={24}>
+        Rendered on the server
+      </Box>
+      <Box tag="p" mt={2} color="slate-600" sm={{ fontSize: 16 }}>
         Its CSS was hoisted into &lt;head&gt; by React, not inserted by a client runtime.
-      </P>
+      </Box>
     </Box>
   );
 }
@@ -238,12 +239,19 @@ Notes and limits:
 - **Still client-only:** hover-callback children (`{({ isHover }) => …}`) and `Box.Theme`, which
   needs state, storage and a media-query listener. Theme _styles_ are unaffected: a `theme` prop
   generates ancestor-scoped rules, so setting the theme class on `<html>` in a server component is
-  enough. The pre-built components (`Flex`, `Button`, `Dropdown`, `DataGrid`, …) are client
-  components today.
+  enough.
+- **The pre-built components stay in client modules.** `Flex`, `Button`, `H1`, `Dropdown`,
+  `DataGrid` … are client components and the published chunks carry no `'use client'` directive, so
+  importing one _directly_ from a Server Component fails the build. Use `Box` with a `tag` prop in
+  server components, and import the components from your own `'use client'` modules.
 - **React 19 only.** On React 18 the elements cannot be hoisted and render inline; keep the default
   sink there (a documented App Router fallback for React 18 is still to come).
 - **Cost:** one base element per page (the reset, `:root`, and the layer order — ~1.8 KB gzipped)
   plus one `<style>` element per distinct rule, deduped across every Box that uses it.
+
+A whole Next.js App Router app built this way — streamed Suspense boundary, client island, theme
+toggle and all — is in [`examples/next-app`](examples/next-app): `npm run build:next-app` and
+`npm run smoke:next-app`, which starts the production server and asserts on the HTML it serves.
 
 ## Using the core without React
 

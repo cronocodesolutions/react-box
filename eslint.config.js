@@ -7,7 +7,9 @@ import globals from 'globals';
 import tseslint from 'typescript-eslint';
 
 export default tseslint.config(
-  { ignores: ['dist'] },
+  // Build output, ours and Next's: `.next/types/**` and `next-env.d.ts` are generated files the
+  // Next.js example rewrites on every build.
+  { ignores: ['dist', '**/.next/**', '**/next-env.d.ts'] },
   {
     extends: [js.configs.recommended, ...tseslint.configs.recommended],
     files: ['**/*.{ts,tsx}'],
@@ -67,6 +69,14 @@ export default tseslint.config(
           patterns: ['react/*', 'react-dom/*'],
         },
       ],
+    },
+  },
+  {
+    // The Next.js example is not a Vite app: Next's own convention is a route file exporting both a
+    // component and its metadata, which is exactly what this rule exists to prevent elsewhere.
+    files: ['examples/next-app/**/*.tsx'],
+    rules: {
+      'react-refresh/only-export-components': 'off',
     },
   },
   {

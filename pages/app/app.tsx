@@ -12,6 +12,7 @@ import GridPage from '../pages/gridPage';
 import HomePage from '../pages/homePage';
 import InstallationPage from '../pages/installationPage';
 import RadioButtonPage from '../pages/radioButtonPage';
+import ServerComponentsPage from '../pages/serverComponentsPage';
 import TextareaPage from '../pages/textareaPage';
 import TextboxPage from '../pages/textboxPage';
 import TextStylePage from '../pages/textStylePage';
@@ -26,6 +27,7 @@ export default function App() {
         <Route index element={<HomePage />} />
         <Route path="/installation" element={<InstallationPage />} />
         <Route path="/theme-setup" element={<ThemeSetupPage />} />
+        <Route path="/server-components" element={<ServerComponentsPage />} />
         <Route path="/box" element={<BoxPage />} />
         <Route path="/flex" element={<FlexPage />} />
         <Route path="/grid" element={<GridPage />} />
