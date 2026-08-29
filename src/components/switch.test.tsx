@@ -116,6 +116,18 @@ describe('Switch', () => {
     expect(css).not.toContain('::before:checked');
   });
 
+  it('stops the thumb travelling when the user asked for less motion', () => {
+    render(<Switch name="notify" label="Email notifications" />);
+
+    const css = (document.getElementById('crono-styles') as HTMLStyleElement | null)?.textContent ?? '';
+
+    // The library-wide default (`--transitionTime: 0s`) cannot reach a component that named its
+    // own 150ms, so the switch opts out by name — for the track and for the thumb.
+    expect(css).toContain('@media (prefers-reduced-motion: reduce){:root{--transitionTime: 0s;--svgTransitionTime: 0s;}}');
+    expect(css).toMatch(/@media \(prefers-reduced-motion: reduce\)\{\.\S+\{transition-property:none\}\}/);
+    expect(css).toMatch(/@media \(prefers-reduced-motion: reduce\)\{\.\S+::before\{transition-property:none\}\}/);
+  });
+
   it('reports its change to onChange like any other control', async () => {
     const onChange = vi.fn();
     const user = keyboard();

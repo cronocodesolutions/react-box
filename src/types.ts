@@ -1,5 +1,14 @@
 /* eslint-disable @typescript-eslint/no-empty-object-type */
-import { breakpoints, cssStyles, pseudo1, pseudo2, pseudoClasses, pseudoGroupClasses, themeGroupClass } from './core/boxStyles';
+import {
+  breakpoints,
+  cssStyles,
+  mediaFeatures,
+  pseudo1,
+  pseudo2,
+  pseudoClasses,
+  pseudoGroupClasses,
+  themeGroupClass,
+} from './core/boxStyles';
 import { ClassNameType } from './core/classNames';
 import { BoxStyle, BoxStylesType, ExtractKeys, ExtractTupleValues } from './core/coreTypes';
 import boxComponents from './core/extends/boxComponents';
@@ -42,6 +51,15 @@ type BoxThemeGroupClassStyles = ExtractKeys<
 >;
 type BoxBreakpointsStyles = ExtractKeys<
   typeof breakpoints,
+  BoxStylesWithPseudoClasses & BoxPseudoGroupClassesStyles & BoxThemeGroupClassStyles
+>;
+/**
+ * The accessibility-preference media features (`motionReduce`, `forcedColors`, `contrastMore`).
+ * Deliberately the same shape as a breakpoint and, like a breakpoint, not offered inside one: a
+ * rule lives in one `@media` block, so nesting the two would have to drop half of what was asked.
+ */
+type BoxMediaFeatureStyles = ExtractKeys<
+  typeof mediaFeatures,
   BoxStylesWithPseudoClasses & BoxPseudoGroupClassesStyles & BoxThemeGroupClassStyles
 >;
 
@@ -96,8 +114,9 @@ export type BoxStyleProps<TKey extends keyof ComponentsAndVariants = never> = Si
     BoxPseudoGroupClassesStyles &
     BoxThemeGroupClassStyles &
     BoxBreakpointsStyles &
+    BoxMediaFeatureStyles &
     ComponentProps<TKey>
 >;
 export type BoxComponentStyles = Simplify<
-  BoxStylesWithPseudoClasses & BoxBreakpointsStyles & BoxPseudoGroupClassesStyles & BoxThemeGroupClassStyles
+  BoxStylesWithPseudoClasses & BoxBreakpointsStyles & BoxMediaFeatureStyles & BoxPseudoGroupClassesStyles & BoxThemeGroupClassStyles
 >;

@@ -5,6 +5,9 @@ import ObjectUtils from '../../utils/object/objectUtils';
 import {
   breakpoints,
   cssStyles as defaultCssStyles,
+  mediaCondition,
+  mediaFeatures,
+  mediaKeys,
   pseudo1,
   pseudo2,
   pseudoClassesByWeight,
@@ -149,22 +152,21 @@ function escapeClassName(className: string): string {
   return className.replace(invalidInCssIdentifier, (char) => `\\${char}`);
 }
 
-// `normal` first, then the breakpoints in ascending order: the major half of the cascade order, so
-// a responsive rule always overrides the base one.
-const breakpointRank: Record<string, number> = Object.keys(breakpoints).reduce<Record<string, number>>(
-  (acc, key, index) => {
-    acc[key] = index + 1;
-    return acc;
-  },
-  { normal: 0 },
-);
+// `normal` first, then the breakpoints in ascending order, then the accessibility media features:
+// the major half of the cascade order, so a responsive rule always overrides the base one and a
+// user preference always overrides both.
+const mediaRank: Record<string, number> = mediaKeys.reduce<Record<string, number>>((acc, key, index) => {
+  acc[key] = index;
+
+  return acc;
+}, {});
 
 /** The layer the base rules live in — the reset has to lose against every generated rule. */
 const BASE_LAYER = 'rb';
 
-/** The cascade layer of one generated rule: breakpoint-major, then prop declaration order. */
-function layerName(breakpoint: string, sortIndex: number): string {
-  return `${BASE_LAYER}${breakpointRank[breakpoint] ?? 0}${sortIndex.toString(36)}`;
+/** The cascade layer of one generated rule: media-major, then prop declaration order. */
+function layerName(media: string, sortIndex: number): string {
+  return `${BASE_LAYER}${mediaRank[media] ?? 0}${sortIndex.toString(36)}`;
 }
 
 /** What the class-name cache holds per style signature. `elements` is null outside element mode. */
@@ -259,7 +261,7 @@ export function createStyleEngine(options: StyleEngineOptions = {}): StyleEngine
   // the second occurrence of a prop/value pair: without this, the first Box would (correctly) get
   // no class name and every later one would get a class with no rule behind it.
   const unsupportedRules = new Set<string>();
-  // Pending rules to be flushed: [sortIndex, breakpointOrder, rule]
+  // Pending rules to be flushed: [sortIndex, mediaOrder, rule]
   const pendingRules: [number, number, string][] = [];
   let requireFlush = true;
   let isInitialized = false;
@@ -268,7 +270,7 @@ export function createStyleEngine(options: StyleEngineOptions = {}): StyleEngine
   const svgClassName = '_s';
 
   // Whether a prop key affects the class list — i.e. one of the keys `addClassNames` dispatches
-  // on (style props + pseudo/breakpoint/group wrappers). Checked live (not snapshotted) because
+  // on (style props + pseudo/media/group wrappers). Checked live (not snapshotted) because
   // `extend()` adds keys to this engine's registry at runtime; mirrors addClassNames exactly.
   function isStyleKey(key: string): boolean {
     return (
@@ -276,6 +278,7 @@ export function createStyleEngine(options: StyleEngineOptions = {}): StyleEngine
       ObjectUtils.isKeyOf(key, pseudo1) ||
       ObjectUtils.isKeyOf(key, pseudo2) ||
       ObjectUtils.isKeyOf(key, breakpoints) ||
+      ObjectUtils.isKeyOf(key, mediaFeatures) ||
       ObjectUtils.isKeyOf(key, pseudoGroupClasses) ||
       ObjectUtils.isKeyOf(key, themeGroupClass)
     );
@@ -313,32 +316,27 @@ export function createStyleEngine(options: StyleEngineOptions = {}): StyleEngine
     props: BoxStyleProps<any>,
     classNames: string[],
     currentPseudoClasses: PseudoClassesType[],
-    breakpoint?: string,
+    media?: string,
     pseudoClassParentName?: string,
     rootSelector?: string,
   ) {
     Object.entries(props).forEach(([key, value]) => {
       if (value === undefined || value === null) return;
       if (ObjectUtils.isKeyOf(key, cssStyles)) {
-        addClassName(key, value, classNames, currentPseudoClasses, breakpoint, pseudoClassParentName, rootSelector);
+        addClassName(key, value, classNames, currentPseudoClasses, media, pseudoClassParentName, rootSelector);
       } else if (ObjectUtils.isKeyOf(key, pseudo1)) {
-        addClassNames(value as BoxStyleProps, classNames, [...currentPseudoClasses, key], breakpoint, pseudoClassParentName, rootSelector);
+        addClassNames(value as BoxStyleProps, classNames, [...currentPseudoClasses, key], media, pseudoClassParentName, rootSelector);
       } else if (ObjectUtils.isKeyOf(key, pseudo2)) {
         if (Array.isArray(value)) {
           const [_, styles] = value as [unknown, BoxStyleProps];
-          addClassNames(styles, classNames, [...currentPseudoClasses, key], breakpoint, pseudoClassParentName, rootSelector);
+          addClassNames(styles, classNames, [...currentPseudoClasses, key], media, pseudoClassParentName, rootSelector);
         }
         if (ObjectUtils.isObject(value)) {
-          addClassNames(
-            value as BoxStyleProps,
-            classNames,
-            [...currentPseudoClasses, key],
-            breakpoint,
-            pseudoClassParentName,
-            rootSelector,
-          );
+          addClassNames(value as BoxStyleProps, classNames, [...currentPseudoClasses, key], media, pseudoClassParentName, rootSelector);
         }
-      } else if (ObjectUtils.isKeyOf(key, breakpoints)) {
+      } else if (ObjectUtils.isKeyOf(key, breakpoints) || ObjectUtils.isKeyOf(key, mediaFeatures)) {
+        // Both fill the same slot — one `@media` block per rule. The types offer neither inside the
+        // other, so the last one to arrive winning is a shape TypeScript already refuses.
         addClassNames(value as BoxStyleProps, classNames, currentPseudoClasses, key, pseudoClassParentName, rootSelector);
       } else if (ObjectUtils.isKeyOf(key, pseudoGroupClasses)) {
         Object.entries(value).forEach(([name, pseudoClassProps]) => {
@@ -346,7 +344,7 @@ export function createStyleEngine(options: StyleEngineOptions = {}): StyleEngine
             pseudoClassProps as BoxStyles,
             classNames,
             [...currentPseudoClasses, pseudoGroupClasses[key]],
-            breakpoint,
+            media,
             name,
             rootSelector,
           );
@@ -362,14 +360,14 @@ export function createStyleEngine(options: StyleEngineOptions = {}): StyleEngine
                   groupProps as BoxStyles,
                   classNames,
                   [...themePseudoClasses, pseudoGroupClasses[themeKey]],
-                  breakpoint,
+                  media,
                   // Use | as separator to distinguish theme from group name
                   `${name}|${groupName}`,
                   rootSelector,
                 );
               });
             } else {
-              addClassNames({ [themeKey]: themeValue } as BoxStyles, classNames, themePseudoClasses, breakpoint, name, rootSelector);
+              addClassNames({ [themeKey]: themeValue } as BoxStyles, classNames, themePseudoClasses, media, name, rootSelector);
             }
           });
         });
@@ -382,18 +380,18 @@ export function createStyleEngine(options: StyleEngineOptions = {}): StyleEngine
     value: TValue | undefined | null,
     classNames: string[],
     currentPseudoClasses: PseudoClassesType[],
-    breakpoint: string = 'normal',
+    media: string = 'normal',
     pseudoClassParentName?: string,
     rootSelector?: string,
   ) {
     if (value === undefined || value === null) return;
 
     const weight = currentPseudoClasses.reduce((sum, pseudoClass) => sum + pseudoClassesWeight[pseudoClass], 0);
-    const className = createClassName(key, value, weight, breakpoint, pseudoClassParentName);
+    const className = createClassName(key, value, weight, media, pseudoClassParentName);
 
     // Create a unique key to track if this rule has been generated
     const serializedValue = Array.isArray(value) ? value.join('_') : value;
-    const ruleKey = `${breakpoint}-${weight}-${key}-${serializedValue}-${pseudoClassParentName ?? ''}-${rootSelector ?? ''}`;
+    const ruleKey = `${media}-${weight}-${key}-${serializedValue}-${pseudoClassParentName ?? ''}-${rootSelector ?? ''}`;
 
     // Only generate rule if it hasn't been generated before
     if (!generatedRules.has(ruleKey)) {
@@ -403,19 +401,19 @@ export function createStyleEngine(options: StyleEngineOptions = {}): StyleEngine
         key,
         value as string | number | boolean | readonly (string | number | boolean)[],
         weight,
-        breakpoint,
+        media,
         pseudoClassParentName,
         rootSelector,
       );
       if (result) {
-        pendingRules.push([result.sortIndex, result.breakpointOrder, result.rule]);
+        pendingRules.push([result.sortIndex, result.mediaOrder, result.rule]);
         requireFlush = true;
         if (isElementMode()) {
           ruleElements.set(ruleKey, {
             href: `${RULE_PRECEDENCE}-${stableHash(result.rule)}`,
             css: result.rule,
             precedence: RULE_PRECEDENCE,
-            sortKey: sortKeyOf(result.sortIndex, result.breakpointOrder),
+            sortKey: sortKeyOf(result.sortIndex, result.mediaOrder),
           });
         }
         // The engine, not the caller, owns "something is pending" — an adapter that never flushes
@@ -442,10 +440,10 @@ export function createStyleEngine(options: StyleEngineOptions = {}): StyleEngine
     key: string,
     value: string | number | boolean | readonly (string | number | boolean)[],
     weight: number,
-    breakpoint: string,
+    media: string,
     pseudoClassParentName?: string,
     rootSelector?: string,
-  ): { rule: string; sortIndex: number; breakpointOrder: number } | null {
+  ): { rule: string; sortIndex: number; mediaOrder: number } | null {
     const item = cssStyles[key as keyof typeof cssStyles] as BoxStyle[];
 
     let itemValue = item.find((x) => {
@@ -471,27 +469,28 @@ export function createStyleEngine(options: StyleEngineOptions = {}): StyleEngine
     if (!itemValue) return null;
 
     const sortIndex = cssStylesIndex[key] ?? 0;
-    const breakpointOrder = breakpoints[breakpoint as keyof typeof breakpoints] ?? 0;
+    const mediaOrder = mediaRank[media] ?? 0;
+    const condition = mediaCondition(media);
 
     /**
      * The finished rule: wrapped in its media query, and in element mode in its cascade layer.
      *
      * The space after `@media` matters: browsers accept `@media(...)` but the CSS parsers in
-     * happy-dom and jsdom reject the rule outright, so without it every breakpoint rule silently
+     * happy-dom and jsdom reject the rule outright, so without it every media rule silently
      * vanishes from a consumer's test DOM.
      */
     function finish(rule: string) {
-      const media = breakpoint === 'normal' ? rule : `@media (min-width: ${breakpointOrder}px){${rule}}`;
+      const wrapped = condition === null ? rule : `@media ${condition}{${rule}}`;
 
       return {
-        rule: isElementMode() ? `@layer ${layerName(breakpoint, sortIndex)}{${media}}` : media,
+        rule: isElementMode() ? `@layer ${layerName(media, sortIndex)}{${wrapped}}` : wrapped,
         sortIndex,
-        breakpointOrder,
+        mediaOrder,
       };
     }
 
     const className = escapeClassName(
-      createClassName(key as keyof BoxStyles, value as BoxStyles[keyof BoxStyles], weight, breakpoint, pseudoClassParentName),
+      createClassName(key as keyof BoxStyles, value as BoxStyles[keyof BoxStyles], weight, media, pseudoClassParentName),
     );
 
     if (pseudoClassParentName) {
@@ -559,13 +558,13 @@ export function createStyleEngine(options: StyleEngineOptions = {}): StyleEngine
     key: TKey,
     value: TValue,
     weight: number,
-    breakpoint: string,
+    media: string,
     pseudoClassParentName?: string,
   ) {
     const pseudoClassList = pseudoClassesByWeight[weight];
     const serializedValue = Array.isArray(value) ? value.join('_') : value;
 
-    const className = `${breakpoint === 'normal' ? '' : `${breakpoint}-`}${pseudoClassList.map((p) => `${p}-`).join('')}${pseudoClassParentName ? `${pseudoClassParentName}-` : ''}${key}-${serializedValue}`;
+    const className = `${media === 'normal' ? '' : `${media}-`}${pseudoClassList.map((p) => `${p}-`).join('')}${pseudoClassParentName ? `${pseudoClassParentName}-` : ''}${key}-${serializedValue}`;
 
     switch (namingMode()) {
       case 'readable':
@@ -583,7 +582,7 @@ export function createStyleEngine(options: StyleEngineOptions = {}): StyleEngine
    * Element mode gives up control of where a rule lands in `<head>`: React hoists the elements in
    * the order it discovers them, which is render order — a Box that only uses `md={{ p: 4 }}` can
    * put its rule in front of the `p={2}` rule another Box already needed, and a plain reading of
-   * the cascade would then apply them the wrong way round. One layer per (breakpoint, prop) makes
+   * the cascade would then apply them the wrong way round. One layer per (media, prop) makes
    * element order irrelevant: this statement, which travels with the base element and therefore
    * reaches the document first, is what fixes the order.
    *
@@ -595,9 +594,9 @@ export function createStyleEngine(options: StyleEngineOptions = {}): StyleEngine
   function layerOrder(): string {
     const names = [BASE_LAYER];
 
-    for (const breakpoint of Object.keys(breakpointRank)) {
+    for (const media of Object.keys(mediaRank)) {
       for (let index = 0; index < Object.keys(cssStyles).length; index++) {
-        names.push(layerName(breakpoint, index));
+        names.push(layerName(media, index));
       }
     }
 
@@ -613,6 +612,11 @@ export function createStyleEngine(options: StyleEngineOptions = {}): StyleEngine
     const rules = [
       ...(usedVariables ? [`:root{${usedVariables}}`] : []),
       `:root{--borderColor: black;--outlineColor: black;--lineHeight: 1.2;--fontSize: 14px;--transitionTime: 0.25s;--svgTransitionTime: 0.3s;}`,
+      // Every Box transitions on these two variables, so zeroing them is the whole default: a user
+      // who asked for less motion gets a library that does not animate, with nothing to opt into.
+      // A component that still wants movement here declares it under `motionReduce`, which lands in
+      // the same media query and later in the cascade.
+      `@media (prefers-reduced-motion: reduce){:root{--transitionTime: 0s;--svgTransitionTime: 0s;}}`,
       `#crono-box {position: absolute;top: 0;left: 0;height: 0;z-index:99999;}`,
       `html{font-size: 16px;font-family: Arial, sans-serif;}`,
       `body{margin: 0;line-height: var(--lineHeight);font-size: var(--fontSize);}`,
@@ -632,14 +636,14 @@ export function createStyleEngine(options: StyleEngineOptions = {}): StyleEngine
     return [layerOrder(), `@layer ${BASE_LAYER}{${rules.join('')}}`];
   }
 
-  /** A rule's position in the cascade: breakpoint first, then prop declaration order. */
-  function sortKeyOf(sortIndex: number, breakpointOrder: number): number {
-    return breakpointOrder * 100000 + sortIndex;
+  /** A rule's position in the cascade: media first, then prop declaration order. */
+  function sortKeyOf(sortIndex: number, mediaOrder: number): number {
+    return mediaOrder * 100000 + sortIndex;
   }
 
   /**
    * Empty the pending queue into a sorted batch. Pure rule bookkeeping — no sink, no DOM: the
-   * sort key (breakpoint first, then prop declaration order) is the cascade position a rule must
+   * sort key (media first, then prop declaration order) is the cascade position a rule must
    * end up at, whichever flush it happens to arrive in.
    */
   function drainPendingRules(): SortedRule[] {
@@ -647,7 +651,7 @@ export function createStyleEngine(options: StyleEngineOptions = {}): StyleEngine
 
     pendingRules.sort((a, b) => a[1] - b[1] || a[0] - b[0]);
 
-    const drained = pendingRules.map(([sortIndex, breakpointOrder, rule]) => ({ sortKey: sortKeyOf(sortIndex, breakpointOrder), rule }));
+    const drained = pendingRules.map(([sortIndex, mediaOrder, rule]) => ({ sortKey: sortKeyOf(sortIndex, mediaOrder), rule }));
     pendingRules.length = 0;
 
     return drained;

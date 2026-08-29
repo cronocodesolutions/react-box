@@ -123,6 +123,17 @@ describe('DataGrid accessibility', () => {
       expect(grid().getAttribute('aria-busy')).toBe('true');
       expect(screen.queryByRole('progressbar')).toBeNull();
     });
+
+    it('stops the loading bar sweeping when the user asked for less motion', () => {
+      render(<DataGrid<Person> data={people} loading def={{ rowKey: 'id', columns, visibleRowsCount: 'all' } as Definition} />);
+
+      // The sweep is the library's only animation, and it repeats forever. It lives in a class
+      // rather than an inline style precisely so this rule can outrank it.
+      const css = document.getElementById('rb-datagrid-loader-keyframes')?.textContent ?? '';
+
+      expect(css).toContain('@media (prefers-reduced-motion: reduce){.rb-datagrid-loader-bar{animation:none}}');
+      expect(document.querySelector('.rb-datagrid-loader-bar')?.getAttribute('style')).toBeNull();
+    });
   });
 
   describe('Roles under virtualization', () => {
