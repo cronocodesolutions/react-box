@@ -1,7 +1,8 @@
-import { useCallback } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 import Box from '../../../box';
 import Flex from '../../flex';
 import ColumnModel from '../models/columnModel';
+import GridModel from '../models/gridModel';
 
 interface Props<TRow> {
   column: ColumnModel<TRow>;
@@ -15,12 +16,31 @@ const pageXOf = (e: MouseEvent | TouchEvent): number => ('touches' in e ? (e.tou
 const RESIZE_STEP_PX = 16;
 
 /**
+ * How long after the last arrow press the widths are committed to React. Only reached when a key
+ * repeat ends without a `keyup` — losing focus mid-press — since a real one commits on release.
+ */
+const KEY_COMMIT_MS = 150;
+
+/**
+ * Column widths are CSS variables on one element, so a resize can be painted without React. This
+ * is what keeps a drag at 60fps, and the keyboard needs it just as much: a held arrow key repeats
+ * about thirty times a second, and a `notify()` per press re-renders every row in the grid.
+ */
+function paintSizes<TRow>(grid: GridModel<TRow>): void {
+  const el = grid.sizingElement;
+
+  if (!el) return;
+
+  Object.entries(grid.sizes.value).forEach(([name, value]) => el.style.setProperty(name, value));
+}
+
+/**
  * The column resizer, which is APG's window splitter: a `separator` with a value in pixels, its
  * own tab stop, and the arrows that move it.
  *
- * The pointer drag and the keyboard are two ways to run the same model. The drag bypasses React on
- * every move because it happens sixty times a second; a key press is one whole gesture, so it goes
- * through the model and lets the render put the new widths on screen.
+ * The pointer drag and the keyboard are two ways of running the same model, and they cost the same:
+ * each step changes the widths and paints them straight onto the grid element, and React is told
+ * once, when the gesture ends. A press is a gesture too — it just ends on `keyup`.
  */
 export default function DataGridHeaderCellResizer<TRow>(props: Props<TRow>) {
   const { column, controls } = props;
@@ -35,6 +55,12 @@ export default function DataGridHeaderCellResizer<TRow>(props: Props<TRow>) {
   const startResize = useCallback(
     (e: React.MouseEvent | React.TouchEvent) => {
       const { grid } = column;
+
+      // A drag is not a visit. Without this the pointer focuses the separator, which leaves a
+      // keyboard ring behind after the mouse has gone and re-renders the grid to move the roving
+      // tab stop. Mouse only — `preventDefault` on a touch start is what stops the page scrolling.
+      if (e.type === 'mousedown') e.preventDefault();
+
       column.beginResize(pageXOf(e.nativeEvent));
 
       const controller = new AbortController();
@@ -45,9 +71,7 @@ export default function DataGridHeaderCellResizer<TRow>(props: Props<TRow>) {
 
       const paint = () => {
         column.applyResize(latestX);
-        const el = grid.sizingElement;
-        if (!el) return;
-        Object.entries(grid.sizes.value).forEach(([name, value]) => el.style.setProperty(name, value));
+        paintSizes(grid);
       };
 
       // 'instant': paint synchronously on every move so the column tracks the cursor with no
@@ -83,6 +107,52 @@ export default function DataGridHeaderCellResizer<TRow>(props: Props<TRow>) {
     [column],
   );
 
+  // Set while a key gesture is in flight, so a repeat that ends without a `keyup` still commits.
+  const commitTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
+  const keyFrame = useRef(0);
+
+  /**
+   * The same coalescing the drag uses: a held arrow repeats faster than the screen refreshes, and
+   * every paint restyles every cell in the grid, so the repeats inside one frame collapse to one.
+   */
+  const paintByKey = useCallback(() => {
+    const { grid } = column;
+
+    if (grid.resizeMode === 'instant') {
+      paintSizes(grid);
+      return;
+    }
+
+    if (keyFrame.current) return;
+
+    keyFrame.current = requestAnimationFrame(() => {
+      keyFrame.current = 0;
+      paintSizes(grid);
+    });
+  }, [column]);
+
+  const commitResize = useCallback(() => {
+    if (commitTimer.current === undefined) return;
+
+    clearTimeout(commitTimer.current);
+    commitTimer.current = undefined;
+
+    if (keyFrame.current) {
+      cancelAnimationFrame(keyFrame.current);
+      keyFrame.current = 0;
+    }
+
+    column.endResize(); // the single notify → React reconciles to the widths already on screen
+  }, [column]);
+
+  useEffect(
+    () => () => {
+      clearTimeout(commitTimer.current);
+      if (keyFrame.current) cancelAnimationFrame(keyFrame.current);
+    },
+    [],
+  );
+
   const resizeByKey = useCallback(
     (e: React.KeyboardEvent) => {
       switch (e.key) {
@@ -105,8 +175,12 @@ export default function DataGridHeaderCellResizer<TRow>(props: Props<TRow>) {
       // The grid leaves every key alone while focus is inside a cell, but the scroller does not:
       // Home and End would scroll it sideways underneath the resize nobody could then see.
       e.preventDefault();
+
+      paintByKey();
+      clearTimeout(commitTimer.current);
+      commitTimer.current = setTimeout(commitResize, KEY_COMMIT_MS);
     },
-    [column, headerCell],
+    [column, commitResize, headerCell, paintByKey],
   );
 
   return (
@@ -142,6 +216,9 @@ export default function DataGridHeaderCellResizer<TRow>(props: Props<TRow>) {
             'aria-valuetext': `${headerCell.width} pixels`,
             tabIndex: 0,
             onKeyDown: resizeByKey,
+            // Where a key gesture ends, and so where the widths reach React and `aria-valuenow`
+            // reaches a screen reader. The timer above is only the safety net behind this.
+            onKeyUp: commitResize,
           }}
         />
       </Box>

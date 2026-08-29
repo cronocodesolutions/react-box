@@ -479,17 +479,21 @@ export default class ColumnModel<TRow> {
   };
 
   /**
-   * Move the resize separator `delta` pixels to the right — the keyboard's half of the drag, and
-   * a whole gesture in one call: it starts from the widths as they are and commits immediately.
-   * Rightwards widens a column whose separator is on its right edge and narrows a right-pinned
-   * one, exactly as dragging that way does.
+   * Move the resize separator `delta` pixels to the right — one whole step of a keyboard resize,
+   * starting from the widths as they are, so pressing again carries on from here. Rightwards widens
+   * a column whose separator is on its right edge and narrows a right-pinned one, exactly as
+   * dragging that way does.
+   *
+   * Does **not** notify, for the same reason `applyResize` does not: a held arrow key repeats about
+   * thirty times a second, and a re-render per press would cost more than the resize. The caller
+   * paints the widths and calls `endResize()` when the gesture ends.
    */
   public moveResizer = (delta: number): void => {
     this.beginResize(0);
-    this.resizeTo(delta);
+    this.applyResize(delta);
   };
 
-  /** Resize to an exact total width — where Home and End on the separator land. */
+  /** Resize to an exact total width — where Home and End on the separator land. Does not notify. */
   public resizeWidthTo = (width: number): void => {
     const current = this.inlineWidth ?? this.baseWidth;
 

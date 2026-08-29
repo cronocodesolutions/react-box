@@ -406,6 +406,16 @@ describe('DataGrid accessibility', () => {
     const resizers = () => screen.getAllByRole('separator');
     const widthOf = (separator: Element) => Number(separator.getAttribute('aria-valuenow'));
 
+    /**
+     * The way a keyboard actually gets there: into the grid, then into the cell's first widget.
+     * Not a click — a pointer deliberately does not focus the separator, so that a drag leaves no
+     * ring behind and costs no re-render.
+     */
+    const focusResizer = async (user: ReturnType<typeof keyboard>) => {
+      await user.pressTab();
+      await user.press('F2');
+    };
+
     it('is a splitter with a name, an orientation and a width in pixels', () => {
       renderGrid();
       const separator = resizers()[0];
@@ -426,7 +436,7 @@ describe('DataGrid accessibility', () => {
       const separator = resizers()[0];
       const before = widthOf(separator);
 
-      await user.click(separator);
+      await focusResizer(user);
       expectFocusOn(separator);
 
       await user.pressArrow('Right');
@@ -441,7 +451,7 @@ describe('DataGrid accessibility', () => {
       const user = keyboard();
       renderGrid();
 
-      await user.click(resizers()[0]);
+      await focusResizer(user);
 
       await user.press('Home');
       expect(widthOf(resizers()[0])).toBe(48);
@@ -455,7 +465,7 @@ describe('DataGrid accessibility', () => {
       const user = keyboard();
       renderGrid();
 
-      await user.click(resizers()[0]);
+      await focusResizer(user);
       // Well past the minimum, which the model clamps rather than following.
       for (let press = 0; press < 20; press++) await user.pressArrow('Left');
 
