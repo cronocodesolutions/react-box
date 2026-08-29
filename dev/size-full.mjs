@@ -13,6 +13,7 @@ import * as dropdown from '../dist/components/dropdown.mjs';
 import * as flex from '../dist/components/flex.mjs';
 import * as form from '../dist/components/form.mjs';
 import * as grid from '../dist/components/grid.mjs';
+import * as overlay from '../dist/components/overlay.mjs';
 import * as radioButton from '../dist/components/radioButton.mjs';
 import * as select from '../dist/components/select.mjs';
 import * as semantics from '../dist/components/semantics.mjs';
@@ -34,6 +35,7 @@ console.log(
   flex,
   form,
   grid,
+  overlay,
   radioButton,
   select,
   semantics,

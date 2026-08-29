@@ -6,8 +6,8 @@ import PinIcon from '../../../icons/pinIcon';
 import SortIcon from '../../../icons/sortIcon';
 import Button from '../../button';
 import Flex from '../../flex';
+import Overlay from '../../overlay';
 import { Span } from '../../semantics';
-import Tooltip from '../../tooltip';
 import ColumnModel from '../models/columnModel';
 
 interface Props<TRow> {
@@ -37,7 +37,7 @@ export default function DataGridHeaderCellContextMenu<TRow>(props: Props<TRow>) 
           <DotsIcon fill="currentColor" />
         </Span>
         {isOpen && (
-          <Tooltip
+          <Overlay
             component={`${grid.componentName}.header.cell.contextMenu.tooltip` as never}
             onPositionChange={setTooltipPosition}
             ref={refToUse}
@@ -130,7 +130,7 @@ export default function DataGridHeaderCellContextMenu<TRow>(props: Props<TRow>) 
                 <Box textWrap="nowrap">Un-Group All</Box>
               </Button>
             )}
-          </Tooltip>
+          </Overlay>
         )}
       </Button>
     </Flex>

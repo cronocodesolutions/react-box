@@ -20,6 +20,13 @@ identically and are named completely differently; a hook that decided both would
 of them. Movement, state and focus are here — the semantics belong to whoever is building the
 pattern.
 
+`Tooltip` is the first component assembled from them, and a small enough one to read as a worked
+example: `src/components/tooltip.tsx` is `useControllableState` for the open state (so a consumer
+can control it and be told _why_ it changed), `useIdentifier` for the id `aria-describedby` points
+at, and `useDismiss` with `outsidePointer: false` for Escape. Everything left over — the delays,
+the hover grace period, `role="tooltip"` — is the pattern, and that is the split this file is
+about. It uses no `useFocusReturn`: focus never enters a tooltip, so there is nothing to return.
+
 ---
 
 ## `useControllableState`

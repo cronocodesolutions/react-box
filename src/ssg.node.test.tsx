@@ -3,7 +3,7 @@ import ReactDOMServer from 'react-dom/server';
 import { describe, expect, it } from 'vitest';
 import Box from './box';
 import Flex from './components/flex';
-import Tooltip from './components/tooltip';
+import Overlay from './components/overlay';
 import { getStyles, renderToStaticMarkup, resetStyles } from './ssg';
 
 /**
@@ -87,11 +87,11 @@ describe('SSG without a DOM', () => {
   });
 
   it('renders a component that needs a portal in the browser', () => {
-    // Tooltip resolves its portal container during render. It only worked on the server because
+    // Overlay resolves its portal container during render. It only worked on the server because
     // the fake document answered `getElementById` with its own style element.
     const result = renderToStaticMarkup(
       <Flex>
-        <Tooltip>tip</Tooltip>
+        <Overlay>tip</Overlay>
       </Flex>,
       false,
     );

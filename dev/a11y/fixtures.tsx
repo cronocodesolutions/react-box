@@ -7,6 +7,7 @@ import Dropdown from '../../src/components/dropdown';
 import Flex from '../../src/components/flex';
 import Form from '../../src/components/form';
 import Grid from '../../src/components/grid';
+import Overlay from '../../src/components/overlay';
 import RadioButton from '../../src/components/radioButton';
 import Select from '../../src/components/select';
 import { H1, Img, Link, Nav, P } from '../../src/components/semantics';
@@ -192,7 +193,21 @@ export const fixtures: A11yFixture[] = [
   },
   {
     name: 'Tooltip',
-    render: () => <Tooltip>Deletes the row</Tooltip>,
+    render: () => <Tooltip content="Deletes the row">{(trigger) => <Button {...trigger}>Delete</Button>}</Tooltip>,
+  },
+  {
+    name: 'Tooltip (open)',
+    render: () => (
+      <Tooltip content="Deletes the row" defaultOpen>
+        {(trigger) => <Button {...trigger}>Delete</Button>}
+      </Tooltip>
+    ),
+  },
+  {
+    // The positioning primitive on its own carries no ARIA and should not: it is a place to render,
+    // and the pattern belongs to whatever is rendered into it.
+    name: 'Overlay',
+    render: () => <Overlay>Anything, anywhere</Overlay>,
   },
   {
     name: 'DataGrid',

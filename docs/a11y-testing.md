@@ -40,7 +40,9 @@ Fixtures live in `dev/` rather than beside the components because `src/component
 
 APG is mostly a specification of _where focus goes_, which no static check can see. These tests drive the component with a real keyboard ([user-event](https://testing-library.com/docs/user-event/intro), so DOM focus actually moves and `tabindex`/`disabled` are respected) and assert the result.
 
-`src/components/checkbox.a11y.test.tsx` and `src/components/tooltip.a11y.test.tsx` are the two templates. Checkbox is the case where the platform already supplies the pattern and there is something passing to assert. Tooltip is the case where the component implements almost none of it yet, so the file is mostly `it.todo` naming the contract A3 has to meet — plus one test that pins today's gap, so it cannot be closed silently.
+`src/components/checkbox.a11y.test.tsx` and `src/components/tooltip.a11y.test.tsx` are the two templates. Checkbox is the case where the platform already supplies the pattern and there is something passing to assert. Tooltip is the case where the library implements the whole pattern itself — semantics, keyboard and pointer, each in its own block — and it is also the file that shows what this layer catches and axe does not: the three WCAG 1.4.13 tests (dismissible, hoverable, persistent) are about _when the markup exists_, and a tooltip that vanishes the moment you reach for it has perfect markup right up until it disappears.
+
+That file started life as A1 wrote it: four `it.todo`s naming the contract, and one test asserting the pattern was **absent**, so the gap could not be closed silently. A3 deleted that test and promoted the todos, which is the intended life cycle — a todo here is a commitment with a date on it, not a note.
 
 The helpers are in `dev/a11y/`:
 
@@ -52,6 +54,7 @@ The helpers are in `dev/a11y/`:
 | `.press('Enter' \| 'Escape' \| 'Home' \| ' ')` | Any other named key.                                                    |
 | `.type('ala')`                                 | Printable characters, for typeahead and search boxes.                   |
 | `.click(element)`                              | A real pointer click — "open with the mouse, then drive with the keys". |
+| `.hover(el)` / `.unhover(el)`                  | Pointer travel, for hover-triggered content and WCAG 1.4.13.            |
 | `expectFocusOn(element)`                       | Asserts DOM focus, and says what has it instead when it does not.       |
 | `expectNoAxeViolations(container)`             | Fails with the full axe report — rule, impact, markup, fix.             |
 
@@ -99,7 +102,9 @@ What the sweep finds today, with the step that owns each fix. This is the measur
 | DataGrid                    | `aria-required-parent` | `role="row"`/`"columnheader"` hang off a `role="presentation"` root                | A7    |
 | DataGrid                    | `button-name`          | The group and column-chooser buttons are icon-only with no accessible name         | A7    |
 
-Everything else in the sweep is clean — including, and this is the point of the section above, Dropdown, Select and Tooltip in the states where they have no ARIA at all to get wrong.
+Everything else in the sweep is clean — including, and this is the point of the section above, Dropdown and Select in the states where they have no ARIA at all to get wrong.
+
+**Closed since:** Tooltip had no violations to fix here, which is exactly the limitation this document opens with — it had no ARIA at all, and axe cannot fail what is not there. A3 made it the APG pattern, and the sweep now covers it open as well as closed.
 
 ---
 

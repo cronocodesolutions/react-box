@@ -10,6 +10,7 @@ import {
   Download,
   Layers,
   LayoutGrid,
+  MessageSquare,
   Moon,
   MousePointer2,
   Paintbrush,
@@ -176,8 +177,11 @@ export default function Sidebar({ toggleTheme, onClose }: SidebarProps) {
           <MenuItem to="/radiobutton" icon={<Circle size={16} />}>
             Radio Button
           </MenuItem>
-          <MenuItem to="/tooltip" icon={<MousePointer2 size={16} />}>
+          <MenuItem to="/tooltip" icon={<MessageSquare size={16} />}>
             Tooltip
+          </MenuItem>
+          <MenuItem to="/overlay" icon={<Layers size={16} />}>
+            Overlay
           </MenuItem>
           <MenuItem to="/dropdown" icon={<ChevronDown size={16} />}>
             Dropdown

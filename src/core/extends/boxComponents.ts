@@ -32,6 +32,24 @@ const boxComponents = {
   span: {
     styles: { display: 'inline-block' },
   },
+  // The `role="tooltip"` bubble. Inverted against the page on purpose: a tooltip is a temporary
+  // overlay and has to read as one at a glance, whichever theme is underneath it.
+  tooltip: {
+    styles: {
+      display: 'inline-block',
+      maxWidth: 72,
+      py: 1.5,
+      px: 2.5,
+      borderRadius: 1.5,
+      fontSize: 13,
+      lineHeight: 18,
+      bgColor: 'gray-900',
+      color: 'gray-50',
+      theme: {
+        dark: { bgColor: 'gray-100', color: 'gray-900' },
+      },
+    },
+  },
   button: {
     styles: {
       display: 'inline-flex',

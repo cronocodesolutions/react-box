@@ -113,7 +113,8 @@ react-box/
 │   │   ├── textbox.tsx
 │   │   ├── textarea.tsx
 │   │   ├── radioButton.tsx
-│   │   ├── tooltip.tsx
+│   │   ├── tooltip.tsx           # The APG tooltip, assembled from the a11y primitives
+│   │   ├── overlay.tsx           # Its positioning half: a portal at the place it is declared
 │   │   ├── form.tsx
 │   │   ├── flex.tsx
 │   │   ├── grid.tsx

@@ -1,167 +1,282 @@
 import { motion } from 'framer-motion';
-import { MousePointer2 } from 'lucide-react';
-import { useState } from 'react';
+import { Keyboard, MessageSquare, MousePointerClick, ShieldCheck } from 'lucide-react';
+import { ReactNode, useState } from 'react';
 import Box from '../../src/box';
 import Button from '../../src/components/button';
 import Flex from '../../src/components/flex';
-import Tooltip from '../../src/components/tooltip';
+import { H2, Span } from '../../src/components/semantics';
+import Tooltip, { TooltipReason } from '../../src/components/tooltip';
 import Code from '../components/code';
 import PageHeader from '../components/pageHeader';
+import useTableOfContents from '../hooks/useTableOfContents';
 
 export default function TooltipPage() {
-  const [open1, setOpen1] = useState(false);
-  const [open2, setOpen2] = useState(false);
+  useTableOfContents(sidebarLinks);
+
+  const [lastReason, setLastReason] = useState<TooltipReason>();
 
   return (
     <Box>
       <PageHeader
-        icon={MousePointer2}
+        icon={MessageSquare}
         title="Tooltip"
-        description="Render a component on top of entire application. Useful when parent has overflow hidden."
+        description="A description that appears on hover and on focus, wired to its trigger with aria-describedby — the APG tooltip, including the three WCAG 1.4.13 rules everyone forgets."
       />
 
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
-        <Flex d="column" gap={8}>
+        <Flex d="column" gap={10}>
           <Code label="Import" language="jsx" code="import Tooltip from '@cronocode/react-box/components/tooltip';" />
 
           <Code
-            label="Tooltip Usage"
+            id="usage"
+            label="Usage"
             language="jsx"
-            code={`function Component() {
-  const [open1, setOpen1] = useState(false);
-  const [open2, setOpen2] = useState(false);
-
-  return (
-    <Flex gap={4} flexWrap="wrap">
-      <Box flex1 height={40} b={1} borderRadius={1} overflow="auto" bgColor="violet-100" position="relative" minWidth={80}>
-        <Flex jc="space-between">
-          <Box position="sticky" top={4} textAlign="right" m={4}>
-            (position absolute)
-          </Box>
-          <Box position="sticky" top={4} textAlign="right" m={4}>
-            overflow hidden box
-          </Box>
-        </Flex>
-        <Flex ml={4}>
-          <Button onClick={() => setOpen1(!open1)} position="relative" jc="center" width={30}>
-            Click me!
-            {open1 && (
-              <Box
-                textAlign="left"
-                height={50}
-                borderRadius={2}
-                p={3}
-                left={0}
-                top={12}
-                color="violet-950"
-                bgColor="violet-200"
-                b={1}
-                position="absolute"
-              >
-                position absolute box
-              </Box>
-            )}
-          </Button>
-        </Flex>
-      </Box>
-
-      <Box flex1 height={40} b={1} borderRadius={1} overflow="auto" bgColor="violet-100" position="relative" minWidth={80}>
-        <Flex jc="space-between">
-          <Box position="sticky" top={4} textAlign="right" m={4}>
-            (tooltip)
-          </Box>
-          <Box position="sticky" top={4} textAlign="right" m={4}>
-            overflow hidden box
-          </Box>
-        </Flex>
-        <Flex ml={4}>
-          <Box>
-            <Button onClick={() => setOpen2(!open2)} display="block" width={30}>
-              Click me!
-            </Button>
-            {open2 && (
-              <Tooltip height={50} borderRadius={2} p={3} top={1} bgColor="violet-200" b={1}>
-                tooltip box
+            code={`<Tooltip content="Deletes the row for good">
+  {(trigger) => <Button {...trigger}>Delete</Button>}
+</Tooltip>`}
+          >
+            <Flex gap={4} flexWrap="wrap" ai="center" py={6}>
+              <Tooltip content="Deletes the row for good">{(trigger) => <Button {...trigger}>Delete</Button>}</Tooltip>
+              <Tooltip content="Hover me, then move the pointer onto the tooltip — it waits for you.">
+                {(trigger) => <Button {...trigger}>Hoverable</Button>}
               </Tooltip>
-            )}
-          </Box>
+              <Tooltip content="Tab to me: focus shows the tooltip with no delay. Escape puts it away." openDelay={0}>
+                {(trigger) => <Button {...trigger}>Keyboard</Button>}
+              </Tooltip>
+            </Flex>
+          </Code>
+
+          <Section id="trigger" title="Why the trigger is a render prop">
+            <Box>
+              The tooltip has to put <Mono>aria-describedby</Mono> on the element the user lands on — the control itself, not a wrapper
+              around it. Cloning a child would mean guessing where that attribute goes, and this library has two answers: Box takes DOM
+              attributes in a <Mono>props</Mono> bag, a plain <Mono>&lt;button&gt;</Mono> takes them at the top level. So the trigger is
+              handed to you instead, and you say where it belongs. It carries a <Mono>ref</Mono> too — the bubble is positioned against the
+              trigger's own box, which is what keeps it under the control and out of the layout.
+            </Box>
+            <Box mt={4}>
+              <Code
+                language="jsx"
+                codeOnly
+                code={`// A Box component — ref and props are both top-level Box props, so one spread does it.
+<Tooltip content="Save the draft">{(trigger) => <Button {...trigger}>Save</Button>}</Tooltip>
+
+// A plain element — the same two pieces, named.
+<Tooltip content="Save the draft">{(trigger) => <button ref={trigger.ref} {...trigger.props}>Save</button>}</Tooltip>`}
+              />
+            </Box>
+          </Section>
+
+          <Section id="keyboard" title="Keyboard and pointer">
+            <KeyTable />
+          </Section>
+
+          <Section id="wcag" title="What the component guarantees">
+            <Flex d="column" gap={3}>
+              <Note icon={ShieldCheck} title="Dismissible — WCAG 1.4.13">
+                Escape closes the tooltip and focus does not move. It stays closed while the pointer sits where it is: re-showing it because
+                nothing moved would put the user straight back where they were.
+              </Note>
+              <Note icon={MousePointerClick} title="Hoverable — WCAG 1.4.13">
+                Leaving the trigger starts a <Mono>closeDelay</Mono> (150&nbsp;ms) rather than closing, so the pointer can travel onto the
+                tooltip — to read a long description, or to select text in it. Once it is on the tooltip, the tooltip keeps it open.
+              </Note>
+              <Note icon={Keyboard} title="Persistent — WCAG 1.4.13">
+                Nothing hides it on a timer. It closes when the pointer leaves and focus has moved on, and not before.
+              </Note>
+            </Flex>
+          </Section>
+
+          <Code
+            id="controlled"
+            label="Controlled, with the reason it changed"
+            language="jsx"
+            code={`const [open, setOpen] = useState(false);
+
+<Tooltip
+  content="Deletes the row for good"
+  open={open}
+  onOpenChange={(next, { reason }) => {
+    setOpen(next);
+    console.log(reason); // 'hover' | 'focus' | 'pointer-leave' | 'blur' | 'escape'
+  }}
+>
+  {(trigger) => <Button {...trigger}>Delete</Button>}
+</Tooltip>`}
+          >
+            <Flex gap={4} ai="center" py={6}>
+              <Tooltip content="Watch the reason change" openDelay={0} onOpenChange={(_open, { reason }) => setLastReason(reason)}>
+                {(trigger) => <Button {...trigger}>Hover or tab to me</Button>}
+              </Tooltip>
+              <Span fontSize={14} theme={{ dark: { color: 'slate-400' }, light: { color: 'slate-600' } }}>
+                last reason: <Mono>{lastReason ?? '—'}</Mono>
+              </Span>
+            </Flex>
+          </Code>
+
+          <Section id="styling" title="Styling">
+            <Box>
+              Every Box prop on <Mono>&lt;Tooltip&gt;</Mono> styles the bubble, on top of the built-in <Mono>tooltip</Mono> component style
+              (inverted against the page, so it reads as an overlay in either theme). <Mono>adjustTranslateX</Mono> and{' '}
+              <Mono>adjustTranslateY</Mono> nudge where it lands.
+            </Box>
+            <Box mt={4}>
+              <Code
+                language="jsx"
+                codeOnly
+                code={`<Tooltip content="On brand" bgColor="indigo-600" color="white" borderRadius={2} adjustTranslateY="4px">
+  {(trigger) => <Button {...trigger}>Delete</Button>}
+</Tooltip>`}
+              />
+            </Box>
+          </Section>
+
+          <Section id="overlay" title="Only need the positioning?">
+            <Box>
+              A tooltip is a pattern; escaping an <Mono>overflow: hidden</Mono> is not. The portal-and-position half of this component ships
+              on its own as <Mono>Overlay</Mono> — no ARIA, no open state, no dismissal — and that is what to reach for when the thing being
+              rendered is not a description of a control. Before A3 this component <em>was</em> that primitive, so code that used it to
+              escape an overflow becomes <Mono>Overlay</Mono>, unchanged.
+            </Box>
+            <Box mt={4}>
+              <Code
+                language="jsx"
+                codeOnly
+                code={`import Overlay from '@cronocode/react-box/components/overlay';
+
+{open && <Overlay p={3} bgColor="slate-800">anything, anywhere</Overlay>}`}
+              />
+            </Box>
+          </Section>
         </Flex>
+      </motion.div>
+    </Box>
+  );
+}
+
+const sidebarLinks = [
+  { id: 'usage', label: 'Usage' },
+  { id: 'trigger', label: 'Why a render prop' },
+  { id: 'keyboard', label: 'Keyboard and pointer' },
+  { id: 'wcag', label: 'What it guarantees' },
+  { id: 'controlled', label: 'Controlled' },
+  { id: 'styling', label: 'Styling' },
+  { id: 'overlay', label: 'Only the positioning' },
+] as const;
+
+const interactions: { input: string; result: string }[] = [
+  { input: 'Pointer rests on the trigger', result: 'Shows under the trigger after openDelay (300 ms by default).' },
+  { input: 'Pointer leaves the trigger', result: 'Hides after closeDelay (150 ms) — unless it lands on the tooltip.' },
+  { input: 'Pointer moves onto the tooltip', result: 'Stays open for as long as it is there.' },
+  { input: 'Tab to the trigger', result: 'Shows immediately: focus ignores openDelay.' },
+  { input: 'Tab away', result: 'Hides, unless the pointer is still on the trigger.' },
+  { input: 'Escape', result: 'Hides. Focus stays on the trigger, and it does not come back until the pointer leaves and returns.' },
+  { input: 'Tab, again', result: 'Reaches the next control — the tooltip is never in the tab order.' },
+];
+
+function KeyTable() {
+  return (
+    <Box tag="table" width="fit" style={{ borderCollapse: 'collapse' }}>
+      <Box tag="thead">
+        <Box tag="tr">
+          <HeadCell>Input</HeadCell>
+          <HeadCell>Result</HeadCell>
+        </Box>
+      </Box>
+      <Box tag="tbody">
+        {interactions.map((row) => (
+          <Box tag="tr" key={row.input}>
+            <Cell>
+              <Mono>{row.input}</Mono>
+            </Cell>
+            <Cell>{row.result}</Cell>
+          </Box>
+        ))}
+      </Box>
+    </Box>
+  );
+}
+
+function HeadCell({ children }: { children: ReactNode }) {
+  return (
+    <Box
+      tag="th"
+      textAlign="left"
+      fontSize={13}
+      fontWeight={600}
+      py={2}
+      pr={6}
+      bb={1}
+      theme={{ dark: { color: 'slate-300', borderColor: 'slate-700' }, light: { color: 'slate-700', borderColor: 'slate-200' } }}
+    >
+      {children}
+    </Box>
+  );
+}
+
+function Cell({ children }: { children: ReactNode }) {
+  return (
+    <Box
+      tag="td"
+      fontSize={14}
+      py={2}
+      pr={6}
+      bb={1}
+      theme={{ dark: { color: 'slate-400', borderColor: 'slate-800' }, light: { color: 'slate-600', borderColor: 'slate-100' } }}
+    >
+      {children}
+    </Box>
+  );
+}
+
+function Section({ id, title, children }: { id: string; title: string; children: ReactNode }) {
+  return (
+    <Box id={id}>
+      <H2 fontSize={20} fontWeight={600} mb={4} theme={{ dark: { color: 'white' }, light: { color: 'slate-900' } }}>
+        {title}
+      </H2>
+      <Box fontSize={15} lineHeight={26} theme={{ dark: { color: 'slate-400' }, light: { color: 'slate-600' } }}>
+        {children}
+      </Box>
+    </Box>
+  );
+}
+
+function Note({ icon: Icon, title, children }: { icon: typeof ShieldCheck; title: string; children: ReactNode }) {
+  return (
+    <Flex
+      gap={3}
+      p={4}
+      borderRadius={2}
+      b={1}
+      theme={{
+        dark: { bgColor: 'slate-900', borderColor: 'slate-800' },
+        light: { bgColor: 'slate-50', borderColor: 'slate-200' },
+      }}
+    >
+      <Box theme={{ dark: { color: 'indigo-400' }, light: { color: 'indigo-500' } }} pt={0.5}>
+        <Icon size={16} />
+      </Box>
+      <Box>
+        <Box fontSize={14} fontWeight={600} mb={1} theme={{ dark: { color: 'slate-200' }, light: { color: 'slate-800' } }}>
+          {title}
+        </Box>
+        <Box fontSize={14}>{children}</Box>
       </Box>
     </Flex>
   );
-}`}
-          >
-            <Flex gap={4} flexWrap="wrap">
-              <Box flex1 height={40} b={1} borderRadius={1} overflow="auto" position="relative" minWidth={80}>
-                <Flex jc="space-between">
-                  <Box position="sticky" top={4} textAlign="right" m={4}>
-                    (position absolute)
-                  </Box>
-                  <Box position="sticky" top={4} textAlign="right" m={4}>
-                    overflow hidden box
-                  </Box>
-                </Flex>
-                <Flex ml={4}>
-                  <Button onClick={() => setOpen1(!open1)} position="relative" jc="center" width={30}>
-                    Click me!
-                    {open1 && (
-                      <Box
-                        textAlign="left"
-                        height={50}
-                        borderRadius={2}
-                        p={3}
-                        left={0}
-                        top={12}
-                        theme={{
-                          light: { bgColor: 'slate-300' },
-                          dark: { bgColor: 'slate-700' },
-                        }}
-                        b={1}
-                        position="absolute"
-                      >
-                        position absolute box
-                      </Box>
-                    )}
-                  </Button>
-                </Flex>
-              </Box>
+}
 
-              <Box flex1 height={40} b={1} borderRadius={1} overflow="auto" position="relative" minWidth={80}>
-                <Flex jc="space-between">
-                  <Box position="sticky" top={4} textAlign="right" m={4}>
-                    (tooltip)
-                  </Box>
-                  <Box position="sticky" top={4} textAlign="right" m={4}>
-                    overflow hidden box
-                  </Box>
-                </Flex>
-                <Flex ml={4}>
-                  <Box>
-                    <Button onClick={() => setOpen2(!open2)} display="block" width={30}>
-                      Click me!
-                    </Button>
-                    {open2 && (
-                      <Tooltip
-                        height={50}
-                        borderRadius={2}
-                        p={3}
-                        mt={0.5}
-                        b={1}
-                        theme={{
-                          light: { bgColor: 'slate-300' },
-                          dark: { bgColor: 'slate-700' },
-                        }}
-                      >
-                        tooltip box
-                      </Tooltip>
-                    )}
-                  </Box>
-                </Flex>
-              </Box>
-            </Flex>
-          </Code>
-        </Flex>
-      </motion.div>
+function Mono({ children }: { children: ReactNode }) {
+  return (
+    <Box
+      tag="code"
+      px={1}
+      borderRadius={1}
+      fontSize={13}
+      theme={{ dark: { bgColor: 'slate-800', color: 'slate-200' }, light: { bgColor: 'slate-100', color: 'slate-800' } }}
+    >
+      {children}
     </Box>
   );
 }
