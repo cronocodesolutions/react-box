@@ -658,11 +658,20 @@ describe('Dropdown accessibility', () => {
     it('keeps the value in the flow as well, so the box does not collapse around a field it cannot see', () => {
       renderSearchable({ defaultValue: 'b' });
 
-      // The field is absolutely positioned and contributes no width. The same text, hidden from
-      // the accessibility tree, is what the box is actually sized by.
+      // The field is absolutely positioned and reaches neither the shell's width nor its height.
+      // The same text, hidden from the accessibility tree, is what the box is actually sized by.
       const spacer = screen.getByText('Banana');
       expect(spacer.tagName).toBe('SPAN');
       expect(spacer).not.toBe(field());
+    });
+
+    it('holds a no-break space when there is no value, so an empty field still has a line box', () => {
+      renderSearchable();
+
+      // A plain space collapses away under `white-space: nowrap` and leaves no line box at all,
+      // which is a control 20px shorter than the one next to it the moment it is opened.
+      const shell = field().parentElement!.parentElement!;
+      expect(shell.querySelector('span')?.textContent).toBe('\u00A0');
     });
 
     it('names the listbox and points aria-controls at it from the field', async () => {

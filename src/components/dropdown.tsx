@@ -583,17 +583,17 @@ function DropdownImpl<TVal>(props: Props<TVal>, ref: Ref<HTMLInputElement>): Rea
         comboboxProps={comboboxProps}
         onOpen={openFromField}
       />
-      {/* The field is absolutely positioned over the shell, so something in the flow has to give
-          the shell its width. The same text, invisible: `visibility` keeps the space and keeps the
-          copy out of the accessibility tree, where the field's own value already says it. */}
-      {display ??
-        (selectionText ? (
-          <Box tag="span" visibility="hidden">
-            {selectionText}
-          </Box>
-        ) : (
-          ' '
-        ))}
+      {/* The field is absolutely positioned over the shell, so nothing it contains reaches the
+          flow — and the shell has to be given both its width and its height by something that
+          does. The same text, invisible: `visibility` keeps the space and keeps the copy out of
+          the accessibility tree, where the field's own value already says it. A no-break space
+          when there is no text, because a plain one collapses away under `white-space: nowrap`
+          and leaves no line box at all — which is a shell 20px shorter than the one beside it. */}
+      {display ?? (
+        <Box tag="span" visibility="hidden">
+          {selectionText || '\u00A0'}
+        </Box>
+      )}
       {icon}
       {popup}
     </Box>
