@@ -9,8 +9,10 @@ import Form from '../../src/components/form';
 import Grid from '../../src/components/grid';
 import Overlay from '../../src/components/overlay';
 import RadioButton from '../../src/components/radioButton';
+import RadioGroup from '../../src/components/radioGroup';
 import Select from '../../src/components/select';
 import { H1, Img, Link, Nav, P } from '../../src/components/semantics';
+import Switch from '../../src/components/switch';
 import Textarea from '../../src/components/textarea';
 import Textbox from '../../src/components/textbox';
 import Tooltip from '../../src/components/tooltip';
@@ -20,10 +22,11 @@ import VisuallyHidden from '../../src/components/visuallyHidden';
  * One render per shipped component, in the smallest form its docs show — the thing a consumer
  * actually copies. `src/components/a11y.test.tsx` puts each through axe.
  *
- * A fixture is written the way a consumer would write it, not the way that scores best: a Checkbox
- * with no label stays without one, because supplying its own label is work the component owes and
- * A4 owns. What a fixture must not do is invent consumer content — an `<Img>` gets its `alt`,
- * since no library can guess that.
+ * A fixture is written the way a consumer would write it, not the way that scores best. Nothing
+ * here may wire up accessibility the component still owes: a Checkbox carries `label` because the
+ * component supplies the `<label>` itself now (A4), not because a fixture propped it up. What a
+ * fixture must not do is invent consumer content — an `<Img>` gets its `alt`, since no library can
+ * guess that.
  *
  * These live in `dev/` rather than beside the components because `src/components/*` is the build's
  * entry glob: a fixture file there would be published as an entry point.
@@ -72,22 +75,35 @@ export const fixtures: A11yFixture[] = [
   },
   {
     name: 'Checkbox',
-    render: () => <Checkbox name="terms" />,
-    knownViolations: {
-      label: 'A4 — a Checkbox has no way to carry its own label, so every consumer has to wire one by hand.',
-    },
+    render: () => <Checkbox name="terms" label="Accept the terms" />,
+  },
+  {
+    // The mixed state is markup of its own — `aria-checked="mixed"` has to agree with the DOM
+    // property, which axe checks, and only agrees because the effect setting it has run.
+    name: 'Checkbox (indeterminate)',
+    render: () => <Checkbox name="rows" label="Select all rows" indeterminate />,
+  },
+  {
+    name: 'Switch',
+    render: () => <Switch name="notify" label="Email notifications" />,
   },
   {
     name: 'RadioButton',
     render: () => (
       <Flex>
-        <RadioButton name="plan" value="free" />
-        <RadioButton name="plan" value="pro" />
+        <RadioButton name="plan" value="free" label="Free" />
+        <RadioButton name="plan" value="pro" label="Pro" />
       </Flex>
     ),
-    knownViolations: {
-      label: 'A4 — same gap as Checkbox, and the group needs a role="radiogroup" wrapper besides.',
-    },
+  },
+  {
+    name: 'RadioGroup',
+    render: () => (
+      <RadioGroup label="Plan" name="plan" defaultValue="free">
+        <RadioGroup.Item value="free" label="Free" />
+        <RadioGroup.Item value="pro" label="Pro" />
+      </RadioGroup>
+    ),
   },
   {
     name: 'Flex',

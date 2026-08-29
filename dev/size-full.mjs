@@ -15,8 +15,10 @@ import * as form from '../dist/components/form.mjs';
 import * as grid from '../dist/components/grid.mjs';
 import * as overlay from '../dist/components/overlay.mjs';
 import * as radioButton from '../dist/components/radioButton.mjs';
+import * as radioGroup from '../dist/components/radioGroup.mjs';
 import * as select from '../dist/components/select.mjs';
 import * as semantics from '../dist/components/semantics.mjs';
+import * as switchControl from '../dist/components/switch.mjs';
 import * as textarea from '../dist/components/textarea.mjs';
 import * as textbox from '../dist/components/textbox.mjs';
 import * as tooltip from '../dist/components/tooltip.mjs';
@@ -37,8 +39,10 @@ console.log(
   grid,
   overlay,
   radioButton,
+  radioGroup,
   select,
   semantics,
+  switchControl,
   textarea,
   textbox,
   tooltip,

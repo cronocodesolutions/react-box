@@ -252,12 +252,13 @@ Notes and limits:
   generates ancestor-scoped rules, so setting the theme class on `<html>` in a server component is
   enough.
 - **Most pre-built components render on the server too.** `Flex`, `Grid`, `Button`, `Textbox`,
-  `Textarea`, `RadioButton`, `BaseSvg` and the semantic tags (`H1`, `P`, `Link`, `Nav` …) are
+  `Textarea`, `RadioButton`, `BaseSvg`, `VisuallyHidden` and the semantic tags (`H1`, `P`, `Link`, `Nav` …) are
   hook-free wrappers around Box, and their published chunks import the package by name — so the
   `react-server` condition reaches them and they resolve the same hook-free Box. Import them
   straight into a Server Component.
 - **The stateful ones become client boundaries.** `Dropdown`, `Tooltip`, `Overlay`, `DataGrid`,
-  `Checkbox`, `Select` and `Form` hold state or measure the DOM, so their chunks ship a `'use client'` banner.
+  `Checkbox`, `Switch`, `RadioGroup`, `Select` and `Form` hold state or measure the DOM, so their chunks ship a
+  `'use client'` banner.
   A Server Component may still import one — the bundler opens the boundary for you — but it is
   hydrated like any client component, and its CSS is in the server-rendered HTML only if a client
   module of yours has already called `Box.configure({ sink: 'element' })`.

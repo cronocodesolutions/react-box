@@ -161,6 +161,14 @@ export default defineConfig(({ mode }) => {
                   if (module.startsWith('src/utils/environment/') || module.startsWith('src/utils/dom/')) return 'platform';
                   if (module === 'src/react/effects.ts') return 'effects';
 
+                  // The markup the form controls share. Server-safe — `RadioButton` reaches it —
+                  // but not part of `react-shared`, because it is the one shared module that
+                  // imports a *component* entry (`Flex`). In `react-shared` that edge is a cycle:
+                  // the server-safe components import that chunk, so the chunk importing one of
+                  // them back left `semantics.mjs` reading `StringUtils` before it was defined,
+                  // and would have put a component in the `react-server` entry's own graph.
+                  if (module.startsWith('src/react/forms/')) return 'forms';
+
                   // 'engine', not 'core': `core` is an entry name now (src/core.ts), and a chunk
                   // sharing it would fight the entry for `core.mjs`.
                   if (frameworkFree.has(module)) return 'engine';

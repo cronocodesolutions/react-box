@@ -57,7 +57,7 @@ export const SERVER_SAFE_COMPONENTS = [
  * import one — their chunks carry a `'use client'` banner, so the bundler opens a client boundary
  * instead of failing to resolve `useState`. Nothing here renders *on* the server.
  */
-export const CLIENT_ONLY_COMPONENTS = ['checkbox', 'dataGrid', 'dropdown', 'form', 'overlay', 'select', 'tooltip'];
+export const CLIENT_ONLY_COMPONENTS = ['checkbox', 'dataGrid', 'dropdown', 'form', 'overlay', 'radioGroup', 'select', 'switch', 'tooltip'];
 
 /**
  * Entries that are hooks all the way down and so can only run on the client. They carry the same

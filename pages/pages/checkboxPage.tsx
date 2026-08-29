@@ -1,8 +1,10 @@
 import { motion } from 'framer-motion';
 import { CheckSquare } from 'lucide-react';
+import { ReactNode } from 'react';
 import Box from '../../src/box';
 import Checkbox from '../../src/components/checkbox';
 import Flex from '../../src/components/flex';
+import { H2 } from '../../src/components/semantics';
 import Code from '../components/code';
 import PageHeader from '../components/pageHeader';
 import useTableOfContents from '../hooks/useTableOfContents';
@@ -15,24 +17,74 @@ export default function CheckboxPage() {
       <PageHeader icon={CheckSquare} title="Checkbox" description="Use Checkbox component to turn an option on or off." />
 
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
-        <Flex d="column" gap={8}>
+        <Flex d="column" gap={10}>
           <Code label="Import" language="jsx" code="import Checkbox from '@cronocode/react-box/components/checkbox';" />
 
-          <Code id="basic" label="Basic Checkbox" language="jsx">
-            <Checkbox defaultChecked />
+          <Code id="basic" label="Basic Checkbox" language="jsx" code={`<Checkbox label="Accept the terms" name="terms" defaultChecked />`}>
+            <Checkbox label="Accept the terms" name="terms" defaultChecked />
           </Code>
 
-          <Code id="clean" label="Clean Checkbox" language="jsx">
+          <Section id="label" title="The label is the component's job">
+            <Box>
+              <Mono>label</Mono> renders the text inside a <Mono>&lt;label&gt;</Mono> that wraps the input. The association is implicit, so
+              there is no <Mono>htmlFor</Mono>/<Mono>id</Mono> pair to generate or keep in sync, and the whole row is a click target — which
+              is what a checkbox row is expected to be. A checkbox with no label is the most common accessibility failure there is, so this
+              is not left to the consumer.
+            </Box>
+            <Box mt={4}>
+              Style that <Mono>&lt;label&gt;</Mono> with <Mono>labelProps</Mono>; every other Box prop still styles the box itself. Leave{' '}
+              <Mono>label</Mono> out and nothing wraps the input at all — the markup is exactly what it was before.
+            </Box>
+            <Box mt={4}>
+              <Code
+                language="jsx"
+                codeOnly
+                code={`<Checkbox label="Accept the terms" name="terms" labelProps={{ gap: 3, fontSize: 14 }} />`}
+              />
+            </Box>
+          </Section>
+
+          <Code
+            id="indeterminate"
+            label="Indeterminate"
+            language="jsx"
+            code={`<Checkbox label="Select all rows" name="rows" indeterminate />`}
+          >
+            <Checkbox label="Select all rows" name="rows" indeterminate />
+          </Code>
+
+          <Section id="mixed" title="The mixed state is announced, not just drawn">
+            <Box>
+              <Mono>indeterminate</Mono> is a DOM property, not an attribute — set it and the browser draws the dash, but the accessibility
+              tree still says checked or not checked. The component adds <Mono>aria-checked=&quot;mixed&quot;</Mono> alongside it, which is
+              what a screen reader reads out. A parent checkbox over a partly-selected list is the case this exists for.
+            </Box>
+            <Box mt={4}>
+              <Mono>indeterminate</Mono> is a pseudo-class style prop as well as a state, so the tuple form carries both:{' '}
+              <Mono>indeterminate=&#123;[mixed, &#123; opacity: 0.6 &#125;]&#125;</Mono> is the state first and what{' '}
+              <Mono>:indeterminate</Mono> should look like second.
+            </Box>
+          </Section>
+
+          <Code
+            id="disabled"
+            label="Disabled Checkbox"
+            language="jsx"
+            code={`<Checkbox label="Accept the terms" disabled defaultChecked />`}
+          >
+            <Checkbox label="Accept the terms" disabled defaultChecked />
+          </Code>
+
+          <Code id="clean" label="Clean Checkbox" language="jsx" code={`<Checkbox clean defaultChecked />`}>
             <Checkbox clean defaultChecked />
           </Code>
 
-          <Code id="disabled" label="Disabled Checkbox" language="jsx">
-            <Checkbox disabled defaultChecked />
-          </Code>
-
-          <Code id="indeterminate" label="Indeterminate Checkbox" language="jsx">
-            <Checkbox indeterminate />
-          </Code>
+          <Section id="switch" title="On or off, rather than checked?">
+            <Box>
+              A setting that takes effect immediately is a switch, not a checkbox. <Mono>Switch</Mono> is the same input underneath with{' '}
+              <Mono>role=&quot;switch&quot;</Mono> and a track-and-thumb style — see its page.
+            </Box>
+          </Section>
         </Flex>
       </motion.div>
     </Box>
@@ -41,7 +93,37 @@ export default function CheckboxPage() {
 
 const sidebarLinks = [
   { id: 'basic', label: 'Basic Checkbox' },
-  { id: 'clean', label: 'Clean Checkbox' },
+  { id: 'label', label: 'The label' },
+  { id: 'indeterminate', label: 'Indeterminate' },
+  { id: 'mixed', label: 'The mixed state' },
   { id: 'disabled', label: 'Disabled Checkbox' },
-  { id: 'indeterminate', label: 'Indeterminate Checkbox' },
+  { id: 'clean', label: 'Clean Checkbox' },
+  { id: 'switch', label: 'Or a Switch' },
 ] as const;
+
+function Section({ id, title, children }: { id: string; title: string; children: ReactNode }) {
+  return (
+    <Box id={id}>
+      <H2 fontSize={20} fontWeight={600} mb={4} theme={{ dark: { color: 'white' }, light: { color: 'slate-900' } }}>
+        {title}
+      </H2>
+      <Box fontSize={15} lineHeight={26} theme={{ dark: { color: 'slate-400' }, light: { color: 'slate-600' } }}>
+        {children}
+      </Box>
+    </Box>
+  );
+}
+
+function Mono({ children }: { children: ReactNode }) {
+  return (
+    <Box
+      tag="code"
+      px={1}
+      borderRadius={1}
+      fontSize={13}
+      theme={{ dark: { bgColor: 'slate-800', color: 'slate-200' }, light: { bgColor: 'slate-100', color: 'slate-800' } }}
+    >
+      {children}
+    </Box>
+  );
+}

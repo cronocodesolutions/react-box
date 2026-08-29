@@ -6,14 +6,15 @@ import { ignoreLogs } from '../../dev/tests';
 import Button from './button';
 import Checkbox from './checkbox';
 import { Label } from './semantics';
+import Switch from './switch';
 
 /**
  * The template for a keyboard-interaction test — the shape A3–A7 copy.
  *
  * Checkbox is the easy case on purpose: it renders a real `<input type="checkbox">`, so the
  * browser already supplies the APG checkbox pattern (focusable, Space toggles, submits with the
- * form) and there is something passing to assert. What the `it.todo`s below name is the rest of
- * the pattern the component still leaves to the consumer; A4 turns each of them into a real test.
+ * form). What A1 recorded as `it.todo` was the rest of the contract, which A4 has now closed: the
+ * component labels itself, reports the mixed state, and has a sibling that wears `role="switch"`.
  *
  * Pattern: https://www.w3.org/WAI/ARIA/apg/patterns/checkbox/
  */
@@ -92,9 +93,36 @@ describe('Checkbox accessibility', () => {
       await expectNoAxeViolations(container);
     });
 
-    // A4 — the gaps. Each becomes a real test when the component closes it.
-    it.todo('labels itself from a `label` prop instead of leaving htmlFor/id to the consumer');
-    it.todo('reports aria-checked="mixed" when indeterminate, not just the DOM property');
-    it.todo('renders as role="switch" with Space/Enter toggling, via the new Switch component');
+    it('labels itself from a `label` prop instead of leaving htmlFor/id to the consumer', async () => {
+      const { container } = render(<Checkbox name="terms" label="Accept the terms" />);
+
+      expect(screen.getByRole('checkbox', { name: 'Accept the terms' })).toBeTruthy();
+      await expectNoAxeViolations(container);
+    });
+
+    it('reports aria-checked="mixed" when indeterminate, not just the DOM property', async () => {
+      const { container } = render(<Checkbox name="terms" label="Select all" indeterminate />);
+
+      const control = screen.getByRole('checkbox', { name: 'Select all' }) as HTMLInputElement;
+
+      expect(control.indeterminate).toBe(true);
+      expect(control.getAttribute('aria-checked')).toBe('mixed');
+      await expectNoAxeViolations(container);
+    });
+
+    it('renders as role="switch" with Space/Enter toggling, via the new Switch component', async () => {
+      const user = keyboard();
+      const { container } = render(<Switch name="notify" label="Email notifications" />);
+
+      const control = screen.getByRole('switch', { name: 'Email notifications' }) as HTMLInputElement;
+      await expectNoAxeViolations(container);
+
+      await user.pressTab();
+      await user.press(' ');
+      expect(control.checked).toBe(true);
+
+      await user.press('Enter');
+      expect(control.checked).toBe(false);
+    });
   });
 });

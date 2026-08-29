@@ -1,5 +1,6 @@
 import { forwardRef, Ref, useEffect, useRef, useImperativeHandle, RefAttributes } from 'react';
 import Box, { BoxTagProps, BoxProps } from '../box';
+import LabelledControl from '../react/forms/labelledControl';
 import { ComponentsAndVariants } from '../types';
 import ObjectUtils from '../utils/object/objectUtils';
 
@@ -18,22 +19,56 @@ interface Props<TKey extends keyof ComponentsAndVariants> extends CheckboxProps<
   autoFocus?: boolean;
   readOnly?: boolean;
   defaultChecked?: boolean;
+  /**
+   * The text beside the checkbox — rendered inside a `<label>` that wraps the input, so the
+   * association is the component's job. Without it a consumer has to wire `htmlFor`/`id` by hand,
+   * and a checkbox with no label is the single most common accessibility failure there is.
+   */
+  label?: React.ReactNode;
+  /** Styles for the wrapping `<label>`: the row's layout, not the box's own appearance. */
+  labelProps?: BoxProps<'label'>;
 }
 
+/**
+ * The APG checkbox — which is to say, a real `<input type="checkbox">`.
+ *
+ * Almost nothing here is behaviour: the platform already supplies focus, Space to toggle, the
+ * checked state and form submission, and every custom-drawn checkbox that reimplements those gets
+ * some of them wrong. What the component owes is the part the platform cannot guess — the label
+ * beside it, and the mixed state.
+ *
+ * Pattern: https://www.w3.org/WAI/ARIA/apg/patterns/checkbox/
+ */
 function CheckboxImpl<TKey extends keyof ComponentsAndVariants>(props: Props<TKey>, ref: Ref<HTMLInputElement>) {
-  const newProps = ObjectUtils.buildProps(props, tagProps, { type: 'checkbox' });
-  const indeterminate = Array.isArray(props.indeterminate) ? props.indeterminate[0] : props.indeterminate;
+  const { label, labelProps, ...controlProps } = props;
+  // `indeterminate` is a pseudo-class style prop (`:indeterminate`) as well as a state, so it
+  // arrives as a boolean or as `[state, styles]`. Only a boolean says anything about the control's
+  // value — anything else is styles a JavaScript caller passed on their own, and `Boolean(styles)`
+  // would have pinned the checkbox in the state those styles were only meant to describe.
+  const flag = Array.isArray(props.indeterminate) ? props.indeterminate[0] : props.indeterminate;
+  const indeterminate = typeof flag === 'boolean' ? flag : false;
+
+  const newProps = ObjectUtils.buildProps(controlProps, tagProps, {
+    type: 'checkbox',
+    // The DOM property alone is what the browser draws from; assistive technology reads the
+    // accessibility tree, where a checkbox with no `aria-checked` is either checked or not.
+    ...(indeterminate ? { 'aria-checked': 'mixed' } : {}),
+  });
 
   const checkboxRef = useRef<HTMLInputElement>(null);
   useImperativeHandle<HTMLInputElement | null, HTMLInputElement | null>(ref, () => checkboxRef.current);
 
   useEffect(() => {
     if (checkboxRef.current) {
-      checkboxRef.current.indeterminate = Boolean(indeterminate);
+      checkboxRef.current.indeterminate = indeterminate;
     }
   }, [checkboxRef, indeterminate]);
 
-  return <Box tag="input" ref={checkboxRef} component={'checkbox' as TKey} {...newProps} />;
+  return (
+    <LabelledControl label={label} labelProps={labelProps}>
+      <Box tag="input" ref={checkboxRef} component={'checkbox' as TKey} {...newProps} />
+    </LabelledControl>
+  );
 }
 
 const Checkbox = forwardRef(CheckboxImpl);

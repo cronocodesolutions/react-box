@@ -81,7 +81,8 @@ Different props have different dividers — this is the #1 source of bugs:
 Pre-built components wrap Box with the correct HTML tag. Each is a separate entry point (`@cronocode/react-box/components/...`):
 
 - `flex.tsx` / `grid.tsx` — Layout (display flex/grid)
-- `button.tsx`, `textbox.tsx`, `checkbox.tsx`, `radioButton.tsx`, `textarea.tsx` — Form elements
+- `button.tsx`, `textbox.tsx`, `textarea.tsx` — Form elements
+- `checkbox.tsx`, `switch.tsx`, `radioButton.tsx`, `radioGroup.tsx` — The A4 form controls: real native inputs, each with a `label` prop that renders the wrapping `<label>` itself. `Checkbox` reports `aria-checked="mixed"` alongside the `indeterminate` property; `Switch` is `role="switch"` over the same input (Enter toggles too); `RadioGroup` is the APG radio group — the role, the shared `name`, and the arrow keys — with `RadioGroup.Item` children. The shared `<label>` markup lives in `src/react/forms/labelledControl.tsx`
 - `overlay.tsx` — The positioning primitive: a portal rendered at the place it is declared (via `usePortalContainer`), no ARIA and no open state. `Dropdown` and the DataGrid menu stand on it
 - `tooltip.tsx` — The APG tooltip on top of `Overlay`: `role="tooltip"` + `aria-describedby`, hover and focus with delays, Escape, and the WCAG 1.4.13 rules (dismissible, hoverable, persistent). Trigger is a render prop
 - `dropdown.tsx` — Select-only dropdown (A5 owns its ARIA)

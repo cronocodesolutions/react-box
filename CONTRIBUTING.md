@@ -112,7 +112,9 @@ react-box/
 │   │   ├── dropdown.tsx
 │   │   ├── textbox.tsx
 │   │   ├── textarea.tsx
-│   │   ├── radioButton.tsx
+│   │   ├── radioButton.tsx      # One native radio, with the <label> the pattern needs
+│   │   ├── radioGroup.tsx        # The APG radio group: the role, the shared name, the arrows
+│   │   ├── switch.tsx            # role="switch" over the same input Checkbox renders
 │   │   ├── tooltip.tsx           # The APG tooltip, assembled from the a11y primitives
 │   │   ├── overlay.tsx           # Its positioning half: a portal at the place it is declared
 │   │   ├── form.tsx
@@ -212,17 +214,18 @@ The same command prints the adapter ratio published in the README:
 
 ### The chunk split
 
-`vite.config.ts` derives three shared chunks from those same two graph walks, so a new module
+`vite.config.ts` derives the shared chunks from those same two graph walks, so a new module
 cannot be classified one way by the checks and another by the bundler:
 
-| Chunk          | What is in it                                                                                          | Who imports it                               |
-| -------------- | ------------------------------------------------------------------------------------------------------ | -------------------------------------------- |
-| `engine`       | everything `src/core.ts` reaches — framework-free                                                      | every entry                                  |
-| `react-shared` | hook-free React modules, plus what only a server-safe component uses                                   | `box`, `rsc`, components                     |
-| `behavior`     | `src/react/a11y/**` — the primitives, React and nothing else                                           | `a11y`, and the components A3+ build on them |
-| `platform`     | `src/utils/environment/**`, `src/utils/dom/**` — is there a DOM, and did this event happen inside that | every group, engine included                 |
-| `effects`      | `src/react/effects.ts` — which effect to use in this environment                                       | `client`, `behavior`                         |
-| `client`       | hooks, effects, the theme provider                                                                     | `box`, the client-only components            |
+| Chunk          | What is in it                                                                                          | Who imports it                                    |
+| -------------- | ------------------------------------------------------------------------------------------------------ | ------------------------------------------------- |
+| `engine`       | everything `src/core.ts` reaches — framework-free                                                      | every entry                                       |
+| `react-shared` | hook-free React modules, plus what only a server-safe component uses                                   | `box`, `rsc`, components                          |
+| `behavior`     | `src/react/a11y/**` — the primitives, React and nothing else                                           | `a11y`, and the components A3+ build on them      |
+| `platform`     | `src/utils/environment/**`, `src/utils/dom/**` — is there a DOM, and did this event happen inside that | every group, engine included                      |
+| `effects`      | `src/react/effects.ts` — which effect to use in this environment                                       | `client`, `behavior`                              |
+| `forms`        | `src/react/forms/**` — the `<label>` the form controls share                                           | `checkbox`, `radioButton`, `radioGroup`, `switch` |
+| `client`       | hooks, effects, the theme provider                                                                     | `box`, the client-only components                 |
 
 `core.mjs` imports `engine` and nothing else; `rsc.mjs` may not import `client`, and neither may a
 server-safe component — which is why `serverSafeModules()`, not the `react-server` walk alone,
@@ -243,6 +246,12 @@ client code and were correct inside `client`, but that made `@cronocode/react-bo
 chunk holding the styling binding and the theme provider: 17.8 KB gzipped for a consumer who wanted
 `useDismiss` alone. Split out, the entry is 2.2 KB and reaches no engine at all. `npm run size` is
 what notices this; the budget is per entry for exactly that reason.
+
+`forms` is a group for a third reason: it is the one shared module that imports a _component_
+entry (`Flex`). Left in `react-shared` — which is where a module the server-safe components reach
+otherwise lands — that edge is a cycle, since those same components import `react-shared` back. It
+showed up as `semantics.mjs` reading `StringUtils` before it was defined, and would also have put
+a component inside the `react-server` entry's own graph.
 
 ### How a component reaches Box
 
@@ -1121,6 +1130,8 @@ dist/
 ├── platform.cjs
 ├── effects.mjs      # Which React effect runs where — shared by the binding and the primitives
 ├── effects.cjs
+├── forms.mjs        # The label wrapper the form controls share — server-safe, imports Flex
+├── forms.cjs
 ├── core.mjs         # Engine chunk — no client hook reaches it, so rsc.mjs can import it
 ├── core.cjs
 ├── client.mjs       # The client binding: flush effect, theme provider, shared hooks

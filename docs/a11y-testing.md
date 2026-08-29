@@ -94,8 +94,6 @@ What the sweep finds today, with the step that owns each fix. This is the measur
 
 | Component                   | Rule                   | What is wrong                                                                      | Owner |
 | --------------------------- | ---------------------- | ---------------------------------------------------------------------------------- | ----- |
-| Checkbox                    | `label`                | No way to carry its own label; every consumer wires `htmlFor`/`id` by hand         | A4    |
-| RadioButton                 | `label`                | Same, and the group needs a `role="radiogroup"` wrapper besides                    | A4    |
 | Dropdown (open)             | `aria-allowed-attr`    | Items carry `aria-selected` on a plain `div` — legal only with `role="option"`     | A5    |
 | Dropdown (searchable, open) | `nested-interactive`   | The search input renders inside the trigger `<button>`: a focusable in a focusable | A6    |
 | Select (open)               | `button-name`          | With nothing selected and no placeholder, the trigger renders empty and unnamed    | A5    |
@@ -104,7 +102,10 @@ What the sweep finds today, with the step that owns each fix. This is the measur
 
 Everything else in the sweep is clean — including, and this is the point of the section above, Dropdown and Select in the states where they have no ARIA at all to get wrong.
 
-**Closed since:** Tooltip had no violations to fix here, which is exactly the limitation this document opens with — it had no ARIA at all, and axe cannot fail what is not there. A3 made it the APG pattern, and the sweep now covers it open as well as closed.
+**Closed since:**
+
+- **A3 — Tooltip** had no violations to fix here, which is exactly the limitation this document opens with: it had no ARIA at all, and axe cannot fail what is not there. A3 made it the APG pattern, and the sweep now covers it open as well as closed.
+- **A4 — Checkbox and RadioButton** both failed `label`. Both now render the `<label>` themselves from a `label` prop, so their fixtures carry no `knownViolations` and the sweep would fail if the rule came back. The sweep also gained `Checkbox (indeterminate)` — where `aria-checked="mixed"` has to agree with the DOM property — plus `Switch` and `RadioGroup`, neither of which existed when the baseline was measured.
 
 ---
 

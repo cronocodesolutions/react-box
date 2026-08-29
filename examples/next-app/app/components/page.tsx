@@ -80,10 +80,9 @@ export default function ComponentsPage() {
           <Span fontWeight={600}>Checkbox</Span> runs an effect, so it ships a <code>&apos;use client&apos;</code> banner and the bundler
           makes it a client boundary. Importing it here used to fail the build outright.
         </P>
-        <Flex ai="center" gap={3} mt={4}>
-          <Checkbox name="agree" defaultChecked />
-          <Label fontSize={14}>Rendered from a Server Component</Label>
-        </Flex>
+        <Box mt={4}>
+          <Checkbox name="agree" label="Rendered from a Server Component" labelProps={{ fontSize: 14 }} defaultChecked />
+        </Box>
       </Box>
 
       <Link props={{ href: '/' }} fontSize={14} color="sky-600" theme={{ dark: { color: 'sky-400' } }}>

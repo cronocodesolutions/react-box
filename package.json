@@ -80,7 +80,7 @@
         "react-dom"
       ],
       "gzip": true,
-      "limit": "17 KB"
+      "limit": "17.5 KB"
     },
     {
       "name": "Box in a Server Component (react-server entry)",
@@ -126,7 +126,7 @@
         "react-dom"
       ],
       "gzip": true,
-      "limit": "42 KB"
+      "limit": "43 KB"
     }
   ],
   "repository": {
