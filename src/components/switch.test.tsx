@@ -103,6 +103,19 @@ describe('Switch', () => {
     expect(control().checked).toBe(false);
   });
 
+  // The thumb travels on `checked: { before: { translateX: 4 } }` in the `switch` component style,
+  // which is a pseudo-element nested inside a pseudo-class — the combination that used to be
+  // assembled as `::before:checked`, invalid CSS the browser throws the whole rule away for. The
+  // class was on the element and the switch simply did not move; see `pseudoSelectors.test.ts`.
+  it('moves its thumb on :checked — the rule reaches the stylesheet, with ::before last', () => {
+    render(<Switch name="notify" label="Email notifications" />);
+
+    const css = (document.getElementById('crono-styles') as HTMLStyleElement | null)?.textContent ?? '';
+
+    expect(css).toContain(':checked::before{transform:translateX(1rem)}');
+    expect(css).not.toContain('::before:checked');
+  });
+
   it('reports its change to onChange like any other control', async () => {
     const onChange = vi.fn();
     const user = keyboard();

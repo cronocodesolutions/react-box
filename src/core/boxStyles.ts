@@ -1340,6 +1340,30 @@ const theme = {
 };
 
 export const pseudoClasses = { ...pseudo1, ...pseudo2, ...theme };
+
+/**
+ * The three of those that are pseudo-*elements* rather than pseudo-classes.
+ *
+ * They have to come last in a compound selector. A combination is otherwise assembled in the order
+ * the keys are declared above, which put `::before` in the middle: `checked: { before: {…} }`
+ * generated `::before:checked`, and a selector with a pseudo-element anywhere but the end is
+ * invalid, so the browser drops the whole rule rather than the offending part. `:checked::before`
+ * is what was meant, and `hover: { before: {…} }` only worked because `hover` happens to be
+ * declared first.
+ */
+export const pseudoElements: readonly (keyof typeof pseudo1)[] = ['before', 'after', 'placeholderStyles'];
+
+function isPseudoElement(key: keyof typeof pseudoClasses): boolean {
+  return (pseudoElements as readonly string[]).includes(key);
+}
+
+/** A set of pseudo keys as one compound selector suffix, with any pseudo-element last. */
+export function pseudoSelector(keys: readonly (keyof typeof pseudoClasses)[]): string {
+  const elements = keys.filter(isPseudoElement);
+  const ordered = elements.length === 0 ? keys : [...keys.filter((key) => !isPseudoElement(key)), ...elements];
+
+  return ordered.map((key) => pseudoClasses[key]).join('');
+}
 export const pseudoClassesWeight = Object.entries(pseudoClasses).reduce(
   (acc, [key], index) => {
     acc[key as keyof typeof pseudoClasses] = Math.pow(2, index);
