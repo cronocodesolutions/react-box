@@ -833,7 +833,7 @@ import Dropdown from '@cronocode/react-box/components/dropdown';
 | `label`                  | `ReactNode`                                          | The control's name, rendered above it and wired with `aria-labelledby` |
 | `labelProps`             | `BoxProps<'div'>`                                    | Styles for the wrapper the label and the trigger share                 |
 | `multiple`               | `boolean`                                            | Multi-select mode                                                      |
-| `isSearchable`           | `boolean`                                            | Show search input when open                                            |
+| `isSearchable`           | `boolean`                                            | Editable combobox: a text field that filters the list (see Accessibility) |
 | `searchPlaceholder`      | `string`                                             | Search input placeholder                                               |
 | `hideIcon`               | `boolean`                                            | Hide chevron icon                                                      |
 | `showCheckbox`           | `boolean`                                            | Show checkboxes in multiple mode                                       |
@@ -843,7 +843,7 @@ import Dropdown from '@cronocode/react-box/components/dropdown';
 | `iconProps`              | `BoxStyleProps`                                      | Style overrides for the chevron icon container (`dropdown.icon`)       |
 | `variant`                | `ClassNameType`                                      | Propagates to root **and all child sub-components**                    |
 
-Also accepts all `BoxProps` (styling props) which apply to the root button element.
+Also accepts all `BoxProps` (styling props), which apply to the root element — a `<button>`, or the wrapper around the text field when `isSearchable`. Anything in `props` goes to the combobox itself: the button, or that field.
 
 ### Sub-Components
 
@@ -883,8 +883,15 @@ has no accessible name at all.
 <Dropdown<string> props={{ 'aria-label': 'Fruit' }}>…</Dropdown>
 ```
 
-`isSearchable` is the exception: that mode still nests the search box inside the trigger and is not yet
-the editable-combobox pattern.
+`isSearchable` switches patterns rather than decorating this one: the **editable combobox**. The search
+`<input>` _is_ the combobox — `role="combobox"`, `aria-autocomplete="list"`, and whatever you pass in
+`props` all land on it, so nothing focusable sits inside anything else focusable. The field shows the
+selection as its value and the query while one is being typed; a custom `Dropdown.Display` keeps drawing
+the selection instead, since arbitrary JSX cannot be a field's value. Its keyboard map differs: the
+printable keys type (no typeahead — the visible field owns them), Space types a space, Home/End and the
+left/right arrows move the caret and hand the highlight back to the field, only Down/Up reach the listbox,
+Enter chooses the highlighted option, and Escape closes the listbox before a second Escape clears the
+field. Filtering never moves the highlight onto a suggestion — that is the user's to do with an arrow.
 
 ### Style Customization
 
@@ -956,7 +963,7 @@ import Select from '@cronocode/react-box/components/select';
   value={selected} onChange={(value) => setSelected(value!)} />
 
 // Multiple + search + custom display
-<Select<User, number> data={users} multiple showCheckbox isSearchable searchPlaceholder="Search..."
+<Select<User, number> label="Users" data={users} multiple showCheckbox isSearchable searchPlaceholder="Search..."
   def={{
     valueKey: 'id', displayKey: 'name', placeholder: 'Pick users...',
     selectAllText: 'Select all', emptyText: 'No results',
@@ -977,7 +984,7 @@ import Select from '@cronocode/react-box/components/select';
 | `selectAllText`   | `string`                                       | Select all option text (multiple mode)                 |
 | `emptyText`       | `string`                                       | Empty search results text                              |
 
-Also accepts: `data` (TRow[]), `value`/`defaultValue`, `label`/`labelProps`, `multiple`, `isSearchable`, `searchPlaceholder`, `showCheckbox`, `hideIcon`, `name`, `onChange`, `itemsProps`, `iconProps`, `variant`, and all BoxProps. Same styling, variants and combobox accessibility as Dropdown — including owing it a name.
+Also accepts: `data` (TRow[]), `value`/`defaultValue`, `label`/`labelProps`, `multiple`, `isSearchable`, `searchPlaceholder`, `showCheckbox`, `hideIcon`, `name`, `onChange`, `itemsProps`, `iconProps`, `variant`, and all BoxProps. Same styling, variants and combobox accessibility as Dropdown — including owing it a name, and including `isSearchable` switching it to the editable combobox.
 
 ---
 

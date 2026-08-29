@@ -105,7 +105,7 @@ describe('Select', () => {
         def: { valueKey: 'id', displayKey: 'name', emptyText: 'No fruits found' },
       });
       openSelect();
-      fireEvent.change(screen.getByRole('textbox'), { target: { value: 'zzz' } });
+      fireEvent.change(screen.getByRole('combobox'), { target: { value: 'zzz' } });
       expect(screen.getByText('No fruits found')).toBeTruthy();
     });
 

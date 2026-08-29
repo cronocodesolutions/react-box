@@ -426,37 +426,264 @@ describe('Dropdown accessibility', () => {
     });
   });
 
-  describe('The searchable mode is not this pattern (A6)', () => {
-    /**
-     * Bug #47, pinned. A5 turned the trigger into a `role="combobox"`, and a combobox is one of
-     * the roles that *may* contain a focusable descendant — so axe's `nested-interactive` stopped
-     * firing on the search box nested inside the trigger without anything about it changing.
-     *
-     * The editable combobox puts `role="combobox"` on the input itself, which removes the nesting
-     * as a side effect. This test fails the moment A6 does that, which is the point of it.
-     */
-    it('still renders the search input inside the trigger', async () => {
-      const user = keyboard();
-      renderDropdown({ isSearchable: true, searchPlaceholder: 'Search' });
-      await user.pressTab();
-      await user.pressTab();
-      await user.pressArrow('Down');
+  /**
+   * The APG *editable* combobox: the same listbox, reached from a text field instead of a button.
+   *
+   * Pattern: https://www.w3.org/WAI/ARIA/apg/patterns/combobox/
+   *
+   * | Key                 | Closed                              | Open                                   |
+   * | ------------------- | ----------------------------------- | -------------------------------------- |
+   * | printable character | types, and opens on what it matches  | types, filters, highlight goes nowhere |
+   * | Down / Up           | opens at an end or the selection     | moves the highlight                    |
+   * | Alt + Down          | opens, moving nothing                | —                                      |
+   * | Enter               | —                                    | chooses the highlight, if there is one |
+   * | Space               | types a space                        | types a space                          |
+   * | Home / End          | moves the caret                      | moves the caret, highlight back to it  |
+   * | Left / Right        | moves the caret                      | moves the caret, highlight back to it  |
+   * | Escape              | clears the field                     | closes, keeping what was typed         |
+   * | Tab                 | leaves the control                   | chooses the highlight, then leaves     |
+   *
+   * The field is the combobox, so the two things worth asserting are that DOM focus never leaves
+   * it and that `aria-activedescendant` — the *only* thing telling a screen reader where the
+   * arrows are — is on it and points at the right option.
+   */
+  describe('Keyboard — editable (isSearchable)', () => {
+    const renderSearchable = (props?: Omit<Parameters<typeof Dropdown<string>>[0], 'children'>) =>
+      render(
+        <>
+          <Button>Before</Button>
+          <Dropdown<string> label="Fruit" isSearchable searchPlaceholder="Search" {...props}>
+            <Dropdown.Item value="a">Apple</Dropdown.Item>
+            <Dropdown.Item value="b">Banana</Dropdown.Item>
+            <Dropdown.Item value="bl">Blueberry</Dropdown.Item>
+          </Dropdown>
+          <Button>After</Button>
+        </>,
+      );
 
-      const search = screen.getByPlaceholderText('Search');
-      expect(trigger().contains(search)).toBe(true);
-      expect(search.getAttribute('role')).toBeNull();
+    const field = () => trigger() as HTMLInputElement;
+
+    /** Tab into the control — one press past the button before it, because it is one tab stop. */
+    const tabIn = async (user: ReturnType<typeof keyboard>) => {
+      await user.pressTab();
+      await user.pressTab();
+    };
+
+    it('is the field itself that carries the combobox, so nothing focusable sits inside another', () => {
+      renderSearchable();
+
+      const combobox = screen.getByRole('combobox', { name: 'Fruit' });
+      expect(combobox.tagName).toBe('INPUT');
+      // Bug #47: the search box used to render inside the trigger `<button>`.
+      expect(combobox.closest('button')).toBeNull();
+      expect(combobox.getAttribute('aria-autocomplete')).toBe('list');
     });
 
-    it('names the highlighted option on the search box, which is what holds focus there', async () => {
+    it('is one tab stop, and keeps focus in the field the whole way through', async () => {
       const user = keyboard();
-      renderDropdown({ isSearchable: true, searchPlaceholder: 'Search' });
-      await user.pressTab();
-      await user.pressTab();
+      renderSearchable();
+
+      await tabIn(user);
+      expectFocusOn(field());
+
+      await user.pressArrow('Down');
+      expectFocusOn(field());
+
+      await user.type('ban');
+      expectFocusOn(field());
+    });
+
+    it('opens on Down with the highlight on the first option, and on Up at the last', async () => {
+      const user = keyboard();
+      renderSearchable();
+      await tabIn(user);
+
+      await user.pressArrow('Down');
+      expect(isOpen()).toBe(true);
+      expect(highlighted()).toBe('Apple');
+
+      await user.press('Escape');
+      await user.pressArrow('Up');
+      expect(highlighted()).toBe('Blueberry');
+    });
+
+    it('opens on Alt+Down without highlighting anything', async () => {
+      const user = keyboard();
+      renderSearchable();
+      await tabIn(user);
+
+      await user.press('Alt>');
+      await user.pressArrow('Down');
+      await user.press('/Alt');
+
+      expect(isOpen()).toBe(true);
+      expect(highlighted()).toBeUndefined();
+    });
+
+    it('types into the field, which opens the listbox and filters it', async () => {
+      const user = keyboard();
+      renderSearchable();
+      await tabIn(user);
+
+      await user.type('bl');
+
+      expect(isOpen()).toBe(true);
+      expect(field().value).toBe('bl');
+      expect(options().map((option) => option.textContent)).toEqual(['Blueberry']);
+    });
+
+    it('leaves the highlight where it is — on nothing — while the filtering happens', async () => {
+      const user = keyboard();
+      renderSearchable();
+      await tabIn(user);
+      await user.pressArrow('Down');
+      expect(highlighted()).toBe('Apple');
+
+      await user.type('b');
+
+      // APG list autocomplete: the suggestions change, visual focus stays in the textbox. An index
+      // kept across a filter would also be pointing at a different option than it was.
+      expect(highlighted()).toBeUndefined();
+
+      await user.pressArrow('Down');
+      expect(highlighted()).toBe('Banana');
+    });
+
+    it('types a space instead of choosing, since the field owns the printable keys', async () => {
+      const user = keyboard();
+      renderSearchable();
+      await tabIn(user);
       await user.pressArrow('Down');
 
-      const search = screen.getByPlaceholderText('Search');
-      expect(trigger().getAttribute('aria-activedescendant')).toBeNull();
-      expect(document.getElementById(search.getAttribute('aria-activedescendant')!)?.textContent).toBe('Apple');
+      await user.press(' ');
+
+      expect(isOpen()).toBe(true);
+      expect(field().value).toBe(' ');
+    });
+
+    it('hands the highlight back to the field on Home, End and the left/right arrows', async () => {
+      const user = keyboard();
+      renderSearchable();
+      await tabIn(user);
+
+      for (const key of ['Home', 'End'] as const) {
+        await user.pressArrow('Down');
+        expect(highlighted()).toBe('Apple');
+        await user.press(key);
+        expect(highlighted()).toBeUndefined();
+        expect(isOpen()).toBe(true);
+      }
+
+      for (const direction of ['Left', 'Right'] as const) {
+        await user.pressArrow('Down');
+        expect(highlighted()).toBe('Apple');
+        await user.pressArrow(direction);
+        expect(highlighted()).toBeUndefined();
+        expect(isOpen()).toBe(true);
+      }
+    });
+
+    it('chooses the highlighted option on Enter and puts it in the field', async () => {
+      const user = keyboard();
+      renderSearchable();
+      await tabIn(user);
+      await user.pressArrow('Down');
+      await user.pressArrow('Down');
+
+      await user.press('Enter');
+
+      expect(isOpen()).toBe(false);
+      expect(field().value).toBe('Banana');
+      expectFocusOn(field());
+    });
+
+    it('does nothing on Enter while the highlight is still on the field', async () => {
+      const user = keyboard();
+      renderSearchable();
+      await tabIn(user);
+      await user.type('ba');
+
+      await user.press('Enter');
+
+      expect(isOpen()).toBe(true);
+      expect(selected()).toEqual([]);
+    });
+
+    it('closes on Escape keeping what was typed, and clears the field on a second Escape', async () => {
+      const user = keyboard();
+      renderSearchable();
+      await tabIn(user);
+      await user.type('ba');
+
+      await user.press('Escape');
+      expect(isOpen()).toBe(false);
+      expect(field().value).toBe('ba');
+
+      await user.press('Escape');
+      expect(field().value).toBe('');
+    });
+
+    it('puts the field back to the value when a click outside closes it', async () => {
+      const user = keyboard();
+      renderSearchable({ defaultValue: 'a' });
+      await tabIn(user);
+      await user.type('zzz');
+
+      await user.click(screen.getByRole('button', { name: 'Before' }));
+
+      expect(isOpen()).toBe(false);
+      // A query left in the field would be describing a filter that is no longer applied.
+      expect(field().value).toBe('Apple');
+    });
+
+    it('chooses the highlighted option on Tab and then leaves the control', async () => {
+      const user = keyboard();
+      renderSearchable();
+      await tabIn(user);
+      await user.pressArrow('Down');
+
+      await user.pressTab();
+
+      expect(isOpen()).toBe(false);
+      expect(field().value).toBe('Apple');
+      expectFocusOn(screen.getByRole('button', { name: 'After' }));
+    });
+
+    it('shows the selection as the field value, which is what a combobox is announced by', () => {
+      renderSearchable({ defaultValue: 'b' });
+
+      expect(field().value).toBe('Banana');
+    });
+
+    it('keeps the value in the flow as well, so the box does not collapse around a field it cannot see', () => {
+      renderSearchable({ defaultValue: 'b' });
+
+      // The field is absolutely positioned and contributes no width. The same text, hidden from
+      // the accessibility tree, is what the box is actually sized by.
+      const spacer = screen.getByText('Banana');
+      expect(spacer.tagName).toBe('SPAN');
+      expect(spacer).not.toBe(field());
+    });
+
+    it('names the listbox and points aria-controls at it from the field', async () => {
+      const user = keyboard();
+      renderSearchable();
+      await tabIn(user);
+      await user.pressArrow('Down');
+
+      expect(document.getElementById(field().getAttribute('aria-controls')!)).toBe(screen.getByRole('listbox'));
+    });
+
+    it('has no axe violations, closed or filtering', async () => {
+      const user = keyboard();
+      const { container } = renderSearchable({ defaultValue: 'a' });
+
+      await expectNoAxeViolations(container);
+
+      await tabIn(user);
+      await user.type('b');
+
+      await expectNoAxeViolations(document.body);
     });
   });
 });

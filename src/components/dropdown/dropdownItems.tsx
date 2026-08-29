@@ -9,7 +9,8 @@ interface Props<TVal> {
   /** Every row the listbox shows, already in keyboard order. */
   rows: DropdownRow<TVal>[];
   emptyItem?: React.ReactElement;
-  buttonRef: React.RefObject<HTMLButtonElement | null>;
+  /** The shell the popup hangs off: a button in select-only mode, the field's wrapper otherwise. */
+  triggerRef: React.RefObject<HTMLElement | null>;
   /** The layer element — what the dismissal hook treats as *inside* the popup. */
   popupRef: Ref<HTMLDivElement>;
   /** `aria-controls` on the trigger names this. */
@@ -37,14 +38,14 @@ function rolesFor(hasOptions: boolean, multiple: boolean, labelledBy: string): R
 }
 
 export default function DropdownItems<TVal>(props: Props<TVal>) {
-  const { rows, emptyItem, buttonRef, popupRef, listboxId, labelledBy, itemsProps } = props;
+  const { rows, emptyItem, triggerRef, popupRef, listboxId, labelledBy, itemsProps } = props;
   const { multiple, variant } = useDropdownContext<TVal>();
 
   const [openUp, setOpenUp] = useState(false);
-  // Read the button height synchronously for the initial downward offset before the Overlay
+  // Read the trigger height synchronously for the initial downward offset before the Overlay
   // reports its measured position via onPositionChange; a deferred read would flash at the wrong spot.
   // eslint-disable-next-line react-hooks/refs
-  const translateY = openUp ? 0 : (buttonRef.current?.getBoundingClientRect().height ?? 0);
+  const translateY = openUp ? 0 : (triggerRef.current?.getBoundingClientRect().height ?? 0);
 
   const handlePositionChange = useCallback((data: { top: number; windowScrollY: number }) => {
     const shouldOpenUp = data.top - data.windowScrollY > window.innerHeight / 2;

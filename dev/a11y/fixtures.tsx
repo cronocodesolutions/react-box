@@ -189,10 +189,10 @@ export const fixtures: A11yFixture[] = [
         <Dropdown.Item value="b">Beta</Dropdown.Item>
       </Dropdown>
     ),
-    // No `knownViolations`, and that is not the same as being right: A5 turned the trigger into a
-    // `role="combobox"`, which *may* contain a focusable descendant, so `nested-interactive` stopped
-    // applying to the search box nested in it. Bug #47 is untouched — see `dropdown.a11y.test.tsx`,
-    // where a test pins the gap until A6 makes the input the combobox itself.
+    // A6 made the input the combobox, so the search box no longer sits inside a `<button>` and
+    // bug #47 is closed. Nothing here has ever fired: `nested-interactive` stopped applying the
+    // moment A5 gave the trigger a combobox role, which is why the proof lives in
+    // `dropdown.a11y.test.tsx` instead — this fixture only guards against a new violation.
     setup: openPopup,
   },
   {

@@ -269,16 +269,15 @@ describe('Dropdown', () => {
   });
 
   describe('Search', () => {
-    it('shows search input when isSearchable and dropdown is open', () => {
+    it('makes the combobox a text field, not a button, when isSearchable', () => {
       renderDropdown({ isSearchable: true });
-      openDropdown();
-      expect(screen.getByRole('textbox')).toBeTruthy();
+      expect(screen.getByRole('combobox').tagName).toBe('INPUT');
     });
 
     it('filters items based on search text', () => {
       renderDropdown({ isSearchable: true });
       openDropdown();
-      fireEvent.change(screen.getByRole('textbox'), { target: { value: 'al' } });
+      fireEvent.change(screen.getByRole('combobox'), { target: { value: 'al' } });
       expect(screen.getByText('Alpha')).toBeTruthy();
       expect(screen.queryByText('Beta')).toBeNull();
       expect(screen.queryByText('Charlie')).toBeNull();
@@ -287,7 +286,7 @@ describe('Dropdown', () => {
     it('is case-insensitive', () => {
       renderDropdown({ isSearchable: true });
       openDropdown();
-      fireEvent.change(screen.getByRole('textbox'), { target: { value: 'BETA' } });
+      fireEvent.change(screen.getByRole('combobox'), { target: { value: 'BETA' } });
       expect(screen.getByText('Beta')).toBeTruthy();
       expect(screen.queryByText('Alpha')).toBeNull();
     });
@@ -307,7 +306,7 @@ describe('Dropdown', () => {
         </Dropdown>,
       );
       openDropdown();
-      fireEvent.change(screen.getByRole('textbox'), { target: { value: 'zzz' } });
+      fireEvent.change(screen.getByRole('combobox'), { target: { value: 'zzz' } });
       expect(screen.getByText('No results')).toBeTruthy();
     });
   });
