@@ -624,6 +624,23 @@ const boxComponents = {
           },
         },
         variants: {
+          // Where the keyboard is. A listbox driven by `aria-activedescendant` holds no DOM focus
+          // anywhere, so `:focus-within` never fires and the highlight has to be drawn from state.
+          // An inset outline rather than a background: it reads over the selected row's own colour
+          // instead of fighting it for the same declaration.
+          highlighted: {
+            outline: 2,
+            // Without a style there is no outline at all: `outline-style` starts at `none`, and the
+            // `focus` rules elsewhere only get away with omitting it because the UA supplies one.
+            outlineStyle: 'solid',
+            outlineOffset: -2,
+            outlineColor: 'indigo-500',
+            theme: {
+              dark: {
+                outlineColor: 'indigo-400',
+              },
+            },
+          },
           compact: {
             px: 2,
             py: 1,
@@ -670,6 +687,23 @@ const boxComponents = {
           },
         },
         variants: {
+          // Where the keyboard is. A listbox driven by `aria-activedescendant` holds no DOM focus
+          // anywhere, so `:focus-within` never fires and the highlight has to be drawn from state.
+          // An inset outline rather than a background: it reads over the selected row's own colour
+          // instead of fighting it for the same declaration.
+          highlighted: {
+            outline: 2,
+            // Without a style there is no outline at all: `outline-style` starts at `none`, and the
+            // `focus` rules elsewhere only get away with omitting it because the UA supplies one.
+            outlineStyle: 'solid',
+            outlineOffset: -2,
+            outlineColor: 'indigo-500',
+            theme: {
+              dark: {
+                outlineColor: 'indigo-400',
+              },
+            },
+          },
           compact: {
             px: 2,
             py: 1,
@@ -711,6 +745,23 @@ const boxComponents = {
           },
         },
         variants: {
+          // Where the keyboard is. A listbox driven by `aria-activedescendant` holds no DOM focus
+          // anywhere, so `:focus-within` never fires and the highlight has to be drawn from state.
+          // An inset outline rather than a background: it reads over the selected row's own colour
+          // instead of fighting it for the same declaration.
+          highlighted: {
+            outline: 2,
+            // Without a style there is no outline at all: `outline-style` starts at `none`, and the
+            // `focus` rules elsewhere only get away with omitting it because the UA supplies one.
+            outlineStyle: 'solid',
+            outlineOffset: -2,
+            outlineColor: 'indigo-500',
+            theme: {
+              dark: {
+                outlineColor: 'indigo-400',
+              },
+            },
+          },
           compact: {
             px: 2,
             py: 1,

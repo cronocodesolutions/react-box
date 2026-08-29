@@ -7,13 +7,34 @@ export interface DropdownItemProps<TVal = unknown> extends BoxProps {
   onClick?(e: React.MouseEvent): void;
 }
 
+/**
+ * A row of the open listbox, in the order the keyboard walks them.
+ *
+ * "Clear" and "Select all" are rows, not decorations beside the list: they sit inside the listbox,
+ * so they carry `role="option"` like everything else in it and the arrow keys have to reach them.
+ * Building one array up front is what makes an index mean the same thing to the roving-focus hook,
+ * to `aria-activedescendant` and to the markup.
+ */
+export type DropdownRow<TVal = unknown> =
+  | { kind: 'unselect'; element: React.ReactElement<{ props?: object }> }
+  | { kind: 'selectAll'; element: React.ReactElement<{ props?: object }> }
+  | { kind: 'item'; element: React.ReactElement<DropdownItemProps<TVal>> };
+
 export interface DropdownContextValue<TVal = unknown> {
   valueToUse: TVal[];
   multiple: boolean;
   variant: ClassNameType;
   showCheckbox: boolean;
-  itemSelectHandler: (e: React.MouseEvent, ...items: React.ReactElement<DropdownItemProps<TVal>>[]) => void;
-  getItemText: (item: React.ReactElement) => string;
+  /** Choose the row at `index` — the one path a click and an Enter both take. */
+  selectRow: (index: number, event: React.SyntheticEvent) => void;
+  /** The id `aria-activedescendant` names when the keyboard is on the row at `index`. */
+  optionId: (index: number) => string;
+  /** The row the keyboard is on, or `-1` when it is on none of them. */
+  activeIndex: number;
+  /** Collects a row's element, so the active one can be named and scrolled to. */
+  rowRef: (index: number) => (element: HTMLElement | null) => void;
+  /** Whether a row is a disabled option: skipped by the arrows, and inert to a click. */
+  isRowDisabled: (index: number) => boolean;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any

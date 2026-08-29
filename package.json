@@ -116,7 +116,7 @@
         "react-dom"
       ],
       "gzip": true,
-      "limit": "40 KB"
+      "limit": "41 KB"
     },
     {
       "name": "Full library (Box + ssg + every component)",
@@ -126,7 +126,7 @@
         "react-dom"
       ],
       "gzip": true,
-      "limit": "43 KB"
+      "limit": "44 KB"
     }
   ],
   "repository": {

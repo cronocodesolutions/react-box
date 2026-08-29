@@ -20,29 +20,29 @@ describe('Dropdown', () => {
     );
 
   const openDropdown = () => {
-    fireEvent.click(screen.getByRole('button'));
+    fireEvent.click(screen.getByRole('combobox'));
   };
 
   describe('Rendering', () => {
     it('renders without crashing', () => {
       renderDropdown();
-      expect(screen.getByRole('button')).toBeTruthy();
+      expect(screen.getByRole('combobox')).toBeTruthy();
     });
 
     it('renders as a button element', () => {
       renderDropdown();
-      expect(screen.getByRole('button').tagName).toBe('BUTTON');
+      expect(screen.getByRole('combobox').tagName).toBe('BUTTON');
     });
 
     it('renders the chevron icon by default', () => {
       renderDropdown();
-      const svg = screen.getByRole('button').querySelector('svg');
+      const svg = screen.getByRole('combobox').querySelector('svg');
       expect(svg).toBeTruthy();
     });
 
     it('hides the chevron icon when hideIcon is true', () => {
       renderDropdown({ hideIcon: true });
-      const svg = screen.getByRole('button').querySelector('svg');
+      const svg = screen.getByRole('combobox').querySelector('svg');
       expect(svg).toBeNull();
     });
 
@@ -78,7 +78,9 @@ describe('Dropdown', () => {
       renderDropdown();
       openDropdown();
       expect(screen.getByText('Alpha')).toBeTruthy();
-      fireEvent.keyDown(window, { key: 'Escape' });
+      // On `document`, which is where `useDismiss` listens — a real Escape reaches it by bubbling
+      // from whatever has focus, but an event dispatched straight at `window` never goes back down.
+      fireEvent.keyDown(document, { key: 'Escape' });
       expect(screen.queryByText('Alpha')).toBeNull();
     });
   });
@@ -339,8 +341,15 @@ describe('Dropdown', () => {
     it('renders checkboxes when showCheckbox and multiple', () => {
       renderDropdown({ multiple: true, showCheckbox: true });
       openDropdown();
-      const checkboxes = screen.getAllByRole('checkbox');
-      expect(checkboxes.length).toBe(3);
+      expect(document.querySelectorAll('input[type="checkbox"]').length).toBe(3);
+    });
+
+    it('keeps them out of the accessibility tree — aria-selected on the option is the state', () => {
+      renderDropdown({ multiple: true, showCheckbox: true, defaultValue: ['a'] });
+      openDropdown();
+
+      expect(screen.queryAllByRole('checkbox')).toEqual([]);
+      expect(screen.getAllByRole('option', { selected: true }).map((option) => option.textContent)).toEqual(['Alpha']);
     });
   });
 
@@ -362,7 +371,7 @@ describe('Dropdown', () => {
   describe('Compact Variant', () => {
     it('renders without crashing in compact mode', () => {
       renderDropdown({ variant: 'compact' as never });
-      expect(screen.getByRole('button')).toBeTruthy();
+      expect(screen.getByRole('combobox')).toBeTruthy();
     });
   });
 
@@ -383,7 +392,7 @@ describe('Dropdown', () => {
           <Dropdown.Item value="a">Alpha</Dropdown.Item>
         </Dropdown>,
       );
-      const svg = screen.getByRole('button').querySelector('svg');
+      const svg = screen.getByRole('combobox').querySelector('svg');
       expect(svg).toBeTruthy();
     });
   });

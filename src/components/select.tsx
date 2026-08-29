@@ -34,6 +34,9 @@ interface Props<TRow, TVal extends TRow[keyof TRow], TKey extends keyof Componen
   searchPlaceholder?: string;
   hideIcon?: boolean;
   showCheckbox?: boolean;
+  /** The select's name, rendered above it — see `label` on `Dropdown`. A combobox needs one. */
+  label?: React.ReactNode;
+  labelProps?: BoxProps<'div'>;
   itemsProps?: BoxStyleProps;
   iconProps?: BoxStyleProps;
   onChange?: (value: TVal | undefined, values: TVal[]) => void;

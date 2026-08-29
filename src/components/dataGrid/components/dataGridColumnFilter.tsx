@@ -151,6 +151,9 @@ function NumberFilter<TRow>({ column }: Props<TRow>) {
         b={0}
         bgColor="transparent"
         focus={{ outline: 0 }}
+        // The trigger's content is a mathematical symbol, and a combobox is not named by its
+        // content anyway — without this the control announces as nothing at all.
+        props={{ 'aria-label': 'Comparison' }}
       >
         <Dropdown.Item value="eq">=</Dropdown.Item>
         <Dropdown.Item value="ne">≠</Dropdown.Item>
@@ -256,6 +259,7 @@ function MultiselectFilter<TRow>({ column }: Props<TRow>) {
         variant="compact"
         b={0}
         focus={{ outline: 0 }}
+        props={{ 'aria-label': 'Filter' }}
       >
         <Dropdown.Display>
           {(vals: (string | number | boolean | null)[]) => {

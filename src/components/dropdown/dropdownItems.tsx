@@ -1,31 +1,45 @@
-import { FunctionComponent, useCallback, useRef, useState } from 'react';
+import { FunctionComponent, Ref, useCallback, useState } from 'react';
 import Box from '../../box';
 import { BoxStyleProps } from '../../types';
 import Overlay from '../overlay';
-import { DropdownItemProps, useDropdownContext } from './dropdownContext';
-import DropdownItemRenderer from './dropdownItemRenderer';
+import { DropdownRow, useDropdownContext } from './dropdownContext';
+import DropdownRowRenderer from './dropdownRowRenderer';
 
 interface Props<TVal> {
-  filteredItems: React.ReactElement<DropdownItemProps<TVal>>[];
-  items: React.ReactElement<DropdownItemProps<TVal>>[];
-  unselectItem?: React.ReactElement;
-  selectAllItem?: React.ReactElement;
+  /** Every row the listbox shows, already in keyboard order. */
+  rows: DropdownRow<TVal>[];
   emptyItem?: React.ReactElement;
-  showUnselect: boolean;
-  showSelectAll: boolean;
   buttonRef: React.RefObject<HTMLButtonElement | null>;
+  /** The layer element — what the dismissal hook treats as *inside* the popup. */
+  popupRef: Ref<HTMLDivElement>;
+  /** `aria-controls` on the trigger names this. */
+  listboxId: string;
+  /** What names the listbox: the dropdown's own label when it has one, else its trigger. */
+  labelledBy: string;
   itemsProps?: BoxStyleProps;
 }
 
+/** The popup the trigger controls: a `listbox` while it has options, a status message when it does not. */
+function rolesFor(hasOptions: boolean, multiple: boolean, labelledBy: string): Record<string, unknown> {
+  if (!hasOptions) {
+    // A listbox owns options. With none left — a search that matched nothing — the popup holds one
+    // message instead, and a message is announced rather than offered as something to choose.
+    return { role: 'status' };
+  }
+
+  return {
+    role: 'listbox',
+    'aria-labelledby': labelledBy,
+    // Only when it is true: `false` is the default, and saying it on every single-select listbox
+    // is noise in the accessibility tree.
+    ...(multiple ? { 'aria-multiselectable': true } : {}),
+  };
+}
+
 export default function DropdownItems<TVal>(props: Props<TVal>) {
-  const { filteredItems, items, unselectItem, selectAllItem, emptyItem, showUnselect, showSelectAll, buttonRef, itemsProps } = props;
-  const { valueToUse, variant, itemSelectHandler } = useDropdownContext<TVal>();
+  const { rows, emptyItem, buttonRef, popupRef, listboxId, labelledBy, itemsProps } = props;
+  const { multiple, variant } = useDropdownContext<TVal>();
 
-  // React 19 types ReactElement.props as `unknown`; these dropdown markers carry an optional `props` bag.
-  const unselect = unselectItem as React.ReactElement<{ props?: object }> | undefined;
-  const selectAll = selectAllItem as React.ReactElement<{ props?: object }> | undefined;
-
-  const itemsRef = useRef<HTMLDivElement>(null);
   const [openUp, setOpenUp] = useState(false);
   // Read the button height synchronously for the initial downward offset before the Overlay
   // reports its measured position via onPositionChange; a deferred read would flash at the wrong spot.
@@ -40,53 +54,33 @@ export default function DropdownItems<TVal>(props: Props<TVal>) {
   return (
     <Box position="absolute" inset={0}>
       <Overlay
-        ref={itemsRef}
+        ref={popupRef}
         minWidth="fit-content"
         style={{ transform: openUp ? `translateY(calc(-100% - 2px))` : `translateY(${translateY}px)` }}
         onPositionChange={handlePositionChange}
       >
-        {(filteredItems.length > 0 || emptyItem) && (
-          <Box component="dropdown.items" variant={variant as never} {...itemsProps}>
-            {showUnselect && unselect && (
-              <Box
-                component="dropdown.unselect"
-                variant={variant as never}
-                selected={valueToUse.length === 0}
-                {...{
-                  ...unselect.props,
-                  props: { ...unselect.props.props, onClick: (e: React.MouseEvent) => itemSelectHandler(e) },
-                }}
-              />
-            )}
-            {showSelectAll && selectAll && (
-              <Box
-                component="dropdown.selectAll"
-                variant={variant as never}
-                {...{
-                  ...selectAll.props,
-                  props: {
-                    ...selectAll.props.props,
-                    onClick: (e: React.MouseEvent) => itemSelectHandler(e, ...(items as React.ReactElement<DropdownItemProps<TVal>>[])),
-                  },
-                }}
-              />
-            )}
-            {filteredItems.map((item) => (
-              <DropdownItemRenderer<TVal> key={item.props.value as React.Key} item={item} />
-            ))}
+        <Box
+          component="dropdown.items"
+          variant={variant as never}
+          {...itemsProps}
+          id={listboxId}
+          props={rolesFor(rows.length > 0, multiple, labelledBy)}
+        >
+          {rows.map((row, index) => (
+            <DropdownRowRenderer<TVal> key={rowKey(row, index)} row={row} index={index} />
+          ))}
 
-            {filteredItems.length === 0 && emptyItem && (
-              <Box
-                component="dropdown.emptyItem"
-                variant={variant as never}
-                {...(emptyItem as React.ReactElement<{ props?: object }>).props}
-              />
-            )}
-          </Box>
-        )}
+          {rows.length === 0 && emptyItem && (
+            <Box component="dropdown.emptyItem" variant={variant as never} {...(emptyItem as React.ReactElement<object>).props} />
+          )}
+        </Box>
       </Overlay>
     </Box>
   );
+}
+
+function rowKey<TVal>(row: DropdownRow<TVal>, index: number): React.Key {
+  return row.kind === 'item' ? (row.element.props.value as React.Key) : `${row.kind}-${index}`;
 }
 
 (DropdownItems as FunctionComponent).displayName = 'DropdownItems';

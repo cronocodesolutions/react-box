@@ -58,7 +58,7 @@ const people: Person[] = [
   { id: 3, name: 'Alan', age: 41 },
 ];
 
-const openPopup = () => fireEvent.click(screen.getByRole('button'));
+const openPopup = () => fireEvent.click(screen.getByRole('combobox'));
 
 export const fixtures: A11yFixture[] = [
   {
@@ -165,7 +165,7 @@ export const fixtures: A11yFixture[] = [
   {
     name: 'Dropdown (closed)',
     render: () => (
-      <Dropdown<string> defaultValue="a">
+      <Dropdown<string> label="Fruit" defaultValue="a">
         <Dropdown.Item value="a">Alpha</Dropdown.Item>
         <Dropdown.Item value="b">Beta</Dropdown.Item>
       </Dropdown>
@@ -174,38 +174,31 @@ export const fixtures: A11yFixture[] = [
   {
     name: 'Dropdown (open)',
     render: () => (
-      <Dropdown<string> defaultValue="a">
+      <Dropdown<string> label="Fruit" defaultValue="a">
         <Dropdown.Item value="a">Alpha</Dropdown.Item>
         <Dropdown.Item value="b">Beta</Dropdown.Item>
       </Dropdown>
     ),
     setup: openPopup,
-    knownViolations: {
-      'aria-allowed-attr': 'A5 — items carry aria-selected on a plain div; the attribute is only legal once they are role="option".',
-    },
   },
   {
     name: 'Dropdown (searchable, open)',
     render: () => (
-      <Dropdown<string> isSearchable searchPlaceholder="Search">
+      <Dropdown<string> label="Fruit" isSearchable searchPlaceholder="Search">
         <Dropdown.Item value="a">Alpha</Dropdown.Item>
         <Dropdown.Item value="b">Beta</Dropdown.Item>
       </Dropdown>
     ),
+    // No `knownViolations`, and that is not the same as being right: A5 turned the trigger into a
+    // `role="combobox"`, which *may* contain a focusable descendant, so `nested-interactive` stopped
+    // applying to the search box nested in it. Bug #47 is untouched — see `dropdown.a11y.test.tsx`,
+    // where a test pins the gap until A6 makes the input the combobox itself.
     setup: openPopup,
-    knownViolations: {
-      'aria-allowed-attr': 'A5 — aria-selected on item divs with no role="option".',
-      'nested-interactive': 'A6 — the search input is rendered inside the trigger button, so one focusable contains another.',
-    },
   },
   {
     name: 'Select (open)',
-    render: () => <Select<Person, number> data={people} def={{ valueKey: 'id', displayKey: 'name' }} />,
+    render: () => <Select<Person, number> label="Person" data={people} def={{ valueKey: 'id', displayKey: 'name' }} />,
     setup: openPopup,
-    knownViolations: {
-      'aria-allowed-attr': 'A5 — aria-selected on item divs with no role="option".',
-      'button-name': 'A5 — with nothing selected and no placeholder the trigger renders empty, so the button has no name at all.',
-    },
   },
   {
     name: 'Tooltip',

@@ -1,10 +1,15 @@
 import { forwardRef, FunctionComponent, ReactElement, Ref, RefAttributes, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { BoxProps } from '../box';
-import useVisibility from '../react/hooks/useVisibility';
+import Box, { BoxProps } from '../box';
+import { useEventCallback } from '../react/a11y/callbacks';
+import useDismiss from '../react/a11y/useDismiss';
+import useFocusReturn from '../react/a11y/useFocusReturn';
+import useIdentifier from '../react/a11y/useIdentifier';
+import useRovingFocus from '../react/a11y/useRovingFocus';
+import { useIsomorphicLayoutEffect } from '../react/effects';
 import { BoxStyleProps, ComponentsAndVariants } from '../types';
 import BaseSvg from './baseSvg';
 import Button from './button';
-import DropdownContext, { DropdownItemProps } from './dropdown/dropdownContext';
+import DropdownContext, { DropdownItemProps, DropdownRow } from './dropdown/dropdownContext';
 import DropdownItems from './dropdown/dropdownItems';
 import DropdownSearch from './dropdown/dropdownSearch';
 import { searchItemText } from './dropdown/utils';
@@ -21,6 +26,17 @@ interface Props<TVal, TKey extends keyof ComponentsAndVariants = 'dropdown'> ext
   hideIcon?: boolean;
   /** Show checkbox for each item in multiple selection mode */
   showCheckbox?: boolean;
+  /**
+   * The dropdown's name, rendered above it and pointed at by `aria-labelledby`.
+   *
+   * A combobox is not named by what it contains — the text in the trigger is its *value*, and
+   * accname does not read the contents of a combobox at all. Without a `label` (or an `aria-label`
+   * of your own in `props`) the control has no accessible name, exactly like an `<input>` with
+   * nothing but a placeholder.
+   */
+  label?: React.ReactNode;
+  /** Styles for the wrapper the label and the trigger share. Only rendered when there is a label. */
+  labelProps?: BoxProps<'div'>;
   /** BoxProps applied to the opened items container (dropdown.items) */
   itemsProps?: BoxStyleProps;
   /** BoxProps applied to the chevron icon container (dropdown.icon) */
@@ -28,6 +44,45 @@ interface Props<TVal, TKey extends keyof ComponentsAndVariants = 'dropdown'> ext
   onChange?: (value: TVal | undefined, values: TVal[]) => void;
 }
 
+/** A `disabled` that came from a caller as a state, not as the `[state, styles]` pseudo-class form. */
+function isDisabledElement(element?: ReactElement): boolean {
+  const flag = (element?.props as { disabled?: unknown } | undefined)?.disabled;
+
+  return (Array.isArray(flag) ? flag[0] : flag) === true;
+}
+
+/** A key that types a character, as opposed to one that commands. Printables open the listbox. */
+function isPrintable(event: React.KeyboardEvent): boolean {
+  return event.key.length === 1 && !event.ctrlKey && !event.metaKey && !event.altKey;
+}
+
+/**
+ * The APG select-only combobox: a trigger that owns focus and a listbox it controls.
+ * Pattern: https://www.w3.org/WAI/ARIA/apg/patterns/combobox/
+ *
+ * ```tsx
+ * <Dropdown<string> label="Fruit" defaultValue="apple" onChange={(value) => setFruit(value)}>
+ *   <Dropdown.Item value="apple">Apple</Dropdown.Item>
+ *   <Dropdown.Item value="banana">Banana</Dropdown.Item>
+ * </Dropdown>
+ * ```
+ *
+ * DOM focus never moves into the popup. That is the shape of this pattern rather than a shortcut:
+ * the trigger keeps focus and names the highlighted option with `aria-activedescendant`, so one
+ * Tab still enters and leaves the control, Escape has somewhere to return to for free, and the
+ * options do not each become a tab stop. `useRovingFocus({ focusItems: false })` is the half of
+ * that hook written for it.
+ *
+ * The keyboard map, closed: Down/Up/Enter/Space open — on the selected option when there is one,
+ * otherwise the first or the last — Home and End open at an end, and a printable character opens
+ * and jumps to the first match. Open: the arrows move the highlight, Home/End go to the ends,
+ * typing searches, Enter and Space choose, Escape closes and changes nothing, and Tab chooses
+ * before it leaves. `PageUp`/`PageDown` are the one part of the APG map left out — they are
+ * optional there, and a second movement implementation beside the hook's would be the wrong place
+ * for it.
+ *
+ * What is deliberately *not* here is a name. See the `label` prop.
+ */
 function DropdownImpl<TVal>(props: Props<TVal>, ref: Ref<HTMLInputElement>): React.ReactNode {
   const {
     name,
@@ -39,6 +94,8 @@ function DropdownImpl<TVal>(props: Props<TVal>, ref: Ref<HTMLInputElement>): Rea
     children,
     hideIcon,
     showCheckbox = false,
+    label,
+    labelProps,
     itemsProps,
     iconProps,
     onChange,
@@ -54,8 +111,17 @@ function DropdownImpl<TVal>(props: Props<TVal>, ref: Ref<HTMLInputElement>): Rea
   );
   const [search, setSearch] = useState<string>('');
 
-  const [isOpen, setOpen, refToUse] = useVisibility<HTMLButtonElement>();
+  const [isOpen, setOpen] = useState(false);
+  const buttonRef = useRef<HTMLButtonElement>(null);
+  const popupRef = useRef<HTMLDivElement>(null);
   const searchBoxRef = useRef<HTMLInputElement>(null);
+
+  const identifier = useIdentifier('dropdown');
+  const triggerId = restProps.id ?? `${identifier}-trigger`;
+  const listboxId = `${identifier}-listbox`;
+  const labelId = `${identifier}-label`;
+  const hasLabel = label !== undefined && label !== null && label !== false;
+  const optionId = useCallback((index: number) => `${identifier}-option-${index}`, [identifier]);
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const allKids = useMemo<ReactElement<any, FunctionComponent>[]>(
@@ -87,6 +153,30 @@ function DropdownImpl<TVal>(props: Props<TVal>, ref: Ref<HTMLInputElement>): Rea
   const emptyItem = useMemo(() => allKids.find((x) => (x.type as FunctionComponent)?.displayName === 'DropdownEmptyItem'), [allKids]);
   const displayItem = useMemo(() => allKids.find((x) => (x.type as FunctionComponent)?.displayName === 'DropdownDisplay'), [allKids]);
 
+  const showSelectAll = !!(selectAllItem && multiple && filteredItems.length > valueToUse.length);
+  const showUnselect = !!(unselectItem && filteredItems.length > 0 && !showSelectAll);
+
+  /** Every row of the open listbox in one array — see `DropdownRow`. Index is the shared language. */
+  const rows = useMemo<DropdownRow<TVal>[]>(() => {
+    const list: DropdownRow<TVal>[] = [];
+
+    if (showUnselect && unselectItem) list.push({ kind: 'unselect', element: unselectItem });
+    if (showSelectAll && selectAllItem) list.push({ kind: 'selectAll', element: selectAllItem });
+    for (const item of filteredItems) list.push({ kind: 'item', element: item });
+
+    return list;
+  }, [showUnselect, unselectItem, showSelectAll, selectAllItem, filteredItems]);
+
+  const isRowDisabled = useCallback((index: number) => isDisabledElement(rows[index]?.element), [rows]);
+  const rowText = useCallback(
+    (index: number) => {
+      const row = rows[index];
+
+      return row ? getItemText(row.element) : '';
+    },
+    [rows, getItemText],
+  );
+
   const display = useMemo(() => {
     if (isOpen && isSearchable) return null;
 
@@ -108,8 +198,8 @@ function DropdownImpl<TVal>(props: Props<TVal>, ref: Ref<HTMLInputElement>): Rea
     );
   }, [multiple, filteredItems, valueToUse, unselectItem, isOpen, isSearchable, displayItem, getItemText]);
 
-  const itemSelectHandler = useCallback(
-    (e: React.MouseEvent, ...kids: React.ReactElement<DropdownItemProps<TVal>>[]) => {
+  const applySelection = useCallback(
+    (e: React.SyntheticEvent, ...kids: React.ReactElement<DropdownItemProps<TVal>>[]) => {
       // unselect all
       if (kids.length === 0) {
         setSelectedValues([]);
@@ -141,17 +231,53 @@ function DropdownImpl<TVal>(props: Props<TVal>, ref: Ref<HTMLInputElement>): Rea
         }
       }
 
-      if (multiple) {
-        e.stopPropagation();
+      // The popup is a React child of the trigger even though it renders through a portal, so a
+      // click inside it bubbles to the trigger's own toggle. Stopping it here is what keeps
+      // choosing an option from reopening the dropdown in the same gesture.
+      e.stopPropagation();
 
-        setTimeout(() => searchBoxRef.current?.focus(), 0);
+      if (multiple) {
+        if (isSearchable) setTimeout(() => searchBoxRef.current?.focus(), 0);
       } else {
         setOpen(false);
-        setTimeout(() => refToUse.current?.focus(), 0);
       }
     },
-    [multiple, valueToUse, setSelectedValues, onChange, setOpen, refToUse],
+    [multiple, isSearchable, valueToUse, onChange],
   );
+
+  /** Choosing a row, whichever kind it is — the one path a click and an Enter both take. */
+  const selectRow = useEventCallback((index: number, event: React.SyntheticEvent) => {
+    const row = rows[index];
+    if (!row || isRowDisabled(index)) return;
+
+    if (row.kind === 'unselect') applySelection(event);
+    else if (row.kind === 'selectAll') applySelection(event, ...(items as React.ReactElement<DropdownItemProps<TVal>>[]));
+    else applySelection(event, row.element);
+  });
+
+  const roving = useRovingFocus({
+    count: rows.length,
+    focusItems: false,
+    defaultActiveIndex: -1,
+    isDisabled: isRowDisabled,
+    // Typeahead is the list's while the trigger holds the keystrokes. In searchable mode the
+    // search box does, and a hidden second buffer racing the one the user can see is worse than
+    // no typeahead at all.
+    textOf: isSearchable ? undefined : rowText,
+    onSelect: selectRow,
+  });
+
+  useDismiss({
+    enabled: isOpen,
+    // The trigger counts as inside: a press on an open dropdown's own button has to reach its
+    // toggle, not be read as a press outside and dismissed and reopened in one gesture.
+    inside: [buttonRef, popupRef],
+    onDismiss: () => setOpen(false),
+  });
+
+  // Focus lands back on the trigger only when a close left it nowhere — clicking an option drops
+  // it to the body. Escape never moved it, and Tab moved it on purpose; neither is taken back.
+  useFocusReturn({ enabled: isOpen, returnTo: buttonRef });
 
   const [prevOpen, setPrevOpen] = useState(isOpen);
   // Clear the search box when the dropdown closes (render-phase sync, no effect needed).
@@ -168,58 +294,204 @@ function DropdownImpl<TVal>(props: Props<TVal>, ref: Ref<HTMLInputElement>): Rea
     }
   }, [isOpen]);
 
-  const toggleOpen = useCallback(() => setOpen((prev) => !prev), [setOpen]);
+  const activeIndex = roving.activeIndex;
+  const activeItem = roving.activeItem;
+  useIsomorphicLayoutEffect(() => {
+    if (!isOpen || activeIndex === -1) return;
 
-  const showSelectAll = !!(selectAllItem && multiple && filteredItems.length > valueToUse.length);
-  const showUnselect = !!(unselectItem && filteredItems.length > 0 && !showSelectAll);
+    // A highlight the user cannot see is not a highlight. `nearest` so a list that already shows
+    // the option does not jump.
+    activeItem()?.scrollIntoView?.({ block: 'nearest' });
+  }, [isOpen, activeIndex, activeItem]);
 
+  /** The first row the arrows may land on, from either end. */
+  const edgeIndex = (from: 'first' | 'last'): number => {
+    const delta = from === 'first' ? 1 : -1;
+
+    for (let index = from === 'first' ? 0 : rows.length - 1; index >= 0 && index < rows.length; index += delta) {
+      if (!isRowDisabled(index)) return index;
+    }
+
+    return -1;
+  };
+
+  /** Where the highlight lands when the listbox opens: on what is selected, or at the end implied. */
+  const indexOnOpen = (fallback: 'first' | 'last' | 'none'): number => {
+    const selected = rows.findIndex((row) => row.kind === 'item' && valueToUse.includes(row.element.props.value));
+    if (selected !== -1 && !isRowDisabled(selected)) return selected;
+
+    return fallback === 'none' ? -1 : edgeIndex(fallback);
+  };
+
+  const openAt = (index: number, event: React.SyntheticEvent) => {
+    setOpen(true);
+    roving.setActiveIndex(index, { reason: 'programmatic', event });
+  };
+
+  const toggleOpen = useEventCallback((event: React.MouseEvent) => {
+    if (isOpen) setOpen(false);
+    else openAt(indexOnOpen('none'), event);
+  });
+
+  const handleClosedKeyDown = (event: React.KeyboardEvent) => {
+    const { key } = event;
+
+    if (key === 'ArrowDown' || key === 'Enter' || key === ' ') {
+      // Without this the browser activates the button on its own straight afterwards, and the
+      // click that follows would toggle the listbox back shut in the same keystroke.
+      event.preventDefault();
+      openAt(indexOnOpen(event.altKey ? 'none' : 'first'), event);
+      return;
+    }
+
+    if (key === 'ArrowUp') {
+      event.preventDefault();
+      openAt(indexOnOpen('last'), event);
+      return;
+    }
+
+    if (key === 'Home' || key === 'End') {
+      event.preventDefault();
+      openAt(edgeIndex(key === 'Home' ? 'first' : 'last'), event);
+      return;
+    }
+
+    if (isPrintable(event)) {
+      setOpen(true);
+      // The row list does not depend on the popup being on screen, so the same typeahead that
+      // moves the highlight while open can decide where it starts.
+      if (!isSearchable) roving.onKeyDown(event);
+    }
+  };
+
+  const handleKeyDown = useEventCallback((event: React.KeyboardEvent) => {
+    tagProps?.onKeyDown?.(event as React.KeyboardEvent<HTMLButtonElement>);
+    if (event.defaultPrevented) return;
+
+    if (!isOpen) {
+      handleClosedKeyDown(event);
+      return;
+    }
+
+    // Escape is not handled here on purpose: `useDismiss` owns it, and it owns it for the whole
+    // page at once. A dropdown open inside a dialog must close the dropdown and leave the dialog
+    // alone, and only the layer registry knows which of the two is innermost.
+
+    if (event.key === 'Tab') {
+      // APG: Tab commits the highlighted option and then leaves. No `preventDefault` — moving on
+      // is the whole point of the key.
+      if (!multiple && roving.activeIndex !== -1) selectRow(roving.activeIndex, event);
+      setOpen(false);
+      return;
+    }
+
+    if (event.altKey && event.key === 'ArrowUp') {
+      event.preventDefault();
+      if (roving.activeIndex !== -1) selectRow(roving.activeIndex, event);
+      setOpen(false);
+      return;
+    }
+
+    // The search box owns the keys that edit text; the list keeps the arrows.
+    if (isSearchable && (event.key === ' ' || event.key === 'Home' || event.key === 'End')) return;
+
+    roving.onKeyDown(event);
+  });
+
+  const hasPopup = rows.length > 0 || !!emptyItem;
+  const activeOptionId = isOpen && activeIndex !== -1 && hasPopup ? optionId(activeIndex) : undefined;
+
+  // `roving.itemProps` rather than `roving` itself: the hook's object is new on every render, and
+  // a context value that changes with it re-renders every option in the list for nothing.
+  const rovingItemProps = roving.itemProps;
   const contextValue = useMemo(
-    () => ({ valueToUse, multiple, variant: restProps.variant, showCheckbox, itemSelectHandler, getItemText }),
-    [valueToUse, multiple, restProps.variant, showCheckbox, itemSelectHandler, getItemText],
+    () => ({
+      valueToUse,
+      multiple,
+      variant: restProps.variant,
+      showCheckbox,
+      selectRow,
+      optionId,
+      activeIndex,
+      rowRef: (index: number) => rovingItemProps(index).ref,
+      isRowDisabled,
+    }),
+    [valueToUse, multiple, restProps.variant, showCheckbox, selectRow, optionId, activeIndex, rovingItemProps, isRowDisabled],
+  );
+
+  const trigger = (
+    <Button
+      ref={buttonRef}
+      onClick={toggleOpen}
+      component="dropdown"
+      // A dropdown inside a form is not its submit button, which is what an untyped one defaults to.
+      type="button"
+      props={{
+        tabIndex: 0,
+        role: 'combobox',
+        'aria-expanded': isOpen,
+        'aria-controls': isOpen && hasPopup ? listboxId : undefined,
+        // Where the keyboard is, on whichever element holds focus: the trigger, unless a search
+        // box has taken it.
+        'aria-activedescendant': isSearchable ? undefined : activeOptionId,
+        'aria-labelledby': hasLabel ? labelId : undefined,
+        ...tagProps,
+        onKeyDown: handleKeyDown,
+      }}
+      position="relative"
+      pr={!hideIcon ? 6 : undefined}
+      minWidth={isOpen && isSearchable ? 36 : undefined}
+      width="fit-content"
+      {...restProps}
+      id={triggerId}
+    >
+      {valueToUse.map((x) => {
+        const serialized = JSON.stringify(x);
+        return <Textbox key={serialized} ref={ref} name={name} type="hidden" value={serialized ?? ''} />;
+      })}
+      {isSearchable && isOpen && (
+        <DropdownSearch
+          search={search}
+          onSearchChange={setSearch}
+          searchPlaceholder={searchPlaceholder}
+          searchBoxRef={searchBoxRef}
+          activeDescendantId={activeOptionId}
+        />
+      )}
+      {display ?? ' '}
+      {!hideIcon && (
+        <Flex component="dropdown.icon" {...iconProps}>
+          <BaseSvg viewBox="0 0 10 6" width="0.6rem" rotate={isOpen ? 180 : 0}>
+            <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 1 4 4 4-4" />
+          </BaseSvg>
+        </Flex>
+      )}
+      {isOpen && hasPopup && (
+        <DropdownItems<TVal>
+          rows={rows}
+          emptyItem={emptyItem}
+          buttonRef={buttonRef}
+          popupRef={popupRef}
+          listboxId={listboxId}
+          labelledBy={hasLabel ? labelId : triggerId}
+          itemsProps={itemsProps}
+        />
+      )}
+    </Button>
   );
 
   return (
     <DropdownContext.Provider value={contextValue}>
-      <Button
-        ref={refToUse}
-        onClick={toggleOpen}
-        component="dropdown"
-        props={{ tabIndex: 0, ...tagProps }}
-        position="relative"
-        pr={!hideIcon ? 6 : undefined}
-        minWidth={isOpen && isSearchable ? 36 : undefined}
-        width="fit-content"
-        {...restProps}
-      >
-        {valueToUse.map((x) => {
-          const serialized = JSON.stringify(x);
-          return <Textbox key={serialized} ref={ref} name={name} type="hidden" value={serialized ?? ''} />;
-        })}
-        {isSearchable && isOpen && (
-          <DropdownSearch search={search} onSearchChange={setSearch} searchPlaceholder={searchPlaceholder} searchBoxRef={searchBoxRef} />
-        )}
-        {display ?? '\u00A0'}
-        {!hideIcon && (
-          <Flex component="dropdown.icon" {...iconProps}>
-            <BaseSvg viewBox="0 0 10 6" width="0.6rem" rotate={isOpen ? 180 : 0}>
-              <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 1 4 4 4-4" />
-            </BaseSvg>
-          </Flex>
-        )}
-        {isOpen && (
-          <DropdownItems<TVal>
-            filteredItems={filteredItems}
-            items={items}
-            unselectItem={unselectItem}
-            selectAllItem={selectAllItem}
-            emptyItem={emptyItem}
-            showUnselect={showUnselect}
-            showSelectAll={showSelectAll}
-            buttonRef={refToUse}
-            itemsProps={itemsProps}
-          />
-        )}
-      </Button>
+      {hasLabel ? (
+        <Flex d="column" gap={1} width="fit-content" {...labelProps}>
+          <Box tag="span" id={labelId}>
+            {label}
+          </Box>
+          {trigger}
+        </Flex>
+      ) : (
+        trigger
+      )}
     </DropdownContext.Provider>
   );
 }

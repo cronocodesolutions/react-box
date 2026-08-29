@@ -28,12 +28,12 @@ describe('Select', () => {
     return render(<Select<Fruit, string> data={data} def={def} {...rest} />);
   };
 
-  const openSelect = () => fireEvent.click(screen.getByRole('button'));
+  const openSelect = () => fireEvent.click(screen.getByRole('combobox'));
 
   describe('Rendering', () => {
     it('renders without crashing', () => {
       renderSelect();
-      expect(screen.getByRole('button')).toBeTruthy();
+      expect(screen.getByRole('combobox')).toBeTruthy();
     });
 
     it('renders items from data using displayKey', () => {
@@ -147,7 +147,10 @@ describe('Select', () => {
     it('passes showCheckbox to Dropdown', () => {
       renderSelect({ multiple: true, showCheckbox: true });
       openSelect();
-      expect(screen.getAllByRole('checkbox').length).toBe(3);
+      // Drawn, but not in the accessibility tree: `aria-selected` on the option is what carries
+      // the state, and a focusable input inside an option would be a widget inside a widget.
+      expect(document.querySelectorAll('input[type="checkbox"][aria-hidden="true"]').length).toBe(3);
+      expect(screen.queryAllByRole('checkbox')).toEqual([]);
     });
 
     it('passes name for form integration', () => {
