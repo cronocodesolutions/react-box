@@ -412,6 +412,19 @@ describe('Dropdown accessibility', () => {
       expect(selected()).toEqual([]);
     });
 
+    it('holds a no-break space when it has nothing to show, so it keeps its line box', () => {
+      render(
+        <Dropdown<string> label="Toppings" multiple>
+          <Dropdown.Item value="a">Apple</Dropdown.Item>
+        </Dropdown>,
+      );
+
+      // `multiple` with nothing chosen displays nothing at all, and a plain space would collapse
+      // away under `white-space: nowrap` — leaving no line box, and a control 20px shorter than
+      // the ones beside it. Nothing a test can measure: jsdom computes no layout.
+      expect(trigger().textContent).toBe('\u00A0');
+    });
+
     it('has no axe violations, open or closed', async () => {
       const user = keyboard();
       const { container } = renderDropdown({ defaultValue: 'a' });

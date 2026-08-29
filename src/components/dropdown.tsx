@@ -612,7 +612,11 @@ function DropdownImpl<TVal>(props: Props<TVal>, ref: Ref<HTMLInputElement>): Rea
       id={triggerId}
     >
       {hiddenValues}
-      {display ?? ' '}
+      {/* A no-break space, not a plain one: a lone space collapses away under the component's
+          `white-space: nowrap`, and with nothing else in the flow — a `multiple` dropdown with
+          nothing selected — the control loses its line box and stands 20px shorter than its
+          neighbours. Written as an escape so it cannot be typed away again. */}
+      {display ?? '\u00A0'}
       {icon}
       {popup}
     </Button>
