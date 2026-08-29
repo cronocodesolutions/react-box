@@ -58,6 +58,31 @@ describe('Overlay', () => {
     }
   });
 
+  it('measures the anchor it is given instead of rendering a placeholder', () => {
+    const anchor = document.createElement('div');
+    anchor.getBoundingClientRect = () => ({ top: 10, bottom: 34, left: 5, width: 90 }) as DOMRect;
+
+    const { container } = render(<Overlay anchor={anchor}>anywhere</Overlay>);
+
+    // Nothing at all in the caller's layout — the placeholder is what makes an anchored layer
+    // shift the row it was declared in.
+    expect(container.childElementCount).toBe(0);
+    expect(screen.getByText('anywhere').parentElement!.style.transform).toBe('translate3d(calc(5px + 0px),calc(10px + 0px), 0)');
+  });
+
+  it('starts from the anchor bottom edge when asked, which is where a tooltip goes', () => {
+    const anchor = document.createElement('div');
+    anchor.getBoundingClientRect = () => ({ top: 10, bottom: 34, left: 5, width: 90 }) as DOMRect;
+
+    render(
+      <Overlay anchor={anchor} anchorSide="bottom">
+        anywhere
+      </Overlay>,
+    );
+
+    expect(screen.getByText('anywhere').parentElement!.style.transform).toBe('translate3d(calc(5px + 0px),calc(34px + 0px), 0)');
+  });
+
   it('reports the position it measured, so a caller can decide to open the other way', () => {
     vi.spyOn(Element.prototype, 'getBoundingClientRect').mockReturnValue({ top: 40, left: 12, width: 0 } as DOMRect);
     const onPositionChange = vi.fn();

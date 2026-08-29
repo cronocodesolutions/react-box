@@ -4,6 +4,7 @@ import Box, { BoxProps } from '../box';
 import usePortalContainer from '../react/hooks/usePortalContainer';
 import { ExtractElementFromTag } from '../react/reactTypes';
 import { ComponentsAndVariants } from '../types';
+import { ElementLike, htmlElementOf } from '../utils/dom/domUtils';
 
 const positionDigitsAfterComma = 2;
 
@@ -25,8 +26,20 @@ interface OverlayProps {
   adjustTranslateX?: string;
   adjustTranslateY?: string;
   /**
-   * Whether the layer takes the measured width of the space it was declared in. Default true, so a
-   * dropdown popup lines up with its trigger; a tooltip sizes to its own content and turns it off.
+   * Measure this element instead of the layer's own placeholder.
+   *
+   * Without it the layer measures an empty `<div>` rendered where the component sits, which is
+   * exactly right when the caller chose that spot — and wrong when the layer belongs to an element
+   * next to it. The placeholder is a real box in the layout: inside a flex row it becomes a flex
+   * item, so opening the layer shifts everything after it by one `gap` and the layer lands *beside*
+   * the thing it describes rather than under it. Pass the element and neither happens.
+   */
+  anchor?: ElementLike;
+  /** Which edge of the anchor the layer starts from. Default `'top'`. */
+  anchorSide?: 'top' | 'bottom';
+  /**
+   * Whether the layer takes the measured width of the anchor. Default true, so a dropdown popup
+   * lines up with its trigger; a tooltip sizes to its own content and turns it off.
    */
   matchWidth?: boolean;
 }
@@ -34,7 +47,15 @@ interface OverlayProps {
 type Props = OverlayProps & BoxProps;
 
 function OverlayImpl(props: Props, ref: Ref<HTMLDivElement>) {
-  const { onPositionChange, adjustTranslateX = '0px', adjustTranslateY = '0px', matchWidth = true, ...restProps } = props;
+  const {
+    onPositionChange,
+    adjustTranslateX = '0px',
+    adjustTranslateY = '0px',
+    anchor,
+    anchorSide = 'top',
+    matchWidth = true,
+    ...restProps
+  } = props;
 
   const positionRef = useRef<HTMLDivElement>(null);
   const [position, setPosition] = useState<
@@ -42,7 +63,7 @@ function OverlayImpl(props: Props, ref: Ref<HTMLDivElement>) {
   >();
   const portalContainer = usePortalContainer();
 
-  const observeScroll = useCallback((element: HTMLDivElement, callback: (el: HTMLDivElement) => void) => {
+  const observeScroll = useCallback((element: HTMLElement, callback: (el: HTMLElement) => void) => {
     const listener = (e: Event) => {
       if ((e.target as HTMLElement).contains(element)) {
         callback(element);
@@ -54,7 +75,7 @@ function OverlayImpl(props: Props, ref: Ref<HTMLDivElement>) {
     return () => controller.abort();
   }, []);
 
-  const observeResize = useCallback((element: HTMLDivElement, callback: (el: HTMLDivElement) => void) => {
+  const observeResize = useCallback((element: HTMLElement, callback: (el: HTMLElement) => void) => {
     const listener = (_e: Event) => {
       callback(element);
     };
@@ -65,10 +86,11 @@ function OverlayImpl(props: Props, ref: Ref<HTMLDivElement>) {
   }, []);
 
   const positionHandler = useCallback(
-    (el: HTMLDivElement) => {
+    (el: HTMLElement) => {
       const rect = el.getBoundingClientRect();
 
-      const top = Math.round((rect.top + window.scrollY) * positionDigitsAfterComma) / positionDigitsAfterComma;
+      const edge = anchorSide === 'bottom' ? rect.bottom : rect.top;
+      const top = Math.round((edge + window.scrollY) * positionDigitsAfterComma) / positionDigitsAfterComma;
       const left = Math.round((rect.left + window.scrollX) * positionDigitsAfterComma) / positionDigitsAfterComma;
       const windowScrollX = window.scrollX;
       const windowScrollY = window.scrollY;
@@ -83,25 +105,28 @@ function OverlayImpl(props: Props, ref: Ref<HTMLDivElement>) {
         setPosition({ top, left, width: rect.width > 0 ? rect.width : undefined, windowScrollX, windowScrollY });
       }
     },
-    [position, onPositionChange],
+    [anchorSide, position, onPositionChange],
   );
 
   useLayoutEffect(() => {
-    if (positionRef.current) {
-      positionHandler(positionRef.current);
-      const scrollHandlerDispose = observeScroll(positionRef.current, positionHandler);
-      const resizeHandlerDispose = observeResize(positionRef.current, positionHandler);
+    const element = htmlElementOf(anchor) ?? positionRef.current;
+
+    if (element) {
+      positionHandler(element);
+      const scrollHandlerDispose = observeScroll(element, positionHandler);
+      const resizeHandlerDispose = observeResize(element, positionHandler);
 
       return () => {
         scrollHandlerDispose();
         resizeHandlerDispose();
       };
     }
-  }, [positionHandler, observeScroll, observeResize]);
+  }, [anchor, positionHandler, observeScroll, observeResize]);
 
   return (
     <>
-      <Box ref={positionRef} />
+      {/* Only when there is nothing else to measure — see `anchor`. */}
+      {!anchor && <Box ref={positionRef} />}
       {position &&
         portalContainer &&
         createPortal(

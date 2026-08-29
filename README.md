@@ -74,7 +74,7 @@ import Textbox from "@cronocode/react-box/components/textbox";
 ```JS
 import Tooltip from "@cronocode/react-box/components/tooltip";
 
-<Tooltip content="Deletes the row for good">{(trigger) => <Button props={trigger}>Delete</Button>}</Tooltip>;
+<Tooltip content="Deletes the row for good">{(trigger) => <Button {...trigger}>Delete</Button>}</Tooltip>;
 ```
 
 - **Overlay** - the positioning half on its own: renders its children into a portal at the place it

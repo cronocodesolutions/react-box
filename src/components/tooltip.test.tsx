@@ -2,6 +2,7 @@ import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { ignoreLogs } from '../../dev/tests';
 import Button from './button';
+import Flex from './flex';
 import Tooltip, { TooltipReason } from './tooltip';
 
 /**
@@ -21,7 +22,7 @@ describe('Tooltip', () => {
   function renderTooltip(props: Partial<React.ComponentProps<typeof Tooltip>> = {}) {
     return render(
       <Tooltip content="Deletes the row" openDelay={0} closeDelay={0} {...props}>
-        {(bag) => <Button props={bag}>Delete</Button>}
+        {(bag) => <Button {...bag}>Delete</Button>}
       </Tooltip>,
     );
   }
@@ -90,6 +91,28 @@ describe('Tooltip', () => {
     expect(bubble).toHaveAttribute('id', 'delete-tip');
     expect(bubble).toHaveAttribute('dir', 'rtl');
     expect(trigger()).toHaveAttribute('aria-describedby', 'delete-tip');
+  });
+
+  it('adds nothing to the layout around the trigger when it opens', () => {
+    // The bubble is positioned against the trigger's own box. Measuring a placeholder instead —
+    // which is what the underlying layer does when it has no anchor — would put a real `<div>` in
+    // this flex row: everything after it shifts by one `gap`, and the tooltip lands beside the
+    // button rather than under it.
+    const { container } = render(
+      <Flex gap={4}>
+        <Tooltip content="Deletes the row" openDelay={0}>
+          {(bag) => <Button {...bag}>Delete</Button>}
+        </Tooltip>
+        <Button>After</Button>
+      </Flex>,
+    );
+    const row = container.firstElementChild!;
+    const before = row.childElementCount;
+
+    fireEvent.pointerOver(trigger());
+
+    expect(screen.getByRole('tooltip')).toBeInTheDocument();
+    expect(row.childElementCount).toBe(before);
   });
 
   it('leaves no timer behind when it unmounts mid-delay', () => {

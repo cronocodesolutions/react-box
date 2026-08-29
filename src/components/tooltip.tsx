@@ -1,4 +1,4 @@
-import { FunctionComponent, useCallback, useEffect, useMemo, useRef } from 'react';
+import { FunctionComponent, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { BoxProps } from '../box';
 import { useEventCallback } from '../react/a11y/callbacks';
 import useControllableState, { ChangeHandler } from '../react/a11y/useControllableState';
@@ -10,17 +10,32 @@ import Overlay from './overlay';
 /** Why the tooltip opened or closed — `onOpenChange` gets this alongside the event that did it. */
 export type TooltipReason = 'hover' | 'focus' | 'pointer-leave' | 'blur' | 'escape';
 
-/**
- * What the trigger has to carry for the pattern to work. Spread it into the `props` bag of the
- * control the tooltip describes — the control itself, not a wrapper around it, because
- * `aria-describedby` only means something on the element the user actually lands on.
- */
-export interface TooltipTriggerProps {
+/** The DOM attributes and handlers the trigger has to carry. */
+export interface TooltipTriggerAttributes {
   'aria-describedby'?: string;
   onPointerEnter(event: React.PointerEvent): void;
   onPointerLeave(event: React.PointerEvent): void;
   onFocus(event: React.FocusEvent): void;
   onBlur(event: React.FocusEvent): void;
+}
+
+/**
+ * What the trigger has to carry for the pattern to work. Spread it onto the control the tooltip
+ * describes — the control itself, not a wrapper around it, because `aria-describedby` only means
+ * something on the element the user actually lands on:
+ *
+ * ```tsx
+ * {(trigger) => <Button {...trigger}>Delete</Button>}          // a Box component
+ * {(trigger) => <button ref={trigger.ref} {...trigger.props}>} // a plain element
+ * ```
+ *
+ * The `ref` is not optional decoration: it is what the tooltip is positioned against. Without it
+ * the layer has to measure a placeholder of its own, which is a real box in the layout — see
+ * `anchor` on `Overlay`.
+ */
+export interface TooltipTrigger {
+  ref: React.RefCallback<HTMLElement>;
+  props: TooltipTriggerAttributes;
 }
 
 // `content` shadows the CSS prop of the same name, which is the right trade: the CSS one is for
@@ -30,16 +45,17 @@ type TooltipBoxProps<TKey extends keyof ComponentsAndVariants> = Omit<BoxProps<'
 interface Props<TKey extends keyof ComponentsAndVariants> extends TooltipBoxProps<TKey> {
   /** The description itself. Nothing renders while this is empty. */
   content?: React.ReactNode;
-  /** The trigger, handed the props that wire it to the tooltip. */
-  children: (trigger: TooltipTriggerProps) => React.ReactNode;
+  /** The trigger, handed the ref and props that wire it to the tooltip. */
+  children: (trigger: TooltipTrigger) => React.ReactNode;
   /** Controlled open state. Leave it out and the tooltip owns it. */
   open?: boolean;
   defaultOpen?: boolean;
   onOpenChange?: ChangeHandler<boolean, TooltipReason>;
   /**
    * How long the pointer has to rest on the trigger before the tooltip appears, in ms. Default
-   * 500. Focus ignores it: a keyboard user asked for the tooltip by arriving, and APG shows it
-   * straight away.
+   * 300 — long enough that sweeping the pointer across a toolbar does not light every control up,
+   * short enough that deliberately resting on one does not feel broken. Focus ignores it entirely:
+   * a keyboard user asked for the tooltip by arriving, and APG shows it straight away.
    */
   openDelay?: number;
   /**
@@ -56,13 +72,15 @@ interface Props<TKey extends keyof ComponentsAndVariants> extends TooltipBoxProp
  * done with it. Pattern: https://www.w3.org/WAI/ARIA/apg/patterns/tooltip/
  *
  * ```tsx
- * <Tooltip content="Deletes the row for good">{(trigger) => <Button props={trigger}>Delete</Button>}</Tooltip>
+ * <Tooltip content="Deletes the row for good">{(trigger) => <Button {...trigger}>Delete</Button>}</Tooltip>
  * ```
  *
  * The trigger is a render prop rather than a cloned child. Cloning would have to guess where a
  * given child wants its DOM attributes — Box takes them in a `props` bag, a plain `<button>` takes
  * them at the top level — and guessing wrong on `aria-describedby` costs exactly the thing the
- * pattern is for. Handing the props over says which element is the trigger, and works for either.
+ * pattern is for. Handing them over says which element is the trigger, and works for either. The
+ * bag carries a `ref` as well as the attributes: the tooltip is positioned against the trigger's
+ * own box, so it needs the element.
  *
  * What the component owns, so its consumer does not have to know the pattern: `role="tooltip"` and
  * the `aria-describedby` pointing at it, opening on hover *and* on focus, and the three WCAG
@@ -79,7 +97,7 @@ function Tooltip<TKey extends keyof ComponentsAndVariants = 'tooltip'>(props: Pr
     open,
     defaultOpen = false,
     onOpenChange,
-    openDelay = 500,
+    openDelay = 300,
     closeDelay = 150,
     adjustTranslateX,
     adjustTranslateY,
@@ -97,6 +115,10 @@ function Tooltip<TKey extends keyof ComponentsAndVariants = 'tooltip'>(props: Pr
     onChange: onOpenChange,
   });
 
+  // The trigger element, as state rather than a ref: it is read during render (it is what the
+  // layer is positioned against), and a ref read in render is both a lint error here and a real
+  // staleness bug — the first render after it attaches has to be the one that positions.
+  const [triggerElement, setTriggerElement] = useState<HTMLElement | null>(null);
   const overlayRef = useRef<HTMLDivElement>(null);
   const timer = useRef<ReturnType<typeof setTimeout>>(undefined);
   // Why the tooltip should still be showing, read when a scheduled close finally runs: the pointer
@@ -200,13 +222,16 @@ function Tooltip<TKey extends keyof ComponentsAndVariants = 'tooltip'>(props: Pr
     scheduleClose('pointer-leave', event);
   });
 
-  const trigger = useMemo<TooltipTriggerProps>(
+  const trigger = useMemo<TooltipTrigger>(
     () => ({
-      'aria-describedby': showTooltip ? tooltipId : undefined,
-      onPointerEnter: handleTriggerEnter,
-      onPointerLeave: handleTriggerLeave,
-      onFocus: handleTriggerFocus,
-      onBlur: handleTriggerBlur,
+      ref: setTriggerElement,
+      props: {
+        'aria-describedby': showTooltip ? tooltipId : undefined,
+        onPointerEnter: handleTriggerEnter,
+        onPointerLeave: handleTriggerLeave,
+        onFocus: handleTriggerFocus,
+        onBlur: handleTriggerBlur,
+      },
     }),
     [handleTriggerBlur, handleTriggerEnter, handleTriggerFocus, handleTriggerLeave, showTooltip, tooltipId],
   );
@@ -217,9 +242,13 @@ function Tooltip<TKey extends keyof ComponentsAndVariants = 'tooltip'>(props: Pr
       {showTooltip && (
         <Overlay
           ref={overlayRef}
+          anchor={triggerElement}
+          // Under the trigger, not over it — with a small gap, which is also what keeps the pointer
+          // travelling between the two from crossing anything else.
+          anchorSide="bottom"
           matchWidth={false}
           adjustTranslateX={adjustTranslateX}
-          adjustTranslateY={adjustTranslateY}
+          adjustTranslateY={adjustTranslateY ?? '4px'}
           component={'tooltip' as TKey}
           {...(restProps as TooltipBoxProps<TKey>)}
           id={tooltipId}

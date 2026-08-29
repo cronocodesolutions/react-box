@@ -33,7 +33,7 @@ describe('Tooltip accessibility', () => {
     return (
       <>
         <Tooltip content="Deletes the row for good" openDelay={openDelay} closeDelay={closeDelay}>
-          {(trigger) => <Button props={trigger}>Delete</Button>}
+          {(trigger) => <Button {...trigger}>Delete</Button>}
         </Tooltip>
         <Button>After</Button>
       </>

@@ -193,13 +193,13 @@ export const fixtures: A11yFixture[] = [
   },
   {
     name: 'Tooltip',
-    render: () => <Tooltip content="Deletes the row">{(trigger) => <Button props={trigger}>Delete</Button>}</Tooltip>,
+    render: () => <Tooltip content="Deletes the row">{(trigger) => <Button {...trigger}>Delete</Button>}</Tooltip>,
   },
   {
     name: 'Tooltip (open)',
     render: () => (
       <Tooltip content="Deletes the row" defaultOpen>
-        {(trigger) => <Button props={trigger}>Delete</Button>}
+        {(trigger) => <Button {...trigger}>Delete</Button>}
       </Tooltip>
     ),
   },

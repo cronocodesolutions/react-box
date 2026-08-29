@@ -506,19 +506,21 @@ Full reference: `docs/a11y-primitives.md`.
 ```tsx
 import Tooltip from '@cronocode/react-box/components/tooltip';
 
-<Tooltip content="Deletes the row for good">{(trigger) => <Button props={trigger}>Delete</Button>}</Tooltip>;
+<Tooltip content="Deletes the row for good">{(trigger) => <Button {...trigger}>Delete</Button>}</Tooltip>;
 ```
 
-The child is a **render prop**, not an element: the bag it receives (`aria-describedby` plus the
-pointer and focus handlers) has to land on the control itself. Put it in `props` on a Box component,
-or spread it on a plain element — `<button {...trigger}>`.
+The child is a **render prop**, not an element: what it receives (a `ref`, plus `aria-describedby`
+and the pointer/focus handlers in `props`) has to land on the control itself. One spread on a Box
+component — `<Button {...trigger}>` — or, on a plain element,
+`<button ref={trigger.ref} {...trigger.props}>`. The `ref` is what the bubble is positioned against,
+so the tooltip sits under the trigger and adds nothing to the layout.
 
 | Prop                      | Default | What it does                                                                       |
 | ------------------------- | ------- | ---------------------------------------------------------------------------------- |
 | `content`                 | —       | The description. Nothing renders while it is empty.                                |
 | `open` / `defaultOpen`    | —       | Controlled / uncontrolled open state.                                              |
 | `onOpenChange`            | —       | `(open, { reason, event })` — `hover`, `focus`, `pointer-leave`, `blur`, `escape`. |
-| `openDelay`               | `500`   | Hover dwell before it appears. Focus ignores it and shows immediately.             |
+| `openDelay`               | `300`   | Hover dwell before it appears. Focus ignores it and shows immediately.             |
 | `closeDelay`              | `150`   | Grace period after the pointer leaves, so it can travel onto the tooltip.          |
 | `adjustTranslateX` / `…Y` | `0px`   | Nudge where the bubble lands.                                                      |
 

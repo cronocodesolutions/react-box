@@ -32,16 +32,16 @@ export default function TooltipPage() {
             label="Usage"
             language="jsx"
             code={`<Tooltip content="Deletes the row for good">
-  {(trigger) => <Button props={trigger}>Delete</Button>}
+  {(trigger) => <Button {...trigger}>Delete</Button>}
 </Tooltip>`}
           >
             <Flex gap={4} flexWrap="wrap" ai="center" py={6}>
-              <Tooltip content="Deletes the row for good">{(trigger) => <Button props={trigger}>Delete</Button>}</Tooltip>
+              <Tooltip content="Deletes the row for good">{(trigger) => <Button {...trigger}>Delete</Button>}</Tooltip>
               <Tooltip content="Hover me, then move the pointer onto the tooltip — it waits for you.">
-                {(trigger) => <Button props={trigger}>Hoverable</Button>}
+                {(trigger) => <Button {...trigger}>Hoverable</Button>}
               </Tooltip>
               <Tooltip content="Tab to me: focus shows the tooltip with no delay. Escape puts it away." openDelay={0}>
-                {(trigger) => <Button props={trigger}>Keyboard</Button>}
+                {(trigger) => <Button {...trigger}>Keyboard</Button>}
               </Tooltip>
             </Flex>
           </Code>
@@ -50,18 +50,19 @@ export default function TooltipPage() {
             <Box>
               The tooltip has to put <Mono>aria-describedby</Mono> on the element the user lands on — the control itself, not a wrapper
               around it. Cloning a child would mean guessing where that attribute goes, and this library has two answers: Box takes DOM
-              attributes in a <Mono>props</Mono> bag, a plain <Mono>&lt;button&gt;</Mono> takes them at the top level. So the trigger props
-              are handed to you instead, and you say where they belong.
+              attributes in a <Mono>props</Mono> bag, a plain <Mono>&lt;button&gt;</Mono> takes them at the top level. So the trigger is
+              handed to you instead, and you say where it belongs. It carries a <Mono>ref</Mono> too — the bubble is positioned against the
+              trigger's own box, which is what keeps it under the control and out of the layout.
             </Box>
             <Box mt={4}>
               <Code
                 language="jsx"
                 codeOnly
-                code={`// A Box component — the bag goes in props.
-<Tooltip content="Save the draft">{(trigger) => <Button props={trigger}>Save</Button>}</Tooltip>
+                code={`// A Box component — ref and props are both top-level Box props, so one spread does it.
+<Tooltip content="Save the draft">{(trigger) => <Button {...trigger}>Save</Button>}</Tooltip>
 
-// A plain element — the same bag, spread.
-<Tooltip content="Save the draft">{(trigger) => <button {...trigger}>Save</button>}</Tooltip>`}
+// A plain element — the same two pieces, named.
+<Tooltip content="Save the draft">{(trigger) => <button ref={trigger.ref} {...trigger.props}>Save</button>}</Tooltip>`}
               />
             </Box>
           </Section>
@@ -100,12 +101,12 @@ export default function TooltipPage() {
     console.log(reason); // 'hover' | 'focus' | 'pointer-leave' | 'blur' | 'escape'
   }}
 >
-  {(trigger) => <Button props={trigger}>Delete</Button>}
+  {(trigger) => <Button {...trigger}>Delete</Button>}
 </Tooltip>`}
           >
             <Flex gap={4} ai="center" py={6}>
               <Tooltip content="Watch the reason change" openDelay={0} onOpenChange={(_open, { reason }) => setLastReason(reason)}>
-                {(trigger) => <Button props={trigger}>Hover or tab to me</Button>}
+                {(trigger) => <Button {...trigger}>Hover or tab to me</Button>}
               </Tooltip>
               <Span fontSize={14} theme={{ dark: { color: 'slate-400' }, light: { color: 'slate-600' } }}>
                 last reason: <Mono>{lastReason ?? '—'}</Mono>
@@ -124,7 +125,7 @@ export default function TooltipPage() {
                 language="jsx"
                 codeOnly
                 code={`<Tooltip content="On brand" bgColor="indigo-600" color="white" borderRadius={2} adjustTranslateY="4px">
-  {(trigger) => <Button props={trigger}>Delete</Button>}
+  {(trigger) => <Button {...trigger}>Delete</Button>}
 </Tooltip>`}
               />
             </Box>
@@ -164,7 +165,7 @@ const sidebarLinks = [
 ] as const;
 
 const interactions: { input: string; result: string }[] = [
-  { input: 'Pointer rests on the trigger', result: 'Shows after openDelay (500 ms by default).' },
+  { input: 'Pointer rests on the trigger', result: 'Shows under the trigger after openDelay (300 ms by default).' },
   { input: 'Pointer leaves the trigger', result: 'Hides after closeDelay (150 ms) — unless it lands on the tooltip.' },
   { input: 'Pointer moves onto the tooltip', result: 'Stays open for as long as it is there.' },
   { input: 'Tab to the trigger', result: 'Shows immediately: focus ignores openDelay.' },
