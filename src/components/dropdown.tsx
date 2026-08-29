@@ -21,6 +21,15 @@ interface Props<TVal, TKey extends keyof ComponentsAndVariants = 'dropdown'> ext
   defaultValue?: TVal | TVal[];
   value?: TVal | TVal[];
   multiple?: boolean;
+  /**
+   * Turn the control into the APG *editable* combobox: a text field that filters the listbox.
+   *
+   * The field is the combobox — it carries the role, the ARIA and anything you pass in `props` —
+   * so this is a different pattern from the select-only one rather than a decoration on top of it.
+   * What changes for a keyboard: printable keys type instead of jumping to an option (there is no
+   * typeahead, the visible field owns the keystrokes), Home/End and the left/right arrows move the
+   * caret, and Escape closes the listbox before it clears the field.
+   */
   isSearchable?: boolean;
   searchPlaceholder?: string;
   hideIcon?: boolean;
@@ -57,7 +66,17 @@ function isPrintable(event: React.KeyboardEvent): boolean {
 }
 
 /**
- * The APG select-only combobox: a trigger that owns focus and a listbox it controls.
+ * The keys an editable combobox hands straight to its text field.
+ *
+ * Each of them also puts the highlight back on the field, which is what APG means by "moves visual
+ * focus to the textbox": the caret has moved, so the option the arrows were on is no longer where
+ * the user is.
+ */
+const TEXT_EDITING_KEYS = new Set([' ', 'Home', 'End', 'ArrowLeft', 'ArrowRight']);
+
+/**
+ * The APG combobox, in both of its shapes.
+ *
  * Pattern: https://www.w3.org/WAI/ARIA/apg/patterns/combobox/
  *
  * ```tsx
@@ -67,11 +86,12 @@ function isPrintable(event: React.KeyboardEvent): boolean {
  * </Dropdown>
  * ```
  *
- * DOM focus never moves into the popup. That is the shape of this pattern rather than a shortcut:
- * the trigger keeps focus and names the highlighted option with `aria-activedescendant`, so one
- * Tab still enters and leaves the control, Escape has somewhere to return to for free, and the
- * options do not each become a tab stop. `useRovingFocus({ focusItems: false })` is the half of
- * that hook written for it.
+ * **Select-only** by default: a `<button>` that owns focus and a listbox it controls. DOM focus
+ * never moves into the popup. That is the shape of this pattern rather than a shortcut: the
+ * trigger keeps focus and names the highlighted option with `aria-activedescendant`, so one Tab
+ * still enters and leaves the control, Escape has somewhere to return to for free, and the options
+ * do not each become a tab stop. `useRovingFocus({ focusItems: false })` is the half of that hook
+ * written for it.
  *
  * The keyboard map, closed: Down/Up/Enter/Space open — on the selected option when there is one,
  * otherwise the first or the last — Home and End open at an end, and a printable character opens
@@ -80,6 +100,14 @@ function isPrintable(event: React.KeyboardEvent): boolean {
  * before it leaves. `PageUp`/`PageDown` are the one part of the APG map left out — they are
  * optional there, and a second movement implementation beside the hook's would be the wrong place
  * for it.
+ *
+ * **Editable** with `isSearchable`: the trigger is a text field carrying `role="combobox"` and
+ * `aria-autocomplete="list"`, and the listbox holds what that field has filtered down to. Focus
+ * lives in the field from the first keystroke to the last, so the keys divide differently — the
+ * printable ones type, Home/End and the left/right arrows move the caret and hand the highlight
+ * back to the field, only Down/Up reach the listbox, and Escape closes the listbox before a second
+ * Escape clears what was typed. Filtering never moves the highlight onto a suggestion; that is the
+ * user's to do with an arrow, and it is the difference between list and inline autocomplete.
  *
  * What is deliberately *not* here is a name. See the `label` prop.
  */
@@ -109,10 +137,23 @@ function DropdownImpl<TVal>(props: Props<TVal>, ref: Ref<HTMLInputElement>): Rea
     () => (isControlled ? (Array.isArray(value) ? value : value ? [value] : []) : selectedValues),
     [isControlled, value, selectedValues],
   );
-  const [search, setSearch] = useState<string>('');
+
+  /**
+   * What has been typed into the field, or `null` for "nothing — it is showing the value".
+   *
+   * The two are genuinely different states: an empty string is a field the user emptied, which
+   * matches everything and displays nothing, while `null` is a field that has gone back to
+   * displaying what is selected.
+   */
+  const [search, setSearch] = useState<string | null>(null);
 
   const [isOpen, setOpen] = useState(false);
-  const buttonRef = useRef<HTMLButtonElement>(null);
+  const triggerRef = useRef<HTMLElement | null>(null);
+  // A callback rather than a ref object: the trigger is a `<button>` in one mode and a `<div>` in
+  // the other, and one `RefObject<T>` cannot be handed to both.
+  const setTriggerRef = useCallback((element: HTMLElement | null) => {
+    triggerRef.current = element;
+  }, []);
   const popupRef = useRef<HTMLDivElement>(null);
   const searchBoxRef = useRef<HTMLInputElement>(null);
 
@@ -122,6 +163,12 @@ function DropdownImpl<TVal>(props: Props<TVal>, ref: Ref<HTMLInputElement>): Rea
   const labelId = `${identifier}-label`;
   const hasLabel = label !== undefined && label !== null && label !== false;
   const optionId = useCallback((index: number) => `${identifier}-option-${index}`, [identifier]);
+
+  /** Close the listbox, and let the field go back to the value — unless Escape said not to. */
+  const close = useEventCallback((keepSearch = false) => {
+    setOpen(false);
+    if (!keepSearch) setSearch(null);
+  });
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const allKids = useMemo<ReactElement<any, FunctionComponent>[]>(
@@ -138,20 +185,37 @@ function DropdownImpl<TVal>(props: Props<TVal>, ref: Ref<HTMLInputElement>): Rea
   }, [items]);
   const getItemText = useCallback((item: React.ReactElement) => itemTextCache.get(item) ?? searchItemText(item), [itemTextCache]);
 
-  const filteredItems = useMemo<React.ReactElement<DropdownItemProps<TVal>>[]>(() => {
-    return items.filter((x) => {
-      if (isSearchable && search) {
-        return getItemText(x).toLowerCase().includes(search.toLowerCase());
-      }
+  const query = isSearchable ? (search ?? '') : '';
 
-      return true;
-    });
-  }, [isSearchable, search, items, getItemText]);
+  const filteredItems = useMemo<React.ReactElement<DropdownItemProps<TVal>>[]>(() => {
+    if (!query) return items;
+
+    return items.filter((x) => getItemText(x).toLowerCase().includes(query.toLowerCase()));
+  }, [query, items, getItemText]);
 
   const unselectItem = useMemo(() => allKids.find((x) => (x.type as FunctionComponent)?.displayName === 'DropdownUnselect'), [allKids]);
   const selectAllItem = useMemo(() => allKids.find((x) => (x.type as FunctionComponent)?.displayName === 'DropdownSelectAll'), [allKids]);
   const emptyItem = useMemo(() => allKids.find((x) => (x.type as FunctionComponent)?.displayName === 'DropdownEmptyItem'), [allKids]);
   const displayItem = useMemo(() => allKids.find((x) => (x.type as FunctionComponent)?.displayName === 'DropdownDisplay'), [allKids]);
+
+  /**
+   * The selection as text, when it has one — what an editable combobox puts in its field.
+   *
+   * A combobox is announced by its name and its *value*, and the value of an editable one is the
+   * text in the field: leaving that blank while something is selected is how a screen-reader user
+   * ends up hearing "Fruit, combobox, blank" with Apple chosen. A custom `Dropdown.Display` is the
+   * case with no text form — arbitrary JSX cannot be a field's value — and there the field stays
+   * empty, the display node keeps drawing the selection, and `aria-selected` on the options is
+   * what carries it into the accessibility tree.
+   */
+  const selectionText = useMemo(() => {
+    if (!isSearchable || displayItem) return '';
+
+    return items
+      .filter((item) => valueToUse.includes(item.props.value))
+      .map((item) => getItemText(item))
+      .join(', ');
+  }, [isSearchable, displayItem, items, valueToUse, getItemText]);
 
   const showSelectAll = !!(selectAllItem && multiple && filteredItems.length > valueToUse.length);
   const showUnselect = !!(unselectItem && filteredItems.length > 0 && !showSelectAll);
@@ -178,7 +242,10 @@ function DropdownImpl<TVal>(props: Props<TVal>, ref: Ref<HTMLInputElement>): Rea
   );
 
   const display = useMemo(() => {
-    if (isOpen && isSearchable) return null;
+    // In the editable pattern the field is what shows the selection, and two copies of it in one
+    // box is one too many. The display node stands in only where the field cannot: while the
+    // listbox is open — the query owns the field then — and when the selection has no text form.
+    if (isSearchable && (isOpen || selectionText !== '')) return null;
 
     if (displayItem)
       return typeof displayItem.props.children === 'function' ? displayItem.props.children(valueToUse, isOpen) : displayItem.props.children;
@@ -196,7 +263,7 @@ function DropdownImpl<TVal>(props: Props<TVal>, ref: Ref<HTMLInputElement>): Rea
       selectedKid?.props.value ??
       (multiple ? null : unselectItem?.props.children)
     );
-  }, [multiple, filteredItems, valueToUse, unselectItem, isOpen, isSearchable, displayItem, getItemText]);
+  }, [multiple, filteredItems, valueToUse, unselectItem, isOpen, isSearchable, selectionText, displayItem, getItemText]);
 
   const applySelection = useCallback(
     (e: React.SyntheticEvent, ...kids: React.ReactElement<DropdownItemProps<TVal>>[]) => {
@@ -237,12 +304,14 @@ function DropdownImpl<TVal>(props: Props<TVal>, ref: Ref<HTMLInputElement>): Rea
       e.stopPropagation();
 
       if (multiple) {
+        // A row is not focusable, so pressing one drops focus to the body. The field has to take
+        // it back, or the next keystroke of a search in progress goes nowhere.
         if (isSearchable) setTimeout(() => searchBoxRef.current?.focus(), 0);
       } else {
-        setOpen(false);
+        close();
       }
     },
-    [multiple, isSearchable, valueToUse, onChange],
+    [multiple, isSearchable, valueToUse, onChange, close],
   );
 
   /** Choosing a row, whichever kind it is — the one path a click and an Enter both take. */
@@ -267,31 +336,33 @@ function DropdownImpl<TVal>(props: Props<TVal>, ref: Ref<HTMLInputElement>): Rea
     onSelect: selectRow,
   });
 
+  const setActiveIndex = roving.setActiveIndex;
+  /** Hand the highlight back to the text field: no option is the one the arrows are on. */
+  const clearHighlight = useCallback(
+    (event?: React.SyntheticEvent) => setActiveIndex(-1, { reason: 'programmatic', event }),
+    [setActiveIndex],
+  );
+
   useDismiss({
     enabled: isOpen,
     // The trigger counts as inside: a press on an open dropdown's own button has to reach its
     // toggle, not be read as a press outside and dismissed and reopened in one gesture.
-    inside: [buttonRef, popupRef],
-    onDismiss: () => setOpen(false),
+    inside: [triggerRef, popupRef],
+    // Escape keeps what has been typed, which is what makes a *second* Escape the key that clears
+    // the field — the editable combobox's two-step dismissal. Every other way of closing puts the
+    // field back to the value, since a query left behind would be describing a filter that is no
+    // longer applied to anything.
+    onDismiss: (reason) => close(reason === 'escape'),
   });
 
   // Focus lands back on the trigger only when a close left it nowhere — clicking an option drops
   // it to the body. Escape never moved it, and Tab moved it on purpose; neither is taken back.
-  useFocusReturn({ enabled: isOpen, returnTo: buttonRef });
-
-  const [prevOpen, setPrevOpen] = useState(isOpen);
-  // Clear the search box when the dropdown closes (render-phase sync, no effect needed).
-  if (isOpen !== prevOpen) {
-    setPrevOpen(isOpen);
-    if (!isOpen) setSearch('');
-  }
+  useFocusReturn({ enabled: isOpen, returnTo: isSearchable ? searchBoxRef : triggerRef });
 
   useEffect(() => {
-    if (isOpen) {
-      setTimeout(() => {
-        searchBoxRef.current?.focus();
-      }, 0);
-    }
+    // Opening from a keystroke leaves focus where it already is; opening from a press on the
+    // shell's own padding does not, and the field is where the keys have to arrive either way.
+    if (isOpen) searchBoxRef.current?.focus();
   }, [isOpen]);
 
   const activeIndex = roving.activeIndex;
@@ -329,12 +400,41 @@ function DropdownImpl<TVal>(props: Props<TVal>, ref: Ref<HTMLInputElement>): Rea
   };
 
   const toggleOpen = useEventCallback((event: React.MouseEvent) => {
-    if (isOpen) setOpen(false);
+    if (isOpen) close();
     else openAt(indexOnOpen('none'), event);
+  });
+
+  /** A press in the text field opens the listbox and never closes it — see `DropdownSearch`. */
+  const openFromField = useEventCallback((event: React.MouseEvent) => {
+    if (!isOpen) openAt(indexOnOpen('none'), event);
+  });
+
+  const handleSearchChange = useEventCallback((next: string) => {
+    setSearch(next);
+    // Typing into a closed combobox is a request to see what it matches.
+    if (!isOpen) setOpen(true);
+    // Filtering must not carry the highlight with it: APG keeps visual focus in the field while
+    // the user types, and an index into a list that has just changed points at the wrong option.
+    clearHighlight();
   });
 
   const handleClosedKeyDown = (event: React.KeyboardEvent) => {
     const { key } = event;
+
+    if (isSearchable) {
+      // The field owns every key that types or moves a caret; only the two that command the
+      // listbox are taken, and a printable character reaches it through `onChange` instead.
+      if (key === 'ArrowDown' || key === 'ArrowUp') {
+        event.preventDefault();
+        openAt(indexOnOpen(key === 'ArrowUp' ? 'last' : event.altKey ? 'none' : 'first'), event);
+        return;
+      }
+
+      // APG: Escape dismisses the listbox — and with no listbox to dismiss, clears the field.
+      if (key === 'Escape') setSearch('');
+
+      return;
+    }
 
     if (key === 'ArrowDown' || key === 'Enter' || key === ' ') {
       // Without this the browser activates the button on its own straight afterwards, and the
@@ -360,7 +460,7 @@ function DropdownImpl<TVal>(props: Props<TVal>, ref: Ref<HTMLInputElement>): Rea
       setOpen(true);
       // The row list does not depend on the popup being on screen, so the same typeahead that
       // moves the highlight while open can decide where it starts.
-      if (!isSearchable) roving.onKeyDown(event);
+      roving.onKeyDown(event);
     }
   };
 
@@ -381,19 +481,21 @@ function DropdownImpl<TVal>(props: Props<TVal>, ref: Ref<HTMLInputElement>): Rea
       // APG: Tab commits the highlighted option and then leaves. No `preventDefault` — moving on
       // is the whole point of the key.
       if (!multiple && roving.activeIndex !== -1) selectRow(roving.activeIndex, event);
-      setOpen(false);
+      close();
       return;
     }
 
     if (event.altKey && event.key === 'ArrowUp') {
       event.preventDefault();
       if (roving.activeIndex !== -1) selectRow(roving.activeIndex, event);
-      setOpen(false);
+      close();
       return;
     }
 
-    // The search box owns the keys that edit text; the list keeps the arrows.
-    if (isSearchable && (event.key === ' ' || event.key === 'Home' || event.key === 'End')) return;
+    if (isSearchable && TEXT_EDITING_KEYS.has(event.key)) {
+      clearHighlight(event);
+      return;
+    }
 
     roving.onKeyDown(event);
   });
@@ -419,64 +521,104 @@ function DropdownImpl<TVal>(props: Props<TVal>, ref: Ref<HTMLInputElement>): Rea
     [valueToUse, multiple, restProps.variant, showCheckbox, selectRow, optionId, activeIndex, rovingItemProps, isRowDisabled],
   );
 
-  const trigger = (
+  /** What makes this a combobox, on the button or on the field that replaces it. */
+  const comboboxProps = {
+    'aria-expanded': isOpen,
+    'aria-controls': isOpen && hasPopup ? listboxId : undefined,
+    // Where the keyboard is, on whichever element holds focus.
+    'aria-activedescendant': activeOptionId,
+    'aria-labelledby': hasLabel ? labelId : undefined,
+    ...tagProps,
+    onKeyDown: handleKeyDown,
+  };
+
+  const hiddenValues = valueToUse.map((x) => {
+    const serialized = JSON.stringify(x);
+
+    return <Textbox key={serialized} ref={ref} name={name} type="hidden" value={serialized ?? ''} />;
+  });
+
+  const icon = !hideIcon && (
+    <Flex component="dropdown.icon" {...iconProps}>
+      <BaseSvg viewBox="0 0 10 6" width="0.6rem" rotate={isOpen ? 180 : 0}>
+        <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 1 4 4 4-4" />
+      </BaseSvg>
+    </Flex>
+  );
+
+  const popup = isOpen && hasPopup && (
+    <DropdownItems<TVal>
+      rows={rows}
+      emptyItem={emptyItem}
+      triggerRef={triggerRef}
+      popupRef={popupRef}
+      listboxId={listboxId}
+      labelledBy={hasLabel ? labelId : triggerId}
+      itemsProps={itemsProps}
+    />
+  );
+
+  const trigger = isSearchable ? (
+    // Not a button: the combobox is the field inside it, and a focusable element inside a button
+    // is the whole of bug #47. The shell is a shape to hang the border and the chevron on — its
+    // `focus` styles are `:focus-within`, so it still lights up when the field has focus.
+    <Box
+      ref={setTriggerRef}
+      component="dropdown"
+      props={{ onClick: toggleOpen }}
+      position="relative"
+      pr={!hideIcon ? 6 : undefined}
+      minWidth={isOpen ? 36 : undefined}
+      width="fit-content"
+      {...restProps}
+      id={undefined}
+    >
+      {hiddenValues}
+      <DropdownSearch
+        id={triggerId}
+        value={search ?? selectionText}
+        onValueChange={handleSearchChange}
+        placeholder={isOpen ? searchPlaceholder : undefined}
+        inputRef={searchBoxRef}
+        comboboxProps={comboboxProps}
+        onOpen={openFromField}
+      />
+      {/* The field is absolutely positioned over the shell, so nothing it contains reaches the
+          flow — and the shell has to be given both its width and its height by something that
+          does. The same text, invisible: `visibility` keeps the space and keeps the copy out of
+          the accessibility tree, where the field's own value already says it. A no-break space
+          when there is no text, because a plain one collapses away under `white-space: nowrap`
+          and leaves no line box at all — which is a shell 20px shorter than the one beside it. */}
+      {display ?? (
+        <Box tag="span" visibility="hidden">
+          {selectionText || '\u00A0'}
+        </Box>
+      )}
+      {icon}
+      {popup}
+    </Box>
+  ) : (
     <Button
-      ref={buttonRef}
+      ref={setTriggerRef}
       onClick={toggleOpen}
       component="dropdown"
       // A dropdown inside a form is not its submit button, which is what an untyped one defaults to.
       type="button"
-      props={{
-        tabIndex: 0,
-        role: 'combobox',
-        'aria-expanded': isOpen,
-        'aria-controls': isOpen && hasPopup ? listboxId : undefined,
-        // Where the keyboard is, on whichever element holds focus: the trigger, unless a search
-        // box has taken it.
-        'aria-activedescendant': isSearchable ? undefined : activeOptionId,
-        'aria-labelledby': hasLabel ? labelId : undefined,
-        ...tagProps,
-        onKeyDown: handleKeyDown,
-      }}
+      props={{ tabIndex: 0, role: 'combobox', ...comboboxProps }}
       position="relative"
       pr={!hideIcon ? 6 : undefined}
-      minWidth={isOpen && isSearchable ? 36 : undefined}
       width="fit-content"
       {...restProps}
       id={triggerId}
     >
-      {valueToUse.map((x) => {
-        const serialized = JSON.stringify(x);
-        return <Textbox key={serialized} ref={ref} name={name} type="hidden" value={serialized ?? ''} />;
-      })}
-      {isSearchable && isOpen && (
-        <DropdownSearch
-          search={search}
-          onSearchChange={setSearch}
-          searchPlaceholder={searchPlaceholder}
-          searchBoxRef={searchBoxRef}
-          activeDescendantId={activeOptionId}
-        />
-      )}
-      {display ?? ' '}
-      {!hideIcon && (
-        <Flex component="dropdown.icon" {...iconProps}>
-          <BaseSvg viewBox="0 0 10 6" width="0.6rem" rotate={isOpen ? 180 : 0}>
-            <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 1 4 4 4-4" />
-          </BaseSvg>
-        </Flex>
-      )}
-      {isOpen && hasPopup && (
-        <DropdownItems<TVal>
-          rows={rows}
-          emptyItem={emptyItem}
-          buttonRef={buttonRef}
-          popupRef={popupRef}
-          listboxId={listboxId}
-          labelledBy={hasLabel ? labelId : triggerId}
-          itemsProps={itemsProps}
-        />
-      )}
+      {hiddenValues}
+      {/* A no-break space, not a plain one: a lone space collapses away under the component's
+          `white-space: nowrap`, and with nothing else in the flow — a `multiple` dropdown with
+          nothing selected — the control loses its line box and stands 20px shorter than its
+          neighbours. Written as an escape so it cannot be typed away again. */}
+      {display ?? '\u00A0'}
+      {icon}
+      {popup}
     </Button>
   );
 

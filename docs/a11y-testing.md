@@ -91,20 +91,21 @@ the list is still taking focus, focus returning to a trigger a roving index has 
 
 What the sweep finds today, with the step that owns each fix. This is the measured starting point the accessibility work is judged against.
 
-| Component                   | Rule                   | What is wrong                                                                      | Owner |
-| --------------------------- | ---------------------- | ---------------------------------------------------------------------------------- | ----- |
-| ~~Dropdown (open)~~         | `aria-allowed-attr`    | Items carry `aria-selected` on a plain `div` — legal only with `role="option"`     | A5 ✅ |
-| Dropdown (searchable, open) | `nested-interactive`   | The search input renders inside the trigger `<button>`: a focusable in a focusable | A6 ⚠️ |
-| ~~Select (open)~~           | `button-name`          | With nothing selected and no placeholder, the trigger renders empty and unnamed    | A5 ✅ |
-| DataGrid                    | `aria-required-parent` | `role="row"`/`"columnheader"` hang off a `role="presentation"` root                | A7    |
-| DataGrid                    | `button-name`          | The group and column-chooser buttons are icon-only with no accessible name         | A7    |
+| Component                       | Rule                   | What is wrong                                                                      | Owner |
+| ------------------------------- | ---------------------- | ---------------------------------------------------------------------------------- | ----- |
+| ~~Dropdown (open)~~             | `aria-allowed-attr`    | Items carry `aria-selected` on a plain `div` — legal only with `role="option"`     | A5 ✅ |
+| ~~Dropdown (searchable, open)~~ | `nested-interactive`   | The search input renders inside the trigger `<button>`: a focusable in a focusable | A6 ✅ |
+| ~~Select (open)~~               | `button-name`          | With nothing selected and no placeholder, the trigger renders empty and unnamed    | A5 ✅ |
+| DataGrid                        | `aria-required-parent` | `role="row"`/`"columnheader"` hang off a `role="presentation"` root                | A7    |
+| DataGrid                        | `button-name`          | The group and column-chooser buttons are icon-only with no accessible name         | A7    |
 
 Everything else in the sweep is clean — including, and this is the point of the section above, Dropdown and Select in the states where they have no ARIA at all to get wrong.
 
-⚠️ **The searchable row stopped firing without being fixed, and that is worth reading twice.** A5 turned the trigger into a `role="combobox"`, and a combobox is one of the roles that _may_ contain a focusable descendant — so `nested-interactive` simply stopped applying to the input nested inside it. Nothing about the markup improved. The entry was deleted from `knownViolations` because it no longer fires, and replaced by a test in `dropdown.a11y.test.tsx` that asserts the nesting is still there and fails when A6 removes it. This is the same manoeuvre A1 used for the absent Tooltip pattern, and the same reason: a gap the tooling cannot see needs a test that can.
+⚠️ **The searchable row stopped firing before it was fixed, and that is worth reading twice.** A5 turned the trigger into a `role="combobox"`, and a combobox is one of the roles that _may_ contain a focusable descendant — so `nested-interactive` simply stopped applying to the input nested inside it. Nothing about the markup had improved. The entry was deleted from `knownViolations` because it no longer fired, and replaced by a test in `dropdown.a11y.test.tsx` that asserted the nesting was still there and failed the moment A6 removed it. That is what closed the row: A6 made the input the combobox, the test flipped to asserting `combobox.closest('button')` is null, and the sweep never had an opinion either way. The same manoeuvre A1 used for the absent Tooltip pattern, and the same reason: a gap the tooling cannot see needs a test that can.
 
 **Closed since:**
 
+- **A6 — the searchable Dropdown** moved `role="combobox"` onto the search `<input>` itself, which is what took the input out of the trigger `<button>` and closed the row above. 16 tests in `dropdown.a11y.test.tsx` cover the editable map (28 → 42 for the file, the two that pinned the old nesting being gone) — where the printable keys type instead of navigating, Home/End and the left/right arrows hand the highlight back to the field, and Escape closes before it clears.
 - **A5 — Dropdown and Select** closed both of their rows at once. Items are `role="option"` inside a `role="listbox"`, which is what makes the `aria-selected` beside them legal, and the trigger takes its name from a `label` prop instead of from whatever happens to be selected. The sweep gained nothing new, but `dropdown.a11y.test.tsx` did: 28 tests over the APG select-only combobox map, which is the layer that can see a pattern rather than an attribute.
 - **A3 — Tooltip** had no violations to fix here, which is exactly the limitation this document opens with: it had no ARIA at all, and axe cannot fail what is not there. A3 made it the APG pattern, and the sweep now covers it open as well as closed.
 - **A4 — Checkbox and RadioButton** both failed `label`. Both now render the `<label>` themselves from a `label` prop, so their fixtures carry no `knownViolations` and the sweep would fail if the rule came back. The sweep also gained `Checkbox (indeterminate)` — where `aria-checked="mixed"` has to agree with the DOM property — plus `Switch` and `RadioGroup`, neither of which existed when the baseline was measured.

@@ -88,10 +88,10 @@ export default function DropdownPage() {
 
           <Section id="a11y" title="Keyboard and roles">
             <Box>
-              This is the APG select-only combobox, whole. The trigger is a <Mono>role="combobox"</Mono> that keeps DOM focus the entire
-              time; the popup is a <Mono>role="listbox"</Mono> of <Mono>role="option"</Mono> rows, and the option the arrows are on is named
-              by <Mono>aria-activedescendant</Mono> rather than focused. You write none of that — and if you were writing it by hand before,
-              delete it.
+              This is the APG combobox, whole — in both of its shapes. The trigger is a <Mono>role="combobox"</Mono> that keeps DOM focus
+              the entire time; the popup is a <Mono>role="listbox"</Mono> of <Mono>role="option"</Mono> rows, and the option the arrows are
+              on is named by <Mono>aria-activedescendant</Mono> rather than focused. Add <Mono>isSearchable</Mono> and the combobox becomes
+              the text field instead of a button. You write none of that — and if you were writing it by hand before, delete it.
             </Box>
             <Flex d="column" gap={3} mt={4}>
               <Note icon={Tags} title="Give it a label">
@@ -103,13 +103,23 @@ export default function DropdownPage() {
                 <Mono>Dropdown.Unselect</Mono> and <Mono>Dropdown.SelectAll</Mono> sit inside the listbox, so they carry{' '}
                 <Mono>role="option"</Mono> and the arrow keys reach them like any other row.
               </Note>
-              <Note icon={Keyboard} title="Searchable is still the old shape">
-                <Mono>isSearchable</Mono> nests the search box inside the trigger. The editable-combobox pattern — where the input{' '}
-                <em>is</em> the combobox — is a separate piece of work, and until it lands that mode is not the pattern below.
+              <Note icon={Keyboard} title="Searchable is the editable combobox">
+                With <Mono>isSearchable</Mono> the text field <em>is</em> the combobox — the role, the ARIA and anything you pass in{' '}
+                <Mono>props</Mono> live on the input, so nothing focusable sits inside anything else focusable. It is a different keyboard
+                map, in the second table below: the printable keys type instead of navigating, and only Down and Up reach the listbox.
               </Note>
             </Flex>
             <Box mt={6}>
-              <KeyTable />
+              <H3 fontSize={15} fontWeight={600} mb={3} theme={{ dark: { color: 'slate-200' }, light: { color: 'slate-800' } }}>
+                Select-only — the default
+              </H3>
+              <KeyTable rows={interactions} />
+            </Box>
+            <Box mt={6}>
+              <H3 fontSize={15} fontWeight={600} mb={3} theme={{ dark: { color: 'slate-200' }, light: { color: 'slate-800' } }}>
+                Editable — with isSearchable
+              </H3>
+              <KeyTable rows={editableInteractions} />
             </Box>
           </Section>
 
@@ -203,7 +213,7 @@ Box.components({
           </Code>
 
           <Code id="searchable" label="Searchable" language="jsx">
-            <Dropdown isSearchable width={50}>
+            <Dropdown label="User" isSearchable searchPlaceholder="Search users..." width={50}>
               <Dropdown.Unselect>Select</Dropdown.Unselect>
               <Dropdown.Item value={1}>John Doe</Dropdown.Item>
               <Dropdown.Item value={2}>Joe Smith</Dropdown.Item>
@@ -213,7 +223,7 @@ Box.components({
           </Code>
 
           <Code id="empty-item" label="Searchable with Empty Item" language="jsx">
-            <Dropdown isSearchable width={50}>
+            <Dropdown label="User" isSearchable searchPlaceholder="Search users..." width={50}>
               <Dropdown.EmptyItem>No options</Dropdown.EmptyItem>
               <Dropdown.Unselect>Select</Dropdown.Unselect>
               <Dropdown.Item value={1}>John Doe</Dropdown.Item>
@@ -336,10 +346,11 @@ Box.components({
     selectedDisplay: (rows) =>
       rows.length === 0 ? 'Pick users...' : \`\${rows.length} selected\`,
   }}
-  multiple showCheckbox isSearchable searchPlaceholder="Search users..."
+  label="Users" multiple showCheckbox isSearchable searchPlaceholder="Search users..."
 />`}
               >
                 <Select<User, number>
+                  label="Users"
                   data={users}
                   def={{
                     valueKey: 'id',
@@ -399,7 +410,32 @@ const interactions: { input: string; result: string }[] = [
   { input: 'Tab (open)', result: 'Chooses the highlighted option, then moves on to the next control.' },
 ];
 
-function KeyTable() {
+const editableInteractions: { input: string; result: string }[] = [
+  {
+    input: 'A printable character',
+    result: 'Types into the field, which opens the listbox and filters it. No typeahead — the field owns the keys.',
+  },
+  { input: 'Down / Up (closed)', result: 'Opens, with the highlight on the selected option — or the first / last when nothing is chosen.' },
+  { input: 'Alt + Down (closed)', result: 'Opens without highlighting anything.' },
+  { input: 'Down / Up (open)', result: 'Moves the highlight through what the filter left, wrapping and skipping disabled options.' },
+  {
+    input: 'Home / End, Left / Right',
+    result: 'Move the caret, and hand the highlight back to the field — no option is where you are any more.',
+  },
+  { input: 'Space', result: 'Types a space. Only Enter chooses in this mode.' },
+  {
+    input: 'Enter (open)',
+    result: 'Chooses the highlighted option and puts its text in the field. With nothing highlighted it does nothing.',
+  },
+  { input: 'Escape', result: 'Closes the listbox, keeping what was typed. Pressed again on a closed one, it clears the field.' },
+  { input: 'Tab (open)', result: 'Chooses the highlighted option, then moves on to the next control.' },
+  {
+    input: 'Clicking away',
+    result: 'Closes, and the field goes back to the value — a query left behind would describe a filter that is gone.',
+  },
+];
+
+function KeyTable({ rows }: { rows: { input: string; result: string }[] }) {
   return (
     <Box tag="table" width="fit" style={{ borderCollapse: 'collapse' }}>
       <Box tag="thead">
@@ -409,7 +445,7 @@ function KeyTable() {
         </Box>
       </Box>
       <Box tag="tbody">
-        {interactions.map((row) => (
+        {rows.map((row) => (
           <Box tag="tr" key={row.input}>
             <Cell>
               <Mono>{row.input}</Mono>
