@@ -1,6 +1,7 @@
 import { useCallback } from 'react';
 import Box from '../../../box';
 import SortIcon from '../../../icons/sortIcon';
+import useIdentifier from '../../../react/a11y/useIdentifier';
 import Checkbox from '../../checkbox';
 import Flex from '../../flex';
 import VisuallyHidden from '../../visuallyHidden';
@@ -24,6 +25,8 @@ export default function DataGridHeaderCell<TRow>(props: Props<TRow>) {
   const { isSortable, showResizer, showContextMenu, paddingLeft, paddingRight } = headerCell;
   const navigation = useGridNavigationContext();
   const { ref, tabIndex, onFocus } = navigation?.cellProps(row, columnIndex) ?? {};
+  // The resizer is a separator, and a separator names the pane it resizes — which is this cell.
+  const identifier = useIdentifier('datagrid-columnheader');
 
   const toggleSelectAll = useCallback(() => {
     grid.toggleSelectAllRows();
@@ -49,6 +52,7 @@ export default function DataGridHeaderCell<TRow>(props: Props<TRow>) {
   return (
     <Flex
       ref={ref}
+      id={identifier}
       props={{
         role: 'columnheader',
         'aria-colindex': headerCell.columnIndex,
@@ -95,7 +99,7 @@ export default function DataGridHeaderCell<TRow>(props: Props<TRow>) {
             </Flex>
           </Flex>
 
-          {showResizer && <DataGridHeaderCellResizer column={column} />}
+          {showResizer && <DataGridHeaderCellResizer column={column} controls={identifier} />}
 
           {showContextMenu && <DataGridHeaderCellContextMenu column={column} />}
         </>

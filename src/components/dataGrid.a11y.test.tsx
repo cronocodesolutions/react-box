@@ -195,6 +195,36 @@ describe('DataGrid accessibility', () => {
       expectFocusOn(headers()[1]);
     });
 
+    it('keeps the column through a grouped header, where the rows are ragged', async () => {
+      const user = keyboard();
+      // Two header rows: `Where` covers City and Age, so the row below it holds a different number
+      // of cells and the same ordinal means a different column in each.
+      renderGrid({
+        columns: [
+          { key: 'name', header: 'Name' },
+          { key: 'where', header: 'Where', columns: [{ key: 'city' }, { key: 'age' }] },
+        ],
+      });
+
+      await user.pressTab();
+      await user.pressArrow('Right');
+      expect(document.activeElement?.getAttribute('aria-colspan')).toBe('2');
+
+      // Counting cells would land on Age, the second cell of the row below. The column `Where`
+      // starts at is City's.
+      await user.pressArrow('Down');
+      expect(document.activeElement?.getAttribute('aria-colindex')).toBe('2');
+
+      // Up out of Age lands on the cell covering its column, and coming back down the column the
+      // user asked for is still there rather than collapsed onto the start of the span.
+      await user.pressArrow('Right');
+      await user.pressArrow('Up');
+      expect(document.activeElement?.textContent).toBe('Where');
+
+      await user.pressArrow('Down');
+      expect(document.activeElement?.getAttribute('aria-colindex')).toBe('3');
+    });
+
     it('goes to the ends of the row with Home and End', async () => {
       const user = keyboard();
       renderGrid();
@@ -265,7 +295,8 @@ describe('DataGrid accessibility', () => {
       await user.pressTab();
       await user.press('F2');
 
-      expectFocusOn(screen.getAllByRole('button', { name: /Column options/ })[0]);
+      // The first widget the cell holds, which is the resizer — the menu button is a Tab further.
+      expectFocusOn(screen.getAllByRole('separator', { name: /Resize/ })[0]);
       // And the column was not sorted on the way in.
       expect(headers()[0].getAttribute('aria-sort')).toBe('none');
     });
@@ -365,6 +396,76 @@ describe('DataGrid accessibility', () => {
     });
   });
 
+  /**
+   * APG's window splitter: https://www.w3.org/WAI/ARIA/apg/patterns/windowsplitter/
+   *
+   * A column that can only be resized by dragging is a column a keyboard-only user cannot resize
+   * at all, which is the difference between a grid that is navigable and one that is operable.
+   */
+  describe('The column resizer', () => {
+    const resizers = () => screen.getAllByRole('separator');
+    const widthOf = (separator: Element) => Number(separator.getAttribute('aria-valuenow'));
+
+    it('is a splitter with a name, an orientation and a width in pixels', () => {
+      renderGrid();
+      const separator = resizers()[0];
+
+      expect(separator.getAttribute('aria-label')).toBe('Resize Name');
+      expect(separator.getAttribute('aria-orientation')).toBe('vertical');
+      expect(separator.getAttribute('aria-valuemin')).toBe('48');
+      expect(widthOf(separator)).toBeGreaterThan(48);
+      expect(separator.getAttribute('aria-valuetext')).toBe(`${widthOf(separator)} pixels`);
+      // The pane it resizes: the header cell it sits in.
+      expect(separator.getAttribute('aria-controls')).toBe(headers()[0].id);
+    });
+
+    it('steps the width with the arrows, and reports the new one', async () => {
+      const user = keyboard();
+      renderGrid();
+
+      const separator = resizers()[0];
+      const before = widthOf(separator);
+
+      await user.click(separator);
+      expectFocusOn(separator);
+
+      await user.pressArrow('Right');
+      expect(widthOf(resizers()[0])).toBe(before + 16);
+
+      await user.pressArrow('Left');
+      await user.pressArrow('Left');
+      expect(widthOf(resizers()[0])).toBe(before - 16);
+    });
+
+    it('goes to its bounds with Home and End', async () => {
+      const user = keyboard();
+      renderGrid();
+
+      await user.click(resizers()[0]);
+
+      await user.press('Home');
+      expect(widthOf(resizers()[0])).toBe(48);
+
+      const ceiling = Number(resizers()[0].getAttribute('aria-valuemax'));
+      await user.press('End');
+      expect(widthOf(resizers()[0])).toBe(ceiling);
+    });
+
+    it('never reports a width outside the range it declares', async () => {
+      const user = keyboard();
+      renderGrid();
+
+      await user.click(resizers()[0]);
+      // Well past the minimum, which the model clamps rather than following.
+      for (let press = 0; press < 20; press++) await user.pressArrow('Left');
+
+      const separator = resizers()[0];
+      expect(widthOf(separator)).toBe(48);
+      expect(widthOf(separator)).toBeGreaterThanOrEqual(Number(separator.getAttribute('aria-valuemin')));
+      expect(widthOf(separator)).toBeLessThanOrEqual(Number(separator.getAttribute('aria-valuemax')));
+    });
+  });
+
   describe('Known gaps', () => {
     it('does not yet keep Tab inside the grid', async () => {
       const user = keyboard();
@@ -377,9 +478,9 @@ describe('DataGrid accessibility', () => {
 
       // APG says Tab leaves the grid altogether and the widgets inside cells are reached with
       // Enter/F2. Here they are still their own tab stops, so this lands on the first column's
-      // menu button. Deliberate for now — taking every cell widget out of the tab order is a
-      // breaking change for anyone tabbing into a filter box today. Delete this test when it goes.
-      expect(document.activeElement?.getAttribute('aria-label')).toBe('Column options for Name');
+      // resizer. Deliberate for now — taking every cell widget out of the tab order is a breaking
+      // change for anyone tabbing into a filter box today. Delete this test when it goes.
+      expect(document.activeElement?.getAttribute('aria-label')).toBe('Resize Name');
     });
   });
 });

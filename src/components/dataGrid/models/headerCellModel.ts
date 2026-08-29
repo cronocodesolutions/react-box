@@ -3,6 +3,13 @@ import type { SortDirection } from '../contracts/dataGridContract';
 import type ColumnModel from './columnModel';
 import type GridModel from './gridModel';
 
+/**
+ * The ceiling the resizer offers before anything has measured the grid — a server render, a test,
+ * the first paint. A number rather than the columns' own widths so that `aria-valuemax` holds
+ * still while the column it belongs to is being resized.
+ */
+const UNMEASURED_MAX_WIDTH_PX = 1000;
+
 /** All derived state for rendering a column's header cell and its context menu. */
 export default class HeaderCellModel<TRow> {
   constructor(public readonly column: ColumnModel<TRow>) {}
@@ -102,6 +109,32 @@ export default class HeaderCellModel<TRow> {
     if (!this.isSorted || !this.sortDirection) return 'none';
 
     return this.sortDirection === 'ASC' ? 'ascending' : 'descending';
+  }
+
+  // ========== The resizer, as APG's window splitter ==========
+
+  /** What the resizer names itself. A separator carries no text, so it has nothing else to go on. */
+  public get resizerLabel(): string {
+    return `Resize ${this.label ?? this.column.key}`;
+  }
+
+  /** `aria-valuenow`: how wide the column is right now, in px. */
+  public get width(): number {
+    return this.column.inlineWidth ?? this.column.baseWidth;
+  }
+
+  /** `aria-valuemin`: every leaf the header covers at the narrowest the grid allows. */
+  public get minWidth(): number {
+    return Math.max(1, this.column.leafs.length) * this.grid.MIN_COLUMN_WIDTH_PX;
+  }
+
+  /**
+   * `aria-valuemax`. There is no width the grid refuses — a drag can take a column past the
+   * viewport and scroll to it — so the ceiling the keyboard offers is the grid's own width, raised
+   * to whatever a drag has already made it so that `aria-valuenow` stays inside the range.
+   */
+  public get maxWidth(): number {
+    return Math.max(this.grid.containerWidth || UNMEASURED_MAX_WIDTH_PX, this.width, this.minWidth);
   }
 
   public get paddingLeft(): number | undefined {

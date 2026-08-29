@@ -1290,6 +1290,26 @@ const boxComponents = {
                   height: 'fit',
                   bgColor: 'gray-400',
                   hoverGroup: { resizer: { bgColor: 'gray-600' } },
+                  // The separator is its own tab stop, and a bar two pixels wide has no room for a
+                  // ring inside itself — so the outline sits around it and the bar itself lights
+                  // up. `opacity` is here rather than on the element because a resizer that only
+                  // appears on hover is a tab stop nobody could otherwise follow, and a pseudo
+                  // rule outranks the base one the element writes to hide it.
+                  focusVisible: {
+                    opacity: 1,
+                    outline: 2,
+                    outlineStyle: 'solid',
+                    outlineColor: 'indigo-500',
+                    bgColor: 'indigo-500',
+                  },
+                  theme: {
+                    dark: {
+                      focusVisible: {
+                        outlineColor: 'indigo-400',
+                        bgColor: 'indigo-400',
+                      },
+                    },
+                  },
                 },
               },
             },

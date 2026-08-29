@@ -762,7 +762,12 @@ not add roles or `tabIndex` by hand.
 - Keyboard: one cell is in the tab order at a time. Arrows move it, Home/End go to the row's ends,
   Ctrl+Home/End to the grid's corners (scrolling to a row that has not been rendered), PageUp/Down
   move a screenful. Enter/Space sorts on a sortable header and otherwise steps into the cell's own
-  control; F2 steps in even on a header; Escape hands the keyboard back to the cell.
+  control; F2 steps in even on a header; Escape hands the keyboard back to the cell. Down/Up keep
+  the **column**, not the cell ordinal, so they land under where they started even through a
+  grouped header or a group row whose cells cover several columns each.
+- The column resizer is APG's window splitter: `role="separator"` with `aria-valuenow`/`-valuemin`/
+  `-valuemax` in pixels and `aria-controls` on its header cell. Tab or F2 reaches it, the arrows
+  move it 16px, Home/End take it to the narrowest the grid allows and to the grid's own width.
 - Every control the grid draws for itself is named after what it acts on: "Select row 4", "Filter
   Country", "Column options for Age", "Columns". The column menu is the APG menu button —
   `aria-haspopup="menu"`, `role="menuitem"` rows, arrows and typeahead, Escape returns focus.

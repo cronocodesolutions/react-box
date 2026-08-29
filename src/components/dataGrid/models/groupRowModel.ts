@@ -51,6 +51,14 @@ export default class GroupRowModel<TRow> {
     return this.renderedCells.length;
   }
 
+  /**
+   * Where a cell starts in column-index space. The cells the grouping cell spans are not rendered
+   * at all, so an ordinal here is short of its column by however many of them came before it.
+   */
+  public columnOf(cell: number): number {
+    return this.renderedCells[cell]?.columnIndex ?? cell;
+  }
+
   public get selected() {
     return this.allRows.every((r) => r.selected);
   }

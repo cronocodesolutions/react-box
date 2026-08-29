@@ -31,9 +31,21 @@ export interface RovingFocusOptions {
    * first and last cell, and PageUp/PageDown move `pageSize` rows at a time.
    */
   columns?: number | ((row: number) => number);
+  /**
+   * Where a cell starts in column-index space — the 0-based grid column its first column is.
+   *
+   * Supply it when a row's cells do not line up one-to-one with the grid's columns: a grouped
+   * header covers the columns of every leaf under it, and a group row's spanning cell covers all
+   * of them at once. Vertical movement is measured in this space rather than in cell ordinals, so
+   * a move down out of a cell covering columns 4–6 lands under the column it started in instead of
+   * on whichever cell happens to share its ordinal.
+   *
+   * Identity by default, which is what a row of one cell per column already is.
+   */
+  columnIndexOf?: (row: number, cell: number) => number;
   /** Rows a PageUp/PageDown moves. Default 10. Grid mode only. */
   pageSize?: number;
-  /** The starting column, when the caller wants one other than the first. Grid mode only. */
+  /** The starting column *index*, when the caller wants one other than the first. Grid mode only. */
   defaultActiveColumn?: number;
   /** The active cell moved. Grid mode only — `onActiveIndexChange` still reports the row. */
   onActiveCellChange?: ChangeHandler<RovingCell, RovingFocusReason>;
@@ -69,10 +81,16 @@ export interface RovingFocusItemProps {
 export interface RovingFocus {
   /** Clamped to the current `count`; `-1` when nothing is active. The row, in grid mode. */
   activeIndex: number;
-  /** The active cell's column, clamped to its row's width. `-1` outside grid mode. */
+  /**
+   * The active cell's ordinal in its row — where it sits among the cells, which is only its column
+   * index while no cell spans more than one column. `-1` outside grid mode.
+   */
   activeColumn: number;
   setActiveIndex: (index: number, details: ChangeDetails<RovingFocusReason>) => void;
-  /** Grid mode: move both axes at once. Out-of-range values are clamped, never rejected. */
+  /**
+   * Grid mode: move both axes at once, `column` being a cell ordinal as `cellProps` takes one.
+   * Out-of-range values are clamped, never rejected.
+   */
   setActiveCell: (row: number, column: number, details: ChangeDetails<RovingFocusReason>) => void;
   /** Put this on the element that has focus: the list in roving-tabindex, the trigger otherwise. */
   onKeyDown: (event: React.KeyboardEvent) => void;
@@ -171,6 +189,7 @@ export default function useRovingFocus(options: RovingFocusOptions): RovingFocus
   const {
     count,
     columns,
+    columnIndexOf,
     pageSize = DEFAULT_PAGE_SIZE,
     defaultActiveColumn = 0,
     onActiveCellChange,
@@ -198,13 +217,34 @@ export default function useRovingFocus(options: RovingFocusOptions): RovingFocus
   const widthOf = useCallback((row: number) => (typeof columns === 'function' ? columns(row) : (columns ?? 0)), [columns]);
 
   /**
-   * The column the user last *asked* for, which is not always one the current row has: moving down
-   * through a group row that spans its columns, or a detail row that is a single cell, must not
-   * collapse the position permanently into column 0. The clamp below is a view of it, so the
-   * column comes back on the far side.
+   * Which cell of a row covers a column index: the last one starting at or before it. A row tiles
+   * its columns in order, so a walk finds it, and a column past the row's last cell lands on that
+   * one. With no `columnIndexOf` the two spaces are the same and this is the clamp it used to be.
+   */
+  const cellAtColumn = useCallback(
+    (row: number, columnIndex: number): number => {
+      const width = widthOf(row);
+
+      if (!columnIndexOf) return clamp(columnIndex, width - 1);
+      if (width <= 0) return -1;
+
+      let cell = 0;
+
+      while (cell + 1 < width && columnIndexOf(row, cell + 1) <= columnIndex) cell++;
+
+      return cell;
+    },
+    [columnIndexOf, widthOf],
+  );
+
+  /**
+   * The column the user last *asked* for, in column-index space — which is not always a column the
+   * current row starts a cell at: moving down through a group row that spans its columns, or a
+   * detail row that is a single cell, must not collapse the position permanently into column 0.
+   * `activeColumn` is the cell covering it, so the column comes back on the far side.
    */
   const [rawColumn, setRawColumn] = useState(defaultActiveColumn);
-  const activeColumn = isGrid && activeIndex >= 0 ? clamp(rawColumn, widthOf(activeIndex) - 1) : -1;
+  const activeColumn = isGrid && activeIndex >= 0 ? cellAtColumn(activeIndex, rawColumn) : -1;
 
   const items = useRef<(HTMLElement | null)[]>([]);
   const itemRefs = useRef(new Map<number, (element: HTMLElement | null) => void>());
@@ -242,12 +282,18 @@ export default function useRovingFocus(options: RovingFocusOptions): RovingFocus
   const desiredColumn = useLatest(rawColumn);
   const cellChange = useLatest(onActiveCellChange);
   const width = useLatest(widthOf);
+  const cellAt = useLatest(cellAtColumn);
+  const columnStart = useLatest(columnIndexOf);
 
-  const setActiveCell = useCallback(
-    (row: number, column: number, details: ChangeDetails<RovingFocusReason>): RovingCell => {
+  /**
+   * The move both the public setter and the keyboard go through, in column-index space: the
+   * column *asked for* is what gets remembered, and the cell covering it is what becomes active.
+   */
+  const setActiveAtColumn = useCallback(
+    (row: number, columnIndex: number, details: ChangeDetails<RovingFocusReason>): RovingCell => {
       const targetRow = clamp(row, count - 1);
-      const desired = Math.max(0, column);
-      const targetColumn = targetRow < 0 ? -1 : clamp(desired, width.current(targetRow) - 1);
+      const desired = Math.max(0, columnIndex);
+      const targetColumn = targetRow < 0 ? -1 : cellAt.current(targetRow, desired);
       const current = activeCell.current;
 
       if (targetRow === current.row && targetColumn === current.column) return current;
@@ -258,7 +304,19 @@ export default function useRovingFocus(options: RovingFocusOptions): RovingFocus
 
       return { row: targetRow, column: targetColumn };
     },
-    [activeCell, cellChange, count, setIndex, width],
+    [activeCell, cellAt, cellChange, count, setIndex],
+  );
+
+  const setActiveCell = useCallback(
+    (row: number, column: number, details: ChangeDetails<RovingFocusReason>): RovingCell => {
+      const targetRow = clamp(row, count - 1);
+      // A cell ordinal only means a column once it is one the row really holds, so it is clamped
+      // here rather than carried out of range the way a desired column is.
+      const cell = targetRow < 0 ? -1 : clamp(Math.max(0, column), width.current(targetRow) - 1);
+
+      return setActiveAtColumn(targetRow, cell < 0 ? 0 : (columnStart.current?.(targetRow, cell) ?? cell), details);
+    },
+    [columnStart, count, setActiveAtColumn, width],
   );
 
   const cellProps = useCallback(
@@ -317,15 +375,21 @@ export default function useRovingFocus(options: RovingFocusOptions): RovingFocus
   const onGridKeyDown = useCallback(
     (event: React.KeyboardEvent) => {
       const { row, column } = activeCell.current;
-      // Sideways moves start from the column that is really there; downward ones from the column
-      // the user asked for, which is what carries a position past a row too narrow to hold it.
-      const desired = desiredColumn.current;
 
       // Every key below is one the grid consumes whether or not it has anywhere to go: an arrow
       // at the last row must not fall through to the page and scroll it instead.
       const move = (targetRow: number, targetColumn: number) => {
         event.preventDefault();
         const moved = setActiveCell(targetRow, targetColumn, { reason: 'keyboard', event });
+        if (focusItems) focusCell(moved.row, moved.column);
+      };
+
+      // Sideways moves count cells, because that is what is next to you. Vertical ones travel in
+      // column-index space from the column the user asked for, which is what carries a position
+      // both past a row too narrow to hold it and under a cell spanning several of them.
+      const moveRow = (targetRow: number) => {
+        event.preventDefault();
+        const moved = setActiveAtColumn(targetRow, desiredColumn.current, { reason: 'keyboard', event });
         if (focusItems) focusCell(moved.row, moved.column);
       };
 
@@ -337,20 +401,20 @@ export default function useRovingFocus(options: RovingFocusOptions): RovingFocus
         case 'ArrowLeft':
           return move(row, column - 1);
         case 'ArrowDown':
-          return move(row + 1, desired);
+          return moveRow(row + 1);
         case 'ArrowUp':
-          return move(row - 1, desired);
+          return moveRow(row - 1);
         case 'Home':
           return event.ctrlKey || event.metaKey ? move(0, 0) : move(row, 0);
         case 'End':
           return event.ctrlKey || event.metaKey ? move(count - 1, toEnd) : move(row, toEnd);
         case 'PageDown':
-          return move(row + pageSize, desired);
+          return moveRow(row + pageSize);
         case 'PageUp':
-          return move(row - pageSize, desired);
+          return moveRow(row - pageSize);
       }
     },
-    [activeCell, count, desiredColumn, focusCell, focusItems, pageSize, setActiveCell],
+    [activeCell, count, desiredColumn, focusCell, focusItems, pageSize, setActiveAtColumn, setActiveCell],
   );
 
   const onKeyDown = useCallback(

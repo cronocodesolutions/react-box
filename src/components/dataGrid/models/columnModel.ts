@@ -478,6 +478,24 @@ export default class ColumnModel<TRow> {
     this.grid.notify();
   };
 
+  /**
+   * Move the resize separator `delta` pixels to the right — the keyboard's half of the drag, and
+   * a whole gesture in one call: it starts from the widths as they are and commits immediately.
+   * Rightwards widens a column whose separator is on its right edge and narrows a right-pinned
+   * one, exactly as dragging that way does.
+   */
+  public moveResizer = (delta: number): void => {
+    this.beginResize(0);
+    this.resizeTo(delta);
+  };
+
+  /** Resize to an exact total width — where Home and End on the separator land. */
+  public resizeWidthTo = (width: number): void => {
+    const current = this.inlineWidth ?? this.baseWidth;
+
+    this.moveResizer((width - current) * (this.pin === 'RIGHT' ? -1 : 1));
+  };
+
   public pinColumn = (pin?: PinPosition) => {
     if (this.isLeaf) {
       this._pin = pin;
