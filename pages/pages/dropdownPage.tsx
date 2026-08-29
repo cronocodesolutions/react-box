@@ -1,12 +1,12 @@
 import { motion } from 'framer-motion';
-import { ChevronDown } from 'lucide-react';
-import { useState } from 'react';
+import { ChevronDown, Keyboard, ListTree, Tags } from 'lucide-react';
+import { ReactNode, useState } from 'react';
 import Box from '../../src/box';
 import Button from '../../src/components/button';
 import Dropdown from '../../src/components/dropdown';
 import Flex from '../../src/components/flex';
 import Select from '../../src/components/select';
-import { H3 } from '../../src/components/semantics';
+import { H2, H3 } from '../../src/components/semantics';
 import Code from '../components/code';
 import PageHeader from '../components/pageHeader';
 import useTableOfContents from '../hooks/useTableOfContents';
@@ -66,21 +66,52 @@ export default function DropdownPage() {
         <Flex d="column" gap={8}>
           <Code label="Import" language="jsx" code="import Dropdown from '@cronocode/react-box/components/dropdown';" />
 
-          <Code id="basic" label="Basic Dropdown" language="jsx">
-            <Dropdown defaultValue={1} props={{ role: 'combobox' }} width={50}>
-              <Dropdown.Item value={1} props={{ role: 'option' }}>
-                Option 1
-              </Dropdown.Item>
-              <Dropdown.Item value={2} props={{ role: 'option' }}>
-                Option 2
-              </Dropdown.Item>
+          <Code
+            id="basic"
+            label="Basic Dropdown"
+            language="jsx"
+            code={`<Dropdown label="Choice" defaultValue={1}>
+  <Dropdown.Item value={1}>Option 1</Dropdown.Item>
+  <Dropdown.Item value={2}>Option 2</Dropdown.Item>
+</Dropdown>`}
+          >
+            <Dropdown label="Choice" defaultValue={1} width={50}>
+              <Dropdown.Item value={1}>Option 1</Dropdown.Item>
+              <Dropdown.Item value={2}>Option 2</Dropdown.Item>
               {[3, 4].map((x) => (
-                <Dropdown.Item value={x} key={x} props={{ role: 'option' }}>
+                <Dropdown.Item value={x} key={x}>
                   Option {x}
                 </Dropdown.Item>
               ))}
             </Dropdown>
           </Code>
+
+          <Section id="a11y" title="Keyboard and roles">
+            <Box>
+              This is the APG select-only combobox, whole. The trigger is a <Mono>role="combobox"</Mono> that keeps DOM focus the entire
+              time; the popup is a <Mono>role="listbox"</Mono> of <Mono>role="option"</Mono> rows, and the option the arrows are on is named
+              by <Mono>aria-activedescendant</Mono> rather than focused. You write none of that — and if you were writing it by hand before,
+              delete it.
+            </Box>
+            <Flex d="column" gap={3} mt={4}>
+              <Note icon={Tags} title="Give it a label">
+                A combobox is not named by what it contains: the text in the trigger is its <em>value</em>. Pass <Mono>label</Mono> and the
+                component renders it and wires <Mono>aria-labelledby</Mono> — or pass your own <Mono>aria-label</Mono> in <Mono>props</Mono>
+                . Without either, the control has no accessible name, exactly like an input with only a placeholder.
+              </Note>
+              <Note icon={ListTree} title="Clear and Select all are options too">
+                <Mono>Dropdown.Unselect</Mono> and <Mono>Dropdown.SelectAll</Mono> sit inside the listbox, so they carry{' '}
+                <Mono>role="option"</Mono> and the arrow keys reach them like any other row.
+              </Note>
+              <Note icon={Keyboard} title="Searchable is still the old shape">
+                <Mono>isSearchable</Mono> nests the search box inside the trigger. The editable-combobox pattern — where the input{' '}
+                <em>is</em> the combobox — is a separate piece of work, and until it lands that mode is not the pattern below.
+              </Note>
+            </Flex>
+            <Box mt={6}>
+              <KeyTable />
+            </Box>
+          </Section>
 
           <Code
             id="controlled"
@@ -252,12 +283,18 @@ Box.components({
 ];
 
 <Select
+  label="User"
   data={users}
   def={{ valueKey: 'id', displayKey: 'name', placeholder: 'Pick a user...' }}
   width={50}
 />`}
               >
-                <Select<User, number> data={users} def={{ valueKey: 'id', displayKey: 'name', placeholder: 'Pick a user...' }} width={50} />
+                <Select<User, number>
+                  label="User"
+                  data={users}
+                  def={{ valueKey: 'id', displayKey: 'name', placeholder: 'Pick a user...' }}
+                  width={50}
+                />
               </Code>
 
               <Code
@@ -330,6 +367,7 @@ Box.components({
 const sidebarLinks = [
   { label: 'Dropdown', section: true },
   { id: 'basic', label: 'Basic' },
+  { id: 'a11y', label: 'Keyboard and roles' },
   { id: 'controlled', label: 'Controlled' },
   { id: 'unselect', label: 'Unselect Item' },
   { id: 'disabled', label: 'Disabled' },
@@ -345,3 +383,122 @@ const sidebarLinks = [
   { id: 'select-display', label: 'Custom Display' },
   { id: 'select-multiple', label: 'Multiple + Search' },
 ] as const;
+
+const interactions: { input: string; result: string }[] = [
+  { input: 'Down / Up (closed)', result: 'Opens, with the highlight on the selected option — or the first / last when nothing is chosen.' },
+  { input: 'Alt + Down (closed)', result: 'Opens without moving the highlight.' },
+  { input: 'Enter / Space (closed)', result: 'Opens. The browser own activation is suppressed, so it does not shut again.' },
+  { input: 'Home / End (closed)', result: 'Opens at the first or the last option.' },
+  { input: 'A printable character', result: 'Opens with the first option starting with it already highlighted.' },
+  { input: 'Down / Up (open)', result: 'Moves the highlight, wrapping at the ends and skipping disabled options.' },
+  { input: 'Home / End (open)', result: 'Jumps to the first or last option.' },
+  { input: 'Typing (open)', result: 'Typeahead. A longer buffer narrows; the same letter twice cycles through the options sharing it.' },
+  { input: 'Enter / Space (open)', result: 'Chooses the highlighted option and closes. In multiple mode it toggles and stays open.' },
+  { input: 'Alt + Up (open)', result: 'Chooses the highlighted option and closes.' },
+  { input: 'Escape', result: 'Closes, changing nothing. Focus never left the trigger, so nothing has to be restored.' },
+  { input: 'Tab (open)', result: 'Chooses the highlighted option, then moves on to the next control.' },
+];
+
+function KeyTable() {
+  return (
+    <Box tag="table" width="fit" style={{ borderCollapse: 'collapse' }}>
+      <Box tag="thead">
+        <Box tag="tr">
+          <HeadCell>Key</HeadCell>
+          <HeadCell>What happens</HeadCell>
+        </Box>
+      </Box>
+      <Box tag="tbody">
+        {interactions.map((row) => (
+          <Box tag="tr" key={row.input}>
+            <Cell>
+              <Mono>{row.input}</Mono>
+            </Cell>
+            <Cell>{row.result}</Cell>
+          </Box>
+        ))}
+      </Box>
+    </Box>
+  );
+}
+
+function Section({ id, title, children }: { id: string; title: string; children: ReactNode }) {
+  return (
+    <Box id={id}>
+      <H2 fontSize={20} fontWeight={600} mb={4} theme={{ dark: { color: 'white' }, light: { color: 'slate-900' } }}>
+        {title}
+      </H2>
+      <Box fontSize={15} lineHeight={26} theme={{ dark: { color: 'slate-400' }, light: { color: 'slate-600' } }}>
+        {children}
+      </Box>
+    </Box>
+  );
+}
+
+function Note({ icon: Icon, title, children }: { icon: typeof Tags; title: string; children: ReactNode }) {
+  return (
+    <Flex
+      gap={3}
+      p={4}
+      borderRadius={2}
+      b={1}
+      theme={{ dark: { bgColor: 'slate-900', borderColor: 'slate-800' }, light: { bgColor: 'slate-50', borderColor: 'slate-200' } }}
+    >
+      <Box theme={{ dark: { color: 'indigo-400' }, light: { color: 'indigo-500' } }} pt={0.5}>
+        <Icon size={16} />
+      </Box>
+      <Box>
+        <Box fontSize={14} fontWeight={600} mb={1} theme={{ dark: { color: 'slate-200' }, light: { color: 'slate-800' } }}>
+          {title}
+        </Box>
+        <Box fontSize={14}>{children}</Box>
+      </Box>
+    </Flex>
+  );
+}
+
+function HeadCell({ children }: { children: ReactNode }) {
+  return (
+    <Box
+      tag="th"
+      textAlign="left"
+      fontSize={13}
+      fontWeight={600}
+      py={2}
+      pr={6}
+      bb={1}
+      theme={{ dark: { color: 'slate-300', borderColor: 'slate-700' }, light: { color: 'slate-700', borderColor: 'slate-200' } }}
+    >
+      {children}
+    </Box>
+  );
+}
+
+function Cell({ children }: { children: ReactNode }) {
+  return (
+    <Box
+      tag="td"
+      fontSize={14}
+      py={2}
+      pr={6}
+      bb={1}
+      theme={{ dark: { color: 'slate-400', borderColor: 'slate-800' }, light: { color: 'slate-600', borderColor: 'slate-100' } }}
+    >
+      {children}
+    </Box>
+  );
+}
+
+function Mono({ children }: { children: ReactNode }) {
+  return (
+    <Box
+      tag="code"
+      px={1}
+      borderRadius={1}
+      fontSize={13}
+      theme={{ dark: { bgColor: 'slate-800', color: 'slate-200' }, light: { bgColor: 'slate-100', color: 'slate-800' } }}
+    >
+      {children}
+    </Box>
+  );
+}

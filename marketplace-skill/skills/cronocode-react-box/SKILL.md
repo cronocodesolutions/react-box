@@ -129,20 +129,25 @@ export const { extendedProps, extendedPropTypes } = Box.extend(
 
 ## Dropdown
 
+The APG select-only combobox. **Always pass `label`** (or your own `aria-label` via `props`) — a combobox is
+not named by its content, so without one it has no accessible name. Never add `role="combobox"`/`role="option"`
+by hand; the component supplies the whole pattern.
+
 ```tsx
 import Dropdown from '@cronocode/react-box/components/dropdown';
-<Dropdown<string> defaultValue="a" onChange={(value, values) => {}}>
+<Dropdown<string> label="Fruit" defaultValue="a" onChange={(value, values) => {}}>
   <Dropdown.Unselect>Pick...</Dropdown.Unselect>
   <Dropdown.Item value="a">Alpha</Dropdown.Item>
 </Dropdown>;
-// Multiple: <Dropdown multiple showCheckbox isSearchable searchPlaceholder="Search...">
+// Multiple: <Dropdown label="Fruit" multiple showCheckbox isSearchable searchPlaceholder="Search...">
 //   <Dropdown.SelectAll>All</Dropdown.SelectAll> <Dropdown.EmptyItem>No results</Dropdown.EmptyItem>
 //   <Dropdown.Display>{(values) => `${values.length} selected`}</Dropdown.Display>
 ```
 
-**Props**: `value`/`defaultValue`, `multiple`, `isSearchable`, `searchPlaceholder`, `hideIcon`, `showCheckbox`, `name`, `onChange`, `itemsProps`, `iconProps`, `variant` (propagates to children). All BoxProps.
-**Sub-components**: `Item<T>` (requires `value`), `Unselect`, `SelectAll`, `EmptyItem`, `Display` (static or `(values, isOpen) => ReactNode`).
-**Style tree**: `dropdown` > `items`, `item` (variants: compact, multiple), `unselect`, `selectAll`, `emptyItem`, `icon`.
+**Props**: `label`/`labelProps`, `value`/`defaultValue`, `multiple`, `isSearchable`, `searchPlaceholder`, `hideIcon`, `showCheckbox`, `name`, `onChange`, `itemsProps`, `iconProps`, `variant` (propagates to children). All BoxProps.
+**Sub-components**: `Item<T>` (requires `value`; `disabled` is skipped by the arrows), `Unselect`, `SelectAll`, `EmptyItem`, `Display` (static or `(values, isOpen) => ReactNode`).
+**Keyboard**: closed — Down/Up/Enter/Space/Home/End open, a printable character opens at the first match. Open — arrows move, Home/End jump, typing searches, Enter/Space choose, Escape closes unchanged, Tab chooses then leaves. DOM focus stays on the trigger throughout (`aria-activedescendant`).
+**Style tree**: `dropdown` > `items`, `item` (variants: compact, multiple, highlighted), `unselect`, `selectAll`, `emptyItem`, `icon`.
 
 ## Select
 
@@ -151,6 +156,7 @@ Data-driven dropdown — `data` + `def` instead of children. Shares `dropdown.*`
 ```tsx
 import Select from '@cronocode/react-box/components/select';
 <Select<User, number>
+  label="User"
   data={users}
   def={{ valueKey: 'id', displayKey: 'name', placeholder: 'Pick...' }}
   value={selected}
@@ -159,7 +165,7 @@ import Select from '@cronocode/react-box/components/select';
 ```
 
 **SelectDef**: `valueKey` (required), `displayKey`, `display` (`(row) => ReactNode`), `selectedDisplay` (`(rows, isOpen) => ReactNode`), `placeholder`, `selectAllText`, `emptyText`.
-Also: `data`, `value`/`defaultValue`, `multiple`, `isSearchable`, `searchPlaceholder`, `showCheckbox`, `hideIcon`, `name`, `onChange`, `itemsProps`, `iconProps`, `variant`, BoxProps.
+Also: `data`, `label`/`labelProps`, `value`/`defaultValue`, `multiple`, `isSearchable`, `searchPlaceholder`, `showCheckbox`, `hideIcon`, `name`, `onChange`, `itemsProps`, `iconProps`, `variant`, BoxProps. Same combobox pattern as Dropdown, so it needs a name too.
 
 ## DataGrid
 

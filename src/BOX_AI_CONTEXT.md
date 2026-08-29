@@ -799,21 +799,21 @@ import Dropdown from '@cronocode/react-box/components/dropdown';
 ### Usage
 
 ```tsx
-// Single selection (uncontrolled)
-<Dropdown<string> defaultValue="apple" onChange={(value, values) => console.log(value)}>
+// Single selection (uncontrolled). `label` is not decoration — see Accessibility below.
+<Dropdown<string> label="Fruit" defaultValue="apple" onChange={(value, values) => console.log(value)}>
   <Dropdown.Unselect>Pick a fruit...</Dropdown.Unselect>
   <Dropdown.Item value="apple">Apple</Dropdown.Item>
   <Dropdown.Item value="banana">Banana</Dropdown.Item>
 </Dropdown>
 
 // Controlled
-<Dropdown<string> value={fruit} onChange={(value) => setFruit(value!)}>
+<Dropdown<string> label="Fruit" value={fruit} onChange={(value) => setFruit(value!)}>
   <Dropdown.Item value="apple">Apple</Dropdown.Item>
   <Dropdown.Item value="banana">Banana</Dropdown.Item>
 </Dropdown>
 
 // Multiple + search + checkboxes
-<Dropdown<string> multiple showCheckbox isSearchable searchPlaceholder="Search...">
+<Dropdown<string> label="Fruit" multiple showCheckbox isSearchable searchPlaceholder="Search...">
   <Dropdown.SelectAll>Select all</Dropdown.SelectAll>
   <Dropdown.EmptyItem>No results</Dropdown.EmptyItem>
   <Dropdown.Display>{(values) => values.length === 0 ? 'Pick...' : `${values.length} selected`}</Dropdown.Display>
@@ -827,19 +827,21 @@ import Dropdown from '@cronocode/react-box/components/dropdown';
 
 ### Props
 
-| Prop                     | Type                                                 | Description                                                       |
-| ------------------------ | ---------------------------------------------------- | ----------------------------------------------------------------- |
-| `value` / `defaultValue` | `TVal \| TVal[]`                                     | Controlled / uncontrolled selected value(s)                       |
-| `multiple`               | `boolean`                                            | Multi-select mode                                                 |
-| `isSearchable`           | `boolean`                                            | Show search input when open                                       |
-| `searchPlaceholder`      | `string`                                             | Search input placeholder                                          |
-| `hideIcon`               | `boolean`                                            | Hide chevron icon                                                 |
-| `showCheckbox`           | `boolean`                                            | Show checkboxes in multiple mode                                  |
-| `name`                   | `string`                                             | Form field name (renders hidden `<input>` elements)               |
-| `onChange`               | `(value: TVal \| undefined, values: TVal[]) => void` | Selection callback                                                |
-| `itemsProps`             | `BoxStyleProps`                                      | Style overrides for the opened items container (`dropdown.items`) |
-| `iconProps`              | `BoxStyleProps`                                      | Style overrides for the chevron icon container (`dropdown.icon`)  |
-| `variant`                | `ClassNameType`                                      | Propagates to root **and all child sub-components**               |
+| Prop                     | Type                                                 | Description                                                            |
+| ------------------------ | ---------------------------------------------------- | ---------------------------------------------------------------------- |
+| `value` / `defaultValue` | `TVal \| TVal[]`                                     | Controlled / uncontrolled selected value(s)                            |
+| `label`                  | `ReactNode`                                          | The control's name, rendered above it and wired with `aria-labelledby` |
+| `labelProps`             | `BoxProps<'div'>`                                    | Styles for the wrapper the label and the trigger share                 |
+| `multiple`               | `boolean`                                            | Multi-select mode                                                      |
+| `isSearchable`           | `boolean`                                            | Show search input when open                                            |
+| `searchPlaceholder`      | `string`                                             | Search input placeholder                                               |
+| `hideIcon`               | `boolean`                                            | Hide chevron icon                                                      |
+| `showCheckbox`           | `boolean`                                            | Show checkboxes in multiple mode                                       |
+| `name`                   | `string`                                             | Form field name (renders hidden `<input>` elements)                    |
+| `onChange`               | `(value: TVal \| undefined, values: TVal[]) => void` | Selection callback                                                     |
+| `itemsProps`             | `BoxStyleProps`                                      | Style overrides for the opened items container (`dropdown.items`)      |
+| `iconProps`              | `BoxStyleProps`                                      | Style overrides for the chevron icon container (`dropdown.icon`)       |
+| `variant`                | `ClassNameType`                                      | Propagates to root **and all child sub-components**                    |
 
 Also accepts all `BoxProps` (styling props) which apply to the root button element.
 
@@ -854,6 +856,35 @@ All sub-components accept BoxProps for per-instance style overrides.
 | `Dropdown.SelectAll`  | Select all (shown in `multiple` when not all selected)                             |
 | `Dropdown.EmptyItem`  | Shown when search yields no results                                                |
 | `Dropdown.Display`    | Custom display: static content or `(values: TVal[], isOpen: boolean) => ReactNode` |
+
+### Accessibility
+
+Dropdown is the APG **select-only combobox**, and it supplies the whole pattern — do not add roles by
+hand (`props={{ role: 'combobox' }}` on the trigger and `role="option"` on items used to be the advice;
+delete it). What you get:
+
+- Trigger: `role="combobox"`, `aria-expanded`, `aria-controls`, `aria-activedescendant`. **DOM focus
+  never leaves it** — the popup is navigated by naming the highlighted option, not by focusing it.
+- Popup: `role="listbox"` (`aria-multiselectable` in `multiple` mode), rows `role="option"` with
+  `aria-selected`. `Dropdown.Unselect` and `Dropdown.SelectAll` are options too, so the arrows reach them.
+- Keyboard, closed: Down/Up/Enter/Space open (on the selection, else at an end), Home/End open at an end,
+  a printable character opens at the first match. Open: arrows move, Home/End jump, typing searches,
+  Enter/Space choose, Escape closes unchanged, Tab chooses then leaves, Alt+Up chooses and closes.
+- `disabled` on a `Dropdown.Item` gets `aria-disabled`, is skipped by the arrows and ignores clicks.
+- `showCheckbox` draws the boxes as decoration (`aria-hidden`): `aria-selected` on the option is the state,
+  and a focusable input inside an option would be one widget nested in another.
+
+**You still owe it a name.** A combobox is not named by its contents — the trigger's text is its _value_ —
+so pass `label`, or your own `aria-label` / `aria-labelledby` through `props`. With neither, the control
+has no accessible name at all.
+
+```tsx
+<Dropdown<string> label="Fruit">…</Dropdown>
+<Dropdown<string> props={{ 'aria-label': 'Fruit' }}>…</Dropdown>
+```
+
+`isSearchable` is the exception: that mode still nests the search box inside the trigger and is not yet
+the editable-combobox pattern.
 
 ### Style Customization
 
@@ -920,8 +951,8 @@ Data-driven dropdown — pass `data` + `def` instead of composing children. Wrap
 ```tsx
 import Select from '@cronocode/react-box/components/select';
 
-// Basic
-<Select<User, number> data={users} def={{ valueKey: 'id', displayKey: 'name', placeholder: 'Pick...' }}
+// Basic — `label` names the combobox, same as on Dropdown
+<Select<User, number> label="User" data={users} def={{ valueKey: 'id', displayKey: 'name', placeholder: 'Pick...' }}
   value={selected} onChange={(value) => setSelected(value!)} />
 
 // Multiple + search + custom display
@@ -946,7 +977,7 @@ import Select from '@cronocode/react-box/components/select';
 | `selectAllText`   | `string`                                       | Select all option text (multiple mode)                 |
 | `emptyText`       | `string`                                       | Empty search results text                              |
 
-Also accepts: `data` (TRow[]), `value`/`defaultValue`, `multiple`, `isSearchable`, `searchPlaceholder`, `showCheckbox`, `hideIcon`, `name`, `onChange`, `itemsProps`, `iconProps`, `variant`, and all BoxProps. Same styling/variants as Dropdown.
+Also accepts: `data` (TRow[]), `value`/`defaultValue`, `label`/`labelProps`, `multiple`, `isSearchable`, `searchPlaceholder`, `showCheckbox`, `hideIcon`, `name`, `onChange`, `itemsProps`, `iconProps`, `variant`, and all BoxProps. Same styling, variants and combobox accessibility as Dropdown — including owing it a name.
 
 ---
 

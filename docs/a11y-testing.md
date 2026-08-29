@@ -25,11 +25,10 @@ The second half is what keeps the ledger honest. `knownViolations` is not a mute
 
 ```tsx
 {
-  name: 'Dropdown (open)',
+  name: 'DataGrid',
   render: () => ( /* ... */ ),
-  setup: openPopup,
   knownViolations: {
-    'aria-allowed-attr': 'A5 — items carry aria-selected on a plain div; the attribute is only legal once they are role="option".',
+    'aria-required-parent': 'A7 — role="row"/"columnheader" hang off a role="presentation" root, so the grid structure is not announced.',
   },
 }
 ```
@@ -40,7 +39,7 @@ Fixtures live in `dev/` rather than beside the components because `src/component
 
 APG is mostly a specification of _where focus goes_, which no static check can see. These tests drive the component with a real keyboard ([user-event](https://testing-library.com/docs/user-event/intro), so DOM focus actually moves and `tabindex`/`disabled` are respected) and assert the result.
 
-`src/components/checkbox.a11y.test.tsx` and `src/components/tooltip.a11y.test.tsx` are the two templates. Checkbox is the case where the platform already supplies the pattern and there is something passing to assert. Tooltip is the case where the library implements the whole pattern itself — semantics, keyboard and pointer, each in its own block — and it is also the file that shows what this layer catches and axe does not: the three WCAG 1.4.13 tests (dismissible, hoverable, persistent) are about _when the markup exists_, and a tooltip that vanishes the moment you reach for it has perfect markup right up until it disappears.
+`src/components/checkbox.a11y.test.tsx` and `src/components/tooltip.a11y.test.tsx` are the two templates, and `src/components/dropdown.a11y.test.tsx` is the third shape: a pattern whose state is not focus. There, `expectFocusOn` proves DOM focus **never moves** — every assertion about _where the user is_ reads `aria-activedescendant` instead, because that is the only place a select-only combobox keeps it. Checkbox is the case where the platform already supplies the pattern and there is something passing to assert. Tooltip is the case where the library implements the whole pattern itself — semantics, keyboard and pointer, each in its own block — and it is also the file that shows what this layer catches and axe does not: the three WCAG 1.4.13 tests (dismissible, hoverable, persistent) are about _when the markup exists_, and a tooltip that vanishes the moment you reach for it has perfect markup right up until it disappears.
 
 That file started life as A1 wrote it: four `it.todo`s naming the contract, and one test asserting the pattern was **absent**, so the gap could not be closed silently. A3 deleted that test and promoted the todos, which is the intended life cycle — a todo here is a commitment with a date on it, not a note.
 
@@ -94,16 +93,19 @@ What the sweep finds today, with the step that owns each fix. This is the measur
 
 | Component                   | Rule                   | What is wrong                                                                      | Owner |
 | --------------------------- | ---------------------- | ---------------------------------------------------------------------------------- | ----- |
-| Dropdown (open)             | `aria-allowed-attr`    | Items carry `aria-selected` on a plain `div` — legal only with `role="option"`     | A5    |
-| Dropdown (searchable, open) | `nested-interactive`   | The search input renders inside the trigger `<button>`: a focusable in a focusable | A6    |
-| Select (open)               | `button-name`          | With nothing selected and no placeholder, the trigger renders empty and unnamed    | A5    |
+| ~~Dropdown (open)~~         | `aria-allowed-attr`    | Items carry `aria-selected` on a plain `div` — legal only with `role="option"`     | A5 ✅ |
+| Dropdown (searchable, open) | `nested-interactive`   | The search input renders inside the trigger `<button>`: a focusable in a focusable | A6 ⚠️ |
+| ~~Select (open)~~           | `button-name`          | With nothing selected and no placeholder, the trigger renders empty and unnamed    | A5 ✅ |
 | DataGrid                    | `aria-required-parent` | `role="row"`/`"columnheader"` hang off a `role="presentation"` root                | A7    |
 | DataGrid                    | `button-name`          | The group and column-chooser buttons are icon-only with no accessible name         | A7    |
 
 Everything else in the sweep is clean — including, and this is the point of the section above, Dropdown and Select in the states where they have no ARIA at all to get wrong.
 
+⚠️ **The searchable row stopped firing without being fixed, and that is worth reading twice.** A5 turned the trigger into a `role="combobox"`, and a combobox is one of the roles that _may_ contain a focusable descendant — so `nested-interactive` simply stopped applying to the input nested inside it. Nothing about the markup improved. The entry was deleted from `knownViolations` because it no longer fires, and replaced by a test in `dropdown.a11y.test.tsx` that asserts the nesting is still there and fails when A6 removes it. This is the same manoeuvre A1 used for the absent Tooltip pattern, and the same reason: a gap the tooling cannot see needs a test that can.
+
 **Closed since:**
 
+- **A5 — Dropdown and Select** closed both of their rows at once. Items are `role="option"` inside a `role="listbox"`, which is what makes the `aria-selected` beside them legal, and the trigger takes its name from a `label` prop instead of from whatever happens to be selected. The sweep gained nothing new, but `dropdown.a11y.test.tsx` did: 28 tests over the APG select-only combobox map, which is the layer that can see a pattern rather than an attribute.
 - **A3 — Tooltip** had no violations to fix here, which is exactly the limitation this document opens with: it had no ARIA at all, and axe cannot fail what is not there. A3 made it the APG pattern, and the sweep now covers it open as well as closed.
 - **A4 — Checkbox and RadioButton** both failed `label`. Both now render the `<label>` themselves from a `label` prop, so their fixtures carry no `knownViolations` and the sweep would fail if the rule came back. The sweep also gained `Checkbox (indeterminate)` — where `aria-checked="mixed"` has to agree with the DOM property — plus `Switch` and `RadioGroup`, neither of which existed when the baseline was measured.
 
