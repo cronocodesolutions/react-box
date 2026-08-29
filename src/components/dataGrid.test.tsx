@@ -86,7 +86,7 @@ describe('DataGrid', () => {
   it('renders without crashing', () => {
     renderDataGrid();
     // Check if the component renders without throwing
-    expect(screen.getByRole('presentation')).toBeTruthy();
+    expect(screen.getByRole('grid')).toBeTruthy();
   });
 
   it('renders correct number of rows', () => {
@@ -201,7 +201,7 @@ describe('DataGrid', () => {
 
     renderDataGrid({ gridDef: alignedGridDef });
     // We can't easily test the alignment visually, but we can check if the component renders
-    expect(screen.getByRole('presentation')).toBeTruthy();
+    expect(screen.getByRole('grid')).toBeTruthy();
   });
 
   it('renders with custom column widths', () => {
@@ -218,7 +218,7 @@ describe('DataGrid', () => {
     };
 
     renderDataGrid({ gridDef: widthGridDef });
-    expect(screen.getByRole('presentation')).toBeTruthy();
+    expect(screen.getByRole('grid')).toBeTruthy();
 
     [
       ['First Name', 150],
@@ -251,7 +251,7 @@ describe('DataGrid', () => {
 
     renderDataGrid({ gridDef: pinnedGridDef });
 
-    expect(screen.getByRole('presentation')).toBeTruthy();
+    expect(screen.getByRole('grid')).toBeTruthy();
 
     const firstNameEl = screen.getByText('First Name').closest('[role="columnheader"]')!;
     expect(firstNameEl).toBeDefined();

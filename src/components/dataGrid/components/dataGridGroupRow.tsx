@@ -4,16 +4,21 @@ import ExpandIcon from '../../../icons/expandIcon';
 import Button from '../../button';
 import Checkbox from '../../checkbox';
 import Flex from '../../flex';
+import { useGridNavigationContext } from '../gridNavigationContext';
 import GroupRowModel from '../models/groupRowModel';
 import DataGridCell from './dataGridCell';
 
 interface Props<TRow> {
   row: GroupRowModel<TRow>;
+  /** Position in the whole row list, not in the rendered window. */
+  index: number;
 }
 
 export default function DataGridGroupRow<TRow>(props: Props<TRow>) {
-  const { row } = props;
-  const { selected, indeterminate, cells, expanded } = row;
+  const { row, index } = props;
+  const { selected, indeterminate, expanded } = row;
+  const navigation = useGridNavigationContext();
+  const navRow = (navigation?.headerRowCount ?? 0) + index;
 
   const selectAllHandler = useCallback(() => row.toggleSelectAll(), [row]);
 
@@ -21,17 +26,24 @@ export default function DataGridGroupRow<TRow>(props: Props<TRow>) {
     <Flex
       component={`${row.grid.componentName}.body.groupRow` as never}
       className="grid-row"
-      selected={selected}
+      // `selected` is `aria-selected` on the element as well as a styling hook — see `DataGridRow`.
+      selected={row.grid.props.def.rowSelection ? selected : undefined}
       display="contents"
-      props={{ role: 'rowgroup' }}
+      // A row, not a rowgroup: it holds cells of its own, and the rows it groups are its siblings
+      // in the same rowgroup rather than its children. `aria-expanded` is what says it collapses.
+      props={{ role: 'row', 'aria-rowindex': navRow + 1, 'aria-expanded': expanded }}
     >
-      {cells.map((cell) => {
+      {row.renderedCells.map(({ cell, columnIndex }, navColumn) => {
         switch (cell.cellKind) {
           case 'grouping':
             return (
               <DataGridCell
                 key={cell.column.key}
                 cell={cell}
+                row={navRow}
+                columnIndex={navColumn}
+                ariaColIndex={columnIndex + 1}
+                ariaColSpan={cell.gridColumnSpan}
                 style={{ width: cell.widthVar, right: cell.isRightPinned ? '0' : undefined }}
                 br={cell.hasGroupingBorder ? 1 : undefined}
                 gridColumn={cell.gridColumnSpan}
@@ -47,6 +59,7 @@ export default function DataGridGroupRow<TRow>(props: Props<TRow>) {
                     display="flex"
                     gap={1}
                     ai="center"
+                    props={{ 'aria-expanded': expanded }}
                   >
                     <ExpandIcon fill="currentColor" width="14px" height="14px" rotate={expanded ? 0 : -90} />
                     {cell.value}
@@ -57,14 +70,28 @@ export default function DataGridGroupRow<TRow>(props: Props<TRow>) {
 
           case 'selection':
             return (
-              <DataGridCell key={cell.column.key} cell={cell}>
-                <Checkbox variant="datagrid" m={1} checked={selected} indeterminate={indeterminate} onChange={selectAllHandler} />
+              <DataGridCell key={cell.column.key} cell={cell} row={navRow} columnIndex={navColumn} ariaColIndex={columnIndex + 1}>
+                <Checkbox
+                  variant="datagrid"
+                  m={1}
+                  checked={selected}
+                  indeterminate={indeterminate}
+                  onChange={selectAllHandler}
+                  props={{ 'aria-label': `Select all rows in ${row.groupValue}` }}
+                />
               </DataGridCell>
             );
 
           case 'spacer':
             return (
-              <DataGridCell key={cell.column.key} cell={cell} px={cell.column.isRowNumber ? 3 : undefined}>
+              <DataGridCell
+                key={cell.column.key}
+                cell={cell}
+                row={navRow}
+                columnIndex={navColumn}
+                ariaColIndex={columnIndex + 1}
+                px={cell.column.isRowNumber ? 3 : undefined}
+              >
                 {cell.value}
               </DataGridCell>
             );

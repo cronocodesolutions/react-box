@@ -1012,6 +1012,22 @@ const boxComponents = {
               ai: 'center',
               p: 2,
               transition: 'none',
+              // The filter row is part of the grid the arrow keys walk, so its cells need the same
+              // ring the header and body cells have.
+              focusVisible: {
+                outline: 2,
+                outlineStyle: 'solid',
+                outlineOffset: -2,
+                outlineColor: 'indigo-500',
+                zIndex: 3,
+              },
+              theme: {
+                dark: {
+                  focusVisible: {
+                    outlineColor: 'indigo-400',
+                  },
+                },
+              },
             },
             variants: {
               isPinned: {
@@ -1102,10 +1118,23 @@ const boxComponents = {
               fontWeight: 600,
               color: 'gray-800',
               py: 3.5,
+              // The cell is where the keyboard lives in a grid, so it has to show where it is. An
+              // inset outline: a cell is flush against its neighbours and an outset ring would be
+              // clipped by the scroll container on the first and last column.
+              focusVisible: {
+                outline: 2,
+                outlineStyle: 'solid',
+                outlineOffset: -2,
+                outlineColor: 'indigo-500',
+                zIndex: 3,
+              },
               theme: {
                 dark: {
                   borderColor: 'gray-700',
                   color: 'gray-200',
+                  focusVisible: {
+                    outlineColor: 'indigo-400',
+                  },
                 },
               },
             },
@@ -1281,6 +1310,14 @@ const boxComponents = {
                   bgColor: 'gray-100',
                 },
               },
+              // Same ring as the header cell: in a grid the cell is the thing that holds focus.
+              focusVisible: {
+                outline: 2,
+                outlineStyle: 'solid',
+                outlineOffset: -2,
+                outlineColor: 'indigo-500',
+                zIndex: 2,
+              },
               theme: {
                 dark: {
                   borderColor: 'gray-800',
@@ -1288,6 +1325,9 @@ const boxComponents = {
                     'grid-row': {
                       bgColor: 'gray-700',
                     },
+                  },
+                  focusVisible: {
+                    outlineColor: 'indigo-400',
                   },
                 },
               },
@@ -1359,7 +1399,22 @@ const boxComponents = {
             },
             children: {
               content: {
-                styles: {},
+                styles: {
+                  // The panel is the detail row's single cell, so it holds focus like any other.
+                  focusVisible: {
+                    outline: 2,
+                    outlineStyle: 'solid',
+                    outlineOffset: -2,
+                    outlineColor: 'indigo-500',
+                  },
+                  theme: {
+                    dark: {
+                      focusVisible: {
+                        outlineColor: 'indigo-400',
+                      },
+                    },
+                  },
+                },
               },
             },
           },

@@ -30,6 +30,18 @@ export default class HeaderCellModel<TRow> {
     return c.header ?? c.key;
   }
 
+  /**
+   * A name for a header that draws nothing. The row-number and row-detail columns are blank on
+   * screen by design, and a blank column header leaves every cell under it unlabelled — which is
+   * the one thing a screen reader relies on when it reads a cell out.
+   */
+  public get hiddenLabel(): string | undefined {
+    if (this.column.isRowNumber) return 'Row number';
+    if (this.column.isRowDetail) return 'Row details';
+
+    return undefined;
+  }
+
   public get isSortable(): boolean {
     const c = this.column;
     return c.isLeaf && !c.isRowNumber && !c.isRowSelection && !c.isRowDetail && c.sortable;
@@ -56,6 +68,40 @@ export default class HeaderCellModel<TRow> {
   /** Grid column span: a leaf occupies one column, a group header spans its leaf count. */
   public get gridColumn(): number {
     return this.column.isLeaf ? 1 : this.column.leafs.length;
+  }
+
+  // ========== Position in the grid, for ARIA ==========
+
+  /** 1-based `aria-colindex`: the first column this header covers. */
+  public get columnIndex(): number {
+    const first = this.column.leafs[0] ?? this.column;
+
+    return this.grid.columns.value.visibleLeafs.indexOf(first) + 1;
+  }
+
+  /** `aria-colspan`, left off when the header covers a single column. */
+  public get columnSpan(): number | undefined {
+    const span = this.column.leafs.length;
+
+    return span > 1 ? span : undefined;
+  }
+
+  /** `aria-rowspan`: a leaf declared above the deepest level reaches down to the bottom row. */
+  public get rowSpan(): number | undefined {
+    const span = this.column.gridRows;
+
+    return span > 1 ? span : undefined;
+  }
+
+  /**
+   * `aria-sort`. A sortable column that is not the sorted one still carries `none`: that is what
+   * tells a screen reader the column *can* be sorted, and leaving it off says the opposite.
+   */
+  public get ariaSort(): 'ascending' | 'descending' | 'none' | undefined {
+    if (!this.isSortable) return undefined;
+    if (!this.isSorted || !this.sortDirection) return 'none';
+
+    return this.sortDirection === 'ASC' ? 'ascending' : 'descending';
   }
 
   public get paddingLeft(): number | undefined {

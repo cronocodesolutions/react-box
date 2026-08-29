@@ -1,10 +1,11 @@
 import { motion } from 'framer-motion';
 import { Filter, Table, X } from 'lucide-react';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { ReactNode, useCallback, useEffect, useMemo, useState } from 'react';
 import Box from '../../src/box';
 import Button from '../../src/components/button';
 import DataGrid from '../../src/components/dataGrid';
 import Flex from '../../src/components/flex';
+import { H2 } from '../../src/components/semantics';
 import Code from '../components/code';
 import PageHeader from '../components/pageHeader';
 import Data from '../data/MOCK_DATA.json';
@@ -265,6 +266,34 @@ export default function DataGridPage() {
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
         <Flex d="column" gap={8}>
           <Code label="Import" language="jsx" code="import DataGrid from '@cronocode/react-box/components/dataGrid';" />
+
+          <Section id="a11y" title="Keyboard and roles">
+            <Box>
+              This is the APG grid pattern, over a virtualized body — the case most grids skip. The scrolling element is a{' '}
+              <Mono>role="grid"</Mono> of <Mono>rowgroup</Mono>s, rows and <Mono>gridcell</Mono>s, and it tells assistive technology the
+              size of the whole grid rather than the size of the window it renders: <Mono>aria-rowcount</Mono> counts every row,{' '}
+              <Mono>aria-rowindex</Mono> numbers each one where it really is, and a jump to a row nobody has scrolled to brings it into view
+              first. You write none of that.
+            </Box>
+            <Flex d="column" gap={3} mt={4}>
+              <Note icon={Table} title="Focus lives on the cells">
+                One cell is in the tab order at a time, so Tab enters the grid in a single press instead of walking through thousands of
+                them. The arrow keys move that cell; a sortable header sorts on Enter; a cell that holds a control hands the keyboard over
+                on Enter or F2 and takes it back on Escape.
+              </Note>
+              <Note icon={Table} title="Give it a title">
+                A grid is not named by the rows in it. Pass <Mono>def.title</Mono> and the grid points <Mono>aria-labelledby</Mono> at it.
+              </Note>
+              <Note icon={Filter} title="Everything the grid draws for itself has a name">
+                The column chooser, the select-all box, each row’s checkbox and expander, each column’s menu and each filter input are named
+                after what they act on — “Select row 4”, “Filter Country”, “Column options for Age” — rather than after the icon drawn on
+                them.
+              </Note>
+            </Flex>
+            <Box mt={6}>
+              <KeyTable rows={interactions} />
+            </Box>
+          </Section>
 
           <Code
             id="full-featured"
@@ -1116,7 +1145,124 @@ useEffect(() => { fetchData({ page: 1, pageSize }); }, []);
   );
 }
 
+function KeyTable({ rows }: { rows: { input: string; result: string }[] }) {
+  return (
+    <Box tag="table" width="fit" style={{ borderCollapse: 'collapse' }}>
+      <Box tag="thead">
+        <Box tag="tr">
+          <HeadCell>Key</HeadCell>
+          <HeadCell>What happens</HeadCell>
+        </Box>
+      </Box>
+      <Box tag="tbody">
+        {rows.map((row) => (
+          <Box tag="tr" key={row.input}>
+            <Cell>
+              <Mono>{row.input}</Mono>
+            </Cell>
+            <Cell>{row.result}</Cell>
+          </Box>
+        ))}
+      </Box>
+    </Box>
+  );
+}
+
+function Section({ id, title, children }: { id: string; title: string; children: ReactNode }) {
+  return (
+    <Box id={id}>
+      <H2 fontSize={20} fontWeight={600} mb={4} theme={{ dark: { color: 'white' }, light: { color: 'slate-900' } }}>
+        {title}
+      </H2>
+      <Box fontSize={15} lineHeight={26} theme={{ dark: { color: 'slate-400' }, light: { color: 'slate-600' } }}>
+        {children}
+      </Box>
+    </Box>
+  );
+}
+
+function Note({ icon: Icon, title, children }: { icon: typeof Table; title: string; children: ReactNode }) {
+  return (
+    <Flex
+      gap={3}
+      p={4}
+      borderRadius={2}
+      b={1}
+      theme={{ dark: { bgColor: 'slate-900', borderColor: 'slate-800' }, light: { bgColor: 'slate-50', borderColor: 'slate-200' } }}
+    >
+      <Box theme={{ dark: { color: 'indigo-400' }, light: { color: 'indigo-500' } }} pt={0.5}>
+        <Icon size={16} />
+      </Box>
+      <Box>
+        <Box fontSize={14} fontWeight={600} mb={1} theme={{ dark: { color: 'slate-200' }, light: { color: 'slate-800' } }}>
+          {title}
+        </Box>
+        <Box fontSize={14}>{children}</Box>
+      </Box>
+    </Flex>
+  );
+}
+
+function HeadCell({ children }: { children: ReactNode }) {
+  return (
+    <Box
+      tag="th"
+      textAlign="left"
+      fontSize={13}
+      fontWeight={600}
+      py={2}
+      pr={6}
+      bb={1}
+      theme={{ dark: { color: 'slate-300', borderColor: 'slate-700' }, light: { color: 'slate-700', borderColor: 'slate-200' } }}
+    >
+      {children}
+    </Box>
+  );
+}
+
+function Cell({ children }: { children: ReactNode }) {
+  return (
+    <Box
+      tag="td"
+      fontSize={14}
+      py={2}
+      pr={6}
+      bb={1}
+      theme={{ dark: { color: 'slate-400', borderColor: 'slate-800' }, light: { color: 'slate-600', borderColor: 'slate-100' } }}
+    >
+      {children}
+    </Box>
+  );
+}
+
+function Mono({ children }: { children: ReactNode }) {
+  return (
+    <Box
+      tag="code"
+      px={1}
+      borderRadius={1}
+      fontSize={13}
+      theme={{ dark: { bgColor: 'slate-800', color: 'slate-200' }, light: { bgColor: 'slate-100', color: 'slate-800' } }}
+    >
+      {children}
+    </Box>
+  );
+}
+
+const interactions: { input: string; result: string }[] = [
+  { input: 'Tab', result: 'Enters the grid at one cell — not at every cell. Shift+Tab leaves it.' },
+  { input: '→ / ←', result: 'One cell along the row. At either end, focus stays where it is.' },
+  { input: '↓ / ↑', result: 'One row, keeping the column — including through a group row or a detail panel that has fewer cells.' },
+  { input: 'Home / End', result: 'The first or last cell of the row.' },
+  { input: 'Ctrl + Home / End', result: 'The first or last cell of the whole grid, scrolling there if it has not been rendered yet.' },
+  { input: 'PageDown / PageUp', result: 'A screenful of rows at a time.' },
+  { input: 'Enter / Space', result: 'Sorts, on a sortable column header. Anywhere else, steps into the cell’s own control.' },
+  { input: 'F2', result: 'Steps into the cell’s control even on a header, where Enter is spoken for by the sort.' },
+  { input: 'Escape', result: 'Hands the keyboard back from that control to the cell.' },
+];
+
 const sidebarLinks = [
+  { id: 'a11y', label: 'Keyboard and roles' },
   { id: 'full-featured', label: 'Full Featured' },
   { id: 'basic', label: 'Basic' },
   { id: 'filters', label: 'Filters' },

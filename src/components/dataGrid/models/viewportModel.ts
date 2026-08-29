@@ -44,6 +44,16 @@ export default class ViewportModel<TRow> {
     return typeof vrc === 'number' ? vrc : ViewportModel.DEFAULT_VISIBLE_ROWS_COUNT;
   }
 
+  /**
+   * Rows a PageUp/PageDown moves. Deliberately not `visibleRowsCount`, which is every row when
+   * `visibleRowsCount === 'all'` — a Page key that jumps to the end of the grid is the End key.
+   */
+  public get pageRows(): number {
+    const vrc = this.grid.props.def.visibleRowsCount;
+
+    return typeof vrc === 'number' ? vrc : ViewportModel.DEFAULT_VISIBLE_ROWS_COUNT;
+  }
+
   public get viewHeight(): number | undefined {
     if (this.showAll) return undefined;
     const { rowHeight } = this.grid;
@@ -57,6 +67,13 @@ export default class ViewportModel<TRow> {
   /** Height to reserve for the empty/no-data state. */
   public get emptyHeight(): number {
     return this.viewHeight ?? this.grid.rowHeight * ViewportModel.DEFAULT_VISIBLE_ROWS_COUNT;
+  }
+
+  /** Where a row sits inside the scrolled body — what a keyboard jump scrolls to. */
+  public rowTop(index: number): number {
+    if (this.hasDetailRows) return this.grid.rowOffsets.value.offsets[index] ?? 0;
+
+    return index * this.grid.rowHeight;
   }
 
   /** Binary search for the first row whose offset is <= scrollTop (variable-height rows). */

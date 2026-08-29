@@ -100,7 +100,7 @@
         "react-dom"
       ],
       "gzip": true,
-      "limit": "2.5 KB"
+      "limit": "3 KB"
     },
     {
       "name": "Core engine (no React)",
@@ -116,7 +116,7 @@
         "react-dom"
       ],
       "gzip": true,
-      "limit": "41 KB"
+      "limit": "44 KB"
     },
     {
       "name": "Full library (Box + ssg + every component)",
@@ -126,7 +126,7 @@
         "react-dom"
       ],
       "gzip": true,
-      "limit": "44 KB"
+      "limit": "47 KB"
     }
   ],
   "repository": {

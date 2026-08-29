@@ -66,8 +66,9 @@ Also: `Mark`, `Figure`, `Figcaption`, `Details`, `Summary`, `Menu`, `Time`. All 
 
 ```tsx
 <Box bgColor="blue-500" hover={{ bgColor: 'blue-600' }} disabled={{ opacity: 0.5 }} />
-// Pseudo: hover, focus, active, disabled, checked, indeterminate, required, selected,
-//   focusWithin, focusVisible, first, last, even, odd, empty
+// Pseudo: hover, focus (:focus-within), focusVisible, hasFocus, active, valid, invalid, optional,
+//   disabled, checked, indeterminate, required, selected, hasChecked, hasRequired, hasDisabled,
+//   before, after, placeholderStyles
 // Responsive (mobile-first): sm(640) md(768) lg(1024) xl(1280) xxl(1536)
 <Box p={2} md={{ p: 4, hover: { bgColor: 'gray-200' } }} />
 ```
@@ -212,6 +213,8 @@ import DataGrid from '@cronocode/react-box/components/dataGrid';
 **ColumnType**: `key`, `header`, `width` (px, default 200), `align`, `pin` (`'LEFT'`/`'RIGHT'`), `columns` (grouped headers), `Cell` (`({ cell }) => ReactNode`), `sortable`/`resizable` (override grid), `flexible`, `filterable` (`true`=text, `{ type: 'number' }`, `{ type: 'multiselect' }`), `contextMenu` (override grid).
 
 **Server-side**: `def={{ pagination: { totalCount }, bottomBar: true }}` + `page={page}` + `onServerStateChange={fetchData}`.
+
+**Accessibility (A7)**: the APG grid pattern, over a virtualized body — supplied whole, so add no roles and no `tabIndex`. The scrolling element is `role="grid"` (header and body are `rowgroup`s, rows `role="row"`, cells `role="gridcell"`/`columnheader`, scroll spacers `presentation`). `aria-rowcount`/`-colcount` describe the _whole_ grid and `aria-rowindex`/`-colindex` place each rendered cell in it, header rows first. Also `aria-sort` on sortable headers, `aria-selected` on rows only with `rowSelection`, `aria-busy` while `loading`, `aria-expanded` on group and expanded rows, and a live region announcing the selection count. Keyboard: one cell in the tab order; arrows move it, Home/End along the row, Ctrl+Home/End to the corners (scrolling to unrendered rows), PageUp/Down by a screenful, Enter/Space sorts a header or steps into the cell’s control, F2 always steps in, Escape steps back out. Every control the grid draws names itself after what it acts on ("Select row 4", "Column options for Age"); the column menu is the APG menu button. **Give it `def.title`** — a grid is not named by its rows. Known gap: Tab does not yet stay inside the grid.
 
 **Style tree**: `datagrid` > `content`, `topBar` > (`globalFilter` > `stats`, `columnGroups` > `icon`|`separator`|`item` > `icon`, `columnVisibility` > `badge`), `filter` > `cell` > `input`, `header` > `cell` > (`contextMenu` > `icon`|`tooltip` > `item` > `icon`|`separator`, `resizer`), `body` > (`cell` > `text`|`rowDetail`, `row`, `groupRow` > `expandButton`, `detailRow`, `empty`), `emptyColumns`, `bottomBar` > (`info`, `clearFilters`, `pagination` > `button`|`info`).
 

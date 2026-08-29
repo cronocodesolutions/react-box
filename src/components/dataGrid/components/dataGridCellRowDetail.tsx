@@ -24,6 +24,7 @@ export default function DataGridCellRowDetail<TRow>(props: Props<TRow>) {
       component={`${cell.grid.componentName}.body.cell.rowDetail` as never}
       variant={{ isExpanded: expanded } as never}
       clean
+      type="button"
       onClick={toggleHandler}
       cursor="pointer"
       display="flex"
@@ -31,6 +32,8 @@ export default function DataGridCellRowDetail<TRow>(props: Props<TRow>) {
       jc="center"
       width="fit"
       height="fit"
+      // A chevron with nothing beside it: the name and the state both have to be spelled out.
+      props={{ 'aria-label': `${expanded ? 'Collapse' : 'Expand'} details for row ${cell.row.rowIndex + 1}`, 'aria-expanded': expanded }}
     >
       <ExpandIcon fill="currentColor" width="14px" height="14px" rotate={expanded ? 0 : -90} />
     </Button>

@@ -41,6 +41,11 @@ export default class RowModel<TRow> {
     return this._cells.value;
   }
 
+  /** One cell per visible column — the width the grid navigation sees for this row. */
+  public get cellCount(): number {
+    return this.cells.length;
+  }
+
   public get selected() {
     return this.grid.selectedRows.has(this.key);
   }

@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import Box from '../../../box';
+import Button from '../../button';
 import Dropdown from '../../dropdown';
 import Flex from '../../flex';
 import Textbox from '../../textbox';
@@ -11,12 +12,43 @@ interface Props<TRow> {
 }
 
 /**
+ * The ✕ that empties a column filter.
+ *
+ * A real `<button>` with a name, not a `<div onClick>`: it is the only way to clear the filter
+ * without selecting the text and deleting it, so a keyboard has to be able to reach it.
+ */
+function ClearFilterButton(props: { columnName: React.ReactNode; onClear: () => void }) {
+  const { columnName, onClear } = props;
+
+  return (
+    <Button
+      clean
+      type="button"
+      position="absolute"
+      right={2}
+      top="1/2"
+      translateY="-1/2"
+      cursor="pointer"
+      display="flex"
+      ai="center"
+      onClick={onClear}
+      props={{ 'aria-label': `Clear the ${columnName} filter` }}
+    >
+      <Box fontSize={10} color="gray-400" hover={{ color: 'gray-600' }}>
+        ✕
+      </Box>
+    </Button>
+  );
+}
+
+/**
  * Text filter with fuzzy search support.
  * Local input + debounce stay here; config/parsing/commit live on ColumnModel.
  */
 function TextFilter<TRow>({ column }: Props<TRow>) {
   const { currentFilter } = column;
   const { componentName } = column.grid;
+  const columnName = column.header ?? column.key;
   const initialValue = currentFilter?.type === 'text' ? currentFilter.value : '';
   const [localValue, setLocalValue] = useState(initialValue);
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -58,14 +90,10 @@ function TextFilter<TRow>({ column }: Props<TRow>) {
         b={0}
         bgColor="transparent"
         focus={{ outline: 0 }}
+        // A placeholder is not a label, and "Filter..." is the same on every column anyway.
+        props={{ 'aria-label': `Filter ${columnName}` }}
       />
-      {localValue && (
-        <Flex position="absolute" right={2} top="1/2" translateY="-1/2" cursor="pointer" props={{ onClick: handleClear }}>
-          <Box fontSize={10} color="gray-400" hover={{ color: 'gray-600' }}>
-            ✕
-          </Box>
-        </Flex>
-      )}
+      {localValue && <ClearFilterButton columnName={columnName} onClear={handleClear} />}
     </Flex>
   );
 }
@@ -76,6 +104,7 @@ function TextFilter<TRow>({ column }: Props<TRow>) {
 function NumberFilter<TRow>({ column }: Props<TRow>) {
   const { currentFilter } = column;
   const { componentName } = column.grid;
+  const columnName = column.header ?? column.key;
   const initialValue = currentFilter?.type === 'number' ? currentFilter.value : '';
   const initialOperator = currentFilter?.type === 'number' ? currentFilter.operator : 'eq';
   const initialValueTo = currentFilter?.type === 'number' ? currentFilter.valueTo : '';
@@ -153,7 +182,7 @@ function NumberFilter<TRow>({ column }: Props<TRow>) {
         focus={{ outline: 0 }}
         // The trigger's content is a mathematical symbol, and a combobox is not named by its
         // content anyway — without this the control announces as nothing at all.
-        props={{ 'aria-label': 'Comparison' }}
+        props={{ 'aria-label': `Comparison for ${columnName}` }}
       >
         <Dropdown.Item value="eq">=</Dropdown.Item>
         <Dropdown.Item value="ne">≠</Dropdown.Item>
@@ -177,14 +206,9 @@ function NumberFilter<TRow>({ column }: Props<TRow>) {
               b={0}
               bgColor="transparent"
               focus={{ outline: 0 }}
+              props={{ 'aria-label': `Filter ${columnName} from` }}
             />
-            {(localValue !== '' || valueTo !== '') && (
-              <Flex position="absolute" right={2} top="1/2" translateY="-1/2" cursor="pointer" props={{ onClick: handleClear }}>
-                <Box fontSize={10} color="gray-400" hover={{ color: 'gray-600' }}>
-                  ✕
-                </Box>
-              </Flex>
-            )}
+            {(localValue !== '' || valueTo !== '') && <ClearFilterButton columnName={columnName} onClear={handleClear} />}
           </Flex>
           <Flex ai="center" flex1>
             <Textbox
@@ -198,6 +222,7 @@ function NumberFilter<TRow>({ column }: Props<TRow>) {
               b={0}
               bgColor="transparent"
               focus={{ outline: 0 }}
+              props={{ 'aria-label': `Filter ${columnName} to` }}
             />
           </Flex>
         </Flex>
@@ -214,14 +239,9 @@ function NumberFilter<TRow>({ column }: Props<TRow>) {
             b={0}
             bgColor="transparent"
             focus={{ outline: 0 }}
+            props={{ 'aria-label': `Filter ${columnName}` }}
           />
-          {localValue !== '' && (
-            <Flex position="absolute" right={2} top="1/2" translateY="-1/2" cursor="pointer" props={{ onClick: handleClear }}>
-              <Box fontSize={10} color="gray-400" hover={{ color: 'gray-600' }}>
-                ✕
-              </Box>
-            </Flex>
-          )}
+          {localValue !== '' && <ClearFilterButton columnName={columnName} onClear={handleClear} />}
         </Flex>
       )}
     </Flex>
@@ -234,6 +254,7 @@ function NumberFilter<TRow>({ column }: Props<TRow>) {
 function MultiselectFilter<TRow>({ column }: Props<TRow>) {
   const { currentFilter } = column;
   const { componentName } = column.grid;
+  const columnName = column.header ?? column.key;
   const selectedValues = currentFilter?.type === 'multiselect' ? currentFilter.values : [];
   const options = column.filterOptions;
 
@@ -259,7 +280,7 @@ function MultiselectFilter<TRow>({ column }: Props<TRow>) {
         variant="compact"
         b={0}
         focus={{ outline: 0 }}
-        props={{ 'aria-label': 'Filter' }}
+        props={{ 'aria-label': `Filter ${columnName}` }}
       >
         <Dropdown.Display>
           {(vals: (string | number | boolean | null)[]) => {

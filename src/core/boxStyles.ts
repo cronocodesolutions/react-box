@@ -1312,6 +1312,10 @@ export const cssStyles = {
 export const pseudo1 = {
   hover: ':hover',
   focus: ':focus-within',
+  // What `focus` cannot express: the ring a keyboard user needs and a mouse user does not. A cell
+  // in a grid, a card, anything focused programmatically — `:focus-within` lights all of them up on
+  // a click, and the browser already knows which presses deserve a ring.
+  focusVisible: ':focus-visible',
   hasFocus: ':has(:focus)',
   active: ':active',
   valid: ':user-valid',

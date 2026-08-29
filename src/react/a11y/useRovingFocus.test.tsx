@@ -410,6 +410,168 @@ describe('useRovingFocus', () => {
     });
   });
 
+  describe('grid mode', () => {
+    /**
+     * The second axis. Row 2 is deliberately narrower than the rest — a grid's rows are not all
+     * the same width once a cell spans its neighbours, and the movement has to clamp rather than
+     * land on a cell that is not there.
+     */
+    const widthOf = (row: number) => (row === 2 ? 1 : 3);
+
+    function DataGridLike(options?: Partial<RovingFocusOptions>) {
+      const roving = useRovingFocus({ count: 4, columns: widthOf, ...options });
+
+      return (
+        <>
+          <button>Before</button>
+          <div role="grid" onKeyDown={roving.onKeyDown}>
+            {[0, 1, 2, 3].map((row) => (
+              <div key={row} role="row">
+                {Array.from({ length: widthOf(row) }, (_, column) => (
+                  <div key={column} role="gridcell" {...roving.cellProps(row, column)}>
+                    {`r${row}c${column}`}
+                  </div>
+                ))}
+              </div>
+            ))}
+          </div>
+          <output data-testid="cell">{`${roving.activeIndex}:${roving.activeColumn}`}</output>
+        </>
+      );
+    }
+
+    const cell = (name: string) => screen.getByRole('gridcell', { name });
+    const active = () => screen.getByTestId('cell').textContent;
+
+    const tabIntoGrid = async (user: ReturnType<typeof keyboard>) => {
+      await user.pressTab();
+      await user.pressTab();
+    };
+
+    it('puts exactly one cell in the tab order', async () => {
+      const user = keyboard();
+      render(<DataGridLike />);
+
+      await tabIntoGrid(user);
+
+      expectFocusOn(cell('r0c0'));
+      expect(cell('r0c1')).toHaveAttribute('tabindex', '-1');
+    });
+
+    it('moves in two axes', async () => {
+      const user = keyboard();
+      render(<DataGridLike />);
+
+      await tabIntoGrid(user);
+      await user.pressArrow('Right');
+      expectFocusOn(cell('r0c1'));
+
+      await user.pressArrow('Down');
+      expectFocusOn(cell('r1c1'));
+
+      await user.pressArrow('Left');
+      expectFocusOn(cell('r1c0'));
+
+      await user.pressArrow('Up');
+      expectFocusOn(cell('r0c0'));
+    });
+
+    it('stops at the edges instead of wrapping, which is where a grid differs from a list', async () => {
+      const user = keyboard();
+      render(<DataGridLike />);
+
+      await tabIntoGrid(user);
+      await user.pressArrow('Left');
+      expect(active()).toBe('0:0');
+
+      await user.pressArrow('Up');
+      expect(active()).toBe('0:0');
+
+      await user.pressCtrl('End');
+      await user.pressArrow('Right');
+      expect(active()).toBe('3:2');
+
+      await user.pressArrow('Down');
+      expect(active()).toBe('3:2');
+    });
+
+    it('clamps the column to a row that holds fewer cells, and remembers the one asked for', async () => {
+      const user = keyboard();
+      render(<DataGridLike />);
+
+      await tabIntoGrid(user);
+      await user.press('End');
+      expect(active()).toBe('0:2');
+
+      // Row 2 has one cell, so the third column is not there to land on.
+      await user.pressArrow('Down');
+      await user.pressArrow('Down');
+      expect(active()).toBe('2:0');
+
+      // Past it, the column the user was in comes back rather than staying collapsed.
+      await user.pressArrow('Down');
+      expect(active()).toBe('3:2');
+    });
+
+    it('takes Home and End along the row, and Ctrl+Home/End to the corners', async () => {
+      const user = keyboard();
+      render(<DataGridLike />);
+
+      await tabIntoGrid(user);
+      await user.pressArrow('Down');
+      await user.press('End');
+      expect(active()).toBe('1:2');
+
+      await user.press('Home');
+      expect(active()).toBe('1:0');
+
+      await user.pressCtrl('End');
+      expect(active()).toBe('3:2');
+
+      await user.pressCtrl('Home');
+      expect(active()).toBe('0:0');
+    });
+
+    it('moves whole pages, clamped at both ends', async () => {
+      const user = keyboard();
+      render(<DataGridLike pageSize={2} />);
+
+      await tabIntoGrid(user);
+      await user.press('PageDown');
+      expect(active()).toBe('2:0');
+
+      await user.press('PageDown');
+      expect(active()).toBe('3:0');
+
+      await user.press('PageUp');
+      expect(active()).toBe('1:0');
+
+      await user.press('PageUp');
+      expect(active()).toBe('0:0');
+    });
+
+    it('reports the cell it moved to, and why', async () => {
+      const user = keyboard();
+      const onActiveCellChange = vi.fn();
+      render(<DataGridLike onActiveCellChange={onActiveCellChange} />);
+
+      await tabIntoGrid(user);
+      await user.pressArrow('Right');
+
+      expect(onActiveCellChange).toHaveBeenCalledWith({ row: 0, column: 1 }, expect.objectContaining({ reason: 'keyboard' }));
+    });
+
+    it('follows focus into a cell, so a click carries on from where it landed', async () => {
+      const user = keyboard();
+      render(<DataGridLike />);
+
+      await user.click(cell('r1c2'));
+
+      expect(active()).toBe('1:2');
+      expect(cell('r1c2')).toHaveAttribute('tabindex', '0');
+    });
+  });
+
   it('ignores a key another handler has already dealt with', async () => {
     const user = keyboard();
 

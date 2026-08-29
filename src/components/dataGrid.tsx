@@ -5,6 +5,7 @@ import DataGridContent from './dataGrid/components/dataGridContent';
 import DataGridTopBar from './dataGrid/components/dataGridTopBar';
 import { DataGridProps } from './dataGrid/contracts/dataGridContract';
 import useGrid from './dataGrid/useGrid';
+import VisuallyHidden from './visuallyHidden';
 
 export default function DataGrid<TRow extends object>(props: DataGridProps<TRow>) {
   const grid = useGrid(props);
@@ -31,12 +32,16 @@ export default function DataGrid<TRow extends object>(props: DataGridProps<TRow>
   }, [grid]);
 
   return (
-    <Box ref={containerRef} component={grid.componentName as never} style={grid.sizes.value} props={{ role: 'presentation' }}>
+    <Box ref={containerRef} component={grid.componentName as never} style={grid.sizes.value}>
       {grid.props.def.topBar && <DataGridTopBar grid={grid} />}
 
       <DataGridContent grid={grid} />
 
       {grid.props.def.bottomBar && <DataGridBottomBar grid={grid} />}
+
+      {/* Selecting a row changes a checkbox somewhere off in the grid and nothing else: without a
+          live region the count is invisible unless you go looking for it. */}
+      <VisuallyHidden props={{ role: 'status' }}>{grid.selectionAnnouncement}</VisuallyHidden>
     </Box>
   );
 }

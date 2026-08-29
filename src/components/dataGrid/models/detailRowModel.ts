@@ -35,6 +35,9 @@ export default class DetailRowModel<TRow> {
 
   public readonly count = 0;
 
+  /** One cell, spanning every column — the width the grid navigation sees for this row. */
+  public readonly cellCount = 1;
+
   public get flatRows() {
     return [this];
   }

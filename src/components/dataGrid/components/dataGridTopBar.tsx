@@ -20,7 +20,9 @@ export default function DataGridTopBar<TRow>(props: Props<TRow>) {
         <Flex ai="center" gap={3} flexWrap="wrap" minWidth={0}>
           <DataGridTopBarContextMenu grid={grid} />
           {title && (
-            <Box fontWeight={600} fontSize={16} color="gray-800" theme={{ dark: { color: 'gray-100' } }}>
+            // The grid points `aria-labelledby` here: a grid is named by its title, never by the
+            // rows inside it.
+            <Box id={grid.titleId} fontWeight={600} fontSize={16} color="gray-800" theme={{ dark: { color: 'gray-100' } }}>
               {title}
             </Box>
           )}

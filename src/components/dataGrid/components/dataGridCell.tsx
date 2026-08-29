@@ -1,16 +1,25 @@
 import { BoxProps } from '../../../box';
 import Flex from '../../flex';
+import { useGridNavigationContext } from '../gridNavigationContext';
 import CellModel from '../models/cellModel';
 import GroupRowCellModel from '../models/groupRowCellModel';
 
 interface Props<TRow> extends BoxProps {
   children: React.ReactNode;
   cell: CellModel<TRow> | GroupRowCellModel<TRow>;
+  /** Navigation coordinates. `columnIndex` counts rendered cells, which a group row has fewer of. */
+  row: number;
+  columnIndex: number;
+  /** 1-based `aria-colindex`, when the cell does not sit at `columnIndex`. */
+  ariaColIndex?: number;
+  ariaColSpan?: number;
 }
 
 export default function DataGridCell<TRow>(props: Props<TRow>) {
-  const { children, cell, style, ...restProps } = props;
+  const { children, cell, row, columnIndex, ariaColIndex, ariaColSpan, style, ...restProps } = props;
   const { column } = cell;
+  const navigation = useGridNavigationContext();
+  const { ref, tabIndex, onFocus } = navigation?.cellProps(row, columnIndex) ?? {};
 
   if (column.hasAlign) restProps.jc = column.align;
 
@@ -21,8 +30,15 @@ export default function DataGridCell<TRow>(props: Props<TRow>) {
 
   return (
     <Flex
+      ref={ref}
       component={`${column.grid.componentName}.body.cell` as never}
-      props={{ role: 'cell' }}
+      props={{
+        role: 'gridcell',
+        'aria-colindex': ariaColIndex ?? columnIndex + 1,
+        'aria-colspan': ariaColSpan,
+        tabIndex,
+        onFocus,
+      }}
       variant={variant as never}
       style={{ ...column.cellStyleVars.value, ...style }}
       {...restProps}

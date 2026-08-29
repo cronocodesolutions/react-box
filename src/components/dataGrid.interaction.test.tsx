@@ -34,7 +34,7 @@ describe('DataGrid interactions (component → model → re-render)', () => {
 
   it('sorts rows when a sortable header is clicked', () => {
     renderGrid();
-    const grid = screen.getByRole('presentation');
+    const grid = screen.getByRole('grid');
 
     fireEvent.click(screen.getByText('First Name')); // ASC → Bob, Jane, John
 
