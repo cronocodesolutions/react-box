@@ -20,6 +20,7 @@ import {
   Sun,
   Table,
   TextCursor,
+  ToggleLeft,
   Type,
   X,
 } from 'lucide-react';
@@ -176,6 +177,9 @@ export default function Sidebar({ toggleTheme, onClose }: SidebarProps) {
           </MenuItem>
           <MenuItem to="/radiobutton" icon={<Circle size={16} />}>
             Radio Button
+          </MenuItem>
+          <MenuItem to="/switch" icon={<ToggleLeft size={16} />}>
+            Switch
           </MenuItem>
           <MenuItem to="/tooltip" icon={<MessageSquare size={16} />}>
             Tooltip

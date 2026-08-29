@@ -408,6 +408,95 @@ const boxComponents = {
       },
     },
   },
+  // The track, with the thumb drawn as its `::before`. One element rather than two so the switch
+  // stays a single native input: everything a screen reader, a form and the tab order need is on
+  // the control itself, and the moving part is decoration the accessibility tree never sees.
+  switch: {
+    styles: {
+      appearance: 'none',
+      position: 'relative',
+      display: 'inline-block',
+      width: 9,
+      height: 5,
+      minWidth: 9,
+      borderRadius: 5,
+      bgColor: 'gray-300',
+      cursor: 'pointer',
+      transition: 'all',
+      transitionDuration: 150,
+      before: {
+        content: 'empty',
+        position: 'absolute',
+        top: 0.5,
+        left: 0.5,
+        width: 4,
+        height: 4,
+        borderRadius: 4,
+        bgColor: 'white',
+        transition: 'all',
+        transitionDuration: 150,
+      },
+      hover: {
+        bgColor: 'gray-400',
+      },
+      focus: {
+        outline: 2,
+        outlineOffset: 2,
+        outlineColor: 'indigo-200',
+      },
+      checked: {
+        bgColor: 'indigo-500',
+        hover: {
+          bgColor: 'indigo-600',
+        },
+        before: {
+          translateX: 4,
+        },
+      },
+      disabled: {
+        cursor: 'not-allowed',
+        bgColor: 'gray-200',
+        hover: {
+          bgColor: 'gray-200',
+        },
+        checked: {
+          bgColor: 'gray-300',
+          hover: {
+            bgColor: 'gray-300',
+          },
+        },
+      },
+      theme: {
+        dark: {
+          bgColor: 'gray-600',
+          hover: {
+            bgColor: 'gray-500',
+          },
+          focus: {
+            outlineColor: 'indigo-900',
+          },
+          checked: {
+            bgColor: 'indigo-500',
+            hover: {
+              bgColor: 'indigo-400',
+            },
+          },
+          disabled: {
+            bgColor: 'gray-700',
+            hover: {
+              bgColor: 'gray-700',
+            },
+            checked: {
+              bgColor: 'gray-600',
+              hover: {
+                bgColor: 'gray-600',
+              },
+            },
+          },
+        },
+      },
+    },
+  },
   dropdown: {
     styles: {
       display: 'inline-block',

@@ -455,7 +455,7 @@ Box.configure({ sink: 'element' }); // React 19 only
 - The hook-free pre-built components render on the server too: `Flex`, `Grid`, `Button`,
   `Textbox`, `Textarea`, `RadioButton`, `BaseSvg` and the semantic tags (`H1`, `P`, `Link`, …).
   Import them straight into a Server Component.
-- `Dropdown`, `Tooltip`, `Overlay`, `DataGrid`, `Checkbox`, `Select` and `Form` hold state, so their chunks
+- `Dropdown`, `Tooltip`, `Overlay`, `DataGrid`, `Checkbox`, `Switch`, `RadioGroup`, `Select` and `Form` hold state, so their chunks
   ship a `'use client'` banner: a Server Component may import one, but it becomes a client
   boundary and its CSS is in the HTML only if a client module already ran
   `Box.configure({ sink: 'element' })`.
@@ -498,6 +498,56 @@ useFocusReturn({ enabled: open, returnTo: triggerRef });
 - The entry is client-only (`'use client'`); `visuallyHidden` renders on a server.
 
 Full reference: `docs/a11y-primitives.md`.
+
+---
+
+## Form controls: Checkbox, Switch, RadioGroup
+
+All three render **real native inputs**, so focus, the checked state, the disabled state and form
+submission come from the platform. What the components add is the part the platform cannot guess.
+
+```tsx
+import Checkbox from '@cronocode/react-box/components/checkbox';
+import Switch from '@cronocode/react-box/components/switch';
+import RadioGroup from '@cronocode/react-box/components/radioGroup';
+import RadioButton from '@cronocode/react-box/components/radioButton';
+
+<Checkbox label="Accept the terms" name="terms" />
+<Checkbox label="Select all rows" name="rows" indeterminate />
+<Switch label="Email notifications" name="notify" defaultChecked />
+
+<RadioGroup label="Plan" name="plan" defaultValue="free" onChange={(plan, { reason }) => setPlan(plan)}>
+  <RadioGroup.Item value="free" label="Free" />
+  <RadioGroup.Item value="pro" label="Pro" />
+  <RadioGroup.Item value="team" label="Team" disabled />
+</RadioGroup>
+
+<RadioButton name="plan" value="free" label="Free" />   {/* on its own, outside a group */}
+```
+
+**`label` is the important prop.** It renders the text inside a `<label>` that wraps the input, so
+the association needs no `htmlFor`/`id` pair and the whole row is a click target. Leave it out and
+nothing wraps the input — the markup is what it always was. `labelProps` styles that `<label>`;
+every other Box prop styles the control itself.
+
+| Component    | Prop                     | What it does                                                                            |
+| ------------ | ------------------------ | --------------------------------------------------------------------------------------- |
+| all three    | `label` / `labelProps`   | The wrapping `<label>` and its styles.                                                  |
+| `Checkbox`   | `indeterminate`          | Sets the DOM property **and** `aria-checked="mixed"`, which is what is announced.       |
+| `Switch`     | —                        | `role="switch"` over the same input; Space **and** Enter toggle, Enter does not submit. |
+| `RadioGroup` | `label`                  | `role="radiogroup"` named by it — a set of radios with nothing over it is a flat list.  |
+| `RadioGroup` | `name`                   | The field every item submits under. Generated when left out.                            |
+| `RadioGroup` | `value` / `defaultValue` | The selected item's value (a string — the platform's own model for a radio).            |
+| `RadioGroup` | `onChange`               | `(value, { reason, event })` — `click` or `keyboard`.                                   |
+| `RadioGroup` | `orientation`            | `vertical` (default) or `horizontal`. Both arrow pairs navigate either way.             |
+
+Arrow keys move **and select** inside a group, wrapping at both ends and skipping disabled items;
+Tab enters the group once and leaves it once, because a native radio set is already a single tab
+stop and the component does not fight that.
+
+`checked`, `disabled` and `indeterminate` are each both a state and a pseudo-class style prop. Pass
+a boolean for the state, or the tuple `[state, styles]` for both:
+`checked={[on, { bgColor: 'emerald-500' }]}`.
 
 ---
 

@@ -14,6 +14,7 @@ import InstallationPage from '../pages/installationPage';
 import OverlayPage from '../pages/overlayPage';
 import RadioButtonPage from '../pages/radioButtonPage';
 import ServerComponentsPage from '../pages/serverComponentsPage';
+import SwitchPage from '../pages/switchPage';
 import TextareaPage from '../pages/textareaPage';
 import TextboxPage from '../pages/textboxPage';
 import TextStylePage from '../pages/textStylePage';
@@ -38,6 +39,7 @@ export default function App() {
         <Route path="/button" element={<ButtonPage />} />
         <Route path="/checkbox" element={<CheckboxPage />} />
         <Route path="/radiobutton" element={<RadioButtonPage />} />
+        <Route path="/switch" element={<SwitchPage />} />
         <Route path="/tooltip" element={<TooltipPage />} />
         <Route path="/overlay" element={<OverlayPage />} />
         <Route path="/dropdown" element={<DropdownPage />} />

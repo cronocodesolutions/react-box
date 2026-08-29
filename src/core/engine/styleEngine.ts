@@ -7,10 +7,10 @@ import {
   cssStyles as defaultCssStyles,
   pseudo1,
   pseudo2,
-  pseudoClasses,
   pseudoClassesByWeight,
   pseudoClassesWeight,
   pseudoGroupClasses,
+  pseudoSelector,
   themeGroupClass,
 } from '../boxStyles';
 import { BoxStyle } from '../coreTypes';
@@ -498,7 +498,7 @@ export function createStyleEngine(options: StyleEngineOptions = {}): StyleEngine
       const pseudoClassList = pseudoClassesByWeight[weight];
       const hasTheme = pseudoClassList.includes('theme');
       const otherPseudoClasses = hasTheme ? pseudoClassList.filter((p) => p !== 'theme') : pseudoClassList;
-      const pseudoClassesToUse = otherPseudoClasses.map((p) => pseudoClasses[p]).join('');
+      const pseudoClassesToUse = pseudoSelector(otherPseudoClasses);
 
       // Check if pseudoClassParentName contains both theme and group (format: themeName|groupName)
       const hasThemeAndGroup = pseudoClassParentName.includes('|');
@@ -538,7 +538,7 @@ export function createStyleEngine(options: StyleEngineOptions = {}): StyleEngine
 
       return finish(rule);
     } else {
-      const pseudoClassesToUse = pseudoClassesByWeight[weight].map((p) => pseudoClasses[p]).join('');
+      const pseudoClassesToUse = pseudoSelector(pseudoClassesByWeight[weight]);
       const baseSelector = rootSelector ?? `.${className}`;
       const selector = itemValue.selector?.(baseSelector, pseudoClassesToUse) ?? `${baseSelector}${pseudoClassesToUse}`;
 
