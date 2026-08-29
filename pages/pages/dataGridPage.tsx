@@ -289,9 +289,16 @@ export default function DataGridPage() {
                 after what they act on — “Select row 4”, “Filter Country”, “Column options for Age” — rather than after the icon drawn on
                 them.
               </Note>
+              <Note icon={Table} title="A column can be resized without a mouse">
+                Each resizer is a <Mono>role="separator"</Mono> — APG’s window splitter — with the column’s width in pixels on{' '}
+                <Mono>aria-valuenow</Mono>, so a screen reader reads the new width out as it changes.
+              </Note>
             </Flex>
             <Box mt={6}>
               <KeyTable rows={interactions} />
+            </Box>
+            <Box mt={6}>
+              <KeyTable rows={resizerInteractions} />
             </Box>
           </Section>
 
@@ -1252,13 +1259,23 @@ function Mono({ children }: { children: ReactNode }) {
 const interactions: { input: string; result: string }[] = [
   { input: 'Tab', result: 'Enters the grid at one cell — not at every cell. Shift+Tab leaves it.' },
   { input: '→ / ←', result: 'One cell along the row. At either end, focus stays where it is.' },
-  { input: '↓ / ↑', result: 'One row, keeping the column — including through a group row or a detail panel that has fewer cells.' },
+  {
+    input: '↓ / ↑',
+    result:
+      'One row, keeping the column — through a group row or a detail panel with fewer cells, and through a grouped header whose cells cover several columns each.',
+  },
   { input: 'Home / End', result: 'The first or last cell of the row.' },
   { input: 'Ctrl + Home / End', result: 'The first or last cell of the whole grid, scrolling there if it has not been rendered yet.' },
   { input: 'PageDown / PageUp', result: 'A screenful of rows at a time.' },
   { input: 'Enter / Space', result: 'Sorts, on a sortable column header. Anywhere else, steps into the cell’s own control.' },
   { input: 'F2', result: 'Steps into the cell’s control even on a header, where Enter is spoken for by the sort.' },
   { input: 'Escape', result: 'Hands the keyboard back from that control to the cell.' },
+];
+
+const resizerInteractions: { input: string; result: string }[] = [
+  { input: 'Tab / F2', result: 'Reaches the resizer of the header cell focus is on. Escape hands the keyboard back to the cell.' },
+  { input: '→ / ←', result: 'Moves the separator 16px, which widens or narrows the column exactly as dragging it would.' },
+  { input: 'Home / End', result: 'The narrowest the grid allows, or as wide as the grid itself.' },
 ];
 
 const sidebarLinks = [

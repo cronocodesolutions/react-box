@@ -38,6 +38,11 @@ export default class DetailRowModel<TRow> {
   /** One cell, spanning every column — the width the grid navigation sees for this row. */
   public readonly cellCount = 1;
 
+  /** That one cell starts at the first column and covers the rest of them. */
+  public columnOf(): number {
+    return 0;
+  }
+
   public get flatRows() {
     return [this];
   }

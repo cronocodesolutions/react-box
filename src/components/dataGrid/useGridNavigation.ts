@@ -14,8 +14,14 @@ const FOCUSABLE_SELECTOR =
 /** Rows kept between a keyboard jump and the edge of the rendered window. */
 const RENDERED_MARGIN = 2;
 
+/** What the navigation needs of a body row: how many cells it holds, and where each of them sits. */
+interface NavigationRow {
+  cellCount: number;
+  columnOf(cell: number): number;
+}
+
 /** One array for every empty grid, so "no rows" is a stable dependency. */
-const EMPTY_ROWS: { cellCount: number }[] = [];
+const EMPTY_ROWS: NavigationRow[] = [];
 
 export interface GridNavigationOptions<TRow> {
   grid: GridModel<TRow>;
@@ -70,6 +76,22 @@ export default function useGridNavigation<TRow>(options: GridNavigationOptions<T
     [bodyRows, columnCount, headerRowCount, headerRows],
   );
 
+  /**
+   * Which column a cell starts at, which is the space a vertical move travels in. Only rows whose
+   * cells line up one-to-one with the columns can answer this with the ordinal itself: a grouped
+   * header covers its leaves, and a group row's spanning cell swallows the cells beside it.
+   */
+  const columnIndexOf = useCallback(
+    (row: number, cell: number): number => {
+      // `columnIndex` is the 1-based `aria-colindex` of the first column the header covers.
+      if (row < headerRows.length) return (headerRows[row]?.[cell]?.headerCell.columnIndex ?? cell + 1) - 1;
+      if (row < headerRowCount) return cell;
+
+      return bodyRows[row - headerRowCount]?.columnOf(cell) ?? cell;
+    },
+    [bodyRows, headerRowCount, headerRows],
+  );
+
   // Set by a keyboard move, read by the layout effect below: the render in between is what puts
   // the target cell in the DOM.
   const pendingFocus = useRef(false);
@@ -114,6 +136,7 @@ export default function useGridNavigation<TRow>(options: GridNavigationOptions<T
   const roving = useRovingFocus({
     count: rowCount,
     columns: columnsIn,
+    columnIndexOf,
     pageSize: grid.viewport.pageRows,
     onActiveCellChange: (cell, details) => {
       const from = lastRow.current;

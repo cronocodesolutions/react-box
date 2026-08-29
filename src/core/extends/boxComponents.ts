@@ -1019,7 +1019,6 @@ const boxComponents = {
                 outlineStyle: 'solid',
                 outlineOffset: -2,
                 outlineColor: 'indigo-500',
-                zIndex: 3,
               },
               theme: {
                 dark: {
@@ -1121,12 +1120,16 @@ const boxComponents = {
               // The cell is where the keyboard lives in a grid, so it has to show where it is. An
               // inset outline: a cell is flush against its neighbours and an outset ring would be
               // clipped by the scroll container on the first and last column.
+              //
+              // Deliberately no `zIndex`. Focus says where the keyboard is, not what is in front of
+              // what — and a focused cell that outranked the pinned columns would slide *over* them
+              // on a horizontal scroll instead of under, which is the one thing pinning promises.
+              // The pinned variants below and the sticky header keep their own layers.
               focusVisible: {
                 outline: 2,
                 outlineStyle: 'solid',
                 outlineOffset: -2,
                 outlineColor: 'indigo-500',
-                zIndex: 3,
               },
               theme: {
                 dark: {
@@ -1290,6 +1293,26 @@ const boxComponents = {
                   height: 'fit',
                   bgColor: 'gray-400',
                   hoverGroup: { resizer: { bgColor: 'gray-600' } },
+                  // The separator is its own tab stop, and a bar two pixels wide has no room for a
+                  // ring inside itself — so the outline sits around it and the bar itself lights
+                  // up. `opacity` is here rather than on the element because a resizer that only
+                  // appears on hover is a tab stop nobody could otherwise follow, and a pseudo
+                  // rule outranks the base one the element writes to hide it.
+                  focusVisible: {
+                    opacity: 1,
+                    outline: 2,
+                    outlineStyle: 'solid',
+                    outlineColor: 'indigo-500',
+                    bgColor: 'indigo-500',
+                  },
+                  theme: {
+                    dark: {
+                      focusVisible: {
+                        outlineColor: 'indigo-400',
+                        bgColor: 'indigo-400',
+                      },
+                    },
+                  },
                 },
               },
             },
@@ -1316,7 +1339,6 @@ const boxComponents = {
                 outlineStyle: 'solid',
                 outlineOffset: -2,
                 outlineColor: 'indigo-500',
-                zIndex: 2,
               },
               theme: {
                 dark: {

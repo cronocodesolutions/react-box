@@ -46,6 +46,11 @@ export default class RowModel<TRow> {
     return this.cells.length;
   }
 
+  /** Where a cell starts in column-index space: one cell per column, so its own ordinal. */
+  public columnOf(cell: number): number {
+    return cell;
+  }
+
   public get selected() {
     return this.grid.selectedRows.has(this.key);
   }

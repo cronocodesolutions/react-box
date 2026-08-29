@@ -570,6 +570,72 @@ describe('useRovingFocus', () => {
       expect(active()).toBe('1:2');
       expect(cell('r1c2')).toHaveAttribute('tabindex', '0');
     });
+
+    /**
+     * Ragged rows, the way a grouped header is ragged: row 0 holds two cells covering two columns
+     * each, and the rows under it hold one cell per column. A cell ordinal means something
+     * different in each — cell 1 of row 0 sits above cells 2 and 3 of row 1 — so a vertical move
+     * that counted ordinals would land two columns from where it started.
+     */
+    describe('rows whose cells span columns', () => {
+      /** Row 0: cells at columns 0 and 2. Every other row: one cell per column. */
+      const spannedWidthOf = (row: number) => (row === 0 ? 2 : 4);
+      const columnIndexOf = (row: number, cell: number) => (row === 0 ? cell * 2 : cell);
+
+      function GroupedHeaderGrid() {
+        const roving = useRovingFocus({ count: 3, columns: spannedWidthOf, columnIndexOf });
+
+        return (
+          <>
+            <button>Before</button>
+            <div role="grid" onKeyDown={roving.onKeyDown}>
+              {[0, 1, 2].map((row) => (
+                <div key={row} role="row">
+                  {Array.from({ length: spannedWidthOf(row) }, (_, column) => (
+                    <div key={column} role="gridcell" {...roving.cellProps(row, column)}>
+                      {`r${row}c${column}`}
+                    </div>
+                  ))}
+                </div>
+              ))}
+            </div>
+            <output data-testid="cell">{`${roving.activeIndex}:${roving.activeColumn}`}</output>
+          </>
+        );
+      }
+
+      it('lands under the column it left, not under the ordinal', async () => {
+        const user = keyboard();
+        render(<GroupedHeaderGrid />);
+
+        await tabIntoGrid(user);
+        // Cell 1 of the header covers columns 2 and 3.
+        await user.pressArrow('Right');
+        expect(active()).toBe('0:1');
+
+        // Counting ordinals would land on cell 1, which is a column too far left.
+        await user.pressArrow('Down');
+        expect(active()).toBe('1:2');
+      });
+
+      it('picks the cell covering the column on the way back up', async () => {
+        const user = keyboard();
+        render(<GroupedHeaderGrid />);
+
+        await tabIntoGrid(user);
+        await user.pressArrow('Down');
+        await user.press('End');
+        expect(active()).toBe('1:3');
+
+        // Column 3 is the second half of the header's second cell.
+        await user.pressArrow('Up');
+        expect(active()).toBe('0:1');
+
+        // And the column it came from is what it goes back to, not the first column of the span.
+        await user.pressArrow('Down');
+        expect(active()).toBe('1:3');
+      });
+    });
   });
 
   it('ignores a key another handler has already dealt with', async () => {
