@@ -1,0 +1,184 @@
+import { useCallback, useRef } from 'react';
+import useRovingFocus from '../../react/a11y/useRovingFocus';
+import { useIsomorphicLayoutEffect } from '../../react/effects';
+import { GridNavigation } from './gridNavigationContext';
+import GridModel from './models/gridModel';
+
+/** A cell, header or body — what a keystroke has to land on for the grid to own it. */
+const CELL_SELECTOR = '[role="gridcell"],[role="columnheader"]';
+
+/** Everything focusable a cell can hold. Enter and F2 hand the keyboard to the first of them. */
+const FOCUSABLE_SELECTOR =
+  'a[href],button:not([disabled]),input:not([disabled]),select:not([disabled]),textarea:not([disabled]),[tabindex]:not([tabindex="-1"])';
+
+/** Rows kept between a keyboard jump and the edge of the rendered window. */
+const RENDERED_MARGIN = 2;
+
+/** One array for every empty grid, so "no rows" is a stable dependency. */
+const EMPTY_ROWS: { cellCount: number }[] = [];
+
+export interface GridNavigationOptions<TRow> {
+  grid: GridModel<TRow>;
+  /** The scrolling element — a jump to a row outside the rendered window has to scroll first. */
+  scrollerRef: React.RefObject<HTMLElement | null>;
+  scrollTop: number;
+  onScrollTo: (top: number) => void;
+}
+
+export interface GridNavigator extends GridNavigation {
+  /** Put this on the `role="grid"` element: cell keystrokes bubble to it. */
+  onKeyDown: (event: React.KeyboardEvent) => void;
+}
+
+/**
+ * APG's grid pattern over a virtualized body.
+ *
+ * Focus lives on the cells — one of them in the tab order at a time — and the arrow keys, Home/End,
+ * Ctrl+Home/End and PageUp/PageDown move it. `useRovingFocus` owns which cell that is; what belongs
+ * here is everything virtualization adds to the pattern: a jump to a row nobody has scrolled to
+ * has to bring it into the rendered window before there is an element to focus, so the move
+ * scrolls, waits for the render it caused, and focuses from a layout effect.
+ *
+ * Inside a cell the grid steps back. A widget that has focus keeps every key, Escape included when
+ * the widget has a popup open; Enter and F2 are how focus got there and Escape is how it leaves.
+ */
+export default function useGridNavigation<TRow>(options: GridNavigationOptions<TRow>): GridNavigator {
+  const { grid, scrollerRef, scrollTop, onScrollTo } = options;
+
+  const headerRows = grid.headerRows.value;
+  const hasFilterRow = grid.filter.hasFilterableColumns;
+  const headerRowCount = headerRows.length + (hasFilterRow ? 1 : 0);
+  // `flatRows` is memoized on the model, so this is the identity of the row list itself — the
+  // empty case has to borrow one rather than allocate a fresh array on every render.
+  const bodyRows = grid.viewport.isEmpty ? EMPTY_ROWS : grid.flatRows.value;
+  const columnCount = grid.columns.value.visibleLeafs.length;
+  const rowCount = headerRowCount + bodyRows.length;
+
+  /**
+   * How many cells a row holds. Only the body varies: a group row's data columns are absorbed into
+   * the spanning cell that names the group, and a detail row is a single cell across all of them.
+   */
+  const columnsIn = useCallback(
+    (row: number): number => {
+      if (row < headerRows.length) return headerRows[row]?.length ?? 0;
+      if (row < headerRowCount) return columnCount;
+
+      const bodyRow = bodyRows[row - headerRowCount];
+
+      return bodyRow ? bodyRow.cellCount : 0;
+    },
+    [bodyRows, columnCount, headerRowCount, headerRows],
+  );
+
+  // Set by a keyboard move, read by the layout effect below: the render in between is what puts
+  // the target cell in the DOM.
+  const pendingFocus = useRef(false);
+
+  /** Scroll far enough that the row is rendered. `focus()` does the precise part afterwards. */
+  const revealRow = useCallback(
+    (row: number, from: number) => {
+      const { viewport } = grid;
+      const bodyIndex = row - headerRowCount;
+      const scroller = scrollerRef.current;
+
+      if (viewport.showAll || !scroller) return;
+
+      if (bodyIndex < 0) {
+        // The header is sticky, so it is on screen whatever the body is doing. Only a move out of
+        // the body scrolls — otherwise walking along the header would yank the rows under it back
+        // to the top on every keystroke.
+        if (from >= headerRowCount) {
+          scroller.scrollTop = 0;
+          onScrollTo(0);
+        }
+
+        return;
+      }
+
+      const { startIndex, take } = viewport.window(scrollTop);
+      if (bodyIndex >= startIndex + RENDERED_MARGIN && bodyIndex < startIndex + take - RENDERED_MARGIN) return;
+
+      // The scroll position is announced to the virtualization as well as written to the element:
+      // the browser clamps `scrollTop` to the scrollable range and reports the clamped value back
+      // on its own scroll event, which is a frame later than the render that has to hold the row.
+      const top = viewport.rowTop(bodyIndex);
+      scroller.scrollTop = top;
+      onScrollTo(top);
+    },
+    [grid, headerRowCount, onScrollTo, scrollTop, scrollerRef],
+  );
+
+  // Which row the move started from, which only a scroll out of the body cares about.
+  const lastRow = useRef(0);
+
+  const roving = useRovingFocus({
+    count: rowCount,
+    columns: columnsIn,
+    pageSize: grid.viewport.pageRows,
+    onActiveCellChange: (cell, details) => {
+      const from = lastRow.current;
+      lastRow.current = cell.row;
+
+      if (details.reason !== 'keyboard') return;
+
+      revealRow(cell.row, from);
+      pendingFocus.current = true;
+    },
+  });
+
+  const activeItem = roving.activeItem;
+  useIsomorphicLayoutEffect(() => {
+    if (!pendingFocus.current) return;
+
+    pendingFocus.current = false;
+    // Focusing scrolls the cell the rest of the way into view by itself, which is the part the
+    // row-height arithmetic above cannot get exactly right through a sticky header.
+    activeItem()?.focus();
+  });
+
+  const rovingKeyDown = roving.onKeyDown;
+  const onKeyDown = useCallback(
+    (event: React.KeyboardEvent) => {
+      const target = event.target as HTMLElement;
+      const cell = target.closest?.(CELL_SELECTOR) as HTMLElement | null;
+
+      if (!cell) return;
+
+      if (target !== cell) {
+        // Focus is on a widget the cell holds. Escape gives the grid its keyboard back — unless
+        // the widget has a popup open, where Escape belongs to closing that first.
+        if (event.key === 'Escape' && !cell.querySelector('[aria-expanded="true"]')) {
+          event.preventDefault();
+          cell.focus();
+        }
+
+        return;
+      }
+
+      if (event.key === 'Enter' || event.key === ' ' || event.key === 'F2') {
+        const column = headerRows[roving.activeIndex]?.[roving.activeColumn];
+
+        // A sortable header's own action comes first: Enter on it sorts, the way a click does.
+        // F2 is the way into the widgets it also holds — the context menu, the resizer.
+        if (event.key !== 'F2' && column?.headerCell.isSortable) {
+          event.preventDefault();
+          column.sortColumn();
+          return;
+        }
+
+        const widget = cell.querySelector<HTMLElement>(FOCUSABLE_SELECTOR);
+
+        if (widget) {
+          event.preventDefault();
+          widget.focus();
+          return;
+        }
+      }
+
+      rovingKeyDown(event);
+    },
+    [headerRows, roving.activeColumn, roving.activeIndex, rovingKeyDown],
+  );
+
+  return { rowCount, columnCount, headerRowCount, cellProps: roving.cellProps, onKeyDown };
+}

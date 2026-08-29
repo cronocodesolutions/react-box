@@ -58,6 +58,26 @@ const people: Person[] = [
   { id: 3, name: 'Alan', age: 41 },
 ];
 
+interface Employee {
+  id: number;
+  name: string;
+  department: string;
+  salary: number;
+}
+
+const departments = ['Engineering', 'Design', 'Sales'];
+
+/**
+ * Ten thousand rows, which is the point: virtualization is where a grid's ARIA usually breaks,
+ * because the row numbers in the DOM stop being the row numbers in the grid.
+ */
+const employees: Employee[] = Array.from({ length: 10_000 }, (_, index) => ({
+  id: index + 1,
+  name: `Employee ${index + 1}`,
+  department: departments[index % departments.length],
+  salary: 40_000 + (index % 50) * 1_000,
+}));
+
 const openPopup = () => fireEvent.click(screen.getByRole('combobox'));
 
 export const fixtures: A11yFixture[] = [
@@ -232,9 +252,36 @@ export const fixtures: A11yFixture[] = [
         }}
       />
     ),
-    knownViolations: {
-      'aria-required-parent': 'A7 — role="row"/"columnheader" hang off a role="presentation" root, so the grid structure is not announced.',
-      'button-name': 'A7 — the group and column-chooser buttons are icon-only with no accessible name.',
-    },
+  },
+  {
+    // The flagship case, and the one every other grid library gets wrong: 10k rows behind a
+    // virtualized window, grouped, selectable, filterable, with an expandable detail row. Every
+    // ARIA number here describes rows and columns that are mostly *not* in the DOM.
+    name: 'DataGrid (virtualized, grouped, selectable)',
+    render: () => (
+      <DataGrid<Employee>
+        data={employees}
+        def={{
+          rowKey: 'id',
+          title: 'Employees',
+          rowSelection: true,
+          showRowNumber: true,
+          visibleRowsCount: 15,
+          globalFilter: true,
+          columns: [
+            { key: 'name', header: 'Name', filterable: true },
+            { key: 'department', header: 'Department', filterable: { type: 'multiselect' } },
+            { key: 'salary', header: 'Salary', filterable: { type: 'number' } },
+          ],
+          rowDetail: {
+            content: (row) => (
+              <P>
+                {row.name} sits in {row.department}.
+              </P>
+            ),
+          },
+        }}
+      />
+    ),
   },
 ];

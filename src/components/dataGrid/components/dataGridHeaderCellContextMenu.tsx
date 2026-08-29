@@ -1,37 +1,193 @@
-import { useMemo, useState } from 'react';
-import Box, { useVisibility } from '../../../box';
+import { Fragment, useCallback, useMemo, useRef, useState } from 'react';
+import Box from '../../../box';
 import DotsIcon from '../../../icons/dotsIcon';
 import GroupingIcon from '../../../icons/groupingIcon';
 import PinIcon from '../../../icons/pinIcon';
 import SortIcon from '../../../icons/sortIcon';
+import useDismiss from '../../../react/a11y/useDismiss';
+import useFocusReturn from '../../../react/a11y/useFocusReturn';
+import useIdentifier from '../../../react/a11y/useIdentifier';
+import useRovingFocus from '../../../react/a11y/useRovingFocus';
+import { useIsomorphicLayoutEffect } from '../../../react/effects';
 import Button from '../../button';
 import Flex from '../../flex';
 import Overlay from '../../overlay';
 import { Span } from '../../semantics';
 import ColumnModel from '../models/columnModel';
 
+interface MenuItem {
+  key: string;
+  /** Left of the label. A separator is drawn instead when the item opens a new section. */
+  icon?: React.ReactNode;
+  label: React.ReactNode;
+  /** Plain text for the menu's typeahead — an icon and a `<Box>` are not searchable. */
+  text: string;
+  run: () => void;
+  startsSection?: boolean;
+}
+
 interface Props<TRow> {
   column: ColumnModel<TRow>;
 }
 
+/**
+ * The column's menu — APG's menu button, on top of `Overlay`.
+ *
+ * The items are built as data rather than written out as JSX, because the pattern needs them as a
+ * list: `useRovingFocus` numbers them for the arrow keys and the typeahead, and which of them exist
+ * changes with the column's state. Sections are a rendering detail on top of that one list.
+ */
 export default function DataGridHeaderCellContextMenu<TRow>(props: Props<TRow>) {
   const { column } = props;
   const { grid, align, header, key } = column;
   const hc = column.headerCell;
+  const columnName = header ?? key;
 
-  const [isOpen, setOpen, refToUse] = useVisibility({ hideOnScroll: true, event: 'mousedown' });
+  const identifier = useIdentifier('datagrid-column-menu');
+  const [isOpen, setOpen] = useState(false);
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  const popupRef = useRef<HTMLDivElement>(null);
+  const pendingFocus = useRef(false);
   const [tooltipPosition, setTooltipPosition] = useState<{ top: number; left: number }>({ top: 0, left: 0 });
   const openLeft = useMemo(() => tooltipPosition.left > window.innerWidth / 2, [tooltipPosition.left]);
 
   const positionLeft = align === 'right' ? 2 : undefined;
   const positionRight = align === 'right' ? undefined : column.pin === 'RIGHT' ? 2.5 : 4;
 
+  const items = useMemo(() => {
+    const iconSlot = (children: React.ReactNode) => (
+      <Span component={`${grid.componentName}.header.cell.contextMenu.tooltip.item.icon` as never}>{children}</Span>
+    );
+    const sortIcon = (rotate?: 0 | 180) => iconSlot(<SortIcon width="100%" fill="currentColor" rotate={rotate} />);
+    const pinIcon = (rotate?: 0 | -90) => iconSlot(<PinIcon width="100%" fill="currentColor" rotate={rotate} />);
+    const groupIcon = iconSlot(<GroupingIcon width="100%" fill="currentColor" />);
+    // Items with no icon keep the label aligned with the ones that have one.
+    const noIcon = <Box width={4} />;
+
+    const sections: (MenuItem | false)[][] = [
+      [
+        hc.canSortAsc && {
+          key: 'sort-asc',
+          icon: sortIcon(),
+          label: 'Sort Ascending',
+          text: 'Sort Ascending',
+          run: () => column.sortColumn('ASC'),
+        },
+        hc.canSortDesc && {
+          key: 'sort-desc',
+          icon: sortIcon(180),
+          label: 'Sort Descending',
+          text: 'Sort Descending',
+          run: () => column.sortColumn('DESC'),
+        },
+        hc.canClearSort && {
+          key: 'sort-clear',
+          icon: noIcon,
+          label: 'Clear Sort',
+          text: 'Clear Sort',
+          run: () => column.sortColumn(undefined),
+        },
+      ],
+      [
+        hc.canPinLeft && { key: 'pin-left', icon: pinIcon(), label: 'Pin Left', text: 'Pin Left', run: () => column.pinColumn('LEFT') },
+        hc.canPinRight && {
+          key: 'pin-right',
+          icon: pinIcon(-90),
+          label: 'Pin Right',
+          text: 'Pin Right',
+          run: () => column.pinColumn('RIGHT'),
+        },
+        hc.canUnpin && { key: 'unpin', icon: noIcon, label: 'Unpin', text: 'Unpin', run: () => column.pinColumn() },
+      ],
+      [
+        hc.canGroupBy && {
+          key: 'group',
+          icon: groupIcon,
+          label: <Box textWrap="nowrap">Group by {columnName}</Box>,
+          text: `Group by ${columnName}`,
+          run: column.toggleGrouping,
+        },
+        hc.canUnGroupAll && {
+          key: 'ungroup',
+          icon: groupIcon,
+          label: <Box textWrap="nowrap">Un-Group All</Box>,
+          text: 'Un-Group All',
+          run: grid.unGroupAll,
+        },
+      ],
+    ];
+
+    return sections
+      .map((section) => section.filter((item): item is MenuItem => item !== false))
+      .filter((section) => section.length > 0)
+      .flatMap((section, sectionIndex) => section.map((item, index) => ({ ...item, startsSection: sectionIndex > 0 && index === 0 })));
+  }, [column, columnName, grid, hc]);
+
+  const close = useCallback((restoreFocus = true) => {
+    pendingFocus.current = false;
+    setOpen(false);
+    if (restoreFocus) triggerRef.current?.focus();
+  }, []);
+
+  const roving = useRovingFocus({
+    count: items.length,
+    // A menu wraps at its ends — the one place APG asks for looping where the grid pattern forbids
+    // it. Typeahead is the menu's, and the trigger holds no keystrokes of its own.
+    textOf: (index) => items[index]?.text ?? '',
+    onSelect: (index) => {
+      items[index]?.run();
+      close();
+    },
+  });
+
+  useDismiss({
+    enabled: isOpen,
+    // The trigger counts as inside: a press on an open menu's own button has to reach its toggle
+    // rather than be read as a press outside and dismissed and reopened in one gesture.
+    inside: [triggerRef, popupRef],
+    onDismiss: () => close(),
+  });
+
+  useFocusReturn({ enabled: isOpen, returnTo: triggerRef });
+
+  const setActiveIndex = roving.setActiveIndex;
+  const activeItem = roving.activeItem;
+  const open = useCallback(() => {
+    // APG: opening a menu puts focus on its first item. Reset first — the menu that opens next may
+    // be a different column's, and the list it holds may be a different length.
+    setActiveIndex(0, { reason: 'programmatic' });
+    pendingFocus.current = true;
+    setOpen(true);
+  }, [setActiveIndex]);
+
+  useIsomorphicLayoutEffect(() => {
+    if (!pendingFocus.current) return;
+
+    // Not `[isOpen]`: `Overlay` measures where it sits before it renders anything into the portal,
+    // so on the commit that opens the menu there is no item to focus yet. Waiting for one to
+    // appear is what makes this run on every render instead.
+    const item = activeItem();
+    if (!item) return;
+
+    pendingFocus.current = false;
+    item.focus();
+  });
+
   return (
     <Flex position="absolute" left={positionLeft} right={positionRight} top="1/2" translateY={-3} ai="center">
       <Button
+        ref={triggerRef}
         component={`${grid.componentName}.header.cell.contextMenu` as never}
-        onClick={() => setOpen(!isOpen)}
+        onClick={() => (isOpen ? close(false) : open())}
         variant={hc.contextMenuButtonVariant as never}
+        type="button"
+        props={{
+          // Three dots name nothing. The column does, and there is one of these per column.
+          'aria-label': `Column options for ${columnName}`,
+          'aria-haspopup': 'menu',
+          'aria-expanded': isOpen,
+          'aria-controls': isOpen ? identifier : undefined,
+        }}
       >
         <Span component={`${grid.componentName}.header.cell.contextMenu.icon` as never}>
           <DotsIcon fill="currentColor" />
@@ -40,96 +196,44 @@ export default function DataGridHeaderCellContextMenu<TRow>(props: Props<TRow>) 
           <Overlay
             component={`${grid.componentName}.header.cell.contextMenu.tooltip` as never}
             onPositionChange={setTooltipPosition}
-            ref={refToUse}
+            ref={popupRef}
             adjustTranslateX={openLeft ? '-100%' : '-21px'}
             adjustTranslateY="16px"
+            id={identifier}
+            props={{ role: 'menu', 'aria-label': `Column options for ${columnName}`, onKeyDown: roving.onKeyDown }}
           >
-            {hc.canSortAsc && (
-              <Button
-                component={`${grid.componentName}.header.cell.contextMenu.tooltip.item` as never}
-                onClick={() => column.sortColumn('ASC')}
-              >
-                <Span component={`${grid.componentName}.header.cell.contextMenu.tooltip.item.icon` as never}>
-                  <SortIcon width="100%" fill="currentColor" />
-                </Span>
-                Sort Ascending
-              </Button>
-            )}
-            {hc.canSortDesc && (
-              <Button
-                component={`${grid.componentName}.header.cell.contextMenu.tooltip.item` as never}
-                onClick={() => column.sortColumn('DESC')}
-              >
-                <Span component={`${grid.componentName}.header.cell.contextMenu.tooltip.item.icon` as never}>
-                  <SortIcon width="100%" fill="currentColor" rotate={180} />
-                </Span>
-                Sort Descending
-              </Button>
-            )}
-            {hc.canClearSort && (
-              <Button
-                component={`${grid.componentName}.header.cell.contextMenu.tooltip.item` as never}
-                onClick={() => column.sortColumn(undefined)}
-              >
-                <Box width={4} />
-                Clear Sort
-              </Button>
-            )}
-            {hc.hasSortSection && (hc.hasPinSection || hc.hasGroupSection) && (
-              <Box
-                bb={1}
-                my={2}
-                borderColor="gray-300"
-                component={`${grid.componentName}.header.cell.contextMenu.tooltip.item.separator` as never}
-              />
-            )}
-            {hc.canPinLeft && (
-              <Button
-                component={`${grid.componentName}.header.cell.contextMenu.tooltip.item` as never}
-                onClick={() => column.pinColumn('LEFT')}
-              >
-                <Span component={`${grid.componentName}.header.cell.contextMenu.tooltip.item.icon` as never}>
-                  <PinIcon width="100%" fill="currentColor" />
-                </Span>
-                Pin Left
-              </Button>
-            )}
-            {hc.canPinRight && (
-              <Button
-                component={`${grid.componentName}.header.cell.contextMenu.tooltip.item` as never}
-                onClick={() => column.pinColumn('RIGHT')}
-              >
-                <Span component={`${grid.componentName}.header.cell.contextMenu.tooltip.item.icon` as never}>
-                  <PinIcon width="100%" fill="currentColor" rotate={-90} />
-                </Span>
-                Pin Right
-              </Button>
-            )}
-            {hc.canUnpin && (
-              <Button component={`${grid.componentName}.header.cell.contextMenu.tooltip.item` as never} onClick={() => column.pinColumn()}>
-                <Box width={4} />
-                Unpin
-              </Button>
-            )}
-            {hc.hasSortSection && hc.hasPinSection && hc.hasGroupSection && (
-              <Box component={`${grid.componentName}.header.cell.contextMenu.tooltip.item.separator` as never} />
-            )}
-            {hc.canGroupBy && (
-              <Button component={`${grid.componentName}.header.cell.contextMenu.tooltip.item` as never} onClick={column.toggleGrouping}>
-                <Span component={`${grid.componentName}.header.cell.contextMenu.tooltip.item.icon` as never}>
-                  <GroupingIcon width="100%" fill="currentColor" />
-                </Span>
-                <Box textWrap="nowrap">Group by {header ?? key}</Box>
-              </Button>
-            )}
-            {hc.canUnGroupAll && (
-              <Button component={`${grid.componentName}.header.cell.contextMenu.tooltip.item` as never} onClick={grid.unGroupAll}>
-                <Span component={`${grid.componentName}.header.cell.contextMenu.tooltip.item.icon` as never}>
-                  <GroupingIcon width="100%" fill="currentColor" />
-                </Span>
-                <Box textWrap="nowrap">Un-Group All</Box>
-              </Button>
-            )}
+            {items.map((item, index) => {
+              const { ref, tabIndex, onFocus } = roving.itemProps(index);
+
+              return (
+                <Fragment key={item.key}>
+                  {item.startsSection && (
+                    <Box
+                      bb={1}
+                      my={2}
+                      borderColor="gray-300"
+                      component={`${grid.componentName}.header.cell.contextMenu.tooltip.item.separator` as never}
+                    />
+                  )}
+                  <Button
+                    component={`${grid.componentName}.header.cell.contextMenu.tooltip.item` as never}
+                    ref={ref}
+                    type="button"
+                    onClick={(event) => {
+                      // The popup is portalled out of the DOM but not out of the React tree, so a
+                      // click in it still reaches the trigger's own toggle on the way up.
+                      event.stopPropagation();
+                      item.run();
+                      close();
+                    }}
+                    props={{ role: 'menuitem', tabIndex, onFocus }}
+                  >
+                    {item.icon}
+                    {item.label}
+                  </Button>
+                </Fragment>
+              );
+            })}
           </Overlay>
         )}
       </Button>

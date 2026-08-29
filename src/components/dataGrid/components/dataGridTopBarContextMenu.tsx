@@ -29,6 +29,9 @@ export default function DataGridTopBarContextMenu<TRow>(props: Props<TRow>) {
       isSearchable={entries.length > 6}
       searchPlaceholder="Search columns..."
       display="inline-flex"
+      // A combobox is never named by what it contains, and this one contains an icon: without a
+      // name it announces as nothing at all, which is bug #50's half that A5 and A6 left behind.
+      props={{ 'aria-label': 'Columns' }}
     >
       <Dropdown.Display<string>>
         {(selected) => {

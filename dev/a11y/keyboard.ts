@@ -12,6 +12,8 @@ export interface Keyboard {
   pressArrow(direction: ArrowDirection): Promise<void>;
   /** Any other named key on whatever has focus: `Enter`, `Escape`, `Home`, `End`, `PageDown`, ` `. */
   press(key: string): Promise<void>;
+  /** The same with Ctrl held. Ctrl+Home and Ctrl+End are the grid pattern's corners. */
+  pressCtrl(key: string): Promise<void>;
   /** Type printable characters into whatever has focus — typeahead, search boxes. */
   type(text: string): Promise<void>;
   /** A real pointer click, for the "open it with the mouse, then drive it with the keyboard" case. */
@@ -42,6 +44,7 @@ export function keyboard(): Keyboard {
     pressShiftTab: () => user.tab({ shift: true }),
     pressArrow: (direction) => user.keyboard(`{Arrow${direction}}`),
     press: (key) => user.keyboard(`{${key}}`),
+    pressCtrl: (key) => user.keyboard(`{Control>}{${key}}{/Control}`),
     type: (text) => user.keyboard(text),
     click: (element) => user.click(element),
     hover: (element) => user.hover(element),

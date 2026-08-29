@@ -28,6 +28,29 @@ export default class GroupRowModel<TRow> {
     return this._cells.value;
   }
 
+  /**
+   * The cells this row actually renders, each with the column it starts at. A `hidden` cell is a
+   * data column the grouping cell has absorbed into its span: no element, and nothing to navigate
+   * to — which is why a group row's cell positions and its `aria-colindex` values differ.
+   */
+  private readonly _renderedCells = memo(() => {
+    const rendered: { cell: GroupRowCellModel<TRow>; columnIndex: number }[] = [];
+
+    this.cells.forEach((cell, columnIndex) => {
+      if (cell.cellKind !== 'hidden') rendered.push({ cell, columnIndex });
+    });
+
+    return rendered;
+  });
+  public get renderedCells(): { cell: GroupRowCellModel<TRow>; columnIndex: number }[] {
+    return this._renderedCells.value;
+  }
+
+  /** Fewer than the column count — the width the grid navigation sees for this row. */
+  public get cellCount(): number {
+    return this.renderedCells.length;
+  }
+
   public get selected() {
     return this.allRows.every((r) => r.selected);
   }

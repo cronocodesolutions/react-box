@@ -31,6 +31,9 @@ export default function DataGridColumnGroups<TRow>(props: Props<TRow>) {
               <Button
                 component={`${grid.componentName}.topBar.columnGroups.item.icon` as never}
                 onClick={() => grid.toggleGrouping(column.key)}
+                // "✕" is a character, not a name: the chip beside it says which grouping this
+                // removes and the button has to say so too.
+                props={{ 'aria-label': `Stop grouping by ${column.header ?? column.key}` }}
               >
                 <Box fontSize={10} color="gray-400" hover={{ color: 'gray-600' }}>
                   ✕

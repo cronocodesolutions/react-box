@@ -23,20 +23,29 @@ describe('Component accessibility (axe)', () => {
     cleanup();
   });
 
-  it.each(fixtures)('$name', async (fixture) => {
-    render(fixture.render());
-    fixture.setup?.();
+  it.each(fixtures)(
+    '$name',
+    async (fixture) => {
+      render(fixture.render());
+      fixture.setup?.();
 
-    // document.body, not the render container: Tooltip and the Dropdown popup render through a
-    // portal, and a container-scoped scan would quietly skip exactly the markup under test.
-    const violations = await runAxe(document.body);
-    const known = fixture.knownViolations ?? {};
+      // document.body, not the render container: Tooltip and the Dropdown popup render through a
+      // portal, and a container-scoped scan would quietly skip exactly the markup under test.
+      const violations = await runAxe(document.body);
+      const known = fixture.knownViolations ?? {};
 
-    const unexpected = violations.filter((violation) => !(violation.id in known));
-    expect(formatViolations(unexpected), `${fixture.name}: ${unexpected.length} unrecorded accessibility violation(s)`).toBe('');
+      const unexpected = violations.filter((violation) => !(violation.id in known));
+      expect(formatViolations(unexpected), `${fixture.name}: ${unexpected.length} unrecorded accessibility violation(s)`).toBe('');
 
-    const fired = new Set(violations.map((violation) => violation.id));
-    const noLongerFiring = Object.keys(known).filter((rule) => !fired.has(rule));
-    expect(noLongerFiring, `${fixture.name}: these rules pass now — delete them from knownViolations in dev/a11y/fixtures.tsx`).toEqual([]);
-  });
+      const fired = new Set(violations.map((violation) => violation.id));
+      const noLongerFiring = Object.keys(known).filter((rule) => !fired.has(rule));
+      expect(noLongerFiring, `${fixture.name}: these rules pass now — delete them from knownViolations in dev/a11y/fixtures.tsx`).toEqual(
+        [],
+      );
+      // Well past the default 5s, for the 10,000-row DataGrid: building that many row models and
+      // then walking the whole document with axe is seconds of work on a loaded CI box, and the
+      // sweep is a correctness gate rather than a performance one.
+    },
+    30_000,
+  );
 });

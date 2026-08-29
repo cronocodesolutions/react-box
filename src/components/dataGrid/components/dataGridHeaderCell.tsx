@@ -3,20 +3,27 @@ import Box from '../../../box';
 import SortIcon from '../../../icons/sortIcon';
 import Checkbox from '../../checkbox';
 import Flex from '../../flex';
+import VisuallyHidden from '../../visuallyHidden';
+import { useGridNavigationContext } from '../gridNavigationContext';
 import ColumnModel from '../models/columnModel';
 import DataGridHeaderCellContextMenu from './dataGridHeaderCellContextMenu';
 import DataGridHeaderCellResizer from './dataGridHeaderCellResizer';
 
 interface Props<TRow> {
   column: ColumnModel<TRow>;
+  /** Navigation coordinates: which header row this is, and where the cell sits along it. */
+  row: number;
+  columnIndex: number;
 }
 
 export default function DataGridHeaderCell<TRow>(props: Props<TRow>) {
-  const { column } = props;
+  const { column, row, columnIndex } = props;
   const { grid } = column;
   const { isLeftPinned, isRightPinned } = column.pinFlags.value;
   const headerCell = column.headerCell;
   const { isSortable, showResizer, showContextMenu, paddingLeft, paddingRight } = headerCell;
+  const navigation = useGridNavigationContext();
+  const { ref, tabIndex, onFocus } = navigation?.cellProps(row, columnIndex) ?? {};
 
   const toggleSelectAll = useCallback(() => {
     grid.toggleSelectAllRows();
@@ -30,14 +37,27 @@ export default function DataGridHeaderCell<TRow>(props: Props<TRow>) {
       indeterminate={grid.someRowsSelected && !grid.allRowsSelected}
       checked={grid.allRowsSelected}
       onChange={toggleSelectAll}
+      // The column it sits in has no header text, so the checkbox has nothing to be named by.
+      props={{ 'aria-label': 'Select all rows' }}
     />
+  ) : headerCell.hiddenLabel ? (
+    <VisuallyHidden tag="span">{headerCell.hiddenLabel}</VisuallyHidden>
   ) : (
     headerCell.label
   );
 
   return (
     <Flex
-      props={{ role: 'columnheader' }}
+      ref={ref}
+      props={{
+        role: 'columnheader',
+        'aria-colindex': headerCell.columnIndex,
+        'aria-colspan': headerCell.columnSpan,
+        'aria-rowspan': headerCell.rowSpan,
+        'aria-sort': headerCell.ariaSort,
+        tabIndex,
+        onFocus,
+      }}
       className="header-cell"
       component={`${grid.componentName}.header.cell` as never}
       variant={headerCell.variant as never}

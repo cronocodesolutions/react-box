@@ -11,13 +11,13 @@ import DataGridDetailRow from './dataGridDetailRow';
 import DataGridGroupRow from './dataGridGroupRow';
 import DataGridRow from './dataGridRow';
 
-function renderRow<TRow>(row: RowModel<TRow> | GroupRowModel<TRow> | DetailRowModel<TRow>) {
+function renderRow<TRow>(row: RowModel<TRow> | GroupRowModel<TRow> | DetailRowModel<TRow>, index: number) {
   if (row instanceof DetailRowModel) {
-    return <DataGridDetailRow key={row.key} row={row} />;
+    return <DataGridDetailRow key={row.key} row={row} index={index} />;
   } else if (row instanceof GroupRowModel) {
-    return <DataGridGroupRow key={row.key} row={row} />;
+    return <DataGridGroupRow key={row.key} row={row} index={index} />;
   } else {
-    return <DataGridRow key={row.key} row={row as RowModel<TRow>} />;
+    return <DataGridRow key={row.key} row={row as RowModel<TRow>} index={index} />;
   }
 }
 
@@ -38,7 +38,9 @@ export default function DataGridBody<TRow>(props: Props<TRow>) {
   const rows = useMemo(() => {
     if (isEmpty) return null;
 
-    return ArrayUtils.take(flatRows, take, startIndex).map(renderRow);
+    // The index a row is rendered with is its index in the *whole* list, not in the window: that
+    // is what `aria-rowindex` means, and what the keyboard navigation counts in.
+    return ArrayUtils.take(flatRows, take, startIndex).map((row, offset) => renderRow(row, startIndex + offset));
   }, [flatRows, isEmpty, take, startIndex]);
 
   // Render empty state outside the CSS Grid to ensure full width
@@ -54,9 +56,14 @@ export default function DataGridBody<TRow>(props: Props<TRow>) {
         width="fit"
         position="sticky"
         left={0}
+        props={{ role: 'row' }}
         style={{ height: viewport.emptyHeight }}
       >
-        {noDataComponent ?? defaultEmpty}
+        {/* A grid may hold nothing but rows, and a row nothing but cells — so the "no data" message
+            is a cell. `display: contents` keeps it out of the layout it would otherwise change. */}
+        <Box display="contents" props={{ role: 'gridcell' }}>
+          {noDataComponent ?? defaultEmpty}
+        </Box>
       </Flex>
     );
   }
@@ -68,6 +75,7 @@ export default function DataGridBody<TRow>(props: Props<TRow>) {
         width="max-content"
         minWidth="fit"
         transition="none"
+        props={{ role: 'rowgroup' }}
         style={{ gridTemplateColumns: grid.gridTemplateColumns.value }}
       >
         {rows}
@@ -76,13 +84,16 @@ export default function DataGridBody<TRow>(props: Props<TRow>) {
   }
 
   return (
-    <Box style={{ height: viewHeight }}>
-      <Box style={{ height: `${totalHeight}px` }}>
+    // The scroll spacers carry the virtualization, not the structure: `presentation` keeps them
+    // from sitting between the grid and its rowgroup in the accessibility tree.
+    <Box props={{ role: 'presentation' }} style={{ height: viewHeight }}>
+      <Box props={{ role: 'presentation' }} style={{ height: `${totalHeight}px` }}>
         <Grid
           component={`${grid.componentName}.body` as never}
           width="max-content"
           minWidth="fit"
           transition="none"
+          props={{ role: 'rowgroup' }}
           style={{
             transform: `translate3d(0, ${translateY}px, 0)`,
             willChange: 'transform',

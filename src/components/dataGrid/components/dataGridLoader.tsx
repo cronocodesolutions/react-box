@@ -29,7 +29,10 @@ export default function DataGridLoader<TRow>(props: Props<TRow>) {
   useLayoutEffect(ensureKeyframes, []);
 
   return (
-    <Box component={`${grid.componentName}.loader` as never} props={{ role: 'progressbar', 'aria-busy': true }}>
+    // Decorative, and hidden from the accessibility tree on purpose: a grid may hold nothing but
+    // rowgroups, and "this grid is loading" is `aria-busy` on the grid itself, which is where
+    // `DataGridContent` puts it.
+    <Box component={`${grid.componentName}.loader` as never} props={{ 'aria-hidden': true }}>
       <Box component={`${grid.componentName}.loader.track` as never} style={{ height: 3 }}>
         <Box
           component={`${grid.componentName}.loader.track.bar` as never}

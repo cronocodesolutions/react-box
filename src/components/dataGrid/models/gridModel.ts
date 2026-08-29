@@ -97,6 +97,27 @@ export default class GridModel<TRow> {
     return (this.props.component || 'datagrid') as keyof ComponentsAndVariants;
   }
 
+  // ========== Identity ==========
+
+  private _identifier = 'datagrid';
+
+  /**
+   * A unique prefix for the ids this grid wires ARIA with. Supplied by the adapter, because only
+   * the adapter can produce one that survives hydration — `useIdentifier` in React's case.
+   */
+  public get identifier(): string {
+    return this._identifier;
+  }
+
+  public setIdentifier(identifier: string): void {
+    this._identifier = identifier;
+  }
+
+  /** The title's id: a grid is not named by the rows in it, so it is named by this. */
+  public get titleId(): string {
+    return `${this._identifier}-title`;
+  }
+
   public get resizerStyle(): 'visible' | 'hover' | 'hidden' {
     return this.props.def.resizerStyle ?? 'visible';
   }
@@ -842,6 +863,23 @@ export default class GridModel<TRow> {
     return this.selectedRows.size > 0;
   }
 
+  private _selectionAnnounced = false;
+
+  /**
+   * What the grid's live region says. Ticking a checkbox halfway down a virtualized grid changes
+   * one control and nothing a screen reader would read out, so the count is announced instead.
+   *
+   * Empty until a selection has actually happened: a live region that already holds text when the
+   * grid mounts is announced by some screen readers as if something had just changed.
+   */
+  public get selectionAnnouncement(): string {
+    if (!this._selectionAnnounced) return '';
+
+    const selected = this.selectedRows.size;
+
+    return selected === 0 ? 'No rows selected' : `${selected} of ${this.props.data.length} rows selected`;
+  }
+
   /** The columns currently grouped, resolved from groupColumns keys (backs the top-bar group chips). */
   public get groupedColumns(): ColumnModel<TRow>[] {
     return Array.from(this.groupColumns, (key) => ArrayUtils.findOrThrow(this.columns.value.leafs, (c) => c.key === key));
@@ -970,6 +1008,7 @@ export default class GridModel<TRow> {
 
   public toggleRowsSelection = (rowKeys: Key[]) => {
     this.selectedRows = new Set(this.selectedRows);
+    this._selectionAnnounced = true;
 
     const hasAllSelected = rowKeys.every((rowKey) => this.selectedRows.has(rowKey));
 

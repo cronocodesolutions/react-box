@@ -136,8 +136,9 @@ All sizing, spacing, and positioning props also accept percentage strings: `p="5
 ## Pseudo-Classes, Breakpoints & Themes
 
 ```tsx
-// Pseudo-classes: hover, focus, active, disabled, checked, indeterminate, required, selected,
-//   focusWithin, focusVisible, first, last, even, odd, empty
+// Pseudo-classes: hover, focus (:focus-within), focusVisible, hasFocus, active, valid, invalid,
+//   optional, disabled, checked, indeterminate, required, selected, hasChecked, hasRequired,
+//   hasDisabled, hasValid, hasInvalid, before, after, placeholderStyles
 <Box bgColor="blue-500" hover={{ bgColor: 'blue-600' }} disabled={{ opacity: 0.5 }} />
 
 // Responsive breakpoints (mobile-first): sm(640) md(768) lg(1024) xl(1280) xxl(1536)
@@ -744,6 +745,36 @@ Box.components({
 <DataGrid component="subgrid" data={data} def={def} />  {/* children resolve under subgrid.* */}
 ```
 
+### Accessibility (A7)
+
+DataGrid is the APG **grid** pattern, over a virtualized body, and it supplies the whole thing — do
+not add roles or `tabIndex` by hand.
+
+- Roles: the scrolling element is `role="grid"` (not the root, which also holds the top and bottom
+  bars); the header and the body are `rowgroup`s; rows are `role="row"` and cells `role="gridcell"`
+  / `columnheader`. The scroll spacers virtualization needs are `role="presentation"`.
+- Numbers that survive virtualization: `aria-rowcount` / `aria-colcount` describe the **whole**
+  grid, and `aria-rowindex` / `aria-colindex` place each rendered row and cell inside it — header
+  rows are row 1 onwards, so a body row's number counts them.
+- `aria-sort` on every sortable header (`none` until it is the sorted one), `aria-selected` on rows
+  **only** when `rowSelection` is on, `aria-multiselectable` on the grid with it, `aria-busy` while
+  `loading`, and `aria-expanded` on a group row and on a row with an open detail panel.
+- Keyboard: one cell is in the tab order at a time. Arrows move it, Home/End go to the row's ends,
+  Ctrl+Home/End to the grid's corners (scrolling to a row that has not been rendered), PageUp/Down
+  move a screenful. Enter/Space sorts on a sortable header and otherwise steps into the cell's own
+  control; F2 steps in even on a header; Escape hands the keyboard back to the cell.
+- Every control the grid draws for itself is named after what it acts on: "Select row 4", "Filter
+  Country", "Column options for Age", "Columns". The column menu is the APG menu button —
+  `aria-haspopup="menu"`, `role="menuitem"` rows, arrows and typeahead, Escape returns focus.
+- Selection is announced through a live region ("3 of 200 rows selected"), because ticking a
+  checkbox halfway down a grid changes nothing a screen reader would otherwise read out.
+
+**Give it a title.** A grid is not named by the rows in it: `def.title` is rendered in the top bar
+and pointed at by `aria-labelledby`.
+
+**Known gap:** Tab does not yet stay inside the grid — controls inside cells are still their own tab
+stops, as they were before A7.
+
 ### Component Style Tree
 
 | Component Name                                            | Description                                      | Variants                                                                                                                                                                                     |
@@ -827,21 +858,21 @@ import Dropdown from '@cronocode/react-box/components/dropdown';
 
 ### Props
 
-| Prop                     | Type                                                 | Description                                                            |
-| ------------------------ | ---------------------------------------------------- | ---------------------------------------------------------------------- |
-| `value` / `defaultValue` | `TVal \| TVal[]`                                     | Controlled / uncontrolled selected value(s)                            |
-| `label`                  | `ReactNode`                                          | The control's name, rendered above it and wired with `aria-labelledby` |
-| `labelProps`             | `BoxProps<'div'>`                                    | Styles for the wrapper the label and the trigger share                 |
-| `multiple`               | `boolean`                                            | Multi-select mode                                                      |
+| Prop                     | Type                                                 | Description                                                               |
+| ------------------------ | ---------------------------------------------------- | ------------------------------------------------------------------------- |
+| `value` / `defaultValue` | `TVal \| TVal[]`                                     | Controlled / uncontrolled selected value(s)                               |
+| `label`                  | `ReactNode`                                          | The control's name, rendered above it and wired with `aria-labelledby`    |
+| `labelProps`             | `BoxProps<'div'>`                                    | Styles for the wrapper the label and the trigger share                    |
+| `multiple`               | `boolean`                                            | Multi-select mode                                                         |
 | `isSearchable`           | `boolean`                                            | Editable combobox: a text field that filters the list (see Accessibility) |
-| `searchPlaceholder`      | `string`                                             | Search input placeholder                                               |
-| `hideIcon`               | `boolean`                                            | Hide chevron icon                                                      |
-| `showCheckbox`           | `boolean`                                            | Show checkboxes in multiple mode                                       |
-| `name`                   | `string`                                             | Form field name (renders hidden `<input>` elements)                    |
-| `onChange`               | `(value: TVal \| undefined, values: TVal[]) => void` | Selection callback                                                     |
-| `itemsProps`             | `BoxStyleProps`                                      | Style overrides for the opened items container (`dropdown.items`)      |
-| `iconProps`              | `BoxStyleProps`                                      | Style overrides for the chevron icon container (`dropdown.icon`)       |
-| `variant`                | `ClassNameType`                                      | Propagates to root **and all child sub-components**                    |
+| `searchPlaceholder`      | `string`                                             | Search input placeholder                                                  |
+| `hideIcon`               | `boolean`                                            | Hide chevron icon                                                         |
+| `showCheckbox`           | `boolean`                                            | Show checkboxes in multiple mode                                          |
+| `name`                   | `string`                                             | Form field name (renders hidden `<input>` elements)                       |
+| `onChange`               | `(value: TVal \| undefined, values: TVal[]) => void` | Selection callback                                                        |
+| `itemsProps`             | `BoxStyleProps`                                      | Style overrides for the opened items container (`dropdown.items`)         |
+| `iconProps`              | `BoxStyleProps`                                      | Style overrides for the chevron icon container (`dropdown.icon`)          |
+| `variant`                | `ClassNameType`                                      | Propagates to root **and all child sub-components**                       |
 
 Also accepts all `BoxProps` (styling props), which apply to the root element — a `<button>`, or the wrapper around the text field when `isSearchable`. Anything in `props` goes to the combobox itself: the button, or that field.
 
