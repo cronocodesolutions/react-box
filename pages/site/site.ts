@@ -65,6 +65,12 @@ export const siteRoutes = [
       'Fourteen SVG paint and stroke properties as typed Box props — dashes, caps, joins, fill rules and a stroke that ignores the scale, all themeable.',
   },
   {
+    path: '/icon',
+    name: 'Icon',
+    description:
+      'Box props on an icon somebody else drew — one adapter for lucide, Tabler, react-icons and a raw <svg>: sized on the ÷4 scale, themed, and named on purpose.',
+  },
+  {
     path: '/button',
     name: 'Button',
     description: 'A real button element with variants, sizes and states, styled entirely through Box props.',

@@ -17,6 +17,7 @@ import {
   Palette,
   Rows3,
   Server,
+  Shapes,
   Spline,
   Sun,
   Table,
@@ -31,6 +32,7 @@ import { version } from '../../package.json';
 import Box from '../../src/box';
 import Button from '../../src/components/button';
 import Flex from '../../src/components/flex';
+import Icon from '../../src/components/icon';
 
 interface SidebarProps {
   toggleTheme: () => void;
@@ -57,7 +59,9 @@ export default function Sidebar({ toggleTheme, onClose }: SidebarProps) {
         <NavLink to="/">
           <Flex ai="center" gap={3}>
             <Box width={10} height={10} borderRadius={2} bgImage="gradient-primary" display="flex" ai="center" jc="center" shadow="medium">
-              <BoxIcon size={20} color="white" strokeWidth={2.5} />
+              <Icon size={5} color="white" strokeWidth={2.5}>
+                <BoxIcon />
+              </Icon>
             </Box>
             <Box>
               <Box fontWeight={700} fontSize={16} theme={{ dark: { color: 'white' }, light: { color: 'slate-900' } }}>
@@ -77,7 +81,9 @@ export default function Sidebar({ toggleTheme, onClose }: SidebarProps) {
           theme={{ dark: { color: 'slate-400' }, light: { color: 'slate-500' } }}
           onClick={onClose}
         >
-          <X size={18} />
+          <Icon size={4.5} label="Close the menu">
+            <X />
+          </Icon>
         </Button>
       </Flex>
 
@@ -85,16 +91,16 @@ export default function Sidebar({ toggleTheme, onClose }: SidebarProps) {
       <Box flex1 overflow="auto" py={4} px={3}>
         {/* Getting Started */}
         <MenuSection label="Getting Started">
-          <MenuItem to="/" icon={<BookOpen size={16} />}>
+          <MenuItem to="/" icon={<BookOpen />}>
             Introduction
           </MenuItem>
-          <MenuItem to="/installation" icon={<Download size={16} />}>
+          <MenuItem to="/installation" icon={<Download />}>
             Installation
           </MenuItem>
-          <MenuItem to="/theme-setup" icon={<Paintbrush size={16} />}>
+          <MenuItem to="/theme-setup" icon={<Paintbrush />}>
             Theme Setup
           </MenuItem>
-          <MenuItem to="/server-components" icon={<Server size={16} />}>
+          <MenuItem to="/server-components" icon={<Server />}>
             Server Components
           </MenuItem>
         </MenuSection>
@@ -127,15 +133,15 @@ export default function Sidebar({ toggleTheme, onClose }: SidebarProps) {
                 fontWeight={500}
                 fontSize={14}
               >
-                <Box
-                  height={4}
+                <Icon
+                  size={4}
                   theme={{
                     dark: { color: isActive ? 'white' : 'indigo-400' },
                     light: { color: isActive ? 'white' : 'indigo-500' },
                   }}
                 >
-                  <Bot size={16} />
-                </Box>
+                  <Bot />
+                </Icon>
                 <Box flex1>AI Context</Box>
                 <Box
                   px={2}
@@ -157,68 +163,71 @@ export default function Sidebar({ toggleTheme, onClose }: SidebarProps) {
 
         {/* Core */}
         <MenuSection label="Core" defaultOpen>
-          <MenuItem to="/box" icon={<BoxIcon size={16} />}>
+          <MenuItem to="/box" icon={<BoxIcon />}>
             Box
           </MenuItem>
-          <MenuItem to="/svg" icon={<Spline size={16} />}>
+          <MenuItem to="/svg" icon={<Spline />}>
             SVG
+          </MenuItem>
+          <MenuItem to="/icon" icon={<Shapes />}>
+            Icon
           </MenuItem>
         </MenuSection>
 
         {/* Components */}
         <MenuSection label="Components" defaultOpen>
-          <MenuItem to="/button" icon={<MousePointer2 size={16} />}>
+          <MenuItem to="/button" icon={<MousePointer2 />}>
             Button
           </MenuItem>
-          <MenuItem to="/textbox" icon={<TextCursor size={16} />}>
+          <MenuItem to="/textbox" icon={<TextCursor />}>
             Textbox
           </MenuItem>
-          <MenuItem to="/textarea" icon={<AlignLeft size={16} />}>
+          <MenuItem to="/textarea" icon={<AlignLeft />}>
             Textarea
           </MenuItem>
-          <MenuItem to="/checkbox" icon={<CheckSquare size={16} />}>
+          <MenuItem to="/checkbox" icon={<CheckSquare />}>
             Checkbox
           </MenuItem>
-          <MenuItem to="/radiobutton" icon={<Circle size={16} />}>
+          <MenuItem to="/radiobutton" icon={<Circle />}>
             Radio Button
           </MenuItem>
-          <MenuItem to="/switch" icon={<ToggleLeft size={16} />}>
+          <MenuItem to="/switch" icon={<ToggleLeft />}>
             Switch
           </MenuItem>
-          <MenuItem to="/tooltip" icon={<MessageSquare size={16} />}>
+          <MenuItem to="/tooltip" icon={<MessageSquare />}>
             Tooltip
           </MenuItem>
-          <MenuItem to="/overlay" icon={<Layers size={16} />}>
+          <MenuItem to="/overlay" icon={<Layers />}>
             Overlay
           </MenuItem>
-          <MenuItem to="/dropdown" icon={<ChevronDown size={16} />}>
+          <MenuItem to="/dropdown" icon={<ChevronDown />}>
             Dropdown
           </MenuItem>
-          <MenuItem to="/datagrid" icon={<Table size={16} />}>
+          <MenuItem to="/datagrid" icon={<Table />}>
             Data Grid
           </MenuItem>
         </MenuSection>
 
         {/* Layout */}
         <MenuSection label="Layout" defaultOpen>
-          <MenuItem to="/flex" icon={<Rows3 size={16} />}>
+          <MenuItem to="/flex" icon={<Rows3 />}>
             Flex
           </MenuItem>
-          <MenuItem to="/grid" icon={<LayoutGrid size={16} />}>
+          <MenuItem to="/grid" icon={<LayoutGrid />}>
             Grid
           </MenuItem>
         </MenuSection>
 
         {/* Extensions */}
         <MenuSection label="Extensions" defaultOpen>
-          <MenuItem to="/style-grouping" icon={<Type size={16} />}>
+          <MenuItem to="/style-grouping" icon={<Type />}>
             Style Grouping
           </MenuItem>
         </MenuSection>
 
         {/* Resources */}
         <MenuSection label="Resources">
-          <MenuItem to="/colors" icon={<Palette size={16} />}>
+          <MenuItem to="/colors" icon={<Palette />}>
             Colors
           </MenuItem>
         </MenuSection>
@@ -229,7 +238,9 @@ export default function Sidebar({ toggleTheme, onClose }: SidebarProps) {
         <Flex ai="center" jc="space-between">
           <Box fontSize={12} theme={{ dark: { color: 'slate-500' }, light: { color: 'slate-400' } }}>
             <Flex ai="center" gap={2}>
-              <Layers size={14} />
+              <Icon size={3.5}>
+                <Layers />
+              </Icon>
               Theme
             </Flex>
           </Box>
@@ -246,7 +257,7 @@ export default function Sidebar({ toggleTheme, onClose }: SidebarProps) {
             transitionDuration={150}
           >
             <Flex ai="center" gap={2}>
-              {theme === 'dark' ? <Sun size={14} /> : <Moon size={14} />}
+              <Icon size={3.5}>{theme === 'dark' ? <Sun /> : <Moon />}</Icon>
               <Box fontSize={12}>{theme === 'dark' ? 'Light' : 'Dark'}</Box>
             </Flex>
           </Button>
@@ -287,9 +298,9 @@ function MenuSection({ label, children, defaultOpen = true }: MenuSectionProps) 
           {label}
         </Box>
         <motion.div animate={{ rotate: isOpen ? 0 : -90 }} transition={{ duration: 0.2 }}>
-          <Box theme={{ dark: { color: 'slate-500' }, light: { color: 'slate-400' } }}>
-            <ChevronDown size={14} />
-          </Box>
+          <Icon size={3.5} theme={{ dark: { color: 'slate-500' }, light: { color: 'slate-400' } }}>
+            <ChevronDown />
+          </Icon>
         </motion.div>
       </Flex>
       <motion.div
@@ -306,7 +317,7 @@ function MenuSection({ label, children, defaultOpen = true }: MenuSectionProps) 
 
 interface MenuItemProps {
   to: string;
-  icon: React.ReactNode;
+  icon: React.ReactElement;
   children: React.ReactNode;
 }
 
@@ -330,15 +341,15 @@ function MenuItem({ to, icon, children }: MenuItemProps) {
           fontWeight={isActive ? 500 : 400}
           fontSize={14}
         >
-          <Box
-            height={4}
+          <Icon
+            size={4}
             theme={{
               dark: { color: isActive ? 'white' : 'slate-500' },
               light: { color: isActive ? 'white' : 'slate-400' },
             }}
           >
             {icon}
-          </Box>
+          </Icon>
           {children}
         </Flex>
       )}

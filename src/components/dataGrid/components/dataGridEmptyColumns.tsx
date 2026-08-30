@@ -1,6 +1,6 @@
 import Box from '../../../box';
-import BaseSvg from '../../baseSvg';
 import Flex from '../../flex';
+import { Path, Svg } from '../../svg';
 import GridModel from '../models/gridModel';
 
 interface Props<TRow> {
@@ -34,13 +34,13 @@ export default function DataGridEmptyColumns<TRow>(props: Props<TRow>) {
           ai="center"
           jc="center"
         >
-          <BaseSvg viewBox="0 0 24 24" width="40" fill="currentColor" color="gray-400" theme={{ dark: { color: 'gray-500' } }}>
-            <path
+          <Svg viewBox="0 0 24 24" width="40" fill="currentColor" color="gray-400" theme={{ dark: { color: 'gray-500' } }}>
+            <Path
               fillRule="evenodd"
-              clipRule="evenodd"
+              props={{ clipRule: 'evenodd' }}
               d="M3 6a3 3 0 013-3h12a3 3 0 013 3v12a3 3 0 01-3 3H6a3 3 0 01-3-3V6zm3-1a1 1 0 00-1 1v12a1 1 0 001 1h12a1 1 0 001-1V6a1 1 0 00-1-1H6zm2 3a1 1 0 011-1h6a1 1 0 110 2H9a1 1 0 01-1-1zm0 4a1 1 0 011-1h6a1 1 0 110 2H9a1 1 0 01-1-1zm0 4a1 1 0 011-1h4a1 1 0 110 2H9a1 1 0 01-1-1z"
             />
-          </BaseSvg>
+          </Svg>
         </Box>
 
         <Flex d="column" ai="center" gap={1}>

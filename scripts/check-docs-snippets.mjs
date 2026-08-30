@@ -76,6 +76,7 @@ const PROVIDED = {
   Flex: "import Flex from '@cronocode/react-box/components/flex';",
   Form: "import Form from '@cronocode/react-box/components/form';",
   Grid: "import Grid from '@cronocode/react-box/components/grid';",
+  Icon: "import Icon from '@cronocode/react-box/components/icon';",
   Overlay: "import Overlay from '@cronocode/react-box/components/overlay';",
   RadioButton: "import RadioButton from '@cronocode/react-box/components/radioButton';",
   RadioGroup: "import RadioGroup from '@cronocode/react-box/components/radioGroup';",

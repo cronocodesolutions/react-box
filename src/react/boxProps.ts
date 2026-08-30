@@ -14,17 +14,25 @@ export type TagPropsType<TTag extends keyof React.JSX.IntrinsicElements> = Omit<
   'className' | 'style' | 'ref' | 'disabled' | 'required' | 'checked' | 'id'
 >;
 
+/**
+ * The style props plus the `className` the engine's classes are merged with — everything the
+ * resolution needs and nothing about a tag. `useClassNames` takes this, which is why it can style
+ * an element this library does not render.
+ */
+export interface BoxClassNameProps<TKey extends keyof ComponentsAndVariants = never> extends BoxStyleProps<TKey> {
+  /** classNames. supports conditional classNames. */
+  className?: ClassNameType;
+}
+
 export interface BoxCoreProps<
   TTag extends keyof React.JSX.IntrinsicElements,
   TKey extends keyof ComponentsAndVariants,
-> extends BoxStyleProps<TKey> {
+> extends BoxClassNameProps<TKey> {
   children?: React.ReactNode | ((props: { isHover: boolean }) => React.ReactNode);
   /** html tag element */
   tag?: TTag;
   /** props (attributes) related to html tag */
   props?: TagPropsType<TTag>;
-  /** classNames. supports conditional classNames. */
-  className?: ClassNameType;
   /** CSSProperties */
   style?: React.ComponentProps<TTag>['style'];
   /** The HTML id attribute is used to specify a unique id for an HTML element. */

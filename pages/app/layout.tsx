@@ -5,6 +5,7 @@ import { NavLink, useLocation } from 'react-router-dom';
 import Box from '../../src/box';
 import Button from '../../src/components/button';
 import Flex from '../../src/components/flex';
+import Icon from '../../src/components/icon';
 import TableOfContents from '../components/tableOfContents';
 import PageContext, { TocEntry } from '../pageContext';
 import DocumentHead from '../site/documentHead';
@@ -66,7 +67,9 @@ export default function Layout({ children }: LayoutProps) {
               }}
               onClick={() => setSidebarOpen(!sidebarOpen)}
             >
-              {sidebarOpen ? <X size={20} /> : <Menu size={20} />}
+              <Icon size={5} label={sidebarOpen ? 'Close the menu' : 'Open the menu'}>
+                {sidebarOpen ? <X /> : <Menu />}
+              </Icon>
             </Button>
             <NavLink to="/">
               <Flex ai="center" gap={2}>
@@ -170,7 +173,13 @@ function ThemeToggle({ theme, toggleTheme }: { theme: string; toggleTheme: () =>
           exit={{ rotate: 90, opacity: 0 }}
           transition={{ duration: 0.15 }}
         >
-          {theme === 'dark' ? <Sun size={18} color="#fbbf24" /> : <Moon size={18} color="#6366f1" />}
+          <Icon
+            size={4.5}
+            color={theme === 'dark' ? 'amber-400' : 'indigo-500'}
+            label={theme === 'dark' ? 'Switch to the light theme' : 'Switch to the dark theme'}
+          >
+            {theme === 'dark' ? <Sun /> : <Moon />}
+          </Icon>
         </motion.div>
       </AnimatePresence>
     </Button>

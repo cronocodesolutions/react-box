@@ -1,6 +1,7 @@
 import { forwardRef, Ref, RefAttributes } from 'react';
 import Box, { BoxProps, BoxTagProps } from '../box';
 import { ExtractElementFromTag } from '../react/reactTypes';
+import svgNaming from '../react/svg/svgNaming';
 import { ComponentsAndVariants } from '../types';
 import StringUtils from '../utils/string/stringUtils';
 
@@ -88,21 +89,6 @@ function svgElement<
 
 const SVG_NAMESPACE = 'http://www.w3.org/2000/svg';
 
-/** The attributes that answer "what is this drawing called" — a caller who set one has decided. */
-const NAMING_ATTRIBUTES = ['role', 'aria-label', 'aria-labelledby', 'aria-hidden'];
-
-/**
- * A drawing nobody named is decoration, and a screen reader should walk straight past it — which is
- * what `aria-hidden` says and what saying nothing leaves ambiguous. `label` is the opt-in: an
- * `<svg>` with a name becomes `role="img"`, the role that says this picture carries meaning.
- */
-function namingAttributes(label: string | undefined, tagProps: object | undefined) {
-  if (label !== undefined) return { role: 'img', 'aria-label': label };
-  if (tagProps && NAMING_ATTRIBUTES.some((name) => name in tagProps)) return undefined;
-
-  return { 'aria-hidden': true };
-}
-
 interface SvgOwnProps {
   /** The coordinate system every number inside the drawing is measured in — `"0 0 24 24"`. */
   viewBox?: string;
@@ -131,13 +117,13 @@ function SvgImpl(props: Props, ref: Ref<SVGSVGElement>) {
       ref={ref}
       component={'svg' as never}
       {...(styleProps as BoxProps<'svg'>)}
-      props={{ xmlns: SVG_NAMESPACE, ...namingAttributes(label, tagProps), ...tagProps }}
+      props={{ xmlns: SVG_NAMESPACE, ...svgNaming(label, tagProps), ...tagProps }}
     />
   );
 }
 
 /** The root `<svg>`: the coordinate system, the size, and whether a screen reader is told about it. */
-export const Svg = forwardRef(SvgImpl);
+export const Svg = /* @__PURE__ */ forwardRef(SvgImpl);
 Svg.displayName = 'Svg';
 
 export type SvgProps = React.ComponentProps<typeof Svg>;
@@ -150,26 +136,34 @@ export type SvgProps = React.ComponentProps<typeof Svg>;
  * — CSS turns an SVG element around the corner of the viewBox unless a `transform-origin` says
  * otherwise, and this library has no prop for that yet.
  */
-export const G = svgElement('g', ['transform']);
-export const Defs = svgElement('defs');
-export const Path = svgElement('path', ['d', 'transform', 'pathLength']);
-export const Circle = svgElement('circle', ['transform', 'pathLength']);
-export const Ellipse = svgElement('ellipse', ['transform', 'pathLength']);
-export const Rect = svgElement('rect', ['width', 'height', 'transform', 'pathLength']);
-export const Line = svgElement('line', ['x1', 'y1', 'x2', 'y2', 'transform', 'pathLength']);
-export const Polyline = svgElement('polyline', ['points', 'transform', 'pathLength']);
-export const Polygon = svgElement('polygon', ['points', 'transform', 'pathLength']);
+export const G = /* @__PURE__ */ svgElement('g', ['transform']);
+export const Defs = /* @__PURE__ */ svgElement('defs');
+export const Path = /* @__PURE__ */ svgElement('path', ['d', 'transform', 'pathLength']);
+export const Circle = /* @__PURE__ */ svgElement('circle', ['transform', 'pathLength']);
+export const Ellipse = /* @__PURE__ */ svgElement('ellipse', ['transform', 'pathLength']);
+export const Rect = /* @__PURE__ */ svgElement('rect', ['width', 'height', 'transform', 'pathLength']);
+export const Line = /* @__PURE__ */ svgElement('line', ['x1', 'y1', 'x2', 'y2', 'transform', 'pathLength']);
+export const Polyline = /* @__PURE__ */ svgElement('polyline', ['points', 'transform', 'pathLength']);
+export const Polygon = /* @__PURE__ */ svgElement('polygon', ['points', 'transform', 'pathLength']);
 
 /**
  * `SvgText`, not `Text`, because `<text>` and a future HTML text component would be one name for
  * two elements. Its `x`/`y` are attributes: the CSS geometry properties do not apply to `<text>`,
  * so the Box props of the same name would compile, generate a rule, and move nothing.
  */
-export const SvgText = svgElement('text', ['x', 'y', 'dx', 'dy', 'textLength', 'lengthAdjust', 'transform'], 'SvgText');
-export const TSpan = svgElement('tspan', ['x', 'y', 'dx', 'dy', 'textLength', 'lengthAdjust'], 'TSpan');
+export const SvgText = /* @__PURE__ */ svgElement('text', ['x', 'y', 'dx', 'dy', 'textLength', 'lengthAdjust', 'transform'], 'SvgText');
+export const TSpan = /* @__PURE__ */ svgElement('tspan', ['x', 'y', 'dx', 'dy', 'textLength', 'lengthAdjust'], 'TSpan');
 
-export const LinearGradient = svgElement('linearGradient', ['x1', 'y1', 'x2', 'y2', 'gradientUnits', 'gradientTransform', 'spreadMethod']);
-export const RadialGradient = svgElement('radialGradient', [
+export const LinearGradient = /* @__PURE__ */ svgElement('linearGradient', [
+  'x1',
+  'y1',
+  'x2',
+  'y2',
+  'gradientUnits',
+  'gradientTransform',
+  'spreadMethod',
+]);
+export const RadialGradient = /* @__PURE__ */ svgElement('radialGradient', [
   'cx',
   'cy',
   'r',
@@ -179,11 +173,19 @@ export const RadialGradient = svgElement('radialGradient', [
   'gradientTransform',
   'spreadMethod',
 ]);
-export const Stop = svgElement('stop', ['offset', 'stopColor', 'stopOpacity']);
+export const Stop = /* @__PURE__ */ svgElement('stop', ['offset', 'stopColor', 'stopOpacity']);
 
-export const ClipPath = svgElement('clipPath', ['clipPathUnits', 'transform']);
-export const Mask = svgElement('mask', ['maskUnits', 'maskContentUnits', 'x', 'y', 'width', 'height']);
-export const Use = svgElement('use', ['href', 'width', 'height', 'transform']);
+export const ClipPath = /* @__PURE__ */ svgElement('clipPath', ['clipPathUnits', 'transform']);
+export const Mask = /* @__PURE__ */ svgElement('mask', ['maskUnits', 'maskContentUnits', 'x', 'y', 'width', 'height']);
+export const Use = /* @__PURE__ */ svgElement('use', ['href', 'width', 'height', 'transform']);
 /** `SvgSymbol`, not `Symbol` — the global of that name is not something a module should shadow. */
-export const SvgSymbol = svgElement('symbol', ['viewBox', 'preserveAspectRatio', 'x', 'y', 'width', 'height'], 'SvgSymbol');
-export const Marker = svgElement('marker', ['markerWidth', 'markerHeight', 'refX', 'refY', 'orient', 'markerUnits', 'viewBox']);
+export const SvgSymbol = /* @__PURE__ */ svgElement('symbol', ['viewBox', 'preserveAspectRatio', 'x', 'y', 'width', 'height'], 'SvgSymbol');
+export const Marker = /* @__PURE__ */ svgElement('marker', [
+  'markerWidth',
+  'markerHeight',
+  'refX',
+  'refY',
+  'orient',
+  'markerUnits',
+  'viewBox',
+]);
