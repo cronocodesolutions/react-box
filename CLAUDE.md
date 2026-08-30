@@ -61,7 +61,7 @@ Different props have different dividers — this is the #1 source of bugs:
 - **Border width** (`b`, `bx`, `by`): direct px → `b={1}` = 1px
 - **borderRadius**: divider 4, same scale as spacing → `borderRadius={2}` = 0.5rem = 8px
 - **lineHeight**: direct px → `lineHeight={24}` = 24px
-- **SVG lengths** (`strokeWidth`, `strokeDasharray`, `strokeDashoffset`, `strokeMiterlimit`, and the geometry props `cx`, `cy`, `r`, `rx`, `ry`, `x`, `y`): no divider and no unit — the number is SVG user units, so `strokeWidth={2}` = `stroke-width: 2` and `r={20}` = `r: 20`. A `<rect>`'s `width`/`height` are **not** in this family: those prop names are the ÷4 layout scale, so a rect's size goes through `props`
+- **SVG lengths** (`strokeWidth`, `strokeDasharray`, `strokeDashoffset`, `strokeMiterlimit`, and the geometry props `cx`, `cy`, `r`, `rx`, `ry`, `x`, `y`): no divider and no unit — the number is SVG user units, so `strokeWidth={2}` = `stroke-width: 2` and `r={20}` = `r: 20`. A `<rect>`'s `width`/`height` are **not** in this family: those prop names are the ÷4 layout scale, which is why `<Rect>` (`components/svg`) claims them back as the SVG attributes they are
 
 ### Extension & Component System
 
@@ -88,6 +88,7 @@ Pre-built components wrap Box with the correct HTML tag. Each is a separate entr
 - `tooltip.tsx` — The APG tooltip on top of `Overlay`: `role="tooltip"` + `aria-describedby`, hover and focus with delays, Escape, and the WCAG 1.4.13 rules (dismissible, hoverable, persistent). Trigger is a render prop
 - `dropdown.tsx` — Select-only dropdown (A5 owns its ARIA)
 - `semantics.tsx` — Semantic HTML wrappers (H1-H6, P, Span, Link, Img, Nav, Header, Footer, etc.) via factory function
+- `svg.tsx` — One component per SVG element (`Svg`, `G`, `Defs`, `Path`, `Circle`, `Ellipse`, `Rect`, `Line`, `Polyline`, `Polygon`, `SvgText`, `TSpan`, `LinearGradient`, `RadialGradient`, `Stop`, `ClipPath`, `Mask`, `Use`, `SvgSymbol`, `Marker`), so SVG has an answer to "never `<Box tag=>`". **Each component settles the names SVG and Box both use, for its own element** — `Path`'s `d` is path data, `Rect`'s `width`/`height` are user units, `SvgText`'s `x`/`y` and `RadialGradient`'s `cx`/`cy`/`r` are attributes (CSS geometry reaches neither), while `Circle`'s `cx` stays the CSS prop. `Svg` also owns `viewBox`/`width`/`height` and a `label` prop: no label means `aria-hidden`, a label means `role="img"`
 - `visuallyHidden.tsx` — Screen-reader-only content: clipped away rather than hidden, so it stays in the accessibility tree
 - `dataGrid/` — Complex data grid with sorting, filtering, grouping, virtualization
 
@@ -102,7 +103,7 @@ Pre-built components wrap Box with the correct HTML tag. Each is a separate entr
 ## Key Conventions
 
 - **Never use inline `style` attributes** — always use Box props. If a prop doesn't exist, create it with `Box.extend()`
-- **Always use component shortcuts** — `<Flex>` not `<Box display="flex">`, `<Button>` not `<Box tag="button">`, `<H1>` not `<Box tag="h1">`
+- **Always use component shortcuts** — `<Flex>` not `<Box display="flex">`, `<Button>` not `<Box tag="button">`, `<H1>` not `<Box tag="h1">`, `<Circle>` not `<Box tag="circle">`
 - **HTML attributes go in `props` prop** — `<Link props={{ href: '/about' }}>` not `<Link href="/about">`
 - **`src/core/` is framework-free** — no `react` import, no JSX, not even a `React.*` global type. New React code goes in `src/react/`
 - Tests are colocated with source files (`*.test.tsx` next to `*.tsx`)

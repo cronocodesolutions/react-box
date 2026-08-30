@@ -2,9 +2,10 @@ import { motion } from 'framer-motion';
 import { Spline } from 'lucide-react';
 import { ReactNode } from 'react';
 import Box from '../../src/box';
-import BaseSvg from '../../src/components/baseSvg';
 import Flex from '../../src/components/flex';
 import { H2 } from '../../src/components/semantics';
+// prettier-ignore
+import { Circle, ClipPath, Defs, Ellipse, G, Line, LinearGradient, Path, Polyline, Rect, Stop, Svg, SvgText } from '../../src/components/svg';
 import Code from '../components/code';
 import PageHeader from '../components/pageHeader';
 import useTableOfContents from '../hooks/useTableOfContents';
@@ -17,7 +18,7 @@ export default function SvgPage() {
       <PageHeader
         icon={Spline}
         title="SVG"
-        description="Twenty-three SVG properties as typed props — paint, stroke, text and the SVG 2 geometry that lets a shape move with no JavaScript at all."
+        description="Twenty-three SVG properties as typed props, and twenty components to put them on — paint, stroke, text and the SVG 2 geometry that lets a shape move with no JavaScript at all."
       />
 
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
@@ -26,22 +27,22 @@ export default function SvgPage() {
             id="paint"
             label="Paint"
             language="jsx"
-            code={`<BaseSvg viewBox="0 0 120 48" width="120px" fill="violet-500" stroke="violet-300" strokeWidth={2}>
-  <circle cx="24" cy="24" r="16" />
-  <rect x="52" y="8" width="32" height="32" fillOpacity={0.4} />
-  <circle cx="104" cy="24" r="16" fill="none" strokeWidth={4} strokeOpacity={0.5} />
-</BaseSvg>`}
+            code={`<Svg viewBox="0 0 120 48" width="120px" fill="violet-500" stroke="violet-300" strokeWidth={2}>
+  <Circle cx={24} cy={24} r={16} />
+  <Rect x={52} y={8} width={32} height={32} fillOpacity={0.4} />
+  <Circle cx={104} cy={24} r={16} fill="none" strokeWidth={4} strokeOpacity={0.5} />
+</Svg>`}
           >
-            <BaseSvg
+            <Svg
               viewBox="0 0 120 48"
               width="120px"
               theme={{ dark: { fill: 'violet-400', stroke: 'violet-200' }, light: { fill: 'violet-500', stroke: 'violet-700' } }}
               strokeWidth={2}
             >
-              <circle cx="24" cy="24" r="16" />
-              <rect x="52" y="8" width="32" height="32" fillOpacity={0.4} />
-              <circle cx="104" cy="24" r="16" fill="none" strokeWidth={4} strokeOpacity={0.5} />
-            </BaseSvg>
+              <Circle cx={24} cy={24} r={16} />
+              <Rect x={52} y={8} width={32} height={32} fillOpacity={0.4} />
+              <Circle cx={104} cy={24} r={16} fill="none" strokeWidth={4} strokeOpacity={0.5} />
+            </Svg>
           </Code>
 
           <Section id="inheritance" title="Set them once, on the element above">
@@ -73,9 +74,9 @@ export default function SvgPage() {
             id="dashes"
             label="Dashes"
             language="jsx"
-            code={`<BaseSvg viewBox="0 0 200 12" width="200px" stroke="emerald-500" strokeWidth={4} fill="none" strokeLinecap="round">
-  <line x1="4" y1="6" x2="196" y2="6" strokeDasharray={12} />
-</BaseSvg>`}
+            code={`<Svg viewBox="0 0 200 12" width="200px" stroke="emerald-500" strokeWidth={4} fill="none" strokeLinecap="round">
+  <Line x1={4} y1={6} x2={196} y2={6} strokeDasharray={12} />
+</Svg>`}
           >
             <Flex d="column" gap={4}>
               {dashPatterns.map(({ label, dasharray, linecap }) => (
@@ -83,7 +84,7 @@ export default function SvgPage() {
                   <Box width={28}>
                     <Mono>{label}</Mono>
                   </Box>
-                  <BaseSvg
+                  <Svg
                     viewBox="0 0 200 12"
                     width="200px"
                     height="12px"
@@ -93,8 +94,8 @@ export default function SvgPage() {
                     strokeDasharray={dasharray}
                     theme={{ dark: { stroke: 'emerald-400' }, light: { stroke: 'emerald-600' } }}
                   >
-                    <line x1="4" y1="6" x2="196" y2="6" />
-                  </BaseSvg>
+                    <Line x1={4} y1={6} x2={196} y2={6} />
+                  </Svg>
                 </Flex>
               ))}
             </Flex>
@@ -115,10 +116,10 @@ export default function SvgPage() {
             language="jsx"
             code={`// The track is drawn once. The line over it starts pushed off its own dash and slides back on hover.
 <Box position="relative" width={50} height={12}>
-  <BaseSvg viewBox="0 0 200 48" width="200px" fill="none" stroke="slate-200" strokeWidth={3} strokeLinecap="round">
-    <path d="M8 40 L56 12 L104 34 L152 8 L192 24" />
-  </BaseSvg>
-  <BaseSvg
+  <Svg viewBox="0 0 200 48" width="200px" fill="none" stroke="slate-200" strokeWidth={3} strokeLinecap="round">
+    <Path d="M8 40 L56 12 L104 34 L152 8 L192 24" />
+  </Svg>
+  <Svg
     viewBox="0 0 200 48"
     width="200px"
     position="absolute"
@@ -132,13 +133,13 @@ export default function SvgPage() {
     strokeDashoffset={320}
     hover={{ strokeDashoffset: 0 }}
   >
-    <path d="M8 40 L56 12 L104 34 L152 8 L192 24" />
-  </BaseSvg>
+    <Path d="M8 40 L56 12 L104 34 L152 8 L192 24" />
+  </Svg>
 </Box>`}
           >
             <Flex d="column" gap={3}>
               <Box position="relative" width={50} height={12}>
-                <BaseSvg
+                <Svg
                   viewBox="0 0 200 48"
                   width="200px"
                   height="48px"
@@ -148,9 +149,9 @@ export default function SvgPage() {
                   strokeLinejoin="round"
                   theme={{ dark: { stroke: 'slate-700' }, light: { stroke: 'slate-200' } }}
                 >
-                  <path d="M8 40 L56 12 L104 34 L152 8 L192 24" />
-                </BaseSvg>
-                <BaseSvg
+                  <Path d="M8 40 L56 12 L104 34 L152 8 L192 24" />
+                </Svg>
+                <Svg
                   viewBox="0 0 200 48"
                   width="200px"
                   height="48px"
@@ -165,8 +166,8 @@ export default function SvgPage() {
                   hover={{ strokeDashoffset: 0 }}
                   theme={{ dark: { stroke: 'violet-400' }, light: { stroke: 'violet-600' } }}
                 >
-                  <path d="M8 40 L56 12 L104 34 L152 8 L192 24" />
-                </BaseSvg>
+                  <Path d="M8 40 L56 12 L104 34 L152 8 L192 24" />
+                </Svg>
               </Box>
               <Box fontSize={13} theme={{ dark: { color: 'slate-400' }, light: { color: 'slate-500' } }}>
                 Hover the line.
@@ -190,14 +191,14 @@ export default function SvgPage() {
             id="joins"
             label="Caps and joins"
             language="jsx"
-            code={`<BaseSvg viewBox="0 0 72 40" width="72px" fill="none" stroke="amber-500" strokeWidth={12} strokeLinejoin="round" strokeLinecap="round">
-  <path d="M10 32 L36 10 L62 32" />
-</BaseSvg>`}
+            code={`<Svg viewBox="0 0 72 40" width="72px" fill="none" stroke="amber-500" strokeWidth={12} strokeLinejoin="round" strokeLinecap="round">
+  <Path d="M10 32 L36 10 L62 32" />
+</Svg>`}
           >
             <Flex gap={8} flexWrap="wrap">
               {joins.map(({ linejoin, linecap }) => (
                 <Flex key={linejoin} d="column" gap={2} ai="center">
-                  <BaseSvg
+                  <Svg
                     viewBox="0 0 72 40"
                     width="72px"
                     height="40px"
@@ -207,8 +208,8 @@ export default function SvgPage() {
                     strokeLinecap={linecap}
                     theme={{ dark: { stroke: 'amber-400' }, light: { stroke: 'amber-500' } }}
                   >
-                    <path d="M10 32 L36 10 L62 32" />
-                  </BaseSvg>
+                    <Path d="M10 32 L36 10 L62 32" />
+                  </Svg>
                   <Mono>{linejoin}</Mono>
                 </Flex>
               ))}
@@ -219,22 +220,22 @@ export default function SvgPage() {
             id="fill-rule"
             label="Fill rule"
             language="jsx"
-            code={`<BaseSvg viewBox="0 0 64 64" width="64px" fill="sky-500" fillRule="evenodd">
-  <path d="M32 4 L39 24 L60 24 L43 37 L50 58 L32 45 L14 58 L21 37 L4 24 L25 24 Z" />
-</BaseSvg>`}
+            code={`<Svg viewBox="0 0 64 64" width="64px" fill="sky-500" fillRule="evenodd">
+  <Path d="M32 4 L39 24 L60 24 L43 37 L50 58 L32 45 L14 58 L21 37 L4 24 L25 24 Z" />
+</Svg>`}
           >
             <Flex gap={8}>
               {(['nonzero', 'evenodd'] as const).map((rule) => (
                 <Flex key={rule} d="column" gap={2} ai="center">
-                  <BaseSvg
+                  <Svg
                     viewBox="0 0 64 64"
                     width="64px"
                     height="64px"
                     fillRule={rule}
                     theme={{ dark: { fill: 'sky-400' }, light: { fill: 'sky-600' } }}
                   >
-                    <path d="M32 4 L39 24 L60 24 L43 37 L50 58 L32 45 L14 58 L21 37 L4 24 L25 24 Z" />
-                  </BaseSvg>
+                    <Path d="M32 4 L39 24 L60 24 L43 37 L50 58 L32 45 L14 58 L21 37 L4 24 L25 24 Z" />
+                  </Svg>
                   <Mono>{rule}</Mono>
                 </Flex>
               ))}
@@ -245,14 +246,14 @@ export default function SvgPage() {
             id="vector-effect"
             label="A stroke that ignores the scale"
             language="jsx"
-            code={`<BaseSvg viewBox="0 0 12 12" width="96px" fill="none" stroke="rose-500" strokeWidth={1} vectorEffect="non-scaling-stroke">
-  <path d="M1 11 L6 1 L11 11 Z" />
-</BaseSvg>`}
+            code={`<Svg viewBox="0 0 12 12" width="96px" fill="none" stroke="rose-500" strokeWidth={1} vectorEffect="non-scaling-stroke">
+  <Path d="M1 11 L6 1 L11 11 Z" />
+</Svg>`}
           >
             <Flex gap={8}>
               {([false, true] as const).map((nonScaling) => (
                 <Flex key={String(nonScaling)} d="column" gap={2} ai="center">
-                  <BaseSvg
+                  <Svg
                     viewBox="0 0 12 12"
                     width="96px"
                     height="96px"
@@ -261,8 +262,8 @@ export default function SvgPage() {
                     vectorEffect={nonScaling ? 'non-scaling-stroke' : 'none'}
                     theme={{ dark: { stroke: 'rose-400' }, light: { stroke: 'rose-600' } }}
                   >
-                    <path d="M1 11 L6 1 L11 11 Z" />
-                  </BaseSvg>
+                    <Path d="M1 11 L6 1 L11 11 Z" />
+                  </Svg>
                   <Mono>{nonScaling ? 'non-scaling-stroke' : 'none'}</Mono>
                 </Flex>
               ))}
@@ -286,16 +287,16 @@ export default function SvgPage() {
             id="paint-order"
             label="Outlined text"
             language="jsx"
-            code={`<BaseSvg viewBox="0 0 200 48" width="200px" fill="white" stroke="indigo-600" strokeWidth={6} paintOrder="stroke" strokeLinejoin="round">
-  <text x="8" y="36" fontSize={36} fontWeight={700}>
+            code={`<Svg viewBox="0 0 200 48" width="200px" fill="white" stroke="indigo-600" strokeWidth={6} paintOrder="stroke" strokeLinejoin="round">
+  <SvgText x={8} y={36} fontSize={36} fontWeight={700}>
     Box
-  </text>
-</BaseSvg>`}
+  </SvgText>
+</Svg>`}
           >
             <Flex gap={8} flexWrap="wrap">
               {(['normal', 'stroke'] as const).map((order) => (
                 <Flex key={order} d="column" gap={2} ai="center">
-                  <BaseSvg
+                  <Svg
                     viewBox="0 0 120 48"
                     width="120px"
                     height="48px"
@@ -304,10 +305,10 @@ export default function SvgPage() {
                     strokeLinejoin="round"
                     theme={{ dark: { fill: 'white', stroke: 'indigo-500' }, light: { fill: 'white', stroke: 'indigo-600' } }}
                   >
-                    <text x="8" y="36" fontSize={36} fontWeight={700}>
+                    <SvgText x={8} y={36} fontSize={36} fontWeight={700}>
                       Box
-                    </text>
-                  </BaseSvg>
+                    </SvgText>
+                  </Svg>
                   <Mono>{order}</Mono>
                 </Flex>
               ))}
@@ -333,10 +334,14 @@ export default function SvgPage() {
               radius handed down to every shape below would be nonsense. Set them on the shape.
             </Box>
             <Box mt={4}>
-              One name is missing from the list on purpose. A <Mono>&lt;rect&gt;</Mono>&apos;s <Mono>width</Mono> and <Mono>height</Mono>{' '}
-              are CSS properties too, but those prop names were taken years ago by the layout scale, where <Mono>width={'{32}'}</Mono> means{' '}
-              <Mono>8rem</Mono>. Give a rect its size through <Mono>props</Mono> — <Mono>props={'{{ width: 40, height: 40 }}'}</Mono> — and
-              use <Mono>x</Mono>, <Mono>y</Mono> and <Mono>rx</Mono> for the rest.
+              Two names are missing from the list, and they are the reason the elements have components of their own. A{' '}
+              <Mono>&lt;rect&gt;</Mono>&apos;s <Mono>width</Mono> and <Mono>height</Mono> are CSS properties too, but those prop names were
+              taken years ago by the layout scale, where <Mono>width={'{32}'}</Mono> means <Mono>8rem</Mono>. So <Mono>&lt;Rect&gt;</Mono>{' '}
+              claims them back for itself:{' '}
+              <Mono>
+                &lt;Rect width={'{40}'} height={'{40}'} /&gt;
+              </Mono>{' '}
+              is forty user units square, written as an attribute the way SVG writes it.
             </Box>
           </Section>
 
@@ -345,23 +350,18 @@ export default function SvgPage() {
             label="Geometry moves"
             language="jsx"
             code={`// Geometry is CSS, so it transitions. There is no JavaScript in this.
-<BaseSvg viewBox="0 0 160 56" width="160px" fill="violet-500">
-  <Box tag="circle" cx={28} cy={28} r={12} hover={{ r: 22 }} />
-  <Box tag="circle" cx={80} cy={28} r={12} hover={{ cy: 14, r: 8 }} />
-  <Box tag="ellipse" cx={132} cy={28} rx={20} ry={10} hover={{ rx: 10, ry: 20 }} />
-</BaseSvg>`}
+<Svg viewBox="0 0 160 56" width="160px" fill="violet-500">
+  <Circle cx={28} cy={28} r={12} hover={{ r: 22 }} />
+  <Circle cx={80} cy={28} r={12} hover={{ cy: 14, r: 8 }} />
+  <Ellipse cx={132} cy={28} rx={20} ry={10} hover={{ rx: 10, ry: 20 }} />
+</Svg>`}
           >
             <Flex d="column" gap={3}>
-              <BaseSvg
-                viewBox="0 0 160 56"
-                width="160px"
-                height="56px"
-                theme={{ dark: { fill: 'violet-400' }, light: { fill: 'violet-600' } }}
-              >
-                <Box tag="circle" cx={28} cy={28} r={12} hover={{ r: 22 }} />
-                <Box tag="circle" cx={80} cy={28} r={12} hover={{ cy: 14, r: 8 }} />
-                <Box tag="ellipse" cx={132} cy={28} rx={20} ry={10} hover={{ rx: 10, ry: 20 }} />
-              </BaseSvg>
+              <Svg viewBox="0 0 160 56" width="160px" height="56px" theme={{ dark: { fill: 'violet-400' }, light: { fill: 'violet-600' } }}>
+                <Circle cx={28} cy={28} r={12} hover={{ r: 22 }} />
+                <Circle cx={80} cy={28} r={12} hover={{ cy: 14, r: 8 }} />
+                <Ellipse cx={132} cy={28} rx={20} ry={10} hover={{ rx: 10, ry: 20 }} />
+              </Svg>
               <Box fontSize={13} theme={{ dark: { color: 'slate-400' }, light: { color: 'slate-500' } }}>
                 Hover each shape.
               </Box>
@@ -372,21 +372,16 @@ export default function SvgPage() {
             id="rect"
             label="Corners and position"
             language="jsx"
-            code={`<BaseSvg viewBox="0 0 56 56" width="56px" fill="teal-500">
-  <Box tag="rect" props={{ width: 40, height: 40 }} x={8} y={8} rx={4} hover={{ rx: 20 }} />
-</BaseSvg>`}
+            code={`<Svg viewBox="0 0 56 56" width="56px" fill="teal-500">
+  <Rect width={40} height={40} x={8} y={8} rx={4} hover={{ rx: 20 }} />
+</Svg>`}
           >
             <Flex gap={8} flexWrap="wrap">
               {rects.map(({ label, rx, hoverRx }) => (
                 <Flex key={label} d="column" gap={2} ai="center">
-                  <BaseSvg
-                    viewBox="0 0 56 56"
-                    width="56px"
-                    height="56px"
-                    theme={{ dark: { fill: 'teal-400' }, light: { fill: 'teal-600' } }}
-                  >
-                    <Box tag="rect" props={{ width: 40, height: 40 }} x={8} y={8} rx={rx} hover={{ rx: hoverRx }} />
-                  </BaseSvg>
+                  <Svg viewBox="0 0 56 56" width="56px" height="56px" theme={{ dark: { fill: 'teal-400' }, light: { fill: 'teal-600' } }}>
+                    <Rect width={40} height={40} x={8} y={8} rx={rx} hover={{ rx: hoverRx }} />
+                  </Svg>
                   <Mono>{label}</Mono>
                 </Flex>
               ))}
@@ -404,12 +399,12 @@ export default function SvgPage() {
             id="text-anchor"
             label="Anchoring a label"
             language="jsx"
-            code={`<BaseSvg viewBox="0 0 200 40" width="200px" fill="slate-700" textAnchor="middle">
-  <Box tag="text" props={{ x: 100, y: 22 }} fontSize={14}>
+            code={`<Svg viewBox="0 0 200 40" width="200px" fill="slate-700" textAnchor="middle">
+  <SvgText x={100} y={22} fontSize={14}>
     the label
-  </Box>
-  <Box tag="line" props={{ x1: 100, y1: 26, x2: 100, y2: 38 }} stroke="rose-400" strokeWidth={2} />
-</BaseSvg>`}
+  </SvgText>
+  <Line x1={100} y1={26} x2={100} y2={38} stroke="rose-400" strokeWidth={2} />
+</Svg>`}
           >
             <Flex d="column" gap={4}>
               {(['start', 'middle', 'end'] as const).map((anchor) => (
@@ -417,23 +412,25 @@ export default function SvgPage() {
                   <Box width={20}>
                     <Mono>{anchor}</Mono>
                   </Box>
-                  <BaseSvg
+                  <Svg
                     viewBox="0 0 200 40"
                     width="200px"
                     height="40px"
                     textAnchor={anchor}
                     theme={{ dark: { fill: 'slate-300' }, light: { fill: 'slate-700' } }}
                   >
-                    <Box tag="text" props={{ x: 100, y: 22 }} fontSize={14}>
+                    <SvgText x={100} y={22} fontSize={14}>
                       the label
-                    </Box>
-                    <Box
-                      tag="line"
-                      props={{ x1: 100, y1: 26, x2: 100, y2: 38 }}
+                    </SvgText>
+                    <Line
+                      x1={100}
+                      y1={26}
+                      x2={100}
+                      y2={38}
                       strokeWidth={2}
                       theme={{ dark: { stroke: 'rose-500' }, light: { stroke: 'rose-400' } }}
                     />
-                  </BaseSvg>
+                  </Svg>
                 </Flex>
               ))}
             </Flex>
@@ -460,12 +457,12 @@ export default function SvgPage() {
             id="baseline-demo"
             label="Baselines against a line"
             language="jsx"
-            code={`<BaseSvg viewBox="0 0 120 40" width="120px" fill="slate-700" dominantBaseline="central">
-  <Box tag="line" props={{ x1: 0, y1: 20, x2: 120, y2: 20 }} stroke="rose-400" strokeWidth={1} />
-  <Box tag="text" props={{ x: 8, y: 20 }} fontSize={14}>
+            code={`<Svg viewBox="0 0 120 40" width="120px" fill="slate-700" dominantBaseline="central">
+  <Line x1={0} y1={20} x2={120} y2={20} stroke="rose-400" strokeWidth={1} />
+  <SvgText x={8} y={20} fontSize={14}>
     the label
-  </Box>
-</BaseSvg>`}
+  </SvgText>
+</Svg>`}
           >
             <Flex d="column" gap={4}>
               {(['alphabetic', 'central', 'hanging'] as const).map((baseline) => (
@@ -473,23 +470,25 @@ export default function SvgPage() {
                   <Box width={22}>
                     <Mono>{baseline}</Mono>
                   </Box>
-                  <BaseSvg
+                  <Svg
                     viewBox="0 0 120 40"
                     width="120px"
                     height="40px"
                     dominantBaseline={baseline}
                     theme={{ dark: { fill: 'slate-300' }, light: { fill: 'slate-700' } }}
                   >
-                    <Box
-                      tag="line"
-                      props={{ x1: 0, y1: 20, x2: 120, y2: 20 }}
+                    <Line
+                      x1={0}
+                      y1={20}
+                      x2={120}
+                      y2={20}
                       strokeWidth={1}
                       theme={{ dark: { stroke: 'rose-500' }, light: { stroke: 'rose-400' } }}
                     />
-                    <Box tag="text" props={{ x: 8, y: 20 }} fontSize={14}>
+                    <SvgText x={8} y={20} fontSize={14}>
                       the label
-                    </Box>
-                  </BaseSvg>
+                    </SvgText>
+                  </Svg>
                 </Flex>
               ))}
             </Flex>
@@ -501,11 +500,10 @@ export default function SvgPage() {
             language="jsx"
             code={`// The ring is one dash as long as the circle's own circumference, pushed off the path and then
 // pulled back. The number is placed at the centre point and centred on it by the two text props.
-<BaseSvg viewBox="0 0 96 96" width="96px" className="gauge" fill="none" strokeLinecap="round">
-  <Box tag="circle" cx={48} cy={48} r={38} stroke="slate-200" strokeWidth={10} />
-  <Box
-    tag="circle"
-    props={{ transform: 'rotate(-90 48 48)' }}
+<Svg viewBox="0 0 96 96" width="96px" className="gauge" fill="none" strokeLinecap="round">
+  <Circle cx={48} cy={48} r={38} stroke="slate-200" strokeWidth={10} />
+  <Circle
+    transform="rotate(-90 48 48)"
     cx={48}
     cy={48}
     r={38}
@@ -515,24 +513,16 @@ export default function SvgPage() {
     strokeDashoffset={239}
     hoverGroup={{ gauge: { strokeDashoffset: 60, r: 40 } }}
   />
-  <Box tag="text" props={{ x: 48, y: 48 }} textAnchor="middle" dominantBaseline="central" fontSize={20} fill="slate-700">
+  <SvgText x={48} y={48} textAnchor="middle" dominantBaseline="central" fontSize={20} fill="slate-700">
     75%
-  </Box>
-</BaseSvg>`}
+  </SvgText>
+</Svg>`}
           >
             <Flex d="column" gap={3}>
-              <BaseSvg viewBox="0 0 96 96" width="96px" height="96px" className="gauge" fill="none" strokeLinecap="round">
-                <Box
-                  tag="circle"
-                  cx={48}
-                  cy={48}
-                  r={38}
-                  strokeWidth={10}
-                  theme={{ dark: { stroke: 'slate-800' }, light: { stroke: 'slate-200' } }}
-                />
-                <Box
-                  tag="circle"
-                  props={{ transform: 'rotate(-90 48 48)' }}
+              <Svg viewBox="0 0 96 96" width="96px" height="96px" className="gauge" fill="none" strokeLinecap="round">
+                <Circle cx={48} cy={48} r={38} strokeWidth={10} theme={{ dark: { stroke: 'slate-800' }, light: { stroke: 'slate-200' } }} />
+                <Circle
+                  transform="rotate(-90 48 48)"
                   cx={48}
                   cy={48}
                   r={38}
@@ -542,9 +532,9 @@ export default function SvgPage() {
                   hoverGroup={{ gauge: { strokeDashoffset: 60, r: 40 } }}
                   theme={{ dark: { stroke: 'indigo-400' }, light: { stroke: 'indigo-600' } }}
                 />
-                <Box
-                  tag="text"
-                  props={{ x: 48, y: 48 }}
+                <SvgText
+                  x={48}
+                  y={48}
                   textAnchor="middle"
                   dominantBaseline="central"
                   fontSize={20}
@@ -552,8 +542,8 @@ export default function SvgPage() {
                   theme={{ dark: { fill: 'slate-200' }, light: { fill: 'slate-700' } }}
                 >
                   75%
-                </Box>
-              </BaseSvg>
+                </SvgText>
+              </Svg>
               <Box fontSize={13} theme={{ dark: { color: 'slate-400' }, light: { color: 'slate-500' } }}>
                 Hover the gauge.
               </Box>
@@ -572,9 +562,10 @@ export default function SvgPage() {
               <Mono>dominantBaseline</Mono> — that pair is the whole reason SVG text is awkward to place by hand.
             </Box>
             <Box mt={4}>
-              Two things here are still attributes and belong in <Mono>props</Mono>. <Mono>transform=&quot;rotate(-90 48 48)&quot;</Mono>{' '}
-              starts the arc at twelve o&apos;clock, and it is the attribute rather than the <Mono>rotate</Mono> prop because it carries its
-              own centre of rotation — CSS would turn the circle around the corner of the <Mono>viewBox</Mono> instead.
+              One thing here is still an attribute, and <Mono>&lt;Circle&gt;</Mono> takes it as a prop of its own:{' '}
+              <Mono>transform=&quot;rotate(-90 48 48)&quot;</Mono> starts the arc at twelve o&apos;clock. It is the SVG attribute rather
+              than the <Mono>rotate</Mono> prop because it carries its own centre of rotation — CSS would turn the circle around the corner
+              of the <Mono>viewBox</Mono> instead.
             </Box>
             <Box mt={4}>
               The transition is the one already on every shape inside an <Mono>&lt;svg&gt;</Mono>, so a reader with{' '}
@@ -582,16 +573,223 @@ export default function SvgPage() {
             </Box>
           </Section>
 
-          <Section id="tag" title="Until the shapes have components of their own">
+          <Section id="elements" title="Every element is a component">
             <Box>
-              These demos write <Mono>&lt;Box tag=&quot;circle&quot;&gt;</Mono>, which is the one place this library still asks you to. An{' '}
-              <Mono>&lt;Svg&gt;</Mono>, <Mono>&lt;Circle&gt;</Mono>, <Mono>&lt;Path&gt;</Mono> set is the next step on this page; until it
-              lands, <Mono>tag</Mono> is how a shape becomes a Box, and every attribute that is not a prop — a path&apos;s <Mono>d</Mono>, a
-              rect&apos;s <Mono>width</Mono>, a line&apos;s <Mono>x1</Mono> — goes through <Mono>props</Mono> as it does anywhere else.
+              <Mono>@cronocode/react-box/components/svg</Mono> is twenty components, one per element: <Mono>Svg</Mono>, <Mono>G</Mono>,{' '}
+              <Mono>Defs</Mono>, <Mono>Path</Mono>, <Mono>Circle</Mono>, <Mono>Ellipse</Mono>, <Mono>Rect</Mono>, <Mono>Line</Mono>,{' '}
+              <Mono>Polyline</Mono>, <Mono>Polygon</Mono>, <Mono>SvgText</Mono>, <Mono>TSpan</Mono>, <Mono>LinearGradient</Mono>,{' '}
+              <Mono>RadialGradient</Mono>, <Mono>Stop</Mono>, <Mono>ClipPath</Mono>, <Mono>Mask</Mono>, <Mono>Use</Mono>,{' '}
+              <Mono>SvgSymbol</Mono> and <Mono>Marker</Mono>. Each one is a Box, so every prop above works on it — and every demo on this
+              page is built from them, without a single <Mono>tag</Mono>.
             </Box>
             <Box mt={4}>
-              <Mono>d</Mono> is deliberately not a prop even though CSS defines one: Safari does not support it, and a path that silently
-              refuses to draw is worse than an attribute that always does.
+              Two are not named after their element. <Mono>SvgText</Mono> is <Mono>&lt;text&gt;</Mono>, because one library cannot have a{' '}
+              <Mono>Text</Mono> that means an SVG element and a <Mono>Text</Mono> that means a paragraph. <Mono>SvgSymbol</Mono> is{' '}
+              <Mono>&lt;symbol&gt;</Mono>, because <Mono>Symbol</Mono> is a global that no module should quietly shadow.
+            </Box>
+          </Section>
+
+          <Section id="collisions" title="Where a name means two things">
+            <Box>
+              An SVG attribute and a Box prop can be the same word, and the clash is silent — Chakra once turned a path&apos;s{' '}
+              <Mono>d</Mono> into <Mono>display</Mono> this way. Here <Mono>d</Mono> is already the shorthand for <Mono>flexDirection</Mono>
+              , a <Mono>&lt;rect&gt;</Mono>&apos;s <Mono>width</Mono> is the ÷4 layout scale, and a <Mono>&lt;text&gt;</Mono>&apos;s{' '}
+              <Mono>x</Mono> is a CSS geometry property that does not apply to text at all. So each component settles those names for its
+              own element: on <Mono>Path</Mono>, <Mono>d</Mono> is path data; on <Mono>Rect</Mono>, <Mono>width</Mono> is user units; on{' '}
+              <Mono>SvgText</Mono>, <Mono>x</Mono> is the attribute. Everywhere else they keep their Box meaning.
+            </Box>
+            <Box mt={4}>
+              One name can be answered twice, because the answer belongs to the element and not to the word. <Mono>cx</Mono> on a{' '}
+              <Mono>Circle</Mono> is the CSS property, and transitions. <Mono>cx</Mono> on a <Mono>RadialGradient</Mono> is an attribute,
+              because CSS geometry does not reach a gradient. Both are typed, and neither needs <Mono>props</Mono>.
+            </Box>
+            <Box mt={4}>
+              <Mono>d</Mono> is still not a styling prop even though CSS defines one: Safari does not support it, and a path that silently
+              refuses to draw is worse than an attribute that always does. A paint server is the other thing that stays in{' '}
+              <Mono>props</Mono> — <Mono>fill</Mono> takes a colour from the palette, so a gradient is{' '}
+              <Mono>props={`{{ fill: 'url(#sky)' }}`}</Mono>.
+            </Box>
+            <Box mt={4}>
+              <ElementTable />
+            </Box>
+          </Section>
+
+          <Section id="naming" title="A drawing says whether it means anything">
+            <Box>
+              An <Mono>&lt;Svg&gt;</Mono> with no <Mono>label</Mono> is <Mono>aria-hidden</Mono>. Most SVG on a page is decoration sitting
+              beside the words that already say it, and a screen reader should walk past it — which is what nothing at all fails to say.
+              Give it a <Mono>label</Mono> and it becomes <Mono>role=&quot;img&quot;</Mono> with that name instead. State a role or an{' '}
+              <Mono>aria-labelledby</Mono> of your own in <Mono>props</Mono> and the component steps out of the way entirely.
+            </Box>
+          </Section>
+
+          <Code
+            id="illustration"
+            label="An illustration"
+            language="jsx"
+            code={`<Svg viewBox="0 0 200 120" width="100%" className="scene" label="A sun rising between two hills">
+  <Defs>
+    <LinearGradient id="sky" x1={0} y1={0} x2={0} y2={1}>
+      <Stop offset="0%" stopColor="currentColor" color="indigo-500" />
+      <Stop offset="100%" stopColor="currentColor" color="amber-200" />
+    </LinearGradient>
+    <ClipPath id="frame">
+      <Rect width={200} height={120} rx={10} />
+    </ClipPath>
+  </Defs>
+  <G props={{ clipPath: 'url(#frame)' }}>
+    <Rect width={200} height={120} props={{ fill: 'url(#sky)' }} />
+    <Circle cx={64} cy={78} r={18} fill="amber-300" hoverGroup={{ scene: { cy: 44, r: 22 } }} />
+    <Path d="M-10 120 L64 68 L138 120 Z" fill="emerald-800" />
+    <Path d="M92 120 L156 56 L220 120 Z" fill="emerald-700" />
+  </G>
+</Svg>`}
+          >
+            <Flex d="column" gap={3}>
+              <Box width={50}>
+                <Svg viewBox="0 0 200 120" width="100%" height="120px" className="scene" label="A sun rising between two hills">
+                  <Defs>
+                    <LinearGradient id="sky" x1={0} y1={0} x2={0} y2={1}>
+                      <Stop
+                        offset="0%"
+                        stopColor="currentColor"
+                        theme={{ dark: { color: 'indigo-900' }, light: { color: 'indigo-500' } }}
+                      />
+                      <Stop
+                        offset="100%"
+                        stopColor="currentColor"
+                        theme={{ dark: { color: 'amber-700' }, light: { color: 'amber-200' } }}
+                      />
+                    </LinearGradient>
+                    <ClipPath id="frame">
+                      <Rect width={200} height={120} rx={10} />
+                    </ClipPath>
+                  </Defs>
+                  <G props={{ clipPath: 'url(#frame)' }}>
+                    <Rect width={200} height={120} props={{ fill: 'url(#sky)' }} />
+                    <Circle
+                      cx={64}
+                      cy={78}
+                      r={18}
+                      hoverGroup={{ scene: { cy: 44, r: 22 } }}
+                      theme={{ dark: { fill: 'amber-400' }, light: { fill: 'amber-300' } }}
+                    />
+                    <Path d="M-10 120 L64 68 L138 120 Z" theme={{ dark: { fill: 'emerald-950' }, light: { fill: 'emerald-800' } }} />
+                    <Path d="M92 120 L156 56 L220 120 Z" theme={{ dark: { fill: 'emerald-900' }, light: { fill: 'emerald-700' } }} />
+                  </G>
+                </Svg>
+              </Box>
+              <Box fontSize={13} theme={{ dark: { color: 'slate-400' }, light: { color: 'slate-500' } }}>
+                Hover the picture — the sun is a <Mono>cy</Mono> and an <Mono>r</Mono>, and the gradient is two stops taking their colour
+                from a Box prop.
+              </Box>
+            </Flex>
+          </Code>
+
+          <Section id="illustration-notes" title="What the illustration needed props for">
+            <Box>
+              Three things, and each of them is a URL or a shape rather than a value from the palette. The sky is{' '}
+              <Mono>props={`{{ fill: 'url(#sky)' }}`}</Mono>, the rounded frame is <Mono>props={`{{ clipPath: 'url(#frame)' }}`}</Mono>, and
+              a gradient stop paints itself with <Mono>stopColor=&quot;currentColor&quot;</Mono> so that the Box <Mono>color</Mono> prop —
+              themed, like everything else — is what actually decides it.
+            </Box>
+          </Section>
+
+          <Code
+            id="chart"
+            label="A chart, by hand"
+            language="jsx"
+            context="declare const revenue: { month: string; value: number }[];"
+            code={`// Six bars, an axis, a label under each, and a trend line that draws itself on hover.
+<Svg viewBox="0 0 240 124" width="100%" className="chart" label="Revenue by month">
+  <Line x1={8} y1={96} x2={232} y2={96} stroke="slate-300" strokeWidth={1} />
+  {revenue.map(({ month, value }, index) => (
+    <Rect key={month} x={16 + index * 36} y={96 - value} width={24} height={value} rx={3} fill="sky-600" hover={{ fill: 'sky-400' }} />
+  ))}
+  <Polyline
+    points={revenue.map(({ value }, index) => \`\${28 + index * 36},\${96 - value}\`).join(' ')}
+    fill="none"
+    stroke="amber-400"
+    strokeWidth={2}
+    strokeLinecap="round"
+    strokeDasharray={260}
+    strokeDashoffset={260}
+    hoverGroup={{ chart: { strokeDashoffset: 0 } }}
+  />
+  {revenue.map(({ month }, index) => (
+    <SvgText key={month} x={28 + index * 36} y={112} textAnchor="middle" fontSize={11} fill="slate-500">
+      {month}
+    </SvgText>
+  ))}
+</Svg>`}
+          >
+            <Flex d="column" gap={3}>
+              <Box width={60}>
+                <Svg viewBox="0 0 240 124" width="100%" height="124px" className="chart" label="Revenue by month">
+                  <Line
+                    x1={8}
+                    y1={96}
+                    x2={232}
+                    y2={96}
+                    strokeWidth={1}
+                    theme={{ dark: { stroke: 'slate-600' }, light: { stroke: 'slate-400' } }}
+                  />
+                  {revenue.map(({ month, value }, index) => (
+                    <Rect
+                      key={month}
+                      x={16 + index * 36}
+                      y={96 - value}
+                      width={24}
+                      height={value}
+                      rx={3}
+                      theme={{
+                        dark: { fill: 'sky-500', hover: { fill: 'sky-300' } },
+                        light: { fill: 'sky-600', hover: { fill: 'sky-400' } },
+                      }}
+                    />
+                  ))}
+                  <Polyline
+                    points={revenue.map(({ value }, index) => `${28 + index * 36},${96 - value}`).join(' ')}
+                    fill="none"
+                    strokeWidth={2}
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeDasharray={260}
+                    strokeDashoffset={260}
+                    hoverGroup={{ chart: { strokeDashoffset: 0 } }}
+                    theme={{ dark: { stroke: 'amber-300' }, light: { stroke: 'amber-500' } }}
+                  />
+                  {revenue.map(({ month }, index) => (
+                    <SvgText
+                      key={month}
+                      x={28 + index * 36}
+                      y={112}
+                      textAnchor="middle"
+                      fontSize={11}
+                      theme={{ dark: { fill: 'slate-400' }, light: { fill: 'slate-500' } }}
+                    >
+                      {month}
+                    </SvgText>
+                  ))}
+                </Svg>
+              </Box>
+              <Box fontSize={13} theme={{ dark: { color: 'slate-400' }, light: { color: 'slate-500' } }}>
+                Hover the chart for the trend line, and a bar for its colour.
+              </Box>
+            </Flex>
+          </Code>
+
+          <Section id="chart-notes" title="What the chart is, and is not">
+            <Box>
+              A bar is a <Mono>&lt;Rect&gt;</Mono> whose <Mono>y</Mono> is a CSS property and whose <Mono>height</Mono> is an attribute —
+              the split this page has been describing, in one element. The axis is a <Mono>&lt;Line&gt;</Mono>, the months are{' '}
+              <Mono>&lt;SvgText&gt;</Mono> centred with <Mono>textAnchor</Mono>, and the trend is a <Mono>&lt;Polyline&gt;</Mono> drawing
+              itself with the dash trick from further up the page. Nothing here is a chart library, and there is no state.
+            </Box>
+            <Box mt={4}>
+              What it is not is a chart <em>component</em> — no scales, no ticks, no tooltip, no responsiveness beyond what the{' '}
+              <Mono>viewBox</Mono> gives for free. Those are the next step. What this page shows is that the primitives underneath them
+              already exist.
             </Box>
           </Section>
 
@@ -608,7 +806,7 @@ export default function SvgPage() {
               <Code
                 language="jsx"
                 codeOnly
-                code={`<BaseSvg
+                code={`<Svg
   viewBox="0 0 24 24"
   fill="none"
   strokeWidth={2}
@@ -616,8 +814,8 @@ export default function SvgPage() {
   hover={{ strokeWidth: 3 }}
   md={{ strokeWidth: 1.5 }}
 >
-  <path d="M4 12h16" />
-</BaseSvg>`}
+  <Path d="M4 12h16" />
+</Svg>`}
               />
             </Box>
           </Section>
@@ -646,7 +844,11 @@ const sidebarLinks = [
   { id: 'text-anchor', label: 'Anchoring text' },
   { id: 'baseline-demo', label: 'Baselines' },
   { id: 'gauge', label: 'A gauge, no JS' },
-  { id: 'tag', label: 'Shapes as Boxes' },
+  { id: 'elements', label: 'The elements' },
+  { id: 'collisions', label: 'One name, two meanings' },
+  { id: 'naming', label: 'Naming a drawing' },
+  { id: 'illustration', label: 'An illustration' },
+  { id: 'chart', label: 'A chart by hand' },
   { id: 'reference', label: 'Every prop' },
   { id: 'themes', label: 'Themes and states' },
 ] as const;
@@ -698,6 +900,65 @@ const props: { name: string; css: string; values: string }[] = [
   { name: 'x', css: 'x', values: 'a number in user units, or a percentage' },
   { name: 'y', css: 'y', values: 'a number in user units, or a percentage' },
 ];
+
+const revenue: { month: string; value: number }[] = [
+  { month: 'Jan', value: 38 },
+  { month: 'Feb', value: 52 },
+  { month: 'Mar', value: 46 },
+  { month: 'Apr', value: 64 },
+  { month: 'May', value: 58 },
+  { month: 'Jun', value: 76 },
+];
+
+const elements: { name: string; element: string; attributes: string }[] = [
+  { name: 'Svg', element: '<svg>', attributes: 'viewBox, preserveAspectRatio, width, height, label' },
+  { name: 'G', element: '<g>', attributes: 'transform' },
+  { name: 'Defs', element: '<defs>', attributes: '—' },
+  { name: 'Path', element: '<path>', attributes: 'd, transform, pathLength' },
+  { name: 'Circle', element: '<circle>', attributes: 'transform, pathLength' },
+  { name: 'Ellipse', element: '<ellipse>', attributes: 'transform, pathLength' },
+  { name: 'Rect', element: '<rect>', attributes: 'width, height, transform, pathLength' },
+  { name: 'Line', element: '<line>', attributes: 'x1, y1, x2, y2, transform, pathLength' },
+  { name: 'Polyline', element: '<polyline>', attributes: 'points, transform, pathLength' },
+  { name: 'Polygon', element: '<polygon>', attributes: 'points, transform, pathLength' },
+  { name: 'SvgText', element: '<text>', attributes: 'x, y, dx, dy, textLength, lengthAdjust, transform' },
+  { name: 'TSpan', element: '<tspan>', attributes: 'x, y, dx, dy, textLength, lengthAdjust' },
+  { name: 'LinearGradient', element: '<linearGradient>', attributes: 'x1, y1, x2, y2, gradientUnits, gradientTransform, spreadMethod' },
+  { name: 'RadialGradient', element: '<radialGradient>', attributes: 'cx, cy, r, fx, fy, gradientUnits, gradientTransform, spreadMethod' },
+  { name: 'Stop', element: '<stop>', attributes: 'offset, stopColor, stopOpacity' },
+  { name: 'ClipPath', element: '<clipPath>', attributes: 'clipPathUnits, transform' },
+  { name: 'Mask', element: '<mask>', attributes: 'maskUnits, maskContentUnits, x, y, width, height' },
+  { name: 'Use', element: '<use>', attributes: 'href, width, height, transform' },
+  { name: 'SvgSymbol', element: '<symbol>', attributes: 'viewBox, preserveAspectRatio, x, y, width, height' },
+  { name: 'Marker', element: '<marker>', attributes: 'markerWidth, markerHeight, refX, refY, orient, markerUnits, viewBox' },
+];
+
+function ElementTable() {
+  return (
+    <Box overflow="auto">
+      <Box tag="table" display="table" width="fit" style={{ borderCollapse: 'collapse' }}>
+        <Box tag="thead" display="table-header-group">
+          <Box tag="tr" display="table-row">
+            <HeadCell>Component</HeadCell>
+            <HeadCell>Element</HeadCell>
+            <HeadCell>Attributes it takes as props</HeadCell>
+          </Box>
+        </Box>
+        <Box tag="tbody" display="table-row-group">
+          {elements.map(({ name, element, attributes }) => (
+            <Box tag="tr" display="table-row" key={name}>
+              <Cell>
+                <Mono>{name}</Mono>
+              </Cell>
+              <Cell>{element}</Cell>
+              <Cell>{attributes}</Cell>
+            </Box>
+          ))}
+        </Box>
+      </Box>
+    </Box>
+  );
+}
 
 function PropTable() {
   return (
