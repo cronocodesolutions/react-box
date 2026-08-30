@@ -11,36 +11,6 @@ import Code from '../components/code';
 import PageHeader from '../components/pageHeader';
 import useTableOfContents from '../hooks/useTableOfContents';
 
-Box.components({
-  dropdown: {
-    variants: {
-      outlined: {
-        bgColor: 'transparent',
-        b: 2,
-        borderColor: 'indigo-500',
-        color: 'indigo-600',
-        theme: { dark: { borderColor: 'indigo-400', color: 'indigo-300' } },
-      },
-    },
-    children: {
-      item: {
-        variants: {
-          outlined: {
-            hover: { bgColor: 'indigo-50' },
-            selected: { bgColor: 'indigo-100', color: 'indigo-700' },
-            theme: { dark: { hover: { bgColor: 'indigo-950' }, selected: { bgColor: 'indigo-900', color: 'indigo-200' } } },
-          },
-        },
-      },
-      items: {
-        variants: {
-          outlined: { b: 2, borderColor: 'indigo-500', theme: { dark: { borderColor: 'indigo-400' } } },
-        },
-      },
-    },
-  },
-});
-
 interface User {
   id: number;
   name: string;
@@ -183,8 +153,9 @@ export default function DropdownPage() {
             id="variant"
             label="Custom Variant (outlined)"
             language="jsx"
-            code={`// Register variant via Box.components()
-Box.components({
+            check={false}
+            code={`// boxExtends.ts — register the variant, and export what you registered.
+export const components = Box.components({
   dropdown: {
     variants: {
       outlined: {
@@ -198,13 +169,23 @@ Box.components({
   },
 });
 
-// Use — variant propagates to all children automatically
+// box.d.ts — teach TypeScript the name, or variant="outlined" stays a type error.
+import { ExtractComponentsAndVariants } from '@cronocode/react-box/types';
+import { components } from './boxExtends';
+
+declare module '@cronocode/react-box/types' {
+  namespace Augmented {
+    interface ComponentsTypes extends ExtractComponentsAndVariants<typeof components> {}
+  }
+}
+
+// Use — the variant propagates to all children automatically.
 <Dropdown variant="outlined">
   <Dropdown.Item value={1}>Option 1</Dropdown.Item>
   <Dropdown.Item value={2}>Option 2</Dropdown.Item>
 </Dropdown>`}
           >
-            <Dropdown variant={'outlined' as never} defaultValue={1} width={50}>
+            <Dropdown variant="outlined" defaultValue={1} width={50}>
               <Dropdown.Unselect>Select</Dropdown.Unselect>
               <Dropdown.Item value={1}>Option 1</Dropdown.Item>
               <Dropdown.Item value={2}>Option 2</Dropdown.Item>
@@ -311,6 +292,7 @@ Box.components({
                 id="select-display"
                 label="Custom Item Display"
                 language="jsx"
+                context="declare const users: { id: number; name: string; role: string }[];"
                 code={`<Select
   data={users}
   def={{
@@ -335,6 +317,7 @@ Box.components({
                 id="select-multiple"
                 label="Multiple with Search"
                 language="jsx"
+                context="declare const users: { id: number; name: string; role: string }[];"
                 code={`<Select
   data={users}
   def={{

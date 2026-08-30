@@ -11,7 +11,7 @@ export default function AiContextPage() {
       <PageHeader
         icon={Bot}
         title="AI Assistant Context"
-        description="Supercharge your AI coding assistant with deep knowledge of React Box. Just share one file and watch the magic happen."
+        description="One file that teaches an AI assistant the whole prop surface, the formatter rules and the patterns that trip it up."
       />
 
       {/* Hero Message */}

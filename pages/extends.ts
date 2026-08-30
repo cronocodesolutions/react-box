@@ -355,6 +355,37 @@ export const components = Box.components({
   },
 
   // DataGrid customization
+  // The variant the Dropdown page documents. It lives here rather than on the page because this is
+  // the object `pages/box.d.ts` augments the types from — registering it on the page would leave
+  // `variant="outlined"` a type error there, which is exactly what the page tells readers to avoid.
+  dropdown: {
+    variants: {
+      outlined: {
+        bgColor: 'transparent',
+        b: 2,
+        borderColor: 'indigo-500',
+        color: 'indigo-600',
+        theme: { dark: { borderColor: 'indigo-400', color: 'indigo-300' } },
+      },
+    },
+    children: {
+      item: {
+        variants: {
+          outlined: {
+            hover: { bgColor: 'indigo-50' },
+            selected: { bgColor: 'indigo-100', color: 'indigo-700' },
+            theme: { dark: { hover: { bgColor: 'indigo-950' }, selected: { bgColor: 'indigo-900', color: 'indigo-200' } } },
+          },
+        },
+      },
+      items: {
+        variants: {
+          outlined: { b: 2, borderColor: 'indigo-500', theme: { dark: { borderColor: 'indigo-400' } } },
+        },
+      },
+    },
+  },
+
   datagrid: {
     children: {
       body: {

@@ -60,6 +60,29 @@ takes over navigation. The shells are metadata only: prerendering the content is
    serves one custom domain per repository.
 5. Add the new address to Search Console and file a change of address for the old one.
 
+## Code blocks
+
+A `<Code>` block shows its example one of two ways, and the difference decides who checks it:
+
+- **No `code` prop** — the block prints the live demo beside it, generated from the children by
+  `reactToJsx`. It is the page's own JSX, so `npm run compile` already checks it and it cannot drift
+  from what the reader sees running. Prefer this shape.
+- **A `code` string** — hand-written, for what the page cannot render: imports, a `.d.ts`, a
+  controlled-state example. `npm run check:docs` compiles every one of these
+  ([scripts/check-docs-snippets.mjs](scripts/check-docs-snippets.mjs)) against the *published*
+  specifiers (`@cronocode/react-box/components/flex`) and without the site's own `Box.extend()`
+  augmentation — so a snippet that only works because `pages/extends.ts` widened a prop fails, which
+  is the point: the reader does not have that file. Two escape hatches, both visible in the page
+  source:
+  - `context="declare const data: Person[];"` — declarations the snippet is written against but does
+    not show. Needed where a generic infers from them (a DataGrid over `any` resolves its row type to
+    `object` and every cell access fails). Keep it to what the page genuinely owns.
+  - `check={false}` — the block is deliberately not compilable code: an outline with `...` in it, a
+    `declare module` augmentation, a walkthrough that needs one.
+
+A snippet that uses a value or component name only the docs site registers is a bug, not a style
+choice — bug #15 shipped a `colSpan` prop that has never existed, next to a demo using `gridColumn`.
+
 ## Patterns to follow
 
 - Use `Box`/`Flex` components and theme variants from `pages/extends.ts` for consistent look (glass cards, gradients, etc.).
@@ -85,5 +108,6 @@ takes over navigation. The shells are metadata only: prerendering the content is
 - Ensure new demos render under both light/dark themes (toggle in header or via `Box.Theme`).
 - Keep bundle-safe imports: use relative `../../src/...` paths, not package names, to avoid build/export issues in docs build.
 - [pages/site/siteMeta.test.ts](pages/site/siteMeta.test.ts) and [pages/site/documentHead.test.tsx](pages/site/documentHead.test.tsx) cover the metadata; `npm test` runs them with the rest.
+- `npm run check:docs` compiles every hand-written code block. CI runs it in the `checks` job, so a broken example fails the build rather than the reader's editor.
 
 If you need deeper architectural details, see [CONTRIBUTING.md](CONTRIBUTING.md) for the library and reuse its patterns when writing demos.

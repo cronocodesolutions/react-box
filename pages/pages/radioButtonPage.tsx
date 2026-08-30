@@ -86,7 +86,8 @@ import RadioButton from '@cronocode/react-box/components/radioButton';`}
             id="controlled"
             label="Controlled, with the reason it changed"
             language="jsx"
-            code={`const [plan, setPlan] = useState('free');
+            code={`// A radio group can also hold nothing, so the state is string | undefined.
+const [plan, setPlan] = useState<string | undefined>('free');
 
 <RadioGroup
   label="Plan"

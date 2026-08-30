@@ -84,7 +84,7 @@ Box.configure({ sink: 'element' });`}
           </Section>
 
           <Code
-            label="The server decides the theme, the browser can change it"
+            label="The server decides the theme"
             language="jsx"
             code={`// app/layout.tsx — a Server Component.
 export default function RootLayout({ children }: { children: React.ReactNode }) {
@@ -93,9 +93,13 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body>{children}</body>
     </html>
   );
-}
+}`}
+          />
 
-// app/themeToggle.tsx — the island that changes it.
+          <Code
+            label="…and the browser can change it"
+            language="jsx"
+            code={`// app/themeToggle.tsx — the island that changes it.
 'use client';
 import { createThemeController } from '@cronocode/react-box/core';
 

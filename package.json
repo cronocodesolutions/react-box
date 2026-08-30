@@ -67,6 +67,7 @@
     "test:a11y": "vitest run a11y",
     "lint": "eslint .",
     "check:boundaries": "node scripts/check-core-boundary.mjs && node scripts/check-rsc-boundary.mjs",
+    "check:docs": "node scripts/check-docs-snippets.mjs",
     "check:package": "publint dist && attw --pack dist --ignore-rules false-esm cjs-resolves-to-esm internal-resolution-error",
     "size": "size-limit"
   },

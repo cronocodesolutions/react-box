@@ -144,7 +144,7 @@ export default function TooltipPage() {
                 codeOnly
                 code={`import Overlay from '@cronocode/react-box/components/overlay';
 
-{open && <Overlay p={3} bgColor="slate-800">anything, anywhere</Overlay>}`}
+<Overlay p={3} bgColor="slate-800">anything, anywhere</Overlay>`}
               />
             </Box>
           </Section>

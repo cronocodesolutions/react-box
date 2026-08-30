@@ -40,7 +40,7 @@ export const siteRoutes = [
   {
     path: '/installation',
     name: 'Installation',
-    description: 'Install react-box and render your first Box. One dependency, no bundler plugin, React 18 and 19 both supported.',
+    description: 'Install react-box and render your first Box: two dependencies, no bundler plugin, and no stylesheet to import.',
   },
   {
     path: '/theme-setup',
