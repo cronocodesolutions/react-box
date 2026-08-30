@@ -1,6 +1,6 @@
 # @cronocode/react-box - AI Assistant Context
 
-Runtime CSS-in-JS library. `Box` component accepts ~144 CSS props and generates CSS classes at runtime. Same prop values share a single class.
+Runtime CSS-in-JS library. `Box` component accepts 129 CSS props and generates CSS classes at runtime. Same prop values share a single class.
 
 ---
 
@@ -56,14 +56,15 @@ All imports from `@cronocode/react-box/components/...`. Semantics also export: `
 
 **#1 source of confusion.** Different props have different dividers:
 
-| Prop Category                                           | Divider | Example            | CSS Output                    |
-| ------------------------------------------------------- | ------- | ------------------ | ----------------------------- |
-| Spacing (`p`, `m`, `gap`, `px`, `py`, `mx`, `my`, etc.) | 4       | `p={4}`            | `padding: 1rem` (16px)        |
-| Font size (`fontSize`)                                  | **16**  | `fontSize={14}`    | `font-size: 0.875rem` (14px)  |
-| Width/Height (numeric)                                  | 4       | `width={20}`       | `width: 5rem` (80px)          |
-| Border width (`b`, `bx`, `by`, `bt`, `br`, `bb`, `bl`)  | none    | `b={1}`            | `border-width: 1px`           |
-| Border radius (`borderRadius`, `borderRadiusTop`, …)    | 4       | `borderRadius={2}` | `border-radius: 0.5rem` (8px) |
-| Line height (`lineHeight`)                              | none    | `lineHeight={24}`  | `line-height: 24px`           |
+| Prop Category                                           | Divider | Example            | CSS Output                     |
+| ------------------------------------------------------- | ------- | ------------------ | ------------------------------ |
+| Spacing (`p`, `m`, `gap`, `px`, `py`, `mx`, `my`, etc.) | 4       | `p={4}`            | `padding: 1rem` (16px)         |
+| Font size (`fontSize`)                                  | **16**  | `fontSize={14}`    | `font-size: 0.875rem` (14px)   |
+| Width/Height (numeric)                                  | 4       | `width={20}`       | `width: 5rem` (80px)           |
+| Border width (`b`, `bx`, `by`, `bt`, `br`, `bb`, `bl`)  | none    | `b={1}`            | `border-width: 1px`            |
+| Border radius (`borderRadius`, `borderRadiusTop`, …)    | 4       | `borderRadius={2}` | `border-radius: 0.5rem` (8px)  |
+| Line height (`lineHeight`)                              | none    | `lineHeight={24}`  | `line-height: 24px`            |
+| SVG lengths (`strokeWidth`, `strokeDasharray`, …)       | none    | `strokeWidth={2}`  | `stroke-width: 2` (user units) |
 
 ```tsx
 // fontSize: divider 16 → value maps directly to px
@@ -130,6 +131,46 @@ All sizing, spacing, and positioning props also accept percentage strings: `p="5
 | `shadow`                                                                         | box-shadow                              | `'small'`, `'medium'`, `'large'`, `'xl'`, `'none'`                                                                                                                              |
 | `opacity`                                                                        | opacity                                 | number                                                                                                                                                                          |
 | `cursor` / `pointerEvents` / `transition` / `transform` / `userSelect`           | misc                                    | string values                                                                                                                                                                   |
+
+### SVG
+
+Fourteen SVG paint and stroke properties, on any Box. `BaseSvg` (`components/baseSvg`) renders the `<svg>`; the shapes inside it are ordinary JSX (`<path>`, `<circle>`, `<line>`).
+
+| Prop                            | CSS Property                  | Accepts                                                                 |
+| ------------------------------- | ----------------------------- | ----------------------------------------------------------------------- |
+| `fill` / `stroke`               | fill / stroke                 | any colour variable, or `'none'`                                        |
+| `fillOpacity` / `strokeOpacity` | fill-opacity / stroke-opacity | `0`–`1` in tenths, same scale as `opacity`                              |
+| `fillRule`                      | fill-rule                     | `'nonzero'`, `'evenodd'`                                                |
+| `strokeWidth`                   | stroke-width                  | number, **user units — no divider** (`strokeWidth={2}` → `2`)           |
+| `strokeLinecap`                 | stroke-linecap                | `'butt'`, `'round'`, `'square'`                                         |
+| `strokeLinejoin`                | stroke-linejoin               | `'miter'`, `'round'`, `'bevel'`                                         |
+| `strokeMiterlimit`              | stroke-miterlimit             | number, 1 or greater                                                    |
+| `strokeDasharray`               | stroke-dasharray              | number (`{12}` = dash 12, gap 12) or the pattern as a string (`"12 4"`) |
+| `strokeDashoffset`              | stroke-dashoffset             | number, or a percentage of the path length (`'40%'`)                    |
+| `paintOrder`                    | paint-order                   | `'normal'`, `'fill'`, `'stroke'`, `'markers'`                           |
+| `vectorEffect`                  | vector-effect                 | `'none'`, `'non-scaling-stroke'`                                        |
+| `shapeRendering`                | shape-rendering               | `'auto'`, `'optimizeSpeed'`, `'crispEdges'`, `'geometricPrecision'`     |
+
+```tsx
+import BaseSvg from '@cronocode/react-box/components/baseSvg';
+
+// Every property except vectorEffect is inherited, so set it once on the <svg>.
+<BaseSvg viewBox="0 0 200 48" width="200px" fill="none" stroke="violet-500" strokeWidth={3} strokeLinecap="round">
+  <path d="M8 40 L56 12 L104 34 L152 8 L192 24" />
+</BaseSvg>
+
+// Draw-on animation: the transition is already there (--svgTransitionTime), and
+// prefers-reduced-motion zeroes it, so this is the whole thing.
+<BaseSvg fill="none" stroke="violet-500" strokeWidth={3} strokeDasharray={320} strokeDashoffset={320} hover={{ strokeDashoffset: 0 }}>
+  <path d="M8 40 L56 12 L104 34 L152 8 L192 24" />
+</BaseSvg>
+```
+
+**Three things to get right:**
+
+1. **No divider on SVG lengths.** `strokeWidth`, `strokeDasharray`, `strokeDashoffset` and `strokeMiterlimit` pass the number through unchanged — they are measured in the coordinate system the `viewBox` sets up.
+2. **Inheritance does the work.** Put `fill`/`stroke`/`strokeWidth` on the `<svg>`, not on every shape. The exception is a shape carrying its own `fill=` attribute — a presentation attribute on an element beats a value inherited from its parent, so style that shape directly.
+3. **`vectorEffect` is not inherited**, so its rule targets the element _and_ its descendants (`.cls, .cls *`). `vectorEffect="non-scaling-stroke"` on the `<svg>` keeps a hairline one pixel wide at any scale — what a responsive chart needs.
 
 ---
 

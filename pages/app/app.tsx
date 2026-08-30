@@ -15,6 +15,7 @@ import InstallationPage from '../pages/installationPage';
 import OverlayPage from '../pages/overlayPage';
 import RadioButtonPage from '../pages/radioButtonPage';
 import ServerComponentsPage from '../pages/serverComponentsPage';
+import SvgPage from '../pages/svgPage';
 import SwitchPage from '../pages/switchPage';
 import TextareaPage from '../pages/textareaPage';
 import TextboxPage from '../pages/textboxPage';
@@ -34,6 +35,7 @@ const pages: Record<SiteRoutePath, ComponentType> = {
   '/theme-setup': ThemeSetupPage,
   '/server-components': ServerComponentsPage,
   '/box': BoxPage,
+  '/svg': SvgPage,
   '/button': ButtonPage,
   '/textbox': TextboxPage,
   '/textarea': TextareaPage,

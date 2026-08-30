@@ -67,6 +67,7 @@ const PROVIDED = {
   useMemo: "import { useMemo } from 'react';",
   useRef: "import { useRef } from 'react';",
   useState: "import { useState } from 'react';",
+  BaseSvg: "import BaseSvg from '@cronocode/react-box/components/baseSvg';",
   Box: "import Box from '@cronocode/react-box';",
   Button: "import Button from '@cronocode/react-box/components/button';",
   Checkbox: "import Checkbox from '@cronocode/react-box/components/checkbox';",

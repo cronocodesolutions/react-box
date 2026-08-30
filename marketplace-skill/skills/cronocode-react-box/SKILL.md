@@ -5,7 +5,7 @@ description: '@cronocode/react-box expert — runtime CSS-in-JS library. Use whe
 
 # @cronocode/react-box AI Skill
 
-Runtime CSS-in-JS library. `Box` accepts ~144 CSS props → generates CSS classes at runtime. Same values share a class.
+Runtime CSS-in-JS library. `Box` accepts 129 CSS props → generates CSS classes at runtime. Same values share a class.
 
 ## Installation & Package Management
 
@@ -29,14 +29,15 @@ Check latest: `npm view @cronocode/react-box version`
 
 ## Numeric Value Formatters
 
-| Category                           | Divider | Example → CSS                     |
-| ---------------------------------- | ------- | --------------------------------- |
-| Spacing (`p`,`m`,`gap`,`px`,`py`…) | 4       | `p={4}` → 1rem (16px)             |
-| fontSize                           | **16**  | `fontSize={14}` → 0.875rem (14px) |
-| width/height/min/max (numeric)     | 4       | `width={20}` → 5rem (80px)        |
-| Border (`b`,`bx`,`by`…)            | px      | `b={1}` → 1px                     |
-| borderRadius                       | 4       | `borderRadius={2}` → 0.5rem (8px) |
-| lineHeight / letterSpacing         | px      | `lineHeight={24}` → 24px          |
+| Category                                       | Divider | Example → CSS                                      |
+| ---------------------------------------------- | ------- | -------------------------------------------------- |
+| Spacing (`p`,`m`,`gap`,`px`,`py`…)             | 4       | `p={4}` → 1rem (16px)                              |
+| fontSize                                       | **16**  | `fontSize={14}` → 0.875rem (14px)                  |
+| width/height/min/max (numeric)                 | 4       | `width={20}` → 5rem (80px)                         |
+| Border (`b`,`bx`,`by`…)                        | px      | `b={1}` → 1px                                      |
+| borderRadius                                   | 4       | `borderRadius={2}` → 0.5rem (8px)                  |
+| lineHeight / letterSpacing                     | px      | `lineHeight={24}` → 24px                           |
+| SVG lengths (`strokeWidth`,`strokeDasharray`…) | none    | `strokeWidth={2}` → `stroke-width: 2` (user units) |
 
 ## Component Shortcuts
 
@@ -65,6 +66,7 @@ expect, not a check against the fields.
 **Borders**: `b`/`bx`/`by`/`bt`/`br`/`bb`/`bl` (px), `borderRadius` (÷4), `borderStyle`
 **Text**: `fontSize` (÷16), `fontWeight`, `lineHeight` (px), `textAlign`/`textDecoration`/`textTransform`/`whiteSpace`/`textOverflow`, `textWrap`
 **Position**: `position`, `top`/`right`/`bottom`/`left`/`inset`, `zIndex`
+**SVG**: `fill`/`stroke` (colour variables), `fillOpacity`/`strokeOpacity` (0–1 in tenths), `fillRule`, `strokeWidth`/`strokeDasharray`/`strokeDashoffset`/`strokeMiterlimit` (**user units — no divider**; a dash pattern with a gap is a string, `"12 4"`), `strokeLinecap`, `strokeLinejoin`, `paintOrder`, `vectorEffect`, `shapeRendering`. All inherited except `vectorEffect`, so set them on the `<svg>` (`BaseSvg`) rather than on every shape.
 **Effects**: `shadow` (`'small'`/`'medium'`/`'large'`/`'xl'`/`'none'`), `opacity`, `cursor`, `pointerEvents`, `transition`, `transform`, `userSelect`, `overflow`
 
 ## Pseudo-Classes & Breakpoints

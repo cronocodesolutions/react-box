@@ -17,6 +17,7 @@ import {
   Palette,
   Rows3,
   Server,
+  Spline,
   Sun,
   Table,
   TextCursor,
@@ -158,6 +159,9 @@ export default function Sidebar({ toggleTheme, onClose }: SidebarProps) {
         <MenuSection label="Core" defaultOpen>
           <MenuItem to="/box" icon={<BoxIcon size={16} />}>
             Box
+          </MenuItem>
+          <MenuItem to="/svg" icon={<Spline size={16} />}>
+            SVG
           </MenuItem>
         </MenuSection>
 
