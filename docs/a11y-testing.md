@@ -85,6 +85,22 @@ the list is still taking focus, focus returning to a trigger a roving index has 
 
 **No screen reader is involved.** Correct ARIA and an announcement a person can use are different things; the matrix below is how that gets checked.
 
+**No media query is ever true.** happy-dom evaluates none of them, so nothing here can prove that a rule written under `motionReduce`, `forcedColors` or `contrastMore` actually takes effect — only that the engine emitted it, with the right condition, in the right place in the cascade. That is what `mediaFeatures.test.ts` asserts. Whether the result is _usable_ under the preference is a browser check: Chrome DevTools' Rendering panel emulates all three.
+
+---
+
+## The preferences the engine answers
+
+A user states these once, in their operating system, and every page is expected to listen. They are Box props, shaped exactly like a breakpoint (see `BOX_AI_CONTEXT.md`):
+
+| Prop           | Media query                      | Default behaviour in this library                                                                                                                                      |
+| -------------- | -------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `motionReduce` | `prefers-reduced-motion: reduce` | **On by default.** Every Box transitions on `--transitionTime`; the preference sets it (and `--svgTransitionTime`) to `0s`, so the library stops animating on its own. |
+| `forcedColors` | `forced-colors: active`          | Tooltip grows a border, the one edge a forced-colors mode keeps once it has thrown away both of its colours.                                                           |
+| `contrastMore` | `prefers-contrast: more`         | Nothing yet — the prop is there for a consumer's own rules.                                                                                                            |
+
+Two components had to say something the variable default could not: **Switch** names its own `150ms`, so it opts out by name (the thumb still arrives on the other side, it just stops travelling), and the **DataGrid loader**'s indeterminate sweep — the library's only `@keyframes` — is applied from a class rather than an inline style precisely so a `prefers-reduced-motion` rule can outrank it. An animation that repeats forever is the clearest case the preference exists for.
+
 ---
 
 ## The baseline, as of A1
@@ -105,6 +121,7 @@ Every row is closed as of A7. Everything else in the sweep is clean — includin
 
 **Closed since:**
 
+- **A8 — the preference media features** closed no rows either, and for the same reason as A10: axe reads one rendered state, and these are three states it never renders. What changed is that the library now has an answer for a preference it used to ignore — see "The preferences the engine answers" above.
 - **A10 — the grid keyboard's remainder** closed no rows at all, and could not have: both of the gaps it fixed are invisible to axe. The column resizer had no keyboard path — a mouse-only control that is perfectly valid markup, because it had no ARIA claiming otherwise — and is now APG's window splitter, a `role="separator"` with the column's width in pixels that the arrows move and Home/End take to its bounds. Vertical movement counted cell _ordinals_, so a move down out of a grouped header landed under whichever cell shared its ordinal rather than under the column it left; `useRovingFocus` travels in column-index space now. Neither is a rule violation; both are the pattern being wrong, which is what `dataGrid.a11y.test.tsx` is for — 26 → 31 tests there, plus two in `useRovingFocus.test.tsx` over ragged rows.
 - **A7 — the DataGrid** closed the last two rows, and the sweep gained the fixture that makes them mean something: a **virtualized 10,000-row grid**, grouped, selectable, filterable, with a detail row — the shape where a grid's ARIA usually breaks, because the rows in the DOM stop being the rows in the grid. `role="grid"` moved onto the scrolling element (not the root, which also holds the top and bottom bars), the header and body became `rowgroup`s, the scroll spacers became `presentation`, and every icon-only control the grid draws for itself was given a name. Two violations nobody had recorded turned up on the way and were fixed in the same change: `empty-table-header` on the row-number and row-detail columns, whose headers are blank by design, and the loader's `role="progressbar"` sitting inside the grid as something that is not a row — the grid carries `aria-busy` instead. 26 tests in `dataGrid.a11y.test.tsx` cover the APG grid map.
 - **A6 — the searchable Dropdown** moved `role="combobox"` onto the search `<input>` itself, which is what took the input out of the trigger `<button>` and closed the row above. 16 tests in `dropdown.a11y.test.tsx` cover the editable map (28 → 42 for the file, the two that pinned the old nesting being gone) — where the printable keys type instead of navigating, Home/End and the left/right arrows hand the highlight back to the field, and Escape closes before it clears.

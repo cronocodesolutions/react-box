@@ -115,6 +115,16 @@ describe('Tooltip', () => {
     expect(row.childElementCount).toBe(before);
   });
 
+  it('grows a border in a forced-colors mode, where its inversion is thrown away', () => {
+    renderTooltip();
+    fireEvent.pointerOver(trigger());
+
+    const css = (document.getElementById('crono-styles') as HTMLStyleElement | null)?.textContent ?? '';
+
+    // Nothing else separates the bubble from the page once both its colors are forced.
+    expect(css).toContain('@media (forced-colors: active){.forcedColors-b-1{border-width:1px}}');
+  });
+
   it('leaves no timer behind when it unmounts mid-delay', () => {
     vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] });
 

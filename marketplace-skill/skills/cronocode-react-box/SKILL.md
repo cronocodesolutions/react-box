@@ -71,6 +71,12 @@ Also: `Mark`, `Figure`, `Figcaption`, `Details`, `Summary`, `Menu`, `Time`. All 
 //   before, after, placeholderStyles
 // Responsive (mobile-first): sm(640) md(768) lg(1024) xl(1280) xxl(1536)
 <Box p={2} md={{ p: 4, hover: { bgColor: 'gray-200' } }} />
+// A11y preferences, same shape as a breakpoint, and they beat every breakpoint in the cascade:
+//   motionReduce (prefers-reduced-motion: reduce), forcedColors (forced-colors: active),
+//   contrastMore (prefers-contrast: more). Not nestable in a breakpoint or in each other.
+// Reduced motion is already the default — the preference sets --transitionTime to 0s, so every
+// Box stops animating. Declare motionReduce only to replace a movement or keep a safe one.
+<Box transitionDuration={150} motionReduce={{ transition: 'none' }} forcedColors={{ b: 1 }} />
 ```
 
 ## Theme System

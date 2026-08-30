@@ -48,6 +48,10 @@ const boxComponents = {
       theme: {
         dark: { bgColor: 'gray-100', color: 'gray-900' },
       },
+      // Inversion is the only thing separating this bubble from the page, and a forced-colors mode
+      // throws both colors away — leaving text floating over whatever it covers. A border is the
+      // one edge those modes keep, so the bubble grows one exactly when it has nothing else.
+      forcedColors: { b: 1 },
     },
   },
   button: {
@@ -452,6 +456,13 @@ const boxComponents = {
         before: {
           translateX: 4,
         },
+      },
+      // The only component that names its own duration, so the library-wide default cannot reach
+      // it: that one zeroes `--transitionTime`, and these two asked for 150ms by name. The thumb
+      // still ends up on the other side — it just arrives there rather than travelling.
+      motionReduce: {
+        transition: 'none',
+        before: { transition: 'none' },
       },
       disabled: {
         cursor: 'not-allowed',

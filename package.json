@@ -126,7 +126,7 @@
         "react-dom"
       ],
       "gzip": true,
-      "limit": "47 KB"
+      "limit": "47.5 KB"
     }
   ],
   "repository": {

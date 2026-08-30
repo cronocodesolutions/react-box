@@ -1413,3 +1413,37 @@ export const breakpoints = {
   /** Styles applied for 2x extra-large screens and larger. >= 1536 */
   xxl: 1536,
 };
+
+/**
+ * The accessibility preferences a user sets once, in their operating system, as media features you
+ * can style against — the same shape as a breakpoint, keyed by preference instead of by width.
+ *
+ * They rank *after* every breakpoint in the cascade: a preference is a statement about the person
+ * reading the page, and a screen wide enough for `xxl` is not a reason to override it.
+ *
+ * `motionReduce` is the one with a default behind it. The base `._b` rule transitions on
+ * `var(--transitionTime)`, and `prefers-reduced-motion: reduce` sets that variable to `0s`, so
+ * every Box stops animating without anyone opting in. Declaring `motionReduce={{ … }}` is how you
+ * opt back in — or how you replace a movement with something still (see `docs/a11y-testing.md`).
+ */
+export const mediaFeatures = {
+  /** Styles applied when the user asked for less motion. `@media (prefers-reduced-motion: reduce)` */
+  motionReduce: '(prefers-reduced-motion: reduce)',
+  /** Styles applied in a forced-colors mode, e.g. Windows High Contrast. `@media (forced-colors: active)` */
+  forcedColors: '(forced-colors: active)',
+  /** Styles applied when the user asked for more contrast. `@media (prefers-contrast: more)` */
+  contrastMore: '(prefers-contrast: more)',
+};
+
+/**
+ * Every key that puts a rule inside an `@media` block, in cascade order, `normal` (no media query
+ * at all) first. The engine ranks rules by this and names their cascade layer from it.
+ */
+export const mediaKeys: readonly string[] = ['normal', ...Object.keys(breakpoints), ...Object.keys(mediaFeatures)];
+
+/** The `@media` condition one media key stands for, or null for `normal`, which needs no query. */
+export function mediaCondition(key: string): string | null {
+  if (key in breakpoints) return `(min-width: ${breakpoints[key as keyof typeof breakpoints]}px)`;
+
+  return mediaFeatures[key as keyof typeof mediaFeatures] ?? null;
+}

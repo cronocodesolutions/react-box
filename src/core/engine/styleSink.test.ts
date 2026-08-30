@@ -16,8 +16,12 @@ function makeEngine(mode: SinkMode, styleElementId: string): StyleEngine {
 }
 
 // A base rule, as opposed to something generated from props. Matched on the selector because the
-// cssom sink reads its CSS back through the DOM's own serializer, which reformats everything.
-const baseSelector = /^(:root|html|body|a,ul|button|input|#crono-box|\._b|\._s)/;
+// cssom sink reads its CSS back through the DOM's own serializer, which reformats everything —
+// including the marker `generatedRulesIn` looks for, which is why this list has to be exhaustive.
+// The reduced-motion query is a base rule too: it zeroes `--transitionTime`, which is how the
+// library stops animating on its own. A rule a test wrote under `motionReduce` collapses to the
+// same text here, so assert on those through `ruleList` rather than through `selectorsOf`.
+const baseSelector = /^(:root|html|body|a,ul|button|input|#crono-box|\._b|\._s|@media \(prefers-reduced-motion: reduce\))/;
 
 /** The selectors in a sheet, in order, base rules dropped and the sink's formatting normalized. */
 function selectorsOf(css: string): string[] {

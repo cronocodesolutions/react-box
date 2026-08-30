@@ -909,6 +909,22 @@ function MiscDemo() {
           Focus, hover, or click me
         </Box>
       </DemoCard>
+
+      <DemoCard
+        title="Accessibility Preferences (motionReduce, forcedColors, contrastMore)"
+        description="The same shape as a breakpoint, keyed by what the user asked their OS for — and ranked above every breakpoint"
+        code="motionReduce={{ transition: 'none' }} forcedColors={{ b: 1 }} contrastMore={{ borderColor: 'black' }}"
+      >
+        <Flex gap={4} flexWrap="wrap">
+          <DemoBox motionReduce={{ borderStyle: 'solid', bgColor: 'violet-500', color: 'white' }} label="motionReduce" />
+          <DemoBox forcedColors={{ borderStyle: 'solid', bgColor: 'violet-500', color: 'white' }} label="forcedColors" />
+          <DemoBox contrastMore={{ borderStyle: 'solid', bgColor: 'violet-500', color: 'white' }} label="contrastMore" />
+        </Flex>
+        <Box fontSize={11} mt={2} theme={{ dark: { color: 'slate-400' }, light: { color: 'slate-500' } }}>
+          Each box fills in when its preference is on — set them in your OS, or emulate all three in Chrome DevTools ▸ Rendering. Reduced
+          motion is already handled without any of this: it sets --transitionTime to 0s, so every Box stops animating.
+        </Box>
+      </DemoCard>
     </Flex>
   );
 }

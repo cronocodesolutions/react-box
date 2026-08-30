@@ -148,6 +148,35 @@ All sizing, spacing, and positioning props also accept percentage strings: `p="5
 <Box bgColor="white" hover={{ bgColor: 'gray-100' }} md={{ bgColor: 'gray-50', hover: { bgColor: 'gray-200' } }} />
 ```
 
+### Accessibility preferences
+
+Three more media keys, shaped exactly like a breakpoint — they nest pseudo-classes, themes and group selectors the same way, and they win the cascade against every breakpoint.
+
+| Prop           | Media query                      | When it applies                                    |
+| -------------- | -------------------------------- | -------------------------------------------------- |
+| `motionReduce` | `prefers-reduced-motion: reduce` | The user asked their OS for less motion            |
+| `forcedColors` | `forced-colors: active`          | A forced-colors mode is on (Windows High Contrast) |
+| `contrastMore` | `prefers-contrast: more`         | The user asked their OS for more contrast          |
+
+```tsx
+// Reduced motion is already the default: every Box transitions on --transitionTime, and the
+// preference sets that variable to 0s. Nothing to opt into — declare motionReduce only to
+// replace a movement with something still, or to keep a transition you decided is safe.
+<Box motionReduce={{ transform: 'none' }} />
+
+// A component that named its own duration is the one case the default cannot reach.
+<Box transitionDuration={150} motionReduce={{ transition: 'none' }} />
+
+// Forced colors throw away background-color and color, so anything whose only edge was a fill
+// (or a shadow, also dropped) needs a border — borders survive.
+<Box bgColor="gray-900" color="gray-50" forcedColors={{ b: 1 }} />
+
+// They nest like a breakpoint does
+<Box contrastMore={{ borderColor: 'black', hover: { borderColor: 'blue-700' }, theme: { dark: { borderColor: 'white' } } }} />
+```
+
+**They do not nest inside a breakpoint, or inside each other** — one rule lives in one `@media` block, so `md={{ motionReduce: {...} }}` is a type error rather than a query that silently drops half of what was asked.
+
 ### Theme System
 
 ```tsx
