@@ -1,8 +1,8 @@
 import { useCallback, useState } from 'react';
 import Box from '../../../box';
-import BaseSvg from '../../baseSvg';
 import Button from '../../button';
 import Flex from '../../flex';
+import { Path, Svg } from '../../svg';
 import Textbox from '../../textbox';
 import GridModel from '../models/gridModel';
 
@@ -135,58 +135,39 @@ function PaginationButton(props: { componentName: string; onClick: () => void; d
   );
 }
 
-function ChevronLeft() {
+/**
+ * One chevron. Stroked rather than filled, which is why it says `fill="none"`: the four of them
+ * differ only in their path data, so the drawing lives here once.
+ */
+function Chevron(props: { d: string }) {
   return (
-    <BaseSvg viewBox="0 0 24 24" width="14" height="14">
-      <Box
-        tag="path"
-        props={{ d: 'M15 18l-6-6 6-6', stroke: 'currentColor', strokeWidth: '2', strokeLinecap: 'round', strokeLinejoin: 'round' }}
-      />
-    </BaseSvg>
+    <Svg
+      viewBox="0 0 24 24"
+      width="14"
+      height="14"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={2}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <Path d={props.d} />
+    </Svg>
   );
+}
+
+function ChevronLeft() {
+  return <Chevron d="M15 18l-6-6 6-6" />;
 }
 
 function ChevronRight() {
-  return (
-    <BaseSvg viewBox="0 0 24 24" width="14" height="14">
-      <Box
-        tag="path"
-        props={{ d: 'M9 18l6-6-6-6', stroke: 'currentColor', strokeWidth: '2', strokeLinecap: 'round', strokeLinejoin: 'round' }}
-      />
-    </BaseSvg>
-  );
+  return <Chevron d="M9 18l6-6-6-6" />;
 }
 
 function ChevronDoubleLeft() {
-  return (
-    <BaseSvg viewBox="0 0 24 24" width="14" height="14">
-      <Box
-        tag="path"
-        props={{
-          d: 'M18 18l-6-6 6-6M11 18l-6-6 6-6',
-          stroke: 'currentColor',
-          strokeWidth: '2',
-          strokeLinecap: 'round',
-          strokeLinejoin: 'round',
-        }}
-      />
-    </BaseSvg>
-  );
+  return <Chevron d="M18 18l-6-6 6-6M11 18l-6-6 6-6" />;
 }
 
 function ChevronDoubleRight() {
-  return (
-    <BaseSvg viewBox="0 0 24 24" width="14" height="14">
-      <Box
-        tag="path"
-        props={{
-          d: 'M6 18l6-6-6-6M13 18l6-6-6-6',
-          stroke: 'currentColor',
-          strokeWidth: '2',
-          strokeLinecap: 'round',
-          strokeLinejoin: 'round',
-        }}
-      />
-    </BaseSvg>
-  );
+  return <Chevron d="M6 18l6-6-6-6M13 18l6-6-6-6" />;
 }

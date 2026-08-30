@@ -48,6 +48,7 @@ NEVER use `<Box tag="...">` when a component exists. NEVER use `<Box display="fl
 | `<Box tag="nav/header/footer/main">` | `<Nav>/<Header>/<Footer>/<Main>` | `components/semantics` |
 | `<Box tag="section/article/aside">`  | `<Section>/<Article>/<Aside>`    | `components/semantics` |
 | `<Box tag="svg/path/circle/rect">`   | `<Svg>/<Path>/<Circle>/<Rect>`   | `components/svg`       |
+| a lucide/Tabler icon, styled         | `<Icon>`                         | `components/icon`      |
 
 All imports from `@cronocode/react-box/components/...`. Semantics also export: `Mark`, `Figure`, `Figcaption`, `Details`, `Summary`, `Menu`, `Time`.
 
@@ -135,7 +136,7 @@ All sizing, spacing, and positioning props also accept percentage strings: `p="5
 
 ### SVG
 
-Twenty-three SVG properties, on any Box, plus twenty element components in `components/svg` — `Svg`, `G`, `Defs`, `Path`, `Circle`, `Ellipse`, `Rect`, `Line`, `Polyline`, `Polygon`, `SvgText`, `TSpan`, `LinearGradient`, `RadialGradient`, `Stop`, `ClipPath`, `Mask`, `Use`, `SvgSymbol`, `Marker`. **Never `<Box tag="path">`.** (`BaseSvg` still exists as the 24×24 icon preset.)
+Twenty-three SVG properties, on any Box, plus twenty element components in `components/svg` — `Svg`, `G`, `Defs`, `Path`, `Circle`, `Ellipse`, `Rect`, `Line`, `Polyline`, `Polygon`, `SvgText`, `TSpan`, `LinearGradient`, `RadialGradient`, `Stop`, `ClipPath`, `Mask`, `Use`, `SvgSymbol`, `Marker`. **Never `<Box tag="path">`.** For an icon from somebody else's set, `<Icon>` (`components/icon`) — see below. (`BaseSvg` is deprecated: it is `Svg` with a 24×24 preset.)
 
 | Prop                            | CSS Property                  | Accepts                                                                                                                          |
 | ------------------------------- | ----------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
@@ -184,7 +185,7 @@ import { Circle, Path, Rect, Svg, SvgText } from '@cronocode/react-box/component
 <Rect x={16} y={32} width={24} height={64} rx={3} fill="sky-600" />
 ```
 
-**Seven things to get right:**
+**Eight things to get right:**
 
 1. **No divider on SVG lengths.** `strokeWidth`, `strokeDasharray`, `strokeDashoffset` and `strokeMiterlimit` pass the number through unchanged — they are measured in the coordinate system the `viewBox` sets up.
 2. **Inheritance does the work.** Put `fill`/`stroke`/`strokeWidth` on the `<svg>`, not on every shape. The exception is a shape carrying its own `fill=` attribute — a presentation attribute on an element beats a value inherited from its parent, so style that shape directly.
@@ -192,7 +193,8 @@ import { Circle, Path, Rect, Svg, SvgText } from '@cronocode/react-box/component
 4. **Geometry belongs to the shape, and it transitions.** `cx`/`cy`/`r`/`rx`/`ry`/`x`/`y` are real CSS in SVG 2, so a gauge or a growing bar is a pseudo-class and no JavaScript. They are not inherited and should not be — set them on the shape.
 5. **Each component settles the names SVG and Box both use, for its own element.** On `Path`, `d` is path data (not `flexDirection`); on `Rect`, `width`/`height` are user units (not the ÷4 layout scale); on `SvgText` and `TSpan`, `x`/`y`/`dx`/`dy` are attributes, because the CSS geometry properties do not apply to text; on `RadialGradient`, `cx`/`cy`/`r` are attributes, because they do not apply to a gradient either — while on `Circle` the same names stay CSS and transition. `transform` is a prop on every shape and group (`transform="rotate(-90 48 48)"` carries its own centre, which the CSS `rotate` prop cannot).
 6. **`Svg` sizes with attributes and names itself with `label`.** `viewBox`, `preserveAspectRatio`, `width` and `height` are the SVG attributes (`width="100%"`, `width={200}`), so the ÷4 layout `width`/`height` are not available on it. No `label` means `aria-hidden` — decoration, which is what most SVG is; `label` makes it `role="img"` with that name. A role or `aria-*` of your own in `props` wins over both.
-7. **A paint server is a URL, so it goes in `props`.** `fill` takes a colour variable, not `url(#id)`: write `props={{ fill: 'url(#sky)' }}`, and `props={{ clipPath: 'url(#frame)' }}` for a clip path (the `clipPath` prop is the CSS shape list, not a URL). A gradient stop can still be themed — `<Stop stopColor="currentColor" color="amber-300" />`.
+7. **An icon from a set is not SVG you draw — it is `<Icon>`.** `<Icon size={5} color="amber-500" label="Sunny"><Sun /></Icon>` from `components/icon`, wrapping one element from lucide, Tabler, react-icons, or a raw `<svg>`. `size` is the ÷4 scale (`size={6}` is 24px, the default) and lands in the _class_, where a CSS declaration outranks the `width`/`height` attributes the icon set writes — which is why `Icon` needs to know no set's API. `strokeWidth` is the same: an ordinary Box prop, so it can change on hover. No `label` means `aria-hidden`; a `label` means `role="img"`. **Do not wrap this library's own `<Svg>` in it** — `Svg` takes these props directly and its attributes live in `props`.
+8. **A paint server is a URL, so it goes in `props`.** `fill` takes a colour variable, not `url(#id)`: write `props={{ fill: 'url(#sky)' }}`, and `props={{ clipPath: 'url(#frame)' }}` for a clip path (the `clipPath` prop is the CSS shape list, not a URL). A gradient stop can still be themed — `<Stop stopColor="currentColor" color="amber-300" />`.
 
 ---
 
@@ -475,6 +477,28 @@ is declared, so they escape `overflow: hidden` and clipped ancestors. No ARIA, n
 positioning only. For a _description of a control_, use `Tooltip` instead (below): it is the same
 layer with the APG pattern on it.
 
+### Styling an element Box cannot render (`useClassNames`)
+
+An icon from a set, a `motion.div`, a router's `NavLink`, a third-party chart: there is no `tag` that
+renders one, and the only styling channel they offer is `className`. `useClassNames` resolves the
+same props Box would and gives you the class list to put on them.
+
+```tsx
+import { useClassNames } from '@cronocode/react-box';
+
+const { className, styles } = useClassNames({ color: 'sky-500', hover: { color: 'sky-300' } });
+
+<>
+  {styles}
+  <NavLink to="/" className={className} />
+</>;
+```
+
+`styles` is defined in element mode only (the CSS as hoistable `<style>` elements); elsewhere it is
+undefined and rendering it costs nothing, so write the line either way. Pass `{ svg: true }` as a
+second argument for an element inside an `<svg>`. `<Icon>` is this hook plus that flag — reach for
+`Icon` for an icon and this only for everything else.
+
 ### Group Hover (hoverGroup)
 
 ```tsx
@@ -546,7 +570,7 @@ Box.configure({ sink: 'element' }); // React 19 only
 - In element mode rules live in CSS cascade layers, so **your own unlayered CSS always wins** over
   Box props, and declaring `Box.extend()` props before the first render matters.
 - The hook-free pre-built components render on the server too: `Flex`, `Grid`, `Button`,
-  `Textbox`, `Textarea`, `RadioButton`, `BaseSvg`, the SVG elements (`Svg`, `Path`, `Circle`, …) and the semantic tags (`H1`, `P`, `Link`, …).
+  `Textbox`, `Textarea`, `RadioButton`, `Icon`, the SVG elements (`Svg`, `Path`, `Circle`, …) and the semantic tags (`H1`, `P`, `Link`, …).
   Import them straight into a Server Component.
 - `Dropdown`, `Tooltip`, `Overlay`, `DataGrid`, `Checkbox`, `Switch`, `RadioGroup`, `Select` and `Form` hold state, so their chunks
   ship a `'use client'` banner: a Server Component may import one, but it becomes a client

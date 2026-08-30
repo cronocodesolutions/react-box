@@ -2,7 +2,8 @@ import React from 'react';
 import getDefaultEngine from './core/engine/defaultEngine';
 import { StylesConfiguration } from './core/engine/styleEngine';
 import BoxExtends from './core/extends/boxExtends';
-import { BoxCoreProps } from './react/boxProps';
+import boxClassNames, { BoxClassNames } from './react/boxClassNames';
+import { BoxClassNameProps, BoxCoreProps } from './react/boxProps';
 import buildTagProps from './react/boxTagProps';
 import resolveStyles from './react/resolveStyles';
 import { ComponentsAndVariants } from './types';
@@ -66,4 +67,21 @@ RscBox.components = BoxExtends.components;
 RscBox.getVariableValue = (name: string) => getDefaultEngine().getVariableValue(name);
 RscBox.configure = (config: StylesConfiguration) => getDefaultEngine().configure(config);
 
+/**
+ * The Server-Component half of `useClassNames` — see the client entry for what it is for.
+ *
+ * Not a hook here, and it does not need to be: in element mode resolving the styles produces the
+ * `<style>` elements themselves, so there is nothing left to flush. The name keeps the `use`
+ * prefix because a component written against it must be able to move between the two entries
+ * without changing a line, and on the client it really is one.
+ */
+export function useClassNames<TKey extends keyof ComponentsAndVariants = never>(
+  props: BoxClassNameProps<TKey>,
+  options?: { svg?: boolean },
+): BoxClassNames {
+  return boxClassNames(resolveStyles(props, options?.svg === true), props.className);
+}
+
 export default RscBox;
+
+export type { BoxClassNames, BoxClassNameProps };

@@ -45,7 +45,7 @@ Node version: v24 (pinned in .nvmrc).
 - `src/react/useStyles.ts` — The React binding: resolves class names during render, flushes from `useInsertionEffect` (ahead of every layout effect in the commit). Lives outside `src/core/` because core is React-free
 - `src/react/resolveStyles.ts` — The same resolution with no hook at all, so a Server Component can render Box; `useStyles` is this plus the flush effect
 - `src/react/styleElements.ts` — Descriptors → `<style href precedence>` elements (React 19 hoists and dedupes them)
-- `src/react/boxProps.ts` / `src/react/boxTagProps.ts` — The prop shape and the tag-props assembly both Box builds share
+- `src/react/boxProps.ts` / `src/react/boxTagProps.ts` / `src/react/boxClassNames.ts` — The prop shape, the tag-props assembly and the class-attribute assembly both Box builds share
 - `src/react/effects.ts` — Which effect runs where: `useIsomorphicInsertionEffect` (the binding's flush) and `useIsomorphicLayoutEffect` (the primitives). Never hand-roll the `useInsertionEffect ?? useLayoutEffect` fallback again
 - `src/utils/environment/environmentUtils.ts` — `isBrowser()`, `hasDocument()`, `documentOrNull()`, `documentRoot()`, `documentHead()`, `matchMedia()`. **Framework-free: use these instead of writing `typeof document === 'undefined'` anywhere**
 - `src/utils/dom/domUtils.ts` — `elementOf()`/`htmlElementOf()` (ref or element) and `isEventInside()` (the click-outside check, composed path with a `contains` fallback)
@@ -89,6 +89,7 @@ Pre-built components wrap Box with the correct HTML tag. Each is a separate entr
 - `dropdown.tsx` — Select-only dropdown (A5 owns its ARIA)
 - `semantics.tsx` — Semantic HTML wrappers (H1-H6, P, Span, Link, Img, Nav, Header, Footer, etc.) via factory function
 - `svg.tsx` — One component per SVG element (`Svg`, `G`, `Defs`, `Path`, `Circle`, `Ellipse`, `Rect`, `Line`, `Polyline`, `Polygon`, `SvgText`, `TSpan`, `LinearGradient`, `RadialGradient`, `Stop`, `ClipPath`, `Mask`, `Use`, `SvgSymbol`, `Marker`), so SVG has an answer to "never `<Box tag=>`". **Each component settles the names SVG and Box both use, for its own element** — `Path`'s `d` is path data, `Rect`'s `width`/`height` are user units, `SvgText`'s `x`/`y` and `RadialGradient`'s `cx`/`cy`/`r` are attributes (CSS geometry reaches neither), while `Circle`'s `cx` stays the CSS prop. `Svg` also owns `viewBox`/`width`/`height` and a `label` prop: no label means `aria-hidden`, a label means `role="img"`
+- `icon.tsx` — `Icon`: Box props on an icon somebody else drew (lucide, Tabler, react-icons, a raw `<svg>`). It clones the one element it is given and puts the engine's class on it, so it knows no icon set's API — `size` is the ÷4 scale and lands in the _class_, where CSS outranks the `width`/`height` attributes the set writes. Same naming rule as `Svg` (`label` → `role="img"`, otherwise `aria-hidden`, shared in `src/react/svg/svgNaming.ts`). The hook behind it, `useClassNames`, is exported from `src/box.ts` and `src/rsc.ts` — one per entry, so a component built on it stays server-safe
 - `visuallyHidden.tsx` — Screen-reader-only content: clipped away rather than hidden, so it stays in the accessibility tree
 - `dataGrid/` — Complex data grid with sorting, filtering, grouping, virtualization
 

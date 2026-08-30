@@ -122,7 +122,9 @@ react-box/
 │   │   ├── grid.tsx
 │   │   ├── visuallyHidden.tsx    # Screen-reader-only content (clipped, not hidden)
 │   │   ├── semantics.tsx         # Semantic HTML components
-│   │   ├── baseSvg.tsx
+│   │   ├── baseSvg.tsx           # Deprecated: Svg with the 24×24 icon preset
+│   │   ├── svg.tsx               # One component per SVG element
+│   │   ├── icon.tsx              # Box props on an icon from somebody else's set
 │   │   └── dataGrid/             # Complex DataGrid component
 │   │
 │   ├── icons/                    # SVG icon components

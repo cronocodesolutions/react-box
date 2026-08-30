@@ -1,7 +1,8 @@
 import React, { forwardRef, memo, Ref, RefAttributes, useMemo, useState } from 'react';
 import getDefaultEngine from './core/engine/defaultEngine';
 import BoxExtends from './core/extends/boxExtends';
-import { BoxCoreProps } from './react/boxProps';
+import boxClassNames, { BoxClassNames } from './react/boxClassNames';
+import { BoxClassNameProps, BoxCoreProps } from './react/boxProps';
 import buildTagProps from './react/boxTagProps';
 import useVisibility from './react/hooks/useVisibility';
 import { ExtractElementFromTag } from './react/reactTypes';
@@ -75,4 +76,33 @@ export type BoxTagProps<
   TKey extends keyof ComponentsAndVariants = never,
 > = Required<BoxProps<TTag, TKey>>['props'];
 
+/**
+ * Box props as a class attribute, for an element Box cannot render.
+ *
+ * Some elements belong to somebody else — an icon from `lucide-react`, a `motion.div`, a router's
+ * `NavLink`. They accept a `className` and nothing else, so there is no `tag` that would let Box
+ * render them, and `style` is the thing this library exists not to write. This resolves the same
+ * props Box would and hands back the class list to put on them yourself:
+ *
+ * ```tsx
+ * const { className, styles } = useClassNames({ color: 'sky-500', hover: { color: 'sky-300' } });
+ *
+ * return <>{styles}<NavLink className={className} to="/" /></>;
+ * ```
+ *
+ * `styles` is defined in element mode only, where the CSS travels as `<style href precedence>`
+ * elements rather than going to a stylesheet — render it beside the element and React 19 hoists it
+ * into `<head>`. In every other mode it is undefined and rendering it costs nothing, so the line
+ * above is what to write either way. Pass `{ svg: true }` for an element inside an `<svg>`: it
+ * picks the SVG reset (`Icon` is this hook plus that flag).
+ */
+export function useClassNames<TKey extends keyof ComponentsAndVariants = never>(
+  props: BoxClassNameProps<TKey>,
+  options?: { svg?: boolean },
+): BoxClassNames {
+  return boxClassNames(useStyles(props, options?.svg === true), props.className);
+}
+
 export { useVisibility };
+
+export type { BoxClassNames, BoxClassNameProps };

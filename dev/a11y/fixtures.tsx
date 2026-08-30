@@ -1,4 +1,5 @@
 import { fireEvent, screen } from '@testing-library/react';
+import { Sun } from 'lucide-react';
 import BaseSvg from '../../src/components/baseSvg';
 import Button from '../../src/components/button';
 import Checkbox from '../../src/components/checkbox';
@@ -7,6 +8,7 @@ import Dropdown from '../../src/components/dropdown';
 import Flex from '../../src/components/flex';
 import Form from '../../src/components/form';
 import Grid from '../../src/components/grid';
+import Icon from '../../src/components/icon';
 import Overlay from '../../src/components/overlay';
 import RadioButton from '../../src/components/radioButton';
 import RadioGroup from '../../src/components/radioGroup';
@@ -172,6 +174,15 @@ export const fixtures: A11yFixture[] = [
       <BaseSvg>
         <path d="M4 12h16" />
       </BaseSvg>
+    ),
+  },
+  {
+    // The icon set a consumer already has, given a name. Anything else is decoration and hides.
+    name: 'Icon',
+    render: () => (
+      <Icon size={5} color="sky-500" label="Sunny">
+        <Sun />
+      </Icon>
     ),
   },
   {

@@ -11,6 +11,7 @@ import FidoEnrollmentPage from '../pages/fidoEnrollmentPage';
 import FlexPage from '../pages/flexPage';
 import GridPage from '../pages/gridPage';
 import HomePage from '../pages/homePage';
+import IconPage from '../pages/iconPage';
 import InstallationPage from '../pages/installationPage';
 import OverlayPage from '../pages/overlayPage';
 import RadioButtonPage from '../pages/radioButtonPage';
@@ -36,6 +37,7 @@ const pages: Record<SiteRoutePath, ComponentType> = {
   '/server-components': ServerComponentsPage,
   '/box': BoxPage,
   '/svg': SvgPage,
+  '/icon': IconPage,
   '/button': ButtonPage,
   '/textbox': TextboxPage,
   '/textarea': TextareaPage,

@@ -65,8 +65,9 @@ import Box from "@cronocode/react-box";
 | `Flex`                                                                       | `components/flex`           | `Box` with `display: flex`                                                                    |
 | `Grid`                                                                       | `components/grid`           | `Box` with `display: grid`                                                                    |
 | `H1`–`H6`, `P`, `Span`, `Link`, `Img`, `Nav`, `Header`, `Main`, `Section`, … | `components/semantics`      | one `Box` per semantic tag — 25 of them                                                       |
-| `BaseSvg`                                                                    | `components/baseSvg`        | an `<svg>` element that takes the style props                                                 |
 | `Svg`, `Path`, `Circle`, `Rect`, `SvgText`, …                                | `components/svg`            | one component per SVG element — 20 of them, so a drawing never writes `tag`                   |
+| `Icon`                                                                       | `components/icon`           | Box props on an icon somebody else drew — lucide, Tabler, react-icons, a raw `<svg>`          |
+| `BaseSvg`                                                                    | `components/baseSvg`        | deprecated: `Svg` with the 24×24 icon preset                                                  |
 | `VisuallyHidden`                                                             | `components/visuallyHidden` | text for a screen reader only — clipped away rather than hidden, so it stays in the a11y tree |
 
 ### Form controls
@@ -129,13 +130,13 @@ describes the object you expect, it is not checked against the fields.
 ## SVG
 
 Twenty-three SVG properties are Box props, so a shape is themed, hovered and made responsive the
-same way a `<div>` is. `BaseSvg` renders the `<svg>`; the shapes inside it are ordinary JSX, or
-`<Box tag="circle">` when a shape wants props of its own.
+same way a `<div>` is — and there is a component for every SVG element, so a drawing never writes
+`tag` either.
 
 ```JSX
-import BaseSvg from '@cronocode/react-box/components/baseSvg';
+import { Path, Svg } from '@cronocode/react-box/components/svg';
 
-<BaseSvg
+<Svg
   viewBox="0 0 200 48"
   width="200px"
   fill="none"
@@ -146,8 +147,8 @@ import BaseSvg from '@cronocode/react-box/components/baseSvg';
   hover={{ strokeDashoffset: 0 }}
   theme={{ dark: { stroke: 'violet-400' }, light: { stroke: 'violet-600' } }}
 >
-  <path d="M8 40 L56 12 L104 34 L152 8 L192 24" />
-</BaseSvg>;
+  <Path d="M8 40 L56 12 L104 34 L152 8 L192 24" />
+</Svg>;
 ```
 
 That draws the line on hover, and nothing in it declares a transition: every `<svg>` and the shapes
@@ -178,12 +179,51 @@ The geometry props are different again. They belong to one shape, so they go on 
 are real CSS, which means they transition, and an animated gauge or a growing bar needs no JavaScript:
 
 ```JSX
-<Box tag="circle" cx={48} cy={48} r={38} strokeDasharray={239} strokeDashoffset={239} hover={{ strokeDashoffset: 60, r: 40 }} />;
+<Circle cx={48} cy={48} r={38} strokeDasharray={239} strokeDashoffset={239} hover={{ strokeDashoffset: 60, r: 40 }} />;
 ```
 
-A `<rect>`'s `width` and `height` are the one gap: those prop names belong to the layout scale
-(`width={32}` is `8rem`), so a rect takes its size through `props={{ width: 40, height: 40 }}` and
-uses `x`, `y` and `rx` for the rest. A path's `d` stays an attribute too — Safari has no CSS `d`.
+Where a prop name and an SVG attribute collide, the element decides which one wins. On `Rect`,
+`width={40}` is forty user units rather than the layout scale's `10rem`; on `Path`, `d` is path data
+rather than `flex-direction`; on `SvgText`, `x` and `y` are the attributes, because the CSS geometry
+properties do not apply to `<text>`. On `Circle` those same names stay the CSS props that transition.
+
+### Icons
+
+An icon set is somebody else's component, so there is no `tag` that renders one and Box cannot wrap
+it. `Icon` styles it through the one channel it does offer — the `className` it spreads onto its own
+`<svg>`:
+
+```JSX
+import Icon from '@cronocode/react-box/components/icon';
+import { Sun } from 'lucide-react';
+
+<Icon size={5} color="amber-500" hover={{ color: 'amber-300' }} label="Sunny">
+  <Sun />
+</Icon>;
+```
+
+It works with lucide, Tabler, react-icons or an `<svg>` you paste in, and it knows none of their
+APIs: `size` is a number on the ÷4 scale (`size={6}` is 24px, the default) that lands in the class,
+where a CSS declaration outranks the `width`/`height` attributes the icon writes for itself. Without
+a `label` an icon is `aria-hidden`; with one it is `role="img"` and that name. For SVG you draw
+yourself, reach for `Svg` instead — it takes these props directly.
+
+Behind it is `useClassNames`, which is public for the same reason: a `motion.div`, a router's
+`NavLink` or a third-party chart takes a `className` and nothing else.
+
+```JSX
+import { useClassNames } from '@cronocode/react-box';
+
+const { className, styles } = useClassNames({ color: 'sky-500', hover: { color: 'sky-300' } });
+
+<>
+  {styles}
+  <NavLink to="/" className={className} />
+</>;
+```
+
+`styles` is defined in element mode only, where the CSS travels as hoistable `<style>` elements
+rather than going to a stylesheet; elsewhere it is undefined and rendering it costs nothing.
 
 ## Extend props
 
@@ -352,7 +392,7 @@ Notes and limits:
   generates ancestor-scoped rules, so setting the theme class on `<html>` in a server component is
   enough.
 - **Most pre-built components render on the server too.** `Flex`, `Grid`, `Button`, `Textbox`,
-  `Textarea`, `RadioButton`, `BaseSvg`, `VisuallyHidden` and the semantic tags (`H1`, `P`, `Link`, `Nav` …) are
+  `Textarea`, `RadioButton`, `Icon`, the SVG elements, `VisuallyHidden` and the semantic tags (`H1`, `P`, `Link`, `Nav` …) are
   hook-free wrappers around Box, and their published chunks import the package by name — so the
   `react-server` condition reaches them and they resolve the same hook-free Box. Import them
   straight into a Server Component.

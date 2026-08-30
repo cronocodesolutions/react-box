@@ -55,7 +55,7 @@ after the shell are streamed as `<style media="not all">` and enabled by React o
 
 `/components` is a Server Component that imports both kinds, which is the whole difference:
 
-- **`Flex`, `Grid`, `Button`, `Textbox`, `Textarea`, `RadioButton`, `BaseSvg` and the semantic tags**
+- **`Flex`, `Grid`, `Button`, `Textbox`, `Textarea`, `RadioButton`, `Icon`, the SVG elements and the semantic tags**
   are hook-free wrappers around Box. Their published chunks import `@cronocode/react-box` by name
   rather than by a relative path, so the `react-server` condition reaches them and they resolve the
   same hook-free Box the page did. They render on the server, CSS in the HTML, no JavaScript behind
