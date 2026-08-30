@@ -25,7 +25,9 @@ export default tseslint.config(
     },
     rules: {
       ...reactHooks.configs.recommended.rules,
-      'react-refresh/only-export-components': ['warn', { allowConstantExport: true }],
+      // `semantic` and `svgElement` are component factories — the rule cannot see through a call
+      // that returns a component, and would read a file of twenty of them as a file of constants.
+      'react-refresh/only-export-components': ['warn', { allowConstantExport: true, extraHOCs: ['semantic', 'svgElement'] }],
       '@typescript-eslint/no-unused-vars': ['warn', { argsIgnorePattern: '^_', varsIgnorePattern: '^_' }],
       '@typescript-eslint/no-namespace': 'off',
       'no-unused-expressions': 'off',

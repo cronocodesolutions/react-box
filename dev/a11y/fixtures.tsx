@@ -12,6 +12,7 @@ import RadioButton from '../../src/components/radioButton';
 import RadioGroup from '../../src/components/radioGroup';
 import Select from '../../src/components/select';
 import { H1, Img, Link, Nav, P } from '../../src/components/semantics';
+import { Circle, Polyline, Svg } from '../../src/components/svg';
 import Switch from '../../src/components/switch';
 import Textarea from '../../src/components/textarea';
 import Textbox from '../../src/components/textbox';
@@ -171,6 +172,15 @@ export const fixtures: A11yFixture[] = [
       <BaseSvg>
         <path d="M4 12h16" />
       </BaseSvg>
+    ),
+  },
+  {
+    name: 'Svg',
+    render: () => (
+      <Svg viewBox="0 0 48 48" width={48} label="Revenue, rising" fill="none" stroke="blue-500" strokeWidth={2}>
+        <Polyline points="4,40 16,24 28,30 44,8" />
+        <Circle cx={44} cy={8} r={3} fill="blue-500" />
+      </Svg>
     ),
   },
   {

@@ -47,6 +47,7 @@ NEVER use `<Box tag="...">` when a component exists. NEVER use `<Box display="fl
 | `<Box tag="p/span">`                 | `<P>/<Span>`                     | `components/semantics` |
 | `<Box tag="nav/header/footer/main">` | `<Nav>/<Header>/<Footer>/<Main>` | `components/semantics` |
 | `<Box tag="section/article/aside">`  | `<Section>/<Article>/<Aside>`    | `components/semantics` |
+| `<Box tag="svg/path/circle/rect">`   | `<Svg>/<Path>/<Circle>/<Rect>`   | `components/svg`       |
 
 All imports from `@cronocode/react-box/components/...`. Semantics also export: `Mark`, `Figure`, `Figcaption`, `Details`, `Summary`, `Menu`, `Time`.
 
@@ -134,7 +135,7 @@ All sizing, spacing, and positioning props also accept percentage strings: `p="5
 
 ### SVG
 
-Twenty-three SVG properties, on any Box. `BaseSvg` (`components/baseSvg`) renders the `<svg>`; the shapes inside it are ordinary JSX (`<path>`, `<circle>`, `<line>`), or `<Box tag="circle">` when a shape wants props of its own.
+Twenty-three SVG properties, on any Box, plus twenty element components in `components/svg` — `Svg`, `G`, `Defs`, `Path`, `Circle`, `Ellipse`, `Rect`, `Line`, `Polyline`, `Polygon`, `SvgText`, `TSpan`, `LinearGradient`, `RadialGradient`, `Stop`, `ClipPath`, `Mask`, `Use`, `SvgSymbol`, `Marker`. **Never `<Box tag="path">`.** (`BaseSvg` still exists as the 24×24 icon preset.)
 
 | Prop                            | CSS Property                  | Accepts                                                                                                                          |
 | ------------------------------- | ----------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
@@ -158,35 +159,40 @@ Twenty-three SVG properties, on any Box. `BaseSvg` (`components/baseSvg`) render
 | `x` / `y`                       | x / y                         | number in user units, or a percentage — `<rect>`, `<image>`, `<use>`, `<foreignObject>`, nested `<svg>`. NOT `<text>`            |
 
 ```tsx
-import BaseSvg from '@cronocode/react-box/components/baseSvg';
+import { Circle, Path, Rect, Svg, SvgText } from '@cronocode/react-box/components/svg';
 
 // Every property except vectorEffect is inherited, so set it once on the <svg>.
-<BaseSvg viewBox="0 0 200 48" width="200px" fill="none" stroke="violet-500" strokeWidth={3} strokeLinecap="round">
-  <path d="M8 40 L56 12 L104 34 L152 8 L192 24" />
-</BaseSvg>
+<Svg viewBox="0 0 200 48" width="200px" fill="none" stroke="violet-500" strokeWidth={3} strokeLinecap="round">
+  <Path d="M8 40 L56 12 L104 34 L152 8 L192 24" />
+</Svg>
 
 // Draw-on animation: the transition is already there (--svgTransitionTime), and
 // prefers-reduced-motion zeroes it, so this is the whole thing.
-<BaseSvg fill="none" stroke="violet-500" strokeWidth={3} strokeDasharray={320} strokeDashoffset={320} hover={{ strokeDashoffset: 0 }}>
-  <path d="M8 40 L56 12 L104 34 L152 8 L192 24" />
-</BaseSvg>
+<Svg fill="none" stroke="violet-500" strokeWidth={3} strokeDasharray={320} strokeDashoffset={320} hover={{ strokeDashoffset: 0 }}>
+  <Path d="M8 40 L56 12 L104 34 L152 8 L192 24" />
+</Svg>
 
 // Geometry is CSS, so a shape moves with no JavaScript. Text is placed by the two text props.
-<BaseSvg viewBox="0 0 96 96" width="96px" fill="none" textAnchor="middle" dominantBaseline="central">
-  <Box tag="circle" cx={48} cy={48} r={38} stroke="indigo-600" strokeWidth={10} hover={{ r: 40 }} />
-  <Box tag="text" props={{ x: 48, y: 48 }} fontSize={20} fill="slate-700">
+<Svg viewBox="0 0 96 96" width="96px" label="Three quarters" fill="none" textAnchor="middle" dominantBaseline="central">
+  <Circle cx={48} cy={48} r={38} stroke="indigo-600" strokeWidth={10} hover={{ r: 40 }} />
+  <SvgText x={48} y={48} fontSize={20} fill="slate-700">
     75%
-  </Box>
-</BaseSvg>
+  </SvgText>
+</Svg>
+
+// A bar: y is the CSS geometry prop, width/height are the rect's own attributes.
+<Rect x={16} y={32} width={24} height={64} rx={3} fill="sky-600" />
 ```
 
-**Five things to get right:**
+**Seven things to get right:**
 
 1. **No divider on SVG lengths.** `strokeWidth`, `strokeDasharray`, `strokeDashoffset` and `strokeMiterlimit` pass the number through unchanged — they are measured in the coordinate system the `viewBox` sets up.
 2. **Inheritance does the work.** Put `fill`/`stroke`/`strokeWidth` on the `<svg>`, not on every shape. The exception is a shape carrying its own `fill=` attribute — a presentation attribute on an element beats a value inherited from its parent, so style that shape directly.
 3. **`vectorEffect` and `dominantBaseline` are not inherited**, so their rules target the element _and_ its descendants (`.cls, .cls *`). `vectorEffect="non-scaling-stroke"` on the `<svg>` keeps a hairline one pixel wide at any scale; `dominantBaseline="central"` on the `<svg>` reaches every label inside it.
 4. **Geometry belongs to the shape, and it transitions.** `cx`/`cy`/`r`/`rx`/`ry`/`x`/`y` are real CSS in SVG 2, so a gauge or a growing bar is a pseudo-class and no JavaScript. They are not inherited and should not be — set them on the shape.
-5. **A `<rect>`'s `width`/`height` are not in that family.** Those prop names belong to the layout scale (`width={32}` → `8rem`), so pass a rect's size through `props={{ width: 40, height: 40 }}`. A path's `d` stays an attribute too — Safari has no CSS `d`.
+5. **Each component settles the names SVG and Box both use, for its own element.** On `Path`, `d` is path data (not `flexDirection`); on `Rect`, `width`/`height` are user units (not the ÷4 layout scale); on `SvgText` and `TSpan`, `x`/`y`/`dx`/`dy` are attributes, because the CSS geometry properties do not apply to text; on `RadialGradient`, `cx`/`cy`/`r` are attributes, because they do not apply to a gradient either — while on `Circle` the same names stay CSS and transition. `transform` is a prop on every shape and group (`transform="rotate(-90 48 48)"` carries its own centre, which the CSS `rotate` prop cannot).
+6. **`Svg` sizes with attributes and names itself with `label`.** `viewBox`, `preserveAspectRatio`, `width` and `height` are the SVG attributes (`width="100%"`, `width={200}`), so the ÷4 layout `width`/`height` are not available on it. No `label` means `aria-hidden` — decoration, which is what most SVG is; `label` makes it `role="img"` with that name. A role or `aria-*` of your own in `props` wins over both.
+7. **A paint server is a URL, so it goes in `props`.** `fill` takes a colour variable, not `url(#id)`: write `props={{ fill: 'url(#sky)' }}`, and `props={{ clipPath: 'url(#frame)' }}` for a clip path (the `clipPath` prop is the CSS shape list, not a URL). A gradient stop can still be themed — `<Stop stopColor="currentColor" color="amber-300" />`.
 
 ---
 
@@ -540,7 +546,7 @@ Box.configure({ sink: 'element' }); // React 19 only
 - In element mode rules live in CSS cascade layers, so **your own unlayered CSS always wins** over
   Box props, and declaring `Box.extend()` props before the first render matters.
 - The hook-free pre-built components render on the server too: `Flex`, `Grid`, `Button`,
-  `Textbox`, `Textarea`, `RadioButton`, `BaseSvg` and the semantic tags (`H1`, `P`, `Link`, …).
+  `Textbox`, `Textarea`, `RadioButton`, `BaseSvg`, the SVG elements (`Svg`, `Path`, `Circle`, …) and the semantic tags (`H1`, `P`, `Link`, …).
   Import them straight into a Server Component.
 - `Dropdown`, `Tooltip`, `Overlay`, `DataGrid`, `Checkbox`, `Switch`, `RadioGroup`, `Select` and `Form` hold state, so their chunks
   ship a `'use client'` banner: a Server Component may import one, but it becomes a client
@@ -709,7 +715,7 @@ auto-hide timer — the three WCAG 1.4.13 rules.
 ## Key Reminders for AI Assistants
 
 1. **NEVER `style={{ }}`** — use Box props. Missing prop? Use `Box.extend()`
-2. **NEVER `<Box tag="...">` for common elements** — use `<Button>`, `<Link>`, `<H1>`, `<P>`, `<Nav>`, etc.
+2. **NEVER `<Box tag="...">` for common elements** — use `<Button>`, `<Link>`, `<H1>`, `<P>`, `<Nav>`, `<Svg>`, `<Path>`, `<Circle>`, etc.
 3. **NEVER `<Box display="flex/grid">`** — use `<Flex>` / `<Grid>`
 4. **fontSize divider is 16** (not 4). `fontSize={14}` → 14px
 5. **Spacing divider is 4**. `p={4}` → 16px (1rem)

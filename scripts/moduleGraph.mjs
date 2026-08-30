@@ -47,6 +47,7 @@ export const SERVER_SAFE_COMPONENTS = [
   'grid',
   'radioButton',
   'semantics',
+  'svg',
   'textarea',
   'textbox',
   'visuallyHidden',

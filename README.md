@@ -66,6 +66,7 @@ import Box from "@cronocode/react-box";
 | `Grid`                                                                       | `components/grid`           | `Box` with `display: grid`                                                                    |
 | `H1`–`H6`, `P`, `Span`, `Link`, `Img`, `Nav`, `Header`, `Main`, `Section`, … | `components/semantics`      | one `Box` per semantic tag — 25 of them                                                       |
 | `BaseSvg`                                                                    | `components/baseSvg`        | an `<svg>` element that takes the style props                                                 |
+| `Svg`, `Path`, `Circle`, `Rect`, `SvgText`, …                                | `components/svg`            | one component per SVG element — 20 of them, so a drawing never writes `tag`                   |
 | `VisuallyHidden`                                                             | `components/visuallyHidden` | text for a screen reader only — clipped away rather than hidden, so it stays in the a11y tree |
 
 ### Form controls

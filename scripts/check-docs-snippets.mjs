@@ -85,6 +85,27 @@ const PROVIDED = {
   Textbox: "import Textbox from '@cronocode/react-box/components/textbox';",
   Tooltip: "import Tooltip from '@cronocode/react-box/components/tooltip';",
   VisuallyHidden: "import VisuallyHidden from '@cronocode/react-box/components/visuallyHidden';",
+  // The SVG elements — one entry each, so a drawing in a snippet reads as a drawing would.
+  Circle: "import { Circle } from '@cronocode/react-box/components/svg';",
+  ClipPath: "import { ClipPath } from '@cronocode/react-box/components/svg';",
+  Defs: "import { Defs } from '@cronocode/react-box/components/svg';",
+  Ellipse: "import { Ellipse } from '@cronocode/react-box/components/svg';",
+  G: "import { G } from '@cronocode/react-box/components/svg';",
+  Line: "import { Line } from '@cronocode/react-box/components/svg';",
+  LinearGradient: "import { LinearGradient } from '@cronocode/react-box/components/svg';",
+  Marker: "import { Marker } from '@cronocode/react-box/components/svg';",
+  Mask: "import { Mask } from '@cronocode/react-box/components/svg';",
+  Path: "import { Path } from '@cronocode/react-box/components/svg';",
+  Polygon: "import { Polygon } from '@cronocode/react-box/components/svg';",
+  Polyline: "import { Polyline } from '@cronocode/react-box/components/svg';",
+  RadialGradient: "import { RadialGradient } from '@cronocode/react-box/components/svg';",
+  Rect: "import { Rect } from '@cronocode/react-box/components/svg';",
+  Stop: "import { Stop } from '@cronocode/react-box/components/svg';",
+  Svg: "import { Svg } from '@cronocode/react-box/components/svg';",
+  SvgSymbol: "import { SvgSymbol } from '@cronocode/react-box/components/svg';",
+  SvgText: "import { SvgText } from '@cronocode/react-box/components/svg';",
+  TSpan: "import { TSpan } from '@cronocode/react-box/components/svg';",
+  Use: "import { Use } from '@cronocode/react-box/components/svg';",
 };
 
 /** A name TypeScript could not find is the page's own context — but only if it is a value. */
