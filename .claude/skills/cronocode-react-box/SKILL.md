@@ -48,8 +48,13 @@ Check latest: `npm view @cronocode/react-box version`
 | `<Box tag="h1..h6/p/span">`          | `<H1>..<H6>`/`<P>`/`<Span>`            | `components/semantics`                                           |
 | `<Box tag="nav/header/footer/main">` | `<Nav>`/`<Header>`/`<Footer>`/`<Main>` | `components/semantics`                                           |
 | `<Box tag="section/article/aside">`  | `<Section>`/`<Article>`/`<Aside>`      | `components/semantics`                                           |
+| `<Box tag="form">`                   | `<Form>`                               | `components/form`                                                |
 
 Also: `Mark`, `Figure`, `Figcaption`, `Details`, `Summary`, `Menu`, `Time`. All from `@cronocode/react-box/components/...`.
+
+`<Form<T> onSubmit={(values, e) => …}>` reads its own named fields on submit (after `preventDefault()`): a value per
+named input, a boolean for a lone checkbox/radio, an array for a repeated name, and `name="a.b"` nests. `T` is the shape you
+expect, not a check against the fields.
 
 ## Props
 

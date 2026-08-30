@@ -5,7 +5,8 @@ Purpose: help AI contributors extend the docs/demo site under `pages/**`.
 ## Quick run/build
 
 - Dev server (docs/demo): `npm run dev` (uses `pages.vite.config.ts`, serves `pages/` via Vite HashRouter).
-- Build docs to dist: `npm run build:pages` (outputs into `dist/`).
+- Build the docs site: `npm run build:pages` (outputs into `dist-pages/` — deliberately not `dist/`,
+  which holds the library build the package is published from).
 
 ## Architecture
 
