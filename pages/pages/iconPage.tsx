@@ -4,11 +4,21 @@ import { ReactNode } from 'react';
 import Box from '../../src/box';
 import Flex from '../../src/components/flex';
 import Icon from '../../src/components/icon';
-import { H2 } from '../../src/components/semantics';
+import { H2, Span } from '../../src/components/semantics';
 import { Circle, Path, Svg } from '../../src/components/svg';
 import Code from '../components/code';
 import PageHeader from '../components/pageHeader';
 import useTableOfContents from '../hooks/useTableOfContents';
+import SiGithub from '~icons/simple-icons/github';
+import SiReact from '~icons/simple-icons/react';
+import SiTypescript from '~icons/simple-icons/typescript';
+import SiVite from '~icons/simple-icons/vite';
+
+// The build-time icons the /icon page demonstrates. `unplugin-icons` names the component it
+// generates after the specifier — `simpleIconsGithub` — and the code block beside a live demo
+// prints the name it finds on the component. Naming them here keeps the printed JSX the code a
+// reader would actually write: a lowercase name in JSX is a DOM element, not a component.
+for (const [name, icon] of Object.entries({ SiGithub, SiReact, SiTypescript, SiVite })) icon.displayName = name;
 
 export default function IconPage() {
   useTableOfContents(sidebarLinks);
@@ -217,6 +227,139 @@ export default function IconPage() {
 
           <Code id="install-code" label="Install" language="shell" code={`npm install lucide-react`} codeOnly />
 
+          <Section id="iconify" title="When the icon is not in lucide">
+            <Box>
+              <a href="https://iconify.design">Iconify</a> collects more than 300,000 icons from 200-plus open-source sets — Material,
+              Phosphor, Remix, Font Awesome, and the brand marks in Simple Icons that lucide deliberately does not draw. Every one of them
+              reaches <Mono>&lt;Icon&gt;</Mono> the same way, because the only thing an icon source has to be is an element that spreads its
+              props onto an <Mono>&lt;svg&gt;</Mono>.
+            </Box>
+            <Box mt={4}>
+              What differs between the ways of getting one is <em>when</em> the icon becomes markup, and that decides whether it can render
+              on a server. Three answers, in the order worth trying them:
+            </Box>
+            <Flex mt={4} d="column" gap={4}>
+              <Box>
+                <Span fontWeight={600}>One icon, no dependency.</Span> Copy the SVG from <a href="https://icones.js.org">icones.js.org</a>{' '}
+                and paste it into an <Mono>&lt;Icon&gt;</Mono>. It is markup, so it renders on a server and costs a bundler nothing — the
+                right answer more often than it looks.
+              </Box>
+              <Box>
+                <Span fontWeight={600}>A set, at build time.</Span> <Mono>unplugin-icons</Mono> compiles{' '}
+                <Mono>~icons/&lt;set&gt;/&lt;name&gt;</Mono> into a component while bundling, out of the icon data in an{' '}
+                <Mono>@iconify-json/&lt;set&gt;</Mono> devDependency. Nothing is fetched at runtime, only the icons you import are compiled,
+                and the result server-renders like any other element.
+              </Box>
+              <Box>
+                <Span fontWeight={600}>A name known only at runtime.</Span> <Mono>@iconify/react</Mono> looks its icon up by name in the
+                browser, over the Iconify API — for an icon that arrives from a CMS or from a user&apos;s own data, where no import can be
+                written.
+              </Box>
+            </Flex>
+          </Section>
+
+          <Code
+            id="iconify-install"
+            label="Build time: install"
+            language="shell"
+            code={`npm install -D unplugin-icons @iconify-json/simple-icons @svgr/core @svgr/plugin-jsx`}
+            codeOnly
+          />
+
+          <Code
+            id="iconify-config"
+            label="Build time: the plugin and the types"
+            language="jsx"
+            check={false}
+            code={`// vite.config.ts
+import react from '@vitejs/plugin-react';
+import icons from 'unplugin-icons/vite';
+import { defineConfig } from 'vite';
+
+export default defineConfig({ plugins: [react(), icons({ compiler: 'jsx', jsx: 'react' })] });
+
+// icons.d.ts — without this the specifier resolves to nothing and every import is a missing module
+/// <reference types="unplugin-icons/types/react" />
+
+// anywhere
+import SiGithub from '~icons/simple-icons/github';`}
+            codeOnly
+          />
+
+          <Box>
+            The two <Mono>@svgr</Mono> packages are what turns the icon data into JSX, and only <Mono>@svgr/core</Mono> is declared as a
+            peer dependency — leave <Mono>@svgr/plugin-jsx</Mono> out and the build fails with a bare <Mono>Cannot find module</Mono> that
+            names neither the plugin nor the icon.
+          </Box>
+
+          <Box>
+            The marks below are that recipe, running: this site is a Vite app, and each of them was compiled into a component by the plugin
+            and handed to <Mono>&lt;Icon&gt;</Mono>, which knows nothing about where it came from. The GitHub mark in the home page&apos;s
+            call to action is the same import.
+          </Box>
+
+          <Code id="iconify-demo" label="Build time: any set, through the same component">
+            <Flex gap={6} ai="center" flexWrap="wrap">
+              <Icon size={7} label="GitHub" theme={{ dark: { color: 'slate-100' }, light: { color: 'slate-800' } }}>
+                <SiGithub />
+              </Icon>
+              <Icon size={7} label="React" theme={{ dark: { color: 'sky-400' }, light: { color: 'sky-600' } }}>
+                <SiReact />
+              </Icon>
+              <Icon size={7} label="TypeScript" theme={{ dark: { color: 'blue-400' }, light: { color: 'blue-600' } }}>
+                <SiTypescript />
+              </Icon>
+              <Icon size={7} label="Vite" theme={{ dark: { color: 'violet-400' }, light: { color: 'violet-500' } }}>
+                <SiVite />
+              </Icon>
+            </Flex>
+          </Code>
+
+          <Section id="iconify-runtime" title="The runtime bridge, and what it costs">
+            <Box>
+              <Mono>@iconify/react</Mono> takes the icon&apos;s name as a string and fetches it when it renders, which is the only way to
+              draw an icon nobody could import. The price is paid where it always is: the component is a client component, the server sends
+              no icon at all — an empty placeholder — and the class <Mono>&lt;Icon&gt;</Mono> generated lands on the{' '}
+              <Mono>&lt;svg&gt;</Mono> when the icon arrives with it. It still beats the <Mono>width</Mono> the icon writes for itself, so
+              the size and the colour are the ones you asked for rather than a flash of something else.
+            </Box>
+            <Box mt={4}>
+              Reach for it when the name is data. When the name is in your source, the build-time recipe gives you the same icon with no
+              network, no client boundary, and no icon missing from the HTML.
+            </Box>
+          </Section>
+
+          <Code
+            id="iconify-runtime-code"
+            label="Runtime: a name the build never saw"
+            language="jsx"
+            code={`import Icon from '@cronocode/react-box/components/icon';
+import { Icon as IconifyIcon } from '@iconify/react';
+
+function CategoryIcon({ name }: { name: string }) {
+  return (
+    <Icon size={6} color="sky-500" label={name}>
+      <IconifyIcon icon={\`material-symbols:\${name}\`} />
+    </Icon>
+  );
+}`}
+            codeOnly
+          />
+
+          <Section id="iconify-bundlers" title="Which bundlers run the build-time recipe">
+            <Box>
+              <Mono>unplugin-icons</Mono> ships adapters for Vite, Rollup, webpack, Rspack, esbuild and Nuxt, so most projects add the
+              config above and are done. The exception worth knowing is <Mono>Next.js 16</Mono>, which builds with Turbopack: Turbopack runs
+              no unplugin — the <Mono>webpack()</Mono> hook in <Mono>next.config.mjs</Mono> never fires — and{' '}
+              <Mono>~icons/simple-icons/github</Mono> fails to resolve.
+            </Box>
+            <Box mt={4}>
+              <Mono>next build --webpack</Mono> does work, and the icon lands in the prerendered HTML. If you would rather keep Turbopack,
+              the other two answers both do: paste the SVG for the handful of icons a page needs, or take the runtime bridge for the ones
+              whose names are data. The Next.js example in this repository does both.
+            </Box>
+          </Section>
+
           <Section id="own-svg" title="Not for SVG you draw yourself">
             <Box>
               <Mono>&lt;Icon&gt;</Mono> exists because an icon set&apos;s component is not a Box. Yours can be: <Mono>&lt;Svg&gt;</Mono> and
@@ -330,6 +473,9 @@ const sidebarLinks = [
   { id: 'a11y', label: 'Hidden by default' },
   { id: 'sets', label: 'Any icon set' },
   { id: 'install', label: 'Installing a set' },
+  { id: 'iconify', label: 'Iconify' },
+  { id: 'iconify-runtime', label: 'The runtime bridge' },
+  { id: 'iconify-bundlers', label: 'Bundlers' },
   { id: 'own-svg', label: 'Your own SVG' },
   { id: 'use-class-names', label: 'useClassNames' },
   { id: 'props', label: 'Props' },

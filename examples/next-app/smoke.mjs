@@ -12,6 +12,7 @@ const root = import.meta.dirname;
 const port = Number(process.env.PORT ?? 3010);
 const url = `http://127.0.0.1:${port}/`;
 const componentsUrl = `${url}components`;
+const iconsUrl = `${url}icons`;
 
 const results = [];
 
@@ -84,7 +85,7 @@ function stop(child) {
 
 // 1. The claim that needs no server: the pages this app renders are Server Components. Only a
 //    directive at the top of a file counts — two of them also *talk* about the directive.
-const serverFiles = ['app/layout.tsx', 'app/page.tsx', 'app/streamedSection.tsx', 'app/components/page.tsx'];
+const serverFiles = ['app/layout.tsx', 'app/page.tsx', 'app/streamedSection.tsx', 'app/components/page.tsx', 'app/icons/page.tsx'];
 const clientDirectives = serverFiles.filter((file) => /^\s*(['"])use client\1/.test(readFileSync(join(root, file), 'utf8')));
 
 check(
@@ -104,11 +105,13 @@ server.stderr.on('data', (chunk) => (serverLog += chunk));
 
 let html = '';
 let componentsHtml = '';
+let iconsHtml = '';
 
 try {
   await waitForServer(server);
   html = await (await fetch(url)).text();
   componentsHtml = await (await fetch(componentsUrl)).text();
+  iconsHtml = await (await fetch(iconsUrl)).text();
 } catch (error) {
   stop(server);
   console.error(`\n✖ ${error.message}\n`);
@@ -226,6 +229,31 @@ check(
   'a client-only component can be imported by a Server Component',
   /<input[^>]*type="checkbox"/.test(componentsHtml),
   'Checkbox rendered from a page with no directive of its own',
+);
+
+// 13. The third page: `Icon` puts the engine's class on an icon it did not render. An inline
+//     `<svg>` is markup like any other, so the whole thing — the icon, the class, the name — is in
+//     the response, and the sizing that beats the icon's own width/height attributes is a rule.
+const iconsCss = styleText(iconsHtml);
+const iconSvg = iconsHtml.match(/<svg[^>]*class="([^"]*)"[^>]*>/);
+const iconClasses = (iconSvg?.[1] ?? '').split(/\s+/).filter((name) => name.startsWith('_'));
+
+check(
+  'an inline icon is server-rendered, class and all',
+  iconClasses.length > 0 && iconClasses.every((name) => hasRuleFor(iconsCss, name)) && /role="img"/.test(iconsHtml),
+  `${iconClasses.length} classes on its <svg>, all covered, named with role="img"`,
+);
+
+// 14. The other icon source on that page looks its icon up over the network, in the browser, so
+//     the server sends none — the tradeoff the /icon docs page documents. The rules are still
+//     generated (`Icon` resolved them during the server render); it is the element that is absent,
+//     which is why an icon that has to be in the HTML cannot come from a runtime bridge.
+const svgCount = (iconsHtml.match(/<svg/g) ?? []).length;
+
+check(
+  'a runtime icon source sends no icon from the server',
+  svgCount === 1 && iconsCss.includes('--emerald-600'),
+  `${svgCount} <svg> in the response, though the runtime icon's own rule was generated`,
 );
 
 const failed = results.filter((result) => !result.ok);

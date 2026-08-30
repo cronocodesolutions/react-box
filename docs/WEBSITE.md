@@ -17,6 +17,12 @@ Purpose: help AI contributors extend the docs/demo site under `pages/**`.
 - Theme & component presets for the site: [pages/extends.ts](pages/extends.ts) (custom gradients, BGs, component variants) loaded before app render.
 - Page context (table of contents): [pages/pageContext.ts](pages/pageContext.ts) provides `setTocEntries` to page components.
 - Global styles, fonts, syntax highlighting: [pages/index.css](pages/index.css).
+- Icons: the site renders lucide through `<Icon>`, and the Iconify sets through `unplugin-icons` —
+  `~icons/<set>/<name>` is compiled into a component at build time by the plugin in
+  [pages.vite.config.ts](pages.vite.config.ts), out of the `@iconify-json/*` devDependencies, with
+  the specifier's types coming from [pages/icons.d.ts](pages/icons.d.ts). It is the recipe the
+  `/icon` page documents, so the page and the site prove each other; a new set is one more
+  `@iconify-json/<set>` devDependency and nothing else.
 
 ## Routing & pages
 
@@ -69,7 +75,7 @@ A `<Code>` block shows its example one of two ways, and the difference decides w
   from what the reader sees running. Prefer this shape.
 - **A `code` string** — hand-written, for what the page cannot render: imports, a `.d.ts`, a
   controlled-state example. `npm run check:docs` compiles every one of these
-  ([scripts/check-docs-snippets.mjs](scripts/check-docs-snippets.mjs)) against the *published*
+  ([scripts/check-docs-snippets.mjs](scripts/check-docs-snippets.mjs)) against the _published_
   specifiers (`@cronocode/react-box/components/flex`) and without the site's own `Box.extend()`
   augmentation — so a snippet that only works because `pages/extends.ts` widened a prop fails, which
   is the point: the reader does not have that file. Two escape hatches, both visible in the page

@@ -5,7 +5,9 @@ import { version } from '../../package.json';
 import Box from '../../src/box';
 import Button from '../../src/components/button';
 import Flex from '../../src/components/flex';
+import Icon from '../../src/components/icon';
 import Code from '../components/code';
+import SiGithub from '~icons/simple-icons/github';
 
 const fadeInUp = {
   initial: { opacity: 0, y: 20 },
@@ -95,7 +97,9 @@ export default function HomePage() {
                   theme={{ dark: { color: 'slate-300' }, light: { color: 'slate-700' } }}
                 >
                   <Flex ai="center" gap={2}>
-                    <Code2 size={18} />
+                    <Icon size={4.5}>
+                      <SiGithub />
+                    </Icon>
                     View on GitHub
                   </Flex>
                 </Button>
