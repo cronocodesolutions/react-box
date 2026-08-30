@@ -80,7 +80,7 @@
         "react-dom"
       ],
       "gzip": true,
-      "limit": "17.75 KB"
+      "limit": "17.9 KB"
     },
     {
       "name": "Box in a Server Component (react-server entry)",
@@ -90,7 +90,7 @@
         "react-dom"
       ],
       "gzip": true,
-      "limit": "15.5 KB"
+      "limit": "15.65 KB"
     },
     {
       "name": "Behavior primitives (a11y entry)",
@@ -106,7 +106,7 @@
       "name": "Core engine (no React)",
       "path": "dist/core.mjs",
       "gzip": true,
-      "limit": "14.75 KB"
+      "limit": "15 KB"
     },
     {
       "name": "DataGrid",
@@ -116,7 +116,7 @@
         "react-dom"
       ],
       "gzip": true,
-      "limit": "44.5 KB"
+      "limit": "44.7 KB"
     },
     {
       "name": "Full library (Box + ssg + every component)",
@@ -126,7 +126,7 @@
         "react-dom"
       ],
       "gzip": true,
-      "limit": "47.75 KB"
+      "limit": "47.9 KB"
     }
   ],
   "repository": {
@@ -152,7 +152,7 @@
     "url": "https://github.com/box-kite/box-kite/issues"
   },
   "homepage": "https://box.cronocode.com",
-  "description": "One React component with 129 typed CSS props that generates atomic CSS at runtime — no CSS files, no build step, renders in a Server Component.",
+  "description": "One React component with 138 typed CSS props that generates atomic CSS at runtime — no CSS files, no build step, renders in a Server Component.",
   "peerDependencies": {
     "react": "^16.14.0 || ^17.0.0 || ^18.0.0 || ^19.0.0",
     "react-dom": "^16.14.0 || ^17.0.0 || ^18.0.0 || ^19.0.0"

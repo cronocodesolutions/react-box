@@ -17,7 +17,7 @@ export default function SvgPage() {
       <PageHeader
         icon={Spline}
         title="SVG"
-        description="Fourteen SVG paint and stroke properties as typed props — the same colour variables, the same themes, the same pseudo-classes every other Box prop gets."
+        description="Twenty-three SVG properties as typed props — paint, stroke, text and the SVG 2 geometry that lets a shape move with no JavaScript at all."
       />
 
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
@@ -46,9 +46,9 @@ export default function SvgPage() {
 
           <Section id="inheritance" title="Set them once, on the element above">
             <Box>
-              Every property here except <Mono>vectorEffect</Mono> is an inherited one, so a value on the <Mono>&lt;svg&gt;</Mono> reaches
-              every shape inside it — that is why the demo above sets <Mono>stroke</Mono> once rather than on all three shapes. A shape that
-              wants something else states it, and wins for itself.
+              Every paint and stroke property here except <Mono>vectorEffect</Mono> is an inherited one, so a value on the{' '}
+              <Mono>&lt;svg&gt;</Mono> reaches every shape inside it — that is why the demo above sets <Mono>stroke</Mono> once rather than
+              on all three shapes. A shape that wants something else states it, and wins for itself.
             </Box>
             <Box mt={4}>
               The one thing inheritance cannot beat is a <Mono>fill</Mono> or <Mono>stroke</Mono> <em>attribute</em> written on the shape
@@ -276,9 +276,9 @@ export default function SvgPage() {
               which is what a chart redrawn at any width needs.
             </Box>
             <Box mt={4}>
-              Alone among these properties, <Mono>vector-effect</Mono> is not inherited — a value on the <Mono>&lt;svg&gt;</Mono> would
-              reach nothing. So this prop, and only this prop, writes a rule that names the element and its descendants:{' '}
-              <Mono>.vectorEffect-non-scaling-stroke, .vectorEffect-non-scaling-stroke *</Mono>. Put it wherever it reads best.
+              Alone among the paint and stroke properties, <Mono>vector-effect</Mono> is not inherited — a value on the{' '}
+              <Mono>&lt;svg&gt;</Mono> would reach nothing. So this prop, and only this prop, writes a rule that names the element and its
+              descendants: <Mono>.vectorEffect-non-scaling-stroke, .vectorEffect-non-scaling-stroke *</Mono>. Put it wherever it reads best.
             </Box>
           </Section>
 
@@ -313,6 +313,287 @@ export default function SvgPage() {
               ))}
             </Flex>
           </Code>
+
+          <Section id="geometry" title="A shape's own numbers are props too">
+            <Box>
+              SVG 2 made the geometry attributes real CSS properties, so <Mono>cx</Mono>, <Mono>cy</Mono>, <Mono>r</Mono>, <Mono>rx</Mono>,{' '}
+              <Mono>ry</Mono>, <Mono>x</Mono> and <Mono>y</Mono> are Box props here. They are user units like every other SVG length on this
+              page — <Mono>r={'{20}'}</Mono> is <Mono>r: 20</Mono> — and a percentage is of the viewport the <Mono>viewBox</Mono> describes.
+            </Box>
+            <Box mt={4}>
+              Which one applies to which element is the SVG spec&apos;s answer, not this library&apos;s. <Mono>cx</Mono> and <Mono>cy</Mono>{' '}
+              centre a <Mono>&lt;circle&gt;</Mono> or an <Mono>&lt;ellipse&gt;</Mono>; <Mono>r</Mono> is the circle&apos;s radius;{' '}
+              <Mono>rx</Mono> and <Mono>ry</Mono> are the ellipse&apos;s two radii and a <Mono>&lt;rect&gt;</Mono>&apos;s corners;{' '}
+              <Mono>x</Mono> and <Mono>y</Mono> position a <Mono>&lt;rect&gt;</Mono>, <Mono>&lt;image&gt;</Mono>, <Mono>&lt;use&gt;</Mono>,{' '}
+              <Mono>&lt;foreignObject&gt;</Mono> or a nested <Mono>&lt;svg&gt;</Mono>. On an element with no such geometry the property is
+              simply ignored, exactly as the attribute would be.
+            </Box>
+            <Box mt={4}>
+              They are not inherited, and here that is the right behaviour rather than the problem it was for <Mono>vectorEffect</Mono> — a
+              radius handed down to every shape below would be nonsense. Set them on the shape.
+            </Box>
+            <Box mt={4}>
+              One name is missing from the list on purpose. A <Mono>&lt;rect&gt;</Mono>&apos;s <Mono>width</Mono> and <Mono>height</Mono>{' '}
+              are CSS properties too, but those prop names were taken years ago by the layout scale, where <Mono>width={'{32}'}</Mono> means{' '}
+              <Mono>8rem</Mono>. Give a rect its size through <Mono>props</Mono> — <Mono>props={'{{ width: 40, height: 40 }}'}</Mono> — and
+              use <Mono>x</Mono>, <Mono>y</Mono> and <Mono>rx</Mono> for the rest.
+            </Box>
+          </Section>
+
+          <Code
+            id="geometry-demo"
+            label="Geometry moves"
+            language="jsx"
+            code={`// Geometry is CSS, so it transitions. There is no JavaScript in this.
+<BaseSvg viewBox="0 0 160 56" width="160px" fill="violet-500">
+  <Box tag="circle" cx={28} cy={28} r={12} hover={{ r: 22 }} />
+  <Box tag="circle" cx={80} cy={28} r={12} hover={{ cy: 14, r: 8 }} />
+  <Box tag="ellipse" cx={132} cy={28} rx={20} ry={10} hover={{ rx: 10, ry: 20 }} />
+</BaseSvg>`}
+          >
+            <Flex d="column" gap={3}>
+              <BaseSvg
+                viewBox="0 0 160 56"
+                width="160px"
+                height="56px"
+                theme={{ dark: { fill: 'violet-400' }, light: { fill: 'violet-600' } }}
+              >
+                <Box tag="circle" cx={28} cy={28} r={12} hover={{ r: 22 }} />
+                <Box tag="circle" cx={80} cy={28} r={12} hover={{ cy: 14, r: 8 }} />
+                <Box tag="ellipse" cx={132} cy={28} rx={20} ry={10} hover={{ rx: 10, ry: 20 }} />
+              </BaseSvg>
+              <Box fontSize={13} theme={{ dark: { color: 'slate-400' }, light: { color: 'slate-500' } }}>
+                Hover each shape.
+              </Box>
+            </Flex>
+          </Code>
+
+          <Code
+            id="rect"
+            label="Corners and position"
+            language="jsx"
+            code={`<BaseSvg viewBox="0 0 56 56" width="56px" fill="teal-500">
+  <Box tag="rect" props={{ width: 40, height: 40 }} x={8} y={8} rx={4} hover={{ rx: 20 }} />
+</BaseSvg>`}
+          >
+            <Flex gap={8} flexWrap="wrap">
+              {rects.map(({ label, rx, hoverRx }) => (
+                <Flex key={label} d="column" gap={2} ai="center">
+                  <BaseSvg
+                    viewBox="0 0 56 56"
+                    width="56px"
+                    height="56px"
+                    theme={{ dark: { fill: 'teal-400' }, light: { fill: 'teal-600' } }}
+                  >
+                    <Box tag="rect" props={{ width: 40, height: 40 }} x={8} y={8} rx={rx} hover={{ rx: hoverRx }} />
+                  </BaseSvg>
+                  <Mono>{label}</Mono>
+                </Flex>
+              ))}
+            </Flex>
+          </Code>
+
+          <Section id="rect-size" title="rx is not borderRadius">
+            <Box>
+              The two read alike and mean different numbers. <Mono>borderRadius={'{8}'}</Mono> is on the spacing scale and comes out as{' '}
+              <Mono>2rem</Mono>; <Mono>rx={'{8}'}</Mono> is eight user units inside the <Mono>viewBox</Mono>. A rect wants <Mono>rx</Mono>.
+            </Box>
+          </Section>
+
+          <Code
+            id="text-anchor"
+            label="Anchoring a label"
+            language="jsx"
+            code={`<BaseSvg viewBox="0 0 200 40" width="200px" fill="slate-700" textAnchor="middle">
+  <Box tag="text" props={{ x: 100, y: 22 }} fontSize={14}>
+    the label
+  </Box>
+  <Box tag="line" props={{ x1: 100, y1: 26, x2: 100, y2: 38 }} stroke="rose-400" strokeWidth={2} />
+</BaseSvg>`}
+          >
+            <Flex d="column" gap={4}>
+              {(['start', 'middle', 'end'] as const).map((anchor) => (
+                <Flex key={anchor} ai="center" gap={4}>
+                  <Box width={20}>
+                    <Mono>{anchor}</Mono>
+                  </Box>
+                  <BaseSvg
+                    viewBox="0 0 200 40"
+                    width="200px"
+                    height="40px"
+                    textAnchor={anchor}
+                    theme={{ dark: { fill: 'slate-300' }, light: { fill: 'slate-700' } }}
+                  >
+                    <Box tag="text" props={{ x: 100, y: 22 }} fontSize={14}>
+                      the label
+                    </Box>
+                    <Box
+                      tag="line"
+                      props={{ x1: 100, y1: 26, x2: 100, y2: 38 }}
+                      strokeWidth={2}
+                      theme={{ dark: { stroke: 'rose-500' }, light: { stroke: 'rose-400' } }}
+                    />
+                  </BaseSvg>
+                </Flex>
+              ))}
+            </Flex>
+          </Code>
+
+          <Section id="baseline" title="dominantBaseline is the vertical half">
+            <Box>
+              <Mono>textAnchor</Mono> decides which part of the text sits on its <Mono>x</Mono>; <Mono>dominantBaseline</Mono> decides which
+              part sits on its <Mono>y</Mono>. <Mono>central</Mono> centres a number inside a gauge, <Mono>hanging</Mono> drops a label
+              below an axis line, and <Mono>alphabetic</Mono> is where every browser starts.
+            </Box>
+            <Box mt={4}>
+              This is the second property CSS does not inherit — <Mono>vectorEffect</Mono> was the first — so it gets the same treatment: a
+              rule that names the element and its descendants. Set it on the <Mono>&lt;svg&gt;</Mono> and every label inside obeys.
+            </Box>
+            <Box mt={4}>
+              Text size is the ordinary <Mono>fontSize</Mono> prop, divider 16 like everywhere else. Inside an <Mono>&lt;svg&gt;</Mono> a
+              pixel <em>is</em> a user unit, so <Mono>fontSize={'{20}'}</Mono> is 20 units and scales with the <Mono>viewBox</Mono> along
+              with the shapes.
+            </Box>
+          </Section>
+
+          <Code
+            id="baseline-demo"
+            label="Baselines against a line"
+            language="jsx"
+            code={`<BaseSvg viewBox="0 0 120 40" width="120px" fill="slate-700" dominantBaseline="central">
+  <Box tag="line" props={{ x1: 0, y1: 20, x2: 120, y2: 20 }} stroke="rose-400" strokeWidth={1} />
+  <Box tag="text" props={{ x: 8, y: 20 }} fontSize={14}>
+    the label
+  </Box>
+</BaseSvg>`}
+          >
+            <Flex d="column" gap={4}>
+              {(['alphabetic', 'central', 'hanging'] as const).map((baseline) => (
+                <Flex key={baseline} ai="center" gap={4}>
+                  <Box width={22}>
+                    <Mono>{baseline}</Mono>
+                  </Box>
+                  <BaseSvg
+                    viewBox="0 0 120 40"
+                    width="120px"
+                    height="40px"
+                    dominantBaseline={baseline}
+                    theme={{ dark: { fill: 'slate-300' }, light: { fill: 'slate-700' } }}
+                  >
+                    <Box
+                      tag="line"
+                      props={{ x1: 0, y1: 20, x2: 120, y2: 20 }}
+                      strokeWidth={1}
+                      theme={{ dark: { stroke: 'rose-500' }, light: { stroke: 'rose-400' } }}
+                    />
+                    <Box tag="text" props={{ x: 8, y: 20 }} fontSize={14}>
+                      the label
+                    </Box>
+                  </BaseSvg>
+                </Flex>
+              ))}
+            </Flex>
+          </Code>
+
+          <Code
+            id="gauge"
+            label="A gauge, with no JavaScript"
+            language="jsx"
+            code={`// The ring is one dash as long as the circle's own circumference, pushed off the path and then
+// pulled back. The number is placed at the centre point and centred on it by the two text props.
+<BaseSvg viewBox="0 0 96 96" width="96px" className="gauge" fill="none" strokeLinecap="round">
+  <Box tag="circle" cx={48} cy={48} r={38} stroke="slate-200" strokeWidth={10} />
+  <Box
+    tag="circle"
+    props={{ transform: 'rotate(-90 48 48)' }}
+    cx={48}
+    cy={48}
+    r={38}
+    stroke="indigo-600"
+    strokeWidth={10}
+    strokeDasharray={239}
+    strokeDashoffset={239}
+    hoverGroup={{ gauge: { strokeDashoffset: 60, r: 40 } }}
+  />
+  <Box tag="text" props={{ x: 48, y: 48 }} textAnchor="middle" dominantBaseline="central" fontSize={20} fill="slate-700">
+    75%
+  </Box>
+</BaseSvg>`}
+          >
+            <Flex d="column" gap={3}>
+              <BaseSvg viewBox="0 0 96 96" width="96px" height="96px" className="gauge" fill="none" strokeLinecap="round">
+                <Box
+                  tag="circle"
+                  cx={48}
+                  cy={48}
+                  r={38}
+                  strokeWidth={10}
+                  theme={{ dark: { stroke: 'slate-800' }, light: { stroke: 'slate-200' } }}
+                />
+                <Box
+                  tag="circle"
+                  props={{ transform: 'rotate(-90 48 48)' }}
+                  cx={48}
+                  cy={48}
+                  r={38}
+                  strokeWidth={10}
+                  strokeDasharray={239}
+                  strokeDashoffset={239}
+                  hoverGroup={{ gauge: { strokeDashoffset: 60, r: 40 } }}
+                  theme={{ dark: { stroke: 'indigo-400' }, light: { stroke: 'indigo-600' } }}
+                />
+                <Box
+                  tag="text"
+                  props={{ x: 48, y: 48 }}
+                  textAnchor="middle"
+                  dominantBaseline="central"
+                  fontSize={20}
+                  fontWeight={600}
+                  theme={{ dark: { fill: 'slate-200' }, light: { fill: 'slate-700' } }}
+                >
+                  75%
+                </Box>
+              </BaseSvg>
+              <Box fontSize={13} theme={{ dark: { color: 'slate-400' }, light: { color: 'slate-500' } }}>
+                Hover the gauge.
+              </Box>
+            </Flex>
+          </Code>
+
+          <Section id="gauge-notes" title="What the gauge is made of">
+            <Box>
+              Four props and no state. <Mono>strokeDasharray={'{239}'}</Mono> makes the ring one dash as long as its own circumference — 2π
+              × 38 is about 239 — and <Mono>strokeDashoffset={'{239}'}</Mono> pushes that dash entirely off the path, so nothing shows.
+              Moving the offset to 60 leaves 179 of the 239 drawn, which is the three quarters the label claims.
+            </Box>
+            <Box mt={4}>
+              <Mono>r</Mono> grows by two units at the same time, which is the geometry tier doing something the attribute cannot. The
+              number in the middle sits at the centre point and is centred on it by <Mono>textAnchor</Mono> and{' '}
+              <Mono>dominantBaseline</Mono> — that pair is the whole reason SVG text is awkward to place by hand.
+            </Box>
+            <Box mt={4}>
+              Two things here are still attributes and belong in <Mono>props</Mono>. <Mono>transform=&quot;rotate(-90 48 48)&quot;</Mono>{' '}
+              starts the arc at twelve o&apos;clock, and it is the attribute rather than the <Mono>rotate</Mono> prop because it carries its
+              own centre of rotation — CSS would turn the circle around the corner of the <Mono>viewBox</Mono> instead.
+            </Box>
+            <Box mt={4}>
+              The transition is the one already on every shape inside an <Mono>&lt;svg&gt;</Mono>, so a reader with{' '}
+              <Mono>prefers-reduced-motion: reduce</Mono> gets a gauge that is simply there, with no sweep.
+            </Box>
+          </Section>
+
+          <Section id="tag" title="Until the shapes have components of their own">
+            <Box>
+              These demos write <Mono>&lt;Box tag=&quot;circle&quot;&gt;</Mono>, which is the one place this library still asks you to. An{' '}
+              <Mono>&lt;Svg&gt;</Mono>, <Mono>&lt;Circle&gt;</Mono>, <Mono>&lt;Path&gt;</Mono> set is the next step on this page; until it
+              lands, <Mono>tag</Mono> is how a shape becomes a Box, and every attribute that is not a prop — a path&apos;s <Mono>d</Mono>, a
+              rect&apos;s <Mono>width</Mono>, a line&apos;s <Mono>x1</Mono> — goes through <Mono>props</Mono> as it does anywhere else.
+            </Box>
+            <Box mt={4}>
+              <Mono>d</Mono> is deliberately not a prop even though CSS defines one: Safari does not support it, and a path that silently
+              refuses to draw is worse than an attribute that always does.
+            </Box>
+          </Section>
 
           <Section id="reference" title="Every prop">
             <PropTable />
@@ -359,6 +640,13 @@ const sidebarLinks = [
   { id: 'vector-effect', label: 'Non-scaling stroke' },
   { id: 'not-inherited', label: 'The one exception' },
   { id: 'paint-order', label: 'Outlined text' },
+  { id: 'geometry', label: 'Geometry' },
+  { id: 'geometry-demo', label: 'Moving a shape' },
+  { id: 'rect', label: 'Corners and position' },
+  { id: 'text-anchor', label: 'Anchoring text' },
+  { id: 'baseline-demo', label: 'Baselines' },
+  { id: 'gauge', label: 'A gauge, no JS' },
+  { id: 'tag', label: 'Shapes as Boxes' },
   { id: 'reference', label: 'Every prop' },
   { id: 'themes', label: 'Themes and states' },
 ] as const;
@@ -367,6 +655,12 @@ const dashPatterns: { label: string; dasharray: number | string; linecap: 'butt'
   { label: '12', dasharray: 12, linecap: 'butt' },
   { label: '"12 4"', dasharray: '12 4', linecap: 'butt' },
   { label: '"1 8"', dasharray: '1 8', linecap: 'round' },
+];
+
+const rects: { label: string; rx: number; hoverRx: number }[] = [
+  { label: 'rx={0}', rx: 0, hoverRx: 20 },
+  { label: 'rx={4}', rx: 4, hoverRx: 20 },
+  { label: 'rx={20}', rx: 20, hoverRx: 4 },
 ];
 
 const joins: { linejoin: 'miter' | 'round' | 'bevel'; linecap: 'butt' | 'round' | 'square' }[] = [
@@ -390,6 +684,19 @@ const props: { name: string; css: string; values: string }[] = [
   { name: 'paintOrder', css: 'paint-order', values: 'normal, fill, stroke, markers' },
   { name: 'vectorEffect', css: 'vector-effect', values: 'none, non-scaling-stroke' },
   { name: 'shapeRendering', css: 'shape-rendering', values: 'auto, optimizeSpeed, crispEdges, geometricPrecision' },
+  { name: 'textAnchor', css: 'text-anchor', values: 'start, middle, end' },
+  {
+    name: 'dominantBaseline',
+    css: 'dominant-baseline',
+    values: 'auto, alphabetic, central, middle, hanging, text-top, text-bottom, ideographic, mathematical',
+  },
+  { name: 'cx', css: 'cx', values: 'a number in user units, or a percentage' },
+  { name: 'cy', css: 'cy', values: 'a number in user units, or a percentage' },
+  { name: 'r', css: 'r', values: 'a number in user units, or a percentage' },
+  { name: 'rx', css: 'rx', values: 'a number, a percentage, or auto' },
+  { name: 'ry', css: 'ry', values: 'a number, a percentage, or auto' },
+  { name: 'x', css: 'x', values: 'a number in user units, or a percentage' },
+  { name: 'y', css: 'y', values: 'a number in user units, or a percentage' },
 ];
 
 function PropTable() {

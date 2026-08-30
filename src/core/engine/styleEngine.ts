@@ -630,7 +630,11 @@ export function createStyleEngine(options: StyleEngineOptions = {}): StyleEngine
       `input[type="number"]::-webkit-outer-spin-button,input[type="number"]::-webkit-inner-spin-button{-webkit-appearance: none;margin: 0;}`,
       `.${boxClassName}{display: block;border: 0 solid var(--borderColor);outline: 0px solid var(--outlineColor);margin: 0;padding: 0;background-color: initial;transition: all var(--transitionTime);box-sizing: border-box;font-family: inherit;font-size: inherit;}`,
       `.${svgClassName}{display: block;border: 0 solid var(--borderColor);outline: 0px solid var(--outlineColor);margin: 0;padding: 0;transition: all var(--svgTransitionTime);}`,
-      `.${svgClassName} path,.${svgClassName} circle,.${svgClassName} rect,.${svgClassName} line {transition: all var(--svgTransitionTime);}`,
+      // The shapes inside an <svg> transition on their own variable. The list is explicit rather
+      // than `*` so the rule cannot reach a <foreignObject>'s HTML; ellipse, polygon, polyline and
+      // text joined it with the SVG geometry props, whose whole point is that a shape can move
+      // with no JavaScript — an <ellipse> that cannot transition `rx` would snap instead.
+      `.${svgClassName} path,.${svgClassName} circle,.${svgClassName} ellipse,.${svgClassName} rect,.${svgClassName} line,.${svgClassName} polygon,.${svgClassName} polyline,.${svgClassName} text {transition: all var(--svgTransitionTime);}`,
     ];
 
     if (!isElementMode()) return rules;

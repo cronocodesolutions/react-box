@@ -1334,6 +1334,115 @@ export const cssStyles = {
       styleName: 'shape-rendering',
     },
   ],
+  /**
+   * The text-anchor CSS property aligns SVG text against the `x` its element declares —
+   * `middle` is what centres an axis label under a tick, `end` is what right-aligns a value
+   * against a bar. Inherited, so a value on the `<svg>` sets the default for every label in it.
+   */
+  textAnchor: [
+    {
+      values: ['start', 'middle', 'end'] as const,
+      styleName: 'text-anchor',
+    },
+  ],
+  /**
+   * The dominant-baseline CSS property chooses which baseline of SVG text sits on the `y` its
+   * element declares — `central` is what vertically centres a number inside a gauge, `hanging`
+   * is what hangs a label below an axis line.
+   *
+   * Like `vectorEffect`, and unlike every other property here, this one is not inherited, so a
+   * value on an `<svg>` would never reach the text inside it. Its rule therefore names the
+   * element *and* its descendants, which is the only way the prop can mean what it says on a
+   * container.
+   */
+  dominantBaseline: [
+    {
+      values: ['auto', 'text-bottom', 'alphabetic', 'ideographic', 'middle', 'central', 'mathematical', 'hanging', 'text-top'] as const,
+      styleName: 'dominant-baseline',
+      selector: (className, pseudoClass) => `${className}${pseudoClass},${className}${pseudoClass} *`,
+    },
+  ],
+  /**
+   * The cx CSS property positions the centre of a `<circle>` or an `<ellipse>` horizontally, in
+   * user units. It is a real CSS property, so unlike the attribute it transitions — moving a
+   * point on hover is one prop and no JavaScript.
+   */
+  cx: [
+    {
+      values: 0,
+    },
+    {
+      values: Variables.percentString,
+    },
+  ],
+  /** The cy CSS property positions the centre of a `<circle>` or an `<ellipse>` vertically, in user units. Transitions like `cx`. */
+  cy: [
+    {
+      values: 0,
+    },
+    {
+      values: Variables.percentString,
+    },
+  ],
+  /** The r CSS property sets the radius of a `<circle>`, in user units. Transition it and the circle grows; a percentage is of the viewport's diagonal. */
+  r: [
+    {
+      values: 0,
+    },
+    {
+      values: Variables.percentString,
+    },
+  ],
+  /**
+   * The rx CSS property sets the horizontal radius of an `<ellipse>`, or the corner radius of a
+   * `<rect>` — the SVG answer to `borderRadius`, and in user units rather than on the spacing
+   * scale. `auto` takes the radius from `ry`.
+   */
+  rx: [
+    {
+      values: 0,
+    },
+    {
+      values: ['auto'] as const,
+    },
+    {
+      values: Variables.percentString,
+    },
+  ],
+  /** The ry CSS property sets the vertical radius of an `<ellipse>` or the vertical corner radius of a `<rect>`, in user units. `auto` takes it from `rx`. */
+  ry: [
+    {
+      values: 0,
+    },
+    {
+      values: ['auto'] as const,
+    },
+    {
+      values: Variables.percentString,
+    },
+  ],
+  /**
+   * The x CSS property positions a `<rect>`, `<image>`, `<use>`, `<foreignObject>` or a nested
+   * `<svg>` horizontally, in user units. It does *not* apply to `<text>`, whose `x` accepts a
+   * list of positions and stays an attribute — pass that through `props`.
+   */
+  x: [
+    {
+      values: 0,
+    },
+    {
+      values: Variables.percentString,
+    },
+  ],
+  /** The y CSS property positions a `<rect>`, `<image>`, `<use>`, `<foreignObject>` or a nested `<svg>` vertically, in user units. Not for `<text>` — see `x`. */
+  y: [
+    {
+      values: 0,
+    },
+    {
+      values: Variables.percentString,
+    },
+  ],
   /** The background-image CSS property sets one or more background images on an element. */
   bgImage: [
     {
