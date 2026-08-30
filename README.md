@@ -5,7 +5,14 @@
 [![Tests](https://github.com/box-kite/box-kite/actions/workflows/test.yml/badge.svg)](https://github.com/box-kite/box-kite/actions/workflows/test.yml)
 [![license](https://img.shields.io/npm/l/@cronocode/react-box)](LICENSE)
 
-This is a react base component which will reduce considerably necessity to write css code.
+`Box` is a single React component with ~144 typed CSS props. It generates the CSS for the values you
+pass at runtime and caches every rule by its content, so the same value anywhere in the app reuses
+one class — a project styles itself in TypeScript, with no CSS files to write and no class-name
+convention to remember.
+
+[Docs and live demos](https://box.cronocode.com) · [Contributing](CONTRIBUTING.md) ·
+[Support](SUPPORT.md) · [Security](SECURITY.md) ·
+[Releases](https://github.com/box-kite/box-kite/releases)
 
 ## Getting Started
 
@@ -15,13 +22,13 @@ This is a react base component which will reduce considerably necessity to write
 npm install @cronocode/react-box
 ```
 
-2. Use component
+React 16.14 or newer, including 18 and 19 (both are covered by CI). TypeScript is optional but the
+props are typed for it.
 
-Sizes is equal to `1/4rem`
+2. Use it
 
-`padding={3}` means `1/4 * 3 => 0.75rem`
-
-In the example below is creating a box with `maring: 0.5rem` and `padding: 1.75rem`
+Spacing counts in quarters of a rem: `p={3}` is `0.75rem`, `m={2}` is `0.5rem`. The example below is
+a box with `margin: 0.5rem` and `padding: 1.75rem`.
 
 ```JS
 import Box from "@cronocode/react-box";
@@ -35,55 +42,88 @@ export default function Component(props: Props) {
 }
 ```
 
-**NOTE**: Root `font-size` is set to `16px`
+**NOTE**: the root `font-size` is `16px`, so a quarter of a rem is 4px. Not every prop divides by
+four — `fontSize` divides by 16 (`fontSize={14}` is `0.875rem`), and border widths and `lineHeight`
+are plain pixels (`b={1}` is 1px).
 
 ## Components
 
-- **Box** - base component with a tons of props
+Every component here is a `Box` underneath — the same style props, the same theming, the same
+`component`/`variant` defaults — with the right HTML tag, the ARIA its pattern owes and, where the
+pattern has one, its keyboard. Each is a separate entry point, so a `Textbox` does not pull the
+`DataGrid` into your bundle. Module paths below are relative to the package name, i.e.
+`@cronocode/react-box/components/flex`.
 
 ```JS
 import Box from "@cronocode/react-box";
 ```
 
-<br/>
+### Layout and content
 
-### Alias-shortcuts components
+| Component                                                                    | Module                      | What it is                                                                                    |
+| ---------------------------------------------------------------------------- | --------------------------- | --------------------------------------------------------------------------------------------- |
+| `Flex`                                                                       | `components/flex`           | `Box` with `display: flex`                                                                    |
+| `Grid`                                                                       | `components/grid`           | `Box` with `display: grid`                                                                    |
+| `H1`–`H6`, `P`, `Span`, `Link`, `Img`, `Nav`, `Header`, `Main`, `Section`, … | `components/semantics`      | one `Box` per semantic tag — 25 of them                                                       |
+| `BaseSvg`                                                                    | `components/baseSvg`        | an `<svg>` element that takes the style props                                                 |
+| `VisuallyHidden`                                                             | `components/visuallyHidden` | text for a screen reader only — clipped away rather than hidden, so it stays in the a11y tree |
 
-- **Flex** - this is a `Box` component with `display: flex` style
+### Form controls
 
-```JS
-import Flex from "@cronocode/react-box/components/flex";
-```
+| Component                       | Module                   | What it is                                                                                                                           |
+| ------------------------------- | ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------ |
+| `Button`                        | `components/button`      | `<button>`, with `type` and `onClick` lifted out of `props`                                                                          |
+| `Textbox`                       | `components/textbox`     | `<input>`                                                                                                                            |
+| `Textarea`                      | `components/textarea`    | `<textarea>`                                                                                                                         |
+| `Checkbox`                      | `components/checkbox`    | a real `<input type="checkbox">`; `label` renders the wrapping `<label>` for you, and `indeterminate` reports `aria-checked="mixed"` |
+| `Switch`                        | `components/switch`      | the same input as `role="switch"` — Enter toggles it as well as Space                                                                |
+| `RadioGroup`, `RadioGroup.Item` | `components/radioGroup`  | the APG radio group: one shared `name`, one tab stop, arrow keys between the options                                                 |
+| `RadioButton`                   | `components/radioButton` | a single labelled `<input type="radio">`, for a group you assemble yourself                                                          |
+| `Select`                        | `components/select`      | a `Dropdown` over a list of rows: `data={rows} def={{ valueKey, displayKey }}`                                                       |
+| `Form`                          | `components/form`        | a `<form>` that reads its own fields on submit and hands them to you as one object                                                   |
 
-- **Button** - this is a `Box` component with html tag `button` and `onClick` prop
+### Overlays and data
 
-```JS
-import Button from "@cronocode/react-box/components/button";
-```
+| Component                                       | Module                | What it is                                                                                                                                         |
+| ----------------------------------------------- | --------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `Overlay`                                       | `components/overlay`  | the positioning primitive: a portal rendered where it is declared, so its children escape `overflow: hidden`. No ARIA, no open state, no dismissal |
+| `Tooltip`                                       | `components/tooltip`  | the APG tooltip on top of `Overlay` — hover _and_ focus, `aria-describedby`, Escape, hoverable (WCAG 1.4.13)                                       |
+| `Dropdown`, `Dropdown.Item`, `Dropdown.Display` | `components/dropdown` | the APG combobox: select-only, or the editable one with `isSearchable`                                                                             |
+| `DataGrid`                                      | `components/dataGrid` | the APG grid — sorting, filtering, grouping, row selection, row details, virtualized rows and columns, and a keyboard that covers all of it        |
 
-- **Textbox** - this is a `Box` component with html tag `input`
+Two whose shape is not obvious from a table:
 
-```JS
-import Textbox from "@cronocode/react-box/components/textbox";
-```
-
-- **Tooltip** - the APG tooltip: a description on hover _and_ on focus, wired to its trigger with
-  `aria-describedby`, dismissed with Escape, and hoverable so the pointer can travel onto it
-  (WCAG 1.4.13). The trigger is a render prop, so the ARIA lands on the control itself.
-
-```JS
-import Tooltip from "@cronocode/react-box/components/tooltip";
+```tsx
+// The tooltip's trigger is a render prop, so `aria-describedby` lands on the control itself
+// rather than on a wrapper around it.
+import Tooltip from '@cronocode/react-box/components/tooltip';
 
 <Tooltip content="Deletes the row for good">{(trigger) => <Button {...trigger}>Delete</Button>}</Tooltip>;
 ```
 
-- **Overlay** - the positioning half on its own: renders its children into a portal at the place it
-  is declared, so they escape `overflow: hidden` and clipped ancestors. No ARIA, no open state, no
-  dismissal. This is what `Tooltip` was before it became the pattern.
+```tsx
+// `Form` reads the named fields under it when it submits, and hands them over as one object.
+import Button from '@cronocode/react-box/components/button';
+import Form from '@cronocode/react-box/components/form';
+import Textbox from '@cronocode/react-box/components/textbox';
 
-```JS
-import Overlay from "@cronocode/react-box/components/overlay";
+interface Credentials {
+  email: string;
+  password: string;
+}
+
+<Form<Credentials> p={4} onSubmit={(values) => signIn(values)}>
+  <Textbox name="email" type="email" />
+  <Textbox name="password" type="password" />
+  <Button type="submit">Sign in</Button>
+</Form>;
 ```
+
+`onSubmit(values, event)` runs after the event's `preventDefault()`. A field is in `values` if it
+has a `name`: a lone checkbox or radio contributes its `checked` boolean, a name used more than
+once collects the checked or entered values into an array, and a dotted name (`address.city`,
+`lines[0].qty`) nests. Everything else arrives as the string the DOM holds — the type argument
+describes the object you expect, it is not checked against the fields.
 
 ## Extend props
 

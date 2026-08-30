@@ -191,6 +191,11 @@ export default defineConfig(({ mode }) => {
     test: {
       environment: 'happy-dom',
       globals: true,
+      // Vitest's 5s default is not enough head-room for the heaviest renders in this suite when the
+      // workers are all busy: the DataGrid a11y tests build a virtualized grid and walk its whole
+      // role tree, and one of them timed out at 5.4s in a full run on a loaded machine while
+      // passing in 4s for the entire file on its own. A hung test still fails, just later.
+      testTimeout: 15_000,
       setupFiles: ['./dev/vitest.setup.ts'],
       coverage: {
         provider: 'v8',

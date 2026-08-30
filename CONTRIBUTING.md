@@ -847,14 +847,14 @@ npm run lint
 
 ### Key Scripts
 
-| Script                | Description                      |
-| --------------------- | -------------------------------- |
-| `npm run dev`         | Start Vite dev server for pages/ |
-| `npm run build`       | Build library to dist/           |
-| `npm run build:pages` | Build demo website               |
-| `npm run compile`     | TypeScript type check only       |
-| `npm test`            | Run Vitest tests                 |
-| `npm run lint`        | ESLint check                     |
+| Script                | Description                       |
+| --------------------- | --------------------------------- |
+| `npm run dev`         | Start Vite dev server for pages/  |
+| `npm run build`       | Build library to dist/            |
+| `npm run build:pages` | Build demo website to dist-pages/ |
+| `npm run compile`     | TypeScript type check only        |
+| `npm test`            | Run Vitest tests                  |
+| `npm run lint`        | ESLint check                      |
 
 ---
 

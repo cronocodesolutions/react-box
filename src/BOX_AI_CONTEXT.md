@@ -581,6 +581,43 @@ a boolean for the state, or the tuple `[state, styles]` for both:
 
 ---
 
+## Form Component
+
+A `<form>` that reads its own fields when it submits, so a simple form needs no state per input.
+
+```tsx
+import Form from '@cronocode/react-box/components/form';
+import Textbox from '@cronocode/react-box/components/textbox';
+
+interface Credentials {
+  email: string;
+  password: string;
+}
+
+<Form<Credentials> p={4} onSubmit={(values, e) => signIn(values)}>
+  <Textbox name="email" type="email" />
+  <Textbox name="password" type="password" />
+  <Button type="submit">Sign in</Button>
+</Form>;
+```
+
+`onSubmit(values, event)` runs after the event's own `preventDefault()`, so nothing navigates. The
+object is built from the form's elements, and a field is in it only if it has a `name`:
+
+| In the markup                     | In `values`                                              |
+| --------------------------------- | -------------------------------------------------------- |
+| one named input                   | its `value` as a string                                  |
+| one named checkbox or radio       | its `checked` **boolean**                                |
+| several elements sharing a `name` | an array — the checked values, or every value for inputs |
+| `name="address.city"`             | nested: `{ address: { city } }`                          |
+| `name="lines[0].qty"`             | nested through an array: `{ lines: [{ qty }] }`          |
+
+The type argument is the shape you expect back; it is not checked against the fields, so keep it
+next to the markup. Everything else is a Box prop, and `props` takes the `<form>` attributes
+(`onSubmit` and `ref` are the component's own).
+
+---
+
 ## Tooltip Component
 
 ```tsx

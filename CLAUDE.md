@@ -96,7 +96,7 @@ Pre-built components wrap Box with the correct HTML tag. Each is a separate entr
 
 ### Demo Site
 
-- `pages/` — Full React SPA (React Router) showcasing all components, built with `npm run build:pages`
+- `pages/` — Full React SPA (React Router) showcasing all components, built with `npm run build:pages` (into `dist-pages/`, never `dist/` — that is the library build)
 
 ## Key Conventions
 
