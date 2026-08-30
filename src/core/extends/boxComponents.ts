@@ -1517,9 +1517,6 @@ const boxComponents = {
       },
     },
   },
-  'orders-datagrid': {
-    extends: 'datagrid',
-  },
 } satisfies Components;
 
 export default boxComponents;

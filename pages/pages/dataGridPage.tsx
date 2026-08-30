@@ -306,6 +306,7 @@ export default function DataGridPage() {
             id="full-featured"
             label="Full Featured DataGrid"
             language="jsx"
+            check={false}
             code={`const filters = useMemo(() => {
   const result = [];
   if (genderFilter) result.push((row) => row.gender === genderFilter);
@@ -403,6 +404,7 @@ export default function DataGridPage() {
             id="basic"
             label="Basic DataGrid"
             language="jsx"
+            context="declare const data: { first_name: string; last_name: string; age: number; email: string }[];"
             code={`<DataGrid
   data={data}
   def={{
@@ -654,11 +656,15 @@ export default function DataGridPage() {
             id="row-detail"
             label="Row Detail — Orders with Items"
             language="jsx"
-            code={`// Define a custom component style tree that extends 'datagrid'.
+            check={false}
+            code={`// Define custom component style trees that extend 'datagrid' — 'orders-datagrid' for the outer
+// grid and 'subgrid' for the one inside the detail row. Both names need the same .d.ts
+// augmentation every Box.components() entry does; the Theme Setup page shows it.
 // isExpanded/isExpandedFirstLeaf/isExpandedLastLeaf variants let you style
 // the expanded row's cells individually (e.g. top + side borders).
 // detailRow.content gets left/right borders without causing scroll overflow.
 Box.components({
+  subgrid: { extends: 'datagrid', styles: { b: 0, borderRadius: 0, shadow: 'none' } },
   'orders-datagrid': {
     extends: 'datagrid',
     children: {
@@ -953,7 +959,7 @@ Box.components({
     ],
     rowHeight: 40,
     visibleRowsCount: 5,
-    resizeMode, // 'smooth' | 'instant'
+    resizeMode: 'smooth', // or 'instant'
   }}
 />`}
           >
@@ -1100,6 +1106,7 @@ function PaginatedDataGridDemo() {
       id="pagination"
       label="Server-Side Pagination & Filters"
       language="jsx"
+      check={false}
       code={`const [data, setData] = useState([]);
 const [page, setPage] = useState(1);
 const [totalCount, setTotalCount] = useState(0);

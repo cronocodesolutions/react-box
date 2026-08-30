@@ -110,8 +110,8 @@ export default function HomePage() {
         <Flex flexWrap="wrap" gap={5} py={10} d="column">
           <FeatureCard
             icon={<Zap size={22} />}
-            title="Lightning Fast"
-            description="Zero runtime overhead. Styles are generated once and cached for optimal performance."
+            title="Generated Once, Shared"
+            description="Each prop value becomes one atomic class the first time it is used, then every component reuses it."
           />
           <FeatureCard
             icon={<BoxIcon size={22} />}
@@ -126,7 +126,7 @@ export default function HomePage() {
           <FeatureCard
             icon={<Layers size={22} />}
             title="Composable"
-            description="Build complex UIs by composing simple components. No CSS conflicts, ever."
+            description="Build complex UIs by composing simple components. Props merge in order, so there is no specificity to reason about."
           />
           <FeatureCard
             icon={<Code2 size={22} />}
@@ -180,18 +180,18 @@ function App() {
             <Code
               label="3. Add responsive styles"
               language="jsx"
-              code={`<Box
+              code={`import Flex from '@cronocode/react-box/components/flex';
+
+<Flex
   p={4}
-  sm={{ p: 6 }}
-  lg={{ p: 8 }}
-  display="flex"
   d="column"
-  sm={{ d: "row" }}
   gap={4}
+  sm={{ p: 6, d: 'row' }}
+  lg={{ p: 8 }}
 >
   <Box flex1>Left</Box>
   <Box flex1>Right</Box>
-</Box>`}
+</Flex>`}
             />
           </Flex>
         </Box>

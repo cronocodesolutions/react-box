@@ -24,9 +24,8 @@ export default function ThemeSetupPage() {
             id="define-styles"
             label="Define Your Own Styles"
             language="jsx"
-            code={`import Box from '@cronocode/react-box';
-import Flex from '@cronocode/react-box/components/flex';
-import Button from '@cronocode/react-box/components/button';
+            code={`// boxExtends.ts — register the styles, and export what you registered.
+import Box from '@cronocode/react-box';
 
 export const components = Box.components({
   button: {
@@ -52,19 +51,33 @@ export const components = Box.components({
       },
     },
   },
-});
+});`}
+            codeOnly
+          />
 
-// Add in .d.ts file ===============================================================================================
+          <Code
+            label="Teach TypeScript the names"
+            language="jsx"
+            check={false}
+            code={`// box.d.ts — without this, variant="primary" is a type error: the names exist at runtime only.
 import '@cronocode/react-box';
-import { ExtractBoxStyles, ExtractComponentsAndVariants } from '@cronocode/react-box/types';
-import { components } from './path-to-your-b0x-extends-declaration';
+import { ExtractComponentsAndVariants } from '@cronocode/react-box/types';
+import { components } from './boxExtends';
 
 declare module '@cronocode/react-box/types' {
   namespace Augmented {
     interface ComponentsTypes extends ExtractComponentsAndVariants<typeof components> {}
   }
-}
-// ==================================================================================================================
+}`}
+            codeOnly
+          />
+
+          <Code
+            label="Use them"
+            language="jsx"
+            check={false}
+            code={`import Flex from '@cronocode/react-box/components/flex';
+import Button from '@cronocode/react-box/components/button';
 
 function App() {
   return (
@@ -95,7 +108,7 @@ function App() {
 
 // Apply Box props to <html> for app-wide, inheritable CSS like scrollbar-color, fontFamily, color.
 // Only takes effect with use="global". Supports theme-keyed values.
-function App() {
+function Providers({ children }: { children: React.ReactNode }) {
   return (
     <Box.Theme
       use="global"
@@ -108,7 +121,7 @@ function App() {
         },
       }}
     >
-      <YourApp />
+      {children}
     </Box.Theme>
   );
 }
@@ -124,6 +137,8 @@ function App() {
             label="Theme Switching"
             language="jsx"
             code={`import Box from '@cronocode/react-box';
+import Button from '@cronocode/react-box/components/button';
+import Flex from '@cronocode/react-box/components/flex';
 
 function App() {
   return (
@@ -148,10 +163,10 @@ function Sample() {
     >
       <Flex gap={3} ai="center">
         <Button bgColor="transparent" onClick={() => setTheme('light')}>
-          <LightSvg theme={{ light: { fill: 'indigo-950' }, dark: { fill: 'white' } }} />
+          Light
         </Button>
         <Button bgColor="transparent" onClick={() => setTheme('dark')}>
-          <DarkSvg theme={{ light: { fill: 'indigo-950' }, dark: { fill: 'white' } }} />
+          Dark
         </Button>
         <Box textTransform="capitalize" p={3}>
           This is {theme} theme

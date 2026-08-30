@@ -11,16 +11,30 @@ import Flex from '../../src/components/flex';
 import reactToJsx from '../utils/reactToJsx';
 
 interface Props extends BoxProps {
-  language?: 'javascript' | 'shell' | 'jsx' | 'auto';
+  language?: 'javascript' | 'shell' | 'jsx' | 'css' | 'auto';
   label?: string;
   /** Optional explicit code string. If not provided, children will be converted to JSX string. */
   code?: string;
   /** If true, only show code block without rendering the children demo */
   codeOnly?: boolean;
+  /**
+   * `false` for a block that is deliberately not compilable code — an outline with `...` in it, a
+   * `.d.ts` augmentation, two files shown at once. Read by `scripts/check-docs-snippets.mjs`,
+   * which compiles every other `code` string as a reader would.
+   */
+  check?: boolean;
+  /**
+   * Declarations the snippet is written against but does not show — the row type a DataGrid infers
+   * its cells from, say. Compiled with the snippet by `scripts/check-docs-snippets.mjs`, never
+   * displayed, so keep it to what the surrounding page genuinely owns.
+   */
+  context?: string;
 }
 
 export default function Code(props: Props) {
-  const { children, language = 'jsx', label, code: codeProp, codeOnly, ...restProps } = props;
+  // `check` and `context` are metadata for scripts/check-docs-snippets.mjs — pulled out of the
+  // props so they never reach the DOM, and never read here.
+  const { children, language = 'jsx', label, code: codeProp, codeOnly, check: _check, context: _context, ...restProps } = props;
   const [copied, setCopied] = useState(false);
 
   // Convert children to JSX string if no explicit code prop

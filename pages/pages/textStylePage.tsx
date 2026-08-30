@@ -25,6 +25,7 @@ export default function TextStylePage() {
             label="The concept"
             language="jsx"
             codeOnly
+            check={false}
             code={`// By default, a styleName array applies the SAME value to all CSS properties:
 {
   styleName: ['padding-left', 'padding-right'],
@@ -48,10 +49,10 @@ export default function TextStylePage() {
           <Code
             id="generated-css"
             label="Generated CSS"
-            language="jsx"
+            language="css"
             codeOnly
-            code={`// <Box textStyle="display-lg" />
-// Generates a single class with four different CSS declarations:
+            code={`/* <Box textStyle="display-lg" />
+   Generates a single class with four different CSS declarations: */
 
 .textStyle-display-lg {
   font-size: var(--text-display-lg-size);            /* 36px */
@@ -85,14 +86,16 @@ Box.extend(
       {
         values: ['display-lg', 'display-sm'] as const,
         styleName: ['font-size', 'font-weight', 'line-height', 'letter-spacing'],
-        valueFormat: (value, getVariable, styleName) => {
-          const suffixMap = {
+        // styleName is the property being generated, so it is optional in the signature —
+        // it is only passed for a multi-property prop like this one.
+        valueFormat: (value: string, getVariable: (name: string) => string, styleName?: string) => {
+          const suffixMap: Record<string, string> = {
             'font-size': 'size',
             'font-weight': 'weight',
             'line-height': 'line-height',
             'letter-spacing': 'letter-spacing',
           };
-          return getVariable(\`text-\${value}-\${suffixMap[styleName]}\`);
+          return getVariable(\`text-\${value}-\${suffixMap[styleName!]}\`);
         },
       },
     ],
