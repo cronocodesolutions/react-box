@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { ignoreLogs } from '../dev/tests';
 import Box from './box';
+import BaseSvg from './components/baseSvg';
 import Flex from './components/flex';
 import { renderToStaticMarkup } from './ssg';
 
@@ -101,5 +102,30 @@ describe('SSG', () => {
     expect(result.styles).includes('display:grid');
     expect(result2.styles).not.includes('display:grid');
     expect(result2.styles).includes('display:inline-block');
+  });
+
+  it('renders the SVG paint props into the static stylesheet', () => {
+    const el = (
+      <BaseSvg
+        fill="none"
+        stroke="violet-500"
+        strokeWidth={2}
+        strokeLinecap="round"
+        strokeDasharray="8 4"
+        vectorEffect="non-scaling-stroke"
+      >
+        <path d="M4 12h16" />
+      </BaseSvg>
+    );
+
+    const result = renderToStaticMarkup(el);
+
+    expect(result.styles).includes('.stroke-violet-500{stroke:var(--violet-500)}');
+    expect(result.styles).includes('.strokeWidth-2{stroke-width:2}');
+    expect(result.styles).includes('.strokeLinecap-round{stroke-linecap:round}');
+    expect(result.styles).includes('.strokeDasharray-8_4{stroke-dasharray:8 4}');
+    expect(result.styles).includes('.vectorEffect-non-scaling-stroke,.vectorEffect-non-scaling-stroke *{vector-effect:non-scaling-stroke}');
+    // The class attribute is what the descendant selector hangs off, so it has to survive the space.
+    expect(result.html).includes('strokeDasharray-8_4 vectorEffect-non-scaling-stroke');
   });
 });

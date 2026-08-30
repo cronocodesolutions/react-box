@@ -568,7 +568,11 @@ export function createStyleEngine(options: StyleEngineOptions = {}): StyleEngine
 
     switch (namingMode()) {
       case 'readable':
-        return className;
+        // A value can carry a space (`strokeDasharray='8 4'`). Escaping it would keep the *selector*
+        // legal, but the class attribute would split into two class names and the rule would match
+        // neither, so the space becomes an underscore here instead — the same separator a tuple
+        // value already uses. Hashed and stable names are alphanumeric and need nothing.
+        return className.replace(/\s+/g, '_');
       case 'stable':
         return `_${stableHash(className)}`;
       default:

@@ -3,6 +3,9 @@ import { BoxStylesFormatters } from './boxStylesFormatters';
 import { BoxStyle } from './coreTypes';
 import Variables from './variables';
 
+/** The opacity scale shared by `opacity`, `fillOpacity` and `strokeOpacity`. */
+const opacityValues = [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1] as const;
+
 export const cssStyles = {
   /** The appearance CSS property is used to display UI elements with platform-specific styling, based on the operating system's theme. */
   appearance: [
@@ -300,7 +303,22 @@ export const cssStyles = {
   /** The `display` CSS property sets whether an element is treated as a block or inline box and the layout used for its children, such as flow layout, grid or flex. */
   display: [
     {
-      values: ['none', 'block', 'inline-block', 'flex', 'inline-flex', 'grid', 'inline-grid', 'contents'] as const,
+      values: [
+        'none',
+        'block',
+        'inline',
+        'inline-block',
+        'flex',
+        'inline-flex',
+        'grid',
+        'inline-grid',
+        'contents',
+        'table',
+        'table-header-group',
+        'table-row-group',
+        'table-row',
+        'table-cell',
+      ] as const,
     },
   ],
   /** The `inline` property is a shortcut to transform `block`, `flex` and `grid` value to `inline-block`, `inline-flex` and `inline-grid` respectively. */
@@ -934,7 +952,7 @@ export const cssStyles = {
   /** The opacity CSS property sets the opacity of an element. Opacity is the degree to which content behind an element is hidden, and is the opposite of transparency. */
   opacity: [
     {
-      values: [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1] as const,
+      values: opacityValues,
     },
   ],
   /** The CSS outline-width property sets the thickness of an element's outline. An outline is a line that is drawn around an element, outside the border. */
@@ -1208,11 +1226,112 @@ export const cssStyles = {
       valueFormat: (value, getVariableValue) => getVariableValue(value),
     },
   ],
+  /** The fill-opacity CSS property defines the opacity of the paint applied to the interior of an SVG shape or to SVG text. */
+  fillOpacity: [
+    {
+      values: opacityValues,
+      styleName: 'fill-opacity',
+    },
+  ],
+  /** The fill-rule CSS property defines which parts of a self-intersecting SVG shape count as inside it, and are therefore filled. */
+  fillRule: [
+    {
+      values: ['nonzero', 'evenodd'] as const,
+      styleName: 'fill-rule',
+    },
+  ],
   /** The stroke CSS property defines the color or SVG paint server used to draw an element's stroke. */
   stroke: [
     {
       values: Variables.colorValues,
       valueFormat: (value, getVariableValue) => getVariableValue(value),
+    },
+  ],
+  /** The stroke-opacity CSS property defines the opacity of the paint applied to an SVG element's stroke. */
+  strokeOpacity: [
+    {
+      values: opacityValues,
+      styleName: 'stroke-opacity',
+    },
+  ],
+  /** The stroke-width CSS property sets the width of an SVG element's stroke, in user units — `strokeWidth={2}` is `stroke-width: 2`, no divider. */
+  strokeWidth: [
+    {
+      values: 0,
+      styleName: 'stroke-width',
+    },
+  ],
+  /** The stroke-linecap CSS property defines the shape drawn at the two ends of an open SVG subpath. */
+  strokeLinecap: [
+    {
+      values: ['butt', 'round', 'square'] as const,
+      styleName: 'stroke-linecap',
+    },
+  ],
+  /** The stroke-linejoin CSS property defines the shape drawn where two segments of an SVG path meet. */
+  strokeLinejoin: [
+    {
+      values: ['miter', 'round', 'bevel'] as const,
+      styleName: 'stroke-linejoin',
+    },
+  ],
+  /** The stroke-miterlimit CSS property sets how far a miter join may extend before it is cut back to a bevel. Values below 1 are invalid. */
+  strokeMiterlimit: [
+    {
+      values: 0,
+      styleName: 'stroke-miterlimit',
+    },
+  ],
+  /** The stroke-dasharray CSS property turns an SVG stroke into dashes: a single number is the dash and the gap alike, a string is the full pattern (`'8 4'`). Lengths are user units. */
+  strokeDasharray: [
+    {
+      values: 0,
+      styleName: 'stroke-dasharray',
+    },
+    {
+      values: '' as string,
+      styleName: 'stroke-dasharray',
+    },
+  ],
+  /** The stroke-dashoffset CSS property moves the dash pattern along the path — the property a path-drawing animation transitions. A percentage is of the path's own length. */
+  strokeDashoffset: [
+    {
+      values: 0,
+      styleName: 'stroke-dashoffset',
+    },
+    {
+      values: Variables.percentString,
+      styleName: 'stroke-dashoffset',
+    },
+  ],
+  /** The paint-order CSS property sets what is painted first. `paintOrder="stroke"` puts the stroke behind the fill, which is how outlined SVG text stays legible. */
+  paintOrder: [
+    {
+      values: ['normal', 'fill', 'stroke', 'markers'] as const,
+      styleName: 'paint-order',
+    },
+  ],
+  /**
+   * The vector-effect CSS property controls how an SVG element's stroke reacts to the transforms above it —
+   * `non-scaling-stroke` keeps a hairline one pixel wide however far the viewBox is scaled, which is what a
+   * responsive chart needs.
+   *
+   * Alone among the SVG paint properties this one is not inherited, so a value set on an `<svg>` would never
+   * reach the shapes inside it. Its rule therefore targets the element *and* its descendants — the only way
+   * the prop can mean what it says on a container.
+   */
+  vectorEffect: [
+    {
+      values: ['none', 'non-scaling-stroke'] as const,
+      styleName: 'vector-effect',
+      selector: (className, pseudoClass) => `${className}${pseudoClass},${className}${pseudoClass} *`,
+    },
+  ],
+  /** The shape-rendering CSS property tells the renderer what to trade away when drawing an SVG shape — `crispEdges` turns off anti-aliasing, which is what pixel-exact gridlines want. */
+  shapeRendering: [
+    {
+      values: ['auto', 'optimizeSpeed', 'crispEdges', 'geometricPrecision'] as const,
+      styleName: 'shape-rendering',
     },
   ],
   /** The background-image CSS property sets one or more background images on an element. */

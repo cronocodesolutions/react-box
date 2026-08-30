@@ -5,7 +5,7 @@
 [![Tests](https://github.com/box-kite/box-kite/actions/workflows/test.yml/badge.svg)](https://github.com/box-kite/box-kite/actions/workflows/test.yml)
 [![license](https://img.shields.io/npm/l/@cronocode/react-box)](LICENSE)
 
-`Box` is a single React component with ~144 typed CSS props. It generates the CSS for the values you
+`Box` is a single React component with 129 typed CSS props. It generates the CSS for the values you
 pass at runtime and caches every rule by its content, so the same value anywhere in the app reuses
 one class — a project styles itself in TypeScript, with no CSS files to write and no class-name
 convention to remember.
@@ -124,6 +124,50 @@ has a `name`: a lone checkbox or radio contributes its `checked` boolean, a name
 once collects the checked or entered values into an array, and a dotted name (`address.city`,
 `lines[0].qty`) nests. Everything else arrives as the string the DOM holds — the type argument
 describes the object you expect, it is not checked against the fields.
+
+## SVG
+
+Fourteen SVG paint and stroke properties are Box props, so a shape is themed, hovered and made
+responsive the same way a `<div>` is. `BaseSvg` renders the `<svg>`; the shapes inside it are
+ordinary JSX.
+
+```JSX
+import BaseSvg from '@cronocode/react-box/components/baseSvg';
+
+<BaseSvg
+  viewBox="0 0 200 48"
+  width="200px"
+  fill="none"
+  strokeWidth={3}
+  strokeLinecap="round"
+  strokeDasharray={320}
+  strokeDashoffset={320}
+  hover={{ strokeDashoffset: 0 }}
+  theme={{ dark: { stroke: 'violet-400' }, light: { stroke: 'violet-600' } }}
+>
+  <path d="M8 40 L56 12 L104 34 L152 8 L192 24" />
+</BaseSvg>;
+```
+
+That draws the line on hover, and nothing in it declares a transition: every `<svg>` and the shapes
+inside it already transition on `--svgTransitionTime`, which `prefers-reduced-motion: reduce` sets
+to `0s`.
+
+| Prop                                                                     | Notes                                                                                             |
+| ------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------- |
+| `fill`, `stroke`                                                         | any colour variable, or `'none'`                                                                  |
+| `fillOpacity`, `strokeOpacity`                                           | `0`–`1` in tenths, the same scale as `opacity`                                                    |
+| `fillRule`                                                               | `'nonzero'`, `'evenodd'`                                                                          |
+| `strokeWidth`, `strokeDasharray`, `strokeDashoffset`, `strokeMiterlimit` | numbers in **SVG user units — no divider**. A dash pattern with its own gap is a string, `'12 4'` |
+| `strokeLinecap`, `strokeLinejoin`                                        | `'butt'`/`'round'`/`'square'`, `'miter'`/`'round'`/`'bevel'`                                      |
+| `paintOrder`                                                             | `'normal'`, `'fill'`, `'stroke'`, `'markers'` — `'stroke'` is how outlined text stays legible     |
+| `vectorEffect`                                                           | `'none'`, `'non-scaling-stroke'`                                                                  |
+| `shapeRendering`                                                         | `'auto'`, `'optimizeSpeed'`, `'crispEdges'`, `'geometricPrecision'`                               |
+
+Every one of these is an inherited CSS property, so setting it on the `<svg>` reaches the shapes
+inside — with one exception. `vector-effect` is not inherited, so `vectorEffect` writes a rule that
+names the element _and_ its descendants, and `vectorEffect="non-scaling-stroke"` on the `<svg>` keeps
+a hairline one pixel wide however far the `viewBox` is scaled.
 
 ## Extend props
 
@@ -413,7 +457,7 @@ A complete page — props, pseudo-classes, breakpoints, themes, `extend`, `compo
 
 ## Architecture
 
-The styling engine is framework-free. Everything that generates CSS — the ~144 prop definitions,
+The styling engine is framework-free. Everything that generates CSS — the 129 prop definitions,
 the value formatters, class-name generation, rule ordering, the style sinks (CSSOM, `textContent`,
 string for SSR, style elements for React 19), the flush scheduler, CSS variables and the theme
 runtime — lives in `src/core/` and imports no React at all. CI fails the build if it ever does

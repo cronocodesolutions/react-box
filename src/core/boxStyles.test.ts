@@ -178,9 +178,15 @@ const definitions = Object.entries(cssStyles).flatMap(([prop, defs]) =>
 );
 
 describe('every declared prop value produces a rule', () => {
-  it('covers the whole registry', () => {
-    expect(Object.keys(cssStyles).length).toBeGreaterThan(100);
-    expect(definitions.length).toBeGreaterThan(Object.keys(cssStyles).length);
+  // The prop count is quoted in the README, CLAUDE.md, CONTRIBUTING.md, ARTICLE.md, the npm
+  // description, BOX_AI_CONTEXT.md, both skill files and two places on the docs site. Every one of
+  // those was written by hand and none of them was ever checked, so the figure drifted to '~144'
+  // against a registry of 117 (bug #71). Adding a prop now fails here until they are updated.
+  const PROP_COUNT = 129;
+
+  it('holds exactly the number of props the docs claim', () => {
+    expect(Object.keys(cssStyles).length).toBe(PROP_COUNT);
+    expect(definitions.length).toBeGreaterThan(PROP_COUNT);
   });
 
   it('declares at least one value definition for every prop', () => {
@@ -206,4 +212,94 @@ describe('every declared prop value produces a rule', () => {
       }
     },
   );
+});
+
+/**
+ * The SVG paint and stroke tier. Two things make it worth its own block: the numbers are user
+ * units rather than any of the three dividers above, and `vectorEffect` is the one prop in the
+ * registry that rewrites its own selector.
+ */
+describe('SVG paint and stroke props', () => {
+  it.each([
+    ['fill', 'red-500', 'fill:var(--red-500)'],
+    ['stroke', 'blue-600', 'stroke:var(--blue-600)'],
+    ['fillOpacity', 0.5, 'fill-opacity:0.5'],
+    ['strokeOpacity', 0.8, 'stroke-opacity:0.8'],
+    ['fillRule', 'evenodd', 'fill-rule:evenodd'],
+    ['strokeLinecap', 'round', 'stroke-linecap:round'],
+    ['strokeLinejoin', 'bevel', 'stroke-linejoin:bevel'],
+    ['paintOrder', 'stroke', 'paint-order:stroke'],
+    ['shapeRendering', 'crispEdges', 'shape-rendering:crispEdges'],
+  ] as const)('%s emits %s', (prop, value, declaration) => {
+    expect(generatedRulesFor({ [prop]: value }, `svg-${prop}`)).toContain(`{${declaration}}`);
+  });
+
+  describe('lengths are SVG user units — no divider, no unit', () => {
+    it.each([
+      ['strokeWidth', 'stroke-width'],
+      ['strokeMiterlimit', 'stroke-miterlimit'],
+      ['strokeDasharray', 'stroke-dasharray'],
+      ['strokeDashoffset', 'stroke-dashoffset'],
+    ] as const)('%s passes the number through', (prop, styleName) => {
+      expect(generatedRulesFor({ [prop]: 2 }, `svg-unit-${prop}`)).toContain(`{${styleName}:2}`);
+      expect(generatedRulesFor({ [prop]: 1.5 }, `svg-unit-half-${prop}`)).toContain(`{${styleName}:1.5}`);
+    });
+
+    it('takes a percentage of the path length for the dash offset', () => {
+      expect(generatedRulesFor({ strokeDashoffset: '40%' }, 'svg-dashoffset-pct')).toContain('{stroke-dashoffset:40%}');
+    });
+  });
+
+  describe('a dash pattern is a number or a string', () => {
+    it('reads a single number as the dash and the gap alike', () => {
+      expect(generatedRulesFor({ strokeDasharray: 8 }, 'svg-dash-number')).toContain('{stroke-dasharray:8}');
+    });
+
+    // A space in a value used to split the readable class name in two, so the class attribute held
+    // neither of the names the rule was written for and the dashes never appeared.
+    it('keeps a multi-length pattern in one class name', () => {
+      const engine = makeEngine('svg-dash-pattern');
+      const classNames = renderStyles(engine, { strokeDasharray: '8 4' });
+
+      expect(classNames).toContain('strokeDasharray-8_4');
+      expect(classNames.every((name) => !name.includes(' '))).toBe(true);
+      expect(generatedRulesOf(engine)).toContain('.strokeDasharray-8_4{stroke-dasharray:8 4}');
+    });
+  });
+
+  describe('vectorEffect reaches the shapes inside the element', () => {
+    // vector-effect is the only SVG paint property that is not inherited, so a value on an <svg>
+    // would otherwise style nothing at all.
+    it('targets the element and its descendants', () => {
+      const engine = makeEngine('svg-vector-effect');
+      const classNames = renderStyles(engine, { vectorEffect: 'non-scaling-stroke' }, true);
+
+      expect(classNames).toContain('vectorEffect-non-scaling-stroke');
+      expect(generatedRulesOf(engine)).toContain(
+        '.vectorEffect-non-scaling-stroke,.vectorEffect-non-scaling-stroke *{vector-effect:non-scaling-stroke}',
+      );
+    });
+
+    it('keeps both halves of the selector under a pseudo-class', () => {
+      expect(generatedRulesFor({ hover: { vectorEffect: 'non-scaling-stroke' } }, 'svg-vector-effect-hover')).toContain(
+        '.hover-vectorEffect-non-scaling-stroke:hover,.hover-vectorEffect-non-scaling-stroke:hover *{vector-effect:non-scaling-stroke}',
+      );
+    });
+
+    it('keeps both halves of the selector under a theme', () => {
+      expect(generatedRulesFor({ theme: { dark: { vectorEffect: 'none' } } }, 'svg-vector-effect-theme')).toContain(
+        '.dark .theme-dark-vectorEffect-none,.dark .theme-dark-vectorEffect-none *{vector-effect:none}',
+      );
+    });
+  });
+
+  it('nests under a theme, a pseudo-class and a breakpoint like any other prop', () => {
+    expect(generatedRulesFor({ theme: { dark: { fill: 'slate-100' } } }, 'svg-theme')).toContain(
+      '.dark .theme-dark-fill-slate-100{fill:var(--slate-100)}',
+    );
+    expect(generatedRulesFor({ hover: { stroke: 'red-500' } }, 'svg-hover')).toContain(
+      '.hover-stroke-red-500:hover{stroke:var(--red-500)}',
+    );
+    expect(generatedRulesFor({ md: { strokeWidth: 3 } }, 'svg-breakpoint')).toContain('.md-strokeWidth-3{stroke-width:3}');
+  });
 });

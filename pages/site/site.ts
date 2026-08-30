@@ -56,7 +56,13 @@ export const siteRoutes = [
   {
     path: '/box',
     name: 'Box',
-    description: 'The foundational component: around 144 CSS properties as type-safe props, with the numeric formatters explained.',
+    description: 'The foundational component: 129 CSS properties as type-safe props, with the numeric formatters explained.',
+  },
+  {
+    path: '/svg',
+    name: 'SVG',
+    description:
+      'Fourteen SVG paint and stroke properties as typed Box props — dashes, caps, joins, fill rules and a stroke that ignores the scale, all themeable.',
   },
   {
     path: '/button',
