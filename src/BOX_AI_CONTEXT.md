@@ -1,6 +1,6 @@
 # @cronocode/react-box - AI Assistant Context
 
-Runtime CSS-in-JS library. `Box` component accepts 129 CSS props and generates CSS classes at runtime. Same prop values share a single class.
+Runtime CSS-in-JS library. `Box` component accepts 138 CSS props and generates CSS classes at runtime. Same prop values share a single class.
 
 ---
 
@@ -56,15 +56,15 @@ All imports from `@cronocode/react-box/components/...`. Semantics also export: `
 
 **#1 source of confusion.** Different props have different dividers:
 
-| Prop Category                                           | Divider | Example            | CSS Output                     |
-| ------------------------------------------------------- | ------- | ------------------ | ------------------------------ |
-| Spacing (`p`, `m`, `gap`, `px`, `py`, `mx`, `my`, etc.) | 4       | `p={4}`            | `padding: 1rem` (16px)         |
-| Font size (`fontSize`)                                  | **16**  | `fontSize={14}`    | `font-size: 0.875rem` (14px)   |
-| Width/Height (numeric)                                  | 4       | `width={20}`       | `width: 5rem` (80px)           |
-| Border width (`b`, `bx`, `by`, `bt`, `br`, `bb`, `bl`)  | none    | `b={1}`            | `border-width: 1px`            |
-| Border radius (`borderRadius`, `borderRadiusTop`, …)    | 4       | `borderRadius={2}` | `border-radius: 0.5rem` (8px)  |
-| Line height (`lineHeight`)                              | none    | `lineHeight={24}`  | `line-height: 24px`            |
-| SVG lengths (`strokeWidth`, `strokeDasharray`, …)       | none    | `strokeWidth={2}`  | `stroke-width: 2` (user units) |
+| Prop Category                                                | Divider | Example            | CSS Output                     |
+| ------------------------------------------------------------ | ------- | ------------------ | ------------------------------ |
+| Spacing (`p`, `m`, `gap`, `px`, `py`, `mx`, `my`, etc.)      | 4       | `p={4}`            | `padding: 1rem` (16px)         |
+| Font size (`fontSize`)                                       | **16**  | `fontSize={14}`    | `font-size: 0.875rem` (14px)   |
+| Width/Height (numeric)                                       | 4       | `width={20}`       | `width: 5rem` (80px)           |
+| Border width (`b`, `bx`, `by`, `bt`, `br`, `bb`, `bl`)       | none    | `b={1}`            | `border-width: 1px`            |
+| Border radius (`borderRadius`, `borderRadiusTop`, …)         | 4       | `borderRadius={2}` | `border-radius: 0.5rem` (8px)  |
+| Line height (`lineHeight`)                                   | none    | `lineHeight={24}`  | `line-height: 24px`            |
+| SVG lengths (`strokeWidth`, `strokeDasharray`, `r`, `cx`, …) | none    | `strokeWidth={2}`  | `stroke-width: 2` (user units) |
 
 ```tsx
 // fontSize: divider 16 → value maps directly to px
@@ -134,22 +134,28 @@ All sizing, spacing, and positioning props also accept percentage strings: `p="5
 
 ### SVG
 
-Fourteen SVG paint and stroke properties, on any Box. `BaseSvg` (`components/baseSvg`) renders the `<svg>`; the shapes inside it are ordinary JSX (`<path>`, `<circle>`, `<line>`).
+Twenty-three SVG properties, on any Box. `BaseSvg` (`components/baseSvg`) renders the `<svg>`; the shapes inside it are ordinary JSX (`<path>`, `<circle>`, `<line>`), or `<Box tag="circle">` when a shape wants props of its own.
 
-| Prop                            | CSS Property                  | Accepts                                                                 |
-| ------------------------------- | ----------------------------- | ----------------------------------------------------------------------- |
-| `fill` / `stroke`               | fill / stroke                 | any colour variable, or `'none'`                                        |
-| `fillOpacity` / `strokeOpacity` | fill-opacity / stroke-opacity | `0`–`1` in tenths, same scale as `opacity`                              |
-| `fillRule`                      | fill-rule                     | `'nonzero'`, `'evenodd'`                                                |
-| `strokeWidth`                   | stroke-width                  | number, **user units — no divider** (`strokeWidth={2}` → `2`)           |
-| `strokeLinecap`                 | stroke-linecap                | `'butt'`, `'round'`, `'square'`                                         |
-| `strokeLinejoin`                | stroke-linejoin               | `'miter'`, `'round'`, `'bevel'`                                         |
-| `strokeMiterlimit`              | stroke-miterlimit             | number, 1 or greater                                                    |
-| `strokeDasharray`               | stroke-dasharray              | number (`{12}` = dash 12, gap 12) or the pattern as a string (`"12 4"`) |
-| `strokeDashoffset`              | stroke-dashoffset             | number, or a percentage of the path length (`'40%'`)                    |
-| `paintOrder`                    | paint-order                   | `'normal'`, `'fill'`, `'stroke'`, `'markers'`                           |
-| `vectorEffect`                  | vector-effect                 | `'none'`, `'non-scaling-stroke'`                                        |
-| `shapeRendering`                | shape-rendering               | `'auto'`, `'optimizeSpeed'`, `'crispEdges'`, `'geometricPrecision'`     |
+| Prop                            | CSS Property                  | Accepts                                                                                                                          |
+| ------------------------------- | ----------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| `fill` / `stroke`               | fill / stroke                 | any colour variable, or `'none'`                                                                                                 |
+| `fillOpacity` / `strokeOpacity` | fill-opacity / stroke-opacity | `0`–`1` in tenths, same scale as `opacity`                                                                                       |
+| `fillRule`                      | fill-rule                     | `'nonzero'`, `'evenodd'`                                                                                                         |
+| `strokeWidth`                   | stroke-width                  | number, **user units — no divider** (`strokeWidth={2}` → `2`)                                                                    |
+| `strokeLinecap`                 | stroke-linecap                | `'butt'`, `'round'`, `'square'`                                                                                                  |
+| `strokeLinejoin`                | stroke-linejoin               | `'miter'`, `'round'`, `'bevel'`                                                                                                  |
+| `strokeMiterlimit`              | stroke-miterlimit             | number, 1 or greater                                                                                                             |
+| `strokeDasharray`               | stroke-dasharray              | number (`{12}` = dash 12, gap 12) or the pattern as a string (`"12 4"`)                                                          |
+| `strokeDashoffset`              | stroke-dashoffset             | number, or a percentage of the path length (`'40%'`)                                                                             |
+| `paintOrder`                    | paint-order                   | `'normal'`, `'fill'`, `'stroke'`, `'markers'`                                                                                    |
+| `vectorEffect`                  | vector-effect                 | `'none'`, `'non-scaling-stroke'`                                                                                                 |
+| `shapeRendering`                | shape-rendering               | `'auto'`, `'optimizeSpeed'`, `'crispEdges'`, `'geometricPrecision'`                                                              |
+| `textAnchor`                    | text-anchor                   | `'start'`, `'middle'`, `'end'` — which part of a label sits on its `x`                                                           |
+| `dominantBaseline`              | dominant-baseline             | `'auto'`, `'alphabetic'`, `'central'`, `'middle'`, `'hanging'`, `'text-top'`, `'text-bottom'`, `'ideographic'`, `'mathematical'` |
+| `cx` / `cy`                     | cx / cy                       | number in user units, or a percentage — `<circle>`, `<ellipse>`                                                                  |
+| `r`                             | r                             | number in user units, or a percentage — `<circle>`                                                                               |
+| `rx` / `ry`                     | rx / ry                       | number, a percentage, or `'auto'` — `<ellipse>` radii, `<rect>` corners                                                          |
+| `x` / `y`                       | x / y                         | number in user units, or a percentage — `<rect>`, `<image>`, `<use>`, `<foreignObject>`, nested `<svg>`. NOT `<text>`            |
 
 ```tsx
 import BaseSvg from '@cronocode/react-box/components/baseSvg';
@@ -164,13 +170,23 @@ import BaseSvg from '@cronocode/react-box/components/baseSvg';
 <BaseSvg fill="none" stroke="violet-500" strokeWidth={3} strokeDasharray={320} strokeDashoffset={320} hover={{ strokeDashoffset: 0 }}>
   <path d="M8 40 L56 12 L104 34 L152 8 L192 24" />
 </BaseSvg>
+
+// Geometry is CSS, so a shape moves with no JavaScript. Text is placed by the two text props.
+<BaseSvg viewBox="0 0 96 96" width="96px" fill="none" textAnchor="middle" dominantBaseline="central">
+  <Box tag="circle" cx={48} cy={48} r={38} stroke="indigo-600" strokeWidth={10} hover={{ r: 40 }} />
+  <Box tag="text" props={{ x: 48, y: 48 }} fontSize={20} fill="slate-700">
+    75%
+  </Box>
+</BaseSvg>
 ```
 
-**Three things to get right:**
+**Five things to get right:**
 
 1. **No divider on SVG lengths.** `strokeWidth`, `strokeDasharray`, `strokeDashoffset` and `strokeMiterlimit` pass the number through unchanged — they are measured in the coordinate system the `viewBox` sets up.
 2. **Inheritance does the work.** Put `fill`/`stroke`/`strokeWidth` on the `<svg>`, not on every shape. The exception is a shape carrying its own `fill=` attribute — a presentation attribute on an element beats a value inherited from its parent, so style that shape directly.
-3. **`vectorEffect` is not inherited**, so its rule targets the element _and_ its descendants (`.cls, .cls *`). `vectorEffect="non-scaling-stroke"` on the `<svg>` keeps a hairline one pixel wide at any scale — what a responsive chart needs.
+3. **`vectorEffect` and `dominantBaseline` are not inherited**, so their rules target the element _and_ its descendants (`.cls, .cls *`). `vectorEffect="non-scaling-stroke"` on the `<svg>` keeps a hairline one pixel wide at any scale; `dominantBaseline="central"` on the `<svg>` reaches every label inside it.
+4. **Geometry belongs to the shape, and it transitions.** `cx`/`cy`/`r`/`rx`/`ry`/`x`/`y` are real CSS in SVG 2, so a gauge or a growing bar is a pseudo-class and no JavaScript. They are not inherited and should not be — set them on the shape.
+5. **A `<rect>`'s `width`/`height` are not in that family.** Those prop names belong to the layout scale (`width={32}` → `8rem`), so pass a rect's size through `props={{ width: 40, height: 40 }}`. A path's `d` stays an attribute too — Safari has no CSS `d`.
 
 ---
 

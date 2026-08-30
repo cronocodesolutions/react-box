@@ -5,7 +5,7 @@
 [![Tests](https://github.com/box-kite/box-kite/actions/workflows/test.yml/badge.svg)](https://github.com/box-kite/box-kite/actions/workflows/test.yml)
 [![license](https://img.shields.io/npm/l/@cronocode/react-box)](LICENSE)
 
-`Box` is a single React component with 129 typed CSS props. It generates the CSS for the values you
+`Box` is a single React component with 138 typed CSS props. It generates the CSS for the values you
 pass at runtime and caches every rule by its content, so the same value anywhere in the app reuses
 one class — a project styles itself in TypeScript, with no CSS files to write and no class-name
 convention to remember.
@@ -127,9 +127,9 @@ describes the object you expect, it is not checked against the fields.
 
 ## SVG
 
-Fourteen SVG paint and stroke properties are Box props, so a shape is themed, hovered and made
-responsive the same way a `<div>` is. `BaseSvg` renders the `<svg>`; the shapes inside it are
-ordinary JSX.
+Twenty-three SVG properties are Box props, so a shape is themed, hovered and made responsive the
+same way a `<div>` is. `BaseSvg` renders the `<svg>`; the shapes inside it are ordinary JSX, or
+`<Box tag="circle">` when a shape wants props of its own.
 
 ```JSX
 import BaseSvg from '@cronocode/react-box/components/baseSvg';
@@ -163,11 +163,26 @@ to `0s`.
 | `paintOrder`                                                             | `'normal'`, `'fill'`, `'stroke'`, `'markers'` — `'stroke'` is how outlined text stays legible     |
 | `vectorEffect`                                                           | `'none'`, `'non-scaling-stroke'`                                                                  |
 | `shapeRendering`                                                         | `'auto'`, `'optimizeSpeed'`, `'crispEdges'`, `'geometricPrecision'`                               |
+| `textAnchor`                                                             | `'start'`, `'middle'`, `'end'` — which part of a label sits on its `x`                            |
+| `dominantBaseline`                                                       | `'alphabetic'`, `'central'`, `'hanging'`, … — which part sits on its `y`                          |
+| `cx`, `cy`, `r`, `rx`, `ry`, `x`, `y`                                    | the SVG 2 geometry, in **user units**, or a percentage. `rx`/`ry` also take `'auto'`              |
 
-Every one of these is an inherited CSS property, so setting it on the `<svg>` reaches the shapes
-inside — with one exception. `vector-effect` is not inherited, so `vectorEffect` writes a rule that
-names the element _and_ its descendants, and `vectorEffect="non-scaling-stroke"` on the `<svg>` keeps
-a hairline one pixel wide however far the `viewBox` is scaled.
+Every paint and stroke property here is an inherited one, so setting it on the `<svg>` reaches the
+shapes inside — with two exceptions. `vector-effect` and `dominant-baseline` are not inherited, so
+those two props write a rule that names the element _and_ its descendants: `vectorEffect="non-scaling-stroke"`
+on the `<svg>` keeps a hairline one pixel wide however far the `viewBox` is scaled, and
+`dominantBaseline="central"` on the `<svg>` reaches every label in it.
+
+The geometry props are different again. They belong to one shape, so they go on the shape — but they
+are real CSS, which means they transition, and an animated gauge or a growing bar needs no JavaScript:
+
+```JSX
+<Box tag="circle" cx={48} cy={48} r={38} strokeDasharray={239} strokeDashoffset={239} hover={{ strokeDashoffset: 60, r: 40 }} />;
+```
+
+A `<rect>`'s `width` and `height` are the one gap: those prop names belong to the layout scale
+(`width={32}` is `8rem`), so a rect takes its size through `props={{ width: 40, height: 40 }}` and
+uses `x`, `y` and `rx` for the rest. A path's `d` stays an attribute too — Safari has no CSS `d`.
 
 ## Extend props
 
@@ -457,7 +472,7 @@ A complete page — props, pseudo-classes, breakpoints, themes, `extend`, `compo
 
 ## Architecture
 
-The styling engine is framework-free. Everything that generates CSS — the 129 prop definitions,
+The styling engine is framework-free. Everything that generates CSS — the 138 prop definitions,
 the value formatters, class-name generation, rule ordering, the style sinks (CSSOM, `textContent`,
 string for SSR, style elements for React 19), the flush scheduler, CSS variables and the theme
 runtime — lives in `src/core/` and imports no React at all. CI fails the build if it ever does

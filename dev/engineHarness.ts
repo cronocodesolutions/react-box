@@ -9,7 +9,8 @@ import { BoxStyleProps } from '../src/types';
  */
 
 /** The last rule the engine writes when it initializes — everything after it is generated CSS. */
-export const LAST_BASE_RULE = '._s path,._s circle,._s rect,._s line {transition: all var(--svgTransitionTime);}';
+export const LAST_BASE_RULE =
+  '._s path,._s circle,._s ellipse,._s rect,._s line,._s polygon,._s polyline,._s text {transition: all var(--svgTransitionTime);}';
 
 export function makeEngine(styleElementId: string, options: StyleEngineOptions = {}): StyleEngine {
   return createStyleEngine({ classNames: 'readable', sink: 'textContent', styleElementId, ...options });

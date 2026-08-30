@@ -5,7 +5,7 @@ description: '@cronocode/react-box expert — runtime CSS-in-JS library. Use whe
 
 # @cronocode/react-box AI Skill
 
-Runtime CSS-in-JS library. `Box` accepts 129 CSS props → generates CSS classes at runtime. Same values share a class.
+Runtime CSS-in-JS library. `Box` accepts 138 CSS props → generates CSS classes at runtime. Same values share a class.
 
 ## Installation & Package Management
 
@@ -29,15 +29,15 @@ Check latest: `npm view @cronocode/react-box version`
 
 ## Numeric Value Formatters
 
-| Category                                       | Divider | Example → CSS                                      |
-| ---------------------------------------------- | ------- | -------------------------------------------------- |
-| Spacing (`p`,`m`,`gap`,`px`,`py`…)             | 4       | `p={4}` → 1rem (16px)                              |
-| fontSize                                       | **16**  | `fontSize={14}` → 0.875rem (14px)                  |
-| width/height/min/max (numeric)                 | 4       | `width={20}` → 5rem (80px)                         |
-| Border (`b`,`bx`,`by`…)                        | px      | `b={1}` → 1px                                      |
-| borderRadius                                   | 4       | `borderRadius={2}` → 0.5rem (8px)                  |
-| lineHeight / letterSpacing                     | px      | `lineHeight={24}` → 24px                           |
-| SVG lengths (`strokeWidth`,`strokeDasharray`…) | none    | `strokeWidth={2}` → `stroke-width: 2` (user units) |
+| Category                                                | Divider | Example → CSS                                      |
+| ------------------------------------------------------- | ------- | -------------------------------------------------- |
+| Spacing (`p`,`m`,`gap`,`px`,`py`…)                      | 4       | `p={4}` → 1rem (16px)                              |
+| fontSize                                                | **16**  | `fontSize={14}` → 0.875rem (14px)                  |
+| width/height/min/max (numeric)                          | 4       | `width={20}` → 5rem (80px)                         |
+| Border (`b`,`bx`,`by`…)                                 | px      | `b={1}` → 1px                                      |
+| borderRadius                                            | 4       | `borderRadius={2}` → 0.5rem (8px)                  |
+| lineHeight / letterSpacing                              | px      | `lineHeight={24}` → 24px                           |
+| SVG lengths (`strokeWidth`,`strokeDasharray`,`r`,`cx`…) | none    | `strokeWidth={2}` → `stroke-width: 2` (user units) |
 
 ## Component Shortcuts
 
@@ -66,7 +66,11 @@ expect, not a check against the fields.
 **Borders**: `b`/`bx`/`by`/`bt`/`br`/`bb`/`bl` (px), `borderRadius` (÷4), `borderStyle`
 **Text**: `fontSize` (÷16), `fontWeight`, `lineHeight` (px), `textAlign`/`textDecoration`/`textTransform`/`whiteSpace`/`textOverflow`, `textWrap`
 **Position**: `position`, `top`/`right`/`bottom`/`left`/`inset`, `zIndex`
-**SVG**: `fill`/`stroke` (colour variables), `fillOpacity`/`strokeOpacity` (0–1 in tenths), `fillRule`, `strokeWidth`/`strokeDasharray`/`strokeDashoffset`/`strokeMiterlimit` (**user units — no divider**; a dash pattern with a gap is a string, `"12 4"`), `strokeLinecap`, `strokeLinejoin`, `paintOrder`, `vectorEffect`, `shapeRendering`. All inherited except `vectorEffect`, so set them on the `<svg>` (`BaseSvg`) rather than on every shape.
+**SVG paint & stroke**: `fill`/`stroke` (colour variables), `fillOpacity`/`strokeOpacity` (0–1 in tenths), `fillRule`, `strokeWidth`/`strokeDasharray`/`strokeDashoffset`/`strokeMiterlimit` (**user units — no divider**; a dash pattern with a gap is a string, `"12 4"`), `strokeLinecap`, `strokeLinejoin`, `paintOrder`, `vectorEffect`, `shapeRendering`. All inherited except `vectorEffect`, so set them on the `<svg>` (`BaseSvg`) rather than on every shape.
+
+**SVG text**: `textAnchor` (`start`/`middle`/`end` — which part of a label sits on its `x`) and `dominantBaseline` (`alphabetic`/`central`/`hanging`/… — which part sits on its `y`). `textAnchor` is inherited; `dominantBaseline` is not, so like `vectorEffect` its rule targets the element _and_ its descendants and still works on the `<svg>`.
+
+**SVG geometry** (SVG 2, all **user units — no divider**, or a percentage): `cx`/`cy` (`<circle>`, `<ellipse>`), `r` (`<circle>`), `rx`/`ry` (`<ellipse>` radii, `<rect>` corners; also `auto`), `x`/`y` (`<rect>`, `<image>`, `<use>`, `<foreignObject>`, nested `<svg>` — **not** `<text>`). They are real CSS, so they transition: `<Box tag="circle" r={38} hover={{ r: 40 }} />` is a whole animation. Not inherited — put them on the shape. A `<rect>`'s `width`/`height` are NOT in this family (those prop names are the ÷4 layout scale) — pass them as `props={{ width: 40, height: 40 }}`; a path's `d` stays an attribute (no Safari support).
 **Effects**: `shadow` (`'small'`/`'medium'`/`'large'`/`'xl'`/`'none'`), `opacity`, `cursor`, `pointerEvents`, `transition`, `transform`, `userSelect`, `overflow`
 
 ## Pseudo-Classes & Breakpoints

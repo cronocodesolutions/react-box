@@ -128,4 +128,26 @@ describe('SSG', () => {
     // The class attribute is what the descendant selector hangs off, so it has to survive the space.
     expect(result.html).includes('strokeDasharray-8_4 vectorEffect-non-scaling-stroke');
   });
+
+  it('renders the SVG geometry and text props into the static stylesheet', () => {
+    const el = (
+      <BaseSvg viewBox="0 0 64 64" textAnchor="middle" dominantBaseline="central">
+        <Box tag="circle" cx={32} cy={32} r={20} fill="sky-500" />
+        <Box tag="rect" x={8} y={8} rx={4} ry={4} fill="none" stroke="sky-700" />
+      </BaseSvg>
+    );
+
+    const result = renderToStaticMarkup(el);
+
+    // Geometry is in user units, so the numbers reach CSS exactly as they were written.
+    expect(result.styles).includes('.cx-32{cx:32}');
+    expect(result.styles).includes('.cy-32{cy:32}');
+    expect(result.styles).includes('.r-20{r:20}');
+    expect(result.styles).includes('.x-8{x:8}');
+    expect(result.styles).includes('.y-8{y:8}');
+    expect(result.styles).includes('.rx-4{rx:4}');
+    expect(result.styles).includes('.ry-4{ry:4}');
+    expect(result.styles).includes('.textAnchor-middle{text-anchor:middle}');
+    expect(result.styles).includes('.dominantBaseline-central,.dominantBaseline-central *{dominant-baseline:central}');
+  });
 });

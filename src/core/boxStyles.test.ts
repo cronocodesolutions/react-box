@@ -182,7 +182,7 @@ describe('every declared prop value produces a rule', () => {
   // description, BOX_AI_CONTEXT.md, both skill files and two places on the docs site. Every one of
   // those was written by hand and none of them was ever checked, so the figure drifted to '~144'
   // against a registry of 117 (bug #71). Adding a prop now fails here until they are updated.
-  const PROP_COUNT = 129;
+  const PROP_COUNT = 138;
 
   it('holds exactly the number of props the docs claim', () => {
     expect(Object.keys(cssStyles).length).toBe(PROP_COUNT);
@@ -301,5 +301,77 @@ describe('SVG paint and stroke props', () => {
       '.hover-stroke-red-500:hover{stroke:var(--red-500)}',
     );
     expect(generatedRulesFor({ md: { strokeWidth: 3 } }, 'svg-breakpoint')).toContain('.md-strokeWidth-3{stroke-width:3}');
+  });
+});
+
+/**
+ * The SVG text and geometry tier. The geometry props are the reason it exists: `cx`, `cy`, `r`,
+ * `rx`, `ry`, `x` and `y` are real CSS properties in SVG 2, so a shape can be transitioned with
+ * no JavaScript at all — but only if the numbers stay in the user units the `viewBox` sets up,
+ * which is the one thing three of the four numeric families here would break.
+ */
+describe('SVG text and geometry props', () => {
+  describe('geometry lengths are user units — no divider, no unit', () => {
+    it.each([['cx'], ['cy'], ['r'], ['rx'], ['ry'], ['x'], ['y']] as const)('%s passes the number through', (prop) => {
+      expect(generatedRulesFor({ [prop]: 12 }, `svg-geom-${prop}`)).toContain(`{${prop}:12}`);
+      expect(generatedRulesFor({ [prop]: 0.5 }, `svg-geom-half-${prop}`)).toContain(`{${prop}:0.5}`);
+    });
+
+    it.each([['cx'], ['cy'], ['r'], ['rx'], ['ry'], ['x'], ['y']] as const)('%s takes a percentage of the viewport', (prop) => {
+      expect(generatedRulesFor({ [prop]: '50%' }, `svg-geom-pct-${prop}`)).toContain(`{${prop}:50%}`);
+    });
+
+    // A rect can sit left of or above its viewBox origin, so the geometry props are the only
+    // numeric family besides the inset props that has to survive a minus sign in a class name.
+    it.each([['x'], ['y'], ['cx'], ['cy']] as const)('%s accepts a negative position', (prop) => {
+      const engine = makeEngine(`svg-geom-neg-${prop}`);
+      const classNames = renderStyles(engine, { [prop]: -8 });
+
+      expect(classNames).toContain(`${prop}--8`);
+      expect(generatedRulesOf(engine)).toContain(`.${prop}--8{${prop}:-8}`);
+    });
+
+    it('lets a rect corner radius follow the other axis', () => {
+      expect(generatedRulesFor({ rx: 'auto' }, 'svg-rx-auto')).toContain('{rx:auto}');
+      expect(generatedRulesFor({ ry: 'auto' }, 'svg-ry-auto')).toContain('{ry:auto}');
+    });
+
+    // borderRadius is on the spacing scale (÷4) and rx is not. They read alike and mean different
+    // numbers, which is exactly the confusion the user-units rule exists to prevent.
+    it('does not share the spacing scale with borderRadius', () => {
+      expect(generatedRulesFor({ borderRadius: 8, rx: 8 }, 'svg-rx-vs-radius')).toContain('{rx:8}');
+      expect(generatedRulesFor({ borderRadius: 8, rx: 8 }, 'svg-rx-vs-radius2')).toContain('{border-radius:2rem}');
+    });
+  });
+
+  it('anchors text against the position its element declares', () => {
+    expect(generatedRulesFor({ textAnchor: 'middle' }, 'svg-text-anchor')).toContain('{text-anchor:middle}');
+    expect(generatedRulesFor({ textAnchor: 'end' }, 'svg-text-anchor-end')).toContain('{text-anchor:end}');
+  });
+
+  describe('dominantBaseline reaches the text inside the element', () => {
+    // dominant-baseline is the second SVG property CSS does not inherit (vectorEffect is the
+    // other), so a value on an <svg> would otherwise style nothing at all.
+    it('targets the element and its descendants', () => {
+      const engine = makeEngine('svg-dominant-baseline');
+      const classNames = renderStyles(engine, { dominantBaseline: 'central' }, true);
+
+      expect(classNames).toContain('dominantBaseline-central');
+      expect(generatedRulesOf(engine)).toContain('.dominantBaseline-central,.dominantBaseline-central *{dominant-baseline:central}');
+    });
+
+    it('keeps both halves of the selector under a pseudo-class and a theme', () => {
+      expect(generatedRulesFor({ hover: { dominantBaseline: 'hanging' } }, 'svg-baseline-hover')).toContain(
+        '.hover-dominantBaseline-hanging:hover,.hover-dominantBaseline-hanging:hover *{dominant-baseline:hanging}',
+      );
+      expect(generatedRulesFor({ theme: { dark: { dominantBaseline: 'middle' } } }, 'svg-baseline-theme')).toContain(
+        '.dark .theme-dark-dominantBaseline-middle,.dark .theme-dark-dominantBaseline-middle *{dominant-baseline:middle}',
+      );
+    });
+  });
+
+  it('moves geometry under a pseudo-class, which is the whole zero-JS animation', () => {
+    expect(generatedRulesFor({ r: 20, hover: { r: 28 } }, 'svg-grow')).toContain('.hover-r-28:hover{r:28}');
+    expect(generatedRulesFor({ md: { cx: 40 } }, 'svg-geom-breakpoint')).toContain('.md-cx-40{cx:40}');
   });
 });
