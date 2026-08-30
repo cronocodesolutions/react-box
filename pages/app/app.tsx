@@ -1,3 +1,4 @@
+import { ComponentType } from 'react';
 import { Route, Routes } from 'react-router-dom';
 import AiContextPage from '../pages/aiContextPage';
 import BoxPage from '../pages/boxPage';
@@ -20,33 +21,46 @@ import TextboxPage from '../pages/textboxPage';
 import TextStylePage from '../pages/textStylePage';
 import ThemeSetupPage from '../pages/themeSetupPage';
 import TooltipPage from '../pages/tooltipPage';
+import { SiteRoutePath, siteRoutes } from '../site/site';
 import Layout from './layout';
+
+/**
+ * What renders at each address. The record is keyed by the route table's own paths, so a page
+ * without metadata — or metadata without a page — is a type error rather than a silent 404.
+ */
+const pages: Record<SiteRoutePath, ComponentType> = {
+  '/': HomePage,
+  '/installation': InstallationPage,
+  '/theme-setup': ThemeSetupPage,
+  '/server-components': ServerComponentsPage,
+  '/box': BoxPage,
+  '/button': ButtonPage,
+  '/textbox': TextboxPage,
+  '/textarea': TextareaPage,
+  '/checkbox': CheckboxPage,
+  '/radiobutton': RadioButtonPage,
+  '/switch': SwitchPage,
+  '/tooltip': TooltipPage,
+  '/overlay': OverlayPage,
+  '/dropdown': DropdownPage,
+  '/datagrid': DataGridPage,
+  '/flex': FlexPage,
+  '/grid': GridPage,
+  '/style-grouping': TextStylePage,
+  '/colors': ColorPage,
+  '/ai-context': AiContextPage,
+  '/fido-enrollment': FidoEnrollmentPage,
+};
 
 export default function App() {
   return (
     <Layout>
       <Routes>
-        <Route index element={<HomePage />} />
-        <Route path="/installation" element={<InstallationPage />} />
-        <Route path="/theme-setup" element={<ThemeSetupPage />} />
-        <Route path="/server-components" element={<ServerComponentsPage />} />
-        <Route path="/box" element={<BoxPage />} />
-        <Route path="/flex" element={<FlexPage />} />
-        <Route path="/grid" element={<GridPage />} />
-        <Route path="/textbox" element={<TextboxPage />} />
-        <Route path="/textarea" element={<TextareaPage />} />
-        <Route path="/datagrid" element={<DataGridPage />} />
-        <Route path="/button" element={<ButtonPage />} />
-        <Route path="/checkbox" element={<CheckboxPage />} />
-        <Route path="/radiobutton" element={<RadioButtonPage />} />
-        <Route path="/switch" element={<SwitchPage />} />
-        <Route path="/tooltip" element={<TooltipPage />} />
-        <Route path="/overlay" element={<OverlayPage />} />
-        <Route path="/dropdown" element={<DropdownPage />} />
-        <Route path="/style-grouping" element={<TextStylePage />} />
-        <Route path="/colors" element={<ColorPage />} />
-        <Route path="/ai-context" element={<AiContextPage />} />
-        <Route path="/fido-enrollment" element={<FidoEnrollmentPage />} />
+        {siteRoutes.map(({ path }) => {
+          const Page = pages[path];
+
+          return <Route key={path} path={path} element={<Page />} />;
+        })}
       </Routes>
     </Layout>
   );

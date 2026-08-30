@@ -56,7 +56,6 @@
     "build:next-app": "npm run install:next-app && npm --prefix examples/next-app run build",
     "smoke:next-app": "npm --prefix examples/next-app run smoke",
     "build:pages": "vite build ./pages --config ./pages.vite.config.ts --outDir ../dist-pages --mode production",
-    "postbuild:pages": "node -e \"require('fs').copyFileSync('dist-pages/index.html','dist-pages/404.html')\"",
     "preview": "vite preview ./pages --config ./pages.vite.config.ts --outDir ../dist-pages",
     "build": "vite build",
     "postbuild": "node scripts/postbuild.mjs",

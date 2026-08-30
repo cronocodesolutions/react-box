@@ -7,6 +7,7 @@ import Button from '../../src/components/button';
 import Flex from '../../src/components/flex';
 import TableOfContents from '../components/tableOfContents';
 import PageContext, { TocEntry } from '../pageContext';
+import DocumentHead from '../site/documentHead';
 import Sidebar from './sidebar';
 
 interface LayoutProps {
@@ -37,6 +38,7 @@ export default function Layout({ children }: LayoutProps) {
         light: { bgColor: 'white', color: 'slate-900', bgImage: 'gradient-aurora-light' },
       }}
     >
+      <DocumentHead />
       <ScrollToTop />
 
       {/* Mobile Header */}
