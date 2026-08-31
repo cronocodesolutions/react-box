@@ -1,6 +1,7 @@
 import { cloneElement, forwardRef, isValidElement, Ref } from 'react';
 import { BoxClassNameProps, useClassNames } from '../box';
 import { TagPropsType } from '../react/boxProps';
+import { hasAttributesInProps } from '../react/svg/attributesInProps';
 import svgNaming from '../react/svg/svgNaming';
 import { BoxStyleProps } from '../types';
 
@@ -72,9 +73,26 @@ function IconImpl(props: IconProps, ref: Ref<SVGSVGElement>) {
     );
   }
 
+  /**
+   * Where the child's DOM attributes go. An icon set spreads its props onto its `<svg>`, so they go
+   * on top; one of this library's own components keeps them in a `props` bag, and handing `role`
+   * and `aria-label` to a Box at the top level drops them without a word (bug #78). The child says
+   * which it is — see `attributesInProps`.
+   */
+  const inProps = hasAttributesInProps(children.type);
+  const childProps = children.props as { props?: IconChildProps; label?: string };
+  const given = (inProps ? childProps.props : children.props) ?? {};
+
+  // A component of ours names itself with a `label` prop rather than with an attribute, and that is
+  // a decision as much as a hand-written `aria-label` is: without reading it, an `<Icon>` around an
+  // `<Svg label="…">` would add `aria-hidden` on top of the name the child is about to write.
+  const alreadyNamed = inProps && childProps.label !== undefined ? { ...given, 'aria-label': childProps.label } : given;
+  const attributes = { ...tagProps, ...svgNaming(label, { ...alreadyNamed, ...tagProps }) };
+
   const iconProps: IconChildProps = {
-    ...tagProps,
-    ...svgNaming(label, { ...children.props, ...tagProps }),
+    // Merged with what the child already had: `cloneElement` replaces a prop it is given, so a bare
+    // `props` bag here would clone away the attributes the child was written with.
+    ...(inProps ? { props: { ...given, ...attributes } } : attributes),
     // Spread rather than assigned: `style: undefined` would clone away a style the icon set wrote.
     ...(style ? { style } : undefined),
     ref,

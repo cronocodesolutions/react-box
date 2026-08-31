@@ -71,6 +71,12 @@ export const siteRoutes = [
       'Box props on an icon somebody else drew — one adapter for lucide, Tabler, react-icons and a raw <svg>: sized on the ÷4 scale, themed, and named on purpose.',
   },
   {
+    path: '/charts',
+    name: 'Charts',
+    description:
+      'Sparklines, progress rings, gauges and mini donuts as Boxes — no chart library, and cheap enough for one in every row of a 10,000-row grid.',
+  },
+  {
     path: '/button',
     name: 'Button',
     description: 'A real button element with variants, sizes and states, styled entirely through Box props.',

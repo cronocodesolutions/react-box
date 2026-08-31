@@ -60,15 +60,16 @@ import Box from "@cronocode/react-box";
 
 ### Layout and content
 
-| Component                                                                    | Module                      | What it is                                                                                    |
-| ---------------------------------------------------------------------------- | --------------------------- | --------------------------------------------------------------------------------------------- |
-| `Flex`                                                                       | `components/flex`           | `Box` with `display: flex`                                                                    |
-| `Grid`                                                                       | `components/grid`           | `Box` with `display: grid`                                                                    |
-| `H1`–`H6`, `P`, `Span`, `Link`, `Img`, `Nav`, `Header`, `Main`, `Section`, … | `components/semantics`      | one `Box` per semantic tag — 25 of them                                                       |
-| `Svg`, `Path`, `Circle`, `Rect`, `SvgText`, …                                | `components/svg`            | one component per SVG element — 20 of them, so a drawing never writes `tag`                   |
-| `Icon`                                                                       | `components/icon`           | Box props on an icon somebody else drew — lucide, Tabler, react-icons, a raw `<svg>`          |
-| `BaseSvg`                                                                    | `components/baseSvg`        | deprecated: `Svg` with the 24×24 icon preset                                                  |
-| `VisuallyHidden`                                                             | `components/visuallyHidden` | text for a screen reader only — clipped away rather than hidden, so it stays in the a11y tree |
+| Component                                                                    | Module                      | What it is                                                                                     |
+| ---------------------------------------------------------------------------- | --------------------------- | ---------------------------------------------------------------------------------------------- |
+| `Flex`                                                                       | `components/flex`           | `Box` with `display: flex`                                                                     |
+| `Grid`                                                                       | `components/grid`           | `Box` with `display: grid`                                                                     |
+| `H1`–`H6`, `P`, `Span`, `Link`, `Img`, `Nav`, `Header`, `Main`, `Section`, … | `components/semantics`      | one `Box` per semantic tag — 25 of them                                                        |
+| `Svg`, `Path`, `Circle`, `Rect`, `SvgText`, …                                | `components/svg`            | one component per SVG element — 20 of them, so a drawing never writes `tag`                    |
+| `Icon`                                                                       | `components/icon`           | Box props on an icon somebody else drew — lucide, Tabler, react-icons, a raw `<svg>`           |
+| `Sparkline`, `ProgressRing`, `Gauge`, `MiniDonut`                            | `components/chart`          | chart micro-primitives over those elements — a chart that takes Box props and no chart library |
+| `BaseSvg`                                                                    | `components/baseSvg`        | deprecated: `Svg` with the 24×24 icon preset                                                   |
+| `VisuallyHidden`                                                             | `components/visuallyHidden` | text for a screen reader only — clipped away rather than hidden, so it stays in the a11y tree  |
 
 ### Form controls
 
@@ -224,6 +225,31 @@ const { className, styles } = useClassNames({ color: 'sky-500', hover: { color: 
 
 `styles` is defined in element mode only, where the CSS travels as hoistable `<style>` elements
 rather than going to a stylesheet; elsewhere it is undefined and rendering it costs nothing.
+
+### Charts
+
+Four micro-primitives, built from the SVG components — the small drawings a dashboard needs rather
+than a chart library:
+
+```JSX
+import { Gauge, MiniDonut, ProgressRing, Sparkline } from '@cronocode/react-box/components/chart';
+
+<Sparkline data={[4, 9, 6, 12, 10, 15]} variant="area" color="sky-500" width="7rem" />;
+<ProgressRing value={0.62} color="emerald-500" label="62% complete" />;
+<Gauge value={0.4} sweep={180} color="rose-500" />;
+<MiniDonut data={[5, 3, 2]} />;
+```
+
+There are no axes, no legends and no data transformations: what they give you instead is that a
+chart is a Box, so its colour, its size, its dark mode and its hover state are the props you already
+know. A sparkline stretches to whatever box it is in (and keeps its line one width thick, through
+`vectorEffect="non-scaling-stroke"`), a ring's arc eases between values with no animation code, and
+naming follows `Svg`: no `label` means `aria-hidden`, a `label` means `role="img"`.
+
+They are cheap enough for one in every row of a virtualized grid, because the part that differs per
+row — the shape — is the `d` attribute, which the styling engine never sees. What _is_ a style prop
+is the paint, which the rows share. `fill` and `stroke` also take `url(#gradient)` and
+`var(--chart-1)` now, so a gradient fill is a value with a theme and a `hover`, not an attribute.
 
 ## Extend props
 
@@ -524,15 +550,15 @@ React is a thin adapter on top of it:
 
 |                                                            | Files | Lines | Share     |
 | ---------------------------------------------------------- | ----- | ----- | --------- |
-| Core engine (`src/core/`, `core.ts`)                       | 20    | 4,738 | 90.0%     |
-| React binding (`src/react/`, `box.ts`, `rsc.ts`, `ssg.ts`) | 13    | 524   | **10.0%** |
+| Core engine (`src/core/`, `core.ts`)                       | 20    | 5,346 | 89.9%     |
+| React binding (`src/react/`, `box.ts`, `rsc.ts`, `ssg.ts`) | 14    | 599   | **10.1%** |
 
 The binding is the whole React-specific surface: resolve class names during render, flush the
 pending rules from `useInsertionEffect`, render the style elements of the Server-Component path,
 and hold the theme state. React feature code the components share sits alongside it and is counted
-separately — three helper hooks (`useVisibility`, `usePortalContainer`, `useVirtualization`) and
-the modules behind [`@cronocode/react-box/a11y`](#behaviour-primitives-for-your-own-components),
-697 lines together. A Vue adapter would need its own arrow-key navigation for the same reason it
+separately — three helper hooks (`useVisibility`, `usePortalContainer`, `useVirtualization`), the
+modules behind [`@cronocode/react-box/a11y`](#behaviour-primitives-for-your-own-components), the
+markup the form controls share, and the ARIA the SVG and chart components share, 999 lines together. A Vue adapter would need its own arrow-key navigation for the same reason it
 would need its own components, which says nothing about how much of the styling engine is
 React-specific.
 

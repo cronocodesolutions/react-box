@@ -107,13 +107,17 @@ if (violations.length) {
 // Informational: the numbers published in the README architecture section. The binding is what a
 // non-React adapter would have to reimplement to render Box — the engine's React half and nothing
 // else. React feature code that ships alongside it (the shared component hooks, the behaviour
-// primitives in `src/react/a11y`, the markup the form controls share in `src/react/forms`) is
+// primitives in `src/react/a11y`, the markup the form controls share in `src/react/forms`, the ARIA and
+// the attribute conventions the SVG and icon components share in `src/react/svg`) is
 // counted separately: a Vue adapter would need its own arrow-key navigation for the same reason it
 // would need its own components, which says nothing about how much of *this* library is
 // framework-specific.
 const reactFiles = walk('src/react');
 const isFeature = (path) =>
-  path.startsWith('src/react/hooks/') || path.startsWith('src/react/a11y/') || path.startsWith('src/react/forms/');
+  path.startsWith('src/react/hooks/') ||
+  path.startsWith('src/react/a11y/') ||
+  path.startsWith('src/react/forms/') ||
+  path.startsWith('src/react/svg/');
 
 const core = measure(coreFiles);
 const binding = measure([...reactFiles.filter((p) => !isFeature(p)), 'src/box.ts', 'src/rsc.ts', 'src/ssg.ts']);

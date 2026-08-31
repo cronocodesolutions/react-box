@@ -1,6 +1,7 @@
 import { forwardRef, Ref, RefAttributes } from 'react';
 import Box, { BoxProps, BoxTagProps } from '../box';
 import { ExtractElementFromTag } from '../react/reactTypes';
+import { withAttributesInProps } from '../react/svg/attributesInProps';
 import svgNaming from '../react/svg/svgNaming';
 import { ComponentsAndVariants } from '../types';
 import StringUtils from '../utils/string/stringUtils';
@@ -84,6 +85,9 @@ function svgElement<
 
   comp.displayName = displayName ?? StringUtils.capitalize(tagName);
 
+  // These are Boxes, so their attributes live in `props` — `Icon` has to know before it clones one.
+  withAttributesInProps(comp);
+
   return comp as unknown as SvgElementType<TTag, TAttribute, TKey>;
 }
 
@@ -123,7 +127,7 @@ function SvgImpl(props: Props, ref: Ref<SVGSVGElement>) {
 }
 
 /** The root `<svg>`: the coordinate system, the size, and whether a screen reader is told about it. */
-export const Svg = /* @__PURE__ */ forwardRef(SvgImpl);
+export const Svg = /* @__PURE__ */ withAttributesInProps(forwardRef(SvgImpl));
 Svg.displayName = 'Svg';
 
 export type SvgProps = React.ComponentProps<typeof Svg>;

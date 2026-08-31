@@ -43,6 +43,7 @@ export const PACKAGE_NAME = '@cronocode/react-box';
 export const SERVER_SAFE_COMPONENTS = [
   'baseSvg',
   'button',
+  'chart',
   'flex',
   'grid',
   'icon',
@@ -175,6 +176,41 @@ export function serverSafeModules() {
   }
 
   return modules;
+}
+
+/**
+ * The modules only **one** component entry reaches, and that no published entry reaches at all.
+ *
+ * They belong inside that component's own chunk. Every shared group in the split is imported by
+ * something everybody imports — `react-shared` is reached by the `react-server` entry and by every
+ * server-safe component — so a leaf that lands in one is paid for by consumers who never use it:
+ * `chartUtils` in `react-shared` put the sparkline geometry into `box.mjs`, `rsc.mjs` and the
+ * DataGrid, ~0.9 KB gz each for arithmetic none of them can reach.
+ *
+ * A rule rather than another hand-maintained group, because the same trap has now caught three
+ * different features (the engine inside `client`, `forms` inside `react-shared`, and this).
+ */
+export function componentPrivateModules() {
+  const published = new Set([
+    ...moduleGraph(BOX_ENTRY).modules.keys(),
+    ...moduleGraph(RSC_ENTRY).modules.keys(),
+    ...moduleGraph(CORE_ENTRY).modules.keys(),
+    ...moduleGraph('src/ssg.ts').modules.keys(),
+    ...moduleGraph('src/a11y.ts').modules.keys(),
+  ]);
+
+  const reachedBy = new Map();
+
+  for (const name of componentEntries()) {
+    for (const path of componentGraph(name).modules.keys()) {
+      // A component's own file is already its own chunk; only its private leaves are in question.
+      if (path.startsWith('src/components/')) continue;
+
+      reachedBy.set(path, (reachedBy.get(path) ?? 0) + 1);
+    }
+  }
+
+  return new Set([...reachedBy].filter(([path, count]) => count === 1 && !published.has(path)).map(([path]) => path));
 }
 
 /** The component entries the build publishes, read from disk, so a new one cannot go unclassified. */

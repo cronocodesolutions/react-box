@@ -239,18 +239,77 @@ describe('Icon', () => {
   });
 
   /**
-   * The one shape `Icon` is not for. `Svg` takes these props already — it is a Box — so wrapping it
-   * adds a class it cannot use and hands attributes to a component whose attributes live in
-   * `props`. The test states the boundary rather than pretending it is not there.
+   * `Svg` takes these props already — it is a Box — so wrapping one in `Icon` is still not what the
+   * adapter is for. It used to be worse than redundant: `Icon` hands attributes the way an icon set
+   * takes them, on top, while a Box keeps them in `props`, so the name was dropped and the icon came
+   * out `aria-hidden` and unnamed (bug #78). The adapter asks the child which convention it follows.
    */
-  it('is not the way to style this library’s own Svg, which takes the props directly', () => {
-    const svg = renderIcon(
-      <Svg viewBox="0 0 24 24" width="1.5rem" color="sky-500" label="Sunny">
-        <Path d="M12 3v18" />
-      </Svg>,
-    );
+  describe('a child of this library’s own', () => {
+    it('is styled directly, which is the way to do it', () => {
+      const svg = renderIcon(
+        <Svg viewBox="0 0 24 24" width="1.5rem" color="sky-500" label="Sunny">
+          <Path d="M12 3v18" />
+        </Svg>,
+      );
 
-    expect(svg.getAttribute('class')).toContain('color-sky-500');
-    expect(svg).toHaveAttribute('role', 'img');
+      expect(svg.getAttribute('class')).toContain('color-sky-500');
+      expect(svg).toHaveAttribute('role', 'img');
+    });
+
+    it('is still named when it is wrapped, in the props bag where its attributes live', () => {
+      const svg = renderIcon(
+        <Icon label="Sort" color="sky-500">
+          <Svg viewBox="0 0 24 24">
+            <Path d="M12 3v18" />
+          </Svg>
+        </Icon>,
+      );
+
+      expect(svg).toHaveAttribute('role', 'img');
+      expect(svg).toHaveAttribute('aria-label', 'Sort');
+      expect(svg.getAttribute('class')).toContain('color-sky-500');
+    });
+
+    it('is hidden when it is wrapped and nobody named it', () => {
+      const svg = renderIcon(
+        <Icon>
+          <Svg viewBox="0 0 24 24">
+            <Path d="M12 3v18" />
+          </Svg>
+        </Icon>,
+      );
+
+      expect(svg).toHaveAttribute('aria-hidden', 'true');
+      expect(svg).not.toHaveAttribute('role');
+    });
+
+    // `cloneElement` replaces a prop it is given, and for a Box that prop is the whole attribute
+    // bag — so the routing has to merge rather than assign.
+    it('keeps the attributes the child was written with', () => {
+      const svg = renderIcon(
+        <Icon label="Sort">
+          <Svg viewBox="0 0 24 24" props={{ 'aria-roledescription': 'sort marker' }}>
+            <Path d="M12 3v18" />
+          </Svg>
+        </Icon>,
+      );
+
+      expect(svg).toHaveAttribute('aria-roledescription', 'sort marker');
+      expect(svg).toHaveAttribute('aria-label', 'Sort');
+      expect(svg).toHaveAttribute('viewBox', '0 0 24 24');
+    });
+
+    it('leaves a name the child gave itself alone', () => {
+      const svg = renderIcon(
+        <Icon>
+          <Svg viewBox="0 0 24 24" label="Drawn by hand">
+            <Path d="M12 3v18" />
+          </Svg>
+        </Icon>,
+      );
+
+      expect(svg).toHaveAttribute('aria-label', 'Drawn by hand');
+      expect(svg).not.toHaveAttribute('aria-hidden');
+    });
   });
 });

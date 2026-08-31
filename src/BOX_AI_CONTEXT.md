@@ -193,8 +193,8 @@ import { Circle, Path, Rect, Svg, SvgText } from '@cronocode/react-box/component
 4. **Geometry belongs to the shape, and it transitions.** `cx`/`cy`/`r`/`rx`/`ry`/`x`/`y` are real CSS in SVG 2, so a gauge or a growing bar is a pseudo-class and no JavaScript. They are not inherited and should not be — set them on the shape.
 5. **Each component settles the names SVG and Box both use, for its own element.** On `Path`, `d` is path data (not `flexDirection`); on `Rect`, `width`/`height` are user units (not the ÷4 layout scale); on `SvgText` and `TSpan`, `x`/`y`/`dx`/`dy` are attributes, because the CSS geometry properties do not apply to text; on `RadialGradient`, `cx`/`cy`/`r` are attributes, because they do not apply to a gradient either — while on `Circle` the same names stay CSS and transition. `transform` is a prop on every shape and group (`transform="rotate(-90 48 48)"` carries its own centre, which the CSS `rotate` prop cannot).
 6. **`Svg` sizes with attributes and names itself with `label`.** `viewBox`, `preserveAspectRatio`, `width` and `height` are the SVG attributes (`width="100%"`, `width={200}`), so the ÷4 layout `width`/`height` are not available on it. No `label` means `aria-hidden` — decoration, which is what most SVG is; `label` makes it `role="img"` with that name. A role or `aria-*` of your own in `props` wins over both.
-7. **An icon from a set is not SVG you draw — it is `<Icon>`.** `<Icon size={5} color="amber-500" label="Sunny"><Sun /></Icon>` from `components/icon`, wrapping one element from lucide, Tabler, react-icons, or a raw `<svg>`. `size` is the ÷4 scale (`size={6}` is 24px, the default) and lands in the _class_, where a CSS declaration outranks the `width`/`height` attributes the icon set writes — which is why `Icon` needs to know no set's API. `strokeWidth` is the same: an ordinary Box prop, so it can change on hover. No `label` means `aria-hidden`; a `label` means `role="img"`. **Do not wrap this library's own `<Svg>` in it** — `Svg` takes these props directly and its attributes live in `props`.
-8. **A paint server is a URL, so it goes in `props`.** `fill` takes a colour variable, not `url(#id)`: write `props={{ fill: 'url(#sky)' }}`, and `props={{ clipPath: 'url(#frame)' }}` for a clip path (the `clipPath` prop is the CSS shape list, not a URL). A gradient stop can still be themed — `<Stop stopColor="currentColor" color="amber-300" />`.
+7. **An icon from a set is not SVG you draw — it is `<Icon>`.** `<Icon size={5} color="amber-500" label="Sunny"><Sun /></Icon>` from `components/icon`, wrapping one element from lucide, Tabler, react-icons, or a raw `<svg>`. `size` is the ÷4 scale (`size={6}` is 24px, the default) and lands in the _class_, where a CSS declaration outranks the `width`/`height` attributes the icon set writes — which is why `Icon` needs to know no set's API. `strokeWidth` is the same: an ordinary Box prop, so it can change on hover. No `label` means `aria-hidden`; a `label` means `role="img"`. **Reach for `Svg` rather than wrapping one in `Icon`** — `Svg` takes these props directly. (Wrapping one does work: `Icon` asks the child which convention it follows and routes `role`/`aria-label` into `props` for a component of ours. It is still a layer nobody needs.)
+8. **A paint server is a value, not an attribute.** `fill`, `stroke` and `clipPath` take `url(#id)` (a `<LinearGradient>`, a pattern, a `<ClipPath>` the document defines) and `var(--name)` (a variable somebody else declared) beside the colour tokens — so `fill="url(#sky)"` and `clipPath="url(#frame)"`, and both can differ per theme, on `hover` and per breakpoint. Only those two shapes are accepted: anything else emits no rule at all rather than a broken declaration. A gradient stop is still themed the same way — `<Stop stopColor="currentColor" color="amber-300" />`.
 9. **An icon outside lucide comes through the same `<Icon>`.** Iconify carries 300,000+ icons in 200-plus sets, and the choice is only about _when_ the icon becomes markup. One icon: copy its SVG and paste it into an `<Icon>` — no dependency, renders on a server. A set: `unplugin-icons` compiles `~icons/<set>/<name>` into a component at build time from an `@iconify-json/<set>` devDependency (`npm i -D unplugin-icons @iconify-json/<set> @svgr/core @svgr/plugin-jsx`, the plugin with `{ compiler: 'jsx', jsx: 'react' }`, and `/// <reference types="unplugin-icons/types/react" />` in a `.d.ts`) — nothing fetched at runtime, server-renders. A name that is data (from a CMS, from a user): `@iconify/react`'s `<Icon icon="set:name"/>` inside our `<Icon>` — it fetches in the browser, so it is a client component and the server sends no icon. **Turbopack runs no unplugin**, so under Next.js 16 the build-time recipe needs `next build --webpack`; the other two work as they are.
 
 ---
@@ -734,6 +734,94 @@ component guarantees, so you do not wire it: `role="tooltip"`, `aria-describedby
 while it is open, opening on hover **and** focus, Escape to dismiss with focus left where it is (and
 no re-show until the pointer leaves and returns), the pointer able to move onto the tooltip, and no
 auto-hide timer — the three WCAG 1.4.13 rules.
+
+---
+
+## Chart primitives (`components/chart`)
+
+Four small drawings built from the `components/svg` elements, server-safe, in one entry. **Not a
+chart library**: no axes, no legends, no data transformations. What they give you is that a chart is
+a Box — its colour, size, dark mode, hover state and breakpoints are the props you already know.
+For a real chart with axes and a tooltip, theme Recharts instead.
+
+```tsx
+import { Gauge, MiniDonut, ProgressRing, Sparkline } from '@cronocode/react-box/components/chart';
+
+// A sparkline stretches to whatever box it is in and keeps its line one width thick.
+<Sparkline data={[4, 9, 6, 12, 10, 15]} width="7rem" color="sky-500" />
+<Sparkline data={[4, 9, 6, 12, 10, 15]} variant="area" fillOpacity={0.2} color="violet-500" />
+<Sparkline data={[4, 9, 6, 12]} variant="bar" min={0} max={20} color="emerald-500" />
+
+// A ring or a dial: the arc eases between values with no animation code.
+<ProgressRing value={0.62} color="emerald-500" label="62% complete" />
+<Gauge value={0.4} sweep={180} start={270} color="rose-500">
+  <SvgText x={50} y={48} textAnchor="middle" fontSize={22} fill="rose-500" stroke="none">40%</SvgText>
+</Gauge>
+
+// One segment per value, each its share of the whole. No total needed.
+<MiniDonut data={[5, 3, 2]} colors={['sky-500', 'emerald-500', 'var(--chart-3)']} />
+
+// A gradient fill is a value now, so it takes a theme and a hover like any other paint.
+<Sparkline data={[4, 9, 6, 12]} variant="area" stroke="url(#trend)" fill="url(#trend)">
+  <Defs>
+    <LinearGradient id="trend" x1="0" y1="0" x2="1" y2="0">
+      <Stop offset="0%" stopColor="currentColor" color="sky-500" />
+      <Stop offset="100%" stopColor="currentColor" color="violet-500" />
+    </LinearGradient>
+  </Defs>
+</Sparkline>
+```
+
+| Prop              | Component                | Default                 | What it is                                                                                         |
+| ----------------- | ------------------------ | ----------------------- | -------------------------------------------------------------------------------------------------- |
+| `data`            | `Sparkline`, `MiniDonut` | —                       | The numbers. A sparkline reads them oldest-first; a donut draws each as its share of the whole     |
+| `variant`         | `Sparkline`              | `'line'`                | `'line'`, `'area'` (the line with the space beneath it filled) or `'bar'`                          |
+| `min` / `max`     | `Sparkline`              | the data's own ends     | Fix the value axis, so a column of rows is comparable instead of each being scaled to itself       |
+| `value`           | `ProgressRing`, `Gauge`  | —                       | How full the arc is, 0–1. Rounded to half a percent (see below) and clamped                        |
+| `thickness`       | all but `Sparkline`      | `10` (`20` for a donut) | The ring's width, out of the 100-unit box the drawing is computed in                               |
+| `trackOpacity`    | `ProgressRing`, `Gauge`  | `0.2`                   | The unfilled part, as the same colour faded — so the track follows the theme too                   |
+| `sweep` / `start` | `Gauge`                  | `270` / `225`           | How far round the dial goes and where it begins, in degrees clockwise from twelve o'clock          |
+| `colors`          | `MiniDonut`              | six tokens              | One paint per segment, cycled. Anything `fill` takes, including `var(--chart-1)`                   |
+| `label`           | all                      | —                       | Names the drawing: `role="img"` with this text. Without one it is `aria-hidden`                    |
+| `children`        | all                      | —                       | SVG content drawn after the chart — an `SvgText` in the middle of a ring, a `Defs` with a gradient |
+
+Everything else is an `Svg`'s: `width`/`height` are the SVG attributes (`width="7rem"`,
+`width={200}`, and a sparkline defaults to `width="100%"`), the paint is inherited by the shapes
+inside (the default stroke is `currentColor`, so `color="sky-500"` recolours any of them), and every
+Box prop, pseudo-class, breakpoint and theme works.
+
+**Four things to get right:**
+
+1. **Naming is `Svg`'s rule, and a chart is where it matters.** A sparkline beside the number it
+   summarises is decoration — leave it unnamed, or a screen reader reads the row twice. A chart that
+   _is_ the data needs a `label` saying what the shape shows: `label="Revenue, rising 12% over six
+months"`, not `label="Chart"`.
+2. **Shape is an attribute, paint is a class.** A sparkline's geometry is the `d` attribute, which
+   the styling engine never sees, so ten thousand different shapes generate no CSS at all; the
+   colour and the width are style props, so the rows share one rule each. That is what makes one
+   sparkline per row of a virtualized grid affordable.
+3. **A ring's value is rounded to half a percent.** A dash length has to be a style prop to be able
+   to transition, so it lands in a class name — rounding caps a column of percentages at a couple of
+   hundred rules instead of one per row, and half a percent of a 48px ring is a third of a pixel.
+4. **A sparkline is the one primitive not drawn to scale.** It is `preserveAspectRatio="none"` and
+   `vectorEffect="non-scaling-stroke"`, so it fills a cell of unknown width and the line stays one
+   width thick. Both are ordinary props — `vectorEffect="none"` opts out. The rings are drawn to
+   scale and stay circular.
+
+In a DataGrid, a cell renderer is a component: define it outside the render, or every scroll
+remounts the column.
+
+```tsx
+function TrendCell({ cell }: { cell: CellModel<Row> }) {
+  return (
+    <Flex px={3} ai="center" height="fit">
+      <Sparkline data={cell.row.data.trend} color="emerald-500" />
+    </Flex>
+  );
+}
+
+<DataGrid data={rows} def={{ rowKey: 'id', columns: [{ key: 'trend', header: 'Last 12 months', width: 180, Cell: TrendCell }] }} />;
+```
 
 ---
 

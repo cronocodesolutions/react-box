@@ -605,9 +605,9 @@ export default function SvgPage() {
             </Box>
             <Box mt={4}>
               <Mono>d</Mono> is still not a styling prop even though CSS defines one: Safari does not support it, and a path that silently
-              refuses to draw is worse than an attribute that always does. A paint server is the other thing that stays in{' '}
-              <Mono>props</Mono> — <Mono>fill</Mono> takes a colour from the palette, so a gradient is{' '}
-              <Mono>props={`{{ fill: 'url(#sky)' }}`}</Mono>.
+              refuses to draw is worse than an attribute that always does. A paint server, on the other hand, no longer needs{' '}
+              <Mono>props</Mono> at all: <Mono>fill</Mono> and <Mono>stroke</Mono> take <Mono>url(#sky)</Mono> and{' '}
+              <Mono>var(--chart-1)</Mono> beside the palette, and so does <Mono>clipPath</Mono> — see the illustration below.
             </Box>
             <Box mt={4}>
               <ElementTable />
@@ -637,8 +637,8 @@ export default function SvgPage() {
       <Rect width={200} height={120} rx={10} />
     </ClipPath>
   </Defs>
-  <G props={{ clipPath: 'url(#frame)' }}>
-    <Rect width={200} height={120} props={{ fill: 'url(#sky)' }} />
+  <G clipPath="url(#frame)">
+    <Rect width={200} height={120} fill="url(#sky)" />
     <Circle cx={64} cy={78} r={18} fill="amber-300" hoverGroup={{ scene: { cy: 44, r: 22 } }} />
     <Path d="M-10 120 L64 68 L138 120 Z" fill="emerald-800" />
     <Path d="M92 120 L156 56 L220 120 Z" fill="emerald-700" />
@@ -665,8 +665,8 @@ export default function SvgPage() {
                       <Rect width={200} height={120} rx={10} />
                     </ClipPath>
                   </Defs>
-                  <G props={{ clipPath: 'url(#frame)' }}>
-                    <Rect width={200} height={120} props={{ fill: 'url(#sky)' }} />
+                  <G clipPath="url(#frame)">
+                    <Rect width={200} height={120} fill="url(#sky)" />
                     <Circle
                       cx={64}
                       cy={78}
@@ -686,12 +686,14 @@ export default function SvgPage() {
             </Flex>
           </Code>
 
-          <Section id="illustration-notes" title="What the illustration needed props for">
+          <Section id="illustration-notes" title="What the illustration used to need props for">
             <Box>
-              Three things, and each of them is a URL or a shape rather than a value from the palette. The sky is{' '}
-              <Mono>props={`{{ fill: 'url(#sky)' }}`}</Mono>, the rounded frame is <Mono>props={`{{ clipPath: 'url(#frame)' }}`}</Mono>, and
-              a gradient stop paints itself with <Mono>stopColor=&quot;currentColor&quot;</Mono> so that the Box <Mono>color</Mono> prop —
-              themed, like everything else — is what actually decides it.
+              Two of these three were attributes until the chart primitives needed them to be values. The sky is{' '}
+              <Mono>fill=&quot;url(#sky)&quot;</Mono> and the rounded frame is <Mono>clipPath=&quot;url(#frame)&quot;</Mono>: a reference to
+              something the document defines is a paint value like any other now, so it can differ per theme, on <Mono>hover</Mono> and per
+              breakpoint, which an attribute never could. The third is not a gap at all — a gradient stop paints itself with{' '}
+              <Mono>stopColor=&quot;currentColor&quot;</Mono> so that the Box <Mono>color</Mono> prop, themed like everything else, is what
+              actually decides it.
             </Box>
           </Section>
 

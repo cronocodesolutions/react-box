@@ -243,6 +243,16 @@ They are split for the same reason `behavior` is, one level down. `platform` mus
 (the `/core` entry reaches it), which is why the effect helpers cannot share its chunk. The cost is
 visible and small: two extra chunk boundaries put ~0.2 KB gz back onto the main entry.
 
+A module only **one** component entry reaches is not grouped at all: `componentPrivateModules()`
+lists them and the split returns `null`, so rolldown inlines each into that component's own chunk.
+Every group above is imported by something everybody imports, so a private leaf landing in one is
+paid for by consumers who cannot reach it — the sparkline geometry classified into `react-shared`
+put ~0.9 KB gz of arithmetic into `box.mjs`, `rsc.mjs` and the DataGrid alike. It is a rule rather
+than a fourth hand-maintained group because the same trap had already caught the engine (inside
+`client`) and `forms` (inside `react-shared`), and applying it took the DataGrid's icons and the
+form utilities out of the shared chunks too: the main entry lost 0.5 KB gz it had been carrying for
+components it never loads.
+
 `behavior` is a group for a different reason — not correctness but weight. The primitives are
 client code and were correct inside `client`, but that made `@cronocode/react-box/a11y` import the
 chunk holding the styling binding and the theme provider: 17.8 KB gzipped for a consumer who wanted

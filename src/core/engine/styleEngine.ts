@@ -447,6 +447,10 @@ export function createStyleEngine(options: StyleEngineOptions = {}): StyleEngine
     const item = cssStyles[key as keyof typeof cssStyles] as BoxStyle[];
 
     let itemValue = item.find((x) => {
+      // A definition that names the values it accepts is judged by that alone: the `typeof` tests
+      // below cannot tell `url(#sky)` from a typo, and a scalar `values` would take both.
+      if (x.match) return x.match(value);
+
       if (Array.isArray(x.values)) {
         if (Array.isArray(value)) {
           // Tuple definition: x.values is a tuple of allowed-value arrays; each position must contain value[i]

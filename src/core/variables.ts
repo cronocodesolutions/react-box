@@ -347,6 +347,33 @@ namespace Variables {
   export type PercentString = `${number}%`;
   export const percentString = '' as PercentString;
 
+  /**
+   * A value CSS resolves for itself, rather than one of this library's tokens: a document reference
+   * (`url(#sky)` — a gradient, a pattern or a clip path defined elsewhere in the same document) or a
+   * custom property (`var(--chart-1)`).
+   *
+   * SVG paint is the reason it exists. `fill` and `stroke` take a colour token, but a chart fills a
+   * bar from a `<LinearGradient>` and a themed series reads its colour from a variable somebody else
+   * declared — neither of which is a name this library can enumerate. Written as an attribute
+   * (`props={{ fill: 'url(#sky)' }}`) the paint leaves the prop system altogether: no theme, no
+   * breakpoint, no `hover`. As a value it keeps all three.
+   */
+  export type Reference = `url(#${string})` | `var(--${string})`;
+  export const reference = '' as Reference;
+
+  /**
+   * Whether a value is one of those two forms. A definition declaring `values: reference` matches
+   * *any* string as far as the engine's `typeof` test can tell — the flaw that makes `percentString`
+   * an unvalidated catch-all — so the definition carries this as its `match`, and a typo produces no
+   * rule at all instead of a broken declaration.
+   *
+   * Deliberately strict: one balanced reference and nothing else. No whitespace (a class attribute
+   * splits on it), no nesting, and no second value, so `fill` cannot smuggle in a whole shorthand.
+   */
+  export function isReference(value: unknown): value is Reference {
+    return typeof value === 'string' && /^(url\(#[^\s()]+\)|var\(--[^\s()]+\))$/.test(value);
+  }
+
   const rootVariables = {
     inherit: 'inherit',
     none: 'none',
