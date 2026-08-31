@@ -7,6 +7,7 @@ import {
   CLIENT_ONLY_ENTRIES,
   PACKAGE_NAME,
   SERVER_SAFE_COMPONENTS,
+  componentPrivateModules,
   coreGraph,
   serverSafeModules,
 } from './scripts/moduleGraph.mjs';
@@ -44,6 +45,8 @@ const extensions = {
 // `src/core.ts` reaches only framework-free modules; `src/rsc.ts` reaches those plus the hook-free
 // React ones; everything else (the flush effect, the theme provider, the shared hooks) is client.
 const frameworkFree = new Set(coreGraph().modules.keys());
+// The leaves a single component owns — see `componentPrivateModules`.
+const componentPrivate = componentPrivateModules();
 const serverSafe = serverSafeModules();
 
 const componentFile = (name: string) => path.resolve(import.meta.dirname, 'src/components', `${name}.tsx`);
@@ -160,6 +163,14 @@ export default defineConfig(({ mode }) => {
                   // which is why the React effect helpers are a second group rather than the same.
                   if (module.startsWith('src/utils/environment/') || module.startsWith('src/utils/dom/')) return 'platform';
                   if (module === 'src/react/effects.ts') return 'effects';
+
+                  // A leaf only one component reaches goes in that component's own chunk. Every
+                  // group below is shared with something everybody imports, so a private leaf that
+                  // lands in one is paid for by consumers who cannot reach it: the sparkline
+                  // geometry in `react-shared` cost `box.mjs`, `rsc.mjs` and the DataGrid ~0.9 KB gz
+                  // each. Rolldown inlines what it is not told to group, which is what `null` asks
+                  // for here.
+                  if (componentPrivate.has(module)) return null;
 
                   // The markup the form controls share. Server-safe — `RadioButton` reaches it —
                   // but not part of `react-shared`, because it is the one shared module that

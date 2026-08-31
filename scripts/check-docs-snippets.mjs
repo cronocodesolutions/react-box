@@ -86,6 +86,11 @@ const PROVIDED = {
   Textbox: "import Textbox from '@cronocode/react-box/components/textbox';",
   Tooltip: "import Tooltip from '@cronocode/react-box/components/tooltip';",
   VisuallyHidden: "import VisuallyHidden from '@cronocode/react-box/components/visuallyHidden';",
+  // The chart primitives, one entry between them.
+  Gauge: "import { Gauge } from '@cronocode/react-box/components/chart';",
+  MiniDonut: "import { MiniDonut } from '@cronocode/react-box/components/chart';",
+  ProgressRing: "import { ProgressRing } from '@cronocode/react-box/components/chart';",
+  Sparkline: "import { Sparkline } from '@cronocode/react-box/components/chart';",
   // The SVG elements — one entry each, so a drawing in a snippet reads as a drawing would.
   Circle: "import { Circle } from '@cronocode/react-box/components/svg';",
   ClipPath: "import { ClipPath } from '@cronocode/react-box/components/svg';",

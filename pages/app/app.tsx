@@ -3,6 +3,7 @@ import { Route, Routes } from 'react-router-dom';
 import AiContextPage from '../pages/aiContextPage';
 import BoxPage from '../pages/boxPage';
 import ButtonPage from '../pages/buttonPage';
+import ChartsPage from '../pages/chartsPage';
 import CheckboxPage from '../pages/checkboxPage';
 import ColorPage from '../pages/colorPage';
 import DataGridPage from '../pages/dataGridPage';
@@ -38,6 +39,7 @@ const pages: Record<SiteRoutePath, ComponentType> = {
   '/box': BoxPage,
   '/svg': SvgPage,
   '/icon': IconPage,
+  '/charts': ChartsPage,
   '/button': ButtonPage,
   '/textbox': TextboxPage,
   '/textarea': TextareaPage,

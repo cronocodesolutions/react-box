@@ -12,8 +12,9 @@ globs: '**/*.{ts,tsx,jsx}'
 5. **fontSize divider is 16** (not 4): `fontSize={14}` → 14px
 6. **Spacing divider is 4**: `p={4}` → 16px (1rem)
 7. **Border width and lineHeight are direct px**: `b={1}` → 1px. **borderRadius uses divider 4**: `borderRadius={2}` → 8px
-8. **SVG lengths have no divider and no unit**: `strokeWidth={2}` → `stroke-width: 2` (user units), same for `strokeDasharray`/`strokeDashoffset` and the geometry props `cx`/`cy`/`r`/`rx`/`ry`/`x`/`y`. `<Rect width={40} height={40}>` and `<Path d="M…">` take those as the SVG attributes they are — the Box props of those names mean something else
-9. **HTML attributes go in `props` prop**: `<Link props={{ href: '/about' }}>` not `<Link href>`
-10. **Size shortcuts**: `width="fit"` = 100%, `width="fit-screen"` = 100vw, `width="1/2"` = 50%
+8. **A gradient fill is a value, not an attribute**: `fill="url(#sky)"`, `stroke="var(--chart-1)"`, `clipPath="url(#frame)"` — so it can be themed and hovered. **A dashboard shape is `components/chart`**: `<Sparkline data={[…]}/>`, `<ProgressRing value={0.6}/>`, `<Gauge>`, `<MiniDonut>` — Box props, no chart library
+9. **SVG lengths have no divider and no unit**: `strokeWidth={2}` → `stroke-width: 2` (user units), same for `strokeDasharray`/`strokeDashoffset` and the geometry props `cx`/`cy`/`r`/`rx`/`ry`/`x`/`y`. `<Rect width={40} height={40}>` and `<Path d="M…">` take those as the SVG attributes they are — the Box props of those names mean something else
+10. **HTML attributes go in `props` prop**: `<Link props={{ href: '/about' }}>` not `<Link href>`
+11. **Size shortcuts**: `width="fit"` = 100%, `width="fit-screen"` = 100vw, `width="1/2"` = 50%
 
 Full reference: `src/BOX_AI_CONTEXT.md` or invoke `/react-box` skill.

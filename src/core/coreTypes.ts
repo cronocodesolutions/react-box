@@ -44,6 +44,16 @@ type BoxStyleScalar = (BoxStyleArrayString | BoxStyleArrayBoolean | BoxStyleArra
 export type BoxStyle = (BoxStyleScalar | BoxStyleTupleArrays) & {
   styleName?: string | string[];
   selector?: (className: string, pseudoClass: string) => string;
+  /**
+   * Which values this definition accepts, when its `values` cannot say.
+   *
+   * A scalar definition (`values: ''`, `values: 0`) is matched by `typeof` alone, so it accepts
+   * *every* string or *every* number — fine for a scale, wrong for a shape. `match` replaces that
+   * test: declare it and the definition takes exactly the values it says yes to, so a value the
+   * prop does not really support produces no rule and no class name rather than a broken
+   * declaration. `fill: 'url(#sky)'` is the first caller (`Variables.isReference`).
+   */
+  match?: (value: string | number | boolean | readonly (string | number | boolean)[]) => boolean;
 };
 
 export type ExtractKeys<T extends Record<string, unknown>, TT> = {

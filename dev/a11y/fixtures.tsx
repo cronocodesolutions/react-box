@@ -2,6 +2,7 @@ import { fireEvent, screen } from '@testing-library/react';
 import { Sun } from 'lucide-react';
 import BaseSvg from '../../src/components/baseSvg';
 import Button from '../../src/components/button';
+import { Gauge, MiniDonut, ProgressRing, Sparkline } from '../../src/components/chart';
 import Checkbox from '../../src/components/checkbox';
 import DataGrid from '../../src/components/dataGrid';
 import Dropdown from '../../src/components/dropdown';
@@ -14,7 +15,7 @@ import RadioButton from '../../src/components/radioButton';
 import RadioGroup from '../../src/components/radioGroup';
 import Select from '../../src/components/select';
 import { H1, Img, Link, Nav, P } from '../../src/components/semantics';
-import { Circle, Polyline, Svg } from '../../src/components/svg';
+import { Circle, Polyline, Svg, SvgText } from '../../src/components/svg';
 import Switch from '../../src/components/switch';
 import Textarea from '../../src/components/textarea';
 import Textbox from '../../src/components/textbox';
@@ -193,6 +194,38 @@ export const fixtures: A11yFixture[] = [
         <Circle cx={44} cy={8} r={3} fill="blue-500" />
       </Svg>
     ),
+  },
+  {
+    // A chart is the case where "unnamed means decoration" earns its keep: a sparkline beside the
+    // number it summarises must not be read out twice, and one that is a cell on its own must be.
+    name: 'Sparkline',
+    render: () => <Sparkline data={[4, 9, 6, 12, 10, 15]} label="Revenue, last six months" />,
+  },
+  {
+    name: 'Sparkline (decoration)',
+    render: () => (
+      <P>
+        Revenue is up 12% <Sparkline data={[4, 9, 6, 12]} width="4rem" />
+      </P>
+    ),
+  },
+  {
+    name: 'ProgressRing',
+    render: () => <ProgressRing value={0.62} label="62% complete" />,
+  },
+  {
+    name: 'Gauge',
+    render: () => (
+      <Gauge value={0.4} label="Load: 40%">
+        <SvgText x={50} y={56} textAnchor="middle" fontSize={18} fill="gray-700" stroke="none">
+          40%
+        </SvgText>
+      </Gauge>
+    ),
+  },
+  {
+    name: 'MiniDonut',
+    render: () => <MiniDonut data={[5, 3, 2]} label="Sales by region" />,
   },
   {
     name: 'Form',

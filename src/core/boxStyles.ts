@@ -6,6 +6,20 @@ import Variables from './variables';
 /** The opacity scale shared by `opacity`, `fillOpacity` and `strokeOpacity`. */
 const opacityValues = [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1] as const;
 
+/**
+ * `url(#id)` or `var(--name)`, for the props whose value can be something the document defines
+ * rather than a token this library knows: a gradient or pattern fill, a clip path.
+ *
+ * Shared by `fill`, `stroke` and `clipPath`, and declared **after** each of their token lists — a
+ * definition is chosen by `Array.prototype.find`, so the exact-match lists get first refusal. It
+ * needs no `valueFormat`: `url(#sky)` is already CSS, and a variable somebody else declared must
+ * not be run through this library's own variable resolution.
+ */
+const referenceValues = {
+  values: Variables.reference,
+  match: Variables.isReference,
+} satisfies BoxStyle;
+
 export const cssStyles = {
   /** The appearance CSS property is used to display UI elements with platform-specific styling, based on the operating system's theme. */
   appearance: [
@@ -250,12 +264,13 @@ export const cssStyles = {
       styleName: 'content-visibility',
     },
   ],
-  /** The clip-path CSS property creates a clipping region that sets what part of an element should be shown. Parts that are inside the region are shown, while those outside are hidden. `inset(50%)` clips an element away entirely without removing it from the accessibility tree — the visually-hidden recipe. */
+  /** The clip-path CSS property creates a clipping region that sets what part of an element should be shown. Parts that are inside the region are shown, while those outside are hidden. `inset(50%)` clips an element away entirely without removing it from the accessibility tree — the visually-hidden recipe. A `<ClipPath>` in the document is `clipPath="url(#frame)"`. */
   clipPath: [
     {
       values: ['inset(50%)', 'none'] as const,
       styleName: 'clip-path',
     },
+    { ...referenceValues, styleName: 'clip-path' },
   ],
   /** The cursor CSS property sets the mouse cursor, if any, to show when the mouse pointer is over an element. */
   cursor: [
@@ -1219,12 +1234,13 @@ export const cssStyles = {
       styleName: 'outline-color',
     },
   ],
-  /** The fill CSS property defines how SVG text content and the interior canvas of SVG shapes are filled or painted. If present, it overrides the element's fill attribute. */
+  /** The fill CSS property defines how SVG text content and the interior canvas of SVG shapes are filled or painted. If present, it overrides the element's fill attribute. Takes a colour token, a paint server the document defines (`fill="url(#sky)"` — a `<LinearGradient>` or a pattern) or a variable somebody else declared (`fill="var(--chart-1)"`). */
   fill: [
     {
       values: Variables.colorValues,
       valueFormat: (value, getVariableValue) => getVariableValue(value),
     },
+    referenceValues,
   ],
   /** The fill-opacity CSS property defines the opacity of the paint applied to the interior of an SVG shape or to SVG text. */
   fillOpacity: [
@@ -1240,12 +1256,13 @@ export const cssStyles = {
       styleName: 'fill-rule',
     },
   ],
-  /** The stroke CSS property defines the color or SVG paint server used to draw an element's stroke. */
+  /** The stroke CSS property defines the color or SVG paint server used to draw an element's stroke. Takes a colour token, `stroke="url(#sky)"` for a paint server the document defines, or `stroke="var(--chart-1)"` for a variable somebody else declared. */
   stroke: [
     {
       values: Variables.colorValues,
       valueFormat: (value, getVariableValue) => getVariableValue(value),
     },
+    referenceValues,
   ],
   /** The stroke-opacity CSS property defines the opacity of the paint applied to an SVG element's stroke. */
   strokeOpacity: [

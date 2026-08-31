@@ -7,6 +7,7 @@ import * as core from '../dist/core.mjs';
 import * as ssg from '../dist/ssg.mjs';
 import * as baseSvg from '../dist/components/baseSvg.mjs';
 import * as button from '../dist/components/button.mjs';
+import * as chart from '../dist/components/chart.mjs';
 import * as checkbox from '../dist/components/checkbox.mjs';
 import * as dataGrid from '../dist/components/dataGrid.mjs';
 import * as dropdown from '../dist/components/dropdown.mjs';
@@ -33,6 +34,7 @@ console.log(
   ssg,
   baseSvg,
   button,
+  chart,
   checkbox,
   dataGrid,
   dropdown,

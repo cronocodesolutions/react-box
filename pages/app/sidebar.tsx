@@ -4,6 +4,7 @@ import {
   BookOpen,
   Bot,
   Box as BoxIcon,
+  ChartSpline,
   CheckSquare,
   ChevronDown,
   Circle,
@@ -171,6 +172,9 @@ export default function Sidebar({ toggleTheme, onClose }: SidebarProps) {
           </MenuItem>
           <MenuItem to="/icon" icon={<Shapes />}>
             Icon
+          </MenuItem>
+          <MenuItem to="/charts" icon={<ChartSpline />}>
+            Charts
           </MenuItem>
         </MenuSection>
 

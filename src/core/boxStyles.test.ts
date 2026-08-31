@@ -147,8 +147,22 @@ describe('numeric dividers', () => {
  * `generateRule` looks for produces no rule at all — silently, until something renders it. This
  * walks the whole registry so that failure mode cannot survive a test run.
  */
+
+/**
+ * Candidates offered to a definition that declares `match`. Such a definition decides for itself
+ * what it accepts, so the walk hands it these and uses the first one it says yes to — which also
+ * proves the predicate accepts something at all. A new `match` definition needs its shape here.
+ */
+const matchCandidates = ['url(#sample)', 'var(--sample)', '50%', 'none', 4] as const;
+
 function sampleFor(def: BoxStyle): { value: unknown; label: string } | undefined {
   const values = def.values as unknown;
+
+  if (def.match) {
+    const accepted = matchCandidates.find((candidate) => def.match?.(candidate));
+
+    return accepted === undefined ? undefined : { value: accepted, label: `match ${accepted}` };
+  }
 
   if (typeof values === 'number') return { value: 4, label: 'number' };
   if (typeof values === 'string') return { value: '50%', label: 'percent string' };
@@ -264,6 +278,56 @@ describe('SVG paint and stroke props', () => {
       expect(classNames).toContain('strokeDasharray-8_4');
       expect(classNames.every((name) => !name.includes(' '))).toBe(true);
       expect(generatedRulesOf(engine)).toContain('.strokeDasharray-8_4{stroke-dasharray:8 4}');
+    });
+  });
+
+  /**
+   * Paint that the document defines rather than this library: a gradient, a pattern, or a variable
+   * a chart declared for a series. Before these value definitions existed the only way to write one
+   * was `props={{ fill: 'url(#sky)' }}` — an attribute, and therefore outside the theme, the
+   * breakpoints and every pseudo-class.
+   */
+  describe('a paint server or a variable is a value, not an attribute', () => {
+    it('passes a paint server through untouched', () => {
+      const engine = makeEngine('svg-paint-server');
+      const classNames = renderStyles(engine, { fill: 'url(#sky)' }, true);
+
+      expect(classNames).toContain('fill-url(#sky)');
+      expect(generatedRulesOf(engine)).toContain('{fill:url(#sky)}');
+    });
+
+    // The colour definition resolves its value to `var(--token)`, so a variable reaching that
+    // definition would come out as `var(--var(--chart-1))`. It has to match this one instead.
+    it('does not resolve a variable somebody else declared', () => {
+      expect(generatedRulesFor({ stroke: 'var(--chart-1)' }, 'svg-paint-variable')).toContain('{stroke:var(--chart-1)}');
+    });
+
+    it('clips to a path the document defines', () => {
+      expect(generatedRulesFor({ clipPath: 'url(#frame)' }, 'svg-clip-url')).toContain('{clip-path:url(#frame)}');
+    });
+
+    it('keeps the token lists working — they are matched first', () => {
+      expect(generatedRulesFor({ fill: 'red-500' }, 'svg-paint-token')).toContain('{fill:var(--red-500)}');
+      expect(generatedRulesFor({ clipPath: 'inset(50%)' }, 'svg-clip-inset')).toContain('{clip-path:inset(50%)}');
+    });
+
+    // The whole reason the definition carries a `match`: a scalar `values` is matched by `typeof`
+    // alone, so without one every string would reach CSS verbatim (bug #31's shape).
+    it.each(['banana', 'url(#a b)', 'url(#a)  url(#b)', 'var(x)', 'url(#)'])('emits nothing for %o', (value) => {
+      const engine = makeEngine(`svg-paint-reject-${value}`);
+      const classNames = renderStyles(engine, { fill: value } as BoxStyleProps, true);
+
+      expect(classNames).toEqual(['_s']);
+      expect(generatedRulesOf(engine)).toBe('');
+    });
+
+    it('nests under a pseudo-class and a theme like any other value', () => {
+      expect(generatedRulesFor({ hover: { fill: 'url(#sky)' } }, 'svg-paint-hover')).toContain(
+        String.raw`.hover-fill-url\(\#sky\):hover{fill:url(#sky)}`,
+      );
+      expect(generatedRulesFor({ theme: { dark: { fill: 'var(--chart-1)' } } }, 'svg-paint-theme')).toContain(
+        String.raw`.dark .theme-dark-fill-var\(--chart-1\){fill:var(--chart-1)}`,
+      );
     });
   });
 
