@@ -7,11 +7,12 @@ import Root from './app/root';
 import { preloadPage } from './app/routePages';
 import { routeFor } from './site/siteMeta';
 import './extends';
-import './index.css';
 // The syntax-highlighting theme belongs to the whole site, and it has to be in the entry's CSS: the
 // stylesheet of an async chunk is linked by the chunk's loader, so a prerendered page would paint its
-// code blocks unstyled until the JavaScript arrived.
+// code blocks unstyled until the JavaScript arrived. It goes *before* `index.css`, which restates the
+// code surface (`--code-bg`) and the token colours — equal specificity, so the later one wins.
 import 'prismjs/themes/prism-okaidia.css';
+import './index.css';
 
 // The build prerenders every route with content-hashed class names (see `entry-server.tsx`); the
 // browser has to name the same rules the same way, or hydration finds a different `class` on every
