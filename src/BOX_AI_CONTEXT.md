@@ -185,7 +185,7 @@ import { Circle, Path, Rect, Svg, SvgText } from '@cronocode/react-box/component
 <Rect x={16} y={32} width={24} height={64} rx={3} fill="sky-600" />
 ```
 
-**Eight things to get right:**
+**Nine things to get right:**
 
 1. **No divider on SVG lengths.** `strokeWidth`, `strokeDasharray`, `strokeDashoffset` and `strokeMiterlimit` pass the number through unchanged — they are measured in the coordinate system the `viewBox` sets up.
 2. **Inheritance does the work.** Put `fill`/`stroke`/`strokeWidth` on the `<svg>`, not on every shape. The exception is a shape carrying its own `fill=` attribute — a presentation attribute on an element beats a value inherited from its parent, so style that shape directly.
@@ -195,6 +195,7 @@ import { Circle, Path, Rect, Svg, SvgText } from '@cronocode/react-box/component
 6. **`Svg` sizes with attributes and names itself with `label`.** `viewBox`, `preserveAspectRatio`, `width` and `height` are the SVG attributes (`width="100%"`, `width={200}`), so the ÷4 layout `width`/`height` are not available on it. No `label` means `aria-hidden` — decoration, which is what most SVG is; `label` makes it `role="img"` with that name. A role or `aria-*` of your own in `props` wins over both.
 7. **An icon from a set is not SVG you draw — it is `<Icon>`.** `<Icon size={5} color="amber-500" label="Sunny"><Sun /></Icon>` from `components/icon`, wrapping one element from lucide, Tabler, react-icons, or a raw `<svg>`. `size` is the ÷4 scale (`size={6}` is 24px, the default) and lands in the _class_, where a CSS declaration outranks the `width`/`height` attributes the icon set writes — which is why `Icon` needs to know no set's API. `strokeWidth` is the same: an ordinary Box prop, so it can change on hover. No `label` means `aria-hidden`; a `label` means `role="img"`. **Do not wrap this library's own `<Svg>` in it** — `Svg` takes these props directly and its attributes live in `props`.
 8. **A paint server is a URL, so it goes in `props`.** `fill` takes a colour variable, not `url(#id)`: write `props={{ fill: 'url(#sky)' }}`, and `props={{ clipPath: 'url(#frame)' }}` for a clip path (the `clipPath` prop is the CSS shape list, not a URL). A gradient stop can still be themed — `<Stop stopColor="currentColor" color="amber-300" />`.
+9. **An icon outside lucide comes through the same `<Icon>`.** Iconify carries 300,000+ icons in 200-plus sets, and the choice is only about _when_ the icon becomes markup. One icon: copy its SVG and paste it into an `<Icon>` — no dependency, renders on a server. A set: `unplugin-icons` compiles `~icons/<set>/<name>` into a component at build time from an `@iconify-json/<set>` devDependency (`npm i -D unplugin-icons @iconify-json/<set> @svgr/core @svgr/plugin-jsx`, the plugin with `{ compiler: 'jsx', jsx: 'react' }`, and `/// <reference types="unplugin-icons/types/react" />` in a `.d.ts`) — nothing fetched at runtime, server-renders. A name that is data (from a CMS, from a user): `@iconify/react`'s `<Icon icon="set:name"/>` inside our `<Icon>` — it fetches in the browser, so it is a client component and the server sends no icon. **Turbopack runs no unplugin**, so under Next.js 16 the build-time recipe needs `next build --webpack`; the other two work as they are.
 
 ---
 

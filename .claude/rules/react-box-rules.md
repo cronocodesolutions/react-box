@@ -7,7 +7,7 @@ globs: '**/*.{ts,tsx,jsx}'
 
 1. **NEVER use `style={{ }}`** — always use Box props. Missing prop? Create with `Box.extend()`
 2. **NEVER `<Box tag="...">`** for common elements — use `<Button>`, `<Link>`, `<H1>`, `<P>`, `<Nav>`, `<Flex>`, `<Grid>`, and for SVG `<Svg>`, `<Path>`, `<Circle>`, `<Rect>`, `<SvgText>`… from `components/svg`
-3. **An icon from lucide/Tabler/react-icons goes in `<Icon>`** (`components/icon`) — `<Icon size={5} color="amber-500"><Sun /></Icon>`. `size` is the ÷4 scale (the set's own `size` prop is pixels), and no `label` means `aria-hidden`. SVG you draw yourself is `<Svg>`, not `<Icon>`
+3. **An icon from lucide/Tabler/react-icons goes in `<Icon>`** (`components/icon`) — `<Icon size={5} color="amber-500"><Sun /></Icon>`. `size` is the ÷4 scale (the set's own `size` prop is pixels), and no `label` means `aria-hidden`. SVG you draw yourself is `<Svg>`, not `<Icon>`. An icon from any other set comes through the same `<Icon>`: `unplugin-icons` (`~icons/<set>/<name>`) at build time, `@iconify/react` when the name is data
 4. **NEVER `<Box display="flex/grid">`** — use `<Flex>` / `<Grid>` components
 5. **fontSize divider is 16** (not 4): `fontSize={14}` → 14px
 6. **Spacing divider is 4**: `p={4}` → 16px (1rem)

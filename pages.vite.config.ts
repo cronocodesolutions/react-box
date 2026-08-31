@@ -1,6 +1,7 @@
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
 import reactPlugin from '@vitejs/plugin-react';
+import iconsPlugin from 'unplugin-icons/vite';
 import { defineConfig, Plugin } from 'vite';
 import { SITE_URL, siteRoutes } from './pages/site/site';
 import { buildRobotsTxt, buildSitemap, notFoundMeta, pageMeta, withHeadHtml } from './pages/site/siteMeta';
@@ -53,7 +54,12 @@ function siteMetadata(): Plugin {
 
 export default defineConfig(({ mode }) => {
   return {
-    plugins: [reactPlugin(), siteMetadata()],
+    // `unplugin-icons` is the Iconify bridge the /icon page documents, and this site is where it is
+    // proved: `~icons/<set>/<name>` becomes a React component at build time, out of the icon data in
+    // an `@iconify-json/*` devDependency, so nothing is fetched at runtime and only the icons the
+    // site imports are compiled. It is a *page* plugin — the library ships no icons, and nothing
+    // about it reaches `vite.config.ts`.
+    plugins: [reactPlugin(), iconsPlugin({ compiler: 'jsx', jsx: 'react' }), siteMetadata()],
     build: {
       emptyOutDir: true,
       minify: mode !== 'dev',
