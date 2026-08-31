@@ -34,6 +34,7 @@ import Box from '../../src/box';
 import Button from '../../src/components/button';
 import Flex from '../../src/components/flex';
 import Icon from '../../src/components/icon';
+import { prefetchPage } from './routePages';
 
 interface SidebarProps {
   toggleTheme: () => void;
@@ -326,8 +327,13 @@ interface MenuItemProps {
 }
 
 function MenuItem({ to, icon, children }: MenuItemProps) {
+  // A page is a dynamic import now, and /datagrid's chunk is nearly a megabyte — so it starts
+  // downloading when the pointer arrives, not when the click does. On intent only: prefetching every
+  // route on idle would put the whole site back in front of every reader.
+  const prefetch = () => prefetchPage(to);
+
   return (
-    <NavLink to={to}>
+    <NavLink to={to} onPointerEnter={prefetch} onFocus={prefetch}>
       {({ isActive }) => (
         <Flex
           ai="center"

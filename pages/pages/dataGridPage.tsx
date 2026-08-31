@@ -9,16 +9,13 @@ import Code from '../components/code';
 import PageHeader from '../components/pageHeader';
 import Reveal from '../components/reveal';
 import Data from '../data/MOCK_DATA.json';
-import Data1 from '../data/MOCK_DATA_1.json';
-import Data2 from '../data/MOCK_DATA_2.json';
-import Data3 from '../data/MOCK_DATA_3.json';
-import Data4 from '../data/MOCK_DATA_4.json';
-import Data5 from '../data/MOCK_DATA_5.json';
-import Data6 from '../data/MOCK_DATA_6.json';
-import Data7 from '../data/MOCK_DATA_7.json';
 import useTableOfContents from '../hooks/useTableOfContents';
 
-const allData = [...Data, ...Data1, ...Data2, ...Data3, ...Data4, ...Data5, ...Data6, ...Data7];
+// One file, not eight. Nothing on this page is about the row count — every demo here shows five to
+// eight rows of a scrolling, filtering, grouping grid — and the eight files were 3.9 MB of JSON in the
+// route's chunk, 947 KB of the 970 KB it downloaded. A thousand real rows demonstrate all of it, and
+// the ten-thousand-row proof lives on /charts, which generates its rows.
+const allData = Data;
 
 const allCountryOptions = [...new Set(allData.map((r) => r.country))].sort().map((c) => ({ label: c, value: c }));
 

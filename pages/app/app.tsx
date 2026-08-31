@@ -19,6 +19,9 @@ function RoutePage({ path }: { path: SiteRoutePath }) {
 export default function App() {
   return (
     <Layout>
+      {/* The router navigates inside a transition, so React keeps the previous page on screen while the
+          next one's chunk arrives, and this fallback never renders — measured, including with a
+          synchronous update landing mid-flight. The wait itself is what prefetchPage is for. */}
       <Suspense fallback={null}>
         <Routes>
           {siteRoutes.map(({ path }) => (

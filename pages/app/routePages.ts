@@ -48,6 +48,15 @@ export async function preloadPage(path: string): Promise<void> {
   resolved.set(path, (await loader()).default);
 }
 
+/**
+ * Warm a route's chunk before it is needed — the nav calls this when a pointer lands on a link, which
+ * is a few hundred milliseconds of head start on the click. Failures are ignored: the navigation asks
+ * for the module again, and reports it properly if it is really gone.
+ */
+export function prefetchPage(path: string): void {
+  void preloadPage(path).catch(() => {});
+}
+
 /** The page component for a path: rendered directly when preloaded, through Suspense otherwise. */
 export default function pageFor(path: SiteRoutePath): ComponentType {
   const preloaded = resolved.get(path);
