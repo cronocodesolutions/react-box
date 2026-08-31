@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion';
 import { ChartSpline } from 'lucide-react';
-import { ReactNode, useMemo, useState } from 'react';
+import { lazy, ReactNode, Suspense, useMemo, useState } from 'react';
 import Box from '../../src/box';
 import Button from '../../src/components/button';
 import { Gauge, MiniDonut, ProgressRing, Sparkline } from '../../src/components/chart';
@@ -12,6 +12,10 @@ import { Defs, LinearGradient, Stop, SvgText } from '../../src/components/svg';
 import Code from '../components/code';
 import PageHeader from '../components/pageHeader';
 import useTableOfContents from '../hooks/useTableOfContents';
+
+// Recharts and its d3 packages are ~95 KB gzipped: the one demo that needs them is a chunk of its
+// own, so only a reader who opens this page downloads them.
+const RechartsDemo = lazy(() => import('../components/rechartsDemo'));
 
 /** A deterministic wander, so the demo grid looks like data without shipping any. */
 function series(seed: number, length = 12): number[] {
@@ -96,7 +100,8 @@ export default function ChartsPage() {
             These are the small, dense drawings a dashboard is made of, and nothing more: no axes, no legends, no data transformations. What
             they give you instead is that a chart is <Mono>a Box</Mono> — its colour, its size, its dark mode, its hover state and its
             breakpoints are the props you already know, and there is no second styling system to learn or to theme. For a real chart with
-            axes and a tooltip, reach for Recharts; these are for the twenty places a dashboard needs a shape rather than a chart.
+            axes and a tooltip, reach for Recharts and wrap it in a <Mono>ChartContainer</Mono>, which is further down this page; these are
+            for the twenty places a dashboard needs a shape rather than a chart.
           </Section>
 
           <Code id="sparkline" label="Sparkline" language="jsx">
@@ -301,6 +306,38 @@ function TrendCell({ cell }: { cell: { row: { data: Row } } }) {
             couple of hundred rules instead of one per row. Half a percent of a 48px ring is a third of a pixel.
           </Section>
 
+          <Section id="vars" title="A CSS variable is a Box prop">
+            Every prop on this page becomes a CSS declaration inside a class. <Mono>vars</Mono> is the one whose <em>names</em> come out of
+            the value: <Mono>{`vars={{ 'color-revenue': 'sky-500' }}`}</Mono> declares <Mono>--color-revenue</Mono> on the element, and
+            everything inside it inherits it — including markup this library never rendered. Because it is an ordinary prop it nests inside{' '}
+            <Mono>theme</Mono>, <Mono>hover</Mono> and a breakpoint like all the others, and it lands in a class, so two subtrees declaring
+            the same palette share one rule rather than each carrying a <Mono>&lt;style&gt;</Mono> tag of its own.
+          </Section>
+
+          <Code
+            id="recharts"
+            label="A Recharts chart, themed by the page it sits on"
+            language="jsx"
+            code={`import { ChartContainer } from '@cronocode/react-box/components/chart';\nimport { Area, AreaChart, CartesianGrid, ResponsiveContainer, XAxis, YAxis } from 'recharts';\n\n<ChartContainer\n  series={['revenue', 'cost']}\n  vars={{ 'chart-grid': 'slate-200', 'chart-label': 'slate-500' }}\n  theme={{ dark: { vars: { 'chart-grid': 'slate-800', 'chart-label': 'slate-400' } } }}\n  height={60}\n>\n  <ResponsiveContainer width="100%" height="100%">\n    <AreaChart data={months}>\n      <CartesianGrid stroke="var(--chart-grid)" strokeDasharray="3 3" vertical={false} />\n      <XAxis dataKey="month" stroke="var(--chart-label)" fontSize={12} />\n      <YAxis stroke="var(--chart-label)" fontSize={12} width={36} />\n      <Area dataKey="revenue" stroke="var(--color-revenue)" fill="var(--color-revenue)" fillOpacity={0.15} strokeWidth={2} />\n      <Area dataKey="cost" stroke="var(--color-cost)" fill="var(--color-cost)" fillOpacity={0.15} strokeWidth={2} />\n    </AreaChart>\n  </ResponsiveContainer>\n</ChartContainer>`}
+          >
+            <Suspense fallback={<Box height={60} />}>
+              <RechartsDemo />
+            </Suspense>
+          </Code>
+
+          <Section id="recharts-notes" title="The chart names no colour">
+            Flip the theme in the header and every line above changes with it — the chart code does not. That is the whole of{' '}
+            <Mono>ChartContainer</Mono>: it declares <Mono>--chart-1</Mono> … <Mono>--chart-6</Mono> in both themes and one{' '}
+            <Mono>--color-&lt;series&gt;</Mono> per name you give it, so <Mono>stroke="var(--color-revenue)"</Mono> is all the chart ever
+            says about paint. The two names it does <em>not</em> know about — the grid and the axis labels — are the same mechanism spelled
+            out by hand, which is what <Mono>vars</Mono> is for.
+            <Box mt={4}>
+              The names are deliberately the ones the ecosystem already uses, so a chart lifted out of shadcn's charts works unchanged. What
+              is different is where they live: there is no <Mono>&lt;style&gt;</Mono> tag per chart and no <Mono>id</Mono> to scope it with,
+              because a Box prop is already scoped to its element — and two tiles with the same series share the rule.
+            </Box>
+          </Section>
+
           <Section id="a11y" title="Naming a picture of numbers">
             Every primitive follows <Mono>Svg</Mono>'s rule, and a chart is the case where it matters most: with no <Mono>label</Mono> the
             drawing is <Mono>aria-hidden</Mono>, and with one it is <Mono>role="img"</Mono> with that name. Both are right in different
@@ -354,5 +391,7 @@ const sidebarLinks = [
   { id: 'donut', label: 'Mini donut' },
   { id: 'grid', label: '10,000 sparklines' },
   { id: 'cost', label: 'What it costs' },
+  { id: 'vars', label: 'A variable is a prop' },
+  { id: 'recharts', label: 'Themed Recharts' },
   { id: 'a11y', label: 'Naming a chart' },
 ];

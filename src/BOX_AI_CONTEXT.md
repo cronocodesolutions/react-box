@@ -1,6 +1,6 @@
 # @cronocode/react-box - AI Assistant Context
 
-Runtime CSS-in-JS library. `Box` component accepts 138 CSS props and generates CSS classes at runtime. Same prop values share a single class.
+Runtime CSS-in-JS library. `Box` component accepts 139 CSS props and generates CSS classes at runtime. Same prop values share a single class.
 
 ---
 
@@ -133,6 +133,31 @@ All sizing, spacing, and positioning props also accept percentage strings: `p="5
 | `shadow`                                                                         | box-shadow                              | `'small'`, `'medium'`, `'large'`, `'xl'`, `'none'`                                                                                                                              |
 | `opacity`                                                                        | opacity                                 | number                                                                                                                                                                          |
 | `cursor` / `pointerEvents` / `transition` / `transform` / `userSelect`           | misc                                    | string values                                                                                                                                                                   |
+
+### Custom properties (`vars`)
+
+The one prop whose declaration _names_ come from its value, for styling markup this library never
+rendered — a chart library, a third-party widget, a subtree with its own tokens:
+
+```tsx
+<Flex
+  vars={{ 'color-revenue': 'sky-500', 'chart-gap': '4px', 'rows': 3 }}
+  theme={{ dark: { vars: { 'color-revenue': 'sky-400' } } }}
+>
+  {/* --color-revenue, --chart-gap and --rows are inherited by everything in here */}
+</Flex>
+```
+
+- A **colour token** resolves to the variable behind it (`--color-revenue: var(--sky-500)`), so it
+  follows the palette. Every other value is written out as it stands: a length, a number, a
+  `var(--x)`/`url(#x)` reference, a colour of your own. Names may carry a leading `--` or not.
+- It is an ordinary prop: it nests in `theme`, `hover`, `md` and a group selector like all the others,
+  and it lands in a **class** — so two subtrees declaring the same variables share one rule, and
+  nothing needs a `<style>` tag or an `id` to scope it. It renders in a Server Component.
+- A name that is not a CSS identifier, or a value containing `;` or a brace, is skipped — that entry
+  only, not the whole record, so one bad name cannot take a palette down with it.
+- Not the same thing as `Box.extend({ variables })`, which declares tokens globally on `:root` before
+  the first render. `vars` is per element, per theme, per breakpoint.
 
 ### SVG
 
@@ -811,6 +836,54 @@ months"`, not `label="Chart"`.
 In a DataGrid, a cell renderer is a component: define it outside the render, or every scroll
 remounts the column.
 
+### Theming a chart library — `ChartContainer`
+
+The bridge for the chart you did not write. It declares the variables a chart reads, so the chart
+names no colour at all and its dark mode belongs to the page:
+
+```tsx
+import { ChartContainer } from '@cronocode/react-box/components/chart';
+import { Area, AreaChart, CartesianGrid, ResponsiveContainer, XAxis, YAxis } from 'recharts';
+
+<ChartContainer
+  series={['revenue', 'cost']}
+  vars={{ 'chart-grid': 'slate-200', 'chart-label': 'slate-500' }}
+  theme={{ dark: { vars: { 'chart-grid': 'slate-800', 'chart-label': 'slate-400' } } }}
+  height={60}
+>
+  <ResponsiveContainer width="100%" height="100%">
+    <AreaChart data={months}>
+      <CartesianGrid stroke="var(--chart-grid)" strokeDasharray="3 3" vertical={false} />
+      <XAxis dataKey="month" stroke="var(--chart-label)" fontSize={12} />
+      <YAxis stroke="var(--chart-label)" fontSize={12} width={36} />
+      <Area dataKey="revenue" stroke="var(--color-revenue)" fill="var(--color-revenue)" fillOpacity={0.15} />
+      <Area dataKey="cost" stroke="var(--color-cost)" fill="var(--color-cost)" fillOpacity={0.15} />
+    </AreaChart>
+  </ResponsiveContainer>
+</ChartContainer>
+```
+
+| Prop     | What it is                                                                                                        |
+| -------- | ----------------------------------------------------------------------------------------------------------------- |
+| `series` | `['revenue', 'cost']` takes the palette in order, or `{ revenue: 'emerald-600' }` names a paint per series          |
+
+Everything else is a Box prop, which is the point:
+
+- It always declares `--chart-1` … `--chart-6` (the six `MiniDonut` cycles through) and redeclares
+  them one step lighter under the dark theme. A series with no paint of its own reads a slot, wrapping
+  round after six.
+- Replacing a slot needs no prop for it: `vars={{ 'chart-1': 'teal-600' }}` and
+  `theme={{ dark: { vars: { 'chart-1': 'teal-400' } } }}` merge with the defaults rather than replacing
+  them, and any other name a chart reads (`--chart-grid`, `--chart-label`) is declared the same way.
+- `--color-<series>` and `--chart-n` are deliberately the names the ecosystem uses, so a chart copied
+  from shadcn's charts works unchanged. Unlike that recipe there is no `<style>` tag per chart and no
+  `id` to scope it with: the variables are in a class, so two tiles with the same series share one rule.
+- A series name becomes part of a custom-property name, so it has to be a CSS identifier. A Recharts
+  dot-path `dataKey` (`user.name`) is skipped — that series only, not the rest of the palette.
+- It adds no role, no ARIA and no styling of its own: it is a `<div>` with variables on it, and what is
+  inside owns its own semantics. Size it like any Box (`height={60}` is 15rem) — Recharts
+  `ResponsiveContainer` measures the parent.
+
 ```tsx
 function TrendCell({ cell }: { cell: CellModel<Row> }) {
   return (
@@ -840,7 +913,8 @@ function TrendCell({ cell }: { cell: CellModel<Row> }) {
 11. **Size shortcuts**: `width="fit"` = 100%, `width="fit-screen"` = 100vw, `width="1/2"` = 50%
 12. **Box is memoized** with `React.memo`
 13. **`style` is top-level only** — never inside breakpoints (`sm={{ style: ... }}`), pseudo-classes, or theme objects
-14. **All sizing props use divider 4** — `width`, `height`, `minWidth`, `maxWidth`, `minHeight`, `maxHeight` are NOT direct pixels. `height={10}` = 2.5rem = 40px
+14. **A CSS variable is a prop**: `vars={{ 'color-x': 'sky-500' }}` declares `--color-x` for everything inside — and a third-party chart goes in `<ChartContainer series={['revenue']}>` so it names no colour at all
+15. **All sizing props use divider 4** — `width`, `height`, `minWidth`, `maxWidth`, `minHeight`, `maxHeight` are NOT direct pixels. `height={10}` = 2.5rem = 40px
 
 ---
 

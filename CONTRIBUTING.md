@@ -57,7 +57,7 @@ react-box/
 │   ├── ssg.ts                    # Server-side rendering support (entry point)
 │   │
 │   ├── core/                     # Core styling engine — ZERO react imports (enforced)
-│   │   ├── boxStyles.ts          # CSS property definitions (138 props)
+│   │   ├── boxStyles.ts          # CSS property definitions (139 props)
 │   │   ├── boxStylesFormatters.ts # Value formatters (px, rem, etc.)
 │   │   ├── variables.ts          # CSS variables (colors, sizes)
 │   │   ├── classNames.ts         # Conditional className utility
@@ -340,6 +340,19 @@ export const cssStyles = {
       values: 0,
       styleName: 'border-inline-width',   // Single string or array
       valueFormat: BoxStylesFormatters.Value.px,
+    },
+  ],
+
+  /**
+   * A definition can also write the whole rule body itself, for a prop whose declaration *names*
+   * come out of its value. `vars` is the only one: a record, so `styleName` could not hold the
+   * names, and `match` decides entry by entry what is safe to write into a rule.
+   */
+  vars: [
+    {
+      values: {} as Variables.CustomProperties,
+      match: Variables.isCustomProperties,
+      declarations: Variables.customProperties,   // → '--color-x:var(--sky-500);--gap:4px'
     },
   ],
 };

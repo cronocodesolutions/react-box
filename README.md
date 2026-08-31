@@ -5,7 +5,7 @@
 [![Tests](https://github.com/box-kite/box-kite/actions/workflows/test.yml/badge.svg)](https://github.com/box-kite/box-kite/actions/workflows/test.yml)
 [![license](https://img.shields.io/npm/l/@cronocode/react-box)](LICENSE)
 
-`Box` is a single React component with 138 typed CSS props. It generates the CSS for the values you
+`Box` is a single React component with 139 typed CSS props. It generates the CSS for the values you
 pass at runtime and caches every rule by its content, so the same value anywhere in the app reuses
 one class — a project styles itself in TypeScript, with no CSS files to write and no class-name
 convention to remember.
@@ -68,6 +68,7 @@ import Box from "@cronocode/react-box";
 | `Svg`, `Path`, `Circle`, `Rect`, `SvgText`, …                                | `components/svg`            | one component per SVG element — 20 of them, so a drawing never writes `tag`                    |
 | `Icon`                                                                       | `components/icon`           | Box props on an icon somebody else drew — lucide, Tabler, react-icons, a raw `<svg>`           |
 | `Sparkline`, `ProgressRing`, `Gauge`, `MiniDonut`                            | `components/chart`          | chart micro-primitives over those elements — a chart that takes Box props and no chart library |
+| `ChartContainer`                                                             | `components/chart`          | the theming bridge: the variables a Recharts (or any) chart reads, declared in both themes     |
 | `BaseSvg`                                                                    | `components/baseSvg`        | deprecated: `Svg` with the 24×24 icon preset                                                   |
 | `VisuallyHidden`                                                             | `components/visuallyHidden` | text for a screen reader only — clipped away rather than hidden, so it stays in the a11y tree  |
 
@@ -250,6 +251,43 @@ They are cheap enough for one in every row of a virtualized grid, because the pa
 row — the shape — is the `d` attribute, which the styling engine never sees. What _is_ a style prop
 is the paint, which the rows share. `fill` and `stroke` also take `url(#gradient)` and
 `var(--chart-1)` now, so a gradient fill is a value with a theme and a `hover`, not an attribute.
+
+### Theming a chart library
+
+The other half of charts is the chart library you already use. A `<ChartContainer>` declares the
+variables a chart reads, so the chart itself names no colour at all:
+
+```JSX
+import { ChartContainer } from '@cronocode/react-box/components/chart';
+import { Area, AreaChart, ResponsiveContainer, XAxis } from 'recharts';
+
+<ChartContainer series={['revenue', 'cost']} height={60}>
+  <ResponsiveContainer width="100%" height="100%">
+    <AreaChart data={months}>
+      <XAxis dataKey="month" />
+      <Area dataKey="revenue" stroke="var(--color-revenue)" fill="var(--color-revenue)" fillOpacity={0.15} />
+      <Area dataKey="cost" stroke="var(--color-cost)" fill="var(--color-cost)" fillOpacity={0.15} />
+    </AreaChart>
+  </ResponsiveContainer>
+</ChartContainer>;
+```
+
+It declares `--chart-1` … `--chart-6` in both themes and one `--color-<series>` per series you name,
+so the chart flips light to dark with nothing in its own code changing — and the names are the ones
+the ecosystem already uses, so a chart lifted out of shadcn's charts works unchanged.
+
+What makes that cheap is the prop behind it. `vars` is the one prop whose declaration _names_ come
+from its value:
+
+```JSX
+<Flex vars={{ 'color-revenue': 'sky-500', 'chart-gap': '4px' }} theme={{ dark: { vars: { 'color-revenue': 'sky-400' } } }}>
+```
+
+declares `--color-revenue: var(--sky-500)` and `--chart-gap: 4px` on the element, inherited by
+everything inside it — including markup this library never rendered. A colour token resolves to the
+variable behind it, anything else is written out as it stands. Being an ordinary prop, it nests in a
+theme, a breakpoint and a pseudo-class, and it lands in a **class**: two subtrees declaring the same
+palette share one rule, and nothing needs a `<style>` tag or an `id` to scope it to one chart.
 
 ## Extend props
 
@@ -539,7 +577,7 @@ A complete page — props, pseudo-classes, breakpoints, themes, `extend`, `compo
 
 ## Architecture
 
-The styling engine is framework-free. Everything that generates CSS — the 138 prop definitions,
+The styling engine is framework-free. Everything that generates CSS — the 139 prop definitions,
 the value formatters, class-name generation, rule ordering, the style sinks (CSSOM, `textContent`,
 string for SSR, style elements for React 19), the flush scheduler, CSS variables and the theme
 runtime — lives in `src/core/` and imports no React at all. CI fails the build if it ever does
@@ -550,8 +588,8 @@ React is a thin adapter on top of it:
 
 |                                                            | Files | Lines | Share     |
 | ---------------------------------------------------------- | ----- | ----- | --------- |
-| Core engine (`src/core/`, `core.ts`)                       | 20    | 5,346 | 89.9%     |
-| React binding (`src/react/`, `box.ts`, `rsc.ts`, `ssg.ts`) | 14    | 599   | **10.1%** |
+| Core engine (`src/core/`, `core.ts`)                       | 20    | 5,455 | 90.1%     |
+| React binding (`src/react/`, `box.ts`, `rsc.ts`, `ssg.ts`) | 14    | 599   | **9.9%**  |
 
 The binding is the whole React-specific surface: resolve class names during render, flush the
 pending rules from `useInsertionEffect`, render the style elements of the Server-Component path,

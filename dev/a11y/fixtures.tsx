@@ -2,7 +2,7 @@ import { fireEvent, screen } from '@testing-library/react';
 import { Sun } from 'lucide-react';
 import BaseSvg from '../../src/components/baseSvg';
 import Button from '../../src/components/button';
-import { Gauge, MiniDonut, ProgressRing, Sparkline } from '../../src/components/chart';
+import { ChartContainer, Gauge, MiniDonut, ProgressRing, Sparkline } from '../../src/components/chart';
 import Checkbox from '../../src/components/checkbox';
 import DataGrid from '../../src/components/dataGrid';
 import Dropdown from '../../src/components/dropdown';
@@ -226,6 +226,16 @@ export const fixtures: A11yFixture[] = [
   {
     name: 'MiniDonut',
     render: () => <MiniDonut data={[5, 3, 2]} label="Sales by region" />,
+  },
+  {
+    // A container declares variables and nothing else — no role, no name — so the drawing inside it
+    // is still the only thing in the accessibility tree. That is the claim worth a fixture.
+    name: 'ChartContainer',
+    render: () => (
+      <ChartContainer series={['revenue']}>
+        <Sparkline data={[3, 8, 5, 11]} stroke="var(--color-revenue)" label="Revenue, last four quarters" />
+      </ChartContainer>
+    ),
   },
   {
     name: 'Form',

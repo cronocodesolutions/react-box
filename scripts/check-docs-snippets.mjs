@@ -86,7 +86,8 @@ const PROVIDED = {
   Textbox: "import Textbox from '@cronocode/react-box/components/textbox';",
   Tooltip: "import Tooltip from '@cronocode/react-box/components/tooltip';",
   VisuallyHidden: "import VisuallyHidden from '@cronocode/react-box/components/visuallyHidden';",
-  // The chart primitives, one entry between them.
+  // The chart primitives and the theming container, one entry between them.
+  ChartContainer: "import { ChartContainer } from '@cronocode/react-box/components/chart';",
   Gauge: "import { Gauge } from '@cronocode/react-box/components/chart';",
   MiniDonut: "import { MiniDonut } from '@cronocode/react-box/components/chart';",
   ProgressRing: "import { ProgressRing } from '@cronocode/react-box/components/chart';",

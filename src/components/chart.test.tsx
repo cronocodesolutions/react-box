@@ -3,7 +3,7 @@ import { createRef } from 'react';
 import { afterEach, describe, expect, it } from 'vitest';
 import { expectNoAxeViolations } from '../../dev/a11y/axe';
 import { StylesContext } from '../react/useStyles';
-import { Gauge, MiniDonut, ProgressRing, Sparkline } from './chart';
+import { ChartContainer, Gauge, MiniDonut, ProgressRing, Sparkline } from './chart';
 
 /**
  * The geometry is tested in `utils/chart/chartUtils.test.ts`, where a path is just a value. What is
@@ -240,5 +240,83 @@ describe('the chart primitives', () => {
 
     expect(ref.current).toBe(svg);
     expect(svg).toHaveAttribute('aria-roledescription', 'ring');
+  });
+});
+
+/**
+ * The container decides nothing about colour — `ChartUtils` does, and its own tests cover the
+ * mapping. What is left here is that the variables land in a class rather than in a style attribute,
+ * that the dark palette arrives through the theme selector, and that a caller still wins.
+ */
+describe('ChartContainer', () => {
+  afterEach(() => {
+    cleanup();
+  });
+
+  const styles = () => {
+    StylesContext.flushSync();
+
+    return (document.getElementById(StylesContext.styleElementId()) as unknown as HTMLStyleElement).innerText;
+  };
+
+  it('declares the numbered palette and one variable per series, in a class', () => {
+    const { container } = render(<ChartContainer series={['revenue', 'cost']} />);
+    const element = container.firstElementChild!;
+
+    expect(element).not.toHaveAttribute('style');
+    expect(styles()).toContain(
+      '--chart-1:var(--sky-500);--chart-2:var(--emerald-500);--chart-3:var(--amber-500);--chart-4:var(--violet-500);--chart-5:var(--rose-500);--chart-6:var(--cyan-500);--color-revenue:var(--chart-1);--color-cost:var(--chart-2)',
+    );
+  });
+
+  // The point of the whole step: nothing inside the chart changes between the two themes.
+  it('redeclares the palette under the theme selector', () => {
+    render(<ChartContainer />);
+
+    expect(styles()).toContain('.dark .theme-dark-vars-chart-1-sky-400');
+    expect(styles()).toContain('--chart-1:var(--sky-400)');
+  });
+
+  it('shares one rule between two containers with the same series', () => {
+    const { container } = render(<ChartContainer series={['a']} />);
+    render(<ChartContainer series={['a']} p={4} />);
+
+    const [first] = Array.from(container.firstElementChild!.classList).filter((name) => name.includes('color-a'));
+
+    expect(first).toBeTruthy();
+    expect(styles().split('--color-a').length - 1).toBe(1);
+  });
+
+  it('lets a caller replace one slot without a prop for it', () => {
+    render(<ChartContainer series={['revenue']} vars={{ 'chart-1': 'teal-600' }} />);
+
+    expect(styles()).toContain('--chart-1:var(--teal-600)');
+  });
+
+  it('keeps the dark palette when the caller brings a theme of their own', () => {
+    render(<ChartContainer theme={{ dark: { bgColor: 'slate-900' } }} />);
+
+    expect(styles()).toContain('--chart-1:var(--sky-400)');
+    expect(styles()).toContain('background-color:var(--slate-900)');
+  });
+
+  it('paints a chart drawn with the variables and nothing else', () => {
+    const { container } = render(
+      <ChartContainer series={['revenue']}>
+        <Sparkline data={[1, 4, 2]} stroke="var(--color-revenue)" />
+      </ChartContainer>,
+    );
+
+    expect(container.querySelector('svg')!.getAttribute('class')).toContain('stroke-var(--color-revenue)');
+    expect(styles()).toContain('stroke:var(--color-revenue)');
+  });
+
+  it('renders a plain wrapper with no role of its own, and forwards its ref', () => {
+    const ref = createRef<HTMLElement>();
+    const { container } = render(<ChartContainer ref={ref} tag="section" />);
+
+    expect(ref.current).toBe(container.firstElementChild);
+    expect(container.firstElementChild!.tagName).toBe('SECTION');
+    expect(container.firstElementChild!.getAttribute('role')).toBeNull();
   });
 });

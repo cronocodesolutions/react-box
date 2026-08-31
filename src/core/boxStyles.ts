@@ -1552,6 +1552,27 @@ export const cssStyles = {
       valueFormat: (value, getVariableValue) => `${getVariableValue(value[0] as string)} ${getVariableValue(value[1] as string)}`,
     },
   ],
+  /**
+   * CSS custom properties, declared on this element and inherited by everything inside it:
+   * `vars={{ 'color-revenue': 'sky-500' }}` emits `--color-revenue: var(--sky-500)`.
+   *
+   * The one prop whose *names* come from its value, which is what makes it the answer for anything
+   * this library does not render: a Recharts `<Line stroke="var(--color-revenue)">`, a third-party
+   * widget that reads a token, a subtree with its own spacing scale. Because it is an ordinary prop,
+   * the variables it declares land in a class — so they nest in `theme`, `hover` and a breakpoint
+   * like everything else, and two subtrees declaring the same palette share one rule instead of
+   * each carrying a `<style>` of its own.
+   *
+   * A colour token becomes the variable behind it; every other value is written out as it stands.
+   * Names may be spelled with or without the leading `--`.
+   */
+  vars: [
+    {
+      values: {} as Variables.CustomProperties,
+      match: Variables.isCustomProperties,
+      declarations: Variables.customProperties as NonNullable<BoxStyle['declarations']>,
+    },
+  ],
 } satisfies Record<string, BoxStyle[]>;
 
 export const pseudo1 = {
