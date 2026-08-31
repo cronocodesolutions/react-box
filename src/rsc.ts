@@ -47,6 +47,7 @@ interface RscBoxType {
   ): React.ReactNode;
   extend: typeof BoxExtends.extend;
   components: typeof BoxExtends.components;
+  keyframes: typeof BoxExtends.keyframes;
   getVariableValue: (name: string) => string;
   /** Explicit engine configuration. Element mode is already on; this is for the rest of it. */
   configure: (config: StylesConfiguration) => void;
@@ -56,6 +57,7 @@ const RscBox = Box as RscBoxType;
 
 RscBox.extend = BoxExtends.extend;
 RscBox.components = BoxExtends.components;
+RscBox.keyframes = BoxExtends.keyframes;
 RscBox.getVariableValue = (name: string) => getDefaultEngine().getVariableValue(name);
 RscBox.configure = (config: StylesConfiguration) => getDefaultEngine().configure(config);
 

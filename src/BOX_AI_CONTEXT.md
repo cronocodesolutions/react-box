@@ -1,6 +1,6 @@
 # @cronocode/react-box - AI Assistant Context
 
-Runtime CSS-in-JS library. `Box` component accepts 139 CSS props and generates CSS classes at runtime. Same prop values share a single class.
+Runtime CSS-in-JS library. `Box` component accepts 150 CSS props and generates CSS classes at runtime. Same prop values share a single class.
 
 ---
 
@@ -58,15 +58,16 @@ All imports from `@cronocode/react-box/components/...`. Semantics also export: `
 
 **#1 source of confusion.** Different props have different dividers:
 
-| Prop Category                                                | Divider | Example            | CSS Output                     |
-| ------------------------------------------------------------ | ------- | ------------------ | ------------------------------ |
-| Spacing (`p`, `m`, `gap`, `px`, `py`, `mx`, `my`, etc.)      | 4       | `p={4}`            | `padding: 1rem` (16px)         |
-| Font size (`fontSize`)                                       | **16**  | `fontSize={14}`    | `font-size: 0.875rem` (14px)   |
-| Width/Height (numeric)                                       | 4       | `width={20}`       | `width: 5rem` (80px)           |
-| Border width (`b`, `bx`, `by`, `bt`, `br`, `bb`, `bl`)       | none    | `b={1}`            | `border-width: 1px`            |
-| Border radius (`borderRadius`, `borderRadiusTop`, …)         | 4       | `borderRadius={2}` | `border-radius: 0.5rem` (8px)  |
-| Line height (`lineHeight`)                                   | none    | `lineHeight={24}`  | `line-height: 24px`            |
-| SVG lengths (`strokeWidth`, `strokeDasharray`, `r`, `cx`, …) | none    | `strokeWidth={2}`  | `stroke-width: 2` (user units) |
+| Prop Category                                                                          | Divider | Example                    | CSS Output                     |
+| -------------------------------------------------------------------------------------- | ------- | -------------------------- | ------------------------------ |
+| Spacing (`p`, `m`, `gap`, `px`, `py`, `mx`, `my`, etc.)                                | 4       | `p={4}`                    | `padding: 1rem` (16px)         |
+| Font size (`fontSize`)                                                                 | **16**  | `fontSize={14}`            | `font-size: 0.875rem` (14px)   |
+| Width/Height (numeric)                                                                 | 4       | `width={20}`               | `width: 5rem` (80px)           |
+| Border width (`b`, `bx`, `by`, `bt`, `br`, `bb`, `bl`)                                 | none    | `b={1}`                    | `border-width: 1px`            |
+| Border radius (`borderRadius`, `borderRadiusTop`, …)                                   | 4       | `borderRadius={2}`         | `border-radius: 0.5rem` (8px)  |
+| Line height (`lineHeight`)                                                             | none    | `lineHeight={24}`          | `line-height: 24px`            |
+| SVG lengths (`strokeWidth`, `strokeDasharray`, `r`, `cx`, …)                           | none    | `strokeWidth={2}`          | `stroke-width: 2` (user units) |
+| Times (`animationDuration`, `animationDelay`, `transitionDuration`, `transitionDelay`) | none    | `animationDuration={1100}` | `animation-duration: 1100ms`   |
 
 ```tsx
 // fontSize: divider 16 → value maps directly to px
@@ -132,7 +133,7 @@ All sizing, spacing, and positioning props also accept percentage strings: `p="5
 | `zIndex`                                                                         | z-index                                 | number                                                                                                                                                                          |
 | `shadow`                                                                         | box-shadow                              | `'small'`, `'medium'`, `'large'`, `'xl'`, `'none'`                                                                                                                              |
 | `opacity`                                                                        | opacity                                 | number                                                                                                                                                                          |
-| `cursor` / `pointerEvents` / `transition` / `transform` / `userSelect`           | misc                                    | string values                                                                                                                                                                   |
+| `cursor` / `pointerEvents` / `userSelect`                                        | misc                                    | string values. For `transition`, `animation` and the transform props see _Animation and transitions_ below                                                                      |
 
 ### Custom properties (`vars`)
 
@@ -140,10 +141,7 @@ The one prop whose declaration _names_ come from its value, for styling markup t
 rendered — a chart library, a third-party widget, a subtree with its own tokens:
 
 ```tsx
-<Flex
-  vars={{ 'color-revenue': 'sky-500', 'chart-gap': '4px', 'rows': 3 }}
-  theme={{ dark: { vars: { 'color-revenue': 'sky-400' } } }}
->
+<Flex vars={{ 'color-revenue': 'sky-500', 'chart-gap': '4px', rows: 3 }} theme={{ dark: { vars: { 'color-revenue': 'sky-400' } } }}>
   {/* --color-revenue, --chart-gap and --rows are inherited by everything in here */}
 </Flex>
 ```
@@ -221,6 +219,61 @@ import { Circle, Path, Rect, Svg, SvgText } from '@cronocode/react-box/component
 7. **An icon from a set is not SVG you draw — it is `<Icon>`.** `<Icon size={5} color="amber-500" label="Sunny"><Sun /></Icon>` from `components/icon`, wrapping one element from lucide, Tabler, react-icons, or a raw `<svg>`. `size` is the ÷4 scale (`size={6}` is 24px, the default) and lands in the _class_, where a CSS declaration outranks the `width`/`height` attributes the icon set writes — which is why `Icon` needs to know no set's API. `strokeWidth` is the same: an ordinary Box prop, so it can change on hover. No `label` means `aria-hidden`; a `label` means `role="img"`. **Reach for `Svg` rather than wrapping one in `Icon`** — `Svg` takes these props directly. (Wrapping one does work: `Icon` asks the child which convention it follows and routes `role`/`aria-label` into `props` for a component of ours. It is still a layer nobody needs.)
 8. **A paint server is a value, not an attribute.** `fill`, `stroke` and `clipPath` take `url(#id)` (a `<LinearGradient>`, a pattern, a `<ClipPath>` the document defines) and `var(--name)` (a variable somebody else declared) beside the colour tokens — so `fill="url(#sky)"` and `clipPath="url(#frame)"`, and both can differ per theme, on `hover` and per breakpoint. Only those two shapes are accepted: anything else emits no rule at all rather than a broken declaration. A gradient stop is still themed the same way — `<Stop stopColor="currentColor" color="amber-300" />`.
 9. **An icon outside lucide comes through the same `<Icon>`.** Iconify carries 300,000+ icons in 200-plus sets, and the choice is only about _when_ the icon becomes markup. One icon: copy its SVG and paste it into an `<Icon>` — no dependency, renders on a server. A set: `unplugin-icons` compiles `~icons/<set>/<name>` into a component at build time from an `@iconify-json/<set>` devDependency (`npm i -D unplugin-icons @iconify-json/<set> @svgr/core @svgr/plugin-jsx`, the plugin with `{ compiler: 'jsx', jsx: 'react' }`, and `/// <reference types="unplugin-icons/types/react" />` in a `.d.ts`) — nothing fetched at runtime, server-renders. A name that is data (from a CMS, from a user): `@iconify/react`'s `<Icon icon="set:name"/>` inside our `<Icon>` — it fetches in the browser, so it is a client component and the server sends no icon. **Turbopack runs no unplugin**, so under Next.js 16 the build-time recipe needs `next build --webpack`; the other two work as they are.
+
+---
+
+### Animation and transitions
+
+Every Box already transitions `all` its properties over `--transitionTime` (0.25s), which is why a
+`hover` colour fades without being asked. On top of that:
+
+| Prop                                                              | CSS Property        | Notes                                                                                                                            |
+| ----------------------------------------------------------------- | ------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| `animation`                                                       | animation           | One of four presets: `'spin'`, `'pulse'`, `'bounce'`, `'ping'`, or `'none'`. Keyframes come with the engine                      |
+| `animationName`                                                   | animation-name      | A sequence registered with `Box.keyframes()`, a preset name, or a name from any stylesheet                                       |
+| `animationDuration` / `animationDelay`                            | ms                  | **Milliseconds, no divider**: `animationDuration={1100}` → `1100ms`                                                              |
+| `animationIterationCount`                                         | number              | A number or `'infinite'`                                                                                                         |
+| `animationDirection` / `animationFillMode` / `animationPlayState` | keywords            | `'normal'`/`'reverse'`/`'alternate'`/`'alternate-reverse'`; `'none'`/`'forwards'`/`'backwards'`/`'both'`; `'running'`/`'paused'` |
+| `animationTimingFunction` / `transitionTimingFunction`            | timing function     | Keywords plus computed curves: `'cubic-bezier(0.4, 0, 0.6, 1)'`, `'steps(4, end)'`, `'linear(0, 0.5, 1)'`                        |
+| `transition`                                                      | transition-property | `'all'`, `'none'`, or a group: `'colors'`, `'opacity'`, `'shadow'`, `'transform'`, `'size'`, `'filter'`                          |
+| `transitionDuration` / `transitionDelay`                          | ms                  | Milliseconds, same as the animation pair                                                                                         |
+| `translateX` / `translateY` / `rotate` / `scale` / `flip`         | transform longhands | Each writes its own CSS property, so they compose. `scale={1.05}` is unitless; `rotate={45}` is degrees                          |
+
+```tsx
+// A preset: no registration, and it stops under prefers-reduced-motion on its own
+<Icon size={6} animation="spin"><Loader2 /></Icon>
+
+// A sequence of your own — the steps are Box props, so the ÷4 scale and colour tokens apply
+Box.keyframes({
+  'slide-in': {
+    from: { opacity: 0, translateY: 3 },   // 3 → 0.75rem
+    to: { opacity: 1, translateY: 0 },
+  },
+});
+
+<Box animationName="slide-in" animationDuration={450} animationTimingFunction="ease-out" animationFillMode="backwards" />
+
+// Narrow what transitions, and compose transforms on hover
+<Box transition="transform" transitionDuration={300} hover={{ translateX: 2, translateY: -2, scale: 1.05 }} />
+```
+
+- **`Box.keyframes({ name: { from, '50%', to } })`** registers sequences; stop keys are `'from'`,
+  `'to'` or a percentage string. Registration is free — a sequence is written into the stylesheet the
+  first time a rule names it, and exactly once, so an unused preset costs nothing. It reaches static
+  output through `getStyles()` and rides the base `<style>` element in element mode, so a Server
+  Component can animate with no client JavaScript.
+- **A preset already respects reduced motion.** Preset durations are multiples of `--transitionTime`,
+  which the base stylesheet zeroes under `prefers-reduced-motion`. The moment you name a duration in
+  milliseconds you own that decision: say `motionReduce={{ animationName: 'none' }}` yourself.
+- **`animation` is declared before the longhands**, so `animationDuration` and friends override
+  whatever a preset chose.
+- **The transform props are CSS longhands, not one `transform` declaration.** `translateX` and
+  `translateY` each set a custom property and both compose into one `translate`, which still
+  transitions (a `var()` is substituted before the browser compares the two states). `rotate` and
+  `scale` are their own properties too. The one collision left: `flip` and `scale` both write `scale`.
+- **`Box.configure({ transition })`** changes what the base class transitions for the whole engine:
+  a group name, or `false` to declare nothing at all and leave transitions entirely to the props.
+  Call it before the first render.
 
 ---
 
@@ -860,12 +913,12 @@ import { Area, AreaChart, CartesianGrid, ResponsiveContainer, XAxis, YAxis } fro
       <Area dataKey="cost" stroke="var(--color-cost)" fill="var(--color-cost)" fillOpacity={0.15} />
     </AreaChart>
   </ResponsiveContainer>
-</ChartContainer>
+</ChartContainer>;
 ```
 
-| Prop     | What it is                                                                                                        |
-| -------- | ----------------------------------------------------------------------------------------------------------------- |
-| `series` | `['revenue', 'cost']` takes the palette in order, or `{ revenue: 'emerald-600' }` names a paint per series          |
+| Prop     | What it is                                                                                                 |
+| -------- | ---------------------------------------------------------------------------------------------------------- |
+| `series` | `['revenue', 'cost']` takes the palette in order, or `{ revenue: 'emerald-600' }` names a paint per series |
 
 Everything else is a Box prop, which is the point:
 

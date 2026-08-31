@@ -53,7 +53,7 @@ export const siteRoutes = [
   {
     path: '/box',
     name: 'Box',
-    description: 'The foundational component: 139 CSS properties as type-safe props, with the numeric formatters explained.',
+    description: 'The foundational component: 150 CSS properties as type-safe props, with the numeric formatters explained.',
   },
   {
     path: '/svg',
@@ -72,6 +72,12 @@ export const siteRoutes = [
     name: 'Charts',
     description:
       'Sparklines, progress rings, gauges and mini donuts as Boxes — no chart library — plus the container that themes a Recharts chart with the variables it reads.',
+  },
+  {
+    path: '/animation',
+    name: 'Animation',
+    description:
+      'Keyframes, presets and transitions as typed props: Box.keyframes() takes Box props as its steps, and a preset stops on its own under reduced motion.',
   },
   {
     path: '/button',

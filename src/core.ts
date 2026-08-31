@@ -19,6 +19,7 @@ export type { ClassNameType } from './core/classNames';
 export { createStyleEngine, DEFAULT_STYLE_ELEMENT_ID } from './core/engine/styleEngine';
 export type { StyleEngine, StyleEngineOptions, StylesConfiguration } from './core/engine/styleEngine';
 export { manualScheduler, microtaskScheduler, syncScheduler } from './core/engine/flushScheduler';
+export type { KeyframeStop, KeyframeStops, Keyframes } from './core/engine/keyframes';
 export type { FlushScheduler } from './core/engine/flushScheduler';
 export type { SinkMode, SortedRule, StyleElementDescriptor, StyleSink } from './core/engine/styleSink';
 export { default as createThemeController } from './core/theme/themeController';

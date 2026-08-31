@@ -48,6 +48,7 @@ interface BoxType {
   ): React.ReactNode;
   extend: typeof BoxExtends.extend;
   components: typeof BoxExtends.components;
+  keyframes: typeof BoxExtends.keyframes;
   Theme: typeof Theme;
   useTheme: typeof Theme.useTheme;
   getVariableValue: (name: string) => string;
@@ -60,6 +61,7 @@ const Box = memo(forwardRef(BoxComponent)) as unknown as BoxType;
 (Box as React.FunctionComponent).displayName = 'Box';
 Box.extend = BoxExtends.extend;
 Box.components = BoxExtends.components;
+Box.keyframes = BoxExtends.keyframes;
 Box.Theme = Theme;
 Box.useTheme = Theme.useTheme;
 Box.getVariableValue = (name: string) => getDefaultEngine().getVariableValue(name);

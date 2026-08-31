@@ -64,6 +64,12 @@ export type BoxStyle = (BoxStyleScalar | BoxStyleTupleArrays | BoxStyleRecord) &
    */
   match?: (value: BoxStyleValue) => boolean;
   /**
+   * The `@keyframes` names this value refers to, for a prop whose value names a sequence (`animation`,
+   * `animationName`). The engine emits the ones it has registered and leaves the rest alone — keyframes
+   * are written only when something asks for them.
+   */
+  keyframes?: (value: BoxStyleValue) => string[];
+  /**
    * The whole rule body this definition writes, for a prop whose property names come out of its *value*:
    * `vars={{ 'color-x': 'sky-500' }}` has to emit `--color-x:var(--sky-500)`, a name the registry never
    * sees. It replaces `styleName`/`valueFormat`; everything else about the prop is unchanged.

@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-@cronocode/react-box is a React runtime CSS-in-JS library. The core `Box` component accepts 139 CSS props and generates CSS classes at runtime — no CSS files needed. Same prop values across components share a single CSS class.
+@cronocode/react-box is a React runtime CSS-in-JS library. The core `Box` component accepts 150 CSS props and generates CSS classes at runtime — no CSS files needed. Same prop values across components share a single CSS class.
 
 ## Commands
 
@@ -35,7 +35,7 @@ Node version: v24 (pinned in .nvmrc).
 - `src/rsc.ts` — The `react-server` build of Box: same props, no hook, no effect, no DOM. Element mode is switched on when it loads, so a Server Component needs no configuration. Enforced by `scripts/check-rsc-boundary.mjs`
 - `src/a11y.ts` — The behaviour primitives (`@cronocode/react-box/a11y`): `useControllableState` (change reasons), `useDismiss` (Escape + outside pointer, layered), `useFocusReturn`, `useRovingFocus` (arrows/Home/End/typeahead, DOM focus or `aria-activedescendant`), `useIdentifier`. Sources in `src/react/a11y/**`, their own `behavior` chunk so the entry pulls in no engine; client-only, so the entry gets a `'use client'` banner. See `docs/a11y-primitives.md`
 - `src/core.ts` — The engine with no React at all (`@cronocode/react-box/core`): `createStyleEngine()`, `engine.classNames(props)`, `createThemeController()`. `examples/vanilla` is a whole page built on it. Both the sources it reaches and the chunks it imports are checked for React
-- `src/core/boxStyles.ts` — All CSS property definitions (139 props). Types auto-generate from these definitions
+- `src/core/boxStyles.ts` — All CSS property definitions (150 props). Types auto-generate from these definitions
 - `src/core/boxStylesFormatters.ts` — Value formatters that convert prop values to CSS (rem, px, fractions, etc.)
 - `src/core/engine/styleEngine.ts` — `createStyleEngine()`: all engine state (class-name cache, rule registry, identity factory, variables, prop and component registries) on an instance; generates class names and rules
 - `src/core/engine/styleSink.ts` — Where the CSS goes: `cssom` (`insertRule`), `textContent`, `string` (server rendering, no DOM), or `element` (nowhere — the rules come back as `<style href precedence>` descriptors for the adapter to render). Every sink places a rule by its sort key, so they all produce the same cascade
@@ -50,6 +50,8 @@ Node version: v24 (pinned in .nvmrc).
 - `src/utils/environment/environmentUtils.ts` — `isBrowser()`, `hasDocument()`, `documentOrNull()`, `documentRoot()`, `documentHead()`, `matchMedia()`. **Framework-free: use these instead of writing `typeof document === 'undefined'` anywhere**
 - `src/utils/dom/domUtils.ts` — `elementOf()`/`htmlElementOf()` (ref or element) and `isEventInside()` (the click-outside check, composed path with a `contains` fallback)
 - `src/core/variables.ts` — CSS variables (200+ Tailwind-like colors), lazy-loaded via pending variables system
+- `src/core/animations.ts` — The values the animation props take that are more than a keyword: the four presets and their shorthands, the easing escape hatch (`cubic-bezier()`/`steps()`/`linear()`, a template type so the keywords keep their autocomplete), and the property groups `transition` accepts
+- `src/core/engine/keyframes.ts` — The `@keyframes` registry behind `Box.keyframes()`: sequences whose steps are Box props, the four presets and the DataGrid sweep registered by default. Registration is free — the engine writes a sequence the first time a rule names it (`BoxStyle.keyframes` says which values name one), into the base stream, so it travels with `getStyles()` and rides the base element in element mode
 - `src/core/classNames.ts` — Conditional className utility
 
 ### Numeric Value Formatters (critical)
@@ -61,13 +63,15 @@ Different props have different dividers — this is the #1 source of bugs:
 - **Border width** (`b`, `bx`, `by`): direct px → `b={1}` = 1px
 - **borderRadius**: divider 4, same scale as spacing → `borderRadius={2}` = 0.5rem = 8px
 - **lineHeight**: direct px → `lineHeight={24}` = 24px
-- **CSS custom properties** (`vars`): the one prop whose declaration *names* come from its value — `vars={{ 'color-revenue': 'sky-500' }}` emits `--color-revenue: var(--sky-500)`. A colour token resolves to the variable behind it, everything else is written out verbatim. It is how markup this library does not render gets styled (a chart library, a third-party widget), and because it is an ordinary prop the variables land in a class and nest in `theme`/`hover`/a breakpoint. A definition that declares `BoxStyle.declarations` writes its own rule body; `Variables.isCustomProperties` validates entry by entry, so one bad name drops one variable rather than the record
+- **CSS custom properties** (`vars`): the one prop whose declaration _names_ come from its value — `vars={{ 'color-revenue': 'sky-500' }}` emits `--color-revenue: var(--sky-500)`. A colour token resolves to the variable behind it, everything else is written out verbatim. It is how markup this library does not render gets styled (a chart library, a third-party widget), and because it is an ordinary prop the variables land in a class and nest in `theme`/`hover`/a breakpoint. A definition that declares `BoxStyle.declarations` writes its own rule body; `Variables.isCustomProperties` validates entry by entry, so one bad name drops one variable rather than the record
 - **SVG paint references**: `fill`, `stroke` and `clipPath` take `url(#id)` and `var(--name)` beside the colour tokens, so a gradient or a pattern is a _value_ — themed, hoverable, responsive — rather than an attribute in `props`. A definition that declares `match` (`BoxStyle.match`, `Variables.isReference`) accepts exactly the values it names, so a typo emits nothing instead of a broken declaration
 - **SVG lengths** (`strokeWidth`, `strokeDasharray`, `strokeDashoffset`, `strokeMiterlimit`, and the geometry props `cx`, `cy`, `r`, `rx`, `ry`, `x`, `y`): no divider and no unit — the number is SVG user units, so `strokeWidth={2}` = `stroke-width: 2` and `r={20}` = `r: 20`. A `<rect>`'s `width`/`height` are **not** in this family: those prop names are the ÷4 layout scale, which is why `<Rect>` (`components/svg`) claims them back as the SVG attributes they are
+- **Animation and transition times** (`animationDuration`, `animationDelay`, `transitionDuration`, `transitionDelay`): direct milliseconds — `animationDuration={1100}` = `1100ms`. Only the four `animation` presets escape it: their durations are multiples of `--transitionTime`, which is what makes them stop under `prefers-reduced-motion` with no opt-in, and naming a duration in ms is how a component takes that decision back (the DataGrid loader does)
+- **The transform props are CSS longhands** (`translateX`/`translateY`/`rotate`/`scale`), so they compose instead of overwriting one `transform`. The two translate axes each set a custom property and both write the same `translate: var(--boxTranslateX, 0) var(--boxTranslateY, 0)` — a `var()` is substituted at computed-value time, so the composed value still transitions. `flip` and `scale` both write `scale`: use one
 
 ### Extension & Component System
 
-- `src/core/extends/boxExtends.ts` — `Box.extend()` for custom CSS variables, new props, extending existing prop values; `Box.components()` for component default styles with variants
+- `src/core/extends/boxExtends.ts` — `Box.extend()` for custom CSS variables, new props, extending existing prop values; `Box.components()` for component default styles with variants; `Box.keyframes()` for `@keyframes` sequences
 - `src/core/extends/boxComponents.ts` — Built-in component default styles
 - `src/core/extends/useComponents.ts` — Merges component defaults with user-provided props
 

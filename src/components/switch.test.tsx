@@ -110,7 +110,7 @@ describe('Switch', () => {
 
     const css = (document.getElementById('crono-styles') as HTMLStyleElement | null)?.textContent ?? '';
 
-    expect(css).toContain(':checked::before{transform:translateX(1rem)}');
+    expect(css).toContain(':checked::before{--boxTranslateX:1rem;translate:var(--boxTranslateX, 0) var(--boxTranslateY, 0)}');
     expect(css).not.toContain('::before:checked');
   });
 

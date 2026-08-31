@@ -866,6 +866,15 @@ const boxComponents = {
                   bottom: 0,
                   left: 0,
                   bgColor: 'indigo-500',
+                  animationName: 'rb-datagrid-loader',
+                  animationDuration: 1100,
+                  animationTimingFunction: 'linear',
+                  animationIterationCount: 'infinite',
+                  // A duration named in milliseconds is outside the reduced-motion default, which only
+                  // zeroes `--transitionTime` — so this sweep says when to stop on its own.
+                  motionReduce: {
+                    animationName: 'none',
+                  },
                   theme: {
                     dark: {
                       bgColor: 'indigo-400',

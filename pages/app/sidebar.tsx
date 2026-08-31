@@ -19,6 +19,7 @@ import {
   Rows3,
   Server,
   Shapes,
+  Sparkles,
   Spline,
   Sun,
   Table,
@@ -176,6 +177,9 @@ export default function Sidebar({ toggleTheme, onClose }: SidebarProps) {
           </MenuItem>
           <MenuItem to="/charts" icon={<ChartSpline />}>
             Charts
+          </MenuItem>
+          <MenuItem to="/animation" icon={<Sparkles />}>
+            Animation
           </MenuItem>
         </MenuSection>
 

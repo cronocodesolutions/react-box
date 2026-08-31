@@ -5,7 +5,7 @@ description: '@cronocode/react-box expert — runtime CSS-in-JS library. Use whe
 
 # @cronocode/react-box AI Skill
 
-Runtime CSS-in-JS library. `Box` accepts 139 CSS props → generates CSS classes at runtime. Same values share a class.
+Runtime CSS-in-JS library. `Box` accepts 150 CSS props → generates CSS classes at runtime. Same values share a class.
 
 ## Installation & Package Management
 
@@ -38,6 +38,7 @@ Check latest: `npm view @cronocode/react-box version`
 | borderRadius                                            | 4       | `borderRadius={2}` → 0.5rem (8px)                  |
 | lineHeight / letterSpacing                              | px      | `lineHeight={24}` → 24px                           |
 | SVG lengths (`strokeWidth`,`strokeDasharray`,`r`,`cx`…) | none    | `strokeWidth={2}` → `stroke-width: 2` (user units) |
+| Times (`animationDuration`,`transitionDelay`…)          | none    | `animationDuration={1100}` → `1100ms`              |
 
 ## Component Shortcuts
 
@@ -92,7 +93,7 @@ skipped. Overriding a slot needs no prop of its own, because the container is a 
 the chart reads (`--chart-grid`, `--chart-label` for axes) is declared the same way. The names are the ones the
 ecosystem already uses, so a chart lifted from shadcn's charts works unchanged. It adds no role and no ARIA.
 
-**Custom properties**: `vars` — the one prop whose declaration *names* come from its value.
+**Custom properties**: `vars` — the one prop whose declaration _names_ come from its value.
 `vars={{ 'color-revenue': 'sky-500', 'chart-gap': '4px' }}` declares `--color-revenue: var(--sky-500)` and
 `--chart-gap: 4px` on the element, inherited by everything inside it — including markup this library never
 rendered (a chart library, a third-party widget). A colour token resolves to the variable behind it; every other
@@ -101,7 +102,23 @@ value is written out as it stands. Names may carry a leading `--` or not. It is 
 and nothing needs a `<style>` tag or an `id` to scope it. A name that is not a CSS identifier, or a value
 containing `;` or a brace, is skipped (that entry only, not the whole record).
 
-**Effects**: `shadow` (`'small'`/`'medium'`/`'large'`/`'xl'`/`'none'`), `opacity`, `cursor`, `pointerEvents`, `transition`, `transform`, `userSelect`, `overflow`
+**Animation & transitions**: every Box already transitions `all` over `--transitionTime` (0.25s), which is why a `hover` colour fades
+unasked. `animation` takes a preset — `'spin'`/`'pulse'`/`'bounce'`/`'ping'`/`'none'`, keyframes included, durations riding
+`--transitionTime` so `prefers-reduced-motion` stops them for free. Longhands (declared after it, so they win): `animationName`,
+`animationDuration`/`animationDelay` (**milliseconds, no divider** — `animationDuration={1100}`), `animationIterationCount` (number or
+`'infinite'`), `animationDirection`, `animationFillMode`, `animationPlayState`, `animationTimingFunction`. Name a duration in ms and you
+own reduced motion: add `motionReduce={{ animationName: 'none' }}`. `transition` narrows what transitions to a group — `'colors'`,
+`'opacity'`, `'shadow'`, `'transform'`, `'size'`, `'filter'` (or `'all'`/`'none'`) — with `transitionDuration`/`transitionDelay` in ms and
+`transitionTimingFunction` taking the keywords plus computed curves (`'cubic-bezier(0.4, 0, 0.6, 1)'`, `'steps(4, end)'`,
+`'linear(0, 0.5, 1)'`; a typo emits no rule). **`Box.keyframes()`** registers sequences whose steps are Box props —
+`Box.keyframes({ 'slide-in': { from: { opacity: 0, translateY: 3 }, to: { opacity: 1, translateY: 0 } } })`, stops keyed `'from'`/`'to'`/`'50%'`
+— written into the stylesheet the first time a rule names one, and exactly once, so an unused sequence costs nothing; it reaches
+`getStyles()` and element mode, so a Server Component animates with no client JS. **Transforms compose**: `translateX`/`translateY` (÷4,
+fractions, percentages) both feed one `translate` and still transition, `rotate={45}` (degrees) and `scale={1.05}` (unitless) are their own
+properties — only `flip` and `scale` collide, both writing `scale`. `Box.configure({ transition: 'colors' | false })` changes what the base
+class transitions, before the first render.
+
+**Effects**: `shadow` (`'small'`/`'medium'`/`'large'`/`'xl'`/`'none'`), `opacity`, `cursor`, `pointerEvents`, `userSelect`, `overflow`
 
 ## Pseudo-Classes & Breakpoints
 

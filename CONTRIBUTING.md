@@ -57,7 +57,7 @@ react-box/
 │   ├── ssg.ts                    # Server-side rendering support (entry point)
 │   │
 │   ├── core/                     # Core styling engine — ZERO react imports (enforced)
-│   │   ├── boxStyles.ts          # CSS property definitions (139 props)
+│   │   ├── boxStyles.ts          # CSS property definitions (150 props)
 │   │   ├── boxStylesFormatters.ts # Value formatters (px, rem, etc.)
 │   │   ├── variables.ts          # CSS variables (colors, sizes)
 │   │   ├── classNames.ts         # Conditional className utility

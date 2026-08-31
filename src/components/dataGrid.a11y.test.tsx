@@ -113,12 +113,12 @@ describe('DataGrid accessibility', () => {
     it('stops the loading bar sweeping when the user asked for less motion', () => {
       render(<DataGrid<Person> data={people} loading def={{ rowKey: 'id', columns, visibleRowsCount: 'all' } as Definition} />);
 
-      // The sweep is the library's only animation, and it repeats forever. It lives in a class
-      // rather than an inline style precisely so this rule can outrank it.
-      const css = document.getElementById('rb-datagrid-loader-keyframes')?.textContent ?? '';
+      // The sweep is the library's only animation, and it repeats forever. It is a Box prop like any
+      // other now, so the sequence and the rule that stops it are both in the engine's stylesheet.
+      const css = (document.getElementById('crono-styles') as HTMLStyleElement | null)?.textContent ?? '';
 
-      expect(css).toContain('@media (prefers-reduced-motion: reduce){.rb-datagrid-loader-bar{animation:none}}');
-      expect(document.querySelector('.rb-datagrid-loader-bar')?.getAttribute('style')).toBeNull();
+      expect(css).toContain('@keyframes rb-datagrid-loader{');
+      expect(css).toContain('@media (prefers-reduced-motion: reduce){.motionReduce-animationName-none{animation-name:none}}');
     });
   });
 

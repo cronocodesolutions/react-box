@@ -1,0 +1,63 @@
+import { BoxStyleValue } from './coreTypes';
+
+/**
+ * The values the animation and transition props take that are more than a CSS keyword: the four presets,
+ * the easing escape hatch, and the property groups `transition` accepts.
+ */
+namespace Animations {
+  /** A preset's duration as a multiple of `--transitionTime` (0.25s), so reduced motion zeroes it too. */
+  function scaled(units: number): string {
+    return `calc(${units} * var(--transitionTime))`;
+  }
+
+  export const presetNames = ['spin', 'pulse', 'bounce', 'ping'] as const;
+
+  export type PresetName = (typeof presetNames)[number];
+
+  /**
+   * The `animation` shorthand each preset writes. Durations ride `--transitionTime` rather than naming
+   * seconds, so a preset stops under `prefers-reduced-motion` for the reason every Box transition does.
+   */
+  export const presets: Record<PresetName, string> = {
+    spin: `spin ${scaled(4)} linear infinite`,
+    pulse: `pulse ${scaled(8)} cubic-bezier(0.4, 0, 0.6, 1) infinite`,
+    bounce: `bounce ${scaled(4)} infinite`,
+    ping: `ping ${scaled(4)} cubic-bezier(0, 0, 0.2, 1) infinite`,
+  };
+
+  /**
+   * An easing curve CSS computes rather than one of the keywords — `cubic-bezier()`, `steps()`, and the
+   * `linear()` a sampled spring compiles to. A template type rather than `string`, so the keywords keep
+   * their autocomplete beside it.
+   */
+  export type TimingFunction = `cubic-bezier(${string})` | `steps(${string})` | `linear(${string})`;
+
+  export const timingFunction = '' as TimingFunction;
+
+  const timingFunctionPattern = /^(cubic-bezier|steps|linear)\([^()]*\)$/;
+
+  /** The definition's `match`: one balanced easing function, so a typo emits nothing at all. */
+  export function isTimingFunction(value: BoxStyleValue): boolean {
+    return typeof value === 'string' && timingFunctionPattern.test(value);
+  }
+
+  /**
+   * What `transition` transitions, by group rather than by CSS property name — the same groups Tailwind
+   * ships, because "which properties are the colours" is not a question worth asking twice. `all` is
+   * still the default every Box gets from the base class.
+   */
+  export const propertyGroups = {
+    colors: 'color, background-color, border-color, outline-color, text-decoration-color, fill, stroke',
+    opacity: 'opacity',
+    shadow: 'box-shadow',
+    transform: 'transform, translate, rotate, scale',
+    size: 'width, height',
+    filter: 'filter, backdrop-filter',
+  } as const;
+
+  export type PropertyGroup = keyof typeof propertyGroups;
+
+  export const propertyGroupNames = Object.keys(propertyGroups) as PropertyGroup[];
+}
+
+export default Animations;
