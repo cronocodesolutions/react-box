@@ -1247,6 +1247,10 @@ needs a code example or has two conventions to reconcile may run to four or five
 longer — a long explanation belongs in this file, on the docs site or in the roadmap, where a reader
 reaches it on purpose rather than while trying to read the code around it.
 
+The `terse-comments` skill (`.claude/skills/terse-comments/`) has the patterns worth cutting and the
+three scripts a bulk sweep runs on — a worklist by block size, a JSON-plan rewriter, and a gate that
+fails if anything but a comment changed.
+
 ### Naming Conventions
 
 | Type              | Convention           | Example                                  |

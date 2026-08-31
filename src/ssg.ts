@@ -8,28 +8,25 @@ import { StylesContext } from './react/useStyles';
  */
 
 /**
- * The CSS for everything rendered since the last reset. Flushes the engine first, so it is safe to
- * call straight after `renderToString`/`renderToStaticMarkup` — no effects have run at that point.
- * Put the result in a `<style id="crono-styles">` tag in the document head.
+ * The CSS for everything rendered since the last reset. Flushes first, so it is safe straight after
+ * `renderToString` — no effects have run at that point. Goes in a `<style id="crono-styles">` in the head.
  */
 export function getStyles(): string {
   return StylesContext.getStyles();
 }
 
 /**
- * Drop every rule, class name and variable the engine has emitted, so the next request starts from
- * a blank sheet. Registration — `Box.extend()`, `Box.components()` — survives. Call it once per
- * request, after `getStyles()`.
+ * Drop every rule, class name and variable the engine has emitted, so the next request starts blank.
+ * Registration (`Box.extend()`, `Box.components()`) survives. Call it once per request, after `getStyles()`.
  */
 export function resetStyles(): void {
   StylesContext.clear();
 }
 
 /**
- * Render `element` to static HTML together with its CSS. When `addStylesToHead` is set (the
- * default) and the tree renders a `<head>`, the styles are injected there; otherwise use the
- * returned `styles` string. The engine is reset before returning, so sequential calls are
- * independent.
+ * Render `element` to static HTML together with its CSS. With `addStylesToHead` (the default) and a
+ * `<head>` in the tree the styles go there; otherwise use the returned `styles`. The engine is reset
+ * before returning, so sequential calls are independent.
  */
 export function renderToStaticMarkup(element: React.ReactElement, addStylesToHead = true) {
   let html = ReactDOMServer.renderToStaticMarkup(element);
