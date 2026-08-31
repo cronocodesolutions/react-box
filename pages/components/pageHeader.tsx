@@ -1,8 +1,8 @@
-import { motion } from 'framer-motion';
 import { LucideIcon } from 'lucide-react';
 import Box from '../../src/box';
 import Flex from '../../src/components/flex';
 import Icon from '../../src/components/icon';
+import Reveal from './reveal';
 
 interface PageHeaderProps {
   icon?: LucideIcon;
@@ -13,7 +13,7 @@ interface PageHeaderProps {
 
 export default function PageHeader({ icon: PageIcon, title, description, badge }: PageHeaderProps) {
   return (
-    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>
+    <Reveal>
       <Box mb={10}>
         <Flex ai="center" gap={4} mb={4}>
           {PageIcon && (
@@ -59,6 +59,6 @@ export default function PageHeader({ icon: PageIcon, title, description, badge }
           {description}
         </Box>
       </Box>
-    </motion.div>
+    </Reveal>
   );
 }

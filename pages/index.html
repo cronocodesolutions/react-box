@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" class="light" data-theme="light">
   <head>
     <meta charset="UTF-8" />
     <link href="/fonts/Roboto/index.css" rel="stylesheet" />
@@ -9,6 +9,25 @@
     <link rel="icon" type="image/svg+xml" href="/logo.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <!-- Title, description, canonical and Open Graph tags are written between these markers, per route, from pages/site/site.ts. -->
+    <!--
+      The theme is a class on <html>: the light one is written above, because that is the theme the
+      prerendered HTML is rendered in, and it is what a reader with no JavaScript at all gets. Which
+      theme a reader actually wants is only knowable in the browser, and the prerendered page paints
+      before any module runs — so this is <Box.Theme>'s own detection, run early enough to count.
+      <Box.Theme> adopts the same value on its first commit.
+    -->
+    <script>
+      try {
+        if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+          document.documentElement.classList.remove('light');
+          document.documentElement.classList.add('dark');
+          document.documentElement.setAttribute('data-theme', 'dark');
+        }
+      } catch (error) {
+        // No matchMedia: the light theme the document already carries.
+      }
+    </script>
+
     <!--site-metadata-->
     <!--/site-metadata-->
   </head>

@@ -6,6 +6,7 @@ import Flex from '../../src/components/flex';
 import Grid from '../../src/components/grid';
 import Code from '../components/code';
 import PageHeader from '../components/pageHeader';
+import Reveal from '../components/reveal';
 
 // Property category definitions with visual demos
 const categories = [
@@ -27,7 +28,7 @@ function DemoCard({ title, description, children, code }: { title: string; descr
   const [showCode, setShowCode] = useState(false);
 
   return (
-    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>
+    <Reveal>
       <Flex
         d="column"
         b={1}
@@ -77,7 +78,7 @@ function DemoCard({ title, description, children, code }: { title: string; descr
           )}
         </AnimatePresence>
       </Flex>
-    </motion.div>
+    </Reveal>
   );
 }
 
@@ -954,7 +955,7 @@ export default function BoxPage() {
         description="The foundational component with CSS-as-props. Build anything with type-safe styling."
       />
 
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
+      <Reveal delay={0.1}>
         <Flex d="column" gap={8}>
           <Code label="Import" language="jsx" code="import Box from '@cronocode/react-box';" />
 
@@ -1034,7 +1035,7 @@ export default function BoxPage() {
             </AnimatePresence>
           </Box>
         </Flex>
-      </motion.div>
+      </Reveal>
     </Box>
   );
 }

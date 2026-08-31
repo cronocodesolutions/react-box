@@ -1,4 +1,3 @@
-import { motion } from 'framer-motion';
 import { Keyboard, MessageSquare, MousePointerClick, ShieldCheck } from 'lucide-react';
 import { ReactNode, useState } from 'react';
 import Box from '../../src/box';
@@ -8,6 +7,7 @@ import { H2, Span } from '../../src/components/semantics';
 import Tooltip, { TooltipReason } from '../../src/components/tooltip';
 import Code from '../components/code';
 import PageHeader from '../components/pageHeader';
+import Reveal from '../components/reveal';
 import useTableOfContents from '../hooks/useTableOfContents';
 
 export default function TooltipPage() {
@@ -23,7 +23,7 @@ export default function TooltipPage() {
         description="A description that appears on hover and on focus, wired to its trigger with aria-describedby — the APG tooltip, including the three WCAG 1.4.13 rules everyone forgets."
       />
 
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
+      <Reveal delay={0.1}>
         <Flex d="column" gap={10}>
           <Code label="Import" language="jsx" code="import Tooltip from '@cronocode/react-box/components/tooltip';" />
 
@@ -149,7 +149,7 @@ export default function TooltipPage() {
             </Box>
           </Section>
         </Flex>
-      </motion.div>
+      </Reveal>
     </Box>
   );
 }

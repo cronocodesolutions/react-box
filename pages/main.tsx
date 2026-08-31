@@ -1,26 +1,41 @@
-import React from 'react';
-import ReactDOM from 'react-dom/client';
+import { StrictMode } from 'react';
+import { createRoot, hydrateRoot } from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
 import Box from '../src/box';
-import App from './app/app';
+import AfterHydration from './app/afterHydration';
+import Root from './app/root';
+import { preloadPage } from './app/routePages';
+import { routeFor } from './site/siteMeta';
 import './extends';
 import './index.css';
+// The syntax-highlighting theme belongs to the whole site, and it has to be in the entry's CSS: the
+// stylesheet of an async chunk is linked by the chunk's loader, so a prerendered page would paint its
+// code blocks unstyled until the JavaScript arrived.
+import 'prismjs/themes/prism-okaidia.css';
 
-const root = ReactDOM.createRoot(document.getElementById('root')!);
+// The build prerenders every route with content-hashed class names (see `entry-server.tsx`); the
+// browser has to name the same rules the same way, or hydration finds a different `class` on every
+// element it adopts.
+Box.configure({ classNames: 'stable' });
 
-root.render(
-  <React.StrictMode>
+const container = document.getElementById('root')!;
+
+const tree = (
+  <StrictMode>
     <BrowserRouter>
-      <Box.Theme
-        use="global"
-        globalStyles={{
-          scrollbarWidth: 'thin',
-          scrollbarColor: ['violet-500', 'transparent'],
-          theme: { dark: { scrollbarColor: ['violet-700', 'transparent'] } },
-        }}
-      >
-        <App />
-      </Box.Theme>
+      <Root />
+      <AfterHydration />
     </BrowserRouter>
-  </React.StrictMode>,
+  </StrictMode>
 );
+
+if (container.hasChildNodes()) {
+  // A prerendered page: `React.lazy` would suspend on the route being hydrated, and a hydration that
+  // suspends throws away the HTML it was supposed to adopt — so that one chunk is fetched first.
+  const route = routeFor(window.location.pathname);
+
+  (route ? preloadPage(route.path) : Promise.resolve()).then(() => hydrateRoot(container, tree));
+} else {
+  // The dev server and a preview of an unbuilt shell: nothing to adopt, render from scratch.
+  createRoot(container).render(tree);
+}

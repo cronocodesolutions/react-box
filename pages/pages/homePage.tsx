@@ -7,110 +7,96 @@ import Button from '../../src/components/button';
 import Flex from '../../src/components/flex';
 import Icon from '../../src/components/icon';
 import Code from '../components/code';
+import Reveal from '../components/reveal';
 import SiGithub from '~icons/simple-icons/github';
-
-const fadeInUp = {
-  initial: { opacity: 0, y: 20 },
-  animate: { opacity: 1, y: 0 },
-};
-
-const staggerContainer = {
-  animate: {
-    transition: {
-      staggerChildren: 0.1,
-    },
-  },
-};
 
 export default function HomePage() {
   return (
     <Box>
       {/* Hero Section */}
-      <motion.div initial="initial" animate="animate" variants={staggerContainer}>
-        <Flex d="column" ai="center" textAlign="center" py={12} lg={{ py: 16 }}>
-          {/* Badge */}
-          <motion.div variants={fadeInUp}>
-            <Flex
-              ai="center"
-              gap={2}
-              px={4}
-              py={2}
-              borderRadius={10}
-              theme={{ dark: { bgColor: 'slate-800', color: 'indigo-400' }, light: { bgColor: 'indigo-50', color: 'indigo-600' } }}
-              fontSize={13}
-              fontWeight={500}
-              mb={6}
-            >
-              <Sparkles size={14} />
-              <Box>Version {version} is here!</Box>
-            </Flex>
-          </motion.div>
+      <Flex d="column" ai="center" textAlign="center" py={12} lg={{ py: 16 }}>
+        {/* Badge */}
+        <Reveal>
+          <Flex
+            ai="center"
+            gap={2}
+            px={4}
+            py={2}
+            borderRadius={10}
+            theme={{ dark: { bgColor: 'slate-800', color: 'indigo-400' }, light: { bgColor: 'indigo-50', color: 'indigo-600' } }}
+            fontSize={13}
+            fontWeight={500}
+            mb={6}
+          >
+            <Sparkles size={14} />
+            <Box>Version {version} is here!</Box>
+          </Flex>
+        </Reveal>
 
-          {/* Title */}
-          <motion.div variants={fadeInUp}>
-            <Box
-              tag="h1"
-              fontSize={32}
-              sm={{ fontSize: 44, lineHeight: 52 }}
-              lg={{ fontSize: 52, lineHeight: 60 }}
-              fontWeight={800}
-              lineHeight={40}
-              mb={6}
-              maxWidth={180}
-            >
-              <Box theme={{ dark: { color: 'white' }, light: { color: 'slate-900' } }}>Build beautiful UIs</Box>
-              <Box className="gradient-text">without writing CSS</Box>
-            </Box>
-          </motion.div>
+        {/* Title */}
+        <Reveal delay={0.1}>
+          <Box
+            tag="h1"
+            fontSize={32}
+            sm={{ fontSize: 44, lineHeight: 52 }}
+            lg={{ fontSize: 52, lineHeight: 60 }}
+            fontWeight={800}
+            lineHeight={40}
+            mb={6}
+            maxWidth={180}
+          >
+            <Box theme={{ dark: { color: 'white' }, light: { color: 'slate-900' } }}>Build beautiful UIs</Box>
+            <Box className="gradient-text">without writing CSS</Box>
+          </Box>
+        </Reveal>
 
-          {/* Description */}
-          <motion.div variants={fadeInUp}>
-            <Box
-              fontSize={16}
-              sm={{ fontSize: 18 }}
-              theme={{ dark: { color: 'slate-400' }, light: { color: 'slate-600' } }}
-              maxWidth={140}
-              lineHeight={28}
-              mb={10}
-            >
-              A utility-first React component library with type-safe props that map directly to CSS. Build faster, ship sooner.
-            </Box>
-          </motion.div>
+        {/* Description */}
+        <Reveal delay={0.2}>
+          <Box
+            fontSize={16}
+            sm={{ fontSize: 18 }}
+            theme={{ dark: { color: 'slate-400' }, light: { color: 'slate-600' } }}
+            maxWidth={140}
+            lineHeight={28}
+            mb={10}
+          >
+            A utility-first React component library with type-safe props that map directly to CSS. Build faster, ship sooner.
+          </Box>
+        </Reveal>
 
-          {/* CTA Buttons */}
-          <motion.div variants={fadeInUp}>
-            <Flex gap={4} d="column" sm={{ d: 'row' }}>
-              <NavLink to="/installation">
-                <Button px={6} py={3} fontSize={15}>
-                  <Flex ai="center" gap={2}>
-                    Get Started
-                    <ArrowRight size={18} />
-                  </Flex>
-                </Button>
-              </NavLink>
-              <a href="https://github.com/box-kite/box-kite" target="_blank" rel="noopener noreferrer">
-                <Button
-                  variant="secondary"
-                  px={6}
-                  py={3}
-                  fontSize={15}
-                  theme={{ dark: { color: 'slate-300' }, light: { color: 'slate-700' } }}
-                >
-                  <Flex ai="center" gap={2}>
-                    <Icon size={4.5}>
-                      <SiGithub />
-                    </Icon>
-                    View on GitHub
-                  </Flex>
-                </Button>
-              </a>
-            </Flex>
-          </motion.div>
-        </Flex>
-      </motion.div>
+        {/* CTA Buttons */}
+        <Reveal delay={0.3}>
+          <Flex gap={4} d="column" sm={{ d: 'row' }}>
+            <NavLink to="/installation">
+              <Button px={6} py={3} fontSize={15}>
+                <Flex ai="center" gap={2}>
+                  Get Started
+                  <ArrowRight size={18} />
+                </Flex>
+              </Button>
+            </NavLink>
+            <a href="https://github.com/box-kite/box-kite" target="_blank" rel="noopener noreferrer">
+              <Button
+                variant="secondary"
+                px={6}
+                py={3}
+                fontSize={15}
+                theme={{ dark: { color: 'slate-300' }, light: { color: 'slate-700' } }}
+              >
+                <Flex ai="center" gap={2}>
+                  <Icon size={4.5}>
+                    <SiGithub />
+                  </Icon>
+                  View on GitHub
+                </Flex>
+              </Button>
+            </a>
+          </Flex>
+        </Reveal>
+      </Flex>
 
       {/* Feature Cards */}
-      <motion.div initial={{ opacity: 0, y: 40 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}>
+      <Reveal y={40} delay={0.4}>
         <Flex flexWrap="wrap" gap={5} py={10} d="column">
           <FeatureCard
             icon={<Zap size={22} />}
@@ -143,10 +129,10 @@ export default function HomePage() {
             description="Built-in breakpoints: sm, md, lg, xl, xxl. Mobile-first by default."
           />
         </Flex>
-      </motion.div>
+      </Reveal>
 
       {/* Quick Start Section */}
-      <motion.div initial={{ opacity: 0, y: 40 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.6 }}>
+      <Reveal y={40} delay={0.6}>
         <Box py={12}>
           <Box textAlign="center" mb={10}>
             <Box
@@ -199,10 +185,10 @@ function App() {
             />
           </Flex>
         </Box>
-      </motion.div>
+      </Reveal>
 
       {/* Bottom CTA */}
-      <motion.div initial={{ opacity: 0, y: 40 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.8 }}>
+      <Reveal y={40} delay={0.8}>
         <Flex
           d="column"
           ai="center"
@@ -235,7 +221,7 @@ function App() {
             </Button>
           </NavLink>
         </Flex>
-      </motion.div>
+      </Reveal>
     </Box>
   );
 }

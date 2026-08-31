@@ -49,17 +49,20 @@ function siteMetadata(): Plugin {
   };
 }
 
-export default defineConfig(({ mode }) => {
+export default defineConfig(({ mode, isSsrBuild }) => {
   return {
     // `unplugin-icons` is the Iconify bridge the /icon page documents, and this site is where it is
     // proved: `~icons/<set>/<name>` becomes a React component at build time, out of the icon data in
     // an `@iconify-json/*` devDependency, so nothing is fetched at runtime and only the icons the
     // site imports are compiled. It is a *page* plugin — the library ships no icons, and nothing
     // about it reaches `vite.config.ts`.
-    plugins: [reactPlugin(), iconsPlugin({ compiler: 'jsx', jsx: 'react' }), siteMetadata()],
+    // The prerender pass builds `entry-server.tsx` through this same config (see
+    // `scripts/prerender-pages.mjs`), and the metadata plugin has nothing to do there: an SSR bundle
+    // has no `index.html` for it to read.
+    plugins: [reactPlugin(), iconsPlugin({ compiler: 'jsx', jsx: 'react' }), ...(isSsrBuild ? [] : [siteMetadata()])],
     build: {
       emptyOutDir: true,
-      minify: mode !== 'dev',
+      minify: mode !== 'dev' && !isSsrBuild,
       // No explicit input: both scripts pass `./pages` as the root, so Vite's default
       // `<root>/index.html` is the entry. Naming it `pages/index.html` resolved against the root
       // (`pages/pages/index.html`), which made the dev server's dependency scan fail and skip

@@ -1,4 +1,3 @@
-import { motion } from 'framer-motion';
 import { ToggleLeft } from 'lucide-react';
 import { ReactNode, useState } from 'react';
 import Box from '../../src/box';
@@ -7,6 +6,7 @@ import { H2 } from '../../src/components/semantics';
 import Switch from '../../src/components/switch';
 import Code from '../components/code';
 import PageHeader from '../components/pageHeader';
+import Reveal from '../components/reveal';
 import useTableOfContents from '../hooks/useTableOfContents';
 
 export default function SwitchPage() {
@@ -23,7 +23,7 @@ export default function SwitchPage() {
         description="An on/off control. A real checkbox input underneath, wearing role=switch — so a screen reader says on and off, and a form still submits it."
       />
 
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
+      <Reveal delay={0.1}>
         <Flex d="column" gap={10}>
           <Code label="Import" language="jsx" code="import Switch from '@cronocode/react-box/components/switch';" />
 
@@ -101,7 +101,7 @@ export default function SwitchPage() {
             </Box>
           </Section>
         </Flex>
-      </motion.div>
+      </Reveal>
     </Box>
   );
 }

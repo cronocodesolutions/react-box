@@ -1,10 +1,10 @@
-import { motion } from 'framer-motion';
 import { Moon, Paintbrush, Sun } from 'lucide-react';
 import Box from '../../src/box';
 import Button from '../../src/components/button';
 import Flex from '../../src/components/flex';
 import Code from '../components/code';
 import PageHeader from '../components/pageHeader';
+import Reveal from '../components/reveal';
 import useTableOfContents from '../hooks/useTableOfContents';
 
 export default function ThemeSetupPage() {
@@ -18,7 +18,7 @@ export default function ThemeSetupPage() {
         description="Customize your app design by defining styles as a theme with variants."
       />
 
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
+      <Reveal delay={0.1}>
         <Flex d="column" gap={8}>
           <Code
             id="define-styles"
@@ -181,7 +181,7 @@ function Sample() {
             </Box.Theme>
           </Code>
         </Flex>
-      </motion.div>
+      </Reveal>
     </Box>
   );
 }

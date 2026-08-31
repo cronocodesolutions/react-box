@@ -1,4 +1,3 @@
-import { motion } from 'framer-motion';
 import { Filter, Table, X } from 'lucide-react';
 import { ReactNode, useCallback, useEffect, useMemo, useState } from 'react';
 import Box from '../../src/box';
@@ -8,6 +7,7 @@ import Flex from '../../src/components/flex';
 import { H2 } from '../../src/components/semantics';
 import Code from '../components/code';
 import PageHeader from '../components/pageHeader';
+import Reveal from '../components/reveal';
 import Data from '../data/MOCK_DATA.json';
 import Data1 from '../data/MOCK_DATA_1.json';
 import Data2 from '../data/MOCK_DATA_2.json';
@@ -263,7 +263,7 @@ export default function DataGridPage() {
         description="A powerful data grid component with sorting, filtering, and custom cells. (Work in Progress)"
       />
 
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
+      <Reveal delay={0.1}>
         <Flex d="column" gap={8}>
           <Code label="Import" language="jsx" code="import DataGrid from '@cronocode/react-box/components/dataGrid';" />
 
@@ -966,7 +966,7 @@ Box.components({
             <ResizeModeDemo />
           </Code>
         </Flex>
-      </motion.div>
+      </Reveal>
     </Box>
   );
 }

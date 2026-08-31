@@ -1,10 +1,10 @@
-import { motion } from 'framer-motion';
 import { TextCursor } from 'lucide-react';
 import Box from '../../src/box';
 import Flex from '../../src/components/flex';
 import Textbox from '../../src/components/textbox';
 import Code from '../components/code';
 import PageHeader from '../components/pageHeader';
+import Reveal from '../components/reveal';
 import useTableOfContents from '../hooks/useTableOfContents';
 
 export default function TextboxPage() {
@@ -18,7 +18,7 @@ export default function TextboxPage() {
         description="Input component for collecting user data with support for various states and customization."
       />
 
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
+      <Reveal delay={0.1}>
         <Flex d="column" gap={8}>
           <Code label="Import" language="jsx" code="import Textbox from '@cronocode/react-box/components/textbox';" />
 
@@ -92,7 +92,7 @@ export default function TextboxPage() {
             />
           </Code>
         </Flex>
-      </motion.div>
+      </Reveal>
     </Box>
   );
 }

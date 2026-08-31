@@ -3,8 +3,7 @@ import { Check, Copy, Terminal } from 'lucide-react';
 import Prism from 'prismjs';
 import 'prismjs/components/prism-bash';
 import 'prismjs/components/prism-jsx';
-import 'prismjs/themes/prism-okaidia.css';
-import { useEffect, useLayoutEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import Box, { BoxProps } from '../../src/box';
 import Button from '../../src/components/button';
 import Flex from '../../src/components/flex';
@@ -53,9 +52,15 @@ export default function Code(props: Props) {
     copied && setTimeout(() => setCopied(false), 2000);
   }, [copied]);
 
-  useLayoutEffect(() => {
-    Prism.highlightAll();
-  }, [code]);
+  // Highlighted during render rather than from an effect. Two reasons: the prerendered HTML carries
+  // the highlighted markup, so a reader never sees a page of plain code repaint; and `highlightAll()`
+  // walked every block in the document on every mount, so a page with thirty of them did that thirty
+  // times. A language Prism does not know (`auto`) falls back to plain text, as it did before.
+  const highlighted = useMemo(() => {
+    const grammar = Prism.languages[language];
+
+    return grammar ? Prism.highlight(code, grammar, language) : null;
+  }, [code, language]);
 
   const isShell = language === 'shell';
 
@@ -107,7 +112,7 @@ export default function Code(props: Props) {
                 transitionDuration={150}
               >
                 <Flex ai="center" gap={2} fontSize={12}>
-                  <AnimatePresence mode="wait">
+                  <AnimatePresence mode="wait" initial={false}>
                     <motion.div
                       key={copied ? 'check' : 'copy'}
                       initial={{ opacity: 0, scale: 0.8 }}
@@ -136,8 +141,9 @@ export default function Code(props: Props) {
               overflow="auto"
               fontSize={13}
               lineHeight={24}
+              props={highlighted ? { dangerouslySetInnerHTML: { __html: highlighted } } : undefined}
             >
-              {code}
+              {highlighted ? null : code}
             </Box>
           </Box>
         </Box>

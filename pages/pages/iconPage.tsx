@@ -1,4 +1,3 @@
-import { motion } from 'framer-motion';
 import { Bell, ChartLine, Compass, Download, Heart, Search, Shapes, Star, Sun, Trash2 } from 'lucide-react';
 import { ReactNode } from 'react';
 import Box from '../../src/box';
@@ -8,6 +7,7 @@ import { H2, Span } from '../../src/components/semantics';
 import { Circle, Path, Svg } from '../../src/components/svg';
 import Code from '../components/code';
 import PageHeader from '../components/pageHeader';
+import Reveal from '../components/reveal';
 import useTableOfContents from '../hooks/useTableOfContents';
 import SiGithub from '~icons/simple-icons/github';
 import SiReact from '~icons/simple-icons/react';
@@ -31,7 +31,7 @@ export default function IconPage() {
         description="Box props on an icon somebody else drew. One adapter for lucide, Tabler, react-icons and the <svg> a designer sent you — sized on the same scale as everything else, themed, and named or hidden on purpose."
       />
 
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
+      <Reveal delay={0.1}>
         <Flex d="column" gap={10}>
           <Code
             id="icons"
@@ -440,7 +440,7 @@ function ActiveLink({ to, children }: { to: string; children: React.ReactNode })
             <PropTable />
           </Section>
         </Flex>
-      </motion.div>
+      </Reveal>
     </Box>
   );
 }

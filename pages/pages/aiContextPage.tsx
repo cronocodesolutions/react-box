@@ -1,9 +1,9 @@
-import { motion } from 'framer-motion';
 import { Bot, CheckCircle2, Code2, FileText, Lightbulb, MessageSquare, Rocket, Sparkles, Zap } from 'lucide-react';
 import Box from '../../src/box';
 import Flex from '../../src/components/flex';
 import Code from '../components/code';
 import PageHeader from '../components/pageHeader';
+import Reveal from '../components/reveal';
 
 export default function AiContextPage() {
   return (
@@ -15,7 +15,7 @@ export default function AiContextPage() {
       />
 
       {/* Hero Message */}
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
+      <Reveal delay={0.1}>
         <Flex
           d="column"
           ai="center"
@@ -46,10 +46,10 @@ export default function AiContextPage() {
             mistakes.
           </Box>
         </Flex>
-      </motion.div>
+      </Reveal>
 
       {/* Why This Matters */}
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
+      <Reveal delay={0.2}>
         <Box mb={12}>
           <Box tag="h3" fontSize={20} fontWeight={600} theme={{ dark: { color: 'white' }, light: { color: 'slate-900' } }} mb={6}>
             Why does this matter?
@@ -72,10 +72,10 @@ export default function AiContextPage() {
             />
           </Flex>
         </Box>
-      </motion.div>
+      </Reveal>
 
       {/* How to Use - Highlighted Section */}
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}>
+      <Reveal delay={0.3}>
         <Box
           mb={12}
           p={6}
@@ -154,10 +154,10 @@ export default function AiContextPage() {
             </StepCard>
           </Flex>
         </Box>
-      </motion.div>
+      </Reveal>
 
       {/* What's Inside */}
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}>
+      <Reveal delay={0.4}>
         <Box mb={12}>
           <Box tag="h3" fontSize={20} fontWeight={600} theme={{ dark: { color: 'white' }, light: { color: 'slate-900' } }} mb={6}>
             What's inside BOX_AI_CONTEXT.md?
@@ -192,10 +192,10 @@ export default function AiContextPage() {
             <FeatureItem icon={<Bot size={18} />} title="Extension system" description="How to add custom colors, props, and components" />
           </Flex>
         </Box>
-      </motion.div>
+      </Reveal>
 
       {/* Pro Tip */}
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }}>
+      <Reveal delay={0.5}>
         <Flex
           gap={4}
           p={5}
@@ -222,10 +222,10 @@ export default function AiContextPage() {
             </Box>
           </Box>
         </Flex>
-      </motion.div>
+      </Reveal>
 
       {/* Bottom CTA */}
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.6 }}>
+      <Reveal delay={0.6}>
         <Flex
           d="column"
           ai="center"
@@ -245,7 +245,7 @@ export default function AiContextPage() {
             Your AI assistant is now a React Box expert. Go build something amazing.
           </Box>
         </Flex>
-      </motion.div>
+      </Reveal>
     </Box>
   );
 }

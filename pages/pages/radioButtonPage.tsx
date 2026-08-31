@@ -1,4 +1,3 @@
-import { motion } from 'framer-motion';
 import { Circle } from 'lucide-react';
 import { ReactNode, useState } from 'react';
 import Box from '../../src/box';
@@ -8,6 +7,7 @@ import RadioGroup, { RadioGroupReason } from '../../src/components/radioGroup';
 import { H2, Span } from '../../src/components/semantics';
 import Code from '../components/code';
 import PageHeader from '../components/pageHeader';
+import Reveal from '../components/reveal';
 import useTableOfContents from '../hooks/useTableOfContents';
 
 export default function RadioButtonPage() {
@@ -24,7 +24,7 @@ export default function RadioButtonPage() {
         description="One choice out of a set. RadioGroup is the APG pattern — a named group, a shared field name, and the arrow keys between the options."
       />
 
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
+      <Reveal delay={0.1}>
         <Flex d="column" gap={10}>
           <Code
             label="Import"
@@ -169,7 +169,7 @@ const [plan, setPlan] = useState<string | undefined>('free');
             </Flex>
           </Code>
         </Flex>
-      </motion.div>
+      </Reveal>
     </Box>
   );
 }

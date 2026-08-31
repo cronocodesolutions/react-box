@@ -27,7 +27,10 @@ export default tseslint.config(
       ...reactHooks.configs.recommended.rules,
       // `semantic` and `svgElement` are component factories — the rule cannot see through a call
       // that returns a component, and would read a file of twenty of them as a file of constants.
-      'react-refresh/only-export-components': ['warn', { allowConstantExport: true, extraHOCs: ['semantic', 'svgElement', 'withAttributesInProps'] }],
+      'react-refresh/only-export-components': [
+        'warn',
+        { allowConstantExport: true, extraHOCs: ['semantic', 'svgElement', 'withAttributesInProps'] },
+      ],
       '@typescript-eslint/no-unused-vars': ['warn', { argsIgnorePattern: '^_', varsIgnorePattern: '^_' }],
       '@typescript-eslint/no-namespace': 'off',
       'no-unused-expressions': 'off',
@@ -71,6 +74,14 @@ export default tseslint.config(
           patterns: ['react/*', 'react-dom/*'],
         },
       ],
+    },
+  },
+  {
+    // The prerender entry renders the site rather than being part of it: it exports the function the
+    // build calls, and fast refresh never applies to it.
+    files: ['pages/entry-server.tsx'],
+    rules: {
+      'react-refresh/only-export-components': 'off',
     },
   },
   {
