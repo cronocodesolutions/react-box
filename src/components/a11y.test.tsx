@@ -5,16 +5,10 @@ import { fixtures } from '../../dev/a11y/fixtures';
 import { ignoreLogs } from '../../dev/tests';
 
 /**
- * Every component, rendered the way its docs show it, put through axe.
- *
- * The gate is two-sided. A rule that fires and is *not* in the fixture's `knownViolations` fails
- * the build — that is the regression guard. A rule that is listed and no longer fires fails it too,
- * so the ledger cannot silently turn into a list of excuses: fixing an issue in A3–A7 means
- * deleting its line here, in the same commit.
- *
- * What this cannot do is notice missing semantics. axe judges the ARIA that *is* there; a listbox
- * built from bare `<div>`s with no roles at all looks clean to it. The APG keyboard tests next to
- * this file are what prove a pattern is actually implemented — see docs/a11y-testing.md.
+ * Every component, rendered the way its docs show it, put through axe. The gate is two-sided: an
+ * unlisted rule that fires fails the build, and a listed rule that no longer fires fails it too, so the
+ * ledger cannot turn into excuses. What it cannot notice is *missing* semantics — a listbox built from
+ * bare `<div>`s looks clean — which is what the APG keyboard tests beside this file are for.
  */
 describe('Component accessibility (axe)', () => {
   ignoreLogs();

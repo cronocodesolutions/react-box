@@ -4,24 +4,11 @@ import { H2, Link, P, Span } from '@cronocode/react-box/components/semantics';
 import RuntimeIcon from './runtimeIcon';
 
 /**
- * The two ways an icon somebody else drew reaches this page, and what each costs on a server.
- *
- * `Icon` styles an element it did not render, by putting the engine's class on it — so whether the
- * icon *exists* during the server render is entirely the icon source's business, not the library's.
- * The two cards below are the same `<Icon>` over two different sources:
- *
- *   - an `<svg>` written out here (or pasted from a design tool) is markup, so it renders on the
- *     server like any other element and needs no dependency and no bundler plugin;
- *   - `@iconify/react` looks its icon up at *runtime*, over the network, in the browser — so it is
- *     a client boundary and the server sends no icon at all. `smoke.mjs` asserts exactly that.
- *
- * The recipe missing from this page is the build-time one — `unplugin-icons`, which turns
- * `~icons/<set>/<name>` into a component while bundling. It is the one to reach for, and it cannot
- * run here: Next 16 builds with Turbopack, which runs no unplugin (the `webpack()` hook in
- * `next.config.mjs` never fires), so `~icons/...` fails to resolve. `next build --webpack` does
- * work — verified, and the icon lands in the prerendered HTML — but pinning this example to the
- * bundler Next is moving away from would cost more than the recipe is worth here. The docs site is
- * a Vite app and runs that recipe for real.
+ * The two ways an icon somebody else drew reaches this page. `Icon` styles an element it did not render, so
+ * whether the icon *exists* during the server render is the source's business: an inline `<svg>` is markup
+ * and renders there, while `@iconify/react` fetches in the browser, so the server sends no icon at all.
+ * The build-time recipe (`unplugin-icons`) cannot run here — Turbopack runs no unplugin — so the docs site
+ * proves that one instead.
  */
 export default function IconsPage() {
   return (

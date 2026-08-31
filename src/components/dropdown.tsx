@@ -22,13 +22,10 @@ interface Props<TVal, TKey extends keyof ComponentsAndVariants = 'dropdown'> ext
   value?: TVal | TVal[];
   multiple?: boolean;
   /**
-   * Turn the control into the APG *editable* combobox: a text field that filters the listbox.
-   *
-   * The field is the combobox — it carries the role, the ARIA and anything you pass in `props` —
-   * so this is a different pattern from the select-only one rather than a decoration on top of it.
-   * What changes for a keyboard: printable keys type instead of jumping to an option (there is no
-   * typeahead, the visible field owns the keystrokes), Home/End and the left/right arrows move the
-   * caret, and Escape closes the listbox before it clears the field.
+   * Turn the control into the APG *editable* combobox: a text field that filters the listbox, and a
+   * different pattern rather than a decoration — the field carries the role, the ARIA and your `props`.
+   * Printable keys type instead of jumping, Home/End and left/right move the caret, and Escape closes
+   * the listbox before it clears the field.
    */
   isSearchable?: boolean;
   searchPlaceholder?: string;
@@ -36,12 +33,9 @@ interface Props<TVal, TKey extends keyof ComponentsAndVariants = 'dropdown'> ext
   /** Show checkbox for each item in multiple selection mode */
   showCheckbox?: boolean;
   /**
-   * The dropdown's name, rendered above it and pointed at by `aria-labelledby`.
-   *
-   * A combobox is not named by what it contains — the text in the trigger is its *value*, and
-   * accname does not read the contents of a combobox at all. Without a `label` (or an `aria-label`
-   * of your own in `props`) the control has no accessible name, exactly like an `<input>` with
-   * nothing but a placeholder.
+   * The dropdown's name, rendered above it and pointed at by `aria-labelledby`. A combobox is not named by
+   * what it contains — accname does not read a combobox at all, and the trigger text is its *value* — so
+   * without this (or your own `aria-label`) it has no accessible name.
    */
   label?: React.ReactNode;
   /** Styles for the wrapper the label and the trigger share. Only rendered when there is a label. */
@@ -66,50 +60,30 @@ function isPrintable(event: React.KeyboardEvent): boolean {
 }
 
 /**
- * The keys an editable combobox hands straight to its text field.
- *
- * Each of them also puts the highlight back on the field, which is what APG means by "moves visual
- * focus to the textbox": the caret has moved, so the option the arrows were on is no longer where
- * the user is.
+ * The keys an editable combobox hands straight to its field. Each also puts the highlight back on the
+ * field, which is what APG means by "moves visual focus to the textbox": the caret has moved.
  */
 const TEXT_EDITING_KEYS = new Set([' ', 'Home', 'End', 'ArrowLeft', 'ArrowRight']);
 
 /**
- * The APG combobox, in both of its shapes.
- *
- * Pattern: https://www.w3.org/WAI/ARIA/apg/patterns/combobox/
+ * The APG combobox, in both shapes: https://www.w3.org/WAI/ARIA/apg/patterns/combobox/
  *
  * ```tsx
  * <Dropdown<string> label="Fruit" defaultValue="apple" onChange={(value) => setFruit(value)}>
  *   <Dropdown.Item value="apple">Apple</Dropdown.Item>
- *   <Dropdown.Item value="banana">Banana</Dropdown.Item>
  * </Dropdown>
  * ```
  *
- * **Select-only** by default: a `<button>` that owns focus and a listbox it controls. DOM focus
- * never moves into the popup. That is the shape of this pattern rather than a shortcut: the
- * trigger keeps focus and names the highlighted option with `aria-activedescendant`, so one Tab
- * still enters and leaves the control, Escape has somewhere to return to for free, and the options
- * do not each become a tab stop. `useRovingFocus({ focusItems: false })` is the half of that hook
- * written for it.
+ * **Select-only** by default: a `<button>` that keeps DOM focus and names the highlighted option with
+ * `aria-activedescendant`, so one Tab enters and leaves and no option becomes a tab stop
+ * (`useRovingFocus({ focusItems: false })` is written for it). Closed, Down/Up/Enter/Space/Home/End and
+ * a printable character open; open, the arrows and typeahead move, Enter/Space choose, Escape closes,
+ * Tab chooses then leaves. `PageUp`/`PageDown` are optional in APG and deliberately left out.
  *
- * The keyboard map, closed: Down/Up/Enter/Space open — on the selected option when there is one,
- * otherwise the first or the last — Home and End open at an end, and a printable character opens
- * and jumps to the first match. Open: the arrows move the highlight, Home/End go to the ends,
- * typing searches, Enter and Space choose, Escape closes and changes nothing, and Tab chooses
- * before it leaves. `PageUp`/`PageDown` are the one part of the APG map left out — they are
- * optional there, and a second movement implementation beside the hook's would be the wrong place
- * for it.
- *
- * **Editable** with `isSearchable`: the trigger is a text field carrying `role="combobox"` and
- * `aria-autocomplete="list"`, and the listbox holds what that field has filtered down to. Focus
- * lives in the field from the first keystroke to the last, so the keys divide differently — the
- * printable ones type, Home/End and the left/right arrows move the caret and hand the highlight
- * back to the field, only Down/Up reach the listbox, and Escape closes the listbox before a second
- * Escape clears what was typed. Filtering never moves the highlight onto a suggestion; that is the
- * user's to do with an arrow, and it is the difference between list and inline autocomplete.
- *
- * What is deliberately *not* here is a name. See the `label` prop.
+ * **Editable** with `isSearchable`: focus lives in the field, so the printable keys type, Home/End and
+ * left/right move the caret and hand the highlight back, only Down/Up reach the listbox, and a second
+ * Escape clears the query. Filtering never highlights a suggestion — that is list, not inline,
+ * autocomplete. What is deliberately *not* here is a name: see the `label` prop.
  */
 function DropdownImpl<TVal>(props: Props<TVal>, ref: Ref<HTMLInputElement>): React.ReactNode {
   const {
@@ -139,11 +113,8 @@ function DropdownImpl<TVal>(props: Props<TVal>, ref: Ref<HTMLInputElement>): Rea
   );
 
   /**
-   * What has been typed into the field, or `null` for "nothing — it is showing the value".
-   *
-   * The two are genuinely different states: an empty string is a field the user emptied, which
-   * matches everything and displays nothing, while `null` is a field that has gone back to
-   * displaying what is selected.
+   * What has been typed into the field, or `null` for "nothing — it is showing the value". Genuinely two
+   * states: an empty string is a field the user emptied, which matches everything and displays nothing.
    */
   const [search, setSearch] = useState<string | null>(null);
 
@@ -199,14 +170,9 @@ function DropdownImpl<TVal>(props: Props<TVal>, ref: Ref<HTMLInputElement>): Rea
   const displayItem = useMemo(() => allKids.find((x) => (x.type as FunctionComponent)?.displayName === 'DropdownDisplay'), [allKids]);
 
   /**
-   * The selection as text, when it has one — what an editable combobox puts in its field.
-   *
-   * A combobox is announced by its name and its *value*, and the value of an editable one is the
-   * text in the field: leaving that blank while something is selected is how a screen-reader user
-   * ends up hearing "Fruit, combobox, blank" with Apple chosen. A custom `Dropdown.Display` is the
-   * case with no text form — arbitrary JSX cannot be a field's value — and there the field stays
-   * empty, the display node keeps drawing the selection, and `aria-selected` on the options is
-   * what carries it into the accessibility tree.
+   * The selection as text, when it has one — what an editable combobox puts in its field, since a combobox
+   * is announced by its name and its *value* ("Fruit, combobox, blank" is the bug this avoids). A custom
+   * `Dropdown.Display` has no text form, so there the field stays empty and `aria-selected` carries it.
    */
   const selectionText = useMemo(() => {
     if (!isSearchable || displayItem) return '';
@@ -348,10 +314,8 @@ function DropdownImpl<TVal>(props: Props<TVal>, ref: Ref<HTMLInputElement>): Rea
     // The trigger counts as inside: a press on an open dropdown's own button has to reach its
     // toggle, not be read as a press outside and dismissed and reopened in one gesture.
     inside: [triggerRef, popupRef],
-    // Escape keeps what has been typed, which is what makes a *second* Escape the key that clears
-    // the field — the editable combobox's two-step dismissal. Every other way of closing puts the
-    // field back to the value, since a query left behind would be describing a filter that is no
-    // longer applied to anything.
+    // Escape keeps what has been typed, which is what makes a *second* Escape the one that clears the field.
+    // Every other way of closing restores the value, since a leftover query would describe no filter.
     onDismiss: (reason) => close(reason === 'escape'),
   });
 
@@ -583,12 +547,10 @@ function DropdownImpl<TVal>(props: Props<TVal>, ref: Ref<HTMLInputElement>): Rea
         comboboxProps={comboboxProps}
         onOpen={openFromField}
       />
-      {/* The field is absolutely positioned over the shell, so nothing it contains reaches the
-          flow — and the shell has to be given both its width and its height by something that
-          does. The same text, invisible: `visibility` keeps the space and keeps the copy out of
-          the accessibility tree, where the field's own value already says it. A no-break space
-          when there is no text, because a plain one collapses away under `white-space: nowrap`
-          and leaves no line box at all — which is a shell 20px shorter than the one beside it. */}
+      {/* The field is positioned over the shell, so nothing in it reaches the flow and the shell needs its
+          size from something that does. `visibility` keeps the space and keeps the copy out of the
+          accessibility tree, where the field's value already says it — and the space is a no-break one,
+          because a plain one collapses under `white-space: nowrap` and leaves no line box at all. */}
       {display ?? (
         <Box tag="span" visibility="hidden">
           {selectionText || '\u00A0'}
@@ -612,10 +574,9 @@ function DropdownImpl<TVal>(props: Props<TVal>, ref: Ref<HTMLInputElement>): Rea
       id={triggerId}
     >
       {hiddenValues}
-      {/* A no-break space, not a plain one: a lone space collapses away under the component's
-          `white-space: nowrap`, and with nothing else in the flow — a `multiple` dropdown with
-          nothing selected — the control loses its line box and stands 20px shorter than its
-          neighbours. Written as an escape so it cannot be typed away again. */}
+      {/* A no-break space: a plain one collapses under the component's `white-space: nowrap`, and with nothing
+          else in the flow the control loses its line box and stands 20px shorter. An escape, so it cannot be
+          typed away again. */}
       {display ?? '\u00A0'}
       {icon}
       {popup}

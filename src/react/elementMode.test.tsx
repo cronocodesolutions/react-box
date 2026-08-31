@@ -7,13 +7,10 @@ import Box from '../box';
 import { StylesContext } from './useStyles';
 
 /**
- * Element mode through the React binding: Box renders its CSS as `<style href precedence>` siblings
- * and React 19 hoists them into `<head>`, dedupes them by href and keeps the precedence groups in
- * order. This is the emission path that needs no effect, and therefore no client runtime — the
- * reason it works in a Server Component and in streaming SSR.
- *
- * Configured for the whole file: the sink is a property of the engine, and Vitest gives every test
- * file its own module registry, so no other suite sees this.
+ * Element mode through the React binding: Box renders its CSS as `<style href precedence>` siblings, which
+ * React 19 hoists into `<head>`, dedupes by href and keeps in precedence order — the emission path that
+ * needs no effect. Configured for the whole file, since the sink belongs to the engine and Vitest gives
+ * each file its own module registry.
  */
 StylesContext.configure({ sink: 'element' });
 

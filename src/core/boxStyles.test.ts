@@ -5,10 +5,9 @@ import { cssStyles } from './boxStyles';
 import { BoxStyle } from './coreTypes';
 
 /**
- * The numeric formatters are the library's most common source of surprise: three different
- * dividers are in play and nothing but these tests pins them down. Each family below states the
- * divider once and then holds every prop that belongs to it, so a prop that silently changes
- * family (or a new prop added to the wrong one) fails here.
+ * The numeric formatters are the library's commonest surprise: three dividers are in play and nothing but
+ * these tests pins them down. Each family states its divider once and holds every prop that belongs to
+ * it, so a prop that changes family fails here.
  */
 const spacingDivider4 = [
   ['p', 'padding'],
@@ -144,14 +143,12 @@ describe('numeric dividers', () => {
 
 /**
  * Every value a prop declares must reach CSS. A definition whose `values` no longer match what
- * `generateRule` looks for produces no rule at all — silently, until something renders it. This
- * walks the whole registry so that failure mode cannot survive a test run.
+ * `generateRule` looks for produces no rule at all, silently, so this walks the whole registry.
  */
 
 /**
- * Candidates offered to a definition that declares `match`. Such a definition decides for itself
- * what it accepts, so the walk hands it these and uses the first one it says yes to — which also
- * proves the predicate accepts something at all. A new `match` definition needs its shape here.
+ * Candidates offered to a definition that declares `match`: the walk uses the first one it says yes to,
+ * which also proves the predicate accepts anything at all. A new `match` definition needs its shape here.
  */
 const matchCandidates = ['url(#sample)', 'var(--sample)', '50%', 'none', 4, { 'sample-var': 'red-500' }] as const;
 
@@ -257,9 +254,8 @@ describe('every declared prop value produces a rule', () => {
 });
 
 /**
- * The SVG paint and stroke tier. Two things make it worth its own block: the numbers are user
- * units rather than any of the three dividers above, and `vectorEffect` is the one prop in the
- * registry that rewrites its own selector.
+ * The SVG paint and stroke tier: the numbers are user units rather than any of the dividers above, and
+ * `vectorEffect` is the one prop in the registry that rewrites its own selector.
  */
 describe('SVG paint and stroke props', () => {
   it.each([
@@ -310,10 +306,9 @@ describe('SVG paint and stroke props', () => {
   });
 
   /**
-   * Paint that the document defines rather than this library: a gradient, a pattern, or a variable
-   * a chart declared for a series. Before these value definitions existed the only way to write one
-   * was `props={{ fill: 'url(#sky)' }}` — an attribute, and therefore outside the theme, the
-   * breakpoints and every pseudo-class.
+   * Paint the document defines rather than this library: a gradient, a pattern, a variable a chart declared.
+   * Before these definitions existed the only spelling was `props={{ fill: 'url(#sky)' }}` — an attribute,
+   * and so outside the theme, the breakpoints and every pseudo-class.
    */
   describe('a paint server or a variable is a value, not an attribute', () => {
     it('passes a paint server through untouched', () => {
@@ -397,10 +392,9 @@ describe('SVG paint and stroke props', () => {
 });
 
 /**
- * The SVG text and geometry tier. The geometry props are the reason it exists: `cx`, `cy`, `r`,
- * `rx`, `ry`, `x` and `y` are real CSS properties in SVG 2, so a shape can be transitioned with
- * no JavaScript at all — but only if the numbers stay in the user units the `viewBox` sets up,
- * which is the one thing three of the four numeric families here would break.
+ * The SVG text and geometry tier. The geometry props are the reason it exists: they are real CSS in SVG 2,
+ * so a shape transitions with no JavaScript — but only while the numbers stay in the user units the
+ * `viewBox` sets up, which three of the four numeric families here would break.
  */
 describe('SVG text and geometry props', () => {
   describe('geometry lengths are user units — no divider, no unit', () => {
@@ -469,9 +463,8 @@ describe('SVG text and geometry props', () => {
 });
 
 /**
- * The one prop whose declarations are named by its value. Everything else about it is an ordinary
- * prop — which is the point: a custom property lands in a class, so it nests in a theme, a
- * breakpoint and a pseudo-class, and two subtrees declaring the same palette share one rule.
+ * The one prop whose declarations are named by its value. Everything else about it is ordinary, which is
+ * the point: it lands in a class, so it nests in a theme and a breakpoint and two subtrees share one rule.
  */
 describe('vars — a CSS variable is a Box prop', () => {
   it('declares a custom property, resolving a colour token to the variable behind it', () => {

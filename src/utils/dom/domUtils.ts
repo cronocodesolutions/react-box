@@ -1,14 +1,8 @@
 /**
- * "Did this happen inside that?" — the question behind every popup that closes when you click away,
- * asked identically by `useVisibility` (the click-outside hook the Dropdown uses) and `useDismiss`
- * (the layered one the accessible components use).
- *
- * `ElementLike` is structural rather than `React.RefObject`, which keeps this file framework-free:
- * a caller holding a ref and a caller holding an element both pass what they have.
- *
- * Named exports rather than the `namespace XUtils` idiom, for the reason given in
- * `environmentUtils.ts`: this is a leaf several chunks import, and a namespace object cannot be
- * tree-shaken a function at a time.
+ * "Did this happen inside that?" — the question behind every popup that closes when you click away, asked
+ * identically by `useVisibility` and `useDismiss`. `ElementLike` is structural rather than
+ * `React.RefObject`, which keeps the file framework-free. Named exports rather than a namespace, for the
+ * reason in `environmentUtils.ts`: a namespace object cannot be tree-shaken a function at a time.
  */
 export type ElementLike = { readonly current: Element | null } | Element | null | undefined;
 
@@ -27,11 +21,9 @@ export function htmlElementOf(value: ElementLike): HTMLElement | null {
 }
 
 /**
- * Whether an event happened inside any of these elements.
- *
- * `composedPath()` first, so an event from inside a shadow root is still recognised as inside its
- * host; `contains()` as the fallback, since the path is only populated while the event is being
- * dispatched and not every environment provides the method.
+ * Whether an event happened inside any of these elements. `composedPath()` first, so an event from a
+ * shadow root counts as inside its host; `contains()` as the fallback, since the path is populated only
+ * while the event is being dispatched.
  */
 export function isEventInside(event: Event, elements: readonly ElementLike[]): boolean {
   const path = typeof event.composedPath === 'function' ? event.composedPath() : [];

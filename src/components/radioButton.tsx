@@ -26,13 +26,10 @@ interface Props<TKey extends keyof ComponentsAndVariants> extends RadioButtonPro
 }
 
 /**
- * One radio button — a real `<input type="radio">`, so the platform supplies the checked state,
- * the shared-`name` grouping and form submission.
- *
- * A radio on its own is not a pattern: APG's radio group is a *set* with one name, one label and
- * arrow keys between the members, which is `RadioGroup`. This renders inside one, or stands alone
- * in a plain form. It reads nothing from a context and calls no hook, which is deliberate: it is
- * one of the components a Server Component can render with no client boundary at all.
+ * One radio button — a real `<input type="radio">`, so the platform supplies the checked state, the
+ * shared-`name` grouping and form submission. A radio alone is not a pattern (APG's radio group is a set
+ * with one label and arrow keys — that is `RadioGroup`). It reads no context and calls no hook, which is
+ * what lets a Server Component render it with no client boundary.
  */
 function RadioButtonImpl<TKey extends keyof ComponentsAndVariants>(props: Props<TKey>, ref: Ref<HTMLInputElement>) {
   const { label, labelProps, ...controlProps } = props;

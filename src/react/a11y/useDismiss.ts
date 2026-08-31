@@ -11,9 +11,8 @@ export interface DismissOptions {
   enabled?: boolean;
   onDismiss: (reason: DismissReason, event: Event) => void;
   /**
-   * What counts as *inside*. The popup, and the trigger too — a pointer press on the trigger of an
-   * open popup must reach the trigger's own toggle, not be read as a press outside it and dismissed
-   * and reopened in the same gesture.
+   * What counts as *inside*: the popup, and the trigger too — a press on the trigger of an open popup must
+   * reach its own toggle rather than being dismissed and reopened in one gesture.
    */
   inside?: ReadonlyArray<ElementLike>;
   /** Default true. */
@@ -28,12 +27,9 @@ interface Layer {
 }
 
 /**
- * Every layer currently listening.
- *
- * Escape closes one thing: the innermost. Without a shared registry a dialog containing an open
- * select would close both on a single press, because each layer only knows about itself. Module
- * state is right here — the registry describes the page, and these layers are all rendered into
- * the same document by the same React runtime.
+ * Every layer currently listening. Escape closes the innermost one, and without a shared registry a
+ * dialog containing an open select would close both on one press. Module state is right: the registry
+ * describes the page, and every layer is rendered into the same document.
  */
 const layers: Layer[] = [];
 
@@ -45,14 +41,10 @@ function wraps(outer: Layer, inner: Layer): boolean {
 }
 
 /**
- * The layer Escape belongs to, worked out from the DOM rather than from registration order.
- *
- * Order of registration is tempting and wrong: React runs a child's effects before its parent's,
- * so a dialog and the select inside it register *select first* when they mount together, and a
- * stack would call the dialog innermost. Containment says what nesting actually is. Layers that
- * contain no other layer are all candidates — two popups side by side, or one portalled out of the
- * other's subtree — and the most recently opened of those wins, which is the one the user is
- * looking at.
+ * The layer Escape belongs to, worked out from the DOM rather than registration order — React runs a
+ * child's effects first, so a dialog and the select inside it register select-first and a stack would
+ * call the dialog innermost. Containment says what nesting is; among layers containing no other layer,
+ * the most recently opened wins, which is the one the user is looking at.
  */
 function innermost(): Layer | undefined {
   const candidates = layers.filter((layer) => !layers.some((other) => other !== layer && wraps(layer, other)));
@@ -61,16 +53,11 @@ function innermost(): Layer | undefined {
 }
 
 /**
- * Close on Escape and on a pointer press outside — the two halves of "light dismiss", composable
- * across nested layers.
- *
- * Escape goes to the innermost layer only. An outside press is judged by each layer for itself, so
- * a press in the page closes a menu and its submenu together, while a press in the menu closes only
- * the submenu.
- *
- * `pointerdown` rather than `click`: dismissal should happen when the gesture starts, and a press
- * that starts inside the popup and ends outside it (a drag across a scrollbar, a text selection) is
- * not a dismissal at all — a `click` listener treats it as one.
+ * Close on Escape and on a pointer press outside — the two halves of light dismiss, composable across
+ * nested layers: Escape reaches the innermost only, while an outside press is judged per layer, so a
+ * press in the page closes a menu and its submenu and a press in the menu closes just the submenu.
+ * `pointerdown` rather than `click`, because a press that starts inside and ends outside (a drag across a
+ * scrollbar, a text selection) is not a dismissal.
  */
 export default function useDismiss(options: DismissOptions): void {
   const { enabled = true, onDismiss, inside, escapeKey = true, outsidePointer = true } = options;

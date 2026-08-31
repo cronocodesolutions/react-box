@@ -2,12 +2,9 @@ import React from 'react';
 import { StyleElementDescriptor } from '../core/engine/styleSink';
 
 /**
- * The engine's style-element descriptors as React elements.
- *
- * `<style href precedence>` is React 19's hoistable style element: React lifts it into `<head>`,
- * keeps one copy per `href` however many components render it, and groups the head by precedence.
- * Nothing here touches the DOM or waits for an effect, which is the whole point — this is the
- * emission path that works inside a Server Component and in streaming SSR.
+ * The engine's style-element descriptors as React elements. `<style href precedence>` is React 19's
+ * hoistable style: lifted into `<head>`, one copy per `href`, grouped by precedence. Nothing here touches
+ * the DOM or waits for an effect, which is what makes it work in a Server Component and in streaming SSR.
  */
 
 // Hoisting arrived in React 19. Below that the elements render inline where the Box sits: the CSS

@@ -51,11 +51,9 @@ class MemoNode<T> implements Memo<T> {
 }
 
 /**
- * Lazily-computed cached value with explicit dependency edges.
- *
- * Pass upstream memos via `deps` (a thunk, so it can reference sibling fields
- * regardless of declaration order). Clearing any dep cascades to this memo, so
- * mutations only need to clear the single root that changed.
+ * Lazily-computed cached value with explicit dependency edges. Upstream memos go in `deps` as a thunk, so
+ * they can reference siblings whatever the declaration order; clearing a dep cascades, so a mutation only
+ * has to clear the root that changed.
  */
 export default function memo<T>(action: () => T, deps: () => Memo<unknown>[] = () => []): Memo<T> {
   return new MemoNode(action, deps);

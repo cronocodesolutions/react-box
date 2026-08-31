@@ -20,18 +20,14 @@ export interface TooltipTriggerAttributes {
 }
 
 /**
- * What the trigger has to carry for the pattern to work. Spread it onto the control the tooltip
- * describes — the control itself, not a wrapper around it, because `aria-describedby` only means
- * something on the element the user actually lands on:
+ * What the trigger has to carry: spread it onto the control itself, not a wrapper, because
+ * `aria-describedby` only means something on the element the user lands on. The `ref` is what the
+ * tooltip is positioned against, so it is not optional decoration (see `anchor` on `Overlay`).
  *
  * ```tsx
  * {(trigger) => <Button {...trigger}>Delete</Button>}          // a Box component
  * {(trigger) => <button ref={trigger.ref} {...trigger.props}>} // a plain element
  * ```
- *
- * The `ref` is not optional decoration: it is what the tooltip is positioned against. Without it
- * the layer has to measure a placeholder of its own, which is a real box in the layout — see
- * `anchor` on `Overlay`.
  */
 export interface TooltipTrigger {
   ref: React.RefCallback<HTMLElement>;
@@ -52,43 +48,29 @@ interface Props<TKey extends keyof ComponentsAndVariants> extends TooltipBoxProp
   defaultOpen?: boolean;
   onOpenChange?: ChangeHandler<boolean, TooltipReason>;
   /**
-   * How long the pointer has to rest on the trigger before the tooltip appears, in ms. Default
-   * 300 — long enough that sweeping the pointer across a toolbar does not light every control up,
-   * short enough that deliberately resting on one does not feel broken. Focus ignores it entirely:
-   * a keyboard user asked for the tooltip by arriving, and APG shows it straight away.
+   * How long the pointer has to rest on the trigger, in ms. Default 300 — sweeping across a toolbar should
+   * not light every control up. Focus ignores it: a keyboard user asked for the tooltip by arriving.
    */
   openDelay?: number;
-  /**
-   * The grace period after the pointer leaves, in ms. Default 150 — long enough to move the
-   * pointer onto the tooltip itself, which WCAG 1.4.13 requires.
-   */
+  /** The grace period after the pointer leaves, in ms. Default 150, so the pointer can reach the tooltip (WCAG 1.4.13). */
   closeDelay?: number;
   adjustTranslateX?: string;
   adjustTranslateY?: string;
 }
 
 /**
- * The APG tooltip: a description that appears on hover and on focus, and stays until the user is
- * done with it. Pattern: https://www.w3.org/WAI/ARIA/apg/patterns/tooltip/
+ * The APG tooltip: a description that appears on hover *and* on focus and stays until the user is done
+ * with it. Pattern: https://www.w3.org/WAI/ARIA/apg/patterns/tooltip/
  *
  * ```tsx
  * <Tooltip content="Deletes the row for good">{(trigger) => <Button {...trigger}>Delete</Button>}</Tooltip>
  * ```
  *
- * The trigger is a render prop rather than a cloned child. Cloning would have to guess where a
- * given child wants its DOM attributes — Box takes them in a `props` bag, a plain `<button>` takes
- * them at the top level — and guessing wrong on `aria-describedby` costs exactly the thing the
- * pattern is for. Handing them over says which element is the trigger, and works for either. The
- * bag carries a `ref` as well as the attributes: the tooltip is positioned against the trigger's
- * own box, so it needs the element.
- *
- * What the component owns, so its consumer does not have to know the pattern: `role="tooltip"` and
- * the `aria-describedby` pointing at it, opening on hover *and* on focus, and the three WCAG
- * 1.4.13 obligations — dismissible with Escape while focus stays put, hoverable (the pointer can
- * travel onto the tooltip without it vanishing), and persistent (nothing closes it on a timer).
- *
- * Focus never moves into the tooltip and it is never in the tab order, which is why nothing here
- * returns focus: a tooltip that can be focused is a dialog wearing the wrong role.
+ * The trigger is a render prop rather than a cloned child: cloning would have to guess where a child
+ * wants its DOM attributes (Box takes a `props` bag, a `<button>` takes them on top), and guessing wrong
+ * on `aria-describedby` costs the thing the pattern is for. The component owns `role="tooltip"`, the
+ * `aria-describedby`, and WCAG 1.4.13's three obligations — dismissible with Escape without moving focus,
+ * hoverable, and never closed on a timer. Focus never enters it: a focusable tooltip is a mislabelled dialog.
  */
 function Tooltip<TKey extends keyof ComponentsAndVariants = 'tooltip'>(props: Props<TKey>) {
   const {

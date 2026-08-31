@@ -35,12 +35,10 @@ function paintSizes<TRow>(grid: GridModel<TRow>): void {
 }
 
 /**
- * The column resizer, which is APG's window splitter: a `separator` with a value in pixels, its
- * own tab stop, and the arrows that move it.
- *
- * The pointer drag and the keyboard are two ways of running the same model, and they cost the same:
- * each step changes the widths and paints them straight onto the grid element, and React is told
- * once, when the gesture ends. A press is a gesture too — it just ends on `keyup`.
+ * The column resizer, which is APG's window splitter: a `separator` with a value in pixels, its own tab
+ * stop, and the arrows that move it. The drag and the keyboard run the same model at the same cost — each
+ * step paints the widths straight onto the grid element and React is told once, when the gesture ends
+ * (a press is a gesture too; it ends on `keyup`).
  */
 export default function DataGridHeaderCellResizer<TRow>(props: Props<TRow>) {
   const { column, controls } = props;

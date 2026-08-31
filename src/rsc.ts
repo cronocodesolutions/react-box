@@ -9,19 +9,11 @@ import resolveStyles from './react/resolveStyles';
 import { ComponentsAndVariants } from './types';
 
 /**
- * Box for React Server Components.
- *
- * This entry is what the `react-server` export condition resolves to, so a Server Component that
- * imports `@cronocode/react-box` lands here automatically — no `'use client'`, no configuration.
- * The difference from the client Box is what it does *not* do: it calls no hook, schedules no
- * effect and never touches the DOM. Its CSS travels with its markup as `<style href precedence>`
- * elements, which React 19 hoists into `<head>` and dedupes by href — the same emission path a
- * streaming SSR pass uses, and the reason none of this needs a client runtime.
- *
- * What stays behind in the client bundle: hover-callback children (they need state) and
- * `Box.Theme` (it needs state, storage and a media-query listener). Theme *styles* work here as
- * they always did — `theme={{ dark: { ... } }}` generates ancestor-scoped rules, so putting the
- * theme class on `<html>` in a server component is enough.
+ * Box for React Server Components: what the `react-server` export condition resolves to, so a Server
+ * Component importing the package lands here with no `'use client'` and no configuration. It calls no hook,
+ * schedules no effect and never touches the DOM — its CSS travels as `<style href precedence>` elements
+ * React hoists. Left in the client bundle: hover-callback children and `Box.Theme`, both of which need
+ * state, while theme *styles* work here as always.
  */
 
 // The engine has to be in element mode before the first render, and importing this entry is the
@@ -68,12 +60,9 @@ RscBox.getVariableValue = (name: string) => getDefaultEngine().getVariableValue(
 RscBox.configure = (config: StylesConfiguration) => getDefaultEngine().configure(config);
 
 /**
- * The Server-Component half of `useClassNames` — see the client entry for what it is for.
- *
- * Not a hook here, and it does not need to be: in element mode resolving the styles produces the
- * `<style>` elements themselves, so there is nothing left to flush. The name keeps the `use`
- * prefix because a component written against it must be able to move between the two entries
- * without changing a line, and on the client it really is one.
+ * The Server-Component half of `useClassNames` — see the client entry for what it is for. Not a hook
+ * here and it does not need to be, since resolving in element mode produces the `<style>` elements
+ * themselves. The `use` prefix stays so a component can move between the two entries unchanged.
  */
 export function useClassNames<TKey extends keyof ComponentsAndVariants = never>(
   props: BoxClassNameProps<TKey>,

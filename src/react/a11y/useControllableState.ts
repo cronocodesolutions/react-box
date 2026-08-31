@@ -2,13 +2,9 @@ import { useCallback, useState } from 'react';
 import { useEventCallback, useLatest } from './callbacks';
 
 /**
- * Why a change happened, and the event that caused it.
- *
- * The reason is the point. A component that only says `onOpenChange(false)` forces its consumer to
- * guess whether the popup closed because the user picked something, pressed Escape, clicked away
- * or the component decided on its own — and every one of those wants different behaviour from the
- * surrounding app (return focus, submit, do nothing). Handing the reason over is the Base UI
- * pattern, and it is what makes a controlled component controllable in practice.
+ * Why a change happened, and the event that caused it — the reason being the point. A component that only
+ * says `onOpenChange(false)` makes its consumer guess whether the popup closed because the user picked
+ * something, pressed Escape or clicked away, and each of those wants different behaviour from the app.
  */
 export interface ChangeDetails<TReason extends string = string> {
   reason: TReason;
@@ -32,12 +28,9 @@ export type SetControllableState<T, TReason extends string = string> = (
 ) => void;
 
 /**
- * One state value that works the same whether the consumer controls it or not.
- *
- * The setter is stable — it can sit in a dependency array without re-running the effect on every
- * render — and every call has to name a reason, which is what reaches `onChange`. A call that
- * resolves to the value already held is dropped: two dismissal layers both closing the same popup
- * is the normal case, not an error, and the consumer should hear about it once.
+ * One state value that works the same whether the consumer controls it or not. The setter is stable, and
+ * every call names a reason, which is what reaches `onChange`. A call resolving to the value already held
+ * is dropped: two dismissal layers closing the same popup is the normal case, not an error.
  */
 export default function useControllableState<T, TReason extends string = string>(
   options: ControllableStateOptions<T, TReason>,

@@ -3,11 +3,9 @@ import GridModel from './gridModel';
 import GroupRowModel from './groupRowModel';
 
 /**
- * How a cell participates in a group row's layout:
- * - `grouping`  — the expand/label cell (spans the grouped data columns)
- * - `selection` — the select-all checkbox cell
- * - `spacer`    — a leading/other-pinned cell rendered with its own value (row number, detail, opposite pin)
- * - `hidden`    — a data column on the grouping side, absorbed into the grouping cell's column span
+ * How a cell participates in a group row's layout: `grouping` is the expand/label cell spanning the
+ * grouped columns, `selection` the select-all cell, `spacer` a pinned or leading cell with its own value,
+ * and `hidden` a data column absorbed into the grouping cell's span.
  */
 export type GroupRowCellKind = 'grouping' | 'selection' | 'spacer' | 'hidden';
 

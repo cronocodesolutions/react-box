@@ -20,15 +20,10 @@ function focused(): HTMLElement | null {
 }
 
 /**
- * Put focus back where it came from when a layer closes.
- *
- * Losing focus to `<body>` is the single most common keyboard bug in a popup: the trigger is gone
- * as far as the tab order is concerned, so the next Tab starts again at the top of the page and a
- * keyboard user has to walk all the way back to where they were.
- *
- * The restore is skipped when something else already holds focus — a menu item that moved focus
- * into a dialog it opened, or a user who tabbed away before the popup closed — because taking it
- * back would be the same bug pointing the other way.
+ * Put focus back where it came from when a layer closes. Losing it to `<body>` is the commonest keyboard
+ * bug in a popup: the next Tab starts again at the top of the page. Skipped when something else already
+ * holds focus — a dialog the layer opened, or a user who tabbed away — since taking it back is the same
+ * bug pointing the other way.
  */
 export default function useFocusReturn(options: FocusReturnOptions = {}): { returnFocus: () => void } {
   const { enabled = true, returnTo, preventScroll } = options;

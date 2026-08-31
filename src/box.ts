@@ -77,12 +77,9 @@ export type BoxTagProps<
 > = Required<BoxProps<TTag, TKey>>['props'];
 
 /**
- * Box props as a class attribute, for an element Box cannot render.
- *
- * Some elements belong to somebody else — an icon from `lucide-react`, a `motion.div`, a router's
- * `NavLink`. They accept a `className` and nothing else, so there is no `tag` that would let Box
- * render them, and `style` is the thing this library exists not to write. This resolves the same
- * props Box would and hands back the class list to put on them yourself:
+ * Box props as a class attribute, for an element Box cannot render: an icon from `lucide-react`, a
+ * `motion.div`, a router's `NavLink`. They take a `className` and nothing else, and `style` is what this
+ * library exists not to write.
  *
  * ```tsx
  * const { className, styles } = useClassNames({ color: 'sky-500', hover: { color: 'sky-300' } });
@@ -90,11 +87,9 @@ export type BoxTagProps<
  * return <>{styles}<NavLink className={className} to="/" /></>;
  * ```
  *
- * `styles` is defined in element mode only, where the CSS travels as `<style href precedence>`
- * elements rather than going to a stylesheet — render it beside the element and React 19 hoists it
- * into `<head>`. In every other mode it is undefined and rendering it costs nothing, so the line
- * above is what to write either way. Pass `{ svg: true }` for an element inside an `<svg>`: it
- * picks the SVG reset (`Icon` is this hook plus that flag).
+ * `styles` is defined in element mode only, where the CSS travels as `<style href precedence>` elements;
+ * elsewhere it is undefined and rendering it costs nothing, so that line is what to write either way.
+ * `{ svg: true }` picks the SVG reset — `Icon` is this hook plus that flag.
  */
 export function useClassNames<TKey extends keyof ComponentsAndVariants = never>(
   props: BoxClassNameProps<TKey>,

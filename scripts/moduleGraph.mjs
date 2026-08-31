@@ -1,24 +1,8 @@
-// What an entry module actually reaches, by walking its imports — and the React APIs some entries
-// may not reach at all. Two entries are checked and chunked by this walk:
-//
-//   `src/core.ts` — the framework-free engine (`@cronocode/react-box/core`). It must reach no
-//   React whatsoever, and its graph is what the `engine` chunk is built from, so a consumer with
-//   no framework bundles none. A directory rule would not do: the engine reaches `src/utils/**`
-//   and `src/types.ts`, which sit outside `src/core/` and were landing in a React chunk.
-//
-//   `src/rsc.ts` — what the `react-server` export condition resolves to: the Box a Server
-//   Component gets. It renders with no hook, no effect and no DOM, its CSS leaving as
-//   `<style href precedence>` elements. Under that condition `react` exports no `useState` and no
-//   effects at all, so a chunk naming them would not even resolve for a consumer bundling a
-//   Server Component.
-//
-//   `src/components/*.tsx` — the pre-built components, split into the ones that render on a
-//   server and the ones that cannot. The hook-free ones reach Box through the package's own name
-//   at build time (see `SERVER_SAFE_COMPONENTS`), so their walk stops at `src/box.ts`: that edge
-//   belongs to the export map, and which Box it lands on is the consumer's condition to decide.
-//
-// The checks (`check-core-boundary.mjs`, `check-rsc-boundary.mjs`) and the chunk split in
-// `vite.config.ts` share the walk so they cannot disagree about what an entry reaches.
+// What an entry module actually reaches, by walking its imports. Three entries are checked and chunked
+// by this walk: `src/core.ts`, which must reach no React at all (a directory rule would not do — the
+// engine reaches `src/utils/**` and `src/types.ts`); `src/rsc.ts`, the Box a Server Component gets,
+// where `react` exports no hooks to name; and `src/components/*.tsx`, split by whether they render on a
+// server. The boundary checks and the chunk split share the walk, so they cannot disagree.
 import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
 import { dirname, join, relative, resolve } from 'node:path';
 
@@ -34,11 +18,9 @@ export const BOX_ENTRY = 'src/box.ts';
 export const PACKAGE_NAME = '@cronocode/react-box';
 
 /**
- * The pre-built components a Server Component can import and render *on the server*: no hook, no
- * effect, nothing but props forwarded to Box. Their built chunks import `@cronocode/react-box`
- * rather than `../box.mjs`, so the `react-server` condition applies and they get the hook-free
- * Box — which is the whole point: `<H1>` in a Server Component must not drag a client runtime in
- * behind it. Enforced by `check-rsc-boundary.mjs`, and loaded for real by `postbuild.mjs`.
+ * The pre-built components a Server Component can render *on the server*: no hook, no effect, just props
+ * forwarded to Box. Their chunks import the package by name rather than `../box.mjs`, so the
+ * `react-server` condition applies and `<H1>` drags no client runtime in behind it.
  */
 export const SERVER_SAFE_COMPONENTS = [
   'baseSvg',
@@ -56,16 +38,14 @@ export const SERVER_SAFE_COMPONENTS = [
 ];
 
 /**
- * The rest: they hold state, measure the DOM or portal into it. A Server Component may still
- * import one — their chunks carry a `'use client'` banner, so the bundler opens a client boundary
- * instead of failing to resolve `useState`. Nothing here renders *on* the server.
+ * The rest: they hold state, measure the DOM or portal into it. A Server Component may still import one —
+ * their chunks carry a `'use client'` banner — but nothing here renders *on* the server.
  */
 export const CLIENT_ONLY_COMPONENTS = ['checkbox', 'dataGrid', 'dropdown', 'form', 'overlay', 'radioGroup', 'select', 'switch', 'tooltip'];
 
 /**
- * Entries that are hooks all the way down and so can only run on the client. They carry the same
- * `'use client'` banner the stateful components do: a Server Component importing `useDismiss`
- * should open a client boundary, not fail to resolve `useRef`.
+ * Entries that are hooks all the way down. Same `'use client'` banner: importing `useDismiss` from a
+ * Server Component should open a client boundary, not fail to resolve `useRef`.
  */
 export const CLIENT_ONLY_ENTRIES = ['a11y'];
 
@@ -111,13 +91,9 @@ function resolveSpecifier(fromFile, specifier) {
 }
 
 /**
- * Walk an entry's imports. Returns every module it reaches — repo-relative POSIX paths, mapped to
- * their comment-free source — plus the bare specifiers it pulls in and anything that would not
- * resolve.
- *
- * `stopAt` names modules the walk records as a bare package import instead of descending into:
- * the build turns those edges into package specifiers, so what lies beyond them is the consumer's
- * export condition to resolve, not ours.
+ * Walk an entry's imports: every module it reaches (repo-relative, comment-free), the bare specifiers it
+ * pulls in, and anything unresolved. `stopAt` names modules recorded as a package import instead of
+ * descended into — the build turns those edges into specifiers, so beyond them is the consumer's to resolve.
  */
 export function moduleGraph(entry, stopAt = new Set()) {
   const modules = new Map();
@@ -164,9 +140,9 @@ export function componentGraph(name) {
 }
 
 /**
- * Every module that can end up in a server graph: the `react-server` entry's, plus the server-safe
- * components'. The chunk split reads this — a module only a component reaches (`stringUtils`, say)
- * would otherwise be classified client, and `semantics` would import a chunk naming `useState`.
+ * Every module that can end up in a server graph: the `react-server` entry's plus the server-safe
+ * components'. Without it a module only a component reaches would be classified client, and
+ * `semantics` would import a chunk naming `useState`.
  */
 export function serverSafeModules() {
   const modules = new Set(rscGraph().modules.keys());
@@ -179,16 +155,10 @@ export function serverSafeModules() {
 }
 
 /**
- * The modules only **one** component entry reaches, and that no published entry reaches at all.
- *
- * They belong inside that component's own chunk. Every shared group in the split is imported by
- * something everybody imports — `react-shared` is reached by the `react-server` entry and by every
- * server-safe component — so a leaf that lands in one is paid for by consumers who never use it:
- * `chartUtils` in `react-shared` put the sparkline geometry into `box.mjs`, `rsc.mjs` and the
- * DataGrid, ~0.9 KB gz each for arithmetic none of them can reach.
- *
- * A rule rather than another hand-maintained group, because the same trap has now caught three
- * different features (the engine inside `client`, `forms` inside `react-shared`, and this).
+ * The modules only **one** component entry reaches and no published entry reaches at all, so they belong
+ * in that component's own chunk. Every shared group is imported by something everybody imports, so a
+ * leaf landing in one is paid for by consumers who cannot reach it (`chartUtils` cost `box.mjs`,
+ * `rsc.mjs` and the DataGrid ~0.9 KB gz each). A rule, because the trap has caught three features.
  */
 export function componentPrivateModules() {
   const published = new Set([

@@ -7,11 +7,9 @@ import { DataGridProps } from './contracts/dataGridContract';
 import GridModel from './models/gridModel';
 
 /**
- * React binding for the headless GridModel store.
- *
- * The model owns all state and behavior; React only subscribes. `setProps` syncs
- * incoming props during render (clearing affected memos lazily), and
- * `useSyncExternalStore` re-renders this component whenever the model calls notify().
+ * React binding for the headless GridModel store: the model owns all state and behaviour, React only
+ * subscribes. `setProps` syncs incoming props during render, and `useSyncExternalStore` re-renders
+ * whenever the model notifies.
  */
 export default function useGrid<TRow>(props: DataGridProps<TRow>): GridModel<TRow> {
   // Lazy initializer creates the model once; the store instance stays stable across renders.

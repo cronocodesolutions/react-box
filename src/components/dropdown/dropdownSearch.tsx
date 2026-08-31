@@ -18,15 +18,9 @@ interface Props {
 }
 
 /**
- * The textbox half of the APG editable combobox.
- *
- * It *is* the combobox: the role, the ARIA and the consumer's own props live on this input rather
- * than on something wrapped around it. That is what stops one focusable element from containing
- * another (bug #47) and what makes the pattern legal — `aria-autocomplete="list"` says the listbox
- * offers completions for what is typed here, and `aria-activedescendant` says which option the
- * arrows are on while DOM focus stays in the field.
- *
- * Pattern: https://www.w3.org/WAI/ARIA/apg/patterns/combobox/
+ * The textbox half of the APG editable combobox, and it *is* the combobox: the role, the ARIA and the
+ * consumer's props live on this input rather than on a wrapper, which is what stops one focusable element
+ * containing another (bug #47). Pattern: https://www.w3.org/WAI/ARIA/apg/patterns/combobox/
  */
 export default function DropdownSearch({ id, value, onValueChange, placeholder, inputRef, comboboxProps, onOpen }: Props) {
   const handleChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => onValueChange(e.target.value), [onValueChange]);

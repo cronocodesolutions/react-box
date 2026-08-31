@@ -21,23 +21,20 @@ interface Props<TKey extends keyof ComponentsAndVariants> extends SwitchProps<TK
 }
 
 /**
- * The APG switch: an on/off control, drawn as a track and a thumb.
+ * The APG switch: an on/off control drawn as a track and a thumb.
  * Pattern: https://www.w3.org/WAI/ARIA/apg/patterns/switch/
  *
  * ```tsx
  * <Switch label="Email notifications" name="notify" defaultChecked />
  * ```
  *
- * Underneath it is the same `<input type="checkbox">` a `Checkbox` renders, with `role="switch"`
- * over it. That role is the whole difference to a screen reader — "on"/"off" rather than
- * "checked"/"not checked" — and keeping the native input is what keeps focus, Space, the disabled
- * state and form submission working without reimplementing any of them. A switch built from a
- * `<div>` submits nothing.
+ * Underneath is the `<input type="checkbox">` a `Checkbox` renders, with `role="switch"` over it: the role
+ * is the whole difference to a screen reader ("on"/"off"), and the native input is what keeps focus,
+ * Space, the disabled state and form submission working. A switch built from a `<div>` submits nothing.
  *
- * The one behaviour the platform does not supply is Enter. APG lists it as optional for a switch,
- * and a native checkbox ignores it — inside a form Enter submits instead. This toggles on Enter
- * and stops the submission, which is the reading a user who pressed Enter *on the switch* meant.
- * There is no mixed state: a switch is on or off, which is why `indeterminate` is not accepted.
+ * The platform supplies everything but Enter, which APG lists as optional and a checkbox ignores (inside
+ * a form it submits instead). This toggles and stops the submission, which is what a user who pressed
+ * Enter *on the switch* meant. There is no mixed state, so `indeterminate` is not accepted.
  */
 function SwitchImpl<TKey extends keyof ComponentsAndVariants>(props: Props<TKey>, ref: Ref<HTMLInputElement>) {
   const { props: tagProps, ...restProps } = props;

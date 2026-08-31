@@ -3,24 +3,11 @@ import { generatedRulesOf, makeEngine, renderStyles } from '../../../dev/engineH
 import { BoxStyleProps } from '../../types';
 
 /**
- * How a nested pseudo prop becomes a compound selector — specifically, where the pseudo-*element*
- * ends up in it.
- *
- * `::before`, `::after` and `::placeholder` are elements, not classes, and CSS requires one to be
- * the last thing in a compound selector. A combination used to be assembled in the order the keys
- * are declared in `pseudoClasses`, which puts `before` in the middle of that list: `hover` is
- * declared first, so `hover: { before: … }` came out as `:hover::before` and worked, while
- * `checked: { before: … }` came out as `::before:checked` — invalid, and a browser drops the whole
- * rule rather than the offending half of the selector. A silent failure with nothing to see: the
- * element carries the class name, the rule is in the stylesheet, and nothing happens.
- *
- * The `switch` component style is what found it. Its thumb travels on
- * `checked: { before: { translateX: 4 } }`, and did not move.
- *
- * Note the two shapes below. At the top level of Box props a `pseudo2` key (`checked`, `disabled`,
- * `indeterminate`, `required`, `selected`) is `boolean | [state, styles]`, because it is a state as
- * well as a selector — so styles for it ride in the tuple's second slot. A component style, which
- * is where this was found, nests them as a plain object. Both reach the engine as the same nesting.
+ * How a nested pseudo prop becomes a compound selector — specifically where the pseudo-*element* ends up.
+ * CSS requires one to be last, and combinations were assembled in declaration order, so
+ * `checked: { before: … }` came out as the invalid `::before:checked` and the browser dropped the whole
+ * rule: class on the element, rule in the stylesheet, and the switch's thumb did not move. Note the two
+ * shapes below — at the top level a `pseudo2` key is `boolean | [state, styles]`, a component style a plain object.
  */
 describe('pseudo-element ordering in a compound selector', () => {
   it('puts ::before last when it is nested inside a pseudo-class declared before it', () => {

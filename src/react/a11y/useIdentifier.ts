@@ -8,12 +8,9 @@ const useReactId = (React as { useId?: () => string }).useId ?? (() => undefined
 let sequence = 0;
 
 /**
- * React's own id, formatted so it can also be used as a CSS selector.
- *
- * `useId` returns something like `:r1:` (React 18) or `«r1»` (React 19): unique, stable across
- * server and client, and rejected by `document.querySelector('#…')`. The punctuation carries no
- * information — the part that varies is the word characters — so dropping it keeps the id unique
- * and makes it addressable by every API a consumer might reach for.
+ * React's own id, formatted so it can also be a CSS selector. `useId` returns `:r1:` (React 18) or `«r1»`
+ * (React 19), which `querySelector` rejects; the punctuation carries no information, so dropping it keeps
+ * the id unique and makes it addressable.
  */
 function usable(id: string): string {
   return id.replace(/[^\w-]/g, '');

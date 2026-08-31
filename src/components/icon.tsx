@@ -6,39 +6,26 @@ import svgNaming from '../react/svg/svgNaming';
 import { BoxStyleProps } from '../types';
 
 /**
- * Box props for an icon this library did not draw.
- *
- * An icon set is somebody else's component — `lucide-react`, `@tabler/icons-react`, `react-icons`,
- * or the `<svg>` a designer handed you. There is no `tag` that renders one, so Box cannot wrap it,
- * and the only styling channel it offers is the `className` it spreads onto its `<svg>`. `Icon`
- * fills that channel with a class the engine generated, so an icon takes the same props everything
- * else in this library takes — themed, hoverable, responsive:
+ * Box props for an icon this library did not draw. An icon set is somebody else's component, and the only
+ * styling channel it offers is the `className` it spreads onto its `<svg>`; `Icon` fills that channel
+ * with a class the engine generated, so an icon takes the props everything else here takes:
  *
  * ```tsx
- * <Icon size={5} color="amber-400" hover={{ color: 'amber-300' }} label="Sunny">
- *   <Sun />
- * </Icon>
+ * <Icon size={5} color="amber-400" hover={{ color: 'amber-300' }} label="Sunny"><Sun /></Icon>
  * ```
  *
- * **Nothing is passed down as a size prop.** The size is in the class, and a CSS declaration
- * outranks the `width`/`height` presentation attributes an icon set writes for itself — which is
- * why one component works for every set without knowing any of their prop names. The same is true
- * of `strokeWidth`: it is the Box prop from SV1, so `stroke-width` comes from the class and beats
- * lucide's attribute, and unlike a passthrough it can differ per breakpoint or on hover.
- *
- * The child has to be an element that spreads its props onto an `<svg>` — every icon set does, and
- * so does an `<svg>` you write inline. **For SVG you draw yourself, reach for `Svg` and the other
- * `components/svg` elements instead**: they are Boxes already, so they take these props directly
- * and need no adapter.
+ * **Nothing is passed down as a prop.** The size is in the class, where a CSS declaration outranks the
+ * `width`/`height` attributes a set writes for itself — which is why one component fits every set
+ * without knowing any of their prop names, and why `strokeWidth` can differ on hover. The child must
+ * spread its props onto an `<svg>`. **For SVG you draw yourself, `Svg` and the `components/svg` elements
+ * are Boxes already** and need no adapter.
  */
 export interface IconProps extends BoxClassNameProps {
   /** The icon: exactly one element, whose `<svg>` these props are styling. */
   children: React.ReactElement;
   /**
-   * Width and height at once, on the ÷4 spacing scale every other length in this library uses —
-   * `size={5}` is 1.25rem, `size={6}` is the 24px an icon set defaults to. It is the default, so an
-   * icon is 24px square unless a `size`, a `width` or a `height` says otherwise, and a `size` wins
-   * over both. Careful when porting: an icon set's own `size` prop counts in pixels, not in fours.
+   * Width and height at once, on the ÷4 scale: `size={6}` is the 24px an icon set defaults to, and is the
+   * default here too. It wins over `width`/`height`. Careful when porting — a set's own `size` is in pixels.
    */
   size?: BoxStyleProps['width'] & BoxStyleProps['height'];
   /** Names the icon — `role="img"` and this text. Without one the icon is `aria-hidden`. */
@@ -74,10 +61,9 @@ function IconImpl(props: IconProps, ref: Ref<SVGSVGElement>) {
   }
 
   /**
-   * Where the child's DOM attributes go. An icon set spreads its props onto its `<svg>`, so they go
-   * on top; one of this library's own components keeps them in a `props` bag, and handing `role`
-   * and `aria-label` to a Box at the top level drops them without a word (bug #78). The child says
-   * which it is — see `attributesInProps`.
+   * Where the child's DOM attributes go. An icon set spreads its props onto its `<svg>`, so they go on top;
+   * one of our own components keeps them in a `props` bag, and handing it `role` at the top level drops
+   * them without a word (bug #78). The child says which it is — see `attributesInProps`.
    */
   const inProps = hasAttributesInProps(children.type);
   const childProps = children.props as { props?: IconChildProps; label?: string };

@@ -14,11 +14,9 @@ export interface PageMeta {
 }
 
 /**
- * The absolute URL of a route.
- *
- * Every path but the home page ends in a slash, because that is the address GitHub Pages actually
- * serves: each route ships as `<route>/index.html`, and a request without the slash is answered
- * with a redirect to it. Canonical links, the sitemap and the shells all agree on the served form.
+ * The absolute URL of a route. Every path but the home page ends in a slash, because that is what GitHub
+ * Pages serves (`<route>/index.html`) and a request without it is answered with a redirect — so the
+ * canonical links, the sitemap and the shells all agree on the served form.
  */
 export function canonicalUrl(path: string, siteUrl: string = SITE_URL): string {
   return path === '/' ? `${siteUrl}/` : `${siteUrl}${path}/`;
@@ -59,10 +57,8 @@ export function indexableRoutes(): readonly SiteRoute[] {
 }
 
 /**
- * `sitemap.xml` for the whole site.
- *
- * No `<lastmod>`: the only date the build knows is its own, which would claim every page changed
- * on every deploy. A sitemap that lies about freshness is worse than one that says nothing.
+ * `sitemap.xml` for the whole site. No `<lastmod>`: the only date the build knows is its own, and a
+ * sitemap that claims every page changed on every deploy is worse than one that says nothing.
  */
 export function buildSitemap(siteUrl: string = SITE_URL): string {
   const urls = indexableRoutes()
@@ -73,18 +69,14 @@ export function buildSitemap(siteUrl: string = SITE_URL): string {
 }
 
 /**
- * The AI crawlers named explicitly in `robots.txt`. `User-agent: *` already allows them; naming
- * them says the allowance is deliberate, so nobody has to guess whether the docs are meant to be
- * readable by an assistant.
+ * The AI crawlers named explicitly in `robots.txt`. `User-agent: *` already allows them; naming them says
+ * the allowance is deliberate.
  */
 const AI_CRAWLERS = ['ClaudeBot', 'Claude-User', 'Claude-SearchBot', 'GPTBot', 'OAI-SearchBot', 'PerplexityBot', 'Google-Extended'];
 
 /**
- * `robots.txt`.
- *
- * The unlisted demo is not disallowed on purpose: a crawler that may not fetch a page never sees
- * its `noindex`, and can still index the URL from a link elsewhere. Crawling is how the `noindex`
- * gets delivered.
+ * `robots.txt`. The unlisted demo is deliberately not disallowed: a crawler that may not fetch a page
+ * never sees its `noindex`, and can still index the URL from a link elsewhere.
  */
 export function buildRobotsTxt(siteUrl: string = SITE_URL): string {
   const agents = ['*', ...AI_CRAWLERS].map((agent) => `User-agent: ${agent}\nAllow: /\n`).join('\n');
