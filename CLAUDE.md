@@ -117,7 +117,7 @@ Pre-built components wrap Box with the correct HTML tag. Each is a separate entr
 - **Accessible behavior belongs in `src/react/a11y/`, not in a component** — focus return, list navigation, dismissal and controlled state are shared primitives (`docs/a11y-primitives.md`). A component supplies the roles and the ARIA; the hooks supply the mechanics
 - Engine-level tests build their own isolated engine via `dev/engineHarness.ts` (readable class names + `textContent` sink) instead of the default instance, so they can assert exact rule text without interfering with each other
 - One component per file, PascalCase component names, camelCase prop names
-- **Comments are one or two lines** — say the thing the code cannot (the trap, the reason, the bug it came from) and stop. Four or five is for a module-level doc that genuinely needs it: a code example, two conventions meeting. Never restate what the next line does; a long explanation belongs in CONTRIBUTING.md, the docs site or the roadmap, where it is read on purpose
+- **Comments are one or two lines** (the `terse-comments` skill has the sweep tooling) — say the thing the code cannot (the trap, the reason, the bug it came from) and stop. Four or five is for a module-level doc that genuinely needs it: a code example, two conventions meeting. Never restate what the next line does; a long explanation belongs in CONTRIBUTING.md, the docs site or the roadmap, where it is read on purpose
 - Prettier: 140 char width, single quotes, trailing commas
 - Import order enforced by ESLint: builtin → external → internal → parent → sibling → index (no blank lines between groups, alphabetized)
 

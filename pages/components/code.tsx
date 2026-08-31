@@ -17,22 +17,19 @@ interface Props extends BoxProps {
   /** If true, only show code block without rendering the children demo */
   codeOnly?: boolean;
   /**
-   * `false` for a block that is deliberately not compilable code — an outline with `...` in it, a
-   * `.d.ts` augmentation, two files shown at once. Read by `scripts/check-docs-snippets.mjs`,
-   * which compiles every other `code` string as a reader would.
+   * `false` for a block that is deliberately not compilable code — an outline with `...` in it, two files
+   * shown at once. Read by `scripts/check-docs-snippets.mjs`, which compiles every other `code` string.
    */
   check?: boolean;
   /**
-   * Hold the live demo back until the block is near the viewport. For a page whose demos are heavy —
-   * /datagrid mounts ten grids, four hundred rows between them — rendering all of them during the
-   * navigation is a third of a second of blocked main thread, and nine of the ten are off screen.
-   * The snippet is never deferred: it is the part a reader (and a crawler) came for.
+   * Hold the live demo back until the block is near the viewport: /datagrid mounts ten grids, four
+   * hundred rows between them, and nine are off screen. The snippet is never deferred — it is the part
+   * a reader (and a crawler) came for.
    */
   defer?: boolean;
   /**
-   * Declarations the snippet is written against but does not show — the row type a DataGrid infers
-   * its cells from, say. Compiled with the snippet by `scripts/check-docs-snippets.mjs`, never
-   * displayed, so keep it to what the surrounding page genuinely owns.
+   * Declarations the snippet is written against but does not show — the row type a DataGrid infers its
+   * cells from. Compiled with the snippet, never displayed, so keep it to what the page genuinely owns.
    */
   context?: string;
 }
