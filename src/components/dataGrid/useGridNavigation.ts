@@ -37,16 +37,11 @@ export interface GridNavigator extends GridNavigation {
 }
 
 /**
- * APG's grid pattern over a virtualized body.
- *
- * Focus lives on the cells — one of them in the tab order at a time — and the arrow keys, Home/End,
- * Ctrl+Home/End and PageUp/PageDown move it. `useRovingFocus` owns which cell that is; what belongs
- * here is everything virtualization adds to the pattern: a jump to a row nobody has scrolled to
- * has to bring it into the rendered window before there is an element to focus, so the move
- * scrolls, waits for the render it caused, and focuses from a layout effect.
- *
- * Inside a cell the grid steps back. A widget that has focus keeps every key, Escape included when
- * the widget has a popup open; Enter and F2 are how focus got there and Escape is how it leaves.
+ * APG's grid pattern over a virtualized body. Focus lives on the cells, one in the tab order at a time,
+ * and `useRovingFocus` owns which; what belongs here is what virtualization adds — a jump to a row nobody
+ * has scrolled to has no element to focus, so the move scrolls, waits for the render it caused, and
+ * focuses from a layout effect. Inside a cell the grid steps back: the widget keeps every key, and Enter
+ * or F2 got focus there while Escape takes it out.
  */
 export default function useGridNavigation<TRow>(options: GridNavigationOptions<TRow>): GridNavigator {
   const { grid, scrollerRef, scrollTop, onScrollTo } = options;

@@ -69,28 +69,21 @@ function directionOf(key: string): number {
 }
 
 /**
- * The APG radio group: one label over a set of radios, with the arrow keys moving between them and
- * choosing as they go. Pattern: https://www.w3.org/WAI/ARIA/apg/patterns/radio/
+ * The APG radio group: one label over a set of radios, the arrow keys moving between them and choosing
+ * as they go. Pattern: https://www.w3.org/WAI/ARIA/apg/patterns/radio/
  *
  * ```tsx
  * <RadioGroup label="Plan" defaultValue="free" onChange={(plan) => setPlan(plan)}>
  *   <RadioGroup.Item value="free" label="Free" />
- *   <RadioGroup.Item value="pro" label="Pro" />
  * </RadioGroup>
  * ```
  *
- * What the group owns: `role="radiogroup"` named by its own label — a set of radios with nothing
- * over it is a flat list of unrelated controls to a screen reader — the shared `name` the items
- * submit under, the selected value, and the arrow keys.
- *
- * What it deliberately does not own is the tab order. A native radio set is already a single tab
- * stop with the checked member holding it: the platform's own roving tabindex, which a `tabIndex`
- * of ours would only fight. The arrow keys are the half worth owning — the browser implements them
- * too, so the handler calls `preventDefault` to stop the move happening twice, and activates the
- * radio it lands on with a real click, which is what the browser's own implementation does.
- *
- * `RadioGroup.Item` is a `RadioButton` wired to the group. A plain `RadioButton` nested inside
- * still gets the role, the label and the arrow keys, but carries its own `name` and `checked`.
+ * The group owns `role="radiogroup"` named by its own label (radios with nothing over them are unrelated
+ * controls to a screen reader), the shared `name`, the value and the arrow keys. It deliberately does
+ * *not* own the tab order: a native radio set is already one tab stop with the platform's own roving
+ * tabindex, which a `tabIndex` of ours would fight. The browser implements the arrows too, so the handler
+ * calls `preventDefault` and activates with a real click, as the browser does. `RadioGroup.Item` is a
+ * `RadioButton` wired to the group; a plain one nested inside keeps its own `name` and `checked`.
  */
 function RadioGroupImpl<TKey extends keyof ComponentsAndVariants = never>(props: Props<TKey>) {
   const { label, name, value, defaultValue, onChange, orientation = 'vertical', children, props: tagProps, ...restProps } = props;
@@ -154,8 +147,8 @@ function RadioGroupImpl<TKey extends keyof ComponentsAndVariants = never>(props:
 }
 
 /**
- * A radio that reads its group: the shared `name`, whether it is the selected one, and what to
- * report when it is chosen. Outside a `RadioGroup` it is a plain `RadioButton`.
+ * A radio that reads its group: the shared `name`, whether it is selected, and what to report when it is
+ * chosen. Outside a `RadioGroup` it is a plain `RadioButton`.
  */
 function RadioGroupItem(props: ItemProps) {
   const group = useContext(RadioGroupContext);

@@ -1,14 +1,9 @@
 import axe, { ElementContext, Result, RunOptions } from 'axe-core';
 
 /**
- * Rules switched off for every run here, so a pass never claims more than it actually checked.
- *
- * - `color-contrast` samples rendered pixels: it needs real layout and a canvas, and happy-dom has
- *   neither, so axe parks it in `incomplete` forever rather than deciding either way. Contrast is a
- *   browser or a manual check — see docs/a11y-testing.md.
- * - `region` wants every piece of content inside a landmark. That is a property of the *page*, and
- *   what these tests render is a fragment: a component dropped into `document.body` with no
- *   `<main>` around it. Judging a Button by it would only ever measure the fixture.
+ * Rules switched off for every run here, so a pass never claims more than it checked. `color-contrast`
+ * samples rendered pixels, which happy-dom cannot produce (it is a browser or a manual check), and
+ * `region` is a property of a *page* — these tests render a fragment with no `<main>` around it.
  */
 export const DEFAULT_DISABLED_RULES = ['color-contrast', 'region'];
 

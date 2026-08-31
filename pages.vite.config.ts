@@ -7,14 +7,11 @@ import { SITE_URL, siteRoutes } from './pages/site/site';
 import { buildRobotsTxt, buildSitemap, notFoundMeta, pageMeta, withHeadHtml } from './pages/site/siteMeta';
 
 /**
- * Everything the site publishes about its own address, built from the route table in
- * `pages/site/site.ts`: the metadata in each page's head, one static shell per route, `sitemap.xml`,
- * `robots.txt`, and the `CNAME` that pins the GitHub Pages custom domain.
+ * Everything the site publishes about its own address, built from the route table in `pages/site/site.ts`:
+ * the head metadata, one static shell per route, `sitemap.xml`, `robots.txt` and the `CNAME`.
  *
- * The shells are why the sitemap is worth having. GitHub Pages answers an address it has no file
- * for with `404.html` and an HTTP 404 — the page renders, but every route the sitemap lists would
- * report itself missing. A `<route>/index.html` per route makes them 200s, and each one carries its
- * own title, description and canonical link for the crawlers that never run the app.
+ * The shells are why the sitemap is worth having: GitHub Pages answers an address it has no file for with
+ * an HTTP 404, so every route the sitemap listed would report itself missing.
  */
 function siteMetadata(): Plugin {
   const home = siteRoutes[0];

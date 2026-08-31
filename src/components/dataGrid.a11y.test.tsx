@@ -5,24 +5,10 @@ import { ignoreLogs } from '../../dev/tests';
 import DataGrid from './dataGrid';
 
 /**
- * The APG grid pattern, key by key and role by role.
- *
- * Pattern: https://www.w3.org/WAI/ARIA/apg/patterns/grid/
- *
- * | Key                | What it does                                                        |
- * | ------------------ | ------------------------------------------------------------------- |
- * | Right / Left       | one cell along the row; stops at the ends, never wraps               |
- * | Down / Up          | one row, keeping the column; stops at the ends                       |
- * | Home / End         | the first / last cell of the row                                     |
- * | Ctrl+Home / Ctrl+End | the first / last cell of the grid                                  |
- * | PageDown / PageUp  | a screenful of rows at a time                                        |
- * | Enter / Space      | sorts a sortable header; otherwise steps into the cell's own widget  |
- * | F2                 | steps into the cell's widget even where Enter is the header's sort   |
- * | Escape             | hands the keyboard back from the widget to the cell                  |
- *
- * The other half of the pattern is the numbering: a virtualized grid holds fifty rows and claims
- * ten thousand, so `aria-rowcount` and `aria-rowindex` are the only thing a screen reader has to
- * tell it where it is. Those are asserted against rows that are deliberately *not* the first ones.
+ * The APG grid pattern, key by key — the tests below name what each key does, and the other half of the
+ * pattern is the numbering: a virtualized grid holds fifty rows and claims ten thousand, so
+ * `aria-rowcount`/`aria-rowindex` are all a screen reader has, asserted against rows that are not the
+ * first ones. Pattern: https://www.w3.org/WAI/ARIA/apg/patterns/grid/
  */
 describe('DataGrid accessibility', () => {
   ignoreLogs();
@@ -408,10 +394,8 @@ describe('DataGrid accessibility', () => {
   });
 
   /**
-   * APG's window splitter: https://www.w3.org/WAI/ARIA/apg/patterns/windowsplitter/
-   *
-   * A column that can only be resized by dragging is a column a keyboard-only user cannot resize
-   * at all, which is the difference between a grid that is navigable and one that is operable.
+   * APG's window splitter: https://www.w3.org/WAI/ARIA/apg/patterns/windowsplitter/ — a column resizable
+   * only by dragging is one a keyboard-only user cannot resize, which is navigable versus operable.
    */
   describe('The column resizer', () => {
     const resizers = () => screen.getAllByRole('separator');

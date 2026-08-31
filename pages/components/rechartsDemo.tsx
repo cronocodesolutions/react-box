@@ -2,12 +2,9 @@ import { Area, AreaChart, CartesianGrid, ResponsiveContainer, XAxis, YAxis } fro
 import { ChartContainer } from '../../src/components/chart';
 
 /**
- * The /charts page's Recharts demo, in a file of its own so it is a **lazy chunk**.
- *
- * Recharts and its d3 packages are ~95 KB gzipped, and this site is one bundle for every route — a
- * library that publishes its own byte budgets should not make the Textbox page pay for the chart on
- * the Charts page. Everything else about the demo is deliberately ordinary: the chart names no
- * colour, only the variables the container above it declares.
+ * The /charts page's Recharts demo, in a file of its own so it is a **lazy chunk**: recharts and its d3
+ * packages are ~95 KB gzipped and this site is one bundle per route, so the Textbox page should not pay
+ * for it. Everything else is deliberately ordinary — the chart names no colour, only the variables.
  */
 
 /** Eight months of two series, for the chart that is drawn by somebody else entirely. */

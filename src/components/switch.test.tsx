@@ -7,11 +7,9 @@ import Form from './form';
 import Switch from './switch';
 
 /**
- * A switch is a checkbox wearing a different role, so most of what is asserted here is that the
- * native control underneath survived: focus, Space, `name`/`value` in a submitted form. What is
- * genuinely new is the role and Enter.
- *
- * Pattern: https://www.w3.org/WAI/ARIA/apg/patterns/switch/
+ * A switch is a checkbox wearing a different role, so most of this asserts that the native control
+ * underneath survived — focus, Space, `name`/`value` in a submitted form. The role and Enter are what is
+ * new. Pattern: https://www.w3.org/WAI/ARIA/apg/patterns/switch/
  */
 describe('Switch', () => {
   ignoreLogs();

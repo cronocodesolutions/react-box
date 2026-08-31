@@ -1,19 +1,8 @@
-// Fails the build if the React Server Components entry can no longer render on a server.
-//
-// `src/rsc.ts` is what the `react-server` export condition resolves to: the Box a Server Component
-// gets when it imports the package. It renders with no hook, no effect and no DOM — its CSS leaves
-// as `<style href precedence>` elements instead. That property is invisible in a normal test run
-// (Vitest renders with the client React), and a single `useState` in any module it reaches turns
-// every server render into React error #482 for consumers. So the graph is checked instead.
-//
-// The pre-built components are checked the same way, one list at a time:
-//   SERVER_SAFE_COMPONENTS render on the server, so they must reach no client API either. Their
-//   `../box` edge is left to the export map (the built chunk imports the package by name), which
-//   is what lets `<H1>` in a Server Component resolve the hook-free Box.
-//   CLIENT_ONLY_COMPONENTS are allowed everything — they ship a `'use client'` banner instead —
-//   but they must genuinely need it, or they belong in the other list.
-//
-// The same graphs decide the chunk split in `vite.config.ts`, so the built chunks inherit them.
+// Fails the build if the React Server Components entry can no longer render on a server. `src/rsc.ts`
+// renders with no hook, no effect and no DOM — invisible in a normal test run (Vitest uses the client
+// React), where one `useState` in any module it reaches turns every server render into React error #482,
+// so the graph is checked instead. The pre-built components go through the same walk, one list at a time,
+// and `vite.config.ts` decides the chunk split from these graphs, so the built chunks inherit them.
 import {
   BANNED_SPECIFIER,
   CLIENT_APIS,

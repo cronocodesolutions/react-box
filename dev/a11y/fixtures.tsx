@@ -23,17 +23,10 @@ import Tooltip from '../../src/components/tooltip';
 import VisuallyHidden from '../../src/components/visuallyHidden';
 
 /**
- * One render per shipped component, in the smallest form its docs show — the thing a consumer
- * actually copies. `src/components/a11y.test.tsx` puts each through axe.
- *
- * A fixture is written the way a consumer would write it, not the way that scores best. Nothing
- * here may wire up accessibility the component still owes: a Checkbox carries `label` because the
- * component supplies the `<label>` itself now (A4), not because a fixture propped it up. What a
- * fixture must not do is invent consumer content — an `<Img>` gets its `alt`, since no library can
- * guess that.
- *
- * These live in `dev/` rather than beside the components because `src/components/*` is the build's
- * entry glob: a fixture file there would be published as an entry point.
+ * One render per shipped component, in the smallest form its docs show — the thing a consumer copies;
+ * `src/components/a11y.test.tsx` puts each through axe. A fixture may not wire up accessibility the
+ * component still owes, though it must supply content no library could guess (an `<Img>` needs its
+ * `alt`). They live in `dev/` because `src/components/*` is the build's entry glob.
  */
 export interface A11yFixture {
   /** How the fixture is named in the test report. */
@@ -43,9 +36,8 @@ export interface A11yFixture {
   /** Reach the state under test: open the popup, focus the trigger. Runs after render. */
   setup?(): void;
   /**
-   * The rules that fail today, each mapped to the roadmap step that owns the fix. The sweep fails
-   * on a rule that is *not* listed, and equally on a listed rule that has stopped firing — so the
-   * ledger cannot quietly rot into a list of excuses.
+   * The rules that fail today, each mapped to the step that owns the fix. The sweep fails on a rule that is
+   * *not* listed and on a listed rule that has stopped firing, so the ledger cannot rot into excuses.
    */
   knownViolations?: Record<string, string>;
 }

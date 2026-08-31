@@ -24,16 +24,11 @@ for (const [from, to] of copies) {
   cpSync(from, to);
 }
 
-// Load the built package the way a Server Component's bundler resolves it. `npm run
-// check:boundaries` proves the *sources* of the `react-server` entry call no client hook; this
-// proves the bundler did not undo it by putting the client binding in a chunk that entry imports.
-// Node applies `--conditions=react-server` to `react` as well, and that build of React exports no
-// `useState` and no effects at all — so a chunk naming one fails to load right here, exactly as it
-// would fail in a consumer's build.
-// The same specifiers a consumer writes, so the `exports` map is exercised too — and for the
-// components that is the whole of the fix: their chunks import the package by name rather than
-// `../box.mjs`, so this resolution is what decides they get the hook-free Box instead of the
-// client one, whose `createContext` at import time is what used to fail the consumer's build.
+// Load the built package the way a Server Component's bundler resolves it: `check:boundaries` proves the
+// *sources* call no client hook, and this proves the bundler did not undo that. Node applies
+// `--conditions=react-server` to `react` too, whose server build exports no `useState` at all, so a chunk
+// naming one fails here exactly as it would in a consumer. The specifiers are the ones a consumer writes,
+// which for the components is the whole of the fix — that resolution is what hands them the hook-free Box.
 const specifiers = ['@cronocode/react-box', ...SERVER_SAFE_COMPONENTS.map((name) => `@cronocode/react-box/components/${name}`)];
 
 const loads = [
@@ -62,11 +57,9 @@ for (const [format, inputType, statement] of loads) {
 
 console.log(`✔ the entry and ${SERVER_SAFE_COMPONENTS.length} components load under the react-server condition (ESM and CJS)`);
 
-// The components that cannot render on a server say so in the one place a bundler looks. Without
-// the banner a Server Component importing `Dropdown` gets it compiled into the server graph, where
-// `useState` does not exist. With it, the bundler opens a client boundary instead. The inverse
-// matters just as much: a banner on a server-safe component would quietly undo the loads above,
-// putting a client runtime behind every `<H1>`.
+// The components that cannot render on a server say so in the one place a bundler looks. Without the
+// banner a Server Component importing `Dropdown` compiles it into the server graph, where `useState` does
+// not exist; with one on a server-safe component, every `<H1>` would drag a client runtime in behind it.
 const DIRECTIVE = /^["']use client["'];/;
 
 const bannerViolations = [];
@@ -100,11 +93,9 @@ console.log(
     `carry a 'use client' banner; the server-safe ones do not`,
 );
 
-// The other half of the boundary, on the built output this time. `npm run check:boundaries` proves
-// `src/core` names no React; this proves the bundler did not hand the framework-free entry a chunk
-// that does. It is the same failure the react-server check catches, one entry over: the split used
-// to be derived from the react-server module graph alone, and everything outside it — the theme
-// runtime included — went to the client chunk, which `/core` then imported.
+// The other half of the boundary, on the built output: `check:boundaries` proves `src/core` names no
+// React, and this proves the bundler did not hand the framework-free entry a chunk that does. The split
+// used to come from the react-server graph alone, so everything outside it went to the client chunk.
 const REACT_SPECIFIER = /(?:from\s*|require\(\s*)["'](react(?:-dom)?(?:\/[^"']*)?)["']/g;
 
 /** The chunk, plus every chunk it imports, as `[path, source]`. */

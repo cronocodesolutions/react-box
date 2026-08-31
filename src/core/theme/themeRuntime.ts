@@ -1,10 +1,7 @@
 /**
- * The framework-free half of the theme system: reading the system preference, watching it, and
- * writing a theme name onto a DOM element. No React, no hooks — the React `<Box.Theme>` provider
- * (`src/react/theme/theme.tsx`) is a thin wrapper over these, and a non-React adapter can drive
- * theming with the same three calls.
- *
- * Every function degrades to a no-op without a DOM, so a server render can call them safely.
+ * The framework-free half of the theme system: reading the system preference, watching it, and writing a
+ * theme name onto an element. `<Box.Theme>` is a thin wrapper over these three calls, and a non-React
+ * adapter can drive theming with the same ones. Every function is a no-op without a DOM.
  */
 import { documentRoot as environmentDocumentRoot, matchMedia } from '../../utils/environment/environmentUtils';
 

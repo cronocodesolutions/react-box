@@ -10,19 +10,10 @@ import useIdentifier from './useIdentifier';
 import useRovingFocus from './useRovingFocus';
 
 /**
- * The five primitives assembled into the pattern they exist for — a select-only combobox, which is
- * the shape A5 has to reach — driven entirely from the keyboard.
- *
- * Each hook is unit-tested next door. This asserts the thing unit tests cannot: that they compose
- * without contradicting each other. The mistakes it is looking for are the ones that only appear
- * in combination — a dismissal that fires while the list is still taking focus, focus returning to
- * a trigger that a roving index has already moved away from, an id generated per render so
- * `aria-activedescendant` points at nothing.
- *
- * It is deliberately *not* a component. Nothing here ships; it is the proof that a consumer can
- * build their own pattern out of the module, which is why the module is published at all.
- *
- * Pattern: https://www.w3.org/WAI/ARIA/apg/patterns/combobox/ (select-only)
+ * The five primitives assembled into the pattern they exist for — a select-only combobox — driven from the
+ * keyboard. Each hook is unit-tested next door; this asserts what unit tests cannot, that they compose: a
+ * dismissal firing while the list takes focus, focus returning to a trigger the roving index has moved
+ * past, an id regenerated per render. Nothing here ships — it is the proof a consumer can build their own.
  */
 describe('the behaviour primitives, composed', () => {
   afterEach(() => {

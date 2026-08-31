@@ -14,12 +14,9 @@ export interface ResolvedBoxStyles {
 }
 
 /**
- * Resolve a Box's classes without calling a single hook — the render path a Server Component can
- * take. In element mode everything those classes need comes back as elements to render, so there
- * is nothing left to flush and no client runtime to wait for.
- *
- * It lives in its own module for that reason: the RSC entry must reach this without pulling in
- * `useStyles`, whose flush effect is meaningless (and unavailable) on a server.
+ * Resolve a Box's classes with no hook at all — the render path a Server Component takes. In element mode
+ * what those classes need comes back as elements to render, so there is nothing to flush. Its own module
+ * for that reason: the RSC entry must reach this without pulling in `useStyles` and its flush effect.
  */
 export default function resolveStyles(props: BoxStyleProps<any>, isSvg: boolean): ResolvedBoxStyles & { signature: string | null } {
   const { classNames, signature, styleElements } = getDefaultEngine().resolveClassNames(props, isSvg);

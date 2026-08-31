@@ -7,13 +7,9 @@ import Variables from './variables';
 const opacityValues = [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1] as const;
 
 /**
- * `url(#id)` or `var(--name)`, for the props whose value can be something the document defines
- * rather than a token this library knows: a gradient or pattern fill, a clip path.
- *
- * Shared by `fill`, `stroke` and `clipPath`, and declared **after** each of their token lists — a
- * definition is chosen by `Array.prototype.find`, so the exact-match lists get first refusal. It
- * needs no `valueFormat`: `url(#sky)` is already CSS, and a variable somebody else declared must
- * not be run through this library's own variable resolution.
+ * `url(#id)` or `var(--name)` — a gradient, a pattern, a clip path: something the document defines
+ * rather than a token this library knows. Declared after each prop's token list, which `find` gives
+ * first refusal, and deliberately unformatted: someone else's variable is not ours to resolve.
  */
 const referenceValues = {
   values: Variables.reference,
@@ -1329,13 +1325,9 @@ export const cssStyles = {
     },
   ],
   /**
-   * The vector-effect CSS property controls how an SVG element's stroke reacts to the transforms above it —
-   * `non-scaling-stroke` keeps a hairline one pixel wide however far the viewBox is scaled, which is what a
-   * responsive chart needs.
-   *
-   * Alone among the SVG paint properties this one is not inherited, so a value set on an `<svg>` would never
-   * reach the shapes inside it. Its rule therefore targets the element *and* its descendants — the only way
-   * the prop can mean what it says on a container.
+   * How an SVG element's stroke reacts to the transforms above it: `non-scaling-stroke` keeps a hairline
+   * one pixel wide at any scale. Not inherited, so its rule targets the element *and* its descendants —
+   * the only way the prop can mean anything on an `<svg>`.
    */
   vectorEffect: [
     {
@@ -1352,9 +1344,8 @@ export const cssStyles = {
     },
   ],
   /**
-   * The text-anchor CSS property aligns SVG text against the `x` its element declares —
-   * `middle` is what centres an axis label under a tick, `end` is what right-aligns a value
-   * against a bar. Inherited, so a value on the `<svg>` sets the default for every label in it.
+   * Which part of SVG text sits on its `x`: `middle` centres an axis label under a tick. Inherited, so a
+   * value on the `<svg>` is the default for every label in it.
    */
   textAnchor: [
     {
@@ -1363,14 +1354,8 @@ export const cssStyles = {
     },
   ],
   /**
-   * The dominant-baseline CSS property chooses which baseline of SVG text sits on the `y` its
-   * element declares — `central` is what vertically centres a number inside a gauge, `hanging`
-   * is what hangs a label below an axis line.
-   *
-   * Like `vectorEffect`, and unlike every other property here, this one is not inherited, so a
-   * value on an `<svg>` would never reach the text inside it. Its rule therefore names the
-   * element *and* its descendants, which is the only way the prop can mean what it says on a
-   * container.
+   * Which baseline of SVG text sits on its `y`: `central` centres a number inside a gauge. Not inherited,
+   * so like `vectorEffect` its rule names the element *and* its descendants.
    */
   dominantBaseline: [
     {
@@ -1380,9 +1365,8 @@ export const cssStyles = {
     },
   ],
   /**
-   * The cx CSS property positions the centre of a `<circle>` or an `<ellipse>` horizontally, in
-   * user units. It is a real CSS property, so unlike the attribute it transitions — moving a
-   * point on hover is one prop and no JavaScript.
+   * The centre of a `<circle>` or `<ellipse>`, horizontally, in user units. Real CSS, so unlike the
+   * attribute it transitions — moving a point on hover is one prop and no JavaScript.
    */
   cx: [
     {
@@ -1411,9 +1395,8 @@ export const cssStyles = {
     },
   ],
   /**
-   * The rx CSS property sets the horizontal radius of an `<ellipse>`, or the corner radius of a
-   * `<rect>` — the SVG answer to `borderRadius`, and in user units rather than on the spacing
-   * scale. `auto` takes the radius from `ry`.
+   * The horizontal radius of an `<ellipse>` or corner radius of a `<rect>` — `borderRadius` for SVG, in
+   * user units rather than on the spacing scale. `auto` takes the radius from `ry`.
    */
   rx: [
     {
@@ -1439,9 +1422,8 @@ export const cssStyles = {
     },
   ],
   /**
-   * The x CSS property positions a `<rect>`, `<image>`, `<use>`, `<foreignObject>` or a nested
-   * `<svg>` horizontally, in user units. It does *not* apply to `<text>`, whose `x` accepts a
-   * list of positions and stays an attribute — pass that through `props`.
+   * Positions a `<rect>`, `<image>`, `<use>`, `<foreignObject>` or nested `<svg>` horizontally, in user
+   * units. Not `<text>`, whose `x` takes a list of positions and stays an attribute — pass it in `props`.
    */
   x: [
     {
@@ -1553,18 +1535,10 @@ export const cssStyles = {
     },
   ],
   /**
-   * CSS custom properties, declared on this element and inherited by everything inside it:
-   * `vars={{ 'color-revenue': 'sky-500' }}` emits `--color-revenue: var(--sky-500)`.
-   *
-   * The one prop whose *names* come from its value, which is what makes it the answer for anything
-   * this library does not render: a Recharts `<Line stroke="var(--color-revenue)">`, a third-party
-   * widget that reads a token, a subtree with its own spacing scale. Because it is an ordinary prop,
-   * the variables it declares land in a class — so they nest in `theme`, `hover` and a breakpoint
-   * like everything else, and two subtrees declaring the same palette share one rule instead of
-   * each carrying a `<style>` of its own.
-   *
-   * A colour token becomes the variable behind it; every other value is written out as it stands.
-   * Names may be spelled with or without the leading `--`.
+   * CSS custom properties on this element, inherited by everything inside it: `vars={{ 'color-x': 'sky-500' }}`
+   * emits `--color-x: var(--sky-500)`. The one prop whose declaration *names* come from its value, which is
+   * what makes it the answer for markup this library does not render — a Recharts `<Line>`, a third-party
+   * widget. A colour token becomes the variable behind it, anything else is written out as it stands.
    */
   vars: [
     {
@@ -1612,14 +1586,9 @@ const theme = {
 export const pseudoClasses = { ...pseudo1, ...pseudo2, ...theme };
 
 /**
- * The three of those that are pseudo-*elements* rather than pseudo-classes.
- *
- * They have to come last in a compound selector. A combination is otherwise assembled in the order
- * the keys are declared above, which put `::before` in the middle: `checked: { before: {…} }`
- * generated `::before:checked`, and a selector with a pseudo-element anywhere but the end is
- * invalid, so the browser drops the whole rule rather than the offending part. `:checked::before`
- * is what was meant, and `hover: { before: {…} }` only worked because `hover` happens to be
- * declared first.
+ * The three that are pseudo-*elements*, which have to come last in a compound selector: assembled in
+ * declaration order, `checked: { before: {…} }` produced the invalid `::before:checked` and the browser
+ * dropped the whole rule.
  */
 export const pseudoElements: readonly (keyof typeof pseudo1)[] = ['before', 'after', 'placeholderStyles'];
 
@@ -1681,16 +1650,10 @@ export const breakpoints = {
 };
 
 /**
- * The accessibility preferences a user sets once, in their operating system, as media features you
- * can style against — the same shape as a breakpoint, keyed by preference instead of by width.
- *
- * They rank *after* every breakpoint in the cascade: a preference is a statement about the person
- * reading the page, and a screen wide enough for `xxl` is not a reason to override it.
- *
- * `motionReduce` is the one with a default behind it. The base `._b` rule transitions on
- * `var(--transitionTime)`, and `prefers-reduced-motion: reduce` sets that variable to `0s`, so
- * every Box stops animating without anyone opting in. Declaring `motionReduce={{ … }}` is how you
- * opt back in — or how you replace a movement with something still (see `docs/a11y-testing.md`).
+ * The preferences a user sets once in their OS, shaped exactly like a breakpoint and ranked *after* every
+ * breakpoint: a screen wide enough for `xxl` is not a reason to override a statement about the reader.
+ * `motionReduce` has a default behind it — the base rule transitions on `var(--transitionTime)`, which
+ * `prefers-reduced-motion` zeroes, so declaring it is how you opt back *in*.
  */
 export const mediaFeatures = {
   /** Styles applied when the user asked for less motion. `@media (prefers-reduced-motion: reduce)` */
@@ -1702,8 +1665,8 @@ export const mediaFeatures = {
 };
 
 /**
- * Every key that puts a rule inside an `@media` block, in cascade order, `normal` (no media query
- * at all) first. The engine ranks rules by this and names their cascade layer from it.
+ * Every key that puts a rule in an `@media` block, in cascade order with `normal` (no query) first. The
+ * engine ranks rules by this and names their cascade layer from it.
  */
 export const mediaKeys: readonly string[] = ['normal', ...Object.keys(breakpoints), ...Object.keys(mediaFeatures)];
 

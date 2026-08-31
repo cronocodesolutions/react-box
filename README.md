@@ -588,15 +588,15 @@ React is a thin adapter on top of it:
 
 |                                                            | Files | Lines | Share     |
 | ---------------------------------------------------------- | ----- | ----- | --------- |
-| Core engine (`src/core/`, `core.ts`)                       | 20    | 5,455 | 90.1%     |
-| React binding (`src/react/`, `box.ts`, `rsc.ts`, `ssg.ts`) | 14    | 599   | **9.9%**  |
+| Core engine (`src/core/`, `core.ts`)                       | 20    | 5,208 | 90.2%     |
+| React binding (`src/react/`, `box.ts`, `rsc.ts`, `ssg.ts`) | 14    | 564   | **9.8%**  |
 
 The binding is the whole React-specific surface: resolve class names during render, flush the
 pending rules from `useInsertionEffect`, render the style elements of the Server-Component path,
 and hold the theme state. React feature code the components share sits alongside it and is counted
 separately — three helper hooks (`useVisibility`, `usePortalContainer`, `useVirtualization`), the
 modules behind [`@cronocode/react-box/a11y`](#behaviour-primitives-for-your-own-components), the
-markup the form controls share, and the ARIA the SVG and chart components share, 999 lines together. A Vue adapter would need its own arrow-key navigation for the same reason it
+markup the form controls share, and the ARIA the SVG and chart components share, 911 lines together. A Vue adapter would need its own arrow-key navigation for the same reason it
 would need its own components, which says nothing about how much of the styling engine is
 React-specific.
 

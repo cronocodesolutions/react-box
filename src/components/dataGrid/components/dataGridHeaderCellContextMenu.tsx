@@ -31,11 +31,9 @@ interface Props<TRow> {
 }
 
 /**
- * The column's menu — APG's menu button, on top of `Overlay`.
- *
- * The items are built as data rather than written out as JSX, because the pattern needs them as a
- * list: `useRovingFocus` numbers them for the arrow keys and the typeahead, and which of them exist
- * changes with the column's state. Sections are a rendering detail on top of that one list.
+ * The column's menu — APG's menu button, on top of `Overlay`. The items are data rather than JSX because
+ * the pattern needs them as a list: `useRovingFocus` numbers them for the arrows and the typeahead, and
+ * which exist changes with the column's state. Sections are a rendering detail on top of that list.
  */
 export default function DataGridHeaderCellContextMenu<TRow>(props: Props<TRow>) {
   const { column } = props;

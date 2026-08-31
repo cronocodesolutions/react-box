@@ -1,11 +1,8 @@
 /**
- * Content-addressed identity for generated CSS.
- *
- * The default engine names classes from a counter (`IdentityFactory`), which is perfect while one
- * process owns every render. Element mode breaks that assumption: the same props are resolved in a
- * Server Component, in the client bundle, and in the next request of a long-lived server, and all
- * three have to agree — a `<style href>` React dedupes by, and the class name that rule targets,
- * must be a function of the CSS itself, not of how many rules happened to be generated first.
+ * Content-addressed identity for generated CSS. Naming classes from a counter is perfect while one process
+ * owns every render; element mode resolves the same props in a Server Component, in the client bundle and
+ * in the next request of a long-lived server, and all three have to agree — so the `href` React dedupes by
+ * and the class name its rule targets must be a function of the CSS itself.
  */
 
 /**

@@ -9,24 +9,18 @@ import {
 } from './themeRuntime';
 
 /**
- * Theming with no framework: the state machine `<Box.Theme>` holds in React state, as a plain
- * object a vanilla-DOM app (or any other adapter) can own.
- *
- * The rules it encodes are the ones the React provider follows too — an explicit choice wins over
- * a persisted one, a persisted one wins over the system preference, and the system preference is
- * followed live until something overrides it. What it adds is that the *first* value is already
- * the real one: there is no hydration to stay consistent with, so nothing has to start on
- * `'light'` and correct itself afterwards.
- *
- * Generated theme rules are ancestor-scoped (`.dark .p-4`), so writing the theme name onto an
- * element is all it takes for everything inside to restyle.
+ * Theming with no framework: the state machine `<Box.Theme>` holds in React state, as a plain object any
+ * adapter can own. Same rules as the provider — explicit beats persisted beats the system preference,
+ * which is followed live — with one difference: the *first* value is already the real one, since there is
+ * no hydration to stay consistent with. Theme rules are ancestor-scoped, so writing the name on an
+ * element restyles everything inside it.
  */
 
 export interface ThemeControllerOptions {
   /**
-   * The element that carries the theme name (as a class) and `data-theme`. Defaults to the
-   * document root, which is what `theme={{ dark: ... }}` props expect. Pass an element to theme a
-   * subtree, or `null` to keep the state and write nothing.
+   * The element that carries the theme name (as a class) and `data-theme`. Defaults to the document root,
+   * which is what `theme={{ dark: … }}` props expect; pass an element to theme a subtree, `null` to write
+   * nothing and keep only the state.
    */
   target?: Element | null;
   /** When set, the chosen theme is persisted under this `localStorage` key and restored on start. */

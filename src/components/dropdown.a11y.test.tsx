@@ -7,24 +7,11 @@ import Button from './button';
 import Dropdown from './dropdown';
 
 /**
- * The APG select-only combobox keyboard map, key by key.
- *
+ * The APG select-only combobox keyboard map, key by key — the tests below name what each one does.
  * Pattern: https://www.w3.org/WAI/ARIA/apg/patterns/combobox/
  *
- * | Key                   | Closed                                   | Open                                    |
- * | --------------------- | ---------------------------------------- | --------------------------------------- |
- * | Down / Up             | opens, on the selection or an end         | moves the highlight, wrapping            |
- * | Alt + Down            | opens, moving nothing                     | —                                        |
- * | Alt + Up              | —                                         | chooses the highlight and closes         |
- * | Enter / Space         | opens on the selection                    | chooses the highlight                    |
- * | Home / End            | opens at an end                           | jumps to an end                          |
- * | printable character   | opens at the first match                  | typeahead                                |
- * | Escape                | —                                         | closes, changing nothing                 |
- * | Tab                   | leaves the control                        | chooses the highlight, then leaves       |
- *
- * The assertions are about two things at once: what the *highlight* is, which lives in
- * `aria-activedescendant` because DOM focus never enters the popup, and where DOM focus actually
- * is, which for this pattern is the trigger from the first keystroke to the last.
+ * Two things are asserted at once: the *highlight*, which lives in `aria-activedescendant` because DOM
+ * focus never enters the popup, and DOM focus, which stays on the trigger from first keystroke to last.
  */
 describe('Dropdown accessibility', () => {
   ignoreLogs();
@@ -440,25 +427,11 @@ describe('Dropdown accessibility', () => {
   });
 
   /**
-   * The APG *editable* combobox: the same listbox, reached from a text field instead of a button.
+   * The APG *editable* combobox: the same listbox reached from a text field, so the keys divide differently
+   * (printable ones type, only Down/Up reach the list, Escape closes before it clears).
    *
-   * Pattern: https://www.w3.org/WAI/ARIA/apg/patterns/combobox/
-   *
-   * | Key                 | Closed                              | Open                                   |
-   * | ------------------- | ----------------------------------- | -------------------------------------- |
-   * | printable character | types, and opens on what it matches  | types, filters, highlight goes nowhere |
-   * | Down / Up           | opens at an end or the selection     | moves the highlight                    |
-   * | Alt + Down          | opens, moving nothing                | —                                      |
-   * | Enter               | —                                    | chooses the highlight, if there is one |
-   * | Space               | types a space                        | types a space                          |
-   * | Home / End          | moves the caret                      | moves the caret, highlight back to it  |
-   * | Left / Right        | moves the caret                      | moves the caret, highlight back to it  |
-   * | Escape              | clears the field                     | closes, keeping what was typed         |
-   * | Tab                 | leaves the control                   | chooses the highlight, then leaves     |
-   *
-   * The field is the combobox, so the two things worth asserting are that DOM focus never leaves
-   * it and that `aria-activedescendant` — the *only* thing telling a screen reader where the
-   * arrows are — is on it and points at the right option.
+   * The field *is* the combobox, so what matters is that DOM focus never leaves it and that
+   * `aria-activedescendant` — the only thing telling a screen reader where the arrows are — is on it.
    */
   describe('Keyboard — editable (isSearchable)', () => {
     const renderSearchable = (props?: Omit<Parameters<typeof Dropdown<string>>[0], 'children'>) =>

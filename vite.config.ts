@@ -40,10 +40,8 @@ const extensions = {
   cjs: 'cjs',
 };
 
-// The chunk split is derived from what the entries actually reach — the same walks
-// `npm run check:boundaries` uses, so a new module cannot be forgotten by one and not the other.
-// `src/core.ts` reaches only framework-free modules; `src/rsc.ts` reaches those plus the hook-free
-// React ones; everything else (the flush effect, the theme provider, the shared hooks) is client.
+// The chunk split is derived from what the entries actually reach — the same walks `check:boundaries`
+// uses, so a new module cannot be forgotten by one and not the other.
 const frameworkFree = new Set(coreGraph().modules.keys());
 // The leaves a single component owns — see `componentPrivateModules`.
 const componentPrivate = componentPrivateModules();
@@ -53,19 +51,10 @@ const componentFile = (name: string) => path.resolve(import.meta.dirname, 'src/c
 const serverSafeFiles = new Set(SERVER_SAFE_COMPONENTS.map(componentFile));
 
 /**
- * The pre-built components resolve Box through the package's own name, not `../box.mjs`.
- *
- * A relative import in a published chunk bypasses the `exports` map, so the `react-server`
- * condition never gets a chance to apply and a Server Component importing `Flex` was handed the
- * *client* Box — a module that calls `createContext` at import time, which the server build of
- * React does not export. The build failed with `createContext is not a function`, naming neither
- * the component nor the fix (bug #43).
- *
- * Emitting the package name instead puts the decision back where it belongs: the consumer's
- * bundler resolves it under its own conditions, so the same `flex.mjs` gets the hook-free Box in
- * a server graph and the client Box in a client one. Only the components that can render on a
- * server get this — the rest are pinned to the client graph by their `'use client'` banner, where
- * the relative path is already correct.
+ * The pre-built components resolve Box through the package's own name. A relative import in a published
+ * chunk bypasses the `exports` map, so a Server Component importing `Flex` was handed the *client* Box and
+ * the build failed with `createContext is not a function`, naming neither the component nor the fix (bug
+ * #43). By name, the consumer's own conditions decide — the same `flex.mjs` works in either graph.
  */
 const boxSelfReference = {
   name: 'box-self-reference',
@@ -82,11 +71,9 @@ const boxSelfReference = {
 };
 
 /**
- * `'use client'` on the components — and the entries — that cannot render on a server, so importing
- * one from a Server Component opens a client boundary instead of failing to resolve `useState`. It
- * goes on at render time rather than in the source: a directive in a source file makes rolldown
- * (and every consumer's Rollup) warn about module-level directives on every build, and the sources
- * are also what the demo site and the tests import, where the directive means nothing.
+ * `'use client'` on the components and entries that cannot render on a server, so importing one opens a
+ * client boundary instead of failing to resolve `useState`. Added at render time rather than in the
+ * source, where it would warn on every build and mean nothing to the tests and the demo site.
  */
 const useClientBanner = {
   name: 'use-client-banner',
@@ -124,20 +111,11 @@ export default defineConfig(({ mode }) => {
         preserveEntrySignatures: 'allow-extension',
         output: {
           exports: 'named',
-          // Rolldown ignores `manualChunks` (it is Rollup's option), so the split is declared here.
-          // Three groups, each answering a constraint an entry has:
-          //   engine       — src/core/**, framework-free. The `/core` entry imports this and
-          //                  nothing else, so a consumer with no React bundles no React.
-          //   react-shared — the hook-free React modules both Boxes use (prop assembly, the
-          //                  element-mode resolve) and the ones only a server-safe component
-          //                  reaches. Server-safe, so the `react-server` entry and those
-          //                  components may import it, but it does name `react` — hence not part
-          //                  of `engine`.
-          //   client       — hooks, effects, the theme provider. Under the `react-server`
-          //                  condition `react` exports no `useState` and no effects at all, so a
-          //                  chunk naming them would not even resolve for a consumer bundling a
-          //                  Server Component. Nothing `src/rsc.ts` reaches may land here.
-          // Everything else is left to rolldown, which already gives each component its own chunk.
+          // Rolldown ignores `manualChunks`, so the split is declared here. Three groups, each answering a
+          // constraint: `engine` is framework-free (the `/core` entry imports it and nothing else); `react-shared`
+          // is the hook-free React modules both Boxes use, server-safe but naming `react`; `client` is hooks and
+          // effects, which under the `react-server` condition would not even resolve. Everything else is
+          // rolldown’s to place, and it already gives each component its own chunk.
           codeSplitting: {
             // Each module lands where the group says and nowhere else; without this a group also
             // swallows everything its modules import, which is how the core engine ended up inside
@@ -155,39 +133,29 @@ export default defineConfig(({ mode }) => {
                   // Component entries keep the chunks rolldown gives them, one per component.
                   if (module.startsWith('src/components/')) return null;
 
-                  // Two leaves that several groups need. Pulled out rather than left to fall into
-                  // `engine` (framework-free, which is where the environment helpers would land)
-                  // or `client`, because a module can only live in one chunk and both of those are
-                  // large: `behavior` would import the whole engine to ask whether there is a
-                  // `document`. `platform` must stay React-free — the `/core` entry reaches it —
-                  // which is why the React effect helpers are a second group rather than the same.
+                  // Two leaves several groups need, pulled out rather than left to fall into `engine` or `client`: a module
+                  // lives in one chunk, so `behavior` would otherwise import the whole engine to ask for a `document`.
+                  // `platform` must stay React-free — the `/core` entry reaches it — hence the effect helpers are separate.
                   if (module.startsWith('src/utils/environment/') || module.startsWith('src/utils/dom/')) return 'platform';
                   if (module === 'src/react/effects.ts') return 'effects';
 
-                  // A leaf only one component reaches goes in that component's own chunk. Every
-                  // group below is shared with something everybody imports, so a private leaf that
-                  // lands in one is paid for by consumers who cannot reach it: the sparkline
-                  // geometry in `react-shared` cost `box.mjs`, `rsc.mjs` and the DataGrid ~0.9 KB gz
-                  // each. Rolldown inlines what it is not told to group, which is what `null` asks
-                  // for here.
+                  // A leaf only one component reaches goes in that component's own chunk: every group below is shared with
+                  // something everybody imports, so a private leaf in one is paid for by consumers who cannot reach it.
+                  // Rolldown inlines what it is not told to group, which is what `null` asks for.
                   if (componentPrivate.has(module)) return null;
 
-                  // The markup the form controls share. Server-safe — `RadioButton` reaches it —
-                  // but not part of `react-shared`, because it is the one shared module that
-                  // imports a *component* entry (`Flex`). In `react-shared` that edge is a cycle:
-                  // the server-safe components import that chunk, so the chunk importing one of
-                  // them back left `semantics.mjs` reading `StringUtils` before it was defined,
-                  // and would have put a component in the `react-server` entry's own graph.
+                  // The markup the form controls share. Server-safe, but not part of `react-shared`: it is the one shared
+                  // module that imports a *component* entry (`Flex`), and in `react-shared` that edge is a cycle — it left
+                  // `semantics.mjs` reading `StringUtils` before it was defined.
                   if (module.startsWith('src/react/forms/')) return 'forms';
 
                   // 'engine', not 'core': `core` is an entry name now (src/core.ts), and a chunk
                   // sharing it would fight the entry for `core.mjs`.
                   if (frameworkFree.has(module)) return 'engine';
 
-                  // The behaviour primitives reach nothing but React and each other. Left in the
-                  // `client` group they would be correct and useless: `@cronocode/react-box/a11y`
-                  // would import the chunk holding the styling binding and the theme provider, so
-                  // a consumer who wanted `useDismiss` alone would bundle the whole engine with it.
+                  // The behaviour primitives reach nothing but React and each other. In `client` they would be correct and
+                  // useless: `/a11y` would import the styling binding and the theme provider, so anyone wanting
+                  // `useDismiss` alone would bundle the engine with it.
                   if (module.startsWith('src/react/a11y/')) return 'behavior';
 
                   return serverSafe.has(module) ? 'react-shared' : 'client';
@@ -202,10 +170,9 @@ export default defineConfig(({ mode }) => {
     test: {
       environment: 'happy-dom',
       globals: true,
-      // Vitest's 5s default is not enough head-room for the heaviest renders in this suite when the
-      // workers are all busy: the DataGrid a11y tests build a virtualized grid and walk its whole
-      // role tree, and one of them timed out at 5.4s in a full run on a loaded machine while
-      // passing in 4s for the entire file on its own. A hung test still fails, just later.
+      // Vitest's 5s default has no head-room for the heaviest renders here: the DataGrid a11y tests build a
+      // virtualized grid and walk its whole role tree, and one timed out at 5.4s on a loaded machine while
+      // passing in 4s alone. A hung test still fails, just later.
       testTimeout: 15_000,
       setupFiles: ['./dev/vitest.setup.ts'],
       coverage: {

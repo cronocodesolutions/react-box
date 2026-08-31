@@ -28,13 +28,10 @@ export interface Keyboard {
 }
 
 /**
- * A keyboard driving the document, for tests that have to prove a pattern works without a mouse.
- *
- * Over `fireEvent`, which dispatches a `keydown` and stops: this moves DOM focus, respects
- * `tabindex` and `disabled`, and fires the whole `keydown`/`keypress`/`keyup` sequence a real key
- * produces — so a test can assert *where focus went*, which is most of what APG specifies.
- *
- * Call it before `render`: user-event installs its own document listeners at setup time.
+ * A keyboard driving the document, for tests that have to prove a pattern works without a mouse. Over
+ * `fireEvent`, which dispatches a `keydown` and stops: this moves DOM focus, respects `tabindex` and
+ * `disabled`, and fires the whole key sequence, so a test can assert *where focus went*. Call it before
+ * `render` — user-event installs its listeners at setup time.
  */
 export function keyboard(): Keyboard {
   const user = userEvent.setup();

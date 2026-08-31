@@ -348,38 +348,26 @@ namespace Variables {
   export const percentString = '' as PercentString;
 
   /**
-   * A value CSS resolves for itself, rather than one of this library's tokens: a document reference
-   * (`url(#sky)` — a gradient, a pattern or a clip path defined elsewhere in the same document) or a
-   * custom property (`var(--chart-1)`).
-   *
-   * SVG paint is the reason it exists. `fill` and `stroke` take a colour token, but a chart fills a
-   * bar from a `<LinearGradient>` and a themed series reads its colour from a variable somebody else
-   * declared — neither of which is a name this library can enumerate. Written as an attribute
-   * (`props={{ fill: 'url(#sky)' }}`) the paint leaves the prop system altogether: no theme, no
-   * breakpoint, no `hover`. As a value it keeps all three.
+   * A value CSS resolves for itself rather than one of this library's tokens: `url(#sky)` for a gradient,
+   * pattern or clip path, `var(--chart-1)` for somebody else's variable. SVG paint is the reason it exists
+   * — written as an attribute the paint would leave the prop system, losing theme, breakpoint and `hover`.
    */
   export type Reference = `url(#${string})` | `var(--${string})`;
   export const reference = '' as Reference;
 
   /**
-   * Whether a value is one of those two forms. A definition declaring `values: reference` matches
-   * *any* string as far as the engine's `typeof` test can tell — the flaw that makes `percentString`
-   * an unvalidated catch-all — so the definition carries this as its `match`, and a typo produces no
-   * rule at all instead of a broken declaration.
-   *
-   * Deliberately strict: one balanced reference and nothing else. No whitespace (a class attribute
-   * splits on it), no nesting, and no second value, so `fill` cannot smuggle in a whole shorthand.
+   * Whether a value is one of those two forms, as the definition's `match`: `typeof` alone cannot tell
+   * `url(#sky)` from a typo. Deliberately strict — one balanced reference, no whitespace (a class
+   * attribute splits on it), no nesting, so `fill` cannot smuggle in a whole shorthand.
    */
   export function isReference(value: unknown): value is Reference {
     return typeof value === 'string' && /^(url\(#[^\s()]+\)|var\(--[^\s()]+\))$/.test(value);
   }
 
   /**
-   * A value for a custom property declared through the `vars` prop: one of this library's colour
-   * tokens (resolved to the variable behind it, so it follows the palette), a `url()`/`var()`
-   * reference, or any CSS value written out — a length, a number, a colour of your own. The token
-   * union comes first so autocomplete still lists the palette, and `string` is intersected with an
-   * empty object so it cannot swallow the literals.
+   * A value for a custom property: a colour token (resolved to the variable behind it), a `url()`/`var()`
+   * reference, or any CSS value written out. `string` is intersected with an empty object so the token
+   * union it follows still reaches autocomplete.
    */
   export type CustomPropertyValue = ColorType | Reference | number | (string & NonNullable<unknown>);
 
@@ -391,12 +379,9 @@ namespace Variables {
   const customPropertyName = /^(--)?[A-Za-z_][\w-]*$/;
 
   /**
-   * Whether one entry of a `vars` record can be written into a rule.
-   *
-   * `vars` is the one prop whose declarations are built from its value, so this is the only thing
-   * standing between a prop value and the text of a rule: a name that is not a CSS identifier, or a
-   * value carrying `;` or a brace, would end the declaration early and let the rest of the string be
-   * read as CSS of its own.
+   * Whether one entry of a `vars` record can be written into a rule — the only thing standing between a
+   * prop value and the text of a rule: a name that is not a CSS identifier, or a value carrying `;` or a
+   * brace, would end the declaration early and let the rest be read as CSS.
    */
   function isUsableEntry([name, entry]: [string, unknown]): boolean {
     if (!customPropertyName.test(name)) return false;
@@ -407,13 +392,9 @@ namespace Variables {
   }
 
   /**
-   * Whether a value is a usable set of custom-property declarations: an object with at least one
-   * entry this library is willing to write out.
-   *
-   * Judged entry by entry rather than as a whole, because a record *is* many independent
-   * declarations. One unusable name — a chart series called `user.name`, say — costs that one
-   * variable instead of taking the other five down with it, and a value nothing can be made of
-   * produces no rule and no class name, as for every other `match`.
+   * Whether a value is a usable set of declarations: an object with at least one entry worth writing.
+   * Judged entry by entry because a record *is* many independent declarations — one unusable name (a
+   * series called `user.name`) costs that variable rather than the other five.
    */
   export function isCustomProperties(value: unknown): value is CustomProperties {
     if (typeof value !== 'object' || value === null || Array.isArray(value)) return false;
@@ -422,13 +403,9 @@ namespace Variables {
   }
 
   /**
-   * Those declarations as the body of a rule: `--color-x:var(--sky-500);--gap:4px`.
-   *
-   * A colour token becomes the variable behind it, so a `vars` value follows the palette and the
-   * theme exactly as `bgColor` does; anything else is written out as it stands, because a custom
-   * property has no type this library could format for. Declared in the order they were written, the
-   * same order the class name is built from — and order carries no meaning to CSS anyway: a custom
-   * property can reference one declared after it.
+   * Those declarations as the body of a rule: `--color-x:var(--sky-500);--gap:4px`. A colour token becomes
+   * the variable behind it, so the value follows the palette; anything else is written out as it stands,
+   * in the order it was written — order carries no meaning to CSS anyway.
    */
   export function customProperties(value: CustomProperties, getVariableValue: (name: string) => string): string {
     return Object.entries(value)
@@ -460,9 +437,8 @@ namespace Variables {
     /** Whether `name` was declared through `Box.extend({ variables })`. */
     isUserVariable(name: string): boolean;
     /**
-     * Forget which variables have been used, so the next `:root` block is built from scratch.
-     * Variables declared through `Box.extend({ variables })` are registration, not per-render
-     * state, and survive.
+     * Forget which variables have been used, so the next `:root` block is built from scratch. Variables from
+     * `Box.extend({ variables })` are registration rather than per-render state, and survive.
      */
     reset(): void;
     /** Add user variables. Merged into the ones already declared, so sequential `extend()` calls accumulate. */
@@ -470,8 +446,8 @@ namespace Variables {
   }
 
   /**
-   * Per-engine variable state. Kept out of module scope so two engines (iframes, shadow roots,
-   * parallel SSR requests) never share a `:root` block or a pending queue.
+   * Per-engine variable state, kept out of module scope so two engines (iframes, shadow roots, parallel
+   * SSR requests) never share a `:root` block or a pending queue.
    */
   export function createRegistry(): VariablesRegistry {
     const _usedVariables: Record<string, string> = {};

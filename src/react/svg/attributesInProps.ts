@@ -1,17 +1,9 @@
 /**
- * Where a component keeps its DOM attributes — and how a component that hands attributes to
- * somebody else's element finds out.
- *
- * Two conventions meet here. Every icon set in the ecosystem spreads its props onto the element it
- * renders, so `<Sun role="img" />` reaches the `<svg>`; this library does the opposite on purpose
- * (convention #9), keeping attributes in a `props` bag so the top level can be all style props.
- * `Icon` speaks the first dialect, because that is what an icon set answers to — which meant that
- * an `<Icon label="Sort">` around one of *our* components handed `role`/`aria-label` to a Box as
- * top-level props, where they were dropped: an unnamed, `aria-hidden` icon, and no error anywhere
- * (bug #78).
- *
- * So the components that take the second route say so, and the adapter asks. It is one bit rather
- * than a list of component names, so a component added later is covered by marking itself.
+ * Where a component keeps its DOM attributes, and how a component handing them to somebody else’s element
+ * finds out. Every icon set spreads its props onto the element it renders; this library keeps them in a
+ * `props` bag. `Icon` speaks the first dialect, so an `<Icon label="Sort">` around one of *our* components
+ * handed `role` to a Box at the top level, where it was dropped — an unnamed icon, no error (bug #78). One
+ * bit rather than a list of names, so a component added later is covered by marking itself.
  */
 const MARKER = '__boxAttributesInProps';
 

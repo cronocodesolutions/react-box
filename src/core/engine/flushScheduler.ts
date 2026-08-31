@@ -1,27 +1,9 @@
 /**
- * *When* pending rules reach the sink.
- *
- * The engine resolves class names during render and queues the rules those names need; the moment
- * the queue is drained is framework policy, not engine logic. So the engine only ever says that
- * something is pending (`scheduleFlush()`) and a `FlushScheduler` decides when `flush` runs — the
- * last piece of the pipeline that used to be React's alone.
- *
- * What a scheduler has to honour:
- * - run `flush` before the browser paints the markup those rules describe (unstyled paint is the
- *   failure mode), and before anything reads layout from it;
- * - running it synchronously is always correct — coalescing is an optimization, not a requirement.
- *
- * The adapters:
- * - **React** (`useStyles`): flushes synchronously from `useInsertionEffect`, React's own
- *   recommendation for injecting CSS-in-JS. Insertion effects run during the commit, ahead of
- *   every layout effect, so the scheduled microtask is only a safety net for rules queued outside
- *   a commit.
- * - **Vanilla DOM / anything without a commit phase**: the default microtask scheduler is enough —
- *   `el.className = ...` cannot be painted before the microtask queue drains.
- * - **Vue**: `syncScheduler`. There is no concurrent rendering to interleave with, so flushing
- *   inside `setup()`/`computed` is safe and needs no queue at all.
- * - **Server rendering**: no scheduler runs in time; `getStyles()` flushes itself (see `ssg.ts`).
- * - **Tests, or a caller that wants full control**: `manualScheduler` plus `flushSync()`.
+ * *When* pending rules reach the sink. The engine only says that something is pending; the moment the queue
+ * drains is framework policy, so a `FlushScheduler` decides it — before the browser paints the markup
+ * those rules describe, and synchronously is always correct. React flushes from `useInsertionEffect`
+ * (ahead of every layout effect, so the microtask default is only a safety net), Vue uses `syncScheduler`,
+ * a server runs none at all (`getStyles()` flushes itself), and tests use `manualScheduler`.
  */
 export type FlushScheduler = (flush: () => void) => void;
 
@@ -35,9 +17,8 @@ export const syncScheduler: FlushScheduler = (flush) => flush();
 export const manualScheduler: FlushScheduler = () => {};
 
 /**
- * Coalescing wrapper around a scheduler: any number of `scheduleFlush()` calls in one turn produce
- * a single `flush`. The latch is released by the scheduled flush itself, so an explicit
- * `flushSync()` in between costs at most one extra flush that finds nothing to do.
+ * Coalescing wrapper: any number of `scheduleFlush()` calls in one turn produce a single `flush`. The
+ * scheduled flush releases the latch, so a `flushSync()` in between costs one flush that finds nothing.
  */
 export function createFlushCoordinator(flush: () => void, schedule: FlushScheduler): () => void {
   let scheduled = false;

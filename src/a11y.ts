@@ -1,19 +1,8 @@
 /**
- * `@cronocode/react-box/a11y` — the behaviour primitives the accessible components are built from.
- *
- * Every APG pattern needs the same four mechanics: return focus to whatever opened a layer, move
- * through a list with the arrow keys, close on Escape or a press outside, and hold a value the
- * consumer may or may not own. Getting those right is most of the work in an accessible component
- * and none of it is visible in the markup, which is why they live here as one tested
- * implementation instead of once per component.
- *
- * They are shipped rather than hidden because the components in this library will never cover
- * every pattern an application needs — a consumer building their own tree view or split button
- * should not have to reimplement the mechanics to make it behave like the ones we ship.
- *
- * These are client hooks: the entry carries a `'use client'` banner, so importing it from a Server
- * Component opens a client boundary. `VisuallyHidden` is a component rather than a hook and ships
- * as `@cronocode/react-box/components/visuallyHidden`, where it can still render on a server.
+ * `@cronocode/react-box/a11y` — the behaviour primitives the accessible components are built from. Every
+ * APG pattern needs the same four mechanics (return focus, move through a list, dismiss, hold a value the
+ * consumer may own), none of them visible in the markup, so they live here once and are published because
+ * this library will never cover every pattern. Client hooks: the entry carries a `'use client'` banner.
  */
 export { default as useControllableState } from './react/a11y/useControllableState';
 export type { ChangeDetails, ChangeHandler, ControllableStateOptions, SetControllableState } from './react/a11y/useControllableState';

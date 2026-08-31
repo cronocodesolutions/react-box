@@ -9,30 +9,20 @@ import { ElementLike, htmlElementOf } from '../utils/dom/domUtils';
 const positionDigitsAfterComma = 2;
 
 /**
- * A floating layer, rendered into the portal container at the place it is declared.
- *
- * This is the positioning half of every popup in the library, and nothing else: it measures where
- * it sits in the layout, then renders its children into `#crono-box` translated to that spot, so
- * they escape `overflow: hidden`, clipped ancestors and stacking contexts. It owns no open state,
- * no ARIA and no dismissal — a layer is not a pattern, and the components built on it (`Tooltip`,
- * `Dropdown`, the DataGrid menu) each need a different one.
- *
- * This component was called `Tooltip` until A3, which is the one thing it is not: the APG tooltip
- * is a described-by popup with a trigger, a delay and an Escape key, and that pattern now owns the
- * name. Code that used the old component only to escape an overflow is this component, unchanged.
+ * A floating layer, rendered into the portal container at the place it is declared: it measures where it
+ * sits, then renders its children into `#crono-box` translated to that spot, so they escape
+ * `overflow: hidden` and every clipped ancestor. It owns no open state, no ARIA and no dismissal — a
+ * layer is not a pattern, and `Tooltip`, `Dropdown` and the DataGrid menu each need a different one.
+ * (This was called `Tooltip` until A3, which is the one thing it is not.)
  */
 interface OverlayProps {
   onPositionChange?(position: { top: number; left: number; windowScrollX: number; windowScrollY: number }): void;
   adjustTranslateX?: string;
   adjustTranslateY?: string;
   /**
-   * Measure this element instead of the layer's own placeholder.
-   *
-   * Without it the layer measures an empty `<div>` rendered where the component sits, which is
-   * exactly right when the caller chose that spot — and wrong when the layer belongs to an element
-   * next to it. The placeholder is a real box in the layout: inside a flex row it becomes a flex
-   * item, so opening the layer shifts everything after it by one `gap` and the layer lands *beside*
-   * the thing it describes rather than under it. Pass the element and neither happens.
+   * Measure this element instead of the layer's own placeholder — right when the layer belongs to an element
+   * next to it rather than to the spot it was declared in. The placeholder is a real box: inside a flex row
+   * it becomes a flex item, so opening the layer shifts everything after it by one `gap`.
    */
   anchor?: ElementLike;
   /** Which edge of the anchor the layer starts from. Default `'top'`. */
