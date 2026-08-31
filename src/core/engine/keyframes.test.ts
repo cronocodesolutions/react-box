@@ -61,6 +61,21 @@ describe('keyframes', () => {
     );
   });
 
+  /**
+   * Without the registration the two axes are universal-syntax custom properties, which animate
+   * *discretely*: the DataGrid's bar stayed at -100% for its whole cycle and jumped to 250% at the end.
+   * A transition works either way — it reads the substituted `translate` — so only an animation catches it.
+   */
+  it('registers the translate axes, so a sequence moving them interpolates', () => {
+    const engine = makeEngine('keyframes-property');
+
+    renderStyles(engine, { animation: 'bounce' });
+
+    const css = rulesOf(engine);
+    expect(css).toContain('@property --boxTranslateX{syntax: "<length-percentage>";inherits: false;initial-value: 0;}');
+    expect(css).toContain('@property --boxTranslateY{syntax: "<length-percentage>";inherits: false;initial-value: 0;}');
+  });
+
   it('emits no sequence for a name it does not know, and keeps the rule', () => {
     const engine = makeEngine('keyframes-unknown');
 

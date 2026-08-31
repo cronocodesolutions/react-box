@@ -617,6 +617,11 @@ export function createStyleEngine(options: StyleEngineOptions = {}): StyleEngine
       // Every Box transitions on these two, so zeroing them is the whole reduced-motion default. A component
       // that still wants movement declares it under `motionReduce`, later in the cascade.
       `@media (prefers-reduced-motion: reduce){:root{--transitionTime: 0s;--svgTransitionTime: 0s;}}`,
+      // The two axes `translate` is composed from. Registering them is what makes them *interpolable*: a
+      // transition reads the substituted `translate` and works either way, but inside `@keyframes` an
+      // unregistered custom property animates discretely — the loading bar sat at -100% and teleported.
+      `@property --boxTranslateX{syntax: "<length-percentage>";inherits: false;initial-value: 0;}`,
+      `@property --boxTranslateY{syntax: "<length-percentage>";inherits: false;initial-value: 0;}`,
       `#crono-box {position: absolute;top: 0;left: 0;height: 0;z-index:99999;}`,
       `html{font-size: 16px;font-family: Arial, sans-serif;}`,
       `body{margin: 0;line-height: var(--lineHeight);font-size: var(--fontSize);}`,

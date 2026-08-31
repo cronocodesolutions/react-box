@@ -114,7 +114,8 @@ own reduced motion: add `motionReduce={{ animationName: 'none' }}`. `transition`
 `Box.keyframes({ 'slide-in': { from: { opacity: 0, translateY: 3 }, to: { opacity: 1, translateY: 0 } } })`, stops keyed `'from'`/`'to'`/`'50%'`
 — written into the stylesheet the first time a rule names one, and exactly once, so an unused sequence costs nothing; it reaches
 `getStyles()` and element mode, so a Server Component animates with no client JS. **Transforms compose**: `translateX`/`translateY` (÷4,
-fractions, percentages) both feed one `translate` and still transition, `rotate={45}` (degrees) and `scale={1.05}` (unitless) are their own
+fractions, percentages) both feed one `translate` and still transition _and_ animate (the base stylesheet registers both axes with
+`@property`, or a keyframe moving them would jump), `rotate={45}` (degrees) and `scale={1.05}` (unitless) are their own
 properties — only `flip` and `scale` collide, both writing `scale`. `Box.configure({ transition: 'colors' | false })` changes what the base
 class transitions, before the first render.
 

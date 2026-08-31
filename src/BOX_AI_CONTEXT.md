@@ -269,8 +269,10 @@ Box.keyframes({
   whatever a preset chose.
 - **The transform props are CSS longhands, not one `transform` declaration.** `translateX` and
   `translateY` each set a custom property and both compose into one `translate`, which still
-  transitions (a `var()` is substituted before the browser compares the two states). `rotate` and
-  `scale` are their own properties too. The one collision left: `flip` and `scale` both write `scale`.
+  transitions (a `var()` is substituted before the browser compares the two states) and still
+  animates (the base stylesheet registers both axes with `@property`, without which a keyframe
+  moving them would jump rather than interpolate). `rotate` and `scale` are their own properties
+  too. The one collision left: `flip` and `scale` both write `scale`.
 - **`Box.configure({ transition })`** changes what the base class transitions for the whole engine:
   a group name, or `false` to declare nothing at all and leave transitions entirely to the props.
   Call it before the first render.

@@ -139,8 +139,11 @@ describe('SSR round-trip', () => {
       render(element);
       const sheet = (document.getElementById(DEFAULT_STYLE_ELEMENT_ID) as unknown as HTMLStyleElement | null)?.sheet;
       // A stylesheet re-serializes what it is given, so the comparison is selector by selector,
-      // in order — the part that decides which declaration wins.
-      const selectorsIn = (rules: string[]) => rules.map((rule) => rule.slice(0, rule.indexOf('{')).replace(/\s+/g, ' ').trim());
+      // in order — the part that decides which declaration wins. `@property` is dropped from both
+      // sides: it registers a custom property rather than competing for one, and happy-dom's parser
+      // rejects it outright, so a live sheet never holds it.
+      const selectorsIn = (rules: string[]) =>
+        rules.filter((rule) => !rule.startsWith('@property')).map((rule) => rule.slice(0, rule.indexOf('{')).replace(/\s+/g, ' ').trim());
 
       expect(selectorsIn([...(sheet?.cssRules ?? [])].map((rule) => rule.cssText))).toEqual(selectorsIn(splitRules(server.styles)));
     } finally {
