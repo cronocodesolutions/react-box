@@ -56,7 +56,7 @@ export const siteRoutes = [
   {
     path: '/box',
     name: 'Box',
-    description: 'The foundational component: 138 CSS properties as type-safe props, with the numeric formatters explained.',
+    description: 'The foundational component: 139 CSS properties as type-safe props, with the numeric formatters explained.',
   },
   {
     path: '/svg',
@@ -74,7 +74,7 @@ export const siteRoutes = [
     path: '/charts',
     name: 'Charts',
     description:
-      'Sparklines, progress rings, gauges and mini donuts as Boxes — no chart library, and cheap enough for one in every row of a 10,000-row grid.',
+      'Sparklines, progress rings, gauges and mini donuts as Boxes — no chart library — plus the container that themes a Recharts chart with the variables it reads.',
   },
   {
     path: '/button',

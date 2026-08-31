@@ -1,6 +1,7 @@
 /**
- * The geometry behind the chart primitives — every number a `<Sparkline>`, `<ProgressRing>`,
- * `<Gauge>` or `<MiniDonut>` draws with, and no React at all.
+ * The model behind the chart primitives — every number a `<Sparkline>`, `<ProgressRing>`, `<Gauge>`
+ * or `<MiniDonut>` draws with, the palette a `<ChartContainer>` hands to whatever draws inside it,
+ * and no React at all.
  *
  * The components render; the arithmetic lives here (the standing rule for this codebase), which is
  * also what makes it testable without a DOM: a path string is a value, so a wrong one is obvious in
@@ -215,6 +216,49 @@ namespace ChartUtils {
 
       return { strokeDasharray: `${run} ${round(length - run)}`, rotate, value, index };
     });
+  }
+
+  /**
+   * The colours a chart uses when nobody names any: `--chart-1` … `--chart-6`, and the same six one
+   * step lighter for a dark background.
+   *
+   * Tokens rather than raw colours, so they resolve through this library's palette and replacing one
+   * is replacing a Box value. Six, because that is as many series as a dashboard tile can be told
+   * apart in — a seventh wraps round to the first, which is more honest than an invented colour.
+   */
+  export const PALETTE = ['sky-500', 'emerald-500', 'amber-500', 'violet-500', 'rose-500', 'cyan-500'] as const;
+
+  /** The same six for a dark background, where a 500 reads as muddy against near-black. */
+  export const DARK_PALETTE = ['sky-400', 'emerald-400', 'amber-400', 'violet-400', 'rose-400', 'cyan-400'] as const;
+
+  /** The numbered palette as custom properties: `{ 'chart-1': 'sky-500', … }`. */
+  export function paletteVariables(palette: readonly string[]): Record<string, string> {
+    return palette.reduce<Record<string, string>>((acc, colour, index) => {
+      acc[`chart-${index + 1}`] = colour;
+
+      return acc;
+    }, {});
+  }
+
+  /**
+   * The variables a chart's series read, by the name the ecosystem already uses for them:
+   * `{ 'color-revenue': 'var(--chart-1)' }`.
+   *
+   * A list of names takes the numbered palette in order, which is the whole case for the container —
+   * a chart written with `stroke="var(--color-revenue)"` names no colour at all, so its dark mode is
+   * a property of the page rather than of the chart. A record names its own paint per series, for
+   * the series a brand insists on.
+   */
+  export function seriesVariables(series: readonly string[] | Readonly<Record<string, string>>, slots: number = PALETTE.length) {
+    const entries: readonly (readonly [string, string])[] = Array.isArray(series)
+      ? series.map((name, index) => [name, `var(--chart-${(index % slots) + 1})`] as const)
+      : Object.entries(series as Record<string, string>);
+
+    return entries.reduce<Record<string, string>>((acc, [name, paint]) => {
+      acc[`color-${name}`] = paint;
+
+      return acc;
+    }, {});
   }
 }
 

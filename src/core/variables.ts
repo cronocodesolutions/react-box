@@ -374,6 +374,73 @@ namespace Variables {
     return typeof value === 'string' && /^(url\(#[^\s()]+\)|var\(--[^\s()]+\))$/.test(value);
   }
 
+  /**
+   * A value for a custom property declared through the `vars` prop: one of this library's colour
+   * tokens (resolved to the variable behind it, so it follows the palette), a `url()`/`var()`
+   * reference, or any CSS value written out — a length, a number, a colour of your own. The token
+   * union comes first so autocomplete still lists the palette, and `string` is intersected with an
+   * empty object so it cannot swallow the literals.
+   */
+  export type CustomPropertyValue = ColorType | Reference | number | (string & NonNullable<unknown>);
+
+  /** The `vars` prop's value: custom-property names, with or without their leading `--`, to values. */
+  export type CustomProperties = Readonly<Record<string, CustomPropertyValue>>;
+
+  // A custom-property name: a CSS identifier, with the `--` optional because both spellings are in
+  // this library's API already (`Box.extend({ variables })` takes bare names, `var(--x)` does not).
+  const customPropertyName = /^(--)?[A-Za-z_][\w-]*$/;
+
+  /**
+   * Whether one entry of a `vars` record can be written into a rule.
+   *
+   * `vars` is the one prop whose declarations are built from its value, so this is the only thing
+   * standing between a prop value and the text of a rule: a name that is not a CSS identifier, or a
+   * value carrying `;` or a brace, would end the declaration early and let the rest of the string be
+   * read as CSS of its own.
+   */
+  function isUsableEntry([name, entry]: [string, unknown]): boolean {
+    if (!customPropertyName.test(name)) return false;
+
+    return typeof entry === 'number'
+      ? Number.isFinite(entry)
+      : typeof entry === 'string' && entry.trim().length > 0 && !/[;{}]/.test(entry);
+  }
+
+  /**
+   * Whether a value is a usable set of custom-property declarations: an object with at least one
+   * entry this library is willing to write out.
+   *
+   * Judged entry by entry rather than as a whole, because a record *is* many independent
+   * declarations. One unusable name — a chart series called `user.name`, say — costs that one
+   * variable instead of taking the other five down with it, and a value nothing can be made of
+   * produces no rule and no class name, as for every other `match`.
+   */
+  export function isCustomProperties(value: unknown): value is CustomProperties {
+    if (typeof value !== 'object' || value === null || Array.isArray(value)) return false;
+
+    return Object.entries(value).some(isUsableEntry);
+  }
+
+  /**
+   * Those declarations as the body of a rule: `--color-x:var(--sky-500);--gap:4px`.
+   *
+   * A colour token becomes the variable behind it, so a `vars` value follows the palette and the
+   * theme exactly as `bgColor` does; anything else is written out as it stands, because a custom
+   * property has no type this library could format for. Declared in the order they were written, the
+   * same order the class name is built from — and order carries no meaning to CSS anyway: a custom
+   * property can reference one declared after it.
+   */
+  export function customProperties(value: CustomProperties, getVariableValue: (name: string) => string): string {
+    return Object.entries(value)
+      .filter(isUsableEntry)
+      .map(([name, entry]) => {
+        const resolved = typeof entry === 'string' && entry in colors ? getVariableValue(entry) : entry;
+
+        return `--${name.replace(/^--/, '')}:${resolved}`;
+      })
+      .join(';');
+  }
+
   const rootVariables = {
     inherit: 'inherit',
     none: 'none',

@@ -1,6 +1,9 @@
-import { forwardRef, Ref } from 'react';
-import { BoxStyleProps } from '../types';
+import { forwardRef, Ref, RefAttributes } from 'react';
+import Box, { BoxProps } from '../box';
+import { ExtractElementFromTag } from '../react/reactTypes';
+import { BoxStyleProps, ComponentsAndVariants } from '../types';
 import ChartUtils from '../utils/chart/chartUtils';
+import ObjectUtils from '../utils/object/objectUtils';
 import { Circle, Path, Svg, SvgProps } from './svg';
 
 /**
@@ -42,11 +45,13 @@ const VIEW_BOX = `0 0 ${ChartUtils.VIEW} ${ChartUtils.VIEW}`;
 type Paint = NonNullable<BoxStyleProps['fill']>;
 
 /**
- * The colours a `<MiniDonut>` cycles through when it is not given any. Tokens rather than
- * `var(--chart-n)`, so a donut draws something the moment it is rendered; a themed chart passes its
- * own — `colors={['var(--chart-1)', 'var(--chart-2)']}` works because `fill` takes a variable.
+ * The colours a `<MiniDonut>` cycles through when it is not given any — the same six a
+ * `<ChartContainer>` declares as `--chart-1` … `--chart-6`, so a donut inside one matches the charts
+ * beside it. Tokens rather than `var(--chart-n)`, so a donut draws something the moment it is
+ * rendered with no container above it; a themed one passes its own — `colors={['var(--color-cost)']}`
+ * works because `fill` takes a variable.
  */
-const DEFAULT_COLORS: readonly Paint[] = ['sky-500', 'emerald-500', 'amber-500', 'violet-500', 'rose-500', 'cyan-500'];
+const DEFAULT_COLORS: readonly Paint[] = ChartUtils.PALETTE;
 
 export interface SparklineProps extends ChartProps {
   /** The numbers to draw, oldest first. */
@@ -225,3 +230,72 @@ function MiniDonutImpl(props: MiniDonutProps, ref: Ref<SVGSVGElement>) {
 /** A ring divided into one segment per value — a pie chart with its middle left for a number. */
 export const MiniDonut = /* @__PURE__ */ forwardRef(MiniDonutImpl);
 MiniDonut.displayName = 'MiniDonut';
+
+/**
+ * The series a `<ChartContainer>` draws. A list of names takes the numbered palette in order —
+ * `series={['revenue', 'cost']}` declares `--color-revenue: var(--chart-1)` and `--color-cost:
+ * var(--chart-2)` — and a record names its own paint per series: `series={{ revenue: 'emerald-600' }}`.
+ *
+ * A name becomes part of a custom-property name, so it has to be a CSS identifier. A Recharts
+ * `dataKey` normally is (`revenue`, `new_users`); one that is not — a dot path like `user.name` — is
+ * skipped rather than taking the rest of the palette down with it.
+ */
+export type ChartSeries = readonly string[] | Readonly<Record<string, Paint>>;
+
+export interface ChartContainerProps<
+  TTag extends keyof React.JSX.IntrinsicElements = 'div',
+  TKey extends keyof ComponentsAndVariants = never,
+> extends BoxProps<TTag, TKey> {
+  /** The series drawn inside, and what colour each of them is. */
+  series?: ChartSeries;
+}
+
+function ChartContainerImpl<TTag extends keyof React.JSX.IntrinsicElements = 'div'>(
+  props: ChartContainerProps<TTag>,
+  ref: Ref<ExtractElementFromTag<TTag>>,
+) {
+  const { series, vars, theme, ...boxProps } = props;
+
+  // Declared on this element and inherited by everything inside it. The caller's own `vars` come
+  // last, so overriding one slot is `vars={{ 'chart-1': 'teal-600' }}` and needs no prop of its own.
+  const declared = {
+    ...ChartUtils.paletteVariables(ChartUtils.PALETTE),
+    ...(series ? ChartUtils.seriesVariables(series) : {}),
+    ...vars,
+  };
+
+  // The dark palette reaches the same variables through the ancestor-scoped selector every other
+  // themed prop uses, which is the whole trick: the chart inside changes nothing between themes.
+  // Merged rather than replaced, so a caller with their own `theme` keeps it.
+  const themes = ObjectUtils.mergeDeep<NonNullable<ChartContainerProps<TTag>['theme']>>(
+    { dark: { vars: ChartUtils.paletteVariables(ChartUtils.DARK_PALETTE) } },
+    theme ?? {},
+  );
+
+  return <Box ref={ref} vars={declared} theme={themes} {...boxProps} />;
+}
+
+const ChartContainerComponent = forwardRef(ChartContainerImpl);
+ChartContainerComponent.displayName = 'ChartContainer';
+
+/**
+ * The theming bridge: a Box that declares the variables a chart reads, so the chart itself can name
+ * no colour at all.
+ *
+ * Every chart library says to write the palette into the chart — which is exactly what makes dark
+ * mode a chart problem, and why a themed Recharts is usually a `<style>` tag per chart. Written as
+ * `stroke="var(--color-revenue)"` instead, the colour lives here, in `vars`: an ordinary Box prop,
+ * so it is themed, responsive and hoverable like every other prop, it lands in a **class** (two
+ * containers with the same series share one rule), and it renders on a server.
+ *
+ * The names are the ones the ecosystem already uses — `--chart-1` … `--chart-6` and
+ * `--color-<series>` — so a chart copied from shadcn's charts works unchanged.
+ *
+ * It adds no role and no ARIA: it is a wrapper, and what is inside it owns its own semantics.
+ */
+export const ChartContainer = ChartContainerComponent as <
+  TTag extends keyof React.JSX.IntrinsicElements = 'div',
+  TKey extends keyof ComponentsAndVariants = never,
+>(
+  props: ChartContainerProps<TTag, TKey> & RefAttributes<ExtractElementFromTag<TTag>>,
+) => React.ReactNode;

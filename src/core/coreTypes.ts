@@ -41,7 +41,21 @@ type BoxStyleScalar = (BoxStyleArrayString | BoxStyleArrayBoolean | BoxStyleArra
   tuple?: never;
 };
 
-export type BoxStyle = (BoxStyleScalar | BoxStyleTupleArrays) & {
+/**
+ * A definition whose value is a record of names to values — the shape a custom property needs,
+ * since the *names* it declares come out of the value and no definition can know them in advance.
+ * It has no `styleName`, so it writes its own `declarations`. `vars` is the only one.
+ */
+interface BoxStyleRecord {
+  values: Readonly<Record<string, string | number>>;
+  tuple?: never;
+  valueFormat?: never;
+}
+
+/** Every shape a prop value can take, and so everything `match` and `declarations` are handed. */
+export type BoxStyleValue = string | number | boolean | readonly (string | number | boolean)[] | Readonly<Record<string, string | number>>;
+
+export type BoxStyle = (BoxStyleScalar | BoxStyleTupleArrays | BoxStyleRecord) & {
   styleName?: string | string[];
   selector?: (className: string, pseudoClass: string) => string;
   /**
@@ -53,7 +67,18 @@ export type BoxStyle = (BoxStyleScalar | BoxStyleTupleArrays) & {
    * prop does not really support produces no rule and no class name rather than a broken
    * declaration. `fill: 'url(#sky)'` is the first caller (`Variables.isReference`).
    */
-  match?: (value: string | number | boolean | readonly (string | number | boolean)[]) => boolean;
+  match?: (value: BoxStyleValue) => boolean;
+  /**
+   * The whole rule body this definition writes, as text — for a definition whose `styleName` cannot
+   * name what it declares.
+   *
+   * One prop, several declarations, and the property names coming out of the *value*:
+   * `vars={{ 'color-x': 'sky-500' }}` has to emit `--color-x:var(--sky-500)`, and `--color-x` is a
+   * name the registry never sees. A definition that declares this ignores `styleName` and
+   * `valueFormat`; everything else about it — the class name, the media query, the theme and group
+   * selectors, the cascade layer — is the same as for any other prop.
+   */
+  declarations?: (value: BoxStyleValue, getVariableValue: (name: string) => string) => string;
 };
 
 export type ExtractKeys<T extends Record<string, unknown>, TT> = {

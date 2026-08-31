@@ -153,7 +153,36 @@ describe('numeric dividers', () => {
  * what it accepts, so the walk hands it these and uses the first one it says yes to — which also
  * proves the predicate accepts something at all. A new `match` definition needs its shape here.
  */
-const matchCandidates = ['url(#sample)', 'var(--sample)', '50%', 'none', 4] as const;
+const matchCandidates = ['url(#sample)', 'var(--sample)', '50%', 'none', 4, { 'sample-var': 'red-500' }] as const;
+
+/** A sample value as text, so a record reads as itself rather than as `[object Object]`. */
+function label(value: unknown): string {
+  return typeof value === 'object' && value !== null ? JSON.stringify(value) : String(value);
+}
+
+/** A sample value as the class name the engine builds from it — records included. */
+function classNameValue(value: unknown): string {
+  if (Array.isArray(value)) return value.join('_');
+  if (typeof value === 'object' && value !== null) {
+    return Object.entries(value)
+      .map(([name, entry]) => `${name}-${entry}`)
+      .join('_');
+  }
+
+  return String(value);
+}
+
+/**
+ * The declarations a definition is expected to emit. Normally its `styleName`s; a definition that
+ * writes its own declarations (`vars`) names one custom property per key of the value it is given.
+ */
+function styleNamesOf(def: BoxStyle, prop: string, value: unknown): string[] {
+  if (def.declarations && typeof value === 'object' && value !== null) {
+    return Object.keys(value).map((name) => `--${name}`);
+  }
+
+  return Array.isArray(def.styleName) ? def.styleName : [def.styleName ?? prop];
+}
 
 function sampleFor(def: BoxStyle): { value: unknown; label: string } | undefined {
   const values = def.values as unknown;
@@ -161,7 +190,7 @@ function sampleFor(def: BoxStyle): { value: unknown; label: string } | undefined
   if (def.match) {
     const accepted = matchCandidates.find((candidate) => def.match?.(candidate));
 
-    return accepted === undefined ? undefined : { value: accepted, label: `match ${accepted}` };
+    return accepted === undefined ? undefined : { value: accepted, label: `match ${label(accepted)}` };
   }
 
   if (typeof values === 'number') return { value: 4, label: 'number' };
@@ -183,12 +212,11 @@ function sampleFor(def: BoxStyle): { value: unknown; label: string } | undefined
 }
 
 const definitions = Object.entries(cssStyles).flatMap(([prop, defs]) =>
-  (defs as BoxStyle[]).map((def, index) => ({
-    prop,
-    index,
-    sample: sampleFor(def),
-    styleNames: Array.isArray(def.styleName) ? def.styleName : [def.styleName ?? prop],
-  })),
+  (defs as BoxStyle[]).map((def, index) => {
+    const sample = sampleFor(def);
+
+    return { prop, index, sample, styleNames: styleNamesOf(def, prop, sample?.value) };
+  }),
 );
 
 describe('every declared prop value produces a rule', () => {
@@ -196,7 +224,7 @@ describe('every declared prop value produces a rule', () => {
   // description, BOX_AI_CONTEXT.md, both skill files and two places on the docs site. Every one of
   // those was written by hand and none of them was ever checked, so the figure drifted to '~144'
   // against a registry of 117 (bug #71). Adding a prop now fails here until they are updated.
-  const PROP_COUNT = 138;
+  const PROP_COUNT = 139;
 
   it('holds exactly the number of props the docs claim', () => {
     expect(Object.keys(cssStyles).length).toBe(PROP_COUNT);
@@ -220,7 +248,7 @@ describe('every declared prop value produces a rule', () => {
       const rules = generatedRulesOf(engine);
 
       // A class name is only emitted when a rule backs it, so both halves must be present.
-      expect(classNames).toContain(`${prop}-${Array.isArray(value) ? value.join('_') : value}`);
+      expect(classNames).toContain(`${prop}-${classNameValue(value)}`);
       for (const styleName of styleNames) {
         expect(rules).toContain(`${styleName}:`);
       }
@@ -437,5 +465,61 @@ describe('SVG text and geometry props', () => {
   it('moves geometry under a pseudo-class, which is the whole zero-JS animation', () => {
     expect(generatedRulesFor({ r: 20, hover: { r: 28 } }, 'svg-grow')).toContain('.hover-r-28:hover{r:28}');
     expect(generatedRulesFor({ md: { cx: 40 } }, 'svg-geom-breakpoint')).toContain('.md-cx-40{cx:40}');
+  });
+});
+
+/**
+ * The one prop whose declarations are named by its value. Everything else about it is an ordinary
+ * prop — which is the point: a custom property lands in a class, so it nests in a theme, a
+ * breakpoint and a pseudo-class, and two subtrees declaring the same palette share one rule.
+ */
+describe('vars — a CSS variable is a Box prop', () => {
+  it('declares a custom property, resolving a colour token to the variable behind it', () => {
+    const engine = makeEngine('vars-colour');
+    const classNames = renderStyles(engine, { vars: { 'color-revenue': 'sky-500' } });
+
+    expect(classNames).toContain('vars-color-revenue-sky-500');
+    expect(generatedRulesOf(engine)).toContain('.vars-color-revenue-sky-500{--color-revenue:var(--sky-500)}');
+  });
+
+  it('writes any other value out as it stands, and takes several at once', () => {
+    expect(generatedRulesFor({ vars: { 'chart-gap': '4px', 'chart-rows': 3, 'color-x': 'var(--chart-1)' } }, 'vars-many')).toContain(
+      '{--chart-gap:4px;--chart-rows:3;--color-x:var(--chart-1)}',
+    );
+  });
+
+  it('accepts a name spelled with its leading --', () => {
+    expect(generatedRulesFor({ vars: { '--color-x': 'emerald-500' } }, 'vars-prefixed')).toContain('{--color-x:var(--emerald-500)}');
+  });
+
+  // The reason the whole step needs no second styling system: the variables a chart reads flip with
+  // the theme through the same ancestor-scoped selector every other prop uses.
+  it('flips with the theme and with a breakpoint', () => {
+    expect(generatedRulesFor({ theme: { dark: { vars: { 'color-x': 'sky-400' } } } }, 'vars-theme')).toContain(
+      '.dark .theme-dark-vars-color-x-sky-400{--color-x:var(--sky-400)}',
+    );
+    expect(generatedRulesFor({ md: { vars: { 'chart-gap': '8px' } } }, 'vars-breakpoint')).toContain(
+      '.md-vars-chart-gap-8px{--chart-gap:8px}',
+    );
+  });
+
+  it('shares one rule between two Boxes declaring the same variables', () => {
+    const engine = makeEngine('vars-shared');
+    const first = renderStyles(engine, { vars: { 'color-x': 'rose-500' } });
+    const second = renderStyles(engine, { vars: { 'color-x': 'rose-500' }, p: 4 });
+
+    expect(second).toContain(first[first.length - 1]);
+    expect(generatedRulesOf(engine).match(/--color-x/g)).toHaveLength(1);
+  });
+
+  // A value ending its own declaration would let the rest of the string be read as CSS, so the
+  // definition refuses it — and an unmatched value produces no class name either.
+  it('refuses a value that could break out of the rule, and a name that is not an identifier', () => {
+    const engine = makeEngine('vars-injection');
+    const classNames = renderStyles(engine, { vars: { 'color-x': 'red;}body{display:none' } });
+
+    expect(classNames.filter((name) => name.startsWith('vars-'))).toEqual([]);
+    expect(generatedRulesOf(engine)).not.toContain('display:none');
+    expect(renderStyles(makeEngine('vars-bad-name'), { vars: { 'color x': 'red-500' } }).filter((n) => n.startsWith('vars-'))).toEqual([]);
   });
 });

@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import Variables from '../../core/variables';
 import ChartUtils from './chartUtils';
 
 /**
@@ -142,6 +143,52 @@ describe('ChartUtils', () => {
 
     it('counts a negative value as none — a ring of a whole cannot show one', () => {
       expect(ChartUtils.donutSegments([-5, 1, 1], 100).map((s) => s.strokeDasharray)).toEqual(['0 100', '50 50', '50 50']);
+    });
+  });
+});
+
+describe('the palette', () => {
+  it('numbers the palette, so a chart can read --chart-3 without knowing what it is', () => {
+    expect(ChartUtils.paletteVariables(ChartUtils.PALETTE)).toEqual({
+      'chart-1': 'sky-500',
+      'chart-2': 'emerald-500',
+      'chart-3': 'amber-500',
+      'chart-4': 'violet-500',
+      'chart-5': 'rose-500',
+      'chart-6': 'cyan-500',
+    });
+  });
+
+  it('has a dark counterpart for every slot', () => {
+    expect(ChartUtils.DARK_PALETTE).toHaveLength(ChartUtils.PALETTE.length);
+  });
+
+  // The light palette is checked by the assignment in `chart.tsx` (a `MiniDonut` cycles through it as
+  // `Paint`); nothing type-checks the dark one, which reaches CSS as a plain string.
+  it('names colours this library actually has', () => {
+    const unknown = [...ChartUtils.PALETTE, ...ChartUtils.DARK_PALETTE].filter((colour) => !(colour in Variables.colors));
+
+    expect(unknown).toEqual([]);
+  });
+
+  it('gives a list of series the palette in order', () => {
+    expect(ChartUtils.seriesVariables(['revenue', 'cost'])).toEqual({
+      'color-revenue': 'var(--chart-1)',
+      'color-cost': 'var(--chart-2)',
+    });
+  });
+
+  // A seventh series is better wrapped than given a colour nobody chose.
+  it('wraps round when there are more series than slots', () => {
+    const wrapped = ChartUtils.seriesVariables(['a', 'b', 'c'], 2);
+
+    expect(wrapped).toEqual({ 'color-a': 'var(--chart-1)', 'color-b': 'var(--chart-2)', 'color-c': 'var(--chart-1)' });
+  });
+
+  it('takes a paint per series when one is named', () => {
+    expect(ChartUtils.seriesVariables({ revenue: 'emerald-600', cost: 'var(--brand)' })).toEqual({
+      'color-revenue': 'emerald-600',
+      'color-cost': 'var(--brand)',
     });
   });
 });

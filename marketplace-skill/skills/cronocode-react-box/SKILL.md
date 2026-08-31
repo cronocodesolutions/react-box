@@ -5,7 +5,7 @@ description: '@cronocode/react-box expert — runtime CSS-in-JS library. Use whe
 
 # @cronocode/react-box AI Skill
 
-Runtime CSS-in-JS library. `Box` accepts 138 CSS props → generates CSS classes at runtime. Same values share a class.
+Runtime CSS-in-JS library. `Box` accepts 139 CSS props → generates CSS classes at runtime. Same values share a class.
 
 ## Installation & Package Management
 
@@ -53,6 +53,7 @@ Check latest: `npm view @cronocode/react-box version`
 | `<Box tag="svg/path/circle/rect">`   | `<Svg>`/`<Path>`/`<Circle>`/`<Rect>`   | `components/svg`                                                 |
 | a lucide/Tabler icon, styled         | `<Icon>`                               | `components/icon`                                                |
 | a sparkline, ring, gauge or donut    | `<Sparkline>`/`<ProgressRing>`/…       | `components/chart`                                               |
+| a themed Recharts (or any) chart     | `<ChartContainer>`                     | `components/chart`                                               |
 
 Also: `Mark`, `Figure`, `Figcaption`, `Details`, `Summary`, `Menu`, `Time`. All from `@cronocode/react-box/components/...`.
 
@@ -80,6 +81,25 @@ expect, not a check against the fields.
 **Icons** (`@cronocode/react-box/components/icon`, server-safe): `<Icon size={5} color="amber-500" label="Sunny"><Sun /></Icon>` — Box props on an icon somebody else drew, wrapping exactly one element from lucide, Tabler, react-icons, or a raw `<svg>`. It resolves the props to a class and puts that on the icon's own `<svg>`, so it knows no set's API: `size` is the ÷4 scale (`size={6}` is 24px, the default; an icon set's own `size` counts in pixels, so `size={20}` becomes `size={5}`) and it lands in the _class_, where a CSS declaration outranks the `width`/`height` attributes the set writes for itself. `strokeWidth` is likewise the ordinary Box prop, so it can change on hover or at a breakpoint. No `label` means `aria-hidden`, a `label` means `role="img"` — the same rule `Svg` follows. **Prefer `Svg` over wrapping one in `Icon`**: `Svg` takes these props directly. (Wrapping works — `Icon` asks the child which convention it follows and routes `role`/`aria-label` into `props` for a component of ours — but it is a layer nobody needs.) The hook underneath is public — `useClassNames(props)` from the main entry returns `{ className, styles }` for anything Box cannot render (a `motion.div`, a `NavLink`); render `styles` beside the element (it is defined in element mode only). **Beyond lucide**: Iconify's 300k+ icons in 200+ sets reach the same `<Icon>`, the choice being only when the icon becomes markup — paste one icon's SVG (no dependency, server-renders); `unplugin-icons` for a set at build time (`npm i -D unplugin-icons @iconify-json/<set> @svgr/core @svgr/plugin-jsx`, plugin with `{ compiler: 'jsx', jsx: 'react' }`, `/// <reference types="unplugin-icons/types/react" />` in a `.d.ts`, then `import SiGithub from '~icons/simple-icons/github'`); or `@iconify/react` when the name is data — it fetches in the browser, so it is a client component and the server sends no icon. Turbopack runs no unplugin: under Next.js 16 the build-time recipe needs `next build --webpack`.
 
 **Charts** (`@cronocode/react-box/components/chart`, server-safe): `Sparkline`, `ProgressRing`, `Gauge`, `MiniDonut` — micro-primitives over the SVG components, **not a chart library** (no axes, no legends, no data transformations; theme Recharts for that). Each is an `Svg`, so `width`/`height` are the attributes, the paint is inherited by the shapes inside (default stroke `currentColor`, so `color="sky-500"` recolours one), and every prop, pseudo-class, breakpoint and theme works. `<Sparkline data={[4, 9, 6, 12]} variant="line|area|bar" min={0} max={20} />` — it fills its box (`preserveAspectRatio="none"` + `vectorEffect="non-scaling-stroke"`, so the line stays one width thick at any size), and `min`/`max` fix the axis so a column of rows is comparable. `<ProgressRing value={0.62} thickness={10} trackOpacity={0.2} />` and `<Gauge value={0.4} sweep={270} start={225} />` (degrees clockwise from twelve o'clock; `sweep={360}` is a ring) draw the value as a dash on the arc — a style prop, so it **eases between values with no animation code**; the fraction is rounded to half a percent, because a dash length lands in a class name. `<MiniDonut data={[5, 3, 2]} colors={['sky-500', 'var(--chart-2)']} />` gives each value its share of the circle. `children` is SVG drawn after the chart (an `SvgText` in the middle, a `Defs` with a gradient); `label` names it `role="img"`, and without one it is `aria-hidden` — leave a sparkline beside its own number unnamed, name one that _is_ the data. Cheap in a grid: the shape is the `d` attribute (no CSS at all, so 10,000 rows share every rule) while the paint is a class. A DataGrid cell renderer is a component — define it outside the render.
+
+**Theming a chart library** — `<ChartContainer>` (same entry, server-safe): the bridge for Recharts and anything
+else that takes a colour. It declares `--chart-1` … `--chart-6` in both themes plus one `--color-<series>` per
+series, so the chart itself names no colour at all: `series={['revenue', 'cost']}` (the palette in order) or
+`series={{ revenue: 'emerald-600' }}` (your own paint), then `<Line stroke="var(--color-revenue)" />` inside. A
+series name becomes part of a custom-property name, so it has to be a CSS identifier — a dot-path `dataKey` is
+skipped. Overriding a slot needs no prop of its own, because the container is a Box:
+`vars={{ 'chart-1': 'teal-600' }}`, `theme={{ dark: { vars: { 'chart-1': 'teal-400' } } }}`, and any other name
+the chart reads (`--chart-grid`, `--chart-label` for axes) is declared the same way. The names are the ones the
+ecosystem already uses, so a chart lifted from shadcn's charts works unchanged. It adds no role and no ARIA.
+
+**Custom properties**: `vars` — the one prop whose declaration *names* come from its value.
+`vars={{ 'color-revenue': 'sky-500', 'chart-gap': '4px' }}` declares `--color-revenue: var(--sky-500)` and
+`--chart-gap: 4px` on the element, inherited by everything inside it — including markup this library never
+rendered (a chart library, a third-party widget). A colour token resolves to the variable behind it; every other
+value is written out as it stands. Names may carry a leading `--` or not. It is an ordinary prop, so it nests in
+`theme`/`hover`/a breakpoint and lands in a **class** — two subtrees declaring the same variables share one rule,
+and nothing needs a `<style>` tag or an `id` to scope it. A name that is not a CSS identifier, or a value
+containing `;` or a brace, is skipped (that entry only, not the whole record).
 
 **Effects**: `shadow` (`'small'`/`'medium'`/`'large'`/`'xl'`/`'none'`), `opacity`, `cursor`, `pointerEvents`, `transition`, `transform`, `userSelect`, `overflow`
 

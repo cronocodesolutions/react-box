@@ -16,7 +16,7 @@ import {
   pseudoSelector,
   themeGroupClass,
 } from '../boxStyles';
-import { BoxStyle } from '../coreTypes';
+import { BoxStyle, BoxStyleValue } from '../coreTypes';
 import defaultBoxComponents, { BoxComponent, Components } from '../extends/boxComponents';
 import { resolveComponentStyles } from '../extends/useComponents';
 import { stableHash } from '../hash';
@@ -150,6 +150,24 @@ const invalidInCssIdentifier = /[^\w\u00A0-\uFFFF-]/g;
 /** A class name escaped for use inside a CSS selector: `width-1/2` becomes `width-1\/2`. */
 function escapeClassName(className: string): string {
   return className.replace(invalidInCssIdentifier, (char) => `\\${char}`);
+}
+
+/**
+ * A prop value as the text its class name and its rule key are built from.
+ *
+ * A record — the `vars` prop, whose declarations are named by its own value — is written out as its
+ * `name-value` pairs in the order they were declared, which is the order the declarations are
+ * emitted in too, so a class name and the rule behind it are built from the same reading of a value.
+ */
+function serializeValue(value: unknown): string {
+  if (Array.isArray(value)) return value.join('_');
+  if (ObjectUtils.isObject(value)) {
+    return Object.entries(value)
+      .map(([name, entry]) => `${name}-${entry}`)
+      .join('_');
+  }
+
+  return String(value);
 }
 
 // `normal` first, then the breakpoints in ascending order, then the accessibility media features:
@@ -390,21 +408,14 @@ export function createStyleEngine(options: StyleEngineOptions = {}): StyleEngine
     const className = createClassName(key, value, weight, media, pseudoClassParentName);
 
     // Create a unique key to track if this rule has been generated
-    const serializedValue = Array.isArray(value) ? value.join('_') : value;
+    const serializedValue = serializeValue(value);
     const ruleKey = `${media}-${weight}-${key}-${serializedValue}-${pseudoClassParentName ?? ''}-${rootSelector ?? ''}`;
 
     // Only generate rule if it hasn't been generated before
     if (!generatedRules.has(ruleKey)) {
       generatedRules.add(ruleKey);
 
-      const result = generateRule(
-        key,
-        value as string | number | boolean | readonly (string | number | boolean)[],
-        weight,
-        media,
-        pseudoClassParentName,
-        rootSelector,
-      );
+      const result = generateRule(key, value as BoxStyleValue, weight, media, pseudoClassParentName, rootSelector);
       if (result) {
         pendingRules.push([result.sortIndex, result.mediaOrder, result.rule]);
         requireFlush = true;
@@ -436,9 +447,24 @@ export function createStyleEngine(options: StyleEngineOptions = {}): StyleEngine
     classNames.push(className);
   }
 
+  /**
+   * The body of one rule: the declarations a definition writes for a value.
+   *
+   * Normally that is its `styleName` (or names) with the formatted value, and the definition that
+   * declares its own `declarations` is the exception the `vars` prop needs — the property names are
+   * in the value, so no `styleName` could hold them.
+   */
+  function declarations(itemValue: BoxStyle, key: string, value: BoxStyleValue) {
+    if (itemValue.declarations) return itemValue.declarations(value, variables.getVariableValue);
+
+    const styleName = Array.isArray(itemValue.styleName) ? itemValue.styleName : [itemValue.styleName ?? key];
+
+    return styleName.map((s) => `${s}:${(itemValue.valueFormat as any)?.(value, variables.getVariableValue, s) ?? value}`).join(';');
+  }
+
   function generateRule(
     key: string,
-    value: string | number | boolean | readonly (string | number | boolean)[],
+    value: BoxStyleValue,
     weight: number,
     media: string,
     pseudoClassParentName?: string,
@@ -459,7 +485,7 @@ export function createStyleEngine(options: StyleEngineOptions = {}): StyleEngine
           }
           return x.values.length === value.length && x.values.every((v, i) => typeof v === typeof value[i]);
         }
-        return x.values.includes(value);
+        return (x.values as readonly unknown[]).includes(value);
       }
       return typeof value === typeof x.values;
     });
@@ -530,31 +556,13 @@ export function createStyleEngine(options: StyleEngineOptions = {}): StyleEngine
       }
       const selector = itemValue.selector?.(defaultSelector, '') ?? defaultSelector;
 
-      const styleName = Array.isArray(itemValue.styleName) ? itemValue.styleName : [itemValue.styleName ?? key];
-
-      const rule = `${selector}{${styleName
-        .map((s) => {
-          const styleValue = (itemValue.valueFormat as any)?.(value, variables.getVariableValue, s) ?? value;
-          return `${s}:${styleValue}`;
-        })
-        .join(';')}}`;
-
-      return finish(rule);
+      return finish(`${selector}{${declarations(itemValue, key, value)}}`);
     } else {
       const pseudoClassesToUse = pseudoSelector(pseudoClassesByWeight[weight]);
       const baseSelector = rootSelector ?? `.${className}`;
       const selector = itemValue.selector?.(baseSelector, pseudoClassesToUse) ?? `${baseSelector}${pseudoClassesToUse}`;
 
-      const styleName = Array.isArray(itemValue.styleName) ? itemValue.styleName : [itemValue.styleName ?? key];
-
-      const rule = `${selector}{${styleName
-        .map((s) => {
-          const styleValue = (itemValue.valueFormat as any)?.(value, variables.getVariableValue, s) ?? value;
-          return `${s}:${styleValue}`;
-        })
-        .join(';')}}`;
-
-      return finish(rule);
+      return finish(`${selector}{${declarations(itemValue, key, value)}}`);
     }
   }
 
@@ -566,7 +574,7 @@ export function createStyleEngine(options: StyleEngineOptions = {}): StyleEngine
     pseudoClassParentName?: string,
   ) {
     const pseudoClassList = pseudoClassesByWeight[weight];
-    const serializedValue = Array.isArray(value) ? value.join('_') : value;
+    const serializedValue = serializeValue(value);
 
     const className = `${media === 'normal' ? '' : `${media}-`}${pseudoClassList.map((p) => `${p}-`).join('')}${pseudoClassParentName ? `${pseudoClassParentName}-` : ''}${key}-${serializedValue}`;
 
