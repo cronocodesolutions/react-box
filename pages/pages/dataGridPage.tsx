@@ -399,6 +399,7 @@ export default function DataGridPage() {
 
           <Code
             id="basic"
+            defer
             label="Basic DataGrid"
             language="jsx"
             context="declare const data: { first_name: string; last_name: string; age: number; email: string }[];"
@@ -527,6 +528,7 @@ export default function DataGridPage() {
 
           <Code
             id="filters"
+            defer
             label="DataGrid with Global Filter and Column Filters"
             language="jsx"
             code={`<DataGrid
@@ -570,6 +572,7 @@ export default function DataGridPage() {
 
           <Code
             id="grouped"
+            defer
             label="Grouped Columns with Row Selection"
             language="jsx"
             code={`<DataGrid
@@ -651,6 +654,7 @@ export default function DataGridPage() {
 
           <Code
             id="row-detail"
+            defer
             label="Row Detail — Orders with Items"
             language="jsx"
             check={false}
@@ -818,6 +822,7 @@ Box.components({
 
           <Code
             id="disable-sort"
+            defer
             label="Disable Sorting and Resizing"
             language="jsx"
             code={`<DataGrid
@@ -859,6 +864,7 @@ Box.components({
 
           <Code
             id="context-menu"
+            defer
             label="Context Menu Control"
             language="jsx"
             code={`<DataGrid
@@ -898,6 +904,7 @@ Box.components({
 
           <Code
             id="resizer-style"
+            defer
             label="Resizer Style"
             language="jsx"
             code={`// 'hover' — resizer appears only when hovering the header cell
@@ -938,6 +945,7 @@ Box.components({
 
           <Code
             id="resize-mode"
+            defer
             label="Resize Mode"
             language="jsx"
             code={`// 'smooth' (default): width updates batched to one per animation frame (~60fps, ~1 frame
@@ -1101,6 +1109,7 @@ function PaginatedDataGridDemo() {
   return (
     <Code
       id="pagination"
+      defer
       label="Server-Side Pagination & Filters"
       language="jsx"
       check={false}
