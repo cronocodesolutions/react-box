@@ -9,11 +9,9 @@ export const metadata: Metadata = {
 };
 
 /**
- * The root layout is a Server Component, and so is everything it renders except the two islands.
- *
- * The theme is decided here, on the server: theme rules are ancestor-scoped (`.dark .someClass`),
- * so the class on `<html>` is the entire mechanism — no provider, no context, nothing to hydrate.
- * `ThemeToggle` rewrites that class in the browser.
+ * The root layout is a Server Component, and so is everything it renders except the two islands. The theme
+ * is decided here, on the server: theme rules are ancestor-scoped, so the class on `<html>` is the entire
+ * mechanism — no provider, no context, nothing to hydrate. `ThemeToggle` rewrites that class in the browser.
  */
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (

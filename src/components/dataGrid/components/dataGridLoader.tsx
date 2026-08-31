@@ -7,14 +7,10 @@ const ANIMATION_NAME = 'rb-datagrid-loader';
 const BAR_CLASS_NAME = 'rb-datagrid-loader-bar';
 const STYLE_ID = 'rb-datagrid-loader-keyframes';
 
-// Box has no @keyframes API, so the loader registers its indeterminate-sweep animation
-// once in a dedicated <style>. The bar (40% wide) slides from off the left edge to off
-// the right edge and repeats, giving a continuous progress sweep.
-//
-// The animation is applied from a class rather than an inline style so that the reduced-motion
-// rule below can take it off again: an inline style outranks every stylesheet, and a sweep that
-// never stops is exactly what `prefers-reduced-motion` is asking about. What is left under that
-// preference is a still bar — `aria-busy` on the grid is what actually says "loading" anyway.
+// Box has no @keyframes API, so the loader registers its indeterminate sweep once in a dedicated <style>:
+// a 40%-wide bar sliding off one edge to the other, repeating. Applied from a class rather than an inline
+// style so the reduced-motion rule below can take it off again — an inline style outranks every
+// stylesheet, and `aria-busy` on the grid is what says "loading" anyway.
 function ensureKeyframes() {
   const doc = documentOrNull();
   if (!doc || doc.getElementById(STYLE_ID)) return;

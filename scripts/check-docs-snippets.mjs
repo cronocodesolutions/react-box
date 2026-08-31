@@ -1,30 +1,9 @@
-// Fails the build if a code snippet the docs site shows does not compile.
-//
-// Every component page presents an example twice: the live demo is real JSX inside the page, so
-// TypeScript already checks it, and the code block beside it is a *string* — hand-written, and
-// until now read by nobody. That is how the homepage shipped a responsive example with the `sm`
-// prop written twice and the Grid page documented a `colSpan` prop that does not exist (bug #15).
-//
-// The strings are compiled the way a reader would compile them: against the published specifiers
-// (`@cronocode/react-box/components/flex`), not the repo-relative paths the pages themselves
-// import, and *without* `pages/box.d.ts` — the docs site extends Box with its own props and
-// component variants, and a snippet that only type-checks because of that augmentation is a
-// snippet that would not type-check for the person copying it.
-//
-// A snippet is a fragment rather than a module, so it gets exactly three allowances:
-//   - the components and hooks it uses are imported for it, unless it imports them itself;
-//   - a *lowercase* name it never declares is something the page around it owns (`data`, `users`)
-//     and becomes `any`. Capitalised names are never declared away: a component that does not
-//     resolve is the mistake this check exists to catch;
-//   - `context` on the `<Code>` element adds declarations that are compiled but not displayed —
-//     for the handful of blocks whose surrounding data has a *shape* a generic component infers
-//     from (a DataGrid over `any` resolves its row type to `object`, and every cell access fails).
-//
-// Blocks that are deliberately not compilable code — a CSS listing, an outline with `...` in it,
-// two files shown at once — say so with `check={false}`, which reads in the page source as the
-// claim it is.
-//
-// Run: npm run check:docs
+// Fails the build if a code snippet the docs site shows does not compile: a live demo is real JSX that
+// TypeScript checks, while the block beside it is a *string* nobody read — which is how the homepage
+// shipped `sm` twice and the Grid page documented a `colSpan` that does not exist (bug #15). Snippets
+// compile as a reader would compile them, against the published specifiers and without the site's own
+// augmentation. A snippet is a fragment: its components are imported for it, a *lowercase* undeclared name
+// becomes `any`, `context` adds hidden declarations, `check={false}` opts out. Run: npm run check:docs
 import { readFileSync, readdirSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 import ts from 'typescript';
@@ -33,9 +12,8 @@ const root = join(import.meta.dirname, '..');
 const PAGES = 'pages';
 
 /**
- * Which JSX elements carry a snippet, and how the page renders the string it holds. `DemoCard`
- * (boxPage.tsx) documents a *prop fragment* and shows it inside a Box, so the check wraps it the
- * same way the page does.
+ * Which JSX elements carry a snippet, and how the page renders it. `DemoCard` documents a *prop fragment*
+ * inside a Box, so the check wraps it the same way the page does.
  */
 const SNIPPET_TAGS = {
   Code: (code) => code,
@@ -230,9 +208,8 @@ function declaredNames(code) {
 }
 
 /**
- * A snippet as a module: what it needs imported, what the page around it owns, then the snippet
- * itself. Each generated line remembers which snippet line it came from, so a diagnostic can be
- * reported at the line of the page the reader would edit.
+ * A snippet as a module: its imports, what the page around it owns, then the snippet. Each generated line
+ * remembers which snippet line it came from, so a diagnostic lands on the line a reader would edit.
  */
 function moduleFor(snippet, { free, fragment }) {
   const declared = declaredNames(snippet.code);

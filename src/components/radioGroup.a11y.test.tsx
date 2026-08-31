@@ -7,17 +7,8 @@ import Button from './button';
 import RadioGroup from './radioGroup';
 
 /**
- * The APG radio-group keyboard map, key by key.
- *
+ * The APG radio-group keyboard map, key by key — the tests below name each one.
  * Pattern: https://www.w3.org/WAI/ARIA/apg/patterns/radio/
- *
- * | Key                    | What must happen                                          |
- * | ---------------------- | --------------------------------------------------------- |
- * | Tab                    | one stop for the whole group, landing on the checked radio |
- * | Down / Right           | next radio, selecting it as focus arrives; wraps           |
- * | Up / Left              | previous radio, same; wraps                                |
- * | Space                  | selects the focused radio (the platform's own)             |
- * | Tab again              | leaves the group entirely, not radio by radio              |
  *
  * Selection follows focus here, unlike a listbox: APG says a radio group moves and chooses in one
  * keystroke, which is why every arrow assertion checks `checked` as well as focus.

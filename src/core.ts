@@ -1,33 +1,18 @@
 /**
- * `@cronocode/react-box/core` — the styling engine, without React.
- *
- * Everything the library does to turn props into CSS lives under `src/core`, which imports no
- * framework (CI enforces it: `npm run check:boundaries`). This entry is that engine as a public
- * package surface, so a plain-DOM app, a Web Component, or an adapter for another framework can
- * use it directly:
+ * `@cronocode/react-box/core` — the styling engine, without React. Everything under `src/core` imports
+ * no framework (CI enforces it), so a plain-DOM app, a Web Component or another framework can use it:
  *
  * ```js
  * import { createStyleEngine } from '@cronocode/react-box/core';
  *
  * const engine = createStyleEngine();
- *
- * document.querySelector('#card').className = engine.classNames({
- *   p: 4,
- *   bgColor: 'blue-500',
- *   borderRadius: 2,
- *   hover: { bgColor: 'blue-600' },
- *   md: { p: 8 },
- * });
+ * document.querySelector('#card').className = engine.classNames({ p: 4, bgColor: 'blue-500' });
  * ```
  *
- * That is the whole runtime: no build step, no provider, no effects to wire up. Rules reach the
- * document on their own microtask, so nothing has to be flushed by hand — `flushSync()` exists for
- * the case where computed styles are read in the same tick, and `getStyles()` for static output.
- *
- * The engine here is always a fresh instance. The React entries share one lazily-created default
- * engine so `Box` and `Box.extend()` agree without configuration; a vanilla app has no such
- * ambient thing to agree with, and an explicit instance is what makes two of them (a widget and
- * its host, say) independent.
+ * That is the whole runtime: no build step, no provider, no effects. Rules reach the document on their
+ * own microtask; `flushSync()` is for reading computed styles in the same tick and `getStyles()` for
+ * static output. Each call here is a fresh instance — the React entries share one default engine so
+ * `Box` and `Box.extend()` agree, while a vanilla app has no such ambient thing to agree with.
  */
 export { classNames } from './core/classNames';
 export type { ClassNameType } from './core/classNames';

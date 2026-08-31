@@ -3,12 +3,9 @@ import { useLocation } from 'react-router-dom';
 import { notFoundMeta, pageMeta, routeFor } from './siteMeta';
 
 /**
- * Keeps the document head in step with the route: title, description, canonical URL, and the Open
- * Graph pair a link preview reads.
- *
- * Each route is also served as a static shell carrying the same tags (see the `site-metadata`
- * plugin in `pages.vite.config.ts`), so the head is right before the app starts. This is what keeps
- * it right afterwards, when navigation happens without a page load.
+ * Keeps the document head in step with the route: title, description, canonical URL and the Open Graph
+ * pair. Each route is also served as a static shell carrying the same tags, so the head is right before
+ * the app starts; this is what keeps it right afterwards, when navigation happens without a page load.
  */
 export default function DocumentHead() {
   const { pathname } = useLocation();

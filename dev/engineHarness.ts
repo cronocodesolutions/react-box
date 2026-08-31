@@ -3,9 +3,8 @@ import { createStyleEngine, StyleEngine, StyleEngineOptions } from '../src/core/
 import { BoxStyleProps } from '../src/types';
 
 /**
- * Shared helpers for engine-level tests. Engines are created with readable class names and the
- * `textContent` sink so a test can assert on the exact rule text, and with an explicit style
- * element id so each test owns its own `<style>` element inside the shared happy-dom document.
+ * Shared helpers for engine-level tests: readable class names and the `textContent` sink, so a test can
+ * assert exact rule text, and an explicit element id, so each test owns its own `<style>` element.
  */
 
 /** The last rule the engine writes when it initializes — everything after it is generated CSS. */

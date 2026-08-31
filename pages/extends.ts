@@ -10,28 +10,12 @@ export const { extendedProps, extendedPropTypes } = Box.extend(
     // Gradients
     'gradient-hero': 'linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, rgba(168, 85, 247, 0.1) 50%, rgba(236, 72, 153, 0.05) 100%)',
     'gradient-hero-dark': 'linear-gradient(135deg, rgba(99, 102, 241, 0.2) 0%, rgba(168, 85, 247, 0.15) 50%, rgba(236, 72, 153, 0.1) 100%)',
-    // 'gradient-card': 'linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(255, 255, 255, 0.7) 100%)',
-    // 'gradient-card-dark': 'linear-gradient(135deg, rgba(30, 41, 59, 0.9) 0%, rgba(30, 41, 59, 0.7) 100%)',
     'gradient-sidebar': 'linear-gradient(180deg, rgba(255, 255, 255, 0.95) 0%, rgba(248, 250, 252, 0.98) 100%)',
     'gradient-sidebar-dark': 'linear-gradient(180deg, rgba(15, 23, 42, 0.98) 0%, rgba(30, 41, 59, 0.95) 100%)',
-    // 'gradient-primary': 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #a855f7 100%)',
-    // 'gradient-accent': 'linear-gradient(135deg, #06b6d4 0%, #3b82f6 50%, #6366f1 100%)',
-    // 'gradient-glow': 'radial-gradient(ellipse 80% 50% at 50% -20%, rgba(120, 119, 198, 0.3), transparent)',
-    // 'gradient-glow-dark': 'radial-gradient(ellipse 80% 50% at 50% -20%, rgba(120, 119, 198, 0.5), transparent)',
-    // 'gradient-mesh':
-    //   'radial-gradient(at 40% 20%, rgba(99, 102, 241, 0.15) 0px, transparent 50%), radial-gradient(at 80% 0%, rgba(168, 85, 247, 0.1) 0px, transparent 50%), radial-gradient(at 0% 50%, rgba(236, 72, 153, 0.1) 0px, transparent 50%), radial-gradient(at 80% 50%, rgba(6, 182, 212, 0.1) 0px, transparent 50%), radial-gradient(at 0% 100%, rgba(99, 102, 241, 0.1) 0px, transparent 50%)',
-    // 'gradient-aurora-light':
-    //   'radial-gradient(900px circle at 18% 18%, rgba(99, 102, 241, 0.12), transparent 46%), radial-gradient(780px circle at 82% 12%, rgba(14, 165, 233, 0.1), transparent 45%), radial-gradient(960px circle at 48% 78%, rgba(236, 72, 153, 0.08), transparent 55%), linear-gradient(180deg, rgba(255, 255, 255, 0.92) 0%, rgba(248, 250, 252, 0.88) 100%)',
-    // 'gradient-aurora-dark':
-    //   'radial-gradient(900px circle at 18% 18%, rgba(129, 140, 248, 0.16), transparent 46%), radial-gradient(820px circle at 82% 10%, rgba(45, 212, 191, 0.12), transparent 48%), radial-gradient(980px circle at 50% 80%, rgba(59, 130, 246, 0.12), transparent 55%), linear-gradient(180deg, rgba(15, 23, 42, 0.96) 0%, rgba(15, 23, 42, 0.9) 100%)',
     // Backgrounds
     'bg-stripes': 'linear-gradient(135deg,var(--violet-300) 10%,#0000 0,#0000 50%,var(--violet-300) 0,var(--violet-300) 60%,#0000 0,#0000)',
     'bg-stripes-dark':
       'linear-gradient(135deg,var(--slate-700) 10%,#0000 0,#0000 50%,var(--slate-700) 0,var(--slate-700) 60%,#0000 0,#0000)',
-    // 'body-bg': 'linear-gradient(19deg, white 40%, rgba(183, 33, 255, 0.05) 94%)',
-    // 'bg-dots': 'radial-gradient(circle, rgba(99, 102, 241, 0.15) 1px, transparent 1px)',
-    // 'bg-grid':
-    //   'linear-gradient(rgba(99, 102, 241, 0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(99, 102, 241, 0.03) 1px, transparent 1px)',
     // Theme colors
     'theme-bg': 'light-dark(#fff, #082f49)',
     'theme-color': 'light-dark(#fff, #082f49)',
@@ -75,25 +59,12 @@ export const { extendedProps, extendedPropTypes } = Box.extend(
     bgImage: [
       {
         values: [
-          // 'body-bg',
           'bg-stripes',
           'bg-stripes-dark',
-          // 'bg-img-indeterminate-green',
           'gradient-hero',
           'gradient-hero-dark',
-          // 'gradient-card',
-          // 'gradient-card-dark',
           'gradient-sidebar',
           'gradient-sidebar-dark',
-          // 'gradient-primary',
-          // 'gradient-accent',
-          // 'gradient-glow',
-          // 'gradient-glow-dark',
-          // 'gradient-mesh',
-          // 'gradient-aurora-light',
-          // 'gradient-aurora-dark',
-          // 'bg-dots',
-          // 'bg-grid',
         ] as const,
         valueFormat: (value, getVariableValue) => getVariableValue(value),
         styleName: 'background-image',

@@ -8,12 +8,9 @@ export interface DropdownItemProps<TVal = unknown> extends BoxProps {
 }
 
 /**
- * A row of the open listbox, in the order the keyboard walks them.
- *
- * "Clear" and "Select all" are rows, not decorations beside the list: they sit inside the listbox,
- * so they carry `role="option"` like everything else in it and the arrow keys have to reach them.
- * Building one array up front is what makes an index mean the same thing to the roving-focus hook,
- * to `aria-activedescendant` and to the markup.
+ * A row of the open listbox, in the order the keyboard walks them. "Clear" and "Select all" are rows
+ * rather than decorations beside the list, so they carry `role="option"` too. One array up front is what
+ * makes an index mean the same thing to the roving-focus hook, to `aria-activedescendant` and to the markup.
  */
 export type DropdownRow<TVal = unknown> =
   | { kind: 'unselect'; element: React.ReactElement<{ props?: object }> }

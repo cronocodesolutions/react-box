@@ -8,11 +8,8 @@ import { useIsomorphicLayoutEffect } from '../effects';
  */
 
 /**
- * The latest value, readable from an event handler that must not be re-registered when it changes.
- *
- * Written from an effect rather than during render, which the lint rules require and which costs
- * nothing here: the value is only ever read from an event, and events fire long after the commit
- * that wrote it.
+ * The latest value, readable from an event handler that must not be re-registered when it changes. Written
+ * from an effect rather than during render, which costs nothing here: it is only read from an event.
  */
 export function useLatest<T>(value: T): React.RefObject<T> {
   const ref = useRef(value);

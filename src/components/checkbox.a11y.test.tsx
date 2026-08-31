@@ -9,13 +9,9 @@ import { Label } from './semantics';
 import Switch from './switch';
 
 /**
- * The template for a keyboard-interaction test — the shape A3–A7 copy.
- *
- * Checkbox is the easy case on purpose: it renders a real `<input type="checkbox">`, so the
- * browser already supplies the APG checkbox pattern (focusable, Space toggles, submits with the
- * form). What A1 recorded as `it.todo` was the rest of the contract, which A4 has now closed: the
- * component labels itself, reports the mixed state, and has a sibling that wears `role="switch"`.
- *
+ * The template for a keyboard-interaction test — the shape A3–A7 copy. Checkbox is the easy case on
+ * purpose: a real `<input type="checkbox">` already supplies the APG pattern, so what is asserted is the
+ * rest of the contract A4 closed — the component labels itself and reports the mixed state.
  * Pattern: https://www.w3.org/WAI/ARIA/apg/patterns/checkbox/
  */
 describe('Checkbox accessibility', () => {

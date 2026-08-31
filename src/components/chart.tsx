@@ -7,34 +7,16 @@ import ObjectUtils from '../utils/object/objectUtils';
 import { Circle, Path, Svg, SvgProps } from './svg';
 
 /**
- * The chart micro-primitives: the small, dense drawings a dashboard is made of, as Boxes.
- *
- * They are deliberately not a chart *library*. There are no axes, no legends and no data
- * transformations — a `<Sparkline>` takes numbers and draws their shape, and everything about how it
- * looks is the props every other component in this library takes: `color`, `strokeWidth`, `hover`,
- * `md`, `theme`, `motionReduce`. That is the whole point. A chart library owns its own styling
- * language and its own dark mode; these own neither, because Box already has both.
- *
- * Two rules run through all four, and both are about where a number ends up:
- *
- * - **Shape is an attribute, colour is a class.** The `d` of a sparkline is per-row data, and an
- *   attribute costs nothing — ten thousand rows of different shapes generate no CSS at all. What
- *   *is* a style prop is the paint, which is shared, so ten thousand rows share one rule.
- * - **A ring's fill is a rounded fraction.** A dash length is a style prop, so it lands in a class
- *   name; rounding it (`ChartUtils.FRACTION_STEP`) is what keeps a column of percentages from
- *   generating a rule each, and what leaves the arc able to transition.
- *
- * The a11y rule is `Svg`'s, because each of these *is* an `Svg`: no `label` means the drawing is
- * decoration and `aria-hidden`, a `label` makes it `role="img"` with that name. A sparkline beside a
- * number needs no label; one that is the only thing in a cell does.
+ * The chart micro-primitives: the small drawings a dashboard is made of, as Boxes. Deliberately not a chart
+ * *library* — no axes, no legends, no data transformations; what you get instead is that every prop,
+ * breakpoint and theme works. Two rules run through all four: **shape is an attribute, paint is a class**
+ * (so ten thousand rows share one rule), and a ring's fill is a **rounded fraction**, because a dash length
+ * lands in a class name and still has to transition. Naming is `Svg`'s: no `label` means `aria-hidden`.
  */
 
 /**
- * The props every primitive shares: an `Svg`'s, minus three it owns itself.
- *
- * `viewBox` is the coordinate system the drawing is computed in. `variant` is Box's component
- * variant, and these have no component style to vary. `children` is narrowed to plain SVG content
- * — a chart's children are a label in the middle of a ring, never Box's `isHover` render prop.
+ * The props every primitive shares: an `Svg`'s, minus the `viewBox` and `variant` they own and with
+ * `children` narrowed to SVG content — a chart's children are a label in a ring, never a render prop.
  */
 type ChartProps = Omit<SvgProps, 'viewBox' | 'variant' | 'children'> & { children?: React.ReactNode };
 
@@ -45,11 +27,9 @@ const VIEW_BOX = `0 0 ${ChartUtils.VIEW} ${ChartUtils.VIEW}`;
 type Paint = NonNullable<BoxStyleProps['fill']>;
 
 /**
- * The colours a `<MiniDonut>` cycles through when it is not given any — the same six a
- * `<ChartContainer>` declares as `--chart-1` … `--chart-6`, so a donut inside one matches the charts
- * beside it. Tokens rather than `var(--chart-n)`, so a donut draws something the moment it is
- * rendered with no container above it; a themed one passes its own — `colors={['var(--color-cost)']}`
- * works because `fill` takes a variable.
+ * The colours a `<MiniDonut>` cycles through when it is not given any — the six a `<ChartContainer>`
+ * declares, so a donut inside one matches the charts beside it. Tokens rather than `var(--chart-n)`, so
+ * a donut with no container above it still draws something.
  */
 const DEFAULT_COLORS: readonly Paint[] = ChartUtils.PALETTE;
 
@@ -74,9 +54,8 @@ function SparklineImpl(props: SparklineProps, ref: Ref<SVGSVGElement>) {
   return (
     <Svg
       viewBox={VIEW_BOX}
-      // The one primitive that is *not* drawn to scale: a sparkline fills whatever box it is given,
-      // and `non-scaling-stroke` is what keeps the line one width thick after it has been stretched.
-      // Both are ordinary props, so a caller who wants a shape that scales says so.
+      // The one primitive not drawn to scale: it fills whatever box it is given, and `non-scaling-stroke`
+      // keeps the line one width thick after the stretch. Both are ordinary props, so a caller can opt out.
       preserveAspectRatio="none"
       vectorEffect="non-scaling-stroke"
       width="100%"
@@ -137,9 +116,8 @@ function ProgressRingImpl(props: ProgressRingProps, ref: Ref<SVGSVGElement>) {
     >
       <Circle cx={ChartUtils.CENTRE} cy={ChartUtils.CENTRE} r={radius} strokeOpacity={trackOpacity} />
       {/*
-       * Turned by the `transform` *attribute*, which carries its own centre of rotation — the CSS
-       * `rotate` prop turns an SVG element around the corner of the viewBox, and this library has no
-       * `transform-origin` prop yet (AN1). Twelve o'clock is where a ring is read from.
+       * Turned by the `transform` *attribute*, which carries its own centre: the CSS `rotate` prop turns a
+       * shape around the corner of the viewBox, and there is no `transformOrigin` prop yet (AN1).
        */}
       <Circle
         cx={ChartUtils.CENTRE}
@@ -232,13 +210,9 @@ export const MiniDonut = /* @__PURE__ */ forwardRef(MiniDonutImpl);
 MiniDonut.displayName = 'MiniDonut';
 
 /**
- * The series a `<ChartContainer>` draws. A list of names takes the numbered palette in order —
- * `series={['revenue', 'cost']}` declares `--color-revenue: var(--chart-1)` and `--color-cost:
- * var(--chart-2)` — and a record names its own paint per series: `series={{ revenue: 'emerald-600' }}`.
- *
- * A name becomes part of a custom-property name, so it has to be a CSS identifier. A Recharts
- * `dataKey` normally is (`revenue`, `new_users`); one that is not — a dot path like `user.name` — is
- * skipped rather than taking the rest of the palette down with it.
+ * The series a `<ChartContainer>` draws: `series={['revenue', 'cost']}` takes the palette in order,
+ * `series={{ revenue: 'emerald-600' }}` names its own paint. A name becomes part of a custom-property
+ * name, so it has to be a CSS identifier — a dot-path `dataKey` is skipped rather than taking the rest.
  */
 export type ChartSeries = readonly string[] | Readonly<Record<string, Paint>>;
 
@@ -256,17 +230,15 @@ function ChartContainerImpl<TTag extends keyof React.JSX.IntrinsicElements = 'di
 ) {
   const { series, vars, theme, ...boxProps } = props;
 
-  // Declared on this element and inherited by everything inside it. The caller's own `vars` come
-  // last, so overriding one slot is `vars={{ 'chart-1': 'teal-600' }}` and needs no prop of its own.
+  // The caller's own `vars` come last, so overriding one slot needs no prop of its own.
   const declared = {
     ...ChartUtils.paletteVariables(ChartUtils.PALETTE),
     ...(series ? ChartUtils.seriesVariables(series) : {}),
     ...vars,
   };
 
-  // The dark palette reaches the same variables through the ancestor-scoped selector every other
-  // themed prop uses, which is the whole trick: the chart inside changes nothing between themes.
-  // Merged rather than replaced, so a caller with their own `theme` keeps it.
+  // The dark palette arrives through the same theme selector every other prop uses, which is the whole
+  // trick. Merged rather than replaced, so a caller's own `theme` survives.
   const themes = ObjectUtils.mergeDeep<NonNullable<ChartContainerProps<TTag>['theme']>>(
     { dark: { vars: ChartUtils.paletteVariables(ChartUtils.DARK_PALETTE) } },
     theme ?? {},
@@ -279,19 +251,10 @@ const ChartContainerComponent = forwardRef(ChartContainerImpl);
 ChartContainerComponent.displayName = 'ChartContainer';
 
 /**
- * The theming bridge: a Box that declares the variables a chart reads, so the chart itself can name
- * no colour at all.
- *
- * Every chart library says to write the palette into the chart — which is exactly what makes dark
- * mode a chart problem, and why a themed Recharts is usually a `<style>` tag per chart. Written as
- * `stroke="var(--color-revenue)"` instead, the colour lives here, in `vars`: an ordinary Box prop,
- * so it is themed, responsive and hoverable like every other prop, it lands in a **class** (two
- * containers with the same series share one rule), and it renders on a server.
- *
- * The names are the ones the ecosystem already uses — `--chart-1` … `--chart-6` and
- * `--color-<series>` — so a chart copied from shadcn's charts works unchanged.
- *
- * It adds no role and no ARIA: it is a wrapper, and what is inside it owns its own semantics.
+ * The theming bridge: a Box that declares the variables a chart reads, so the chart itself names no
+ * colour. `vars` is an ordinary prop, so the palette is themed and responsive like everything else and
+ * lands in a *class* — two containers with the same series share one rule, and it renders on a server.
+ * The names are the ecosystem's, so a chart copied from shadcn works unchanged. It adds no ARIA.
  */
 export const ChartContainer = ChartContainerComponent as <
   TTag extends keyof React.JSX.IntrinsicElements = 'div',

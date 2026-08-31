@@ -1,10 +1,7 @@
 /**
- * Where the docs site lives, and what it publishes.
- *
- * Everything address-bound is built from `SITE_URL`: the canonical link on every page, `sitemap.xml`,
- * `robots.txt` and the `CNAME` that pins the GitHub Pages custom domain. Moving the site to
- * box-kite.dev is therefore this one constant plus the DNS records — see the cutover checklist in
- * `docs/WEBSITE.md`. Nothing else in `pages/` may hard-code a host.
+ * Where the docs site lives. Everything address-bound is built from `SITE_URL` — the canonical links,
+ * `sitemap.xml`, `robots.txt`, the `CNAME` — so moving to box-kite.dev is this constant plus the DNS
+ * records (checklist in `docs/WEBSITE.md`). Nothing else in `pages/` may hard-code a host.
  */
 export const SITE_URL = 'https://box.cronocode.com';
 

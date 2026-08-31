@@ -22,25 +22,15 @@ export interface RovingFocusOptions {
   /** How many items there are right now — rows, in grid mode. A filtered list may change this. */
   count: number;
   /**
-   * Turns the list into a grid and `count` into a count of rows: this is how many cells the row
-   * at `row` holds. A number when every row holds the same, a function when they do not — a group
-   * row spanning its columns holds fewer cells than the rows underneath it.
-   *
-   * Grid mode moves in two axes and, per APG's grid pattern, never wraps: an arrow at an edge
-   * leaves focus where it is. Home/End go to the row's ends, Ctrl+Home/Ctrl+End to the grid's
-   * first and last cell, and PageUp/PageDown move `pageSize` rows at a time.
+   * Turns the list into a grid and `count` into a count of rows: how many cells the row at `row` holds, a
+   * function when rows differ. Grid mode moves in two axes and never wraps (APG), Home/End go to the
+   * row's ends, Ctrl+Home/End to the grid's corners, PageUp/PageDown by `pageSize` rows.
    */
   columns?: number | ((row: number) => number);
   /**
-   * Where a cell starts in column-index space — the 0-based grid column its first column is.
-   *
-   * Supply it when a row's cells do not line up one-to-one with the grid's columns: a grouped
-   * header covers the columns of every leaf under it, and a group row's spanning cell covers all
-   * of them at once. Vertical movement is measured in this space rather than in cell ordinals, so
-   * a move down out of a cell covering columns 4–6 lands under the column it started in instead of
-   * on whichever cell happens to share its ordinal.
-   *
-   * Identity by default, which is what a row of one cell per column already is.
+   * Where a cell starts in column-index space, for rows whose cells do not line up one-to-one with the
+   * grid's columns (a grouped header, a spanning group row). Vertical movement is measured in this space,
+   * so a move down out of a cell covering columns 4–6 lands under the column it started in. Identity by default.
    */
   columnIndexOf?: (row: number, cell: number) => number;
   /** Rows a PageUp/PageDown moves. Default 10. Grid mode only. */
@@ -61,11 +51,9 @@ export interface RovingFocusOptions {
   /** An item's text. Supplying it turns on typeahead. */
   textOf?: (index: number) => string;
   /**
-   * Move real DOM focus onto the active item. Default true — the roving-tabindex pattern.
-   *
-   * `false` is the other half of the APG list patterns: focus stays where it is (a combobox's
-   * trigger, say) and the active item is named by `aria-activedescendant` instead. The hook still
-   * tracks the index and hands back the element; what it does not do is take focus.
+   * Move real DOM focus onto the active item — the roving-tabindex pattern. `false` is the other half of
+   * the APG list patterns: focus stays put (a combobox's trigger) and `aria-activedescendant` names the
+   * active item instead. The hook still tracks the index; it just does not take focus.
    */
   focusItems?: boolean;
   /** Enter, and Space when no typeahead buffer is open. */
@@ -82,15 +70,12 @@ export interface RovingFocus {
   /** Clamped to the current `count`; `-1` when nothing is active. The row, in grid mode. */
   activeIndex: number;
   /**
-   * The active cell's ordinal in its row — where it sits among the cells, which is only its column
-   * index while no cell spans more than one column. `-1` outside grid mode.
+   * The active cell's ordinal in its row — its column index only while no cell spans more than one column.
+   * `-1` outside grid mode.
    */
   activeColumn: number;
   setActiveIndex: (index: number, details: ChangeDetails<RovingFocusReason>) => void;
-  /**
-   * Grid mode: move both axes at once, `column` being a cell ordinal as `cellProps` takes one.
-   * Out-of-range values are clamped, never rejected.
-   */
+  /** Grid mode: move both axes at once, `column` being a cell ordinal. Out-of-range values are clamped. */
   setActiveCell: (row: number, column: number, details: ChangeDetails<RovingFocusReason>) => void;
   /** Put this on the element that has focus: the list in roving-tabindex, the trigger otherwise. */
   onKeyDown: (event: React.KeyboardEvent) => void;
@@ -98,10 +83,9 @@ export interface RovingFocus {
   /** Grid mode's `itemProps`: the roving tabindex and the ref for one cell. */
   cellProps: (row: number, column: number) => RovingFocusItemProps;
   /**
-   * The active item's element — for `aria-activedescendant`, or to scroll it into view.
-   *
-   * `null` in grid mode whenever the active cell is not rendered, which a virtualized grid is full
-   * of: bring the row into view first, then read this again on the render that follows.
+   * The active item's element, for `aria-activedescendant` or to scroll it into view. `null` in grid mode
+   * whenever the active cell is not rendered, which a virtualized grid is full of: bring the row into view
+   * first, then read this on the render that follows.
    */
   activeItem: () => HTMLElement | null;
 }
@@ -137,12 +121,9 @@ function edge(delta: number, count: number, isDisabled?: (index: number) => bool
 }
 
 /**
- * The item a typeahead buffer points at.
- *
- * A buffer of one character — or of the same character repeated, which is how a user cycles
- * through the items sharing a first letter — searches from *after* the current item. A longer
- * buffer is a real prefix and searches from the current item, so typing further letters narrows
- * onto the item already found instead of skipping past it.
+ * The item a typeahead buffer points at. One character — or the same one repeated, which is how a user
+ * cycles through a letter — searches from *after* the current item; a longer buffer is a real prefix and
+ * searches from it, so further letters narrow instead of skipping.
  */
 function typeaheadTarget(
   query: string,
@@ -173,17 +154,10 @@ function isPrintable(event: React.KeyboardEvent): boolean {
 }
 
 /**
- * Arrow-key navigation over a list: the movement half of every APG list pattern (listbox, menu,
- * tabs, radio group), with the two focus strategies those patterns use between them.
- *
- * What it owns: which item is active, how the arrow keys, Home/End and typeahead move it, and
- * which items are skipped. What it leaves to the caller: the roles and the ARIA. That split is
- * deliberate — a listbox and a menu navigate identically and are named completely differently, so
- * a hook that supplied both would be wrong for one of them.
- *
- * `columns` turns the same movement into APG's grid pattern: two axes, no wrapping at the edges,
- * Ctrl+Home/End for the corners and PageUp/PageDown by the page. A grid is the one list pattern
- * whose rows may hold different numbers of cells, so `columns` may be a function of the row.
+ * Arrow-key navigation over a list: the movement half of every APG list pattern (listbox, menu, tabs,
+ * radio group), with both focus strategies. It owns which item is active and how the keys move it; the
+ * caller owns the roles and the ARIA, because a listbox and a menu navigate alike and are named quite
+ * differently. `columns` turns the same movement into APG's grid pattern, and may be a function of the row.
  */
 export default function useRovingFocus(options: RovingFocusOptions): RovingFocus {
   const {
@@ -217,9 +191,8 @@ export default function useRovingFocus(options: RovingFocusOptions): RovingFocus
   const widthOf = useCallback((row: number) => (typeof columns === 'function' ? columns(row) : (columns ?? 0)), [columns]);
 
   /**
-   * Which cell of a row covers a column index: the last one starting at or before it. A row tiles
-   * its columns in order, so a walk finds it, and a column past the row's last cell lands on that
-   * one. With no `columnIndexOf` the two spaces are the same and this is the clamp it used to be.
+   * Which cell of a row covers a column index: the last one starting at or before it. A row tiles its
+   * columns in order, so a walk finds it; with no `columnIndexOf` this is the clamp it used to be.
    */
   const cellAtColumn = useCallback(
     (row: number, columnIndex: number): number => {
@@ -238,10 +211,9 @@ export default function useRovingFocus(options: RovingFocusOptions): RovingFocus
   );
 
   /**
-   * The column the user last *asked* for, in column-index space — which is not always a column the
-   * current row starts a cell at: moving down through a group row that spans its columns, or a
-   * detail row that is a single cell, must not collapse the position permanently into column 0.
-   * `activeColumn` is the cell covering it, so the column comes back on the far side.
+   * The column the user last *asked* for, which is not always one the current row starts a cell at: moving
+   * through a spanning group row must not collapse the position into column 0 for good. `activeColumn` is
+   * the cell covering it, so the column comes back on the far side.
    */
   const [rawColumn, setRawColumn] = useState(defaultActiveColumn);
   const activeColumn = isGrid && activeIndex >= 0 ? cellAtColumn(activeIndex, rawColumn) : -1;
@@ -257,11 +229,8 @@ export default function useRovingFocus(options: RovingFocusOptions): RovingFocus
   }, []);
 
   /**
-   * True only while the hook is moving focus itself.
-   *
-   * `focus()` fires synchronously, so the `onFocus` a move causes runs before the state it set has
-   * been committed — and it would report the cell it landed on as a fresh request, throwing away
-   * the column the user actually asked for on the way through a narrow row.
+   * True only while the hook is moving focus itself: `focus()` fires synchronously, so the `onFocus` it
+   * causes would otherwise report the landing cell as a fresh request and throw away the column asked for.
    */
   const movingFocus = useRef(false);
 
@@ -286,8 +255,8 @@ export default function useRovingFocus(options: RovingFocusOptions): RovingFocus
   const columnStart = useLatest(columnIndexOf);
 
   /**
-   * The move both the public setter and the keyboard go through, in column-index space: the
-   * column *asked for* is what gets remembered, and the cell covering it is what becomes active.
+   * The move both the public setter and the keyboard go through: the column *asked for* is remembered, and
+   * the cell covering it becomes active.
    */
   const setActiveAtColumn = useCallback(
     (row: number, columnIndex: number, details: ChangeDetails<RovingFocusReason>): RovingCell => {

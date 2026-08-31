@@ -1,11 +1,9 @@
 import Box from '@cronocode/react-box';
 
 /**
- * An async Server Component behind a Suspense boundary — the case that made runtime CSS-in-JS
- * awkward. Its markup arrives in a later chunk of the same response, and so do its `<style>`
- * elements, which React appends to what it already hoisted. Nothing waits for a commit, because
- * nothing about this mode needs one: the rules for `bgColor="emerald-500"` below appear nowhere in
- * the shell above and reach the document with the row that uses them.
+ * An async Server Component behind a Suspense boundary — the case that made runtime CSS-in-JS awkward. Its
+ * markup arrives in a later chunk of the same response, and so do its `<style>` elements, which React
+ * appends to what it already hoisted. Nothing waits for a commit, because nothing here needs one.
  */
 
 const releases = [

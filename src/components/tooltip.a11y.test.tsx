@@ -7,15 +7,11 @@ import Button from './button';
 import Tooltip from './tooltip';
 
 /**
- * The APG tooltip, end to end — the contract A1 wrote down as `it.todo` while the component was
- * still only a positioning primitive, now that A3 has made it the pattern.
+ * The APG tooltip, end to end: https://www.w3.org/WAI/ARIA/apg/patterns/tooltip/
  *
- * Three of these tests exist because of WCAG 1.4.13 (Content on Hover or Focus) rather than APG:
- * dismissible, hoverable, persistent. They are the ones that fail on almost every hand-rolled
- * tooltip, and none of them is visible to axe — a tooltip that vanishes when you reach for it has
- * perfect markup right up to the moment it disappears.
- *
- * Pattern: https://www.w3.org/WAI/ARIA/apg/patterns/tooltip/
+ * Three of these come from WCAG 1.4.13 rather than APG — dismissible, hoverable, persistent. They are the
+ * ones every hand-rolled tooltip fails, and none is visible to axe: a tooltip that vanishes when you
+ * reach for it has perfect markup right up to the moment it disappears.
  */
 describe('Tooltip accessibility', () => {
   ignoreLogs();

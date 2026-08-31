@@ -1,11 +1,7 @@
 /**
- * Where a style engine's CSS ends up. `flush()` decides *what* to write and in which order;
- * a sink decides *how* it is written — into a live stylesheet, into the text of a `<style>`
- * element, or into a string for server rendering.
- *
- * Every implementation must produce the same rule order for the same sequence of calls: a
- * generated rule sits at the position its `sortKey` gives it, whichever flush it arrived in, so
- * an app rendered on the server gets the same cascade the browser builds.
+ * Where a style engine's CSS ends up. `flush()` decides *what* to write and in which order; a sink
+ * decides *how* — a live stylesheet, the text of a `<style>` element, or a string for a server. Every
+ * implementation must produce the same order for the same calls, so SSR and the browser agree.
  */
 import { documentHead } from '../../utils/environment/environmentUtils';
 import { stableHash } from '../hash';
@@ -17,10 +13,9 @@ export interface SortedRule {
 }
 
 /**
- * One hoistable `<style>` element: the CSS it carries, the `href` React 19 dedupes it by, and the
- * precedence group it belongs to. Element mode writes nowhere — it hands these to the adapter, and
- * the adapter renders them, which is what makes the mode work inside Server Components and
- * streaming SSR where no effect (and no DOM) is available.
+ * One hoistable `<style>` element: its CSS, the `href` React 19 dedupes it by, and its precedence group.
+ * Element mode hands these to the adapter instead of writing anywhere, which is what makes it work in a
+ * Server Component, where there is no effect and no DOM.
  */
 export interface StyleElementDescriptor {
   /** Content-addressed: the same CSS always produces the same href, in every process. */
@@ -52,9 +47,9 @@ export interface StyleSink {
   /** Drop everything written so far. */
   reset(): void;
   /**
-   * Element mode only: the base rules (reset, `:root` variables, the cascade-layer order) as one
-   * hoistable element — null before anything has been written. The href follows the content, so a
-   * later, longer version of the block is a new element and not a silently-dropped duplicate.
+   * Element mode only: the base rules (reset, `:root`, the layer order) as one hoistable element, null
+   * before anything is written. The href follows the content, so a longer version is a new element rather
+   * than a silently-dropped duplicate.
    */
   baseElement?(): StyleElementDescriptor | null;
 }
@@ -77,9 +72,8 @@ function upperBound(keys: readonly number[], key: number): number {
 }
 
 /**
- * The ordered rule model the string and textContent sinks share. It mirrors what the CSSOM sink
- * does to a real stylesheet: base rules first, late `:root` blocks pushed in front of them
- * (`insertRule(rule, 0)`), generated rules kept sorted by their sort key.
+ * The ordered rule model the string and textContent sinks share, mirroring what the CSSOM sink does to a
+ * real stylesheet: base rules first, late `:root` blocks in front of them, generated rules sorted.
  */
 function createRuleBuffer() {
   let variableRules: string[] = [];
@@ -127,11 +121,9 @@ export function createStringSink(): StyleSink {
 }
 
 /**
- * Element mode: nothing is written anywhere. The engine turns each generated rule into a
- * `StyleElementDescriptor` and the adapter renders it as `<style href precedence>`; React 19
- * hoists those into `<head>` and dedupes them by href. This sink only keeps the same in-memory
- * rule model the string sink does — so `getStyles()` still returns the full stylesheet — plus the
- * base rules as the one descriptor no single Box owns.
+ * Element mode: nothing is written anywhere. Each rule becomes a `StyleElementDescriptor` the adapter
+ * renders as `<style href precedence>`, which React 19 hoists and dedupes. This sink keeps the same
+ * in-memory model as the string one, so `getStyles()` still returns the whole stylesheet.
  */
 export function createElementSink(): StyleSink {
   const buffer = createRuleBuffer();
@@ -297,8 +289,8 @@ export function resolveStyleElement(styleElementId: string): HTMLStyleElement {
 }
 
 /**
- * Build the sink for a mode. With no mode given the sink follows the environment: a stylesheet in
- * the browser, a string on the server — which is why server rendering needs no fake `document`.
+ * The sink for a mode. With none given it follows the environment — a stylesheet in the browser, a
+ * string on a server, which is why server rendering needs no fake `document`.
  */
 export function createSink(styleElementId: string, mode?: SinkMode): StyleSink {
   // Element mode has to be asked for: it changes what the adapter renders, not just where CSS

@@ -7,20 +7,10 @@ import { H2, Label, Link, P, Span } from '@cronocode/react-box/components/semant
 import Textbox from '@cronocode/react-box/components/textbox';
 
 /**
- * The pre-built components, imported straight into a Server Component.
- *
- * There is no `'use client'` in this file. `Flex`, `Grid`, `Button`, `Textbox` and the semantic
- * tags are hook-free wrappers around Box, and their published chunks import the package by its own
- * name rather than by a relative path — so the `react-server` condition applies to them too and
- * they resolve the same hook-free Box this page does. They render on the server, with their CSS in
- * the HTML and no JavaScript behind them.
- *
- * `Checkbox` is the other case. It holds a ref and runs an effect (for the indeterminate state), so
- * it cannot render on a server. Its chunk ships a `'use client'` banner, which is what lets a
- * Server Component import it at all: the bundler opens a client boundary around it instead of
- * compiling `useRef` into the server graph. Its markup is server-rendered like any client
- * component's, but its *rules* arrive with the client bundle — element mode is a client-bundle
- * setting, and only the app can make it (see `elementMode.ts`).
+ * The pre-built components, imported straight into a Server Component — no `'use client'` here. The
+ * hook-free ones are wrappers around Box whose chunks import the package by name, so the `react-server`
+ * condition reaches them and they render on the server. `Checkbox` holds a ref, so its chunk ships a
+ * `use client` banner: its markup is still server-rendered, its *rules* arrive with the client bundle.
  */
 export default function ComponentsPage() {
   return (

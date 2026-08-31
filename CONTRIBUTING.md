@@ -1240,6 +1240,13 @@ npm publish --access public
 - Trailing commas: all
 - Tab width: 2
 
+### Comments
+
+One or two lines, saying what the code cannot: the trap, the reason, the bug it came from. A JSDoc that
+needs a code example or has two conventions to reconcile may run to four or five, and nothing should run
+longer — a long explanation belongs in this file, on the docs site or in the roadmap, where a reader
+reaches it on purpose rather than while trying to read the code around it.
+
 ### Naming Conventions
 
 | Type              | Convention           | Example                                  |

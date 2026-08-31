@@ -13,12 +13,9 @@ interface Props<TVal> {
 const componentOf = { item: 'dropdown.item', unselect: 'dropdown.unselect', selectAll: 'dropdown.selectAll' } as const;
 
 /**
- * One `role="option"` in the listbox.
- *
- * The role is what makes the `aria-selected` beside it legal — on a plain `<div>` the attribute is
- * not defined at all, which is what axe was reporting (bug #46) and what a screen reader was
- * ignoring. It also makes the row addressable: an option needs an id for the combobox's
- * `aria-activedescendant` to point at, since DOM focus never leaves the trigger.
+ * One `role="option"` in the listbox. The role is what makes the `aria-selected` beside it legal — on a
+ * plain `<div>` the attribute is undefined, which is what axe reported (bug #46) — and it gives the row an
+ * id for the combobox's `aria-activedescendant`, since DOM focus never leaves the trigger.
  */
 function DropdownRowRendererImpl<TVal>({ row, index }: Props<TVal>) {
   const { valueToUse, multiple, variant, showCheckbox, selectRow, optionId, activeIndex, rowRef, isRowDisabled } =

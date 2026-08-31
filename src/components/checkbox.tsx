@@ -30,13 +30,9 @@ interface Props<TKey extends keyof ComponentsAndVariants> extends CheckboxProps<
 }
 
 /**
- * The APG checkbox — which is to say, a real `<input type="checkbox">`.
- *
- * Almost nothing here is behaviour: the platform already supplies focus, Space to toggle, the
- * checked state and form submission, and every custom-drawn checkbox that reimplements those gets
- * some of them wrong. What the component owes is the part the platform cannot guess — the label
- * beside it, and the mixed state.
- *
+ * The APG checkbox — which is to say, a real `<input type="checkbox">`. Almost nothing here is behaviour:
+ * the platform supplies focus, Space, the checked state and form submission, and every custom-drawn
+ * checkbox gets some of those wrong. What the component owes is the label and the mixed state.
  * Pattern: https://www.w3.org/WAI/ARIA/apg/patterns/checkbox/
  */
 function CheckboxImpl<TKey extends keyof ComponentsAndVariants>(props: Props<TKey>, ref: Ref<HTMLInputElement>) {

@@ -7,20 +7,11 @@ import { ComponentsAndVariants } from '../types';
 import StringUtils from '../utils/string/stringUtils';
 
 /**
- * The SVG elements as components, so a drawing is written the way the rest of this library is
- * written — `<Circle cx={28} r={12} />`, never `<Box tag="circle">`.
- *
- * The whole difficulty of an SVG component is that SVG attribute names and Box prop names collide,
- * and the collision is silent: a `<path>`'s `d` is Box's flex-direction prop, a `<rect>`'s `width`
- * is the ÷4 layout scale, a `<text>`'s `x` is a CSS geometry property that does not apply to text
- * at all. Chakra once turned the `d` attribute into `display` this way. So each component names the
- * attributes it owns and **lifts them off the style props onto the element itself**: on `Path`, `d`
- * is path data; on `RadialGradient`, `cx` is the attribute; on a shape, `cx` stays the CSS prop SV2
- * shipped. The rule is per element, because whether a name is CSS or an attribute is a question
- * about the element and not about the name.
- *
- * A name CSS really does own on that element is left alone. `cx`/`cy`/`r`/`rx`/`ry`/`x`/`y` on a
- * shape stay Box props, which is what makes them transition — see the geometry section of /svg.
+ * The SVG elements as components, so a drawing is written the way the rest of this library is —
+ * `<Circle cx={28} r={12} />`, never `<Box tag="circle">`. The difficulty is that SVG attribute names and
+ * Box prop names collide silently (a `<path>`'s `d` is Box's flex-direction; Chakra once turned `d` into
+ * `display` this way), so each component names the attributes it owns and lifts them off the style props —
+ * per element, because whether a name is CSS or an attribute is a question about the element.
  */
 
 /** A name the element accepts as an attribute. */
@@ -40,9 +31,9 @@ type SvgElementType<
 > = (props: SvgElementProps<TTag, TAttribute, TKey> & RefAttributes<ExtractElementFromTag<TTag>>) => React.ReactNode;
 
 /**
- * Split the claimed attributes out of a component's props. Returns the style props with those names
- * removed and the attributes to merge over `props`. A name that was not passed is not written
- * either — an absent attribute must never shadow one the caller put in `props` by hand.
+ * Split the claimed attributes out of a component's props: the style props with those names removed, and
+ * the attributes to merge over `props`. A name that was not passed is not written either — an absent
+ * attribute must never shadow one the caller put in `props` by hand.
  */
 function liftAttributes(source: object, names: readonly string[]) {
   // A fresh object, so deleting from it leaves the caller's props untouched.
@@ -133,12 +124,9 @@ Svg.displayName = 'Svg';
 export type SvgProps = React.ComponentProps<typeof Svg>;
 
 /**
- * The rest of the elements. Each list is the attributes that element owns — everything CSS styles
- * on it stays a Box prop, so a shape's geometry still transitions and a gradient's `cx` still lands
- * where SVG expects it. `transform` is an attribute everywhere it appears because SVG's version
- * carries its own centre of rotation (`rotate(-90 48 48)`), which the CSS `rotate` prop cannot say
- * — CSS turns an SVG element around the corner of the viewBox unless a `transform-origin` says
- * otherwise, and this library has no prop for that yet.
+ * The rest of the elements, each with the attributes it owns — everything CSS styles on it stays a Box
+ * prop. `transform` is an attribute everywhere, because SVG's version carries its own centre of rotation
+ * (`rotate(-90 48 48)`) and the CSS `rotate` prop cannot say that without a `transformOrigin` we lack.
  */
 export const G = /* @__PURE__ */ svgElement('g', ['transform']);
 export const Defs = /* @__PURE__ */ svgElement('defs');
@@ -151,9 +139,8 @@ export const Polyline = /* @__PURE__ */ svgElement('polyline', ['points', 'trans
 export const Polygon = /* @__PURE__ */ svgElement('polygon', ['points', 'transform', 'pathLength']);
 
 /**
- * `SvgText`, not `Text`, because `<text>` and a future HTML text component would be one name for
- * two elements. Its `x`/`y` are attributes: the CSS geometry properties do not apply to `<text>`,
- * so the Box props of the same name would compile, generate a rule, and move nothing.
+ * `SvgText`, not `Text`, which a future HTML text component would want. Its `x`/`y` are attributes: the
+ * CSS geometry properties do not apply to `<text>`, so the Box props of that name would move nothing.
  */
 export const SvgText = /* @__PURE__ */ svgElement('text', ['x', 'y', 'dx', 'dy', 'textLength', 'lengthAdjust', 'transform'], 'SvgText');
 export const TSpan = /* @__PURE__ */ svgElement('tspan', ['x', 'y', 'dx', 'dy', 'textLength', 'lengthAdjust'], 'TSpan');

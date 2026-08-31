@@ -27,95 +27,59 @@ import { createSink, RULE_PRECEDENCE, SinkMode, SortedRule, StyleElementDescript
 /** Explicit engine configuration — replaces the previous NODE_ENV-based sniffing. */
 export interface StylesConfiguration {
   /**
-   * How generated class names are emitted.
-   * - `'hashed'` (default): names go through the identity factory (short, stable hashes).
-   * - `'readable'`: the descriptive name is kept as-is (useful for tests and debugging).
-   * - `'stable'`: the descriptive name is hashed, so identical props produce the same class name in
-   *   every process — the default in element mode, where a class generated in a Server Component
-   *   has to match the one the client bundle generates for the same props.
+   * How class names are emitted: `'hashed'` (default, through the identity factory), `'readable'`
+   * (kept as-is, for tests) or `'stable'` (content-hashed, so two processes agree — element mode's default).
    */
   classNames?: 'hashed' | 'readable' | 'stable';
   /**
-   * Where generated rules are written. Defaults to the environment: a stylesheet in the browser,
-   * a string on the server — so server rendering needs no DOM at all.
-   * - `'cssom'`: `CSSStyleSheet.insertRule` (falls back to rule text when the element has no stylesheet).
-   * - `'textContent'`: the style element's text (readable in tests and DevTools).
-   * - `'string'`: kept in memory only, read back with `getStyles()` — the server-rendering sink.
-   * - `'element'`: nowhere. Rules come back from `resolveClassNames()` as style-element
-   *   descriptors for the adapter to render — `<style href precedence>`, which React 19 hoists
-   *   into `<head>` and dedupes. This is the mode that works in Server Components and streaming
-   *   SSR, where no effect ever runs. Rules are wrapped in cascade layers, so the order React
-   *   happens to insert the elements in cannot change the cascade.
-   *
-   * Changing the sink of an engine that has already emitted CSS starts a fresh stylesheet: those
-   * rules live in the old sink, so the engine forgets them and re-emits them on the next render.
+   * Where rules are written: `'cssom'` (`insertRule`), `'textContent'`, `'string'` (in memory, for
+   * `getStyles()`) or `'element'` (nowhere — they come back as `<style href precedence>` descriptors,
+   * which is what works in a Server Component). Defaults to the environment; changing it re-emits everything.
    */
   sink?: SinkMode;
 }
 
 export interface StyleEngineOptions extends StylesConfiguration {
-  /**
-   * The id of the `<style>` element this engine owns. Each engine writes to its own element so
-   * instances never corrupt each other's rule ordering. Defaults to a unique id per engine.
-   */
+  /** The id of the `<style>` element this engine owns, so two engines cannot corrupt each other's rule order. */
   styleElementId?: string;
-  /**
-   * When pending rules reach the sink. Defaults to a microtask — see `FlushScheduler` for the
-   * contract and what each adapter passes. `flushSync()` works regardless of this.
-   */
+  /** When pending rules reach the sink — see `FlushScheduler`. `flushSync()` works regardless. */
   scheduler?: FlushScheduler;
 }
 
 /**
- * An isolated styling engine: its own class-name cache, rule registry, identity factory,
- * variables, prop registry (`Box.extend`) and component registry (`Box.components`).
- * Everything the library used to keep in module scope lives on an instance of this.
+ * An isolated styling engine: its own class-name cache, rule registry, identity factory, variables,
+ * prop registry (`Box.extend`) and component registry (`Box.components`) — nothing in module scope.
  */
 export interface StyleEngine {
   /** The id of the `<style>` element this engine writes to. */
   readonly styleElementId: string;
   /**
-   * Resolve (and cache) the class list for a Box's props. `signature` is null when the props could
-   * not be serialized. `styleElements` is set in element mode only: the hoistable `<style>`
-   * elements this Box's classes need, the engine's base element first.
+   * The class list for a Box's props, cached. `signature` is null when the props would not serialize;
+   * `styleElements` is element mode only, the base element first.
    */
   resolveClassNames(
     props: BoxStyleProps<any>,
     isSvg: boolean,
   ): { classNames: string[]; signature: string | null; styleElements?: StyleElementDescriptor[] };
   /**
-   * The class list for a set of Box props as a `class` attribute value — the whole API a
-   * non-React adapter needs: `el.className = engine.classNames({ p: 4, bgColor: 'blue-500' })`.
-   * The CSS those classes need is written to this engine's sink on its own schedule, so there is
-   * nothing to flush; call `flushSync()` first only when reading computed styles in the same tick.
-   *
-   * Throws in element mode, where the rules go to no sink at all and the caller has to render the
-   * `styleElements` that `resolveClassNames` returns instead.
+   * The class list as a `class` attribute value — the whole API a non-React adapter needs. The CSS
+   * follows on the engine's own schedule; throws in element mode, where `resolveClassNames` is the way in.
    */
   classNames(props: BoxStyleProps<any>, options?: { svg?: boolean }): string;
-  /**
-   * Register rules that target a root selector (e.g. `html`) rather than a generated class.
-   * Returns the style elements they need in element mode, exactly like `resolveClassNames`.
-   */
+  /** Rules targeting a root selector (`html`) rather than a class. Returns style elements like `resolveClassNames`. */
   addGlobalStyles(props: BoxStyleProps<any>, selector: string): StyleElementDescriptor[] | undefined;
   /** Write every pending rule to this engine's sink, now. */
   flushSync(): void;
   /**
-   * Say that rules are pending and let this engine's `FlushScheduler` decide when they are
-   * written; many calls in one turn produce one flush. The engine calls this itself whenever it
-   * queues something, so nothing is ever left unflushed — an adapter needs it only for rules it
-   * queued behind the engine's back.
+   * Say that rules are pending and let the `FlushScheduler` pick the moment, so many calls in one turn
+   * produce one flush. The engine calls it itself; an adapter needs it only for rules it queued alone.
    */
   scheduleFlush(): void;
-  /**
-   * The CSS this engine has emitted, as text. Flushes first, so a server render — where no effect
-   * ever runs — still gets every rule its markup refers to.
-   */
+  /** The CSS emitted so far, as text. Flushes first, so a server render — where no effect runs — is complete. */
   getStyles(): string;
   /**
-   * Drop everything this engine has emitted: generated rules, cached class lists, the class-name
-   * counter, the variables it has resolved, and the contents of its sink. What survives is
-   * registration — extended props, components and declared variables. Call it between SSR requests.
+   * Drop everything emitted: rules, cached class lists, the name counter, resolved variables, the sink.
+   * Registration (extended props, components, declared variables) survives. Call it between SSR requests.
    */
   clear(): void;
   /** Apply explicit configuration. Cached class names are dropped when the configuration changes. */
@@ -132,19 +96,15 @@ export interface StyleEngine {
 
 export const DEFAULT_STYLE_ELEMENT_ID = 'crono-styles';
 
-// The `values` arrays that hold variable-backed tokens (colours, background images, shadows).
-// A value declared through `Box.extend({ variables })` is accepted wherever one of these lists
-// is declared, so a user token works on every prop that resolves its value to `var(--token)`.
+// The value lists that hold variable-backed tokens. A `Box.extend({ variables })` token is accepted
+// wherever one of them is declared.
 const variableBackedValues: ReadonlySet<unknown> = new Set([Variables.colorValues, Variables.bgImageValues, Variables.shadowValues]);
 
-// Only used to give engines distinct style elements when the caller does not name one. This is
-// an id sequence, not engine state — instances share nothing else.
+// An id sequence for engines the caller did not name, not engine state.
 let engineSequence = 0;
 
-// Every character a CSS identifier cannot hold. Class names are used verbatim as selectors, so a
-// readable name for a value like `1/2`, `50%` or `1.5` would otherwise build a selector the CSS
-// parser rejects (`.width-1/2`) and the rule would be dropped. Hashed names are alphanumeric, so
-// escaping is a no-op in the default mode. Non-ASCII is legal in an identifier and stays as-is.
+// Characters a CSS identifier cannot hold. A readable name for `1/2` or `50%` would otherwise build a
+// selector the parser rejects; hashed names are alphanumeric, so this is a no-op there.
 const invalidInCssIdentifier = /[^\w\u00A0-\uFFFF-]/g;
 
 /** A class name escaped for use inside a CSS selector: `width-1/2` becomes `width-1\/2`. */
@@ -153,11 +113,8 @@ function escapeClassName(className: string): string {
 }
 
 /**
- * A prop value as the text its class name and its rule key are built from.
- *
- * A record — the `vars` prop, whose declarations are named by its own value — is written out as its
- * `name-value` pairs in the order they were declared, which is the order the declarations are
- * emitted in too, so a class name and the rule behind it are built from the same reading of a value.
+ * A prop value as the text its class name and rule key are built from. A record (`vars`) becomes its
+ * `name-value` pairs in declaration order — the order its declarations are emitted in too.
  */
 function serializeValue(value: unknown): string {
   if (Array.isArray(value)) return value.join('_');
@@ -170,9 +127,8 @@ function serializeValue(value: unknown): string {
   return String(value);
 }
 
-// `normal` first, then the breakpoints in ascending order, then the accessibility media features:
-// the major half of the cascade order, so a responsive rule always overrides the base one and a
-// user preference always overrides both.
+// `normal`, then the breakpoints ascending, then the preference features: the major half of the cascade
+// order, so a responsive rule beats the base one and a preference beats both.
 const mediaRank: Record<string, number> = mediaKeys.reduce<Record<string, number>>((acc, key, index) => {
   acc[key] = index;
 
@@ -212,16 +168,13 @@ function resolveExtends(components: Components): Components {
 export function createStyleEngine(options: StyleEngineOptions = {}): StyleEngine {
   const styleElementId = options.styleElementId ?? `${DEFAULT_STYLE_ELEMENT_ID}-${++engineSequence}`;
 
-  // Recreated by clear(): class names are derived from a counter, so a long-lived server would
-  // otherwise hand request 2 different names than request 1 for the very same props.
+  // Recreated by clear(): names come from a counter, so request 2 would otherwise differ from request 1.
   let identity = new IdentityFactory();
   const variables = Variables.createRegistry();
 
-  // Undefined means "follow the sink": counter-hashed names normally, content-hashed in element
-  // mode, where a class name resolved in one process has to match the one another resolves.
+  // Undefined means "follow the sink": counter-hashed normally, content-hashed in element mode.
   let classNamesMode: StylesConfiguration['classNames'] = options.classNames;
-  // Undefined means "follow the environment" — resolved when the sink is first needed, not at
-  // construction, so importing the library still touches no DOM.
+  // Undefined means "follow the environment", resolved when first needed so importing touches no DOM.
   let sinkMode: SinkMode | undefined = options.sink;
   let sink: StyleSink | undefined;
 
@@ -232,9 +185,8 @@ export function createStyleEngine(options: StyleEngineOptions = {}): StyleEngine
   }
 
   /**
-   * Element mode: rules are handed to the adapter as `<style>` descriptors instead of being
-   * written anywhere. It also turns on cascade layers and content-hashed class names, because a
-   * hoisted element's position in `<head>` is render order, not cascade order.
+   * Element mode: rules go to the adapter as `<style>` descriptors. It also turns on cascade layers and
+   * content-hashed names, because a hoisted element's position in `<head>` is render order.
    */
   function isElementMode(): boolean {
     return sinkMode === 'element';
@@ -246,8 +198,7 @@ export function createStyleEngine(options: StyleEngineOptions = {}): StyleEngine
 
   // The prop registry. Copied per engine so `extend()` on one engine cannot leak into another.
   const cssStyles = { ...defaultCssStyles };
-  // Sort order for generated rules, derived from prop declaration order. Rebuilt whenever
-  // `extend()` adds a prop so extended props sort after the built-ins instead of all sharing 0.
+  // Rule sort order, from prop declaration order. Rebuilt by `extend()` so new props sort after the built-ins.
   let cssStylesIndex: Record<string, number> = {};
 
   function rebuildCssStylesIndex() {
@@ -261,23 +212,17 @@ export function createStyleEngine(options: StyleEngineOptions = {}): StyleEngine
 
   let componentsStyles: Components = defaultBoxComponents;
 
-  // Maps a style-signature → the resolved class names. A Box's class list is fully determined
-  // by isSvg/clean/component/variant + its recognized style props, so structurally-identical
-  // Boxes (e.g. every DataGrid cell) collapse to a single map lookup instead of re-running the
-  // merge + walk + identity work. Rule generation is still deduped separately by `generatedRules`.
+  // style signature → resolved class names. A Box's list is fully determined by its inputs, so
+  // structurally identical Boxes (every DataGrid cell) collapse to one lookup. Rules dedupe separately.
   const styleCache = new Map<string, ResolvedStyles>();
-  // Track already generated CSS rules to avoid re-generating
   const generatedRules = new Set<string>();
-  // Element mode: the descriptor of every rule generated so far, by rule key. A Box that renders
-  // a rule some earlier Box already generated still has to render its `<style>` element — React
-  // dedupes them by href — so descriptors are kept, not consumed.
+  // Element mode: every rule's descriptor by rule key. A Box whose rule someone else generated still has
+  // to render its `<style>`, so these are kept rather than consumed (React dedupes by href).
   const ruleElements = new Map<string, StyleElementDescriptor>();
-  // The descriptors the resolve currently in progress walked over. Non-null only for the duration
-  // of one resolveClassNames/addGlobalStyles call, and only in element mode.
+  // The descriptors the resolve in progress walked over. Non-null for one call, in element mode only.
   let collecting: StyleElementDescriptor[] | null = null;
-  // Rule keys that matched no value definition. Remembered because `generatedRules` short-circuits
-  // the second occurrence of a prop/value pair: without this, the first Box would (correctly) get
-  // no class name and every later one would get a class with no rule behind it.
+  // Rule keys that matched no definition. `generatedRules` short-circuits the second occurrence, so
+  // without this the first Box would get no class and every later one a class with no rule.
   const unsupportedRules = new Set<string>();
   // Pending rules to be flushed: [sortIndex, mediaOrder, rule]
   const pendingRules: [number, number, string][] = [];
@@ -287,9 +232,8 @@ export function createStyleEngine(options: StyleEngineOptions = {}): StyleEngine
   const boxClassName = '_b';
   const svgClassName = '_s';
 
-  // Whether a prop key affects the class list — i.e. one of the keys `addClassNames` dispatches
-  // on (style props + pseudo/media/group wrappers). Checked live (not snapshotted) because
-  // `extend()` adds keys to this engine's registry at runtime; mirrors addClassNames exactly.
+  // Whether a prop key affects the class list. Checked live rather than snapshotted, because `extend()`
+  // adds keys at runtime; mirrors `addClassNames` exactly.
   function isStyleKey(key: string): boolean {
     return (
       ObjectUtils.isKeyOf(key, cssStyles) ||
@@ -303,10 +247,8 @@ export function createStyleEngine(options: StyleEngineOptions = {}): StyleEngine
   }
 
   /**
-   * Build a stable cache key from the inputs that determine a Box's class list. Component
-   * defaults are keyed via component/variant/clean (they are immutable per name), and JSON is
-   * used for values so e.g. `p={4}` and `p="4"` never collide. Returns null if a value can't be
-   * serialized, in which case the caller falls back to the uncached path (today's behavior).
+   * A stable cache key for the inputs that decide a class list. Values go through JSON so `p={4}` and
+   * `p="4"` cannot collide; null when something will not serialize, and the caller falls back.
    */
   function computeSignature(props: BoxStyleProps<any>, isSvg: boolean): string | null {
     try {
@@ -353,8 +295,7 @@ export function createStyleEngine(options: StyleEngineOptions = {}): StyleEngine
           addClassNames(value as BoxStyleProps, classNames, [...currentPseudoClasses, key], media, pseudoClassParentName, rootSelector);
         }
       } else if (ObjectUtils.isKeyOf(key, breakpoints) || ObjectUtils.isKeyOf(key, mediaFeatures)) {
-        // Both fill the same slot — one `@media` block per rule. The types offer neither inside the
-        // other, so the last one to arrive winning is a shape TypeScript already refuses.
+        // Both fill the same slot — one `@media` block per rule — and the types already refuse the nesting.
         addClassNames(value as BoxStyleProps, classNames, currentPseudoClasses, key, pseudoClassParentName, rootSelector);
       } else if (ObjectUtils.isKeyOf(key, pseudoGroupClasses)) {
         Object.entries(value).forEach(([name, pseudoClassProps]) => {
@@ -407,11 +348,9 @@ export function createStyleEngine(options: StyleEngineOptions = {}): StyleEngine
     const weight = currentPseudoClasses.reduce((sum, pseudoClass) => sum + pseudoClassesWeight[pseudoClass], 0);
     const className = createClassName(key, value, weight, media, pseudoClassParentName);
 
-    // Create a unique key to track if this rule has been generated
     const serializedValue = serializeValue(value);
     const ruleKey = `${media}-${weight}-${key}-${serializedValue}-${pseudoClassParentName ?? ''}-${rootSelector ?? ''}`;
 
-    // Only generate rule if it hasn't been generated before
     if (!generatedRules.has(ruleKey)) {
       generatedRules.add(ruleKey);
 
@@ -427,16 +366,14 @@ export function createStyleEngine(options: StyleEngineOptions = {}): StyleEngine
             sortKey: sortKeyOf(result.sortIndex, result.mediaOrder),
           });
         }
-        // The engine, not the caller, owns "something is pending" — an adapter that never flushes
-        // (vanilla DOM, a framework with no commit phase) still gets its CSS.
+        // The engine owns "something is pending", so an adapter that never flushes still gets its CSS.
         scheduleFlush();
       } else {
         unsupportedRules.add(ruleKey);
       }
     }
 
-    // A value the prop does not declare produces no rule, so it must not produce a class either —
-    // an unmatched value used to leave a dangling class name in the markup.
+    // No rule means no class name either — an unmatched value used to leave a dangling class behind.
     if (unsupportedRules.has(ruleKey)) return;
 
     if (collecting) {
@@ -448,11 +385,8 @@ export function createStyleEngine(options: StyleEngineOptions = {}): StyleEngine
   }
 
   /**
-   * The body of one rule: the declarations a definition writes for a value.
-   *
-   * Normally that is its `styleName` (or names) with the formatted value, and the definition that
-   * declares its own `declarations` is the exception the `vars` prop needs — the property names are
-   * in the value, so no `styleName` could hold them.
+   * The body of one rule: normally the definition's `styleName`s with the formatted value, and for a
+   * definition that declares its own `declarations` (`vars`) the property names come from the value.
    */
   function declarations(itemValue: BoxStyle, key: string, value: BoxStyleValue) {
     if (itemValue.declarations) return itemValue.declarations(value, variables.getVariableValue);
@@ -473,13 +407,12 @@ export function createStyleEngine(options: StyleEngineOptions = {}): StyleEngine
     const item = cssStyles[key as keyof typeof cssStyles] as BoxStyle[];
 
     let itemValue = item.find((x) => {
-      // A definition that names the values it accepts is judged by that alone: the `typeof` tests
-      // below cannot tell `url(#sky)` from a typo, and a scalar `values` would take both.
+      // A definition that names its values judges them itself: `typeof` cannot tell `url(#sky)` from a typo.
       if (x.match) return x.match(value);
 
       if (Array.isArray(x.values)) {
         if (Array.isArray(value)) {
-          // Tuple definition: x.values is a tuple of allowed-value arrays; each position must contain value[i]
+          // Tuple definition: each position must accept the value at that position.
           if (x.values.length > 0 && Array.isArray(x.values[0])) {
             return x.values.length === value.length && (x.values as unknown[][]).every((allowed, i) => allowed.includes(value[i]));
           }
@@ -491,8 +424,7 @@ export function createStyleEngine(options: StyleEngineOptions = {}): StyleEngine
     });
 
     if (!itemValue && typeof value === 'string' && variables.isUserVariable(value)) {
-      // `Box.extend({ variables })` declares tokens the built-in value lists cannot know about.
-      // Accept them on the props whose values are resolved through `var(--token)` anyway.
+      // `Box.extend({ variables })` tokens are accepted on the props whose values resolve to `var(--token)`.
       itemValue = item.find((x) => variableBackedValues.has(x.values));
     }
 
@@ -503,11 +435,8 @@ export function createStyleEngine(options: StyleEngineOptions = {}): StyleEngine
     const condition = mediaCondition(media);
 
     /**
-     * The finished rule: wrapped in its media query, and in element mode in its cascade layer.
-     *
-     * The space after `@media` matters: browsers accept `@media(...)` but the CSS parsers in
-     * happy-dom and jsdom reject the rule outright, so without it every media rule silently
-     * vanishes from a consumer's test DOM.
+     * The finished rule: in its media query, and in element mode in its cascade layer. The space after
+     * `@media` matters — the CSS parsers in happy-dom and jsdom drop `@media(...)` rules outright.
      */
     function finish(rule: string) {
       const wrapped = condition === null ? rule : `@media ${condition}{${rule}}`;
@@ -534,8 +463,7 @@ export function createStyleEngine(options: StyleEngineOptions = {}): StyleEngine
       let defaultSelector: string;
 
       if (rootSelector) {
-        // Global mode: rules target the root selector (e.g. `html`) directly.
-        // Group selectors are not meaningful for the document root — skip them.
+        // Global mode targets the root selector directly, where a group selector means nothing.
         if (hasThemeAndGroup) return null;
         if (hasTheme) {
           // Theme on same element as rootSelector → compound selector
@@ -580,10 +508,8 @@ export function createStyleEngine(options: StyleEngineOptions = {}): StyleEngine
 
     switch (namingMode()) {
       case 'readable':
-        // A value can carry a space (`strokeDasharray='8 4'`). Escaping it would keep the *selector*
-        // legal, but the class attribute would split into two class names and the rule would match
-        // neither, so the space becomes an underscore here instead — the same separator a tuple
-        // value already uses. Hashed and stable names are alphanumeric and need nothing.
+        // A value can carry a space (`strokeDasharray='8 4'`); escaping keeps the selector legal but splits the
+        // class attribute in two, so the space becomes an underscore — the separator a tuple value already uses.
         return className.replace(/\s+/g, '_');
       case 'stable':
         return `_${stableHash(className)}`;
@@ -593,19 +519,9 @@ export function createStyleEngine(options: StyleEngineOptions = {}): StyleEngine
   }
 
   /**
-   * Every cascade layer, in cascade order, declared in one statement.
-   *
-   * Element mode gives up control of where a rule lands in `<head>`: React hoists the elements in
-   * the order it discovers them, which is render order — a Box that only uses `md={{ p: 4 }}` can
-   * put its rule in front of the `p={2}` rule another Box already needed, and a plain reading of
-   * the cascade would then apply them the wrong way round. One layer per (media, prop) makes
-   * element order irrelevant: this statement, which travels with the base element and therefore
-   * reaches the document first, is what fixes the order.
-   *
-   * Props registered by `Box.extend()` after the first render are the one gap — CSS appends layers
-   * it meets for the first time after every layer already named, so an extended prop's layer ends
-   * up after the built-in ones. Declare extended props before the first render (which is where
-   * they belong anyway) and the order is exact.
+   * Every cascade layer, in cascade order, in one statement. Element mode gives up control of where a rule
+   * lands in `<head>` (React hoists in render order), so one layer per (media, prop) makes element order
+   * irrelevant. A prop `extend()` registers after the first render lands after every layer named here.
    */
   function layerOrder(): string {
     const names = [BASE_LAYER];
@@ -621,17 +537,14 @@ export function createStyleEngine(options: StyleEngineOptions = {}): StyleEngine
 
   /** The reset + `:root` block every engine writes before its first generated rule. */
   function baseRules(): string[] {
-    // Variables used before the first flush. Skipped entirely when there are none — an empty
-    // `:root{}` is valid CSS but it is noise in every SSR payload and every base style element.
+    // Skipped when there are none: an empty `:root{}` is valid CSS but noise in every SSR payload.
     const usedVariables = variables.generateVariables();
 
     const rules = [
       ...(usedVariables ? [`:root{${usedVariables}}`] : []),
       `:root{--borderColor: black;--outlineColor: black;--lineHeight: 1.2;--fontSize: 14px;--transitionTime: 0.25s;--svgTransitionTime: 0.3s;}`,
-      // Every Box transitions on these two variables, so zeroing them is the whole default: a user
-      // who asked for less motion gets a library that does not animate, with nothing to opt into.
-      // A component that still wants movement here declares it under `motionReduce`, which lands in
-      // the same media query and later in the cascade.
+      // Every Box transitions on these two, so zeroing them is the whole reduced-motion default. A component
+      // that still wants movement declares it under `motionReduce`, later in the cascade.
       `@media (prefers-reduced-motion: reduce){:root{--transitionTime: 0s;--svgTransitionTime: 0s;}}`,
       `#crono-box {position: absolute;top: 0;left: 0;height: 0;z-index:99999;}`,
       `html{font-size: 16px;font-family: Arial, sans-serif;}`,
@@ -642,17 +555,14 @@ export function createStyleEngine(options: StyleEngineOptions = {}): StyleEngine
       `input[type="number"]::-webkit-outer-spin-button,input[type="number"]::-webkit-inner-spin-button{-webkit-appearance: none;margin: 0;}`,
       `.${boxClassName}{display: block;border: 0 solid var(--borderColor);outline: 0px solid var(--outlineColor);margin: 0;padding: 0;background-color: initial;transition: all var(--transitionTime);box-sizing: border-box;font-family: inherit;font-size: inherit;}`,
       `.${svgClassName}{display: block;border: 0 solid var(--borderColor);outline: 0px solid var(--outlineColor);margin: 0;padding: 0;transition: all var(--svgTransitionTime);}`,
-      // The shapes inside an <svg> transition on their own variable. The list is explicit rather
-      // than `*` so the rule cannot reach a <foreignObject>'s HTML; ellipse, polygon, polyline and
-      // text joined it with the SVG geometry props, whose whole point is that a shape can move
-      // with no JavaScript — an <ellipse> that cannot transition `rx` would snap instead.
+      // The shapes inside an <svg> transition on their own variable. Listed explicitly rather than `*`, so the
+      // rule cannot reach a <foreignObject>'s HTML.
       `.${svgClassName} path,.${svgClassName} circle,.${svgClassName} ellipse,.${svgClassName} rect,.${svgClassName} line,.${svgClassName} polygon,.${svgClassName} polyline,.${svgClassName} text {transition: all var(--svgTransitionTime);}`,
     ];
 
     if (!isElementMode()) return rules;
 
-    // Unlayered CSS beats every layer, so the moment generated rules are layered the reset has to
-    // be as well — otherwise `._b{padding:0}` would win against `.p-4{padding:1rem}`.
+    // Unlayered CSS beats every layer, so once generated rules are layered the reset has to be too.
     return [layerOrder(), `@layer ${BASE_LAYER}{${rules.join('')}}`];
   }
 
@@ -662,9 +572,8 @@ export function createStyleEngine(options: StyleEngineOptions = {}): StyleEngine
   }
 
   /**
-   * Empty the pending queue into a sorted batch. Pure rule bookkeeping — no sink, no DOM: the
-   * sort key (media first, then prop declaration order) is the cascade position a rule must
-   * end up at, whichever flush it happens to arrive in.
+   * Empty the pending queue into a sorted batch. The sort key is the cascade position a rule must end up
+   * at, whichever flush it happens to arrive in.
    */
   function drainPendingRules(): SortedRule[] {
     if (pendingRules.length === 0) return [];
@@ -685,8 +594,7 @@ export function createStyleEngine(options: StyleEngineOptions = {}): StyleEngine
 
     if (!isInitialized) {
       target.writeBase(baseRules());
-      // The base `:root` block above already carries every variable used so far; dropping them
-      // from the pending queue keeps the next flush from emitting a second, identical block.
+      // The base block already carries every variable used so far, so drop them from the pending queue.
       variables.getPendingVariables();
       isInitialized = true;
     } else if (hasPendingVars) {
@@ -707,8 +615,8 @@ export function createStyleEngine(options: StyleEngineOptions = {}): StyleEngine
   const scheduleFlush = createFlushCoordinator(flush, options.scheduler ?? microtaskScheduler);
 
   /**
-   * Run a class-name walk and collect the style elements the rules it touched need. Returns null
-   * outside element mode: nothing would render them there, so nothing pays for building the list.
+   * A class-name walk plus the style elements its rules need. Null outside element mode, where nothing
+   * would render them anyway.
    */
   function collect(walk: () => void): StyleElementDescriptor[] | null {
     if (!isElementMode()) {
@@ -726,8 +634,7 @@ export function createStyleEngine(options: StyleEngineOptions = {}): StyleEngine
       collecting = null;
     }
 
-    // Deduped, because a Box can reach the same rule twice (a component default and its own prop
-    // resolving to the same value), and kept in cascade order so the list reads like a stylesheet.
+    // Deduped (a Box can reach one rule twice) and in cascade order, so the list reads like a stylesheet.
     const seen = new Set<string>();
     const unique = elements.filter((element) => {
       if (seen.has(element.href)) return false;
@@ -741,13 +648,11 @@ export function createStyleEngine(options: StyleEngineOptions = {}): StyleEngine
   }
 
   /**
-   * A Box's elements with the engine's base element in front. The base block — the reset, `:root`,
-   * the cascade-layer order — belongs to no single Box, so every Box carries it: whichever one
-   * React renders first establishes the layer order, and every copy after that is deduped by href.
+   * A Box's elements with the engine's base element in front: the base block belongs to no single Box, so
+   * every Box carries it and React dedupes the copies by href.
    */
   function withBaseElement(elements: StyleElementDescriptor[]): StyleElementDescriptor[] {
-    // Nothing else would move the base rules — or a variable resolved a moment ago — out of the
-    // pending queue: in element mode there is no effect, and on a server there is no commit.
+    // Nothing else would move the base rules out of the queue: no effect in element mode, no commit on a server.
     flush();
     const base = getSink().baseElement?.() ?? null;
 
@@ -763,12 +668,10 @@ export function createStyleEngine(options: StyleEngineOptions = {}): StyleEngine
     isInitialized = false;
     // The next flush has to write the base rules again — the sink no longer holds them.
     requireFlush = true;
-    // Reset the per-Box class cache too: rules were cleared, so cached class lists must be
-    // recomputed (and re-registered) on the next render — otherwise SSG would drop styles.
+    // Cached class lists must be recomputed and re-registered, or SSG drops styles.
     styleCache.clear();
-    // Class names come from a counter and variables accumulate into `:root`. Without resetting
-    // both, request N of a long-lived server gets different names and a fatter `:root` block than
-    // request 1 for identical markup. Registered user variables survive — they are configuration.
+    // Names come from a counter and variables accumulate into `:root`, so without this request N of a
+    // long-lived server differs from request 1. Registered user variables survive — they are configuration.
     identity = new IdentityFactory();
     variables.reset();
     sink?.reset();
@@ -821,8 +724,7 @@ export function createStyleEngine(options: StyleEngineOptions = {}): StyleEngine
     scheduleFlush,
 
     getStyles() {
-      // A server render is synchronous and finishes before any scheduled flush can run, so the
-      // queue is still full at this point — draining it here is what makes the CSS complete.
+      // A server render finishes before any scheduled flush, so draining here is what completes the CSS.
       flush();
 
       return getSink().getStyles();
@@ -834,9 +736,8 @@ export function createStyleEngine(options: StyleEngineOptions = {}): StyleEngine
       if (config.classNames) classNamesMode = config.classNames;
 
       if (config.sink && config.sink !== (sink?.mode ?? sinkMode)) {
-        // Rules already written live in the old sink. The new one starts empty, so the engine has
-        // to forget them as well — otherwise every rule rendered so far would be missing with no
-        // way to get it back. Nothing has been written yet on the first configure, the common case.
+        // Rules already written live in the old sink, so the engine forgets them too — otherwise every rule
+        // rendered so far would be missing with no way back. Nothing is written yet on the first configure.
         if (sink) clear();
         sink = undefined;
         sinkMode = config.sink;
@@ -858,9 +759,8 @@ export function createStyleEngine(options: StyleEngineOptions = {}): StyleEngine
         (cssStyles as Record<string, BoxStyle[]>)[key] = prev ? [...val, ...prev] : val;
       });
 
-      // New props change both what counts as a style key and the rule sort order, so the
-      // signature cache and the derived index are no longer valid. New variables can likewise
-      // turn a value that matched nothing into a supported one.
+      // New props change both what counts as a style key and the sort order, and new variables can turn a
+      // value that matched nothing into a supported one.
       rebuildCssStylesIndex();
       unsupportedRules.forEach((ruleKey) => generatedRules.delete(ruleKey));
       unsupportedRules.clear();
@@ -870,8 +770,7 @@ export function createStyleEngine(options: StyleEngineOptions = {}): StyleEngine
     },
 
     components(components) {
-      // Merge into what this engine already holds, not into the pristine defaults: sequential
-      // calls (one per feature module, say) used to drop every component registered before them.
+      // Merge into what this engine holds, not the defaults: sequential calls used to drop earlier ones.
       componentsStyles = resolveExtends(ObjectUtils.mergeDeep<Components>(componentsStyles, components));
       // Cached class lists were resolved against the previous component defaults.
       styleCache.clear();
@@ -885,8 +784,7 @@ export function createStyleEngine(options: StyleEngineOptions = {}): StyleEngine
 
     getVariableValue(name: string) {
       const value = variables.getVariableValue(name);
-      // Reading a variable is enough to make it pending: it has to reach `:root` even when no
-      // rule was generated alongside it.
+      // Reading a variable makes it pending: it has to reach `:root` even with no rule beside it.
       scheduleFlush();
 
       return value;

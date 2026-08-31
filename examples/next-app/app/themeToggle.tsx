@@ -6,14 +6,10 @@ import { useEffect, useRef, useState } from 'react';
 import './elementMode';
 
 /**
- * Theming with no provider. `Box.Theme` needs state, storage and a media-query listener, so it is
- * client-only — but the *rules* are ancestor-scoped, which means all a server component has to do
- * is put the theme name on `<html>` (see `layout.tsx`). Switching it later is a DOM write, and
- * `createThemeController()` from `@cronocode/react-box/core` is that state machine with no React
- * in it: explicit choice wins over the stored one, which wins over the system preference.
- *
- * The controller is created in an effect, and starts on the theme the server rendered, so the
- * first client render matches the HTML exactly.
+ * Theming with no provider. `Box.Theme` needs state, storage and a media-query listener, but the rules are
+ * ancestor-scoped, so a server component only has to put the theme name on `<html>` (see `layout.tsx`).
+ * `createThemeController()` is that state machine with no React in it; it is created in an effect and
+ * starts on the theme the server rendered, so the first client render matches the HTML.
  */
 const STORAGE_KEY = 'box-next-app-theme';
 

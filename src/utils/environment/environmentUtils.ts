@@ -1,20 +1,8 @@
 /**
- * "Is there a DOM, and what may I touch?" — asked in seven places across the engine, the React
- * binding, the shared hooks and the components, and previously answered with a hand-written
- * `typeof` in every one of them.
- *
- * Worth centralising because the answers are not interchangeable and the differences are easy to
- * get wrong: a server render has no `document` at all, a `document` may exist without a `<head>` to
- * write into, and `window.matchMedia` is missing from environments that otherwise look like
- * browsers (jsdom by default, older embedded webviews).
- *
- * Framework-free, so the engine may use it: `src/core.ts` reaches this file and
- * `npm run check:boundaries` checks it for React along with the rest of the core graph.
- *
- * Plain named exports rather than the `namespace XUtils` idiom the other utils use. This module is
- * imported by every chunk the build emits, and a namespace object compiles to an IIFE that ships
- * whole — a consumer needing `hasDocument` would carry `matchMedia` with it. Named exports are
- * tree-shaken one function at a time.
+ * "Is there a DOM, and what may I touch?" — asked in seven places and once answered with a hand-written
+ * `typeof` in each. The answers are not interchangeable: a server render has no `document`, a `document`
+ * may have no `<head>`, and `matchMedia` is missing from environments that look like browsers. Named
+ * exports rather than a namespace, which compiles to an IIFE that ships whole, and every chunk imports this.
  */
 
 /** A browser: a window with a document. What an effect that touches layout needs to exist. */

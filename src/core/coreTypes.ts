@@ -42,9 +42,8 @@ type BoxStyleScalar = (BoxStyleArrayString | BoxStyleArrayBoolean | BoxStyleArra
 };
 
 /**
- * A definition whose value is a record of names to values — the shape a custom property needs,
- * since the *names* it declares come out of the value and no definition can know them in advance.
- * It has no `styleName`, so it writes its own `declarations`. `vars` is the only one.
+ * A definition whose value is a record — the shape a custom property needs, since the names it declares
+ * come out of the value. It has no `styleName`, so it writes its own `declarations`. `vars` is the only one.
  */
 interface BoxStyleRecord {
   values: Readonly<Record<string, string | number>>;
@@ -59,24 +58,15 @@ export type BoxStyle = (BoxStyleScalar | BoxStyleTupleArrays | BoxStyleRecord) &
   styleName?: string | string[];
   selector?: (className: string, pseudoClass: string) => string;
   /**
-   * Which values this definition accepts, when its `values` cannot say.
-   *
-   * A scalar definition (`values: ''`, `values: 0`) is matched by `typeof` alone, so it accepts
-   * *every* string or *every* number — fine for a scale, wrong for a shape. `match` replaces that
-   * test: declare it and the definition takes exactly the values it says yes to, so a value the
-   * prop does not really support produces no rule and no class name rather than a broken
-   * declaration. `fill: 'url(#sky)'` is the first caller (`Variables.isReference`).
+   * Which values this definition accepts, when its `values` cannot say. A scalar `values` is matched by
+   * `typeof` alone, so it takes *every* string — fine for a scale, wrong for a shape. Declare this and an
+   * unsupported value produces no rule and no class name (`Variables.isReference` was the first caller).
    */
   match?: (value: BoxStyleValue) => boolean;
   /**
-   * The whole rule body this definition writes, as text — for a definition whose `styleName` cannot
-   * name what it declares.
-   *
-   * One prop, several declarations, and the property names coming out of the *value*:
-   * `vars={{ 'color-x': 'sky-500' }}` has to emit `--color-x:var(--sky-500)`, and `--color-x` is a
-   * name the registry never sees. A definition that declares this ignores `styleName` and
-   * `valueFormat`; everything else about it — the class name, the media query, the theme and group
-   * selectors, the cascade layer — is the same as for any other prop.
+   * The whole rule body this definition writes, for a prop whose property names come out of its *value*:
+   * `vars={{ 'color-x': 'sky-500' }}` has to emit `--color-x:var(--sky-500)`, a name the registry never
+   * sees. It replaces `styleName`/`valueFormat`; everything else about the prop is unchanged.
    */
   declarations?: (value: BoxStyleValue, getVariableValue: (name: string) => string) => string;
 };

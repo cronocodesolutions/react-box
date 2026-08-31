@@ -832,11 +832,9 @@ const boxComponents = {
       content: {
         styles: {},
       },
-      // Indeterminate linear progress bar shown at the top of the body (just below the header)
-      // while `loading` is true — e.g. server-side pagination first load / page change. The sticky
-      // wrapper is zero-height so toggling `loading` causes no layout shift; the 3px track overflows
-      // down over the first row and zIndex keeps it on top. sticky + left:0 + width:fit keeps the
-      // rail spanning the visible width during horizontal scroll.
+      // The indeterminate loading bar. The sticky wrapper is zero-height so toggling `loading` shifts no
+      // layout; the 3px track overflows down over the first row, and sticky + left:0 + width:fit keeps the rail
+      // spanning the visible width during a horizontal scroll.
       loader: {
         styles: {
           position: 'sticky',
@@ -1128,14 +1126,10 @@ const boxComponents = {
               fontWeight: 600,
               color: 'gray-800',
               py: 3.5,
-              // The cell is where the keyboard lives in a grid, so it has to show where it is. An
-              // inset outline: a cell is flush against its neighbours and an outset ring would be
-              // clipped by the scroll container on the first and last column.
-              //
-              // Deliberately no `zIndex`. Focus says where the keyboard is, not what is in front of
-              // what — and a focused cell that outranked the pinned columns would slide *over* them
-              // on a horizontal scroll instead of under, which is the one thing pinning promises.
-              // The pinned variants below and the sticky header keep their own layers.
+              // The cell is where the keyboard lives in a grid, so it has to show where it is — an *inset* outline,
+              // since an outset ring on the first or last column would be clipped by the scroll container.
+              // Deliberately no `zIndex`: a focused cell that outranked the pinned columns would slide over them on a
+              // horizontal scroll instead of under, which is the one thing pinning promises.
               focusVisible: {
                 outline: 2,
                 outlineStyle: 'solid',
@@ -1304,11 +1298,9 @@ const boxComponents = {
                   height: 'fit',
                   bgColor: 'gray-400',
                   hoverGroup: { resizer: { bgColor: 'gray-600' } },
-                  // The separator is its own tab stop, and a bar two pixels wide has no room for a
-                  // ring inside itself — so the outline sits around it and the bar itself lights
-                  // up. `opacity` is here rather than on the element because a resizer that only
-                  // appears on hover is a tab stop nobody could otherwise follow, and a pseudo
-                  // rule outranks the base one the element writes to hide it.
+                  // The separator is its own tab stop, and a bar two pixels wide has no room for a ring inside it, so the
+                  // outline sits around it. `opacity` is here rather than on the element because a resizer that only
+                  // appears on hover is a tab stop nobody could follow, and a pseudo rule outranks the base one.
                   focusVisible: {
                     opacity: 1,
                     outline: 2,

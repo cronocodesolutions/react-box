@@ -866,11 +866,9 @@ export default class GridModel<TRow> {
   private _selectionAnnounced = false;
 
   /**
-   * What the grid's live region says. Ticking a checkbox halfway down a virtualized grid changes
-   * one control and nothing a screen reader would read out, so the count is announced instead.
-   *
-   * Empty until a selection has actually happened: a live region that already holds text when the
-   * grid mounts is announced by some screen readers as if something had just changed.
+   * What the grid's live region says. Ticking a checkbox halfway down a virtualized grid changes nothing a
+   * screen reader would read, so the count is announced instead — and it stays empty until a selection has
+   * happened, since some readers announce a region that already holds text on mount.
    */
   public get selectionAnnouncement(): string {
     if (!this._selectionAnnounced) return '';

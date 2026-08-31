@@ -1,13 +1,8 @@
-// Fails the build if anything under src/core — or its published entry, src/core.ts — reaches for React.
-//
-// `src/core` is the future `@box-kite/core` package: the style engine, the prop definitions, the
-// formatters, the variables and the framework-free runtime helpers. It must be usable with no
-// framework at all (vanilla DOM, an iframe widget, another framework's adapter), so a single
-// `import 'react'` there is a real regression, not a style nit.
-//
-// ESLint's `no-restricted-imports` covers the common case; this check exists because it does not
-// see `require()`, dynamic `import()`, JSX, or React's *global* namespace (`React.JSX.*` types need
-// no import at all — that is exactly how `ExtractElementFromTag` hid in coreTypes.ts until CO5).
+// Fails the build if anything under src/core — or its entry, src/core.ts — reaches for React. That
+// directory is the future `@box-kite/core`: usable with no framework at all, so one `import 'react'` is a
+// regression rather than a style nit. ESLint's `no-restricted-imports` covers the common case; this
+// exists because it sees no `require()`, dynamic `import()`, JSX, or React global namespace (`React.JSX.*`
+// needs no import, which is how `ExtractElementFromTag` hid in coreTypes.ts until CO5).
 //
 // Run: npm run check:boundaries
 import { readFileSync, readdirSync, statSync } from 'node:fs';
@@ -104,14 +99,10 @@ if (violations.length) {
   process.exit(1);
 }
 
-// Informational: the numbers published in the README architecture section. The binding is what a
-// non-React adapter would have to reimplement to render Box — the engine's React half and nothing
-// else. React feature code that ships alongside it (the shared component hooks, the behaviour
-// primitives in `src/react/a11y`, the markup the form controls share in `src/react/forms`, the ARIA and
-// the attribute conventions the SVG and icon components share in `src/react/svg`) is
-// counted separately: a Vue adapter would need its own arrow-key navigation for the same reason it
-// would need its own components, which says nothing about how much of *this* library is
-// framework-specific.
+// Informational: the numbers the README architecture section publishes. The binding is what a non-React
+// adapter would have to reimplement; React *feature* code beside it (the shared hooks, `src/react/a11y`,
+// `src/react/forms`, `src/react/svg`) is counted separately, since a Vue adapter would need its own
+// arrow-key navigation for the same reason it needs its own components.
 const reactFiles = walk('src/react');
 const isFeature = (path) =>
   path.startsWith('src/react/hooks/') ||
