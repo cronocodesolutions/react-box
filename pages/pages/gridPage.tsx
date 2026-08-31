@@ -1,17 +1,17 @@
-import { motion } from 'framer-motion';
 import { LayoutGrid } from 'lucide-react';
 import Box from '../../src/box';
 import Flex from '../../src/components/flex';
 import Grid from '../../src/components/grid';
 import Code from '../components/code';
 import PageHeader from '../components/pageHeader';
+import Reveal from '../components/reveal';
 
 export default function GridPage() {
   return (
     <Box>
       <PageHeader icon={LayoutGrid} title="Grid" description="A shortcut component for display: grid with powerful layout features." />
 
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
+      <Reveal delay={0.1}>
         <Flex d="column" gap={8}>
           <Code label="Import" language="jsx" code="import Grid from '@cronocode/react-box/components/grid';" />
 
@@ -84,7 +84,7 @@ export default function GridPage() {
             </Grid>
           </Code>
         </Flex>
-      </motion.div>
+      </Reveal>
     </Box>
   );
 }

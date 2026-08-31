@@ -1,9 +1,9 @@
-import { motion } from 'framer-motion';
 import { CheckCircle2, Download, Package, Rocket } from 'lucide-react';
 import Box from '../../src/box';
 import Flex from '../../src/components/flex';
 import Code from '../components/code';
 import PageHeader from '../components/pageHeader';
+import Reveal from '../components/reveal';
 
 export default function InstallationPage() {
   return (
@@ -14,7 +14,7 @@ export default function InstallationPage() {
         description="Get started with React Box in your project. Installation takes less than a minute."
       />
 
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
+      <Reveal delay={0.1}>
         <Flex d="column" gap={8}>
           <Code language="shell" label="Install via npm" code="npm install @cronocode/react-box" />
 
@@ -27,10 +27,10 @@ export default function InstallationPage() {
             — no bundler plugin, no PostCSS step, no stylesheet to import.
           </Box>
         </Flex>
-      </motion.div>
+      </Reveal>
 
       {/* Success Message */}
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}>
+      <Reveal delay={0.3}>
         <Flex
           d="column"
           ai="center"
@@ -50,10 +50,10 @@ export default function InstallationPage() {
             You're ready to start building beautiful interfaces.
           </Box>
         </Flex>
-      </motion.div>
+      </Reveal>
 
       {/* Next Steps */}
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }}>
+      <Reveal delay={0.5}>
         <Box mt={12}>
           <Box tag="h3" fontSize={20} fontWeight={600} theme={{ dark: { color: 'white' }, light: { color: 'slate-900' } }} mb={6}>
             Next Steps
@@ -71,7 +71,7 @@ export default function InstallationPage() {
             />
           </Flex>
         </Box>
-      </motion.div>
+      </Reveal>
     </Box>
   );
 }

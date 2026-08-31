@@ -3,8 +3,7 @@ import { Check, Copy, Terminal } from 'lucide-react';
 import Prism from 'prismjs';
 import 'prismjs/components/prism-bash';
 import 'prismjs/components/prism-jsx';
-import 'prismjs/themes/prism-okaidia.css';
-import { useEffect, useLayoutEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import Box, { BoxProps } from '../../src/box';
 import Button from '../../src/components/button';
 import Flex from '../../src/components/flex';
@@ -24,6 +23,13 @@ interface Props extends BoxProps {
    */
   check?: boolean;
   /**
+   * Hold the live demo back until the block is near the viewport. For a page whose demos are heavy —
+   * /datagrid mounts ten grids, four hundred rows between them — rendering all of them during the
+   * navigation is a third of a second of blocked main thread, and nine of the ten are off screen.
+   * The snippet is never deferred: it is the part a reader (and a crawler) came for.
+   */
+  defer?: boolean;
+  /**
    * Declarations the snippet is written against but does not show — the row type a DataGrid infers
    * its cells from, say. Compiled with the snippet by `scripts/check-docs-snippets.mjs`, never
    * displayed, so keep it to what the surrounding page genuinely owns.
@@ -34,7 +40,7 @@ interface Props extends BoxProps {
 export default function Code(props: Props) {
   // `check` and `context` are metadata for scripts/check-docs-snippets.mjs — pulled out of the
   // props so they never reach the DOM, and never read here.
-  const { children, language = 'jsx', label, code: codeProp, codeOnly, check: _check, context: _context, ...restProps } = props;
+  const { children, language = 'jsx', label, code: codeProp, codeOnly, defer, check: _check, context: _context, ...restProps } = props;
   const [copied, setCopied] = useState(false);
 
   // Convert children to JSX string if no explicit code prop
@@ -43,6 +49,23 @@ export default function Code(props: Props) {
     if (!children) return '';
     return reactToJsx(children as React.ReactNode);
   }, [codeProp, children]);
+
+  const demoRef = useRef<HTMLDivElement>(null);
+  const [demoReady, setDemoReady] = useState(!defer);
+
+  useEffect(() => {
+    const element = demoRef.current;
+    if (demoReady || !element) return;
+
+    // A generous margin: the demo is built well before it is on screen, so scrolling never waits for it.
+    const observer = new IntersectionObserver((entries) => entries.some((entry) => entry.isIntersecting) && setDemoReady(true), {
+      rootMargin: '600px',
+    });
+
+    observer.observe(element);
+
+    return () => observer.disconnect();
+  }, [demoReady]);
 
   function copyHandler() {
     navigator.clipboard.writeText(code);
@@ -53,9 +76,15 @@ export default function Code(props: Props) {
     copied && setTimeout(() => setCopied(false), 2000);
   }, [copied]);
 
-  useLayoutEffect(() => {
-    Prism.highlightAll();
-  }, [code]);
+  // Highlighted during render rather than from an effect. Two reasons: the prerendered HTML carries
+  // the highlighted markup, so a reader never sees a page of plain code repaint; and `highlightAll()`
+  // walked every block in the document on every mount, so a page with thirty of them did that thirty
+  // times. A language Prism does not know (`auto`) falls back to plain text, as it did before.
+  const highlighted = useMemo(() => {
+    const grammar = Prism.languages[language];
+
+    return grammar ? Prism.highlight(code, grammar, language) : null;
+  }, [code, language]);
 
   const isShell = language === 'shell';
 
@@ -76,11 +105,14 @@ export default function Code(props: Props) {
         {/* Demo Area */}
         {children && !codeOnly && (
           <Box
+            ref={demoRef}
             p={6}
+            // Reserved while the demo is held back, so the page does not jump as it fills in.
+            minHeight={demoReady ? undefined : 100}
             theme={{ dark: { bgColor: 'slate-900', borderColor: 'slate-700' }, light: { bgColor: 'slate-50', borderColor: 'slate-200' } }}
             bb={1}
           >
-            {children}
+            {demoReady ? children : null}
           </Box>
         )}
 
@@ -107,7 +139,7 @@ export default function Code(props: Props) {
                 transitionDuration={150}
               >
                 <Flex ai="center" gap={2} fontSize={12}>
-                  <AnimatePresence mode="wait">
+                  <AnimatePresence mode="wait" initial={false}>
                     <motion.div
                       key={copied ? 'check' : 'copy'}
                       initial={{ opacity: 0, scale: 0.8 }}
@@ -136,8 +168,9 @@ export default function Code(props: Props) {
               overflow="auto"
               fontSize={13}
               lineHeight={24}
+              props={highlighted ? { dangerouslySetInnerHTML: { __html: highlighted } } : undefined}
             >
-              {code}
+              {highlighted ? null : code}
             </Box>
           </Box>
         </Box>

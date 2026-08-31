@@ -1,4 +1,3 @@
-import { motion } from 'framer-motion';
 import { Filter, Table, X } from 'lucide-react';
 import { ReactNode, useCallback, useEffect, useMemo, useState } from 'react';
 import Box from '../../src/box';
@@ -8,17 +7,15 @@ import Flex from '../../src/components/flex';
 import { H2 } from '../../src/components/semantics';
 import Code from '../components/code';
 import PageHeader from '../components/pageHeader';
+import Reveal from '../components/reveal';
 import Data from '../data/MOCK_DATA.json';
-import Data1 from '../data/MOCK_DATA_1.json';
-import Data2 from '../data/MOCK_DATA_2.json';
-import Data3 from '../data/MOCK_DATA_3.json';
-import Data4 from '../data/MOCK_DATA_4.json';
-import Data5 from '../data/MOCK_DATA_5.json';
-import Data6 from '../data/MOCK_DATA_6.json';
-import Data7 from '../data/MOCK_DATA_7.json';
 import useTableOfContents from '../hooks/useTableOfContents';
 
-const allData = [...Data, ...Data1, ...Data2, ...Data3, ...Data4, ...Data5, ...Data6, ...Data7];
+// One file, not eight. Nothing on this page is about the row count — every demo here shows five to
+// eight rows of a scrolling, filtering, grouping grid — and the eight files were 3.9 MB of JSON in the
+// route's chunk, 947 KB of the 970 KB it downloaded. A thousand real rows demonstrate all of it, and
+// the ten-thousand-row proof lives on /charts, which generates its rows.
+const allData = Data;
 
 const allCountryOptions = [...new Set(allData.map((r) => r.country))].sort().map((c) => ({ label: c, value: c }));
 
@@ -263,7 +260,7 @@ export default function DataGridPage() {
         description="A powerful data grid component with sorting, filtering, and custom cells. (Work in Progress)"
       />
 
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
+      <Reveal delay={0.1}>
         <Flex d="column" gap={8}>
           <Code label="Import" language="jsx" code="import DataGrid from '@cronocode/react-box/components/dataGrid';" />
 
@@ -402,6 +399,7 @@ export default function DataGridPage() {
 
           <Code
             id="basic"
+            defer
             label="Basic DataGrid"
             language="jsx"
             context="declare const data: { first_name: string; last_name: string; age: number; email: string }[];"
@@ -530,6 +528,7 @@ export default function DataGridPage() {
 
           <Code
             id="filters"
+            defer
             label="DataGrid with Global Filter and Column Filters"
             language="jsx"
             code={`<DataGrid
@@ -573,6 +572,7 @@ export default function DataGridPage() {
 
           <Code
             id="grouped"
+            defer
             label="Grouped Columns with Row Selection"
             language="jsx"
             code={`<DataGrid
@@ -654,6 +654,7 @@ export default function DataGridPage() {
 
           <Code
             id="row-detail"
+            defer
             label="Row Detail — Orders with Items"
             language="jsx"
             check={false}
@@ -821,6 +822,7 @@ Box.components({
 
           <Code
             id="disable-sort"
+            defer
             label="Disable Sorting and Resizing"
             language="jsx"
             code={`<DataGrid
@@ -862,6 +864,7 @@ Box.components({
 
           <Code
             id="context-menu"
+            defer
             label="Context Menu Control"
             language="jsx"
             code={`<DataGrid
@@ -901,6 +904,7 @@ Box.components({
 
           <Code
             id="resizer-style"
+            defer
             label="Resizer Style"
             language="jsx"
             code={`// 'hover' — resizer appears only when hovering the header cell
@@ -941,6 +945,7 @@ Box.components({
 
           <Code
             id="resize-mode"
+            defer
             label="Resize Mode"
             language="jsx"
             code={`// 'smooth' (default): width updates batched to one per animation frame (~60fps, ~1 frame
@@ -966,7 +971,7 @@ Box.components({
             <ResizeModeDemo />
           </Code>
         </Flex>
-      </motion.div>
+      </Reveal>
     </Box>
   );
 }
@@ -1104,6 +1109,7 @@ function PaginatedDataGridDemo() {
   return (
     <Code
       id="pagination"
+      defer
       label="Server-Side Pagination & Filters"
       language="jsx"
       check={false}

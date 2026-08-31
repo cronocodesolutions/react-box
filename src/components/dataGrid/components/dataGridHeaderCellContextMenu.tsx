@@ -9,6 +9,7 @@ import useFocusReturn from '../../../react/a11y/useFocusReturn';
 import useIdentifier from '../../../react/a11y/useIdentifier';
 import useRovingFocus from '../../../react/a11y/useRovingFocus';
 import { useIsomorphicLayoutEffect } from '../../../react/effects';
+import { isBrowser } from '../../../utils/environment/environmentUtils';
 import Button from '../../button';
 import Flex from '../../flex';
 import Overlay from '../../overlay';
@@ -47,7 +48,9 @@ export default function DataGridHeaderCellContextMenu<TRow>(props: Props<TRow>) 
   const popupRef = useRef<HTMLDivElement>(null);
   const pendingFocus = useRef(false);
   const [tooltipPosition, setTooltipPosition] = useState<{ top: number; left: number }>({ top: 0, left: 0 });
-  const openLeft = useMemo(() => tooltipPosition.left > window.innerWidth / 2, [tooltipPosition.left]);
+  // The menu has never been opened during a server render, so which side it would open to is a
+  // question with no answer there — and `window` is not a thing that exists to ask (bug #85).
+  const openLeft = useMemo(() => isBrowser() && tooltipPosition.left > window.innerWidth / 2, [tooltipPosition.left]);
 
   const positionLeft = align === 'right' ? 2 : undefined;
   const positionRight = align === 'right' ? undefined : column.pin === 'RIGHT' ? 2.5 : 4;

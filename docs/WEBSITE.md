@@ -6,8 +6,10 @@ Purpose: help AI contributors extend the docs/demo site under `pages/**`.
 
 - Dev server (docs/demo): `npm run dev` (uses `pages.vite.config.ts`, serves `pages/`).
 - Build the docs site: `npm run build:pages` (outputs into `dist-pages/` — deliberately not `dist/`,
-  which holds the library build the package is published from). The build writes a static shell per
-  route plus `404.html`, `sitemap.xml`, `robots.txt` and `CNAME`; see "The site's address" below.
+  which holds the library build the package is published from). It is two passes: the Vite build,
+  which writes a static shell per route plus `404.html`, `sitemap.xml`, `robots.txt` and `CNAME`
+  (see "The site's address"), then `npm run prerender:pages`, which fills each shell with that
+  route's HTML and CSS (see "Prerendering").
 
 ## Architecture
 
@@ -52,7 +54,7 @@ down. Everything address-bound is built from it by the `site-metadata` plugin in
 - **`CNAME`**, so a lost or overwritten GitHub Pages custom-domain setting shows up as a diff here.
 
 [pages/site/documentHead.tsx](pages/site/documentHead.tsx) keeps the same tags correct after the app
-takes over navigation. The shells are metadata only: prerendering the content is roadmap G3.
+takes over navigation. The shells carry the metadata; the prerender pass below puts the page in them.
 
 ### Moving the site to another domain
 
@@ -65,6 +67,58 @@ takes over navigation. The shells are metadata only: prerendering the content is
 4. Redirect the old host path-preservingly (301) — it cannot live in this repo, because GitHub Pages
    serves one custom domain per repository.
 5. Add the new address to Search Console and file a change of address for the old one.
+
+## Prerendering
+
+`npm run build:pages` finishes by running [scripts/prerender-pages.mjs](scripts/prerender-pages.mjs):
+it builds [pages/entry-server.tsx](pages/entry-server.tsx) through this same config (`build.ssr`, into
+`dist-pages-ssr/`), renders every route in Node, and writes the HTML into that route's shell together
+with its CSS. `view-source` on any address shows the page, and the page paints with no JavaScript at
+all. The CSS comes from the library's own SSG API — `getStyles()` over the string sink — so the docs
+site is the reference implementation for it.
+
+Four things keep hydration matching the HTML, and each is a trap if you touch it:
+
+- **Class names are content-hashed on both sides** — `Box.configure({ classNames: 'stable' })` in
+  `main.tsx` and in `entry-server.tsx`. A counter starting from zero in a second process names the
+  same rules differently, and every element React adopted would mismatch.
+- **The route's chunk is fetched before `hydrateRoot`.** Pages are dynamic imports (see "Route
+  chunks"), `React.lazy` always suspends on its first render, and a hydration that suspends throws
+  away the HTML it was supposed to adopt. `preloadPage` resolves the module first and
+  [pages/app/routePages.ts](pages/app/routePages.ts) then renders it directly.
+- **The theme is on `<html>` before the first paint.** The shell ships `class="light"` — the theme the
+  prerendered HTML is rendered in, and what a reader with no JavaScript keeps — and an inline script in
+  [pages/index.html](pages/index.html) swaps it for `dark` when the system asks. `<Box.Theme>` adopts
+  the same value on its first commit.
+- **Nothing may start at `opacity: 0`.** framer-motion renders `initial` on the server, so an entrance
+  animation hides the prerendered page until React takes over. Page content is wrapped in
+  [pages/components/reveal.tsx](pages/components/reveal.tsx), which animates a mount _after_ hydration
+  and nothing else; an `AnimatePresence` that exists for a later swap takes `initial={false}`.
+
+The pass fails the build rather than shipping an empty page: every route must produce HTML and CSS
+above a floor, and its number of client-only Suspense boundaries must equal its `CLIENT_ISLANDS` entry
+in the script — a ledger, so a new hole fails and a closed one is a line to delete. That check is what
+caught an unguarded `window` in the DataGrid's column menu, which React had swallowed into a boundary
+with nothing on stderr.
+
+Two build-level traps it exposed, both fixed and both worth remembering:
+
+- **`"sideEffects": false` in package.json is the _library's_ claim, and Rollup applies it to `pages/**`
+  too.** `import './extends'`, whose exports the entry never reads, was dropped from the production
+  build — so every `Box.extend()` and `Box.components()` registration the site makes did nothing on the
+  built site, while the dev server (which does not tree-shake) showed them working. The field now names
+  `pages/**` as the one place in this repo with side effects.
+- **CSS imported by an async chunk is not linked in the prerendered HTML** — the chunk's loader writes
+  that `<link>`, so code blocks painted unstyled until the JavaScript arrived. Site-wide CSS (the Prism
+  theme) is imported from `main.tsx`, which puts it in the entry stylesheet.
+
+## Route chunks
+
+Every page is a dynamic import in [pages/app/routePages.ts](pages/app/routePages.ts), keyed by the
+route table's paths, so a page the table names and the loaders miss is a type error. A reader of
+/textbox no longer downloads the DataGrid, the 5 MB of mock rows behind it, Prism and Recharts: the
+entry chunk is 118 KB gz where it was 1.22 MB. A page-only heavyweight import belongs in its own file
+so the page's chunk carries it — the pattern `rechartsDemo.tsx` started.
 
 ## Code blocks
 

@@ -1,4 +1,3 @@
-import { motion } from 'framer-motion';
 import { Layers } from 'lucide-react';
 import { ReactNode, useState } from 'react';
 import Box from '../../src/box';
@@ -8,6 +7,7 @@ import Overlay from '../../src/components/overlay';
 import { H2 } from '../../src/components/semantics';
 import Code from '../components/code';
 import PageHeader from '../components/pageHeader';
+import Reveal from '../components/reveal';
 
 export default function OverlayPage() {
   const [openAbsolute, setOpenAbsolute] = useState(false);
@@ -21,7 +21,7 @@ export default function OverlayPage() {
         description="Renders its children into a portal, positioned where it is declared — so they escape overflow: hidden, clipped ancestors and stacking contexts."
       />
 
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
+      <Reveal delay={0.1}>
         <Flex d="column" gap={8}>
           <Code label="Import" language="jsx" code="import Overlay from '@cronocode/react-box/components/overlay';" />
 
@@ -167,7 +167,7 @@ export default function OverlayPage() {
             </Flex>
           </Section>
         </Flex>
-      </motion.div>
+      </Reveal>
     </Box>
   );
 }

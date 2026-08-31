@@ -127,7 +127,9 @@ export default function Layout({ children }: LayoutProps) {
         <PageContext.Provider value={{ tocEntries, setTocEntries }}>
           <Box flex1 minWidth={0} minHeight="fit-screen">
             <Box maxWidth={300} mx="auto" px={4} sm={{ px: 8 }} py={8} lg={{ py: 12 }}>
-              <AnimatePresence mode="wait">
+              {/* `initial={false}`: the page under this is prerendered, so on the first paint there is
+                  nothing to fade in — only a navigation is a transition. */}
+              <AnimatePresence mode="wait" initial={false}>
                 <motion.div
                   key={location.pathname}
                   initial={{ opacity: 0, y: 10 }}
@@ -165,7 +167,7 @@ function ThemeToggle({ theme, toggleTheme }: { theme: string; toggleTheme: () =>
       }}
       onClick={toggleTheme}
     >
-      <AnimatePresence mode="wait">
+      <AnimatePresence mode="wait" initial={false}>
         <motion.div
           key={theme}
           initial={{ rotate: -90, opacity: 0 }}

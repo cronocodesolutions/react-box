@@ -1,4 +1,3 @@
-import { motion } from 'framer-motion';
 import { CheckSquare } from 'lucide-react';
 import { ReactNode } from 'react';
 import Box from '../../src/box';
@@ -7,6 +6,7 @@ import Flex from '../../src/components/flex';
 import { H2 } from '../../src/components/semantics';
 import Code from '../components/code';
 import PageHeader from '../components/pageHeader';
+import Reveal from '../components/reveal';
 import useTableOfContents from '../hooks/useTableOfContents';
 
 export default function CheckboxPage() {
@@ -16,7 +16,7 @@ export default function CheckboxPage() {
     <Box>
       <PageHeader icon={CheckSquare} title="Checkbox" description="Use Checkbox component to turn an option on or off." />
 
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
+      <Reveal delay={0.1}>
         <Flex d="column" gap={10}>
           <Code label="Import" language="jsx" code="import Checkbox from '@cronocode/react-box/components/checkbox';" />
 
@@ -86,7 +86,7 @@ export default function CheckboxPage() {
             </Box>
           </Section>
         </Flex>
-      </motion.div>
+      </Reveal>
     </Box>
   );
 }

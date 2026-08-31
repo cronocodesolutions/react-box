@@ -1,6 +1,7 @@
 node_modules
 dist
 dist-pages
+dist-pages-ssr
 **/.DS_Store
 .claude/plans
 .claude/settings.local.json

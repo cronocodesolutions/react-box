@@ -1,9 +1,9 @@
-import { motion } from 'framer-motion';
 import { Rows3 } from 'lucide-react';
 import Box from '../../src/box';
 import Flex from '../../src/components/flex';
 import Code from '../components/code';
 import PageHeader from '../components/pageHeader';
+import Reveal from '../components/reveal';
 import useTableOfContents from '../hooks/useTableOfContents';
 
 export default function FlexPage() {
@@ -13,7 +13,7 @@ export default function FlexPage() {
     <Box>
       <PageHeader icon={Rows3} title="Flex" description="A shortcut component for display: flex with alignment and spacing props." />
 
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
+      <Reveal delay={0.1}>
         <Flex d="column" gap={8}>
           <Code label="Import" language="jsx" code="import Flex from '@cronocode/react-box/components/flex';" />
 
@@ -107,7 +107,7 @@ export default function FlexPage() {
             </Flex>
           </Code>
         </Flex>
-      </motion.div>
+      </Reveal>
     </Box>
   );
 }

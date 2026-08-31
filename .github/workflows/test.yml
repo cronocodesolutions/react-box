@@ -38,6 +38,11 @@ jobs:
         run: npm run check:package
       - name: Check size budgets 🔧
         run: npm run size
+      # The prerender pass renders every route in Node, so this is the only thing in CI that puts a
+      # DataGrid, a Dropdown or a chart through a server render — bug #85 was found by it and by no
+      # test. It fails on a route that renders nothing, and it runs last because it is the slowest.
+      - name: Check the docs site prerenders 🔧
+        run: npm run build:pages
 
   next-app:
     # The RSC claim, end to end. The unit tests render with the client React, so only a real Next.js

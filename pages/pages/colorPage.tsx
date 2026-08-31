@@ -1,9 +1,9 @@
-import { motion } from 'framer-motion';
 import { Palette } from 'lucide-react';
 import Box from '../../src/box';
 import Flex from '../../src/components/flex';
 import Variables from '../../src/core/variables';
 import PageHeader from '../components/pageHeader';
+import Reveal from '../components/reveal';
 
 const colors: Record<string, Variables.ColorType[]> = {
   1: ['none', 'white', 'black', 'transparent', 'currentColor'],
@@ -180,7 +180,7 @@ export default function ColorPage() {
     <Flex gap={10} d="column">
       <PageHeader icon={Palette} title="Colors" description="Complete color palette available for use throughout your application." />
 
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
+      <Reveal delay={0.1}>
         <Flex d="column" gap={8}>
           {Object.entries(colors).map(([group, items]) => (
             <Box key={group}>
@@ -219,7 +219,7 @@ export default function ColorPage() {
             </Box>
           ))}
         </Flex>
-      </motion.div>
+      </Reveal>
     </Flex>
   );
 }

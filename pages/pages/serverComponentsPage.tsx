@@ -1,10 +1,10 @@
-import { motion } from 'framer-motion';
 import { CircleAlert, Layers, Server, Zap } from 'lucide-react';
 import { ReactNode } from 'react';
 import Box from '../../src/box';
 import Flex from '../../src/components/flex';
 import Code from '../components/code';
 import PageHeader from '../components/pageHeader';
+import Reveal from '../components/reveal';
 import useTableOfContents from '../hooks/useTableOfContents';
 
 export default function ServerComponentsPage() {
@@ -19,7 +19,7 @@ export default function ServerComponentsPage() {
         badge="React 19"
       />
 
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
+      <Reveal delay={0.1}>
         <Flex d="column" gap={10}>
           <Section id="how-it-works" title="How it works">
             <Box>
@@ -166,7 +166,7 @@ npm run smoke:next-app   # 13 assertions against the served HTML`}
             </Box>
           </Section>
         </Flex>
-      </motion.div>
+      </Reveal>
     </Box>
   );
 }

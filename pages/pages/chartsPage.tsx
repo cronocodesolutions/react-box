@@ -1,4 +1,3 @@
-import { motion } from 'framer-motion';
 import { ChartSpline } from 'lucide-react';
 import { lazy, ReactNode, Suspense, useMemo, useState } from 'react';
 import Box from '../../src/box';
@@ -11,6 +10,7 @@ import { H2 } from '../../src/components/semantics';
 import { Defs, LinearGradient, Stop, SvgText } from '../../src/components/svg';
 import Code from '../components/code';
 import PageHeader from '../components/pageHeader';
+import Reveal from '../components/reveal';
 import useTableOfContents from '../hooks/useTableOfContents';
 
 // Recharts and its d3 packages are ~95 KB gzipped: the one demo that needs them is a chunk of its
@@ -94,7 +94,7 @@ export default function ChartsPage() {
         description="Four micro-primitives — sparkline, progress ring, gauge and mini donut — built from the SVG components, styled with the props everything else here takes, and cheap enough to put one in every row of a ten-thousand-row grid."
       />
 
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
+      <Reveal delay={0.1}>
         <Flex d="column" gap={10}>
           <Section id="what" title="Not a chart library">
             These are the small, dense drawings a dashboard is made of, and nothing more: no axes, no legends, no data transformations. What
@@ -346,7 +346,7 @@ function TrendCell({ cell }: { cell: { row: { data: Row } } }) {
             <Mono>label="Revenue, rising 12% over six months"</Mono>, not <Mono>label="Chart"</Mono>.
           </Section>
         </Flex>
-      </motion.div>
+      </Reveal>
     </Box>
   );
 }

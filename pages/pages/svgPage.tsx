@@ -1,4 +1,3 @@
-import { motion } from 'framer-motion';
 import { Spline } from 'lucide-react';
 import { ReactNode } from 'react';
 import Box from '../../src/box';
@@ -8,6 +7,7 @@ import { H2 } from '../../src/components/semantics';
 import { Circle, ClipPath, Defs, Ellipse, G, Line, LinearGradient, Path, Polyline, Rect, Stop, Svg, SvgText } from '../../src/components/svg';
 import Code from '../components/code';
 import PageHeader from '../components/pageHeader';
+import Reveal from '../components/reveal';
 import useTableOfContents from '../hooks/useTableOfContents';
 
 export default function SvgPage() {
@@ -21,7 +21,7 @@ export default function SvgPage() {
         description="Twenty-three SVG properties as typed props, and twenty components to put them on — paint, stroke, text and the SVG 2 geometry that lets a shape move with no JavaScript at all."
       />
 
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
+      <Reveal delay={0.1}>
         <Flex d="column" gap={10}>
           <Code
             id="paint"
@@ -822,7 +822,7 @@ export default function SvgPage() {
             </Box>
           </Section>
         </Flex>
-      </motion.div>
+      </Reveal>
     </Box>
   );
 }
