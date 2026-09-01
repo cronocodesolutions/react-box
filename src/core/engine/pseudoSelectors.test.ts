@@ -15,7 +15,9 @@ describe('pseudo-element ordering in a compound selector', () => {
 
     renderStyles(engine, { checked: [false, { before: { translateX: 4 } }] });
 
-    expect(generatedRulesOf(engine)).toContain(':checked::before{transform:translateX(1rem)}');
+    expect(generatedRulesOf(engine)).toContain(
+      ':checked::before{--boxTranslateX:1rem;translate:var(--boxTranslateX, 0) var(--boxTranslateY, 0)}',
+    );
   });
 
   it('does the same for a component style, where the nesting is a plain object', () => {
@@ -24,7 +26,9 @@ describe('pseudo-element ordering in a compound selector', () => {
     // The shape `Box.components({ switch: { styles: { checked: { before: … } } } })` produces.
     renderStyles(engine, { checked: { before: { translateX: 4 } } } as unknown as BoxStyleProps);
 
-    expect(generatedRulesOf(engine)).toContain(':checked::before{transform:translateX(1rem)}');
+    expect(generatedRulesOf(engine)).toContain(
+      ':checked::before{--boxTranslateX:1rem;translate:var(--boxTranslateX, 0) var(--boxTranslateY, 0)}',
+    );
   });
 
   it('leaves the order alone when the pseudo-class is already declared first', () => {
@@ -32,7 +36,9 @@ describe('pseudo-element ordering in a compound selector', () => {
 
     renderStyles(engine, { hover: { before: { translateX: 2 } } });
 
-    expect(generatedRulesOf(engine)).toContain(':hover::before{transform:translateX(0.5rem)}');
+    expect(generatedRulesOf(engine)).toContain(
+      ':hover::before{--boxTranslateX:0.5rem;translate:var(--boxTranslateX, 0) var(--boxTranslateY, 0)}',
+    );
   });
 
   it.each([

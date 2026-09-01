@@ -1,5 +1,6 @@
 import { BoxStyle } from '../coreTypes';
 import getDefaultEngine from '../engine/defaultEngine';
+import { Keyframes } from '../engine/keyframes';
 import { Components } from './boxComponents';
 
 // Thin delegation to the default style engine — every registry these functions used to own
@@ -11,6 +12,10 @@ namespace BoxExtends {
     extendedPropTypes: TPropTypes,
   ) {
     return getDefaultEngine().extend(variables, extendedProps, extendedPropTypes);
+  }
+
+  export function keyframes<T extends Keyframes>(keyframes: T) {
+    return getDefaultEngine().keyframes(keyframes);
   }
 
   export function getComponentsStyles(): Components {

@@ -2,6 +2,7 @@
 import IdentityFactory from '@cronocode/identity-factory';
 import { BoxStyleProps, BoxStyles, PseudoClassesType } from '../../types';
 import ObjectUtils from '../../utils/object/objectUtils';
+import Animations from '../animations';
 import {
   breakpoints,
   cssStyles as defaultCssStyles,
@@ -22,6 +23,7 @@ import { resolveComponentStyles } from '../extends/useComponents';
 import { stableHash } from '../hash';
 import Variables from '../variables';
 import { createFlushCoordinator, FlushScheduler, microtaskScheduler } from './flushScheduler';
+import createKeyframesRegistry, { KeyframeStops, Keyframes } from './keyframes';
 import { createSink, RULE_PRECEDENCE, SinkMode, SortedRule, StyleElementDescriptor, StyleSink } from './styleSink';
 
 /** Explicit engine configuration — replaces the previous NODE_ENV-based sniffing. */
@@ -37,6 +39,12 @@ export interface StylesConfiguration {
    * which is what works in a Server Component). Defaults to the environment; changing it re-emits everything.
    */
   sink?: SinkMode;
+  /**
+   * What the base class transitions — `'all'` by default, one of the `transition` prop's groups, or
+   * `false` to declare nothing at all and leave transitions entirely to the props. Changing it after the
+   * first render re-emits every rule, since the base block is written once.
+   */
+  transition?: string | false;
 }
 
 export interface StyleEngineOptions extends StylesConfiguration {
@@ -90,6 +98,11 @@ export interface StyleEngine {
     extendedPropTypes: TPropTypes,
   ): { extendedProps: TProps; extendedPropTypes: TPropTypes };
   components<T extends Components>(components: T): T;
+  /**
+   * Register `@keyframes` sequences, whose steps are Box props. Nothing is emitted until a rule names
+   * one, so registering a library of them costs no CSS.
+   */
+  keyframes<T extends Keyframes>(keyframes: T): T;
   getComponentsStyles(): Components;
   getVariableValue(name: string): string;
 }
@@ -171,6 +184,10 @@ export function createStyleEngine(options: StyleEngineOptions = {}): StyleEngine
   // Recreated by clear(): names come from a counter, so request 2 would otherwise differ from request 1.
   let identity = new IdentityFactory();
   const variables = Variables.createRegistry();
+  const keyframesRegistry = createKeyframesRegistry();
+
+  // What `._b` transitions. `false` writes no declaration at all.
+  let baseTransition: string | false = options.transition ?? 'all';
 
   // Undefined means "follow the sink": counter-hashed normally, content-hashed in element mode.
   let classNamesMode: StylesConfiguration['classNames'] = options.classNames;
@@ -226,6 +243,8 @@ export function createStyleEngine(options: StyleEngineOptions = {}): StyleEngine
   const unsupportedRules = new Set<string>();
   // Pending rules to be flushed: [sortIndex, mediaOrder, rule]
   const pendingRules: [number, number, string][] = [];
+  // `@keyframes` blocks waiting for the next flush, already built into rule text.
+  const pendingKeyframes: string[] = [];
   let requireFlush = true;
   let isInitialized = false;
 
@@ -396,15 +415,10 @@ export function createStyleEngine(options: StyleEngineOptions = {}): StyleEngine
     return styleName.map((s) => `${s}:${(itemValue.valueFormat as any)?.(value, variables.getVariableValue, s) ?? value}`).join(';');
   }
 
-  function generateRule(
-    key: string,
-    value: BoxStyleValue,
-    weight: number,
-    media: string,
-    pseudoClassParentName?: string,
-    rootSelector?: string,
-  ): { rule: string; sortIndex: number; mediaOrder: number } | null {
-    const item = cssStyles[key as keyof typeof cssStyles] as BoxStyle[];
+  /** The definition a prop's value matches, or null when nothing accepts it — no rule, and no class name. */
+  function findDefinition(key: string, value: BoxStyleValue): BoxStyle | null {
+    const item = cssStyles[key as keyof typeof cssStyles] as BoxStyle[] | undefined;
+    if (!item) return null;
 
     let itemValue = item.find((x) => {
       // A definition that names its values judges them itself: `typeof` cannot tell `url(#sky)` from a typo.
@@ -428,7 +442,55 @@ export function createStyleEngine(options: StyleEngineOptions = {}): StyleEngine
       itemValue = item.find((x) => variableBackedValues.has(x.values));
     }
 
+    return itemValue ?? null;
+  }
+
+  // Built now rather than at flush time: a colour token in a step has to be pending before the flush
+  // writes the `:root` block it belongs in.
+  function buildPendingKeyframes() {
+    if (!keyframesRegistry.hasPending()) return;
+
+    for (const [name, stops] of keyframesRegistry.drainPending()) {
+      pendingKeyframes.push(keyframesRule(name, stops));
+    }
+  }
+
+  /** One `@keyframes` sequence as its rule: every stop's Box props resolved the way a rule's would be. */
+  function keyframesRule(name: string, stops: KeyframeStops): string {
+    const body = Object.entries(stops)
+      .map(([stop, props]) => {
+        const stopDeclarations = Object.entries(props as BoxStyles)
+          .map(([key, value]) => {
+            const definition = findDefinition(key, value as BoxStyleValue);
+
+            return definition ? declarations(definition, key, value as BoxStyleValue) : null;
+          })
+          .filter(Boolean)
+          .join(';');
+
+        return `${stop}{${stopDeclarations}}`;
+      })
+      .join('');
+
+    return `@keyframes ${name}{${body}}`;
+  }
+
+  function generateRule(
+    key: string,
+    value: BoxStyleValue,
+    weight: number,
+    media: string,
+    pseudoClassParentName?: string,
+    rootSelector?: string,
+  ): { rule: string; sortIndex: number; mediaOrder: number } | null {
+    const itemValue = findDefinition(key, value);
     if (!itemValue) return null;
+
+    // A value that names a sequence is what puts it in the stylesheet — registration alone emits nothing.
+    if (itemValue.keyframes) {
+      keyframesRegistry.use(itemValue.keyframes(value));
+      buildPendingKeyframes();
+    }
 
     const sortIndex = cssStylesIndex[key] ?? 0;
     const mediaOrder = mediaRank[media] ?? 0;
@@ -535,6 +597,15 @@ export function createStyleEngine(options: StyleEngineOptions = {}): StyleEngine
     return `@layer ${names.join(',')};`;
   }
 
+  /** What the base classes transition, as a declaration — empty when the engine was told to declare none. */
+  function baseTransitionOf(time: string): string {
+    if (baseTransition === false) return '';
+
+    const property = Animations.propertyGroups[baseTransition as Animations.PropertyGroup] ?? baseTransition;
+
+    return `transition: ${property} var(${time});`;
+  }
+
   /** The reset + `:root` block every engine writes before its first generated rule. */
   function baseRules(): string[] {
     // Skipped when there are none: an empty `:root{}` is valid CSS but noise in every SSR payload.
@@ -546,6 +617,11 @@ export function createStyleEngine(options: StyleEngineOptions = {}): StyleEngine
       // Every Box transitions on these two, so zeroing them is the whole reduced-motion default. A component
       // that still wants movement declares it under `motionReduce`, later in the cascade.
       `@media (prefers-reduced-motion: reduce){:root{--transitionTime: 0s;--svgTransitionTime: 0s;}}`,
+      // The two axes `translate` is composed from. Registering them is what makes them *interpolable*: a
+      // transition reads the substituted `translate` and works either way, but inside `@keyframes` an
+      // unregistered custom property animates discretely — the loading bar sat at -100% and teleported.
+      `@property --boxTranslateX{syntax: "<length-percentage>";inherits: false;initial-value: 0;}`,
+      `@property --boxTranslateY{syntax: "<length-percentage>";inherits: false;initial-value: 0;}`,
       `#crono-box {position: absolute;top: 0;left: 0;height: 0;z-index:99999;}`,
       `html{font-size: 16px;font-family: Arial, sans-serif;}`,
       `body{margin: 0;line-height: var(--lineHeight);font-size: var(--fontSize);}`,
@@ -553,11 +629,11 @@ export function createStyleEngine(options: StyleEngineOptions = {}): StyleEngine
       `button{color: inherit;}`,
       `input[type="number"]{-moz-appearance: textfield;}`,
       `input[type="number"]::-webkit-outer-spin-button,input[type="number"]::-webkit-inner-spin-button{-webkit-appearance: none;margin: 0;}`,
-      `.${boxClassName}{display: block;border: 0 solid var(--borderColor);outline: 0px solid var(--outlineColor);margin: 0;padding: 0;background-color: initial;transition: all var(--transitionTime);box-sizing: border-box;font-family: inherit;font-size: inherit;}`,
-      `.${svgClassName}{display: block;border: 0 solid var(--borderColor);outline: 0px solid var(--outlineColor);margin: 0;padding: 0;transition: all var(--svgTransitionTime);}`,
+      `.${boxClassName}{display: block;border: 0 solid var(--borderColor);outline: 0px solid var(--outlineColor);margin: 0;padding: 0;background-color: initial;${baseTransitionOf('--transitionTime')}box-sizing: border-box;font-family: inherit;font-size: inherit;}`,
+      `.${svgClassName}{display: block;border: 0 solid var(--borderColor);outline: 0px solid var(--outlineColor);margin: 0;padding: 0;${baseTransitionOf('--svgTransitionTime')}}`,
       // The shapes inside an <svg> transition on their own variable. Listed explicitly rather than `*`, so the
       // rule cannot reach a <foreignObject>'s HTML.
-      `.${svgClassName} path,.${svgClassName} circle,.${svgClassName} ellipse,.${svgClassName} rect,.${svgClassName} line,.${svgClassName} polygon,.${svgClassName} polyline,.${svgClassName} text {transition: all var(--svgTransitionTime);}`,
+      `.${svgClassName} path,.${svgClassName} circle,.${svgClassName} ellipse,.${svgClassName} rect,.${svgClassName} line,.${svgClassName} polygon,.${svgClassName} polyline,.${svgClassName} text {${baseTransitionOf('--svgTransitionTime')}}`,
     ];
 
     if (!isElementMode()) return rules;
@@ -588,7 +664,7 @@ export function createStyleEngine(options: StyleEngineOptions = {}): StyleEngine
 
   function flush() {
     const hasPendingVars = variables.hasPendingVariables();
-    if (!requireFlush && !hasPendingVars) return;
+    if (!requireFlush && !hasPendingVars && pendingKeyframes.length === 0) return;
 
     const target = getSink();
 
@@ -604,6 +680,12 @@ export function createStyleEngine(options: StyleEngineOptions = {}): StyleEngine
           .map(([key, val]) => `--${key}: ${val};`)
           .join('')}}`,
       );
+    }
+
+    // With the base rules: a sequence belongs to no single class, and `@keyframes` needs no position in
+    // the cascade — a name resolves wherever the block sits.
+    if (pendingKeyframes.length > 0) {
+      target.writeBase(pendingKeyframes.splice(0, pendingKeyframes.length));
     }
 
     const drained = drainPendingRules();
@@ -665,6 +747,7 @@ export function createStyleEngine(options: StyleEngineOptions = {}): StyleEngine
     unsupportedRules.clear();
     ruleElements.clear();
     pendingRules.length = 0;
+    pendingKeyframes.length = 0;
     isInitialized = false;
     // The next flush has to write the base rules again — the sink no longer holds them.
     requireFlush = true;
@@ -674,6 +757,8 @@ export function createStyleEngine(options: StyleEngineOptions = {}): StyleEngine
     // long-lived server differs from request 1. Registered user variables survive — they are configuration.
     identity = new IdentityFactory();
     variables.reset();
+    // Emitted sequences go with the sink; the rules that named them regenerate, so they come back with it.
+    keyframesRegistry.reset();
     sink?.reset();
   }
 
@@ -735,6 +820,12 @@ export function createStyleEngine(options: StyleEngineOptions = {}): StyleEngine
     configure(config: StylesConfiguration) {
       if (config.classNames) classNamesMode = config.classNames;
 
+      if (config.transition !== undefined && config.transition !== baseTransition) {
+        baseTransition = config.transition;
+        // The base block is written once, so the only way to change it afterwards is to write it again.
+        if (isInitialized) clear();
+      }
+
       if (config.sink && config.sink !== (sink?.mode ?? sinkMode)) {
         // Rules already written live in the old sink, so the engine forgets them too — otherwise every rule
         // rendered so far would be missing with no way back. Nothing is written yet on the first configure.
@@ -776,6 +867,15 @@ export function createStyleEngine(options: StyleEngineOptions = {}): StyleEngine
       styleCache.clear();
 
       return components;
+    },
+
+    keyframes(keyframesToRegister) {
+      keyframesRegistry.register(keyframesToRegister);
+      // Only a sequence redefined after something used it has anything to write here.
+      buildPendingKeyframes();
+      if (pendingKeyframes.length > 0) scheduleFlush();
+
+      return keyframesToRegister;
     },
 
     getComponentsStyles() {

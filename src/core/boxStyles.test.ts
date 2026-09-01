@@ -125,7 +125,9 @@ describe('numeric dividers', () => {
       // Only the inset and translate props declare the negative fraction scale; the spacing props
       // take negative numbers instead. See the roadmap bug ledger for that asymmetry.
       expect(generatedRulesFor({ top: '-1/4' }, 'frac-top')).toContain('{top:-25%}');
-      expect(generatedRulesFor({ translateX: '-1/2' }, 'frac-translate')).toContain('{transform:translateX(-50%)}');
+      expect(generatedRulesFor({ translateX: '-1/2' }, 'frac-translate')).toContain(
+        '{--boxTranslateX:-50%;translate:var(--boxTranslateX, 0) var(--boxTranslateY, 0)}',
+      );
       expect(generatedRulesFor({ mt: -4 }, 'neg-mt')).toContain('{margin-top:-1rem}');
     });
 
@@ -150,7 +152,7 @@ describe('numeric dividers', () => {
  * Candidates offered to a definition that declares `match`: the walk uses the first one it says yes to,
  * which also proves the predicate accepts anything at all. A new `match` definition needs its shape here.
  */
-const matchCandidates = ['url(#sample)', 'var(--sample)', '50%', 'none', 4, { 'sample-var': 'red-500' }] as const;
+const matchCandidates = ['url(#sample)', 'var(--sample)', '50%', 'none', 4, { 'sample-var': 'red-500' }, 'linear(0,1)'] as const;
 
 /** A sample value as text, so a record reads as itself rather than as `[object Object]`. */
 function label(value: unknown): string {
@@ -174,8 +176,12 @@ function classNameValue(value: unknown): string {
  * writes its own declarations (`vars`) names one custom property per key of the value it is given.
  */
 function styleNamesOf(def: BoxStyle, prop: string, value: unknown): string[] {
-  if (def.declarations && typeof value === 'object' && value !== null) {
-    return Object.keys(value).map((name) => `--${name}`);
+  if (def.declarations) {
+    if (typeof value === 'object' && value !== null) return Object.keys(value).map((name) => `--${name}`);
+
+    // The other shape: an axis of the composed `translate`, which names its own variable and the
+    // property both axes write into.
+    return [`--box${prop[0].toUpperCase()}${prop.slice(1)}`, 'translate'];
   }
 
   return Array.isArray(def.styleName) ? def.styleName : [def.styleName ?? prop];
@@ -221,7 +227,7 @@ describe('every declared prop value produces a rule', () => {
   // description, BOX_AI_CONTEXT.md, both skill files and two places on the docs site. Every one of
   // those was written by hand and none of them was ever checked, so the figure drifted to '~144'
   // against a registry of 117 (bug #71). Adding a prop now fails here until they are updated.
-  const PROP_COUNT = 139;
+  const PROP_COUNT = 150;
 
   it('holds exactly the number of props the docs claim', () => {
     expect(Object.keys(cssStyles).length).toBe(PROP_COUNT);
@@ -514,5 +520,65 @@ describe('vars — a CSS variable is a Box prop', () => {
     expect(classNames.filter((name) => name.startsWith('vars-'))).toEqual([]);
     expect(generatedRulesOf(engine)).not.toContain('display:none');
     expect(renderStyles(makeEngine('vars-bad-name'), { vars: { 'color x': 'red-500' } }).filter((n) => n.startsWith('vars-'))).toEqual([]);
+  });
+});
+
+/**
+ * The animation and transition family: times are milliseconds, `transition` names a group of properties
+ * rather than one, and the transform props are longhands so two of them compose instead of colliding.
+ */
+describe('animation and transition props', () => {
+  const composedTranslate = 'translate:var(--boxTranslateX, 0) var(--boxTranslateY, 0)';
+
+  it.each([
+    ['animationDuration', 'animation-duration'],
+    ['animationDelay', 'animation-delay'],
+    ['transitionDelay', 'transition-delay'],
+  ])('%s is a number of milliseconds', (prop, styleName) => {
+    expect(generatedRulesFor({ [prop]: 1100 }, `ms-${prop}`)).toContain(`{${styleName}:1100ms}`);
+  });
+
+  it('expands a transition group into the properties it stands for', () => {
+    expect(generatedRulesFor({ transition: 'colors' }, 'transition-colors')).toContain(
+      '{transition-property:color, background-color, border-color, outline-color, text-decoration-color, fill, stroke}',
+    );
+    expect(generatedRulesFor({ transition: 'transform' }, 'transition-transform')).toContain(
+      '{transition-property:transform, translate, rotate, scale}',
+    );
+    expect(generatedRulesFor({ transition: 'all' }, 'transition-all')).toContain('{transition-property:all}');
+  });
+
+  it('takes a computed easing curve beside the keywords', () => {
+    expect(generatedRulesFor({ transitionTimingFunction: 'cubic-bezier(0.4,0,0.6,1)' }, 'easing-bezier')).toContain(
+      '{transition-timing-function:cubic-bezier(0.4,0,0.6,1)}',
+    );
+    // What AN2's sampled springs will be: a `linear()` curve is a value, not a special case.
+    expect(generatedRulesFor({ animationTimingFunction: 'linear(0,0.5,1)' }, 'easing-linear')).toContain(
+      '{animation-timing-function:linear(0,0.5,1)}',
+    );
+  });
+
+  // The template type rejects it at compile time too — the cast is what a JavaScript caller does.
+  it('refuses an easing that is not one', () => {
+    const engine = makeEngine('easing-typo');
+    const classNames = renderStyles(engine, { transitionTimingFunction: 'cubic-bezierish' } as unknown as BoxStyleProps);
+
+    expect(classNames).toEqual(['_b']);
+    expect(generatedRulesOf(engine)).not.toContain('cubic-bezierish');
+  });
+
+  it('composes the two translate axes, which used to overwrite each other', () => {
+    const engine = makeEngine('translate-composition');
+    const classNames = renderStyles(engine, { translateX: 4, translateY: -2 });
+    const rules = generatedRulesOf(engine);
+
+    expect(classNames).toEqual(['_b', 'translateX-4', 'translateY--2']);
+    expect(rules).toContain(`.translateX-4{--boxTranslateX:1rem;${composedTranslate}}`);
+    expect(rules).toContain(`.translateY--2{--boxTranslateY:-0.5rem;${composedTranslate}}`);
+  });
+
+  it('keeps scale and rotate on their own properties, so a transform is three independent props', () => {
+    expect(generatedRulesFor({ scale: 1.05 }, 'scale-up')).toContain('{scale:1.05}');
+    expect(generatedRulesFor({ rotate: 360 }, 'rotate-full')).toContain('{rotate:360deg}');
   });
 });

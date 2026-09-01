@@ -16,6 +16,10 @@ export namespace BoxStylesFormatters {
     export function px(value: number) {
       return `${value}px`;
     }
+    /** Direct milliseconds: `animationDuration={1100}` is `1100ms`. */
+    export function ms(value: number) {
+      return `${value}ms`;
+    }
     /** Fraction token: `'1/2'` becomes `'50%'`. */
     export function fraction(value: string) {
       const [a, b] = value.split('/');

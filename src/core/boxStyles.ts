@@ -1,6 +1,6 @@
-import { DEFAULT_REM_DIVIDER } from './boxConstants';
+import Animations from './animations';
 import { BoxStylesFormatters } from './boxStylesFormatters';
-import { BoxStyle } from './coreTypes';
+import { BoxStyle, BoxStyleValue } from './coreTypes';
 import Variables from './variables';
 
 /** The opacity scale shared by `opacity`, `fillOpacity` and `strokeOpacity`. */
@@ -16,11 +16,104 @@ const referenceValues = {
   match: Variables.isReference,
 } satisfies BoxStyle;
 
+/**
+ * One axis of the composed `translate`. Both axes used to write `transform`, so a Box asking for both kept
+ * whichever rule landed last; each now sets its own custom property and both write the same declaration,
+ * which still transitions because `var()` substitutes at computed-value time.
+ */
+function translate(axis: 'X' | 'Y', format: (value: BoxStyleValue) => string) {
+  return (value: BoxStyleValue) => `--boxTranslate${axis}:${format(value)};translate:var(--boxTranslateX, 0) var(--boxTranslateY, 0)`;
+}
+
 export const cssStyles = {
   /** The appearance CSS property is used to display UI elements with platform-specific styling, based on the operating system's theme. */
   appearance: [
     {
       values: ['none', 'auto', 'menulist-button', 'textfield', 'button', 'checkbox'] as const,
+    },
+  ],
+  /**
+   * One of the four presets — their `@keyframes` are registered already and their durations ride
+   * `--transitionTime`, so `prefers-reduced-motion` stops them with no opt-in. Declared before the
+   * longhands below, so `animationDuration` and friends override what a preset chose.
+   */
+  animation: [
+    {
+      values: [...Animations.presetNames, 'none'] as const,
+      valueFormat: (value: string) => Animations.presets[value as Animations.PresetName] ?? 'none',
+      keyframes: (value: BoxStyleValue) => [value as string],
+    },
+  ],
+  /** The animation-delay CSS property specifies the amount of time to wait from applying the animation to an element before beginning to perform the animation. Milliseconds, like every other time here. */
+  animationDelay: [
+    {
+      values: 0,
+      styleName: 'animation-delay',
+      valueFormat: BoxStylesFormatters.Value.ms,
+    },
+  ],
+  /** The animation-direction CSS property sets whether an animation should play forward, backward, or alternate back and forth between playing the sequence forward and backward. */
+  animationDirection: [
+    {
+      values: ['normal', 'reverse', 'alternate', 'alternate-reverse'] as const,
+      styleName: 'animation-direction',
+    },
+  ],
+  /** The animation-duration CSS property sets the length of time that an animation takes to complete one cycle. Milliseconds: `animationDuration={1100}` is `1100ms`, and it names its own time, so reduced motion cannot reach it — say so with `motionReduce`. */
+  animationDuration: [
+    {
+      values: 0,
+      styleName: 'animation-duration',
+      valueFormat: BoxStylesFormatters.Value.ms,
+    },
+  ],
+  /** The animation-fill-mode CSS property sets how a CSS animation applies styles to its target before and after its execution. */
+  animationFillMode: [
+    {
+      values: ['none', 'forwards', 'backwards', 'both'] as const,
+      styleName: 'animation-fill-mode',
+    },
+  ],
+  /** The animation-iteration-count CSS property sets the number of times an animation sequence should be played before stopping. */
+  animationIterationCount: [
+    {
+      values: ['infinite'] as const,
+      styleName: 'animation-iteration-count',
+    },
+    {
+      values: 0,
+      styleName: 'animation-iteration-count',
+    },
+  ],
+  /**
+   * Which `@keyframes` to run: a sequence registered with `Box.keyframes()`, one of the four preset
+   * names, or a name from a stylesheet this library never wrote — an unknown name is left alone rather
+   * than dropped, because `@keyframes` can come from anywhere.
+   */
+  animationName: [
+    {
+      values: '',
+      styleName: 'animation-name',
+      keyframes: (value: BoxStyleValue) => String(value).split(/[\s,]+/),
+    },
+  ],
+  /** The animation-play-state CSS property sets whether an animation is running or paused. */
+  animationPlayState: [
+    {
+      values: ['running', 'paused'] as const,
+      styleName: 'animation-play-state',
+    },
+  ],
+  /** The animation-timing-function CSS property sets how an animation progresses through the duration of each cycle. `cubic-bezier()`, `steps()` and `linear()` are values too. */
+  animationTimingFunction: [
+    {
+      values: ['linear', 'ease', 'ease-in', 'ease-in-out', 'ease-out', 'step-start', 'step-end'] as const,
+      styleName: 'animation-timing-function',
+    },
+    {
+      values: Animations.timingFunction,
+      match: Animations.isTimingFunction,
+      styleName: 'animation-timing-function',
     },
   ],
   /** The border-width shorthand CSS property sets the width of an element's border. */
@@ -1025,7 +1118,7 @@ export const cssStyles = {
   /** The rotate CSS property allows you to specify rotation transforms individually and independently of the transform property. This maps better to typical user interface usage, and saves having to remember the exact order of transform functions to specify in the transform property. */
   rotate: [
     {
-      values: [0, 90, 180, 270, -90, -180, -270] as const,
+      values: [0, 45, 90, 135, 180, 270, 360, -45, -90, -135, -180, -270] as const,
       valueFormat: (value: number) => `${value}deg`,
     },
   ],
@@ -1034,6 +1127,12 @@ export const cssStyles = {
       styleName: 'scale',
       values: ['xAxis', 'yAxis'] as const,
       valueFormat: (value: string) => (value === 'xAxis' ? '-1 1' : '1 -1'),
+    },
+  ],
+  /** The scale CSS property lets you specify scale transforms individually and independently of the transform property: `scale={1.05}` is 105% in both axes. Declared after `flip`, which writes the same property — use one or the other, not both. */
+  scale: [
+    {
+      values: 0,
     },
   ],
   /** The text-align CSS property sets the horizontal alignment of the inline-level content inside a block element or table-cell box. This means it works like vertical-align but in the horizontal direction. */
@@ -1071,11 +1170,20 @@ export const cssStyles = {
       values: ['wrap', 'nowrap', 'balance', 'pretty'] as const,
     },
   ],
-  /** The transition-property CSS property sets the CSS properties to which a transition effect should be applied. */
+  /** What a transition applies to: `all` (what the base class already does), `none`, or one of the property groups — `colors`, `opacity`, `shadow`, `transform`, `size`, `filter`. */
   transition: [
     {
       styleName: 'transition-property',
-      values: ['none', 'all'] as const,
+      values: ['none', 'all', ...Animations.propertyGroupNames] as const,
+      valueFormat: (value: string) => Animations.propertyGroups[value as Animations.PropertyGroup] ?? value,
+    },
+  ],
+  /** The transition-delay CSS property specifies the duration to wait before starting a property's transition effect when its value changes. Milliseconds. */
+  transitionDelay: [
+    {
+      styleName: 'transition-delay',
+      values: 0,
+      valueFormat: BoxStylesFormatters.Value.ms,
     },
   ],
   /** The transition-duration CSS property sets the length of time a transition animation should take to complete. By default, the value is 0s, meaning that no animation will occur. */
@@ -1086,11 +1194,16 @@ export const cssStyles = {
       valueFormat: (value: number) => `${value}ms`,
     },
   ],
-  /** The transition-timing-function CSS property sets how intermediate values are calculated for CSS properties being affected by a transition effect. */
+  /** The transition-timing-function CSS property sets how intermediate values are calculated for CSS properties being affected by a transition effect. `cubic-bezier()`, `steps()` and `linear()` are values too. */
   transitionTimingFunction: [
     {
       styleName: 'transition-timing-function',
-      values: ['linear', 'ease', 'ease-in', 'ease-in-out', 'ease-out'] as const,
+      values: ['linear', 'ease', 'ease-in', 'ease-in-out', 'ease-out', 'step-start', 'step-end'] as const,
+    },
+    {
+      styleName: 'transition-timing-function',
+      values: Animations.timingFunction,
+      match: Animations.isTimingFunction,
     },
   ],
   /** The user-select CSS property controls whether the user can select text. This doesn't have any effect on content loaded as part of a browser's user interface (its chrome), except in textboxes. */
@@ -1458,50 +1571,42 @@ export const cssStyles = {
       styleName: 'box-shadow',
     },
   ],
-  /** The translateX() CSS function repositions an element horizontally on the 2D plane. */
+  /** Moves an element horizontally on the 2D plane, on the ÷4 spacing scale, as a fraction of its own width (`'1/2'`) or as a percentage. Composes with `translateY`. */
   translateX: [
     {
       values: 0,
-      valueFormat: (value: number) => `translateX(${value / DEFAULT_REM_DIVIDER}rem)`,
-      styleName: 'transform',
+      declarations: translate('X', (value) => BoxStylesFormatters.Value.rem(value as number)),
     },
     {
       values: Variables.percentages,
-      valueFormat: (value: string) => `translateX(${BoxStylesFormatters.Value.fraction(value)})`,
-      styleName: 'transform',
+      declarations: translate('X', (value) => BoxStylesFormatters.Value.fraction(value as string)),
     },
     {
       values: Variables.negativePercentages,
-      valueFormat: (value: string) => `translateX(${BoxStylesFormatters.Value.fraction(value)})`,
-      styleName: 'transform',
+      declarations: translate('X', (value) => BoxStylesFormatters.Value.fraction(value as string)),
     },
     {
       values: Variables.percentString,
-      valueFormat: (value: string) => `translateX(${value})`,
-      styleName: 'transform',
+      declarations: translate('X', String),
     },
   ],
-  /** The translateY() CSS function repositions an element vertically on the 2D plane. */
+  /** Moves an element vertically on the 2D plane, on the ÷4 spacing scale, as a fraction of its own height (`'1/2'`) or as a percentage. Composes with `translateX`. */
   translateY: [
     {
       values: 0,
-      valueFormat: (value: number) => `translateY(${value / DEFAULT_REM_DIVIDER}rem)`,
-      styleName: 'transform',
+      declarations: translate('Y', (value) => BoxStylesFormatters.Value.rem(value as number)),
     },
     {
       values: Variables.percentages,
-      valueFormat: (value: string) => `translateY(${BoxStylesFormatters.Value.fraction(value)})`,
-      styleName: 'transform',
+      declarations: translate('Y', (value) => BoxStylesFormatters.Value.fraction(value as string)),
     },
     {
       values: Variables.negativePercentages,
-      valueFormat: (value: string) => `translateY(${BoxStylesFormatters.Value.fraction(value)})`,
-      styleName: 'transform',
+      declarations: translate('Y', (value) => BoxStylesFormatters.Value.fraction(value as string)),
     },
     {
       values: Variables.percentString,
-      valueFormat: (value: string) => `translateY(${value})`,
-      styleName: 'transform',
+      declarations: translate('Y', String),
     },
   ],
   /** The content CSS property replaces content with a generated value. It can be used to define what is rendered inside an element or pseudo-element. */

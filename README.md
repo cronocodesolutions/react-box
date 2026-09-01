@@ -5,7 +5,7 @@
 [![Tests](https://github.com/box-kite/box-kite/actions/workflows/test.yml/badge.svg)](https://github.com/box-kite/box-kite/actions/workflows/test.yml)
 [![license](https://img.shields.io/npm/l/@cronocode/react-box)](LICENSE)
 
-`Box` is a single React component with 139 typed CSS props. It generates the CSS for the values you
+`Box` is a single React component with 150 typed CSS props. It generates the CSS for the values you
 pass at runtime and caches every rule by its content, so the same value anywhere in the app reuses
 one class — a project styles itself in TypeScript, with no CSS files to write and no class-name
 convention to remember.
@@ -577,7 +577,7 @@ A complete page — props, pseudo-classes, breakpoints, themes, `extend`, `compo
 
 ## Architecture
 
-The styling engine is framework-free. Everything that generates CSS — the 139 prop definitions,
+The styling engine is framework-free. Everything that generates CSS — the 150 prop definitions,
 the value formatters, class-name generation, rule ordering, the style sinks (CSSOM, `textContent`,
 string for SSR, style elements for React 19), the flush scheduler, CSS variables and the theme
 runtime — lives in `src/core/` and imports no React at all. CI fails the build if it ever does
@@ -586,10 +586,10 @@ runtime — lives in `src/core/` and imports no React at all. CI fails the build
 
 React is a thin adapter on top of it:
 
-|                                                            | Files | Lines | Share     |
-| ---------------------------------------------------------- | ----- | ----- | --------- |
-| Core engine (`src/core/`, `core.ts`)                       | 20    | 5,208 | 90.2%     |
-| React binding (`src/react/`, `box.ts`, `rsc.ts`, `ssg.ts`) | 14    | 564   | **9.8%**  |
+|                                                            | Files | Lines | Share    |
+| ---------------------------------------------------------- | ----- | ----- | -------- |
+| Core engine (`src/core/`, `core.ts`)                       | 20    | 5,208 | 90.2%    |
+| React binding (`src/react/`, `box.ts`, `rsc.ts`, `ssg.ts`) | 14    | 564   | **9.8%** |
 
 The binding is the whole React-specific surface: resolve class names during render, flush the
 pending rules from `useInsertionEffect`, render the style elements of the Server-Component path,

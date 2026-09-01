@@ -1,10 +1,10 @@
 import { HTMLStyleElement } from 'happy-dom';
 import { describe, expect, it } from 'vitest';
 import BoxExtends from '../extends/boxExtends';
-import { createStyleEngine, StyleEngine } from './styleEngine';
+import { createStyleEngine, StyleEngine, StyleEngineOptions } from './styleEngine';
 
-function makeEngine(styleElementId: string) {
-  return createStyleEngine({ classNames: 'readable', sink: 'textContent', styleElementId });
+function makeEngine(styleElementId: string, options: StyleEngineOptions = {}) {
+  return createStyleEngine({ classNames: 'readable', sink: 'textContent', styleElementId, ...options });
 }
 
 function rulesOf(engine: StyleEngine) {
@@ -135,5 +135,41 @@ describe('createStyleEngine', () => {
 
     expect(renderStyles(a, { p: 9 })).not.toContain('p-9');
     expect(renderStyles(b, { p: 9 })).toContain('p-9');
+  });
+
+  /**
+   * `transition: all` on every Box is a default, not a law: an engine can name a narrower group or
+   * declare nothing at all, which is what a consumer that owns its own transitions wants.
+   */
+  describe('the base transition is configurable', () => {
+    it('narrows the base class to one property group', () => {
+      const engine = makeEngine('engine-transition-group', { transition: 'colors' });
+
+      renderStyles(engine, { p: 4 });
+
+      expect(rulesOf(engine)).toContain('transition: color, background-color');
+      expect(rulesOf(engine)).not.toContain('transition: all');
+    });
+
+    it('declares no transition at all when told to', () => {
+      const engine = makeEngine('engine-transition-off', { transition: false });
+
+      renderStyles(engine, { p: 4 });
+
+      expect(rulesOf(engine)).not.toContain('transition:');
+    });
+
+    it('rewrites the base block when configured after the first render', () => {
+      const engine = makeEngine('engine-transition-late');
+
+      renderStyles(engine, { p: 4 });
+      engine.configure({ transition: false });
+      renderStyles(engine, { p: 4 });
+
+      const css = rulesOf(engine);
+      expect(css).not.toContain('transition:');
+      // The rules that were already written come back with it — a reconfigure is a clear().
+      expect(css).toContain('.p-4{padding:1rem}');
+    });
   });
 });

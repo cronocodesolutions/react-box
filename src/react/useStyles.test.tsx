@@ -350,7 +350,9 @@ describe('useStyles', () => {
 
     it('applies translateX with rem', () => {
       const { element, styleElement } = act({ translateX: 4 });
-      expect(styleElement.innerText).toContain('.translateX-4{transform:translateX(1rem)}');
+      expect(styleElement.innerText).toContain(
+        '.translateX-4{--boxTranslateX:1rem;translate:var(--boxTranslateX, 0) var(--boxTranslateY, 0)}',
+      );
       expect(element.classList).toContain('translateX-4');
     });
   });

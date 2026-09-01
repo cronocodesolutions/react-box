@@ -16,6 +16,7 @@ const loaders: Record<SiteRoutePath, () => Promise<{ default: ComponentType }>> 
   '/svg': () => import('../pages/svgPage'),
   '/icon': () => import('../pages/iconPage'),
   '/charts': () => import('../pages/chartsPage'),
+  '/animation': () => import('../pages/animationPage'),
   '/button': () => import('../pages/buttonPage'),
   '/textbox': () => import('../pages/textboxPage'),
   '/textarea': () => import('../pages/textareaPage'),
