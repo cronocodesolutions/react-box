@@ -346,7 +346,7 @@ const wobble = Box.spring({ stiffness: 120, damping: 8 });
   `animation-duration`, not a `transitionend` listener — which fires once per property with no way to
   know how many are coming. So a reader on `prefers-reduced-motion` measures `0s` and the node leaves in
   the same commit, with nothing to configure. `Tooltip`, the `Dropdown` popup and the DataGrid column
-  menu are all built on it, and each expresses its exit as a `closed` variant in its component styles.
+  menu are all built on it, and each expresses its exit as a `closed` variant in its component styles — plus `up`/`closedUp` on `dropdown.items`, since a popup that opened upward has to collapse upward.
 - **`Box.configure({ transition })`** changes what the base class transitions for the whole engine:
   a group name, or `false` to declare nothing at all and leave transitions entirely to the props.
   Call it before the first render.

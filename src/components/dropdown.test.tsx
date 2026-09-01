@@ -96,6 +96,70 @@ describe('Dropdown', () => {
 
         openDropdown();
         expect(screen.getByRole('listbox')).toHaveAttribute('data-state', 'closed');
+        // Collapsing back up into the trigger it grew down out of — see the Open direction tests.
+        expect(screen.getByRole('listbox').className.split(' ')).toContain('translateY--1');
+
+        act(() => vi.advanceTimersByTime(250));
+
+        expect(screen.queryByRole('listbox')).toBeNull();
+      } finally {
+        vi.useRealTimers();
+      }
+    });
+  });
+
+  /**
+   * A popup grows *away* from its trigger and collapses back into it, so the 4px it covers changes sign
+   * with the direction it opened in. Nothing here is visible to happy-dom, which lays out nothing — what
+   * is testable is the class the direction resolves to, and a browser was used for the rest.
+   */
+  describe('Open direction', () => {
+    const realRect = Element.prototype.getBoundingClientRect;
+
+    afterEach(() => {
+      Element.prototype.getBoundingClientRect = realRect;
+    });
+
+    // `Overlay` measures the trigger, and a trigger below the middle of the viewport makes the popup
+    // open upward. With no layout every rect is zero, so where it sits has to be said out loud.
+    const triggerAt = (top: number) => {
+      Element.prototype.getBoundingClientRect = function () {
+        return { top, bottom: top + 30, left: 0, right: 200, width: 200, height: 30, x: 0, y: top, toJSON: () => ({}) } as DOMRect;
+      };
+    };
+
+    const listboxClasses = () => screen.getByRole('listbox').className.split(' ');
+
+    it('starts above its resting place when it opens downward', () => {
+      triggerAt(10);
+      renderDropdown();
+      openDropdown();
+
+      expect(listboxClasses()).toContain('starting-translateY--1');
+    });
+
+    it('starts below it when it opens upward', () => {
+      triggerAt(700);
+      renderDropdown();
+      openDropdown();
+
+      expect(listboxClasses()).toContain('starting-translateY-1');
+      expect(listboxClasses()).not.toContain('starting-translateY--1');
+    });
+
+    it('reverses the exit with the direction too', () => {
+      vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] });
+
+      try {
+        triggerAt(700);
+        renderDropdown({ itemsProps: { transitionDuration: 200 } });
+        openDropdown();
+        openDropdown();
+
+        // Back down into the trigger it rose out of, and inert while it goes.
+        expect(listboxClasses()).toContain('translateY-1');
+        expect(listboxClasses()).not.toContain('translateY--1');
+        expect(listboxClasses()).toContain('pointerEvents-none');
 
         act(() => vi.advanceTimersByTime(250));
 
