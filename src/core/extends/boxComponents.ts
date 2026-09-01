@@ -56,6 +56,11 @@ const boxComponents = {
       // by itself: it starts transparent and 4px high, and `._b`'s transition covers the distance.
       startingStyle: { opacity: 0, translateY: -1 },
     },
+    variants: {
+      // The way back out, over the same distance. `<Presence>` holds the node while this runs, and a
+      // layer on its way out is a picture rather than a control — hence no pointer events.
+      closed: { opacity: 0, translateY: -1, pointerEvents: 'none' },
+    },
   },
   button: {
     styles: {
@@ -599,6 +604,11 @@ const boxComponents = {
           // The popup is mounted when it opens, so `@starting-style` is its entrance and no state,
           // no effect and no JavaScript are involved in it.
           startingStyle: { opacity: 0, translateY: -1 },
+        },
+        variants: {
+          // The exit `<Presence>` holds the popup open for. Not clickable while it runs: a second
+          // selection landing on a closing listbox would change the value the user just settled.
+          closed: { opacity: 0, translateY: -1, pointerEvents: 'none' },
         },
       },
       item: {
@@ -1260,6 +1270,11 @@ const boxComponents = {
                         },
                       },
                       startingStyle: { opacity: 0, translateY: -1 },
+                    },
+                    variants: {
+                      // The exit, held open by `<Presence>`. A click on a closing menu would run its
+                      // item a second time, and `toggleGrouping` twice is grouping never changed.
+                      closed: { opacity: 0, translateY: -1, pointerEvents: 'none' },
                     },
                     children: {
                       item: {

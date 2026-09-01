@@ -2,10 +2,13 @@ import { FunctionComponent, Ref, useCallback, useState } from 'react';
 import Box from '../../box';
 import { BoxStyleProps } from '../../types';
 import Overlay from '../overlay';
+import { PresenceHandle } from '../presence';
 import { DropdownRow, useDropdownContext } from './dropdownContext';
 import DropdownRowRenderer from './dropdownRowRenderer';
 
 interface Props<TVal> {
+  /** Which way the popup is going, from the `<Presence>` that owns its mount. */
+  presence: PresenceHandle;
   /** Every row the listbox shows, already in keyboard order. */
   rows: DropdownRow<TVal>[];
   emptyItem?: React.ReactElement;
@@ -38,7 +41,8 @@ function rolesFor(hasOptions: boolean, multiple: boolean, labelledBy: string): R
 }
 
 export default function DropdownItems<TVal>(props: Props<TVal>) {
-  const { rows, emptyItem, triggerRef, popupRef, listboxId, labelledBy, itemsProps } = props;
+  const { presence, rows, emptyItem, triggerRef, popupRef, listboxId, labelledBy, itemsProps } = props;
+  const { present, ref: contentRef, props: presenceProps } = presence;
   const { multiple, variant } = useDropdownContext<TVal>();
 
   const [openUp, setOpenUp] = useState(false);
@@ -61,11 +65,12 @@ export default function DropdownItems<TVal>(props: Props<TVal>) {
         onPositionChange={handlePositionChange}
       >
         <Box
+          ref={contentRef}
           component="dropdown.items"
-          variant={variant as never}
           {...itemsProps}
+          variant={[variant, { closed: !present }] as never}
           id={listboxId}
-          props={rolesFor(rows.length > 0, multiple, labelledBy)}
+          props={{ ...rolesFor(rows.length > 0, multiple, labelledBy), ...presenceProps }}
         >
           {rows.map((row, index) => (
             <DropdownRowRenderer<TVal> key={rowKey(row, index)} row={row} index={index} />

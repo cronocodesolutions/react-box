@@ -9,10 +9,21 @@ import { BoxStyleProps, ComponentsAndVariants } from '../types';
 
 type AllProps<TTag extends keyof React.JSX.IntrinsicElements> = React.ComponentProps<TTag>;
 
-export type TagPropsType<TTag extends keyof React.JSX.IntrinsicElements> = Omit<
+/** `data-*`, which React's own attribute types allow only in JSX position and never in a props bag. */
+type DataAttributes = { [attribute: `data-${string}`]: string | number | boolean | undefined };
+
+type TagProps<TTag extends keyof React.JSX.IntrinsicElements> = Omit<
   AllProps<TTag>,
   'className' | 'style' | 'ref' | 'disabled' | 'required' | 'checked' | 'id'
 >;
+
+/**
+ * Every attribute the tag takes, plus `data-*` (bug #99: `props={{ 'data-state': 'open' }}` did not
+ * typecheck, and `<Box data-state>` did but was dropped, since Box forwards nothing but `props`). A union
+ * rather than an intersection: an index signature in the target makes every *interface* passed as a bag
+ * unassignable, and `TooltipTrigger.props` is one. Anything else unknown still fails.
+ */
+export type TagPropsType<TTag extends keyof React.JSX.IntrinsicElements> = TagProps<TTag> | (TagProps<TTag> & DataAttributes);
 
 /**
  * The style props plus the `className` the engine's classes are merged with — everything the

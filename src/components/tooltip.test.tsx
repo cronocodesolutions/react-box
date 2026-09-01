@@ -1,4 +1,4 @@
-import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { act, cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { ignoreLogs } from '../../dev/tests';
 import Button from './button';
@@ -123,6 +123,27 @@ describe('Tooltip', () => {
 
     // Nothing else separates the bubble from the page once both its colors are forced.
     expect(css).toContain('@media (forced-colors: active){.forcedColors-b-1{border-width:1px}}');
+  });
+
+  it('holds the bubble in the DOM while its exit runs', () => {
+    vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] });
+
+    try {
+      // A duration of its own, because the base `transition` shorthand is not expanded here — in a
+      // browser the bubble's 250ms comes off `._b` and this prop is not needed.
+      renderTooltip({ defaultOpen: true, transitionDuration: 200 });
+      fireEvent.keyDown(document, { key: 'Escape' });
+
+      // Gone as far as the trigger is concerned, still there as far as the animation is concerned.
+      expect(trigger()).not.toHaveAttribute('aria-describedby');
+      expect(tooltip()).toHaveAttribute('data-state', 'closed');
+
+      act(() => vi.advanceTimersByTime(250));
+
+      expect(tooltip()).toBeNull();
+    } finally {
+      vi.useRealTimers();
+    }
   });
 
   it('leaves no timer behind when it unmounts mid-delay', () => {

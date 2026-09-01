@@ -6,6 +6,7 @@ import useDismiss from '../react/a11y/useDismiss';
 import useIdentifier from '../react/a11y/useIdentifier';
 import { ComponentsAndVariants } from '../types';
 import Overlay from './overlay';
+import Presence from './presence';
 
 /** Why the tooltip opened or closed — `onOpenChange` gets this alongside the event that did it. */
 export type TooltipReason = 'hover' | 'focus' | 'pointer-leave' | 'blur' | 'escape';
@@ -221,32 +222,38 @@ function Tooltip<TKey extends keyof ComponentsAndVariants = 'tooltip'>(props: Pr
   return (
     <>
       {children(trigger)}
-      {showTooltip && (
-        <Overlay
-          ref={overlayRef}
-          anchor={triggerElement}
-          // Under the trigger, not over it — with a small gap, which is also what keeps the pointer
-          // travelling between the two from crossing anything else.
-          anchorSide="bottom"
-          matchWidth={false}
-          adjustTranslateX={adjustTranslateX}
-          adjustTranslateY={adjustTranslateY ?? '4px'}
-          component={'tooltip' as TKey}
-          {...(restProps as TooltipBoxProps<TKey>)}
-          id={tooltipId}
-          props={{
-            role: 'tooltip',
-            ...contentProps,
-            // Last, and deliberately not merged with whatever the consumer passed: these two are
-            // what makes the tooltip hoverable, and WCAG 1.4.13 is not a default to override by
-            // accident while adding an unrelated handler.
-            onPointerEnter: handleContentEnter,
-            onPointerLeave: handleContentLeave,
-          }}
-        >
-          {content}
-        </Overlay>
-      )}
+      {/* The bubble's entrance is `startingStyle` in its component styles; this is the other direction. */}
+      <Presence present={showTooltip}>
+        {(presence) => (
+          <Overlay
+            ref={overlayRef}
+            contentRef={presence.ref}
+            anchor={triggerElement}
+            // Under the trigger, not over it — with a small gap, which is also what keeps the pointer
+            // travelling between the two from crossing anything else.
+            anchorSide="bottom"
+            matchWidth={false}
+            adjustTranslateX={adjustTranslateX}
+            adjustTranslateY={adjustTranslateY ?? '4px'}
+            component={'tooltip' as TKey}
+            {...(restProps as TooltipBoxProps<TKey>)}
+            variant={[restProps.variant, { closed: !presence.present }] as never}
+            id={tooltipId}
+            props={{
+              role: 'tooltip',
+              ...presence.props,
+              ...contentProps,
+              // Last, and deliberately not merged with whatever the consumer passed: these two are
+              // what makes the tooltip hoverable, and WCAG 1.4.13 is not a default to override by
+              // accident while adding an unrelated handler.
+              onPointerEnter: handleContentEnter,
+              onPointerLeave: handleContentLeave,
+            }}
+          >
+            {content}
+          </Overlay>
+        )}
+      </Presence>
     </>
   );
 }

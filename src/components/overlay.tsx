@@ -28,6 +28,12 @@ interface OverlayProps {
   /** Which edge of the anchor the layer starts from. Default `'top'`. */
   anchorSide?: 'top' | 'bottom';
   /**
+   * The content Box, which is the one that animates. `ref` is the positioning wrapper, whose transform
+   * follows the anchor and which therefore transitions nothing on purpose — so a `<Presence>` measuring
+   * an exit has to reach past it.
+   */
+  contentRef?: Ref<HTMLDivElement>;
+  /**
    * Whether the layer takes the measured width of the anchor. Default true, so a dropdown popup
    * lines up with its trigger; a tooltip sizes to its own content and turns it off.
    */
@@ -43,6 +49,7 @@ function OverlayImpl(props: Props, ref: Ref<HTMLDivElement>) {
     adjustTranslateY = '0px',
     anchor,
     anchorSide = 'top',
+    contentRef,
     matchWidth = true,
     ...restProps
   } = props;
@@ -132,7 +139,7 @@ function OverlayImpl(props: Props, ref: Ref<HTMLDivElement>) {
               width: matchWidth ? position.width : undefined,
             }}
           >
-            <Box {...restProps} />
+            <Box ref={contentRef} {...restProps} />
           </Box>,
           portalContainer,
         )}

@@ -25,7 +25,7 @@ Check latest: `npm view @cronocode/react-box version`
 1. **NEVER `style={{ }}`** — use Box props. Missing prop? `Box.extend()`. `style` is top-level only — never inside breakpoints/pseudo-classes/theme
 2. **NEVER `<Box tag="...">`** for common elements — use `<Button>`, `<Link>`, `<H1>`, `<P>`, `<Nav>`, etc.
 3. **NEVER `<Box display="flex/grid">`** — use `<Flex>` / `<Grid>`
-4. **HTML attrs in `props`**: `<Link props={{ href: '/about' }}>` not `<Link href>`
+4. **HTML attrs in `props`**: `<Link props={{ href: '/about' }}>` not `<Link href>` — `data-*`/`aria-*` too (a top-level `data-state` typechecks and is dropped)
 
 ## Numeric Value Formatters
 
@@ -125,9 +125,14 @@ properties — only `flip` and `scale` collide, both writing `scale`. **`startin
 plain props (`startingStyle={{ opacity: 0, translateY: 2 }}`) saying what they start from the first time the element is styled — mounted, or
 shown from `display: none`. It compiles to `@starting-style`, nests inside a breakpoint/pseudo-class/theme rather than around one
 (`md: { startingStyle: … }`), and a browser without the at-rule shows the element finished. `Tooltip` and the `Dropdown` popup already carry
-one. For the way back out React unmounts too fast to animate, so hide instead: `transitionBehavior="allow-discrete"` lets `display`
+one. For the way back out React unmounts too fast to animate, so either hide instead — `transitionBehavior="allow-discrete"` lets `display`
 transition, flipping it at the _end_, so `<Box display={open ? 'block' : 'none'} opacity={open ? 1 : 0} transitionBehavior="allow-discrete"
-startingStyle={{ opacity: 0 }} />` animates both directions. `interpolateSize="allow-keywords"` on a container is what makes
+startingStyle={{ opacity: 0 }} />` animates both directions — or hold the node with **`<Presence present>`**
+(`components/presence`): a render prop handed `{ present, state, ref, props }` that keeps rendering its child with `present: false` until the
+child's own CSS says the transition is over, then lets React remove it. `ref` goes on the element carrying the transition (its computed
+`transition-duration`/`animation-duration` _is_ the wait — not a `transitionend` listener, which fires once per property), `props` is
+`{ 'data-state': 'open' | 'closed' }`. Under `prefers-reduced-motion` the measured wait is `0` and the node leaves in the same commit.
+`Tooltip`, the `Dropdown` popup and the DataGrid column menu are built on it. `interpolateSize="allow-keywords"` on a container is what makes
 `height: auto` animate inside it (inherited; Chromium-only, elsewhere it snaps). `Box.configure({ transition: 'colors' | false })` changes
 what the base class transitions, before the first render.
 

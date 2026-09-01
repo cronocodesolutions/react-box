@@ -56,6 +56,7 @@ const PROVIDED = {
   Grid: "import Grid from '@cronocode/react-box/components/grid';",
   Icon: "import Icon from '@cronocode/react-box/components/icon';",
   Overlay: "import Overlay from '@cronocode/react-box/components/overlay';",
+  Presence: "import Presence from '@cronocode/react-box/components/presence';",
   RadioButton: "import RadioButton from '@cronocode/react-box/components/radioButton';",
   RadioGroup: "import RadioGroup from '@cronocode/react-box/components/radioGroup';",
   Select: "import Select from '@cronocode/react-box/components/select';",

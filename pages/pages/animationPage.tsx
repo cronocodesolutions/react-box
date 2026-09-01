@@ -4,6 +4,7 @@ import Box from '../../src/box';
 import Button from '../../src/components/button';
 import Flex from '../../src/components/flex';
 import Icon from '../../src/components/icon';
+import Presence from '../../src/components/presence';
 import { H2 } from '../../src/components/semantics';
 import { Line, Path, Svg } from '../../src/components/svg';
 import Springs from '../../src/core/springs';
@@ -32,6 +33,7 @@ export default function AnimationPage() {
   const [shown, setShown] = useState(false);
   const [open, setOpen] = useState(false);
   const [expanded, setExpanded] = useState(false);
+  const [leaving, setLeaving] = useState(false);
 
   return (
     <Box>
@@ -342,7 +344,7 @@ const wobble = Box.spring({ stiffness: 120, damping: 8 });
             flipping to <Mono>none</Mono> at the <em>end</em> rather than the start, so an element that is hidden rather than unmounted
             animates out as well as in — and <Mono>startingStyle</Mono> applies again every time it comes back from{' '}
             <Mono>display: none</Mono>. When the node really does have to leave the tree, holding it long enough to animate is a React
-            problem rather than a CSS one, and this library does not solve that one yet.
+            problem rather than a CSS one, and <Mono>&lt;Presence&gt;</Mono> below is the answer to that half.
           </Section>
 
           <Code
@@ -379,6 +381,64 @@ const wobble = Box.spring({ stiffness: 120, damping: 8 });
               </Box>
               <Button variant="secondary" onClick={() => setOpen((on) => !on)}>
                 {open ? 'Hide' : 'Show'}
+              </Button>
+            </Flex>
+          </Code>
+
+          <Section id="presence" title="Unmounting, but not yet">
+            Hiding is not always an option: a list row, a toast, a route. <Mono>&lt;Presence&gt;</Mono> keeps rendering its child with{' '}
+            <Mono>present: false</Mono> until the child's own CSS says the transition is over, and only then lets React remove it — so the
+            exit is written as ordinary props on ordinary state. It reads the element's computed <Mono>transition-duration</Mono> rather
+            than listening for <Mono>transitionend</Mono>, which fires once per property with no way to know how many are coming; the useful
+            consequence is that a reader on <Mono>prefers-reduced-motion</Mono> measures zero and the node leaves in the same commit, with
+            nothing to configure. <Mono>Tooltip</Mono>, the <Mono>Dropdown</Mono> popup and the DataGrid's column menu are all built on it,
+            so every layer in the library already animates both ways.
+          </Section>
+
+          <Code
+            id="presence-demo"
+            label="Presence"
+            language="jsx"
+            context="declare const shown: boolean;"
+            code={`<Presence present={shown}>
+  {({ present, ref, props }) => (
+    <Box
+      ref={ref}
+      props={props}
+      opacity={present ? 1 : 0}
+      translateY={present ? 0 : -2}
+      startingStyle={{ opacity: 0, translateY: -2 }}
+      transitionDuration={320}
+    />
+  )}
+</Presence>`}
+          >
+            <Flex d="column" gap={4} ai="flex-start">
+              <Box height={20}>
+                <Presence present={leaving}>
+                  {({ present, ref, props }) => (
+                    <Box
+                      ref={ref}
+                      props={props}
+                      opacity={present ? 1 : 0}
+                      translateY={present ? 0 : -2}
+                      scale={present ? 1 : 0.96}
+                      startingStyle={{ opacity: 0, translateY: -2, scale: 0.96 }}
+                      transitionDuration={320}
+                      px={5}
+                      py={3}
+                      borderRadius={2}
+                      fontSize={14}
+                      bgImage="gradient-primary"
+                      color="white"
+                    >
+                      unmounted, once it has finished
+                    </Box>
+                  )}
+                </Presence>
+              </Box>
+              <Button variant="secondary" onClick={() => setLeaving((on) => !on)}>
+                {leaving ? 'Remove it' : 'Add it'}
               </Button>
             </Flex>
           </Code>
@@ -542,6 +602,7 @@ const sidebarLinks = [
   { id: 'transforms', label: 'Composing transforms' },
   { id: 'entrances', label: 'startingStyle' },
   { id: 'discrete', label: 'Both directions' },
+  { id: 'presence', label: 'Presence' },
   { id: 'sizes', label: 'height: auto' },
   { id: 'drawing', label: 'Animating any prop' },
   { id: 'server', label: 'On a server' },

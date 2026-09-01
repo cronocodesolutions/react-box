@@ -14,6 +14,7 @@ import DropdownItems from './dropdown/dropdownItems';
 import DropdownSearch from './dropdown/dropdownSearch';
 import { searchItemText } from './dropdown/utils';
 import Flex from './flex';
+import Presence from './presence';
 import Textbox from './textbox';
 
 interface Props<TVal, TKey extends keyof ComponentsAndVariants = 'dropdown'> extends Omit<BoxProps<'button', TKey>, 'ref' | 'tag'> {
@@ -510,16 +511,24 @@ function DropdownImpl<TVal>(props: Props<TVal>, ref: Ref<HTMLInputElement>): Rea
     </Flex>
   );
 
-  const popup = isOpen && hasPopup && (
-    <DropdownItems<TVal>
-      rows={rows}
-      emptyItem={emptyItem}
-      triggerRef={triggerRef}
-      popupRef={popupRef}
-      listboxId={listboxId}
-      labelledBy={hasLabel ? labelId : triggerId}
-      itemsProps={itemsProps}
-    />
+  // `<Presence>` owns the mount rather than `isOpen` doing it, so the popup's exit has somewhere to run.
+  // It stays outside `DropdownItems` because that component measures the trigger during render, and a
+  // closed dropdown should not be paying for a `getBoundingClientRect` on every keystroke.
+  const popup = hasPopup && (
+    <Presence present={isOpen}>
+      {(presence) => (
+        <DropdownItems<TVal>
+          presence={presence}
+          rows={rows}
+          emptyItem={emptyItem}
+          triggerRef={triggerRef}
+          popupRef={popupRef}
+          listboxId={listboxId}
+          labelledBy={hasLabel ? labelId : triggerId}
+          itemsProps={itemsProps}
+        />
+      )}
+    </Presence>
   );
 
   const trigger = isSearchable ? (

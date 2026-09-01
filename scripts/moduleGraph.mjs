@@ -41,7 +41,18 @@ export const SERVER_SAFE_COMPONENTS = [
  * The rest: they hold state, measure the DOM or portal into it. A Server Component may still import one —
  * their chunks carry a `'use client'` banner — but nothing here renders *on* the server.
  */
-export const CLIENT_ONLY_COMPONENTS = ['checkbox', 'dataGrid', 'dropdown', 'form', 'overlay', 'radioGroup', 'select', 'switch', 'tooltip'];
+export const CLIENT_ONLY_COMPONENTS = [
+  'checkbox',
+  'dataGrid',
+  'dropdown',
+  'form',
+  'overlay',
+  'presence',
+  'radioGroup',
+  'select',
+  'switch',
+  'tooltip',
+];
 
 /**
  * Entries that are hooks all the way down. Same `'use client'` banner: importing `useDismiss` from a
