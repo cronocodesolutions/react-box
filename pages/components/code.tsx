@@ -1,4 +1,3 @@
-import { AnimatePresence, motion } from 'framer-motion';
 import { Check, Copy, Terminal } from 'lucide-react';
 import Prism from 'prismjs';
 import 'prismjs/components/prism-bash';
@@ -7,7 +6,9 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import Box, { BoxProps } from '../../src/box';
 import Button from '../../src/components/button';
 import Flex from '../../src/components/flex';
+import Icon from '../../src/components/icon';
 import reactToJsx from '../utils/reactToJsx';
+import IconSwap from './iconSwap';
 
 interface Props extends BoxProps {
   language?: 'javascript' | 'shell' | 'jsx' | 'css' | 'auto';
@@ -136,18 +137,9 @@ export default function Code(props: Props) {
                 transitionDuration={150}
               >
                 <Flex ai="center" gap={2} fontSize={12}>
-                  <AnimatePresence mode="wait" initial={false}>
-                    <motion.div
-                      key={copied ? 'check' : 'copy'}
-                      initial={{ opacity: 0, scale: 0.8 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      exit={{ opacity: 0, scale: 0.8 }}
-                      transition={{ duration: 0.1 }}
-                      style={{ height: '14px' }}
-                    >
-                      {copied ? <Check size={14} /> : <Copy size={14} />}
-                    </motion.div>
-                  </AnimatePresence>
+                  <IconSwap key={copied ? 'check' : 'copy'} scale={0.8}>
+                    <Icon size={3.5}>{copied ? <Check /> : <Copy />}</Icon>
+                  </IconSwap>
                   {copied ? 'Copied!' : 'Copy'}
                 </Flex>
               </Button>
