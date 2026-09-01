@@ -68,7 +68,9 @@ export default function DropdownItems<TVal>(props: Props<TVal>) {
           ref={contentRef}
           component="dropdown.items"
           {...itemsProps}
-          variant={[variant, { closed: !present }] as never}
+          // Which way it opened decides which way it animates, both in and out. `openUp` is settled
+          // before this Box exists: `Overlay` renders nothing into the portal until it has measured.
+          variant={[variant, { up: openUp, closed: !present && !openUp, closedUp: !present && openUp }] as never}
           id={listboxId}
           props={{ ...rolesFor(rows.length > 0, multiple, labelledBy), ...presenceProps }}
         >
