@@ -11,10 +11,11 @@ import {
   mediaKeys,
   pseudo1,
   pseudo2,
-  pseudoClassesByWeight,
+  pseudoClassesOfWeight,
   pseudoClassesWeight,
   pseudoGroupClasses,
   pseudoSelector,
+  startingStyleKey,
   themeGroupClass,
 } from '../boxStyles';
 import { BoxStyle, BoxStyleValue } from '../coreTypes';
@@ -148,12 +149,33 @@ const mediaRank: Record<string, number> = mediaKeys.reduce<Record<string, number
   return acc;
 }, {});
 
+/**
+ * Where `@starting-style` ranks: after every ordinary rule, keeping the media order inside its own half.
+ * The browser computes the before-change style from the whole cascade, so a starting declaration that lands
+ * *before* the ordinary declaration of the same property loses and nothing transitions at all — proved in
+ * a browser, because no test in this repo can see it.
+ */
+const STARTING_RANK = mediaKeys.length;
+
 /** The layer the base rules live in — the reset has to lose against every generated rule. */
 const BASE_LAYER = 'rb';
 
-/** The cascade layer of one generated rule: media-major, then prop declaration order. */
-function layerName(media: string, sortIndex: number): string {
-  return `${BASE_LAYER}${mediaRank[media] ?? 0}${sortIndex.toString(36)}`;
+/**
+ * The cascade layer of one generated rule: rank-major, then prop declaration order. The rank is base36 so
+ * it stays one character — `rb1` + `0` and `rb10` + `0` would otherwise be the same layer.
+ */
+function layerName(rank: number, sortIndex: number): string {
+  return `${BASE_LAYER}${rank.toString(36)}${sortIndex.toString(36)}`;
+}
+
+/**
+ * `@starting-style`'s layers: one per media rank and no prop dimension, because two starting declarations
+ * only ever collide when they are the same property — and then specificity and the media rank settle it.
+ * An underscore keeps them out of `layerName`'s alphabet (base36, so a rank could spell `rbs0`) and out of
+ * nobody's regex — the Next example greps the order statement for `[w,]`.
+ */
+function startingLayerName(rank: number): string {
+  return `${BASE_LAYER}_s${rank.toString(36)}`;
 }
 
 /** What the class-name cache holds per style signature. `elements` is null outside element mode. */
@@ -261,7 +283,8 @@ export function createStyleEngine(options: StyleEngineOptions = {}): StyleEngine
       ObjectUtils.isKeyOf(key, breakpoints) ||
       ObjectUtils.isKeyOf(key, mediaFeatures) ||
       ObjectUtils.isKeyOf(key, pseudoGroupClasses) ||
-      ObjectUtils.isKeyOf(key, themeGroupClass)
+      ObjectUtils.isKeyOf(key, themeGroupClass) ||
+      ObjectUtils.isKeyOf(key, startingStyleKey)
     );
   }
 
@@ -313,6 +336,14 @@ export function createStyleEngine(options: StyleEngineOptions = {}): StyleEngine
         if (ObjectUtils.isObject(value)) {
           addClassNames(value as BoxStyleProps, classNames, [...currentPseudoClasses, key], media, pseudoClassParentName, rootSelector);
         }
+      } else if (ObjectUtils.isKeyOf(key, startingStyleKey)) {
+        // Plain props only. The block wraps a whole rule, so a media query or a selector nested *inside*
+        // it would have nowhere to go — they nest around `startingStyle` instead, and the types say so.
+        Object.entries(value as BoxStyles).forEach(([startingKey, startingValue]) => {
+          if (!ObjectUtils.isKeyOf(startingKey, cssStyles)) return;
+
+          addClassName(startingKey, startingValue, classNames, currentPseudoClasses, media, pseudoClassParentName, rootSelector, true);
+        });
       } else if (ObjectUtils.isKeyOf(key, breakpoints) || ObjectUtils.isKeyOf(key, mediaFeatures)) {
         // Both fill the same slot — one `@media` block per rule — and the types already refuse the nesting.
         addClassNames(value as BoxStyleProps, classNames, currentPseudoClasses, key, pseudoClassParentName, rootSelector);
@@ -361,19 +392,20 @@ export function createStyleEngine(options: StyleEngineOptions = {}): StyleEngine
     media: string = 'normal',
     pseudoClassParentName?: string,
     rootSelector?: string,
+    startingStyle?: boolean,
   ) {
     if (value === undefined || value === null) return;
 
     const weight = currentPseudoClasses.reduce((sum, pseudoClass) => sum + pseudoClassesWeight[pseudoClass], 0);
-    const className = createClassName(key, value, weight, media, pseudoClassParentName);
+    const className = createClassName(key, value, weight, media, pseudoClassParentName, startingStyle);
 
     const serializedValue = serializeValue(value);
-    const ruleKey = `${media}-${weight}-${key}-${serializedValue}-${pseudoClassParentName ?? ''}-${rootSelector ?? ''}`;
+    const ruleKey = `${media}-${weight}-${key}-${serializedValue}-${pseudoClassParentName ?? ''}-${rootSelector ?? ''}-${startingStyle ? 'start' : ''}`;
 
     if (!generatedRules.has(ruleKey)) {
       generatedRules.add(ruleKey);
 
-      const result = generateRule(key, value as BoxStyleValue, weight, media, pseudoClassParentName, rootSelector);
+      const result = generateRule(key, value as BoxStyleValue, weight, media, pseudoClassParentName, rootSelector, startingStyle);
       if (result) {
         pendingRules.push([result.sortIndex, result.mediaOrder, result.rule]);
         requireFlush = true;
@@ -482,6 +514,7 @@ export function createStyleEngine(options: StyleEngineOptions = {}): StyleEngine
     media: string,
     pseudoClassParentName?: string,
     rootSelector?: string,
+    startingStyle?: boolean,
   ): { rule: string; sortIndex: number; mediaOrder: number } | null {
     const itemValue = findDefinition(key, value);
     if (!itemValue) return null;
@@ -493,29 +526,35 @@ export function createStyleEngine(options: StyleEngineOptions = {}): StyleEngine
     }
 
     const sortIndex = cssStylesIndex[key] ?? 0;
-    const mediaOrder = mediaRank[media] ?? 0;
+    const rank = mediaRank[media] ?? 0;
+    // The rank a starting rule is pushed into — see `STARTING_RANK`. It is the same dimension the media
+    // query uses, so a preference still beats a breakpoint inside each half.
+    const mediaOrder = rank + (startingStyle ? STARTING_RANK : 0);
     const condition = mediaCondition(media);
 
     /**
-     * The finished rule: in its media query, and in element mode in its cascade layer. The space after
-     * `@media` matters — the CSS parsers in happy-dom and jsdom drop `@media(...)` rules outright.
+     * The finished rule: inside `@starting-style` when that is what was asked for, in its media query, and
+     * in element mode in its cascade layer. The space after `@media` matters — the CSS parsers in
+     * happy-dom and jsdom drop `@media(...)` rules outright.
      */
     function finish(rule: string) {
-      const wrapped = condition === null ? rule : `@media ${condition}{${rule}}`;
+      const starting = startingStyle ? `@starting-style{${rule}}` : rule;
+      const wrapped = condition === null ? starting : `@media ${condition}{${starting}}`;
+      const layer = startingStyle ? startingLayerName(rank) : layerName(rank, sortIndex);
 
       return {
-        rule: isElementMode() ? `@layer ${layerName(media, sortIndex)}{${wrapped}}` : wrapped,
+        rule: isElementMode() ? `@layer ${layer}{${wrapped}}` : wrapped,
         sortIndex,
         mediaOrder,
       };
     }
 
     const className = escapeClassName(
-      createClassName(key as keyof BoxStyles, value as BoxStyles[keyof BoxStyles], weight, media, pseudoClassParentName),
+      createClassName(key as keyof BoxStyles, value as BoxStyles[keyof BoxStyles], weight, media, pseudoClassParentName, startingStyle),
     );
 
     if (pseudoClassParentName) {
-      const pseudoClassList = pseudoClassesByWeight[weight];
+      const pseudoClassList = pseudoClassesOfWeight(weight);
       const hasTheme = pseudoClassList.includes('theme');
       const otherPseudoClasses = hasTheme ? pseudoClassList.filter((p) => p !== 'theme') : pseudoClassList;
       const pseudoClassesToUse = pseudoSelector(otherPseudoClasses);
@@ -548,7 +587,7 @@ export function createStyleEngine(options: StyleEngineOptions = {}): StyleEngine
 
       return finish(`${selector}{${declarations(itemValue, key, value)}}`);
     } else {
-      const pseudoClassesToUse = pseudoSelector(pseudoClassesByWeight[weight]);
+      const pseudoClassesToUse = pseudoSelector(pseudoClassesOfWeight(weight));
       const baseSelector = rootSelector ?? `.${className}`;
       const selector = itemValue.selector?.(baseSelector, pseudoClassesToUse) ?? `${baseSelector}${pseudoClassesToUse}`;
 
@@ -562,11 +601,12 @@ export function createStyleEngine(options: StyleEngineOptions = {}): StyleEngine
     weight: number,
     media: string,
     pseudoClassParentName?: string,
+    startingStyle?: boolean,
   ) {
-    const pseudoClassList = pseudoClassesByWeight[weight];
+    const pseudoClassList = pseudoClassesOfWeight(weight);
     const serializedValue = serializeValue(value);
 
-    const className = `${media === 'normal' ? '' : `${media}-`}${pseudoClassList.map((p) => `${p}-`).join('')}${pseudoClassParentName ? `${pseudoClassParentName}-` : ''}${key}-${serializedValue}`;
+    const className = `${media === 'normal' ? '' : `${media}-`}${startingStyle ? 'starting-' : ''}${pseudoClassList.map((p) => `${p}-`).join('')}${pseudoClassParentName ? `${pseudoClassParentName}-` : ''}${key}-${serializedValue}`;
 
     switch (namingMode()) {
       case 'readable':
@@ -588,10 +628,16 @@ export function createStyleEngine(options: StyleEngineOptions = {}): StyleEngine
   function layerOrder(): string {
     const names = [BASE_LAYER];
 
-    for (const media of Object.keys(mediaRank)) {
+    for (let rank = 0; rank < STARTING_RANK; rank++) {
       for (let index = 0; index < Object.keys(cssStyles).length; index++) {
-        names.push(layerName(media, index));
+        names.push(layerName(rank, index));
       }
+    }
+
+    // Last, and one name per media rank rather than one per rank and prop: every `@starting-style` rule
+    // has to outrank every ordinary one, whatever property it is about.
+    for (let rank = 0; rank < STARTING_RANK; rank++) {
+      names.push(startingLayerName(rank));
     }
 
     return `@layer ${names.join(',')};`;

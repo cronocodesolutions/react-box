@@ -7,6 +7,7 @@ import {
   pseudo2,
   pseudoClasses,
   pseudoGroupClasses,
+  startingStyleKey,
   themeGroupClass,
 } from './core/boxStyles';
 import { ClassNameType } from './core/classNames';
@@ -42,7 +43,12 @@ export type BoxStyles = ExtractBoxStylesInternal<typeof cssStyles> & Augmented.B
 type BoxPseudoClassesStyles1 = ExtractKeys<typeof pseudo1, BoxStylesWithPseudoClasses>;
 type BoxPseudoClassesStyles2Nested = ExtractKeys<typeof pseudo2, BoxStylesWithPseudoClasses>;
 type BoxPseudoClassesStyles2TopLevel = ExtractKeys<typeof pseudo2, boolean | [boolean, BoxStylesWithPseudoClasses]>;
-export interface BoxStylesWithPseudoClasses extends BoxStyles, BoxPseudoClassesStyles1, BoxPseudoClassesStyles2Nested {}
+/**
+ * `startingStyle` takes plain props and nothing else: the block wraps a finished rule, so a breakpoint or
+ * a pseudo-class belongs *around* it (`md: { startingStyle: … }`), where the rule can still carry both.
+ */
+type BoxStartingStyles = ExtractKeys<typeof startingStyleKey, BoxStyles>;
+export interface BoxStylesWithPseudoClasses extends BoxStyles, BoxPseudoClassesStyles1, BoxPseudoClassesStyles2Nested, BoxStartingStyles {}
 
 type BoxPseudoGroupClassesStyles = ExtractKeys<typeof pseudoGroupClasses, Record<string, BoxStylesWithPseudoClasses>>;
 type BoxThemeGroupClassStyles = ExtractKeys<
@@ -109,6 +115,7 @@ export interface ComponentProps<TKey extends keyof ComponentsAndVariants = never
 
 export type BoxStyleProps<TKey extends keyof ComponentsAndVariants = never> = Simplify<
   BoxStyles &
+    BoxStartingStyles &
     BoxPseudoClassesStyles1 &
     BoxPseudoClassesStyles2TopLevel &
     BoxPseudoGroupClassesStyles &

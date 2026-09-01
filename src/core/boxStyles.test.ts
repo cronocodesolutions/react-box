@@ -228,7 +228,7 @@ describe('every declared prop value produces a rule', () => {
   // description, BOX_AI_CONTEXT.md, both skill files and two places on the docs site. Every one of
   // those was written by hand and none of them was ever checked, so the figure drifted to '~144'
   // against a registry of 117 (bug #71). Adding a prop now fails here until they are updated.
-  const PROP_COUNT = 150;
+  const PROP_COUNT = 152;
 
   it('holds exactly the number of props the docs claim', () => {
     expect(Object.keys(cssStyles).length).toBe(PROP_COUNT);
@@ -619,5 +619,18 @@ describe('animation and transition props', () => {
   it('keeps scale and rotate on their own properties, so a transform is three independent props', () => {
     expect(generatedRulesFor({ scale: 1.05 }, 'scale-up')).toContain('{scale:1.05}');
     expect(generatedRulesFor({ rotate: 360 }, 'rotate-full')).toContain('{rotate:360deg}');
+  });
+
+  it('lets the properties that cannot interpolate transition anyway', () => {
+    // `display` and `overlay` flip at the *end* of the transition instead of the start, which is what
+    // holds a top-layer element in the DOM long enough to animate out of it.
+    expect(generatedRulesFor({ transitionBehavior: 'allow-discrete' }, 'behavior-discrete')).toContain(
+      '{transition-behavior:allow-discrete}',
+    );
+  });
+
+  it('opts a subtree into interpolating a size keyword, which is what makes height: auto animate', () => {
+    // Inherited, so it belongs on the container: every size inside it becomes animatable at once.
+    expect(generatedRulesFor({ interpolateSize: 'allow-keywords' }, 'interpolate-size')).toContain('{interpolate-size:allow-keywords}');
   });
 });

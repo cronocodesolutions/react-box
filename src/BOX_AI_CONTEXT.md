@@ -1,6 +1,6 @@
 # @cronocode/react-box - AI Assistant Context
 
-Runtime CSS-in-JS library. `Box` component accepts 150 CSS props and generates CSS classes at runtime. Same prop values share a single class.
+Runtime CSS-in-JS library. `Box` component accepts 152 CSS props and generates CSS classes at runtime. Same prop values share a single class.
 
 ---
 
@@ -237,6 +237,9 @@ Every Box already transitions `all` its properties over `--transitionTime` (0.25
 | `animationTimingFunction` / `transitionTimingFunction`            | timing function     | Keywords, the four springs (`'spring'`, `'spring-gentle'`, `'spring-bouncy'`, `'spring-snappy'`), or a curve: `'cubic-bezier(0.4, 0, 0.6, 1)'`, `'steps(4, end)'`, `'linear(0, 0.5, 1)'` |
 | `transition`                                                      | transition-property | `'all'`, `'none'`, or a group: `'colors'`, `'opacity'`, `'shadow'`, `'transform'`, `'size'`, `'filter'`                                                                                  |
 | `transitionDuration` / `transitionDelay`                          | ms                  | Milliseconds, same as the animation pair. Both duration props also take a spring name — that spring's settling time                                                                      |
+| `transitionBehavior`                                              | transition-behavior | `'normal'` or `'allow-discrete'`, which lets `display`, `overlay` and `content-visibility` transition — the property that makes an element animate _out_ without unmounting              |
+| `interpolateSize`                                                 | interpolate-size    | `'numeric-only'` or `'allow-keywords'`, which is what makes `height: auto` animate. Inherited, so it belongs on a container. Chromium-only; elsewhere the size snaps                     |
+| `startingStyle`                                                   | `@starting-style`   | A nested block of plain props: what they start from the first time the element is styled. `startingStyle={{ opacity: 0, translateY: 2 }}` is an entrance with no JavaScript              |
 | `translateX` / `translateY` / `rotate` / `scale` / `flip`         | transform longhands | Each writes its own CSS property, so they compose. `scale={1.05}` is unitless; `rotate={45}` is degrees                                                                                  |
 
 ```tsx
@@ -263,6 +266,25 @@ Box.keyframes({
 const wobble = Box.spring({ stiffness: 120, damping: 8 });
 
 <Box transition="transform" transitionTimingFunction={wobble.easing} transitionDuration={wobble.duration} hover={{ translateY: -2 }} />
+
+// An entrance: what a just-mounted element starts from. No state, no effect, no library.
+<Box p={4} startingStyle={{ opacity: 0, translateY: 2 }} transitionDuration={280} />
+
+// Both directions, by hiding rather than unmounting: display flips at the *end* of the transition
+<Box
+  display={open ? 'block' : 'none'}
+  opacity={open ? 1 : 0}
+  transitionBehavior="allow-discrete"
+  startingStyle={{ opacity: 0 }}
+  transitionDuration={260}
+/>
+
+// height: auto, animated — the container opts its subtree in
+<Box interpolateSize="allow-keywords">
+  <Box height={expanded ? 'auto' : 0} overflow="hidden" transition="size" transitionDuration={300}>
+    …
+  </Box>
+</Box>
 ```
 
 - **`Box.keyframes({ name: { from, '50%', to } })`** registers sequences; stop keys are `'from'`,
@@ -291,6 +313,18 @@ const wobble = Box.spring({ stiffness: 120, damping: 8 });
   transition restarts rather than carrying its velocity across — fine for hover, a panel or a toggle,
   not for a drag (that is framer-motion's job). `linear()` is missing in roughly one browser in
   eight, so every curve is written with an `ease-out` declaration underneath it.
+- **`startingStyle` is nesting, not a value.** It takes plain props — no breakpoint, pseudo-class or
+  theme _inside_ it; those nest around it instead — `md: { startingStyle: { … } }`, and the same inside a
+  `theme`. Every rule it writes sorts after the ordinary rules, because the browser computes the
+  before-change style from the whole cascade: a starting declaration that lands first loses and nothing
+  transitions at all. A browser without `@starting-style` drops the one rule and shows the element
+  finished. `Tooltip` and the `Dropdown` popup already carry one.
+- **An exit needs someone to hold the node.** `@starting-style` runs when an element is first
+  rendered — mounted, or shown from `display: none`. Going the other way, React unmounts the node
+  immediately and there is nothing left to animate, so hide it instead: `display` plus
+  `transitionBehavior="allow-discrete"` flips `display` at the _end_ of the transition, and the element
+  animates out as well as in. Holding an unmounting node is a React problem this library does not solve
+  yet.
 - **`Box.configure({ transition })`** changes what the base class transitions for the whole engine:
   a group name, or `false` to declare nothing at all and leave transitions entirely to the props.
   Call it before the first render.

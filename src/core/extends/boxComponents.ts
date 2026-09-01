@@ -52,6 +52,9 @@ const boxComponents = {
       // throws both colors away — leaving text floating over whatever it covers. A border is the
       // one edge those modes keep, so the bubble grows one exactly when it has nothing else.
       forcedColors: { b: 1 },
+      // The bubble is mounted when it opens, and entering the DOM is the one moment CSS can animate
+      // by itself: it starts transparent and 4px high, and `._b`'s transition covers the distance.
+      startingStyle: { opacity: 0, translateY: -1 },
     },
   },
   button: {
@@ -593,6 +596,9 @@ const boxComponents = {
               color: 'gray-100',
             },
           },
+          // The popup is mounted when it opens, so `@starting-style` is its entrance and no state,
+          // no effect and no JavaScript are involved in it.
+          startingStyle: { opacity: 0, translateY: -1 },
         },
       },
       item: {
@@ -1253,6 +1259,7 @@ const boxComponents = {
                           color: 'gray-100',
                         },
                       },
+                      startingStyle: { opacity: 0, translateY: -1 },
                     },
                     children: {
                       item: {

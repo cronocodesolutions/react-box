@@ -5,7 +5,7 @@ description: '@cronocode/react-box expert — runtime CSS-in-JS library. Use whe
 
 # @cronocode/react-box AI Skill
 
-Runtime CSS-in-JS library. `Box` accepts 150 CSS props → generates CSS classes at runtime. Same values share a class.
+Runtime CSS-in-JS library. `Box` accepts 152 CSS props → generates CSS classes at runtime. Same values share a class.
 
 ## Installation & Package Management
 
@@ -121,8 +121,15 @@ velocity — that is framer-motion's job), and every `linear()` is written with 
 `getStyles()` and element mode, so a Server Component animates with no client JS. **Transforms compose**: `translateX`/`translateY` (÷4,
 fractions, percentages) both feed one `translate` and still transition _and_ animate (the base stylesheet registers both axes with
 `@property`, or a keyframe moving them would jump), `rotate={45}` (degrees) and `scale={1.05}` (unitless) are their own
-properties — only `flip` and `scale` collide, both writing `scale`. `Box.configure({ transition: 'colors' | false })` changes what the base
-class transitions, before the first render.
+properties — only `flip` and `scale` collide, both writing `scale`. **`startingStyle` is an entrance with no JavaScript**: a nested block of
+plain props (`startingStyle={{ opacity: 0, translateY: 2 }}`) saying what they start from the first time the element is styled — mounted, or
+shown from `display: none`. It compiles to `@starting-style`, nests inside a breakpoint/pseudo-class/theme rather than around one
+(`md: { startingStyle: … }`), and a browser without the at-rule shows the element finished. `Tooltip` and the `Dropdown` popup already carry
+one. For the way back out React unmounts too fast to animate, so hide instead: `transitionBehavior="allow-discrete"` lets `display`
+transition, flipping it at the _end_, so `<Box display={open ? 'block' : 'none'} opacity={open ? 1 : 0} transitionBehavior="allow-discrete"
+startingStyle={{ opacity: 0 }} />` animates both directions. `interpolateSize="allow-keywords"` on a container is what makes
+`height: auto` animate inside it (inherited; Chromium-only, elsewhere it snaps). `Box.configure({ transition: 'colors' | false })` changes
+what the base class transitions, before the first render.
 
 **Effects**: `shadow` (`'small'`/`'medium'`/`'large'`/`'xl'`/`'none'`), `opacity`, `cursor`, `pointerEvents`, `userSelect`, `overflow`
 

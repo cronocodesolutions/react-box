@@ -29,6 +29,9 @@ export default function AnimationPage() {
   useTableOfContents(sidebarLinks);
   const [runId, setRunId] = useState(0);
   const [sprung, setSprung] = useState(false);
+  const [shown, setShown] = useState(false);
+  const [open, setOpen] = useState(false);
+  const [expanded, setExpanded] = useState(false);
 
   return (
     <Box>
@@ -288,6 +291,139 @@ const wobble = Box.spring({ stiffness: 120, damping: 8 });
             </Flex>
           </Code>
 
+          <Section id="entrances" title="An entrance is a prop, not a lifecycle">
+            <Mono>startingStyle</Mono> holds the values a property starts from the first time the element is styled — which, for something
+            React has just mounted, is the moment it appears. It nests the way a breakpoint does and takes plain props, and since every Box
+            already transitions, that is the entire entrance: no state, no effect, no library, nothing to unmount. It compiles to{' '}
+            <Mono>@starting-style</Mono>, one rule shared by every element that starts from the same place, and a browser that has never
+            heard of the at-rule drops that one rule and shows the element finished.
+          </Section>
+
+          <Code
+            id="entrances-demo"
+            label="startingStyle"
+            language="jsx"
+            context="declare const shown: boolean;"
+            code={`{shown && (
+  <Box
+    width={16}
+    height={16}
+    bgImage="gradient-primary"
+    startingStyle={{ opacity: 0, translateY: 2, scale: 0.96 }}
+    transitionDuration={280}
+  />
+)}`}
+          >
+            <Flex d="column" gap={4} ai="flex-start">
+              <Flex gap={4} height={20} ai="center">
+                {shown &&
+                  [0, 1, 2].map((index) => (
+                    <Box
+                      key={index}
+                      width={16}
+                      height={16}
+                      borderRadius={2}
+                      bgImage="gradient-primary"
+                      startingStyle={{ opacity: 0, translateY: 2, scale: 0.96 }}
+                      transitionDuration={280}
+                      transitionDelay={index * 90}
+                    />
+                  ))}
+              </Flex>
+              <Button variant="secondary" onClick={() => setShown((on) => !on)}>
+                {shown ? 'Unmount them' : 'Mount them'}
+              </Button>
+            </Flex>
+          </Code>
+
+          <Section id="discrete" title="Both directions, without unmounting">
+            An entrance is easy because the element is new; an exit is hard because React removes the node the instant it stops rendering
+            it. The platform's own answer is <Mono>transitionBehavior="allow-discrete"</Mono>: it lets <Mono>display</Mono> transition,
+            flipping to <Mono>none</Mono> at the <em>end</em> rather than the start, so an element that is hidden rather than unmounted
+            animates out as well as in — and <Mono>startingStyle</Mono> applies again every time it comes back from{' '}
+            <Mono>display: none</Mono>. When the node really does have to leave the tree, holding it long enough to animate is a React
+            problem rather than a CSS one, and this library does not solve that one yet.
+          </Section>
+
+          <Code
+            id="discrete-demo"
+            label="transitionBehavior"
+            language="jsx"
+            context="declare const open: boolean;"
+            code={`<Box
+  display={open ? 'block' : 'none'}
+  opacity={open ? 1 : 0}
+  transitionBehavior="allow-discrete"
+  startingStyle={{ opacity: 0, translateY: -2 }}
+  transitionDuration={260}
+/>`}
+          >
+            <Flex d="column" gap={4} ai="flex-start">
+              <Box height={20}>
+                <Box
+                  display={open ? 'block' : 'none'}
+                  opacity={open ? 1 : 0}
+                  translateY={open ? 0 : -2}
+                  transitionBehavior="allow-discrete"
+                  startingStyle={{ opacity: 0, translateY: -2 }}
+                  transitionDuration={260}
+                  px={5}
+                  py={3}
+                  borderRadius={2}
+                  fontSize={14}
+                  bgImage="gradient-primary"
+                  color="white"
+                >
+                  hidden, not unmounted
+                </Box>
+              </Box>
+              <Button variant="secondary" onClick={() => setOpen((on) => !on)}>
+                {open ? 'Hide' : 'Show'}
+              </Button>
+            </Flex>
+          </Code>
+
+          <Section id="sizes" title="Animating to a height nobody measured">
+            <Mono>height: auto</Mono> has never been animatable, which is why every accordion on the web measures its own content in
+            JavaScript. <Mono>interpolateSize="allow-keywords"</Mono> opts a subtree into interpolating the size keywords —{' '}
+            <Mono>auto</Mono>, <Mono>min-content</Mono>, <Mono>fit-content</Mono> — and it inherits, so it belongs on the container and
+            every size inside it becomes animatable at once. Chromium-only for now, and the degradation is the behaviour you have today: the
+            panel snaps open.
+          </Section>
+
+          <Code
+            id="sizes-demo"
+            label="interpolateSize"
+            language="jsx"
+            context="declare const expanded: boolean;"
+            code={`<Box interpolateSize="allow-keywords">
+  <Box height={expanded ? 'auto' : 0} overflow="hidden" transition="size" transitionDuration={300}>
+    <Box p={4}>Content nobody had to measure.</Box>
+  </Box>
+</Box>`}
+          >
+            <Flex d="column" gap={4} ai="flex-start" interpolateSize="allow-keywords">
+              <Button variant="secondary" onClick={() => setExpanded((on) => !on)}>
+                {expanded ? 'Collapse' : 'Expand'}
+              </Button>
+              <Box
+                height={expanded ? 'auto' : 0}
+                overflow="hidden"
+                transition="size"
+                transitionDuration={300}
+                transitionTimingFunction="ease-in-out"
+                borderRadius={2}
+                width="fit"
+                theme={{ dark: { bgColor: 'slate-900' }, light: { bgColor: 'slate-50' } }}
+              >
+                <Box p={4} fontSize={14} lineHeight={22}>
+                  No measuring, no <Mono>scrollHeight</Mono>, no ref: the panel transitions <Mono>height</Mono> from <Mono>0</Mono> to{' '}
+                  <Mono>auto</Mono> because the container said keywords may interpolate.
+                </Box>
+              </Box>
+            </Flex>
+          </Code>
+
           <Section id="drawing" title="A sequence can animate anything a prop can set">
             Because a stop is Box props, a sequence is not limited to the four properties an animation library would give you. This bar
             grows by animating <Mono>width</Mono> from <Mono>0</Mono> to <Mono>fit</Mono> — the size keywords work in a keyframe like they
@@ -404,6 +540,9 @@ const sidebarLinks = [
   { id: 'springs', label: 'Springs' },
   { id: 'springs-honest', label: 'What a spring is not' },
   { id: 'transforms', label: 'Composing transforms' },
+  { id: 'entrances', label: 'startingStyle' },
+  { id: 'discrete', label: 'Both directions' },
+  { id: 'sizes', label: 'height: auto' },
   { id: 'drawing', label: 'Animating any prop' },
   { id: 'server', label: 'On a server' },
   { id: 'off', label: 'Turning it off' },

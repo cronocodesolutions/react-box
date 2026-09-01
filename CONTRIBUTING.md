@@ -57,7 +57,7 @@ react-box/
 │   ├── ssg.ts                    # Server-side rendering support (entry point)
 │   │
 │   ├── core/                     # Core styling engine — ZERO react imports (enforced)
-│   │   ├── boxStyles.ts          # CSS property definitions (150 props)
+│   │   ├── boxStyles.ts          # CSS property definitions (152 props)
 │   │   ├── boxStylesFormatters.ts # Value formatters (px, rem, etc.)
 │   │   ├── variables.ts          # CSS variables (colors, sizes)
 │   │   ├── classNames.ts         # Conditional className utility
@@ -594,7 +594,9 @@ commit. `flushScheduler.test.ts` pins the contract; the ordering guarantee is co
 
 With no explicit `sink` the engine follows its environment, which is why server rendering needs no
 DOM and no fake `document`. Every sink places a rule at the position its **sort key** gives it
-(breakpoint order first, then prop declaration order) no matter which flush it arrived in, so the
+(breakpoint order first, then prop declaration order — and every `@starting-style` rule after all of
+them, because the browser computes the before-change style from the whole cascade) no matter which
+flush it arrived in, so the
 CSS a server produces and the sheet a browser builds agree rule for rule — `styleSink.test.ts` and
 `ssr.roundtrip.test.tsx` pin that down.
 
@@ -612,9 +614,12 @@ Three consequences shape the implementation:
   its rule in `<head>` ahead of the `p={2}` rule another Box needed, and atomic classes are shared
   between Boxes, so no per-Box grouping can fix it either. So every rule is wrapped in a cascade
   layer — `@layer rb<breakpointIndex><propIndex base36>` — and the **base element declares the whole
-  layer order in one statement** (~700 names, 1.3 KB gzipped). Layer order beats source order, so
+  layer order in one statement** (~1,400 names, 1.3 KB gzipped). Layer order beats source order, so
   where React inserts an element no longer matters. The reset goes into the first layer (`rb`),
-  because unlayered CSS would otherwise beat every generated rule.
+  because unlayered CSS would otherwise beat every generated rule. `@starting-style` rules take nine
+  more layers after all of them (`rb_s0`…`rb_s8`, one per media rank and no prop dimension): a
+  starting declaration has to beat the ordinary declaration of the same property or nothing
+  transitions, and two starting declarations only ever collide when they are the same property.
 - **The base element belongs to no Box**, so every Box renders it first in its list: whichever Box
   React sees first establishes the layer order, and the rest are deduped by href. Its href follows
   its content, so a `:root` block that grew a variable becomes a new element rather than a silently
