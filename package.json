@@ -81,7 +81,7 @@
         "react-dom"
       ],
       "gzip": true,
-      "limit": "20.75 KB"
+      "limit": "21.3 KB"
     },
     {
       "name": "Box in a Server Component (react-server entry)",
@@ -91,7 +91,7 @@
         "react-dom"
       ],
       "gzip": true,
-      "limit": "19.2 KB"
+      "limit": "19.75 KB"
     },
     {
       "name": "Behavior primitives (a11y entry)",
@@ -107,7 +107,7 @@
       "name": "Core engine (no React)",
       "path": "dist/core.mjs",
       "gzip": true,
-      "limit": "18.55 KB"
+      "limit": "19.1 KB"
     },
     {
       "name": "DataGrid",
@@ -117,7 +117,7 @@
         "react-dom"
       ],
       "gzip": true,
-      "limit": "48.8 KB"
+      "limit": "49.45 KB"
     },
     {
       "name": "Full library (Box + ssg + every component)",
@@ -127,7 +127,7 @@
         "react-dom"
       ],
       "gzip": true,
-      "limit": "54.9 KB"
+      "limit": "55.55 KB"
     }
   ],
   "repository": {

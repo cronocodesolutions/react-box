@@ -26,6 +26,13 @@ type TagProps<TTag extends keyof React.JSX.IntrinsicElements> = Omit<
 export type TagPropsType<TTag extends keyof React.JSX.IntrinsicElements> = TagProps<TTag> | (TagProps<TTag> & DataAttributes);
 
 /**
+ * `Omit` one union member at a time, for a component claiming attributes of its own. A plain `Omit` over
+ * a union keeps only the keys every member shares, so it collapsed the two above into one and dropped
+ * `data-*` again — bug #99 one layer up, on every pre-built component.
+ */
+export type OmitTagProps<TProps, TKeys extends PropertyKey> = TProps extends unknown ? Omit<TProps, TKeys> : never;
+
+/**
  * The style props plus the `className` the engine's classes are merged with — everything the
  * resolution needs and nothing about a tag. `useClassNames` takes this, which is why it can style
  * an element this library does not render.

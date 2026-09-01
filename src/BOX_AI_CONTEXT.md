@@ -45,6 +45,7 @@ NEVER use `<Box tag="...">` when a component exists. NEVER use `<Box display="fl
 | `<Box tag="a/img/label">`            | `<Link>/<Img>/<Label>`           | `components/semantics` |
 | `<Box tag="h1/h2/h3/h4/h5/h6">`      | `<H1>/<H2>/.../<H6>`             | `components/semantics` |
 | `<Box tag="p/span">`                 | `<P>/<Span>`                     | `components/semantics` |
+| `<Box tag="ul/ol/li">`               | `<Ul>/<Ol>/<Li>`                 | `components/semantics` |
 | `<Box tag="nav/header/footer/main">` | `<Nav>/<Header>/<Footer>/<Main>` | `components/semantics` |
 | `<Box tag="section/article/aside">`  | `<Section>/<Article>/<Aside>`    | `components/semantics` |
 | `<Box tag="svg/path/circle/rect">`   | `<Svg>/<Path>/<Circle>/<Rect>`   | `components/svg`       |
@@ -360,7 +361,7 @@ const wobble = Box.spring({ stiffness: 120, damping: 8 });
 ```tsx
 // Pseudo-classes: hover, focus (:focus-within), focusVisible, hasFocus, active, valid, invalid,
 //   optional, disabled, checked, indeterminate, required, selected, hasChecked, hasRequired,
-//   hasDisabled, hasValid, hasInvalid, before, after, placeholderStyles
+//   hasDisabled, hasValid, hasInvalid
 <Box bgColor="blue-500" hover={{ bgColor: 'blue-600' }} disabled={{ opacity: 0.5 }} />
 
 // Responsive breakpoints (mobile-first): sm(640) md(768) lg(1024) xl(1280) xxl(1536)
@@ -404,6 +405,44 @@ A fourth kind of nesting: a selector fragment on the element's **own** compound 
 - **A variant needs no cascade rank of its own**: `.a[data-state="open"]` is 0,2,0 against a plain class's 0,1,0, so it already outranks the rule it overrides.
 - **A key the grammar rejects drops its whole block** — no rule and no class name, the same failure mode as an unmatched prop value. An attribute name that is not one, a value carrying a quote, an unbalanced `:has()`.
 - **The library sets two attributes itself**: `data-state="open" | "closed"` on whatever `<Presence>` is holding, so `Tooltip`, the `Dropdown` popup and the DataGrid column menu all carry it; and `data-theme` on the element `Box.Theme` writes to.
+
+### Pseudo-elements — `before`, `after`, `placeholder`, `selection`, `marker`…
+
+A fifth kind of nesting, and the only one CSS allows **one** of: a pseudo-element is a slot, not a list, and it is appended last to whatever the other keys build.
+
+| Prop                                        | Element                  | Notes                                                                       |
+| ------------------------------------------- | ------------------------ | --------------------------------------------------------------------------- |
+| `before` / `after`                          | `::before` / `::after`   | Generate a box, so they come with `content` (below)                         |
+| `placeholder`                               | `::placeholder`          | On `Textbox`/`Textarea` a **string** is the attribute, an object the styles |
+| `selection`                                 | `::selection`            | Names descendants too — the text may be in a child                          |
+| `marker`                                    | `::marker`               | Same: write it on the `<Ul>`, it reaches the `<Li>`                          |
+| `firstLine` / `firstLetter`                 | `::first-line` / `-letter` | Typography only, per CSS                                                  |
+| `backdrop` / `fileButton`                   | `::backdrop` / `::file-selector-button` | A `<dialog>`/popover, and an `<input type="file">`      |
+
+```tsx
+// A ::before with no `content` generates no box at all, so declaring one supplies content: '' —
+// and the element exists in exactly the states you styled it in.
+<Box position="relative" before={{ position: 'absolute', inset: 0, bgColor: 'indigo-500' }} />
+<Box hover={{ before: { width: 'fit' } }} /> // .x:hover::before, content included
+
+// content: a keyword, text (quoted for you), or CSS you wrote
+<Box before={{ content: 'empty' }} />                  // content: ''
+<Box before={{ content: 'New' }} />                    // content: "New"
+<Box after={{ content: 'attr(data-count)' }} />        // attr(), counter(), url(), var(), image-set()
+<Box after={{ content: '"Step " counter(step)' }} />   // a sequence has to be written as CSS
+<Box before={{ content: 'none' }} />                   // off again
+
+// Everything nests around them, and the element still lands last and on the target
+<Box md={{ dataAttr: { 'state=open': { after: { opacity: 1 } } } }} />   // @media … .x[data-state="open"]::after
+<Box hoverGroup={{ card: { before: { opacity: 1 } } }} />                // .card:hover .x::before
+
+// On an input the name means both things; both at once puts the text where attributes go
+<Textbox props={{ placeholder: 'Search…' }} placeholder={{ color: 'slate-400', fontStyle: 'italic' }} />
+```
+
+- **One per compound selector**: nesting a second is a type error, and a merged component style that manages it anyway is dropped rather than emitting `::before::after`, which matches nothing.
+- **`content` is the one prop whose value is text**, so text is quoted and escaped, a value written as CSS is scanned instead (every quote closed, parentheses balanced, no `;`, `}` or `@` outside a string), and one that fails produces no rule and no class name.
+- `placeholderStyles` is the old name for `placeholder` and still works.
 
 ### Accessibility preferences
 

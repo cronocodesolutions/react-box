@@ -1,5 +1,6 @@
 import Animations from './animations';
 import { BoxStylesFormatters } from './boxStylesFormatters';
+import Content from './content';
 import { BoxStyle, BoxStyleValue } from './coreTypes';
 import Variables from './variables';
 
@@ -1739,13 +1740,24 @@ export const cssStyles = {
       declarations: translate('Y', String),
     },
   ],
-  /** The content CSS property replaces content with a generated value. It can be used to define what is rendered inside an element or pseudo-element. */
+  /**
+   * What a `::before`/`::after` renders — and whether it renders at all: a generated element with no
+   * `content` produces no box. `content="empty"` is `''` (the value a decoration wants), a quoted string
+   * or a function (`attr()`, `counter()`, `url()`) is written out as CSS, and **anything else is text and
+   * gets quoted for you** — `content="New"` is `content: "New"`.
+   */
   content: [
     {
-      values: ['empty'] as const,
-      valueFormat: () => {
-        return "''";
-      },
+      values: Content.keywords,
+      valueFormat: Content.keyword,
+    },
+    {
+      values: Content.cssValue,
+      match: Content.isCssValue,
+    },
+    {
+      values: Content.text,
+      valueFormat: Content.quote,
     },
   ],
   backdropFilter: [
@@ -1801,9 +1813,6 @@ export const pseudo1 = {
   hasChecked: ':has(:checked)',
   hasRequired: ':has(:required)',
   hasDisabled: ':has([disabled])',
-  before: '::before',
-  after: '::after',
-  placeholderStyles: '::placeholder',
 };
 
 export const pseudo2 = {
@@ -1821,22 +1830,49 @@ const theme = {
 export const pseudoClasses = { ...pseudo1, ...pseudo2, ...theme };
 
 /**
- * The three that are pseudo-*elements*, which have to come last in a compound selector: assembled in
- * declaration order, `checked: { before: {…} }` produced the invalid `::before:checked` and the browser
- * dropped the whole rule.
+ * The pseudo-*elements*, and their own dimension rather than more pseudo-class keys: a compound selector
+ * holds **at most one**, and it has to come last. Mixed into the pseudo-class list they were assembled in
+ * declaration order, so `checked: { before: {…} }` came out as the invalid `::before:checked` and the
+ * browser dropped the whole rule; a slot of their own puts the element last by construction, and lets the
+ * types refuse a second one instead of emitting `::before::after`, which matches nothing.
  */
-export const pseudoElements = ['before', 'after', 'placeholderStyles'] as const satisfies readonly (keyof typeof pseudo1)[];
+export const pseudoElements = {
+  before: '::before',
+  after: '::after',
+  placeholder: '::placeholder',
+  selection: '::selection',
+  marker: '::marker',
+  firstLine: '::first-line',
+  firstLetter: '::first-letter',
+  backdrop: '::backdrop',
+  fileButton: '::file-selector-button',
+  /** @deprecated The name is `placeholder` now — this spelling still works and means the same thing. */
+  placeholderStyles: '::placeholder',
+};
 
-function isPseudoElement(key: keyof typeof pseudoClasses): boolean {
-  return (pseudoElements as readonly string[]).includes(key);
+export type PseudoElementKey = keyof typeof pseudoElements;
+
+/** The two that generate a box of their own, and so need `content` before they render anything at all. */
+const generatedElements: readonly PseudoElementKey[] = ['before', 'after'];
+
+export function generatesContent(key: PseudoElementKey): boolean {
+  return generatedElements.includes(key);
 }
 
-/** A set of pseudo keys as one compound selector suffix, with any pseudo-element last. */
-export function pseudoSelector(keys: readonly (keyof typeof pseudoClasses)[]): string {
-  const elements = keys.filter(isPseudoElement);
-  const ordered = elements.length === 0 ? keys : [...keys.filter((key) => !isPseudoElement(key)), ...elements];
+/**
+ * The two that belong to a *descendant*: a `::marker` is the list item's, a `::selection` is whatever
+ * holds the text — but the prop is written on the list or the paragraph, so their rules name the
+ * descendants as well. The same two selectors Tailwind's `marker:`/`selection:` variants emit.
+ */
+const inheritedElements: readonly PseudoElementKey[] = ['marker', 'selection'];
 
-  return ordered.map((key) => pseudoClasses[key]).join('');
+export function reachesDescendants(key: PseudoElementKey): boolean {
+  return inheritedElements.includes(key);
+}
+
+/** A set of pseudo-class keys as one compound selector suffix. The pseudo-element is appended after it. */
+export function pseudoSelector(keys: readonly (keyof typeof pseudoClasses)[]): string {
+  return keys.map((key) => pseudoClasses[key]).join('');
 }
 export const pseudoClassesWeight = Object.entries(pseudoClasses).reduce(
   (acc, [key], index) => {

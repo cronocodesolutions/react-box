@@ -6,6 +6,7 @@ import Animations from '../animations';
 import {
   breakpoints,
   cssStyles as defaultCssStyles,
+  generatesContent,
   mediaCondition,
   mediaFeatures,
   mediaKeys,
@@ -13,8 +14,11 @@ import {
   pseudo2,
   pseudoClassesOfWeight,
   pseudoClassesWeight,
+  pseudoElements,
+  PseudoElementKey,
   pseudoGroupClasses,
   pseudoSelector,
+  reachesDescendants,
   startingStyleKey,
   themeGroupClass,
 } from '../boxStyles';
@@ -186,6 +190,12 @@ function startingLayerName(rank: number): string {
 interface StyleContext {
   /** The pseudo-class keys collected so far; the weight the class name is built from encodes this set. */
   pseudoClasses: PseudoClassesType[];
+  /**
+   * The one pseudo-element this rule is about, if any. A slot rather than a list: a compound selector
+   * holds at most one, and it goes last — after the variants, and on the *target* when a group or a theme
+   * puts an ancestor in front of it.
+   */
+  element?: PseudoElementKey;
   /** Which `@media` block the rule belongs in: `normal`, a breakpoint, or a preference feature. */
   media: string;
   /** The group or theme class the selector hangs off — `theme|group` when a group is nested in a theme. */
@@ -298,6 +308,7 @@ export function createStyleEngine(options: StyleEngineOptions = {}): StyleEngine
       ObjectUtils.isKeyOf(key, cssStyles) ||
       ObjectUtils.isKeyOf(key, pseudo1) ||
       ObjectUtils.isKeyOf(key, pseudo2) ||
+      ObjectUtils.isKeyOf(key, pseudoElements) ||
       ObjectUtils.isKeyOf(key, breakpoints) ||
       ObjectUtils.isKeyOf(key, mediaFeatures) ||
       ObjectUtils.isKeyOf(key, pseudoGroupClasses) ||
@@ -345,6 +356,19 @@ export function createStyleEngine(options: StyleEngineOptions = {}): StyleEngine
         addClassName(key, value, classNames, context);
       } else if (ObjectUtils.isKeyOf(key, pseudo1)) {
         addClassNames(value as BoxStyleProps, classNames, { ...context, pseudoClasses: [...context.pseudoClasses, key] });
+      } else if (ObjectUtils.isKeyOf(key, pseudoElements)) {
+        // One per compound selector — the types refuse a second, and a merged component style cannot
+        // sneak one in either.
+        if (context.element) return;
+
+        const nested = { ...context, element: key };
+        // A `::before` with no `content` generates no box at all, which is the trap this prop exists to
+        // hide: declare one yourself (`content="none"` included) and nothing is added.
+        if (generatesContent(key) && (value as BoxStyles).content === undefined) {
+          addClassName('content', 'empty', classNames, nested);
+        }
+
+        addClassNames(value as BoxStyleProps, classNames, nested);
       } else if (ObjectUtils.isKeyOf(key, pseudo2)) {
         const nested = { ...context, pseudoClasses: [...context.pseudoClasses, key] };
         if (Array.isArray(value)) {
@@ -418,13 +442,13 @@ export function createStyleEngine(options: StyleEngineOptions = {}): StyleEngine
   ) {
     if (value === undefined || value === null) return;
 
-    const { media, parentName, rootSelector, variants } = context;
+    const { media, parentName, rootSelector, variants, element } = context;
     const weight = context.pseudoClasses.reduce((sum, pseudoClass) => sum + pseudoClassesWeight[pseudoClass], 0);
     const className = createClassName(key, value, weight, context, startingStyle);
 
     const serializedValue = serializeValue(value);
     const variantKey = variants.map((variant) => variant.name).join('_');
-    const ruleKey = `${media}-${weight}-${key}-${serializedValue}-${parentName ?? ''}-${rootSelector ?? ''}-${startingStyle ? 'start' : ''}-${variantKey}`;
+    const ruleKey = `${media}-${weight}-${element ?? ''}-${key}-${serializedValue}-${parentName ?? ''}-${rootSelector ?? ''}-${startingStyle ? 'start' : ''}-${variantKey}`;
 
     if (!generatedRules.has(ruleKey)) {
       generatedRules.add(ruleKey);
@@ -596,6 +620,21 @@ export function createStyleEngine(options: StyleEngineOptions = {}): StyleEngine
     // The variants describe *this* element, so they join its own compound selector — before any
     // pseudo-element, and on the last compound when a group or a theme puts an ancestor in front.
     const variantSelector = context.variants.map((variant) => variant.selector).join('');
+    const elementSelector = context.element ? pseudoElements[context.element] : '';
+
+    /**
+     * The pseudo-element, last and on the *target* — a group's pseudo-classes belong to the ancestor, so
+     * appending the element with them produced `.group:hover::before .x`, a descendant of a
+     * pseudo-element, which matches nothing. `::marker` and `::selection` name the descendants too, since
+     * the prop is written on the list or the paragraph rather than on the item that draws the marker.
+     */
+    function withElement(target: string): string {
+      if (!context.element) return target;
+
+      const own = `${target}${elementSelector}`;
+
+      return reachesDescendants(context.element) ? `${target} *${elementSelector},${own}` : own;
+    }
 
     if (pseudoClassParentName) {
       const pseudoClassList = pseudoClassesOfWeight(weight);
@@ -612,28 +651,33 @@ export function createStyleEngine(options: StyleEngineOptions = {}): StyleEngine
         if (hasThemeAndGroup) return null;
         if (hasTheme) {
           // Theme on same element as rootSelector → compound selector
-          defaultSelector = `${rootSelector}.${escapeClassName(pseudoClassParentName)}${variantSelector}${pseudoClassesToUse}`;
+          defaultSelector = withElement(`${rootSelector}.${escapeClassName(pseudoClassParentName)}${variantSelector}${pseudoClassesToUse}`);
         } else {
           return null;
         }
       } else if (hasThemeAndGroup) {
         // Combined theme + group: .themeName .groupName:hover .className
         const [themeName, groupName] = pseudoClassParentName.split('|');
-        defaultSelector = `.${escapeClassName(themeName)} .${escapeClassName(groupName)}${pseudoClassesToUse} .${className}${variantSelector}`;
+        defaultSelector = withElement(
+          `.${escapeClassName(themeName)} .${escapeClassName(groupName)}${pseudoClassesToUse} .${className}${variantSelector}`,
+        );
       } else if (hasTheme) {
         // Theme only: .themeName .className:hover
-        defaultSelector = `.${escapeClassName(pseudoClassParentName)} .${className}${variantSelector}${pseudoClassesToUse}`;
+        defaultSelector = withElement(`.${escapeClassName(pseudoClassParentName)} .${className}${variantSelector}${pseudoClassesToUse}`);
       } else {
         // Group only: .groupName:hover .className
-        defaultSelector = `.${escapeClassName(pseudoClassParentName)}${pseudoClassesToUse} .${className}${variantSelector}`;
+        defaultSelector = withElement(`.${escapeClassName(pseudoClassParentName)}${pseudoClassesToUse} .${className}${variantSelector}`);
       }
       const selector = itemValue.selector?.(defaultSelector, '') ?? defaultSelector;
 
       return finish(`${selector}{${body(itemValue)}}`);
     } else {
+      // The element goes in the suffix the `selector` hook is handed, so whatever it builds keeps it last.
       const pseudoClassesToUse = pseudoSelector(pseudoClassesOfWeight(weight));
       const baseSelector = `${rootSelector ?? `.${className}`}${variantSelector}`;
-      const selector = itemValue.selector?.(baseSelector, pseudoClassesToUse) ?? `${baseSelector}${pseudoClassesToUse}`;
+      const selector =
+        itemValue.selector?.(baseSelector, `${pseudoClassesToUse}${elementSelector}`) ??
+        withElement(`${baseSelector}${pseudoClassesToUse}`);
 
       return finish(`${selector}{${body(itemValue)}}`);
     }
@@ -646,12 +690,12 @@ export function createStyleEngine(options: StyleEngineOptions = {}): StyleEngine
     context: StyleContext,
     startingStyle?: boolean,
   ) {
-    const { media, parentName, variants } = context;
+    const { media, parentName, variants, element } = context;
     const pseudoClassList = pseudoClassesOfWeight(weight);
     const serializedValue = serializeValue(value);
     const variantNames = variants.map((variant) => `${variant.name}-`).join('');
 
-    const className = `${media === 'normal' ? '' : `${media}-`}${startingStyle ? 'starting-' : ''}${pseudoClassList.map((p) => `${p}-`).join('')}${variantNames}${parentName ? `${parentName}-` : ''}${key}-${serializedValue}`;
+    const className = `${media === 'normal' ? '' : `${media}-`}${startingStyle ? 'starting-' : ''}${pseudoClassList.map((p) => `${p}-`).join('')}${element ? `${element}-` : ''}${variantNames}${parentName ? `${parentName}-` : ''}${key}-${serializedValue}`;
 
     switch (namingMode()) {
       case 'readable':

@@ -48,6 +48,7 @@ Check latest: `npm view @cronocode/react-box version`
 | `<Box tag="button/input/textarea">`  | `<Button>`/`<Textbox>`/`<Textarea>`    | `components/button`, `components/textbox`, `components/textarea` |
 | `<Box tag="a/img/label">`            | `<Link>`/`<Img>`/`<Label>`             | `components/semantics`                                           |
 | `<Box tag="h1..h6/p/span">`          | `<H1>..<H6>`/`<P>`/`<Span>`            | `components/semantics`                                           |
+| `<Box tag="ul/ol/li">`               | `<Ul>`/`<Ol>`/`<Li>`                   | `components/semantics`                                           |
 | `<Box tag="nav/header/footer/main">` | `<Nav>`/`<Header>`/`<Footer>`/`<Main>` | `components/semantics`                                           |
 | `<Box tag="section/article/aside">`  | `<Section>`/`<Article>`/`<Aside>`      | `components/semantics`                                           |
 | `<Box tag="form">`                   | `<Form>`                               | `components/form`                                                |
@@ -145,8 +146,7 @@ what the base class transitions, before the first render.
 ```tsx
 <Box bgColor="blue-500" hover={{ bgColor: 'blue-600' }} disabled={{ opacity: 0.5 }} />
 // Pseudo: hover, focus (:focus-within), focusVisible, hasFocus, active, valid, invalid, optional,
-//   disabled, checked, indeterminate, required, selected, hasChecked, hasRequired, hasDisabled,
-//   before, after, placeholderStyles
+//   disabled, checked, indeterminate, required, selected, hasChecked, hasRequired, hasDisabled
 // Responsive (mobile-first): sm(640) md(768) lg(1024) xl(1280) xxl(1536)
 <Box p={2} md={{ p: 4, hover: { bgColor: 'gray-200' } }} />
 // A11y preferences, same shape as a breakpoint, and they beat every breakpoint in the cascade:
@@ -166,6 +166,19 @@ what the base class transitions, before the first render.
 // The attribute itself still goes in `props`. Everything else nests around them, either direction.
 <Box props={{ 'data-state': state }} dataAttr={{ 'state=busy': { bgColor: 'amber-500' } }}
   md={{ hover: { ariaAttr: { selected: { color: 'white' } } } }} />
+// Pseudo-elements — CSS allows ONE per selector, so it is a slot: a second nested one is a type error,
+// and it lands last on the element's own compound (on the target, not on a group's ancestor).
+//   before, after (both come with content: '' — a generated element with none renders nothing),
+//   placeholder, selection, marker, firstLine, firstLetter, backdrop, fileButton
+//   marker/selection also name descendants, so they go on the <Ul> or the <P>
+// content: 'empty' → ''  ·  'New' → "New" (text is quoted for you)  ·  'attr(data-x)'/'counter(s)'/
+//   'url(...)'/'var(--x)'/'"Step " counter(step)' written out as CSS  ·  'none' turns it off.
+//   A value that cannot be quoted or parsed produces no rule and no class name.
+<Box position="relative" before={{ position: 'absolute', inset: 0, bgColor: 'indigo-500' }}
+  hover={{ before: { width: 'fit' } }} after={{ content: 'attr(data-count)' }} />
+// On Textbox/Textarea the name means both: a string is the attribute, an object the styles; both at
+// once puts the text in `props`. `placeholderStyles` is the old name for `placeholder` and still works.
+<Textbox props={{ placeholder: 'Search…' }} placeholder={{ color: 'slate-400' }} />
 ```
 
 ## Theme System

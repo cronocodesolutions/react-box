@@ -437,7 +437,6 @@ const boxComponents = {
       transition: 'all',
       transitionDuration: 150,
       before: {
-        content: 'empty',
         position: 'absolute',
         top: 0.5,
         left: 0.5,

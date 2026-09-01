@@ -1,5 +1,6 @@
 import { forwardRef, Ref, RefAttributes } from 'react';
 import Box, { BoxProps, BoxTagProps } from '../box';
+import { OmitTagProps } from '../react/boxProps';
 import { ComponentsAndVariants } from '../types';
 import ObjectUtils from '../utils/object/objectUtils';
 
@@ -7,7 +8,7 @@ const tagProps = ['type', 'onClick'] as const;
 type TagPropsType = (typeof tagProps)[number];
 
 type ButtonProps<TKey extends keyof ComponentsAndVariants> = Omit<BoxProps<'button', TKey>, 'tag' | 'props'>;
-type ButtonTagProps = Omit<BoxTagProps<'button'>, TagPropsType>;
+type ButtonTagProps = OmitTagProps<BoxTagProps<'button'>, TagPropsType>;
 
 type ButtonType = Required<React.ComponentProps<'button'>>['type'];
 

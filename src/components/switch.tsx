@@ -1,6 +1,7 @@
 import { forwardRef, Ref, RefAttributes } from 'react';
 import { BoxProps, BoxTagProps } from '../box';
 import { useEventCallback } from '../react/a11y/callbacks';
+import { OmitTagProps } from '../react/boxProps';
 import { ComponentsAndVariants } from '../types';
 import Checkbox from './checkbox';
 
@@ -8,7 +9,7 @@ type SwitchProps<TKey extends keyof ComponentsAndVariants> = Omit<BoxProps<'inpu
 
 interface Props<TKey extends keyof ComponentsAndVariants> extends SwitchProps<TKey> {
   name?: string;
-  props?: Omit<BoxTagProps<'input'>, 'type'>;
+  props?: OmitTagProps<BoxTagProps<'input'>, 'type'>;
   onInput?: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
   value?: string | number;

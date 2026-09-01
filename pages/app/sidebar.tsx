@@ -7,6 +7,7 @@ import {
   CheckSquare,
   ChevronDown,
   Circle,
+  Highlighter,
   Download,
   Layers,
   LayoutGrid,
@@ -183,6 +184,9 @@ export default function Sidebar({ toggleTheme, onClose }: SidebarProps) {
           </MenuItem>
           <MenuItem to="/variants" icon={<SlidersHorizontal />}>
             State Variants
+          </MenuItem>
+          <MenuItem to="/pseudo-elements" icon={<Highlighter />}>
+            Pseudo-Elements
           </MenuItem>
         </MenuSection>
 

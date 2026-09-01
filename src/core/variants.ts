@@ -1,5 +1,5 @@
 import ObjectUtils from '../utils/object/objectUtils';
-import { pseudoClasses, pseudoElements } from './boxStyles';
+import { pseudoClasses } from './boxStyles';
 
 /**
  * The nesting keys that hang off the element's *own* selector: an attribute it carries
@@ -25,10 +25,11 @@ namespace Variants {
   export type VariantKey = keyof typeof variantKeys;
 
   /**
-   * What `not` takes: every pseudo-class key except `theme` (which is an ancestor class, not a selector on
-   * this element) and the three pseudo-*elements* — `:not(::before)` is not a selector.
+   * What `not` takes: every pseudo-class key except `theme`, which is an ancestor class rather than a
+   * selector on this element. The pseudo-*elements* are their own record, so they cannot be named here —
+   * `:not(::before)` is not a selector.
    */
-  export type NotKey = Exclude<keyof typeof pseudoClasses, 'theme' | (typeof pseudoElements)[number]>;
+  export type NotKey = Exclude<keyof typeof pseudoClasses, 'theme'>;
 
   /** One compiled variant: what it adds to the class name, and what it adds to the selector. */
   export interface Variant {
@@ -77,8 +78,8 @@ namespace Variants {
     if (!ObjectUtils.isKeyOf(key, pseudoClasses)) return null;
 
     const selector = pseudoClasses[key];
-    // `theme` is the empty string (an ancestor class), and a pseudo-element cannot be negated.
-    if (!selector || selector.startsWith('::')) return null;
+    // `theme` is the empty string — an ancestor class, not a state of this element.
+    if (!selector) return null;
 
     return `:not(${selector})`;
   }

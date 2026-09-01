@@ -65,6 +65,11 @@ const PROVIDED = {
   Textbox: "import Textbox from '@cronocode/react-box/components/textbox';",
   Tooltip: "import Tooltip from '@cronocode/react-box/components/tooltip';",
   VisuallyHidden: "import VisuallyHidden from '@cronocode/react-box/components/visuallyHidden';",
+  // The semantic tags a snippet writes prose with, all from the one entry.
+  Li: "import { Li } from '@cronocode/react-box/components/semantics';",
+  Ol: "import { Ol } from '@cronocode/react-box/components/semantics';",
+  P: "import { P } from '@cronocode/react-box/components/semantics';",
+  Ul: "import { Ul } from '@cronocode/react-box/components/semantics';",
   // The chart primitives and the theming container, one entry between them.
   ChartContainer: "import { ChartContainer } from '@cronocode/react-box/components/chart';",
   Gauge: "import { Gauge } from '@cronocode/react-box/components/chart';",

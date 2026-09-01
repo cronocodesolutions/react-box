@@ -104,7 +104,7 @@ describe('Switch', () => {
   // The thumb travels on `checked: { before: { translateX: 4 } }` in the `switch` component style,
   // which is a pseudo-element nested inside a pseudo-class — the combination that used to be
   // assembled as `::before:checked`, invalid CSS the browser throws the whole rule away for. The
-  // class was on the element and the switch simply did not move; see `pseudoSelectors.test.ts`.
+  // class was on the element and the switch simply did not move; see `pseudoElements.test.ts`.
   it('moves its thumb on :checked — the rule reaches the stylesheet, with ::before last', () => {
     render(<Switch name="notify" label="Email notifications" />);
 
@@ -112,6 +112,16 @@ describe('Switch', () => {
 
     expect(css).toContain(':checked::before{--boxTranslateX:1rem;translate:var(--boxTranslateX, 0) var(--boxTranslateY, 0)}');
     expect(css).not.toContain('::before:checked');
+  });
+
+  // The thumb is a `::before`, and the component no longer declares its `content`: a generated element
+  // gets an empty one from the engine, which is the whole reason the box exists to be moved.
+  it('gets the content its thumb needs without the component asking for it', () => {
+    render(<Switch name="notify" label="Email notifications" />);
+
+    const css = (document.getElementById('crono-styles') as HTMLStyleElement | null)?.textContent ?? '';
+
+    expect(css).toContain("::before{content:''}");
   });
 
   it('stops the thumb travelling when the user asked for less motion', () => {
