@@ -171,10 +171,11 @@ function layerName(rank: number, sortIndex: number): string {
 /**
  * `@starting-style`'s layers: one per media rank and no prop dimension, because two starting declarations
  * only ever collide when they are the same property — and then specificity and the media rank settle it.
- * A hyphen keeps them out of `layerName`'s alphabet, whose base36 rank could otherwise spell `rbs0`.
+ * An underscore keeps them out of `layerName`'s alphabet (base36, so a rank could spell `rbs0`) and out of
+ * nobody's regex — the Next example greps the order statement for `[w,]`.
  */
 function startingLayerName(rank: number): string {
-  return `${BASE_LAYER}-s${rank.toString(36)}`;
+  return `${BASE_LAYER}_s${rank.toString(36)}`;
 }
 
 /** What the class-name cache holds per style signature. `elements` is null outside element mode. */

@@ -617,7 +617,7 @@ Three consequences shape the implementation:
   layer order in one statement** (~1,400 names, 1.3 KB gzipped). Layer order beats source order, so
   where React inserts an element no longer matters. The reset goes into the first layer (`rb`),
   because unlayered CSS would otherwise beat every generated rule. `@starting-style` rules take nine
-  more layers after all of them (`rb-s0`…`rb-s8`, one per media rank and no prop dimension): a
+  more layers after all of them (`rb_s0`…`rb_s8`, one per media rank and no prop dimension): a
   starting declaration has to beat the ordinary declaration of the same property or nothing
   transitions, and two starting declarations only ever collide when they are the same property.
 - **The base element belongs to no Box**, so every Box renders it first in its list: whichever Box
