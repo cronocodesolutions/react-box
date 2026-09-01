@@ -97,8 +97,8 @@ describe('accessibility media features', () => {
 
     const { styleElements } = engine.resolveClassNames({ motionReduce: { p: 4 } }, false);
 
-    // rb6 is the first rank after the five breakpoints (rb1–rb5).
-    expect(styleElements!.at(-1)!.css).toMatch(/^@layer rb6\w+\{@media \(prefers-reduced-motion: reduce\)\{\.motionReduce-p-4\{/);
+    // Rank 18, base36 'i': the first after the five breakpoints and the twelve container-query slots.
+    expect(styleElements!.at(-1)!.css).toMatch(/^@layer rbi\.p\w+\{@media \(prefers-reduced-motion: reduce\)\{\.motionReduce-p-4\{/);
     expect(styleElements![0].css.startsWith('@layer rb,')).toBe(true);
   });
 });

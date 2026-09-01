@@ -12,6 +12,7 @@ import {
   themeGroupClass,
 } from './core/boxStyles';
 import { ClassNameType } from './core/classNames';
+import Containers from './core/containers';
 import { BoxStyle, BoxStylesType, ExtractKeys, ExtractTupleValues } from './core/coreTypes';
 import boxComponents from './core/extends/boxComponents';
 import Variants from './core/variants';
@@ -98,6 +99,15 @@ type BoxMediaFeatureStyles = ExtractKeys<
   typeof mediaFeatures,
   BoxStylesWithPseudoClasses & BoxPseudoGroupClassesStyles & BoxThemeGroupClassStyles
 >;
+/**
+ * `cq`: the same value shape a breakpoint takes, keyed by a container-query size instead — `md`, its
+ * complement `maxMd`, or either against a named container (`'sidebar/md'`). Not offered inside a
+ * breakpoint or in another `cq`, for the reason a breakpoint is not: a rule lives in one at-rule block.
+ */
+type BoxContainerQueryStyles = ExtractKeys<
+  typeof Containers.containerQueryKey,
+  Partial<Record<Containers.QueryKey, BoxStylesWithPseudoClasses & BoxPseudoGroupClassesStyles & BoxThemeGroupClassStyles>>
+>;
 
 type ExtractVariants<T> = T extends { variants?: infer Variants }
   ? keyof Variants extends never
@@ -154,8 +164,14 @@ export type BoxStyleProps<TKey extends keyof ComponentsAndVariants = never> = Si
     BoxThemeGroupClassStyles &
     BoxBreakpointsStyles &
     BoxMediaFeatureStyles &
+    BoxContainerQueryStyles &
     ComponentProps<TKey>
 >;
 export type BoxComponentStyles = Simplify<
-  BoxStylesWithPseudoClasses & BoxBreakpointsStyles & BoxMediaFeatureStyles & BoxPseudoGroupClassesStyles & BoxThemeGroupClassStyles
+  BoxStylesWithPseudoClasses &
+    BoxBreakpointsStyles &
+    BoxMediaFeatureStyles &
+    BoxContainerQueryStyles &
+    BoxPseudoGroupClassesStyles &
+    BoxThemeGroupClassStyles
 >;

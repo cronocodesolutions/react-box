@@ -5,7 +5,7 @@ description: '@cronocode/react-box expert — runtime CSS-in-JS library. Use whe
 
 # @cronocode/react-box AI Skill
 
-Runtime CSS-in-JS library. `Box` accepts 152 CSS props → generates CSS classes at runtime. Same values share a class.
+Runtime CSS-in-JS library. `Box` accepts 155 CSS props → generates CSS classes at runtime. Same values share a class.
 
 ## Installation & Package Management
 
@@ -66,7 +66,7 @@ expect, not a check against the fields.
 ## Props
 
 **Spacing**: `p`/`px`/`py`/`pt`/`pr`/`pb`/`pl`, `m`/`mx`/`my`/`mt`/`mr`/`mb`/`ml`, `gap`
-**Layout**: `display`, `d` (flex-direction), `wrap`, `ai` (align-items), `jc` (justify-content), `flex`/`grow`/`shrink`
+**Layout**: `display`, `d` (flex-direction), `wrap`, `ai` (align-items), `jc` (justify-content), `flex`/`grow`/`shrink`, `container`/`containerName`/`containerType` (a query container — see `cq`)
 **Sizing**: `width`/`height` — number (÷4=rem), `'auto'`, `'fit'` (100%), `'fit-screen'` (100vw/vh), fractions (`'1/2'`…), `'33%'`. `minWidth`/`maxWidth`/`minHeight`/`maxHeight` same. All accept `"5%"`.
 **Colors**: `bgColor`/`color`/`borderColor` — Tailwind palette `'gray-50'`..`'gray-900'`, red/orange/yellow/green/teal/blue/indigo/purple/pink/violet, `'white'`/`'black'`/`'transparent'`/`'currentColor'`
 **Borders**: `b`/`bx`/`by`/`bt`/`br`/`bb`/`bl` (px), `borderRadius` (÷4), `borderStyle`
@@ -141,7 +141,7 @@ what the base class transitions, before the first render.
 
 **Effects**: `shadow` (`'small'`/`'medium'`/`'large'`/`'xl'`/`'none'`), `opacity`, `cursor`, `pointerEvents`, `userSelect`, `overflow`
 
-## Pseudo-Classes, Breakpoints & State Variants
+## Pseudo-Classes, Breakpoints, State Variants & Container Queries
 
 ```tsx
 <Box bgColor="blue-500" hover={{ bgColor: 'blue-600' }} disabled={{ opacity: 0.5 }} />
@@ -179,6 +179,16 @@ what the base class transitions, before the first render.
 // On Textbox/Textarea the name means both: a string is the attribute, an object the styles; both at
 // once puts the text in `props`. `placeholderStyles` is the old name for `placeholder` and still works.
 <Textbox props={{ placeholder: 'Search…' }} placeholder={{ color: 'slate-400' }} />
+// Container queries — the same question, asked of the element's own container. `container` makes one
+// (true → container-type: inline-size; a name → container: <name> / inline-size), containerName and
+// containerType ('inline-size' | 'size' | 'normal') are the longhands. `cq` queries the NEAREST one,
+// keyed by size: xs(20rem) sm(24) md(28) lg(32) xl(36) xxl(42), each with a complement maxXs…maxXxl
+// (`not (min-width: …)`, so md and maxMd never both match), and `'name/md'` for a named container.
+// Ranked after every breakpoint and before every preference; one at-rule block per rule, so cq and a
+// breakpoint do not nest in each other. A name that is not a CSS ident drops its block.
+<Flex container="card">
+  <Box cq={{ sm: { d: 'row' }, maxSm: { display: 'none' }, 'card/xl': { p: 6 } }} />
+</Flex>
 ```
 
 ## Theme System

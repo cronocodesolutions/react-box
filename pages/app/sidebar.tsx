@@ -16,6 +16,7 @@ import {
   MousePointer2,
   Paintbrush,
   Palette,
+  Proportions,
   Rows3,
   Server,
   Shapes,
@@ -187,6 +188,9 @@ export default function Sidebar({ toggleTheme, onClose }: SidebarProps) {
           </MenuItem>
           <MenuItem to="/pseudo-elements" icon={<Highlighter />}>
             Pseudo-Elements
+          </MenuItem>
+          <MenuItem to="/container-queries" icon={<Proportions />}>
+            Container Queries
           </MenuItem>
         </MenuSection>
 

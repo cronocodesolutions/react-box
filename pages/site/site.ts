@@ -53,7 +53,7 @@ export const siteRoutes = [
   {
     path: '/box',
     name: 'Box',
-    description: 'The foundational component: 152 CSS properties as type-safe props, with the numeric formatters explained.',
+    description: 'The foundational component: 155 CSS properties as type-safe props, with the numeric formatters explained.',
   },
   {
     path: '/svg',
@@ -84,6 +84,12 @@ export const siteRoutes = [
     name: 'Pseudo-Elements',
     description:
       'before, after, placeholder, selection, marker and four more as nested props — with the content a generated element needs supplied for you.',
+  },
+  {
+    path: '/container-queries',
+    name: 'Container Queries',
+    description:
+      'A component that answers to the space it was given rather than to the window: cq, six sizes and their complements, against the nearest container or a named one.',
   },
   {
     path: '/animation',

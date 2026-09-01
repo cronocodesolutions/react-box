@@ -57,9 +57,10 @@ react-box/
 │   ├── ssg.ts                    # Server-side rendering support (entry point)
 │   │
 │   ├── core/                     # Core styling engine — ZERO react imports (enforced)
-│   │   ├── boxStyles.ts          # CSS property definitions (152 props)
+│   │   ├── boxStyles.ts          # CSS property definitions (155 props)
 │   │   ├── boxStylesFormatters.ts # Value formatters (px, rem, etc.)
 │   │   ├── variables.ts          # CSS variables (colors, sizes)
+│   │   ├── containers.ts         # The `cq` key grammar: sizes, complements, named containers
 │   │   ├── classNames.ts         # Conditional className utility
 │   │   ├── coreTypes.ts          # Core TypeScript types (framework-free)
 │   │   ├── boxConstants.ts       # Constants (REM divider, etc.)
@@ -613,13 +614,20 @@ Three consequences shape the implementation:
 - **Element order is render order, not cascade order.** A Box that only uses `md={{ p: 4 }}` can put
   its rule in `<head>` ahead of the `p={2}` rule another Box needed, and atomic classes are shared
   between Boxes, so no per-Box grouping can fix it either. So every rule is wrapped in a cascade
-  layer — `@layer rb<breakpointIndex><propIndex base36>` — and the **base element declares the whole
-  layer order in one statement** (~1,400 names, 1.3 KB gzipped). Layer order beats source order, so
-  where React inserts an element no longer matters. The reset goes into the first layer (`rb`),
-  because unlayered CSS would otherwise beat every generated rule. `@starting-style` rules take nine
-  more layers after all of them (`rb_s0`…`rb_s8`, one per media rank and no prop dimension): a
-  starting declaration has to beat the ordinary declaration of the same property or nothing
-  transitions, and two starting declarations only ever collide when they are the same property.
+  layer — `@layer rb<queryRank base36>.p<propIndex base36>` — and the **base element declares the
+  order**: one statement naming the ranks, then one per rank naming the props inside it. Layer order
+  beats source order, so where React inserts an element no longer matters. The reset goes into the
+  first layer (`rb`), because unlayered CSS would otherwise beat every generated rule.
+  `@starting-style` rules take one more layer per rank after all of them (`rb_s0`…, no prop
+  dimension): a starting declaration has to beat the ordinary declaration of the same property or
+  nothing transitions, and two starting declarations only ever collide when they are the same property.
+  - **The prop is a sub-layer of the rank because naming every pair does not scale.** One flat name
+    per (rank, prop) was 1,378 names at nine ranks; C3's container queries brought twelve more ranks,
+    which would have made it 3,277 names and 6.6 KB gzipped in every server-rendered page. Nested,
+    the inner statement is the _same text_ once per rank — 14 KB raw but **1.2 KB gzipped**, less than
+    half of what nine flat ranks cost, because what gzip stores is the repetition. Verified in Chrome
+    with every rule element rendered in reverse document order: the breakpoint still wins over the
+    base rule, and `px` still wins over `p` inside one rank.
 - **The base element belongs to no Box**, so every Box renders it first in its list: whichever Box
   React sees first establishes the layer order, and the rest are deduped by href. Its href follows
   its content, so a `:root` block that grew a variable becomes a new element rather than a silently
@@ -1306,6 +1314,14 @@ A different dimension from a pseudo-class, because CSS allows **one** per compou
 2. If it generates a box of its own, add it to `generatedElements` — the walk supplies `content: ''` for those unless the block declares one, since a generated element with no `content` renders nothing at all
 3. If it belongs to a descendant (`::marker` is the list item's, `::selection` is whatever holds the text), add it to `inheritedElements`: its rule then names `.x *::el` as well, the two selectors Tailwind's `marker:`/`selection:` variants emit
 4. Types auto-generate — `BoxPseudoElementStyles` is the family that offers everything except a second pseudo-element
+
+### Add a Container-Query Size
+
+The sizes in `src/core/containers.ts` are a scale, not a list of keys: adding one to `containerSizes` gives it a `min-width` condition, a `max` complement and a cascade slot at once, since `rankKeys` and the condition table are both derived from that record.
+
+1. Add the size to `containerSizes` **in ascending order** — `rankKeys` names the sizes ascending and their complements descending, and `queryKeys` in `boxStyles.ts` splices that list between the breakpoints and the preferences
+2. Nothing else: the condition, the `maxXx` key, the class-name segment and the type (`Containers.QueryKey`) all follow
+3. Note that every new rank is one more cascade layer _and_ one more repeat of the prop order statement in element mode — cheap gzipped, but not free
 
 ### Add a New State Variant
 
