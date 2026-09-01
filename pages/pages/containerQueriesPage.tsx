@@ -87,14 +87,25 @@ export default function ContainerQueriesPage() {
 
           <Section id="resize" title="Drag it">
             The same card again, in a container the browser lets you resize. Nothing here listens for anything: the styles are two CSS rules
-            and the browser re-evaluates them as the box changes width.
+            and the browser re-evaluates them as the box changes width. One thing a drag does need, though: every Box transitions on{' '}
+            <Mono>--transitionTime</Mono>, so a resized box would <em>chase</em> the pointer instead of following it — and since a custom
+            property is inherited, <Mono>vars={`{{ transitionTime: '0s' }}`}</Mono> on the container settles that for the whole subtree.
           </Section>
 
           <Code
             id="resize-demo"
             label="A container you can drag"
             language="jsx"
-            code={`<Box container resize="horizontal" overflow="auto" width={72} minWidth={50} maxWidth="fit" p={2}>
+            code={`<Box
+  container
+  resize="horizontal"
+  overflow="auto"
+  vars={{ transitionTime: '0s' }}   // direct manipulation: follow the pointer, do not animate to it
+  width={72}
+  minWidth={50}
+  maxWidth="fit"
+  p={2}
+>
   {/* the card from above */}
 </Box>`}
           >
@@ -102,6 +113,7 @@ export default function ContainerQueriesPage() {
               container
               resize="horizontal"
               overflow="auto"
+              vars={{ transitionTime: '0s' }}
               width={72}
               minWidth={50}
               maxWidth="fit"
