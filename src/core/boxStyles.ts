@@ -17,6 +17,16 @@ const referenceValues = {
 } satisfies BoxStyle;
 
 /**
+ * The percentage every spacing, sizing, inset and translate prop accepts. It carries its own `match`
+ * because `values` is a plain string, and a scalar `values` is matched by `typeof` alone — which made all
+ * thirty of them an unvalidated catch-all (bug #31).
+ */
+const percentValue = {
+  values: Variables.percentString,
+  match: Variables.isPercentString,
+} satisfies BoxStyle;
+
+/**
  * One axis of the composed `translate`. Both axes used to write `transform`, so a Box asking for both kept
  * whichever rule landed last; each now sets its own custom property and both write the same declaration,
  * which still transitions because `var()` substitutes at computed-value time.
@@ -287,7 +297,7 @@ export const cssStyles = {
       valueFormat: BoxStylesFormatters.Value.fraction,
     },
     {
-      values: Variables.percentString,
+      ...percentValue,
     },
   ],
   /** The right CSS property participates in specifying the horizontal position of a positioned element. This inset property has no effect on non-positioned elements. */
@@ -305,7 +315,7 @@ export const cssStyles = {
       valueFormat: BoxStylesFormatters.Value.fraction,
     },
     {
-      values: Variables.percentString,
+      ...percentValue,
     },
   ],
   /** The bottom CSS property participates in setting the vertical position of a positioned element. This inset property has no effect on non-positioned elements. */
@@ -323,7 +333,7 @@ export const cssStyles = {
       valueFormat: BoxStylesFormatters.Value.fraction,
     },
     {
-      values: Variables.percentString,
+      ...percentValue,
     },
   ],
   /** The left CSS property participates in specifying the horizontal position of a positioned element. This inset property has no effect on non-positioned elements. */
@@ -341,7 +351,7 @@ export const cssStyles = {
       valueFormat: BoxStylesFormatters.Value.fraction,
     },
     {
-      values: Variables.percentString,
+      ...percentValue,
     },
   ],
   /** The inset CSS property is a shorthand that corresponds to the top, right, bottom, and/or left properties. It has the same multi-value syntax of the margin shorthand. */
@@ -351,7 +361,7 @@ export const cssStyles = {
       valueFormat: BoxStylesFormatters.Value.rem,
     },
     {
-      values: Variables.percentString,
+      ...percentValue,
     },
   ],
   /** The `box-sizing` CSS property sets how the total width and height of an element is calculated. */
@@ -592,7 +602,7 @@ export const cssStyles = {
       valueFormat: BoxStylesFormatters.Value.rem,
     },
     {
-      values: Variables.percentString,
+      ...percentValue,
     },
   ],
   /** The row-gap CSS property sets the size of the gap (gutter) between an element's rows. */
@@ -604,7 +614,7 @@ export const cssStyles = {
     },
     {
       styleName: 'row-gap',
-      values: Variables.percentString,
+      ...percentValue,
     },
   ],
   /** The column-gap CSS property sets the size of the gap (gutter) between an element's columns. */
@@ -616,7 +626,7 @@ export const cssStyles = {
     },
     {
       styleName: 'column-gap',
-      values: Variables.percentString,
+      ...percentValue,
     },
   ],
   /** The order CSS property sets the order to lay out an item in a flex or grid container. Items in a container are sorted by ascending order value and then by their source code order. Items not given an explicit order value are assigned the default value of 0. */
@@ -645,7 +655,7 @@ export const cssStyles = {
       values: ['auto', 'fit-content', 'max-content', 'min-content'] as const,
     },
     {
-      values: Variables.percentString,
+      ...percentValue,
     },
   ],
   /** The min-height CSS property sets the minimum height of an element. It prevents the used value of the height property from becoming smaller than the value specified for min-height. */
@@ -672,7 +682,7 @@ export const cssStyles = {
     },
     {
       styleName: 'min-height',
-      values: Variables.percentString,
+      ...percentValue,
     },
   ],
   /** The max-height CSS property sets the maximum height of an element. It prevents the used value of the height property from becoming larger than the value specified for max-height. */
@@ -699,7 +709,7 @@ export const cssStyles = {
     },
     {
       styleName: 'max-height',
-      values: Variables.percentString,
+      ...percentValue,
     },
   ],
   /** The width CSS property sets an element's width. By default, it sets the width of the content area, but if box-sizing is set to border-box, it sets the width of the border area. */
@@ -721,7 +731,7 @@ export const cssStyles = {
       values: ['auto', 'fit-content', 'max-content', 'min-content'] as const,
     },
     {
-      values: Variables.percentString,
+      ...percentValue,
     },
   ],
   /** The min-width CSS property sets the minimum width of an element. It prevents the used value of the width property from becoming smaller than the value specified for min-width. */
@@ -748,7 +758,7 @@ export const cssStyles = {
     },
     {
       styleName: 'min-width',
-      values: Variables.percentString,
+      ...percentValue,
     },
   ],
   /** The max-width CSS property sets the maximum width of an element. It prevents the used value of the width property from becoming larger than the value specified by max-width. */
@@ -775,7 +785,7 @@ export const cssStyles = {
     },
     {
       styleName: 'max-width',
-      values: Variables.percentString,
+      ...percentValue,
     },
   ],
   /** The letter-spacing CSS property sets the horizontal spacing behavior between text characters. This value is added to the natural spacing between characters while rendering the text. Positive values of letter-spacing causes characters to spread farther apart, while negative values of letter-spacing bring characters closer together. */
@@ -823,7 +833,12 @@ export const cssStyles = {
       valueFormat: BoxStylesFormatters.Value.fraction,
     },
     {
-      values: Variables.percentString,
+      styleName: 'margin',
+      values: Variables.negativePercentages,
+      valueFormat: BoxStylesFormatters.Value.fraction,
+    },
+    {
+      ...percentValue,
       styleName: 'margin',
     },
   ],
@@ -844,7 +859,12 @@ export const cssStyles = {
       valueFormat: BoxStylesFormatters.Value.fraction,
     },
     {
-      values: Variables.percentString,
+      styleName: 'margin-inline',
+      values: Variables.negativePercentages,
+      valueFormat: BoxStylesFormatters.Value.fraction,
+    },
+    {
+      ...percentValue,
       styleName: 'margin-inline',
     },
   ],
@@ -865,7 +885,12 @@ export const cssStyles = {
       valueFormat: BoxStylesFormatters.Value.fraction,
     },
     {
-      values: Variables.percentString,
+      styleName: 'margin-block',
+      values: Variables.negativePercentages,
+      valueFormat: BoxStylesFormatters.Value.fraction,
+    },
+    {
+      ...percentValue,
       styleName: 'margin-block',
     },
   ],
@@ -886,7 +911,12 @@ export const cssStyles = {
       styleName: 'margin-top',
     },
     {
-      values: Variables.percentString,
+      values: Variables.negativePercentages,
+      valueFormat: BoxStylesFormatters.Value.fraction,
+      styleName: 'margin-top',
+    },
+    {
+      ...percentValue,
       styleName: 'margin-top',
     },
   ],
@@ -907,7 +937,12 @@ export const cssStyles = {
       styleName: 'margin-right',
     },
     {
-      values: Variables.percentString,
+      values: Variables.negativePercentages,
+      valueFormat: BoxStylesFormatters.Value.fraction,
+      styleName: 'margin-right',
+    },
+    {
+      ...percentValue,
       styleName: 'margin-right',
     },
   ],
@@ -928,7 +963,12 @@ export const cssStyles = {
       styleName: 'margin-bottom',
     },
     {
-      values: Variables.percentString,
+      values: Variables.negativePercentages,
+      valueFormat: BoxStylesFormatters.Value.fraction,
+      styleName: 'margin-bottom',
+    },
+    {
+      ...percentValue,
       styleName: 'margin-bottom',
     },
   ],
@@ -949,7 +989,12 @@ export const cssStyles = {
       styleName: 'margin-left',
     },
     {
-      values: Variables.percentString,
+      values: Variables.negativePercentages,
+      valueFormat: BoxStylesFormatters.Value.fraction,
+      styleName: 'margin-left',
+    },
+    {
+      ...percentValue,
       styleName: 'margin-left',
     },
   ],
@@ -966,7 +1011,7 @@ export const cssStyles = {
       styleName: 'padding',
     },
     {
-      values: Variables.percentString,
+      ...percentValue,
       styleName: 'padding',
     },
   ],
@@ -983,7 +1028,7 @@ export const cssStyles = {
       styleName: 'padding-inline',
     },
     {
-      values: Variables.percentString,
+      ...percentValue,
       styleName: 'padding-inline',
     },
   ],
@@ -1000,7 +1045,7 @@ export const cssStyles = {
       styleName: 'padding-block',
     },
     {
-      values: Variables.percentString,
+      ...percentValue,
       styleName: 'padding-block',
     },
   ],
@@ -1017,7 +1062,7 @@ export const cssStyles = {
       styleName: 'padding-top',
     },
     {
-      values: Variables.percentString,
+      ...percentValue,
       styleName: 'padding-top',
     },
   ],
@@ -1034,7 +1079,7 @@ export const cssStyles = {
       styleName: 'padding-right',
     },
     {
-      values: Variables.percentString,
+      ...percentValue,
       styleName: 'padding-right',
     },
   ],
@@ -1051,7 +1096,7 @@ export const cssStyles = {
       styleName: 'padding-bottom',
     },
     {
-      values: Variables.percentString,
+      ...percentValue,
       styleName: 'padding-bottom',
     },
   ],
@@ -1068,7 +1113,7 @@ export const cssStyles = {
       styleName: 'padding-left',
     },
     {
-      values: Variables.percentString,
+      ...percentValue,
       styleName: 'padding-left',
     },
   ],
@@ -1085,12 +1130,14 @@ export const cssStyles = {
       values: opacityValues,
     },
   ],
-  /** The CSS outline-width property sets the thickness of an element's outline. An outline is a line that is drawn around an element, outside the border. */
+  /** The CSS outline-width property sets the thickness of an element's outline. An outline is a line that is drawn around an element, outside the border. A width alone is enough: the style comes with it, and `outlineStyle` — declared after this — is what changes it. */
   outline: [
     {
-      styleName: 'outline-width',
+      // A width with no style draws nothing (`outline-style` starts at `none`), and the UA only supplies
+      // a style for `:focus` — which is why a `highlighted` variant's outline was invisible while the
+      // class, the rule and the tests all looked right (bug #54).
       values: 0,
-      valueFormat: BoxStylesFormatters.Value.px,
+      declarations: (value) => `outline-width:${BoxStylesFormatters.Value.px(value as number)};outline-style:solid`,
     },
   ],
   /** The outline-style CSS property sets the style of an element's outline. An outline is a line that is drawn around an element, outside the border. */
@@ -1375,12 +1422,21 @@ export const cssStyles = {
       values: Variables.colorValues,
       valueFormat: (value, getVariableValue) => getVariableValue(value),
     },
+    {
+      // Every colour prop takes the system colours too, unformatted: they are keywords rather than
+      // tokens, and they are the only palette a forced-colors mode keeps (bug #65).
+      values: Variables.systemColorValues,
+    },
   ],
   /** The background-color CSS property sets the background color of an element. */
   bgColor: [
     {
       values: Variables.colorValues,
       valueFormat: (value, getVariableValue) => getVariableValue(value),
+      styleName: 'background-color',
+    },
+    {
+      values: Variables.systemColorValues,
       styleName: 'background-color',
     },
   ],
@@ -1391,6 +1447,10 @@ export const cssStyles = {
       valueFormat: (value, getVariableValue) => getVariableValue(value),
       styleName: 'border-color',
     },
+    {
+      values: Variables.systemColorValues,
+      styleName: 'border-color',
+    },
   ],
   /** The outline-color CSS property sets the color of an element's outline. */
   outlineColor: [
@@ -1399,12 +1459,19 @@ export const cssStyles = {
       valueFormat: (value, getVariableValue) => getVariableValue(value),
       styleName: 'outline-color',
     },
+    {
+      values: Variables.systemColorValues,
+      styleName: 'outline-color',
+    },
   ],
   /** The fill CSS property defines how SVG text content and the interior canvas of SVG shapes are filled or painted. If present, it overrides the element's fill attribute. Takes a colour token, a paint server the document defines (`fill="url(#sky)"` — a `<LinearGradient>` or a pattern) or a variable somebody else declared (`fill="var(--chart-1)"`). */
   fill: [
     {
       values: Variables.colorValues,
       valueFormat: (value, getVariableValue) => getVariableValue(value),
+    },
+    {
+      values: Variables.systemColorValues,
     },
     referenceValues,
   ],
@@ -1427,6 +1494,9 @@ export const cssStyles = {
     {
       values: Variables.colorValues,
       valueFormat: (value, getVariableValue) => getVariableValue(value),
+    },
+    {
+      values: Variables.systemColorValues,
     },
     referenceValues,
   ],
@@ -1473,6 +1543,9 @@ export const cssStyles = {
     },
     {
       values: '' as string,
+      // The one string prop that is a *list* rather than a token, so it cannot be matched by `typeof`
+      // alone either: dashes and gaps, numbers or percentages, and nothing that could end the rule.
+      match: (value) => typeof value === 'string' && /^\s*[\d.]+%?(\s*[\s,]\s*[\d.]+%?)*\s*$/.test(value),
       styleName: 'stroke-dasharray',
     },
   ],
@@ -1483,7 +1556,7 @@ export const cssStyles = {
       styleName: 'stroke-dashoffset',
     },
     {
-      values: Variables.percentString,
+      ...percentValue,
       styleName: 'stroke-dashoffset',
     },
   ],
@@ -1543,7 +1616,7 @@ export const cssStyles = {
       values: 0,
     },
     {
-      values: Variables.percentString,
+      ...percentValue,
     },
   ],
   /** The cy CSS property positions the centre of a `<circle>` or an `<ellipse>` vertically, in user units. Transitions like `cx`. */
@@ -1552,7 +1625,7 @@ export const cssStyles = {
       values: 0,
     },
     {
-      values: Variables.percentString,
+      ...percentValue,
     },
   ],
   /** The r CSS property sets the radius of a `<circle>`, in user units. Transition it and the circle grows; a percentage is of the viewport's diagonal. */
@@ -1561,7 +1634,7 @@ export const cssStyles = {
       values: 0,
     },
     {
-      values: Variables.percentString,
+      ...percentValue,
     },
   ],
   /**
@@ -1576,7 +1649,7 @@ export const cssStyles = {
       values: ['auto'] as const,
     },
     {
-      values: Variables.percentString,
+      ...percentValue,
     },
   ],
   /** The ry CSS property sets the vertical radius of an `<ellipse>` or the vertical corner radius of a `<rect>`, in user units. `auto` takes it from `rx`. */
@@ -1588,7 +1661,7 @@ export const cssStyles = {
       values: ['auto'] as const,
     },
     {
-      values: Variables.percentString,
+      ...percentValue,
     },
   ],
   /**
@@ -1600,7 +1673,7 @@ export const cssStyles = {
       values: 0,
     },
     {
-      values: Variables.percentString,
+      ...percentValue,
     },
   ],
   /** The y CSS property positions a `<rect>`, `<image>`, `<use>`, `<foreignObject>` or a nested `<svg>` vertically, in user units. Not for `<text>` — see `x`. */
@@ -1609,7 +1682,7 @@ export const cssStyles = {
       values: 0,
     },
     {
-      values: Variables.percentString,
+      ...percentValue,
     },
   ],
   /** The background-image CSS property sets one or more background images on an element. */
@@ -1643,7 +1716,7 @@ export const cssStyles = {
       declarations: translate('X', (value) => BoxStylesFormatters.Value.fraction(value as string)),
     },
     {
-      values: Variables.percentString,
+      ...percentValue,
       declarations: translate('X', String),
     },
   ],
@@ -1662,7 +1735,7 @@ export const cssStyles = {
       declarations: translate('Y', (value) => BoxStylesFormatters.Value.fraction(value as string)),
     },
     {
-      values: Variables.percentString,
+      ...percentValue,
       declarations: translate('Y', String),
     },
   ],
@@ -1752,7 +1825,7 @@ export const pseudoClasses = { ...pseudo1, ...pseudo2, ...theme };
  * declaration order, `checked: { before: {…} }` produced the invalid `::before:checked` and the browser
  * dropped the whole rule.
  */
-export const pseudoElements: readonly (keyof typeof pseudo1)[] = ['before', 'after', 'placeholderStyles'];
+export const pseudoElements = ['before', 'after', 'placeholderStyles'] as const satisfies readonly (keyof typeof pseudo1)[];
 
 function isPseudoElement(key: keyof typeof pseudoClasses): boolean {
   return (pseudoElements as readonly string[]).includes(key);

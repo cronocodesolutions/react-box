@@ -35,7 +35,12 @@ namespace ObjectUtils {
         const pVal = (prev as any)[key];
         const oVal = (obj as any)[key];
 
-        if (isObject(oVal) && 'clean' in oVal && oVal.clean) {
+        if (oVal === undefined) {
+          // An absent prop is exactly what JSX means by `undefined`, so it must not erase what it is
+          // merging into: `hoverGroup={cond ? {…} : undefined}` — the shape every component here uses —
+          // used to delete the component style's own block for that prop (bug #61). `clean` is still the
+          // way to drop a component's styles on purpose.
+        } else if (isObject(oVal) && 'clean' in oVal && oVal.clean) {
           (prev as any)[key] = oVal;
         } else if (key in pseudo2 && typeof oVal === 'boolean') {
           // skip overriding object of styles with a boolean

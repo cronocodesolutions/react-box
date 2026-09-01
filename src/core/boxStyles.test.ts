@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { generatedRulesOf, makeEngine, renderStyles } from '../../dev/engineHarness';
 import { BoxStyleProps } from '../types';
 import { cssStyles } from './boxStyles';
-import { BoxStyle } from './coreTypes';
+import { BoxStyle, BoxStyleValue } from './coreTypes';
 
 /**
  * The numeric formatters are the library's commonest surprise: three dividers are in play and nothing but
@@ -51,7 +51,6 @@ const pixelDirect = [
   ['bl', 'border-left-width'],
   ['lineHeight', 'line-height'],
   ['letterSpacing', 'letter-spacing'],
-  ['outline', 'outline-width'],
   ['outlineOffset', 'outline-offset'],
 ] as const;
 
@@ -85,6 +84,11 @@ describe('numeric dividers', () => {
       expect(generatedRulesFor({ [prop]: 1 }, `px-${prop}`)).toContain(`{${styleName}:1px}`);
       expect(generatedRulesFor({ [prop]: 24 }, `px-24-${prop}`)).toContain(`{${styleName}:24px}`);
     });
+  });
+
+  it('emits an outline width with the style that makes it draw', () => {
+    // Not in the list above: a width alone draws nothing, so the prop declares `solid` beside it (bug #54).
+    expect(generatedRulesFor({ outline: 2 }, 'px-outline')).toContain('{outline-width:2px;outline-style:solid}');
   });
 
   describe('unitless numbers — passed through as declared', () => {
@@ -178,11 +182,12 @@ function classNameValue(value: unknown): string {
  */
 function styleNamesOf(def: BoxStyle, prop: string, value: unknown): string[] {
   if (def.declarations && !def.styleName) {
-    if (typeof value === 'object' && value !== null) return Object.keys(value).map((name) => `--${name}`);
-
-    // The other shape: an axis of the composed `translate`, which names its own variable and the
-    // property both axes write into.
-    return [`--box${prop[0].toUpperCase()}${prop.slice(1)}`, 'translate'];
+    // Ask the definition what it writes rather than guessing: its property names come out of the value
+    // (`vars`), or out of the definition itself (an outline's style, an axis of the composed `translate`).
+    return def
+      .declarations(value as BoxStyleValue, (name) => `var(--${name})`)
+      .split(';')
+      .map((declaration) => declaration.split(':')[0]);
   }
 
   return Array.isArray(def.styleName) ? def.styleName : [def.styleName ?? prop];
@@ -632,5 +637,47 @@ describe('animation and transition props', () => {
   it('opts a subtree into interpolating a size keyword, which is what makes height: auto animate', () => {
     // Inherited, so it belongs on the container: every size inside it becomes animatable at once.
     expect(generatedRulesFor({ interpolateSize: 'allow-keywords' }, 'interpolate-size')).toContain('{interpolate-size:allow-keywords}');
+  });
+});
+
+/**
+ * What a value list accepts, and what it must not. Three of these props were an unvalidated catch-all —
+ * `values` is a plain string, and a scalar `values` is matched by `typeof` alone.
+ */
+describe('what a value list accepts', () => {
+  it('takes a percentage on the props that declare one', () => {
+    expect(generatedRulesFor({ width: '50%' }, 'percent-width')).toContain('{width:50%}');
+    expect(generatedRulesFor({ mt: '-12.5%' }, 'percent-negative')).toContain('{margin-top:-12.5%}');
+  });
+
+  it('emits nothing for a string that is not a percentage', () => {
+    // It used to reach CSS verbatim — `width="banana"` became `width:banana` (bug #31). TypeScript
+    // already rejected it, so what this closes is the JS consumer and the cast.
+    const engine = makeEngine('percent-invalid');
+
+    expect(renderStyles(engine, { width: 'banana' } as unknown as BoxStyleProps)).toEqual(['_b']);
+    expect(generatedRulesOf(engine)).toBe('');
+  });
+
+  it('takes a negative fraction on a margin, the way the inset props already did', () => {
+    // The spacing props took negative *numbers* and rejected `-1/4`, an asymmetry nothing announced (#32).
+    expect(generatedRulesFor({ mt: '-1/4' }, 'negative-fraction-mt')).toContain('{margin-top:-25%}');
+    expect(generatedRulesFor({ mx: '-1/2' }, 'negative-fraction-mx')).toContain('{margin-inline:-50%}');
+  });
+
+  it('takes a system colour on a colour prop, unformatted', () => {
+    // Keywords rather than tokens: the one palette a forced-colors mode keeps, so `var(--ButtonText)`
+    // would be exactly wrong (bug #65).
+    expect(generatedRulesFor({ bgColor: 'ButtonFace' }, 'system-bg')).toContain('{background-color:ButtonFace}');
+    expect(generatedRulesFor({ color: 'GrayText' }, 'system-color')).toContain('{color:GrayText}');
+    expect(generatedRulesFor({ fill: 'CanvasText' }, 'system-fill')).toContain('{fill:CanvasText}');
+  });
+
+  it('keeps a dash array to lengths, so a list cannot become a rule of its own', () => {
+    expect(generatedRulesFor({ strokeDasharray: '8 4' }, 'dash-valid')).toContain('{stroke-dasharray:8 4}');
+
+    const engine = makeEngine('dash-invalid');
+    expect(renderStyles(engine, { strokeDasharray: '8}html{display:none' } as BoxStyleProps)).toEqual(['_b']);
+    expect(generatedRulesOf(engine)).toBe('');
   });
 });

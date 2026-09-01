@@ -14,7 +14,7 @@ describe('startingStyle', () => {
     const classNames = renderStyles(engine, { opacity: 1, startingStyle: { opacity: 0 } });
 
     expect(classNames).toEqual(['_b', 'opacity-1', 'starting-opacity-0']);
-    expect(ruleList(engine)).toEqual(['.opacity-1{opacity:1}', '@starting-style{.starting-opacity-0{opacity:0}}']);
+    expect(ruleList(engine)).toEqual(['.opacity-1{opacity:1}', '@starting-style{.starting-opacity-0{opacity:0!important}}']);
   });
 
   it('keeps a starting value and the value it starts from in separate rules', () => {
@@ -22,7 +22,7 @@ describe('startingStyle', () => {
 
     // Both classes are on the element: the entrance value is a different rule, not a different element.
     expect(renderStyles(engine, { opacity: 0, startingStyle: { opacity: 0 } })).toEqual(['_b', 'opacity-0', 'starting-opacity-0']);
-    expect(ruleList(engine)).toEqual(['.opacity-0{opacity:0}', '@starting-style{.starting-opacity-0{opacity:0}}']);
+    expect(ruleList(engine)).toEqual(['.opacity-0{opacity:0}', '@starting-style{.starting-opacity-0{opacity:0!important}}']);
   });
 
   it('shares one rule between every Box that starts from the same value', () => {
@@ -32,7 +32,7 @@ describe('startingStyle', () => {
     renderStyles(engine, { startingStyle: { opacity: 0 }, bgColor: 'blue-500' });
 
     expect(ruleList(engine).filter((rule) => rule.includes('@starting-style'))).toEqual([
-      '@starting-style{.starting-opacity-0{opacity:0}}',
+      '@starting-style{.starting-opacity-0{opacity:0!important}}',
     ]);
   });
 
@@ -44,8 +44,8 @@ describe('startingStyle', () => {
     // The two translate axes write a custom property plus the composed declaration — a starting block
     // is ordinary declarations, so it inherits that and moves rather than jumping.
     expect(ruleList(engine)).toEqual([
-      '@starting-style{.starting-scale-0\\.95{scale:0.95}}',
-      '@starting-style{.starting-translateY-2{--boxTranslateY:0.5rem;translate:var(--boxTranslateX, 0) var(--boxTranslateY, 0)}}',
+      '@starting-style{.starting-scale-0\\.95{scale:0.95!important}}',
+      '@starting-style{.starting-translateY-2{--boxTranslateY:0.5rem!important;translate:var(--boxTranslateX, 0) var(--boxTranslateY, 0)!important}}',
     ]);
   });
 
@@ -55,7 +55,7 @@ describe('startingStyle', () => {
     const classNames = renderStyles(engine, { md: { startingStyle: { opacity: 0 } } });
 
     expect(classNames).toEqual(['_b', 'md-starting-opacity-0']);
-    expect(ruleList(engine)).toEqual(['@media (min-width: 768px){@starting-style{.md-starting-opacity-0{opacity:0}}}']);
+    expect(ruleList(engine)).toEqual(['@media (min-width: 768px){@starting-style{.md-starting-opacity-0{opacity:0!important}}}']);
   });
 
   it('nests inside a preference, so an entrance can be declared for reduced motion', () => {
@@ -64,7 +64,7 @@ describe('startingStyle', () => {
     renderStyles(engine, { motionReduce: { startingStyle: { opacity: 1 } } });
 
     expect(ruleList(engine)).toEqual([
-      '@media (prefers-reduced-motion: reduce){@starting-style{.motionReduce-starting-opacity-1{opacity:1}}}',
+      '@media (prefers-reduced-motion: reduce){@starting-style{.motionReduce-starting-opacity-1{opacity:1!important}}}',
     ]);
   });
 
@@ -73,7 +73,9 @@ describe('startingStyle', () => {
 
     renderStyles(engine, { theme: { dark: { startingStyle: { bgColor: 'gray-900' } } } });
 
-    expect(ruleList(engine)).toEqual(['@starting-style{.dark .starting-theme-dark-bgColor-gray-900{background-color:var(--gray-900)}}']);
+    expect(ruleList(engine)).toEqual([
+      '@starting-style{.dark .starting-theme-dark-bgColor-gray-900{background-color:var(--gray-900)!important}}',
+    ]);
   });
 
   it('nests inside a pseudo-class', () => {
@@ -81,7 +83,7 @@ describe('startingStyle', () => {
 
     renderStyles(engine, { hover: { startingStyle: { opacity: 0 } } });
 
-    expect(ruleList(engine)).toEqual(['@starting-style{.starting-hover-opacity-0:hover{opacity:0}}']);
+    expect(ruleList(engine)).toEqual(['@starting-style{.starting-hover-opacity-0:hover{opacity:0!important}}']);
   });
 
   it('takes plain props only — a nested key inside it emits nothing', () => {
@@ -92,7 +94,7 @@ describe('startingStyle', () => {
     const classNames = renderStyles(engine, { startingStyle: { opacity: 0, md: { opacity: 0.5 }, hover: { opacity: 0.5 } } as never });
 
     expect(classNames).toEqual(['_b', 'starting-opacity-0']);
-    expect(ruleList(engine)).toEqual(['@starting-style{.starting-opacity-0{opacity:0}}']);
+    expect(ruleList(engine)).toEqual(['@starting-style{.starting-opacity-0{opacity:0!important}}']);
   });
 
   /**
@@ -107,7 +109,7 @@ describe('startingStyle', () => {
 
       renderStyles(engine, { startingStyle: { opacity: 0 }, opacity: 1 });
 
-      expect(ruleList(engine)).toEqual(['.opacity-1{opacity:1}', '@starting-style{.starting-opacity-0{opacity:0}}']);
+      expect(ruleList(engine)).toEqual(['.opacity-1{opacity:1}', '@starting-style{.starting-opacity-0{opacity:0!important}}']);
     });
 
     it('sorts after a breakpoint and a preference too, so a base entrance still wins at every width', () => {
@@ -119,7 +121,7 @@ describe('startingStyle', () => {
       expect(ruleList(engine)).toEqual([
         '@media (min-width: 768px){.md-opacity-1{opacity:1}}',
         '@media (prefers-reduced-motion: reduce){.motionReduce-opacity-1{opacity:1}}',
-        '@starting-style{.starting-opacity-0{opacity:0}}',
+        '@starting-style{.starting-opacity-0{opacity:0!important}}',
       ]);
     });
 
@@ -130,10 +132,40 @@ describe('startingStyle', () => {
 
       const [normal, starting] = styleElements!.slice(-2).map((element) => element.css);
       const layerOf = (css: string) => css.slice('@layer '.length, css.indexOf('{'));
-      const order = styleElements![0].css.slice('@layer '.length).split(',');
+      const base = styleElements![0].css;
+      const order = base.slice('@layer '.length, base.indexOf(';')).split(',');
 
-      expect(starting).toContain('{@starting-style{.starting-opacity-0{opacity:0}}}');
+      expect(starting).toContain('{@starting-style{.starting-opacity-0{opacity:0!important}}}');
       expect(order.indexOf(layerOf(normal))).toBeLessThan(order.indexOf(layerOf(starting)));
+    });
+
+    it('wins over a more specific ordinary rule, which coming later cannot do', () => {
+      const engine = makeEngine('starting-style-specificity');
+
+      // Source order settles a *tie* in specificity and nothing else. `.dark .x` is 0,2,0 against a
+      // starting rule's 0,1,0, so without importance the entrance silently never runs — measured in
+      // Chrome, where the element sat at its finished opacity on the first frame.
+      renderStyles(engine, { theme: { dark: { opacity: 1 } }, startingStyle: { opacity: 0 } });
+
+      expect(ruleList(engine)).toEqual([
+        '.dark .theme-dark-opacity-1{opacity:1}',
+        '@starting-style{.starting-opacity-0{opacity:0!important}}',
+      ]);
+    });
+
+    it('orders the starting layers backwards, because their declarations are important', () => {
+      const engine = makeEngine('starting-style-layer-order', { sink: 'element' });
+
+      const { styleElements } = engine.resolveClassNames({ startingStyle: { opacity: 0 } }, false);
+      const base = styleElements![0].css;
+      const order = base.slice('@layer '.length, base.indexOf(';')).split(',');
+      const starting = order.filter((name) => name.includes('_s'));
+
+      // Layer order reverses for `!important`: the *earliest* layer wins. So a preference's starting
+      // value has to be named before a breakpoint's to keep outranking it, which is the opposite of
+      // how the ordinary layers run.
+      expect(starting[0]).toBe('rb_s8');
+      expect(starting[starting.length - 1]).toBe('rb_s0');
     });
   });
 });

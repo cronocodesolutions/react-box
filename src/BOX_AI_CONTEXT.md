@@ -119,7 +119,7 @@ All sizing, spacing, and positioning props also accept percentage strings: `p="5
 
 | Prop                                                                             | CSS Property                            | Notes                                                                                                                                                                           |
 | -------------------------------------------------------------------------------- | --------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `bgColor` / `color` / `borderColor`                                              | background-color / color / border-color | Tailwind palette: `'gray-50'`..`'gray-900'`, same for red/orange/yellow/green/teal/blue/indigo/purple/pink/violet. Also `'white'`, `'black'`, `'transparent'`, `'currentColor'` |
+| `bgColor` / `color` / `borderColor`                                              | background-color / color / border-color | Tailwind palette: `'gray-50'`..`'gray-900'`, same for red/orange/yellow/green/teal/blue/indigo/purple/pink/violet. Also `'white'`, `'black'`, `'transparent'`, `'currentColor'`. Plus the CSS **system colours** (`'Canvas'`, `'CanvasText'`, `'ButtonFace'`, `'ButtonText'`, `'Highlight'`, `'HighlightText'`, `'GrayText'`, `'LinkText'`) — keywords rather than tokens, and the one palette a forced-colors mode keeps |
 | `b` / `bx` / `by` / `bt` / `br` / `bb` / `bl`                                    | border-width                            | direct px                                                                                                                                                                       |
 | `borderRadius`                                                                   | border-radius                           | divider 4 (spacing scale)                                                                                                                                                       |
 | `borderStyle`                                                                    | border-style                            | `'solid'`, `'dashed'`, `'dotted'`, `'none'`                                                                                                                                     |
@@ -329,10 +329,12 @@ const wobble = Box.spring({ stiffness: 120, damping: 8 });
   eight, so every curve is written with an `ease-out` declaration underneath it.
 - **`startingStyle` is nesting, not a value.** It takes plain props — no breakpoint, pseudo-class or
   theme _inside_ it; those nest around it instead — `md: { startingStyle: { … } }`, and the same inside a
-  `theme`. Every rule it writes sorts after the ordinary rules, because the browser computes the
-  before-change style from the whole cascade: a starting declaration that lands first loses and nothing
-  transitions at all. A browser without `@starting-style` drops the one rule and shows the element
-  finished. `Tooltip` and the `Dropdown` popup already carry one.
+  `theme`. Every rule it writes sorts after the ordinary rules **and is emitted `!important`**, because
+  the browser computes the before-change style from the whole cascade: source order settles a tie in
+  specificity and nothing else, so a starting rule at `.x` would lose to the value it starts from at
+  `.dark .x` or `.x[data-state="open"]` and nothing would transition at all. The importance reaches
+  nothing but the before-change style. A browser without `@starting-style` drops the one rule and shows
+  the element finished. `Tooltip` and the `Dropdown` popup already carry one.
 - **An exit needs someone to hold the node.** `@starting-style` runs when an element is first
   rendered — mounted, or shown from `display: none`. Going the other way, React unmounts the node
   immediately and there is nothing left to animate. Two answers: hide it instead — `display` plus
@@ -367,6 +369,41 @@ const wobble = Box.spring({ stiffness: 120, damping: 8 });
 // Combine: breakpoints can nest pseudo-classes
 <Box bgColor="white" hover={{ bgColor: 'gray-100' }} md={{ bgColor: 'gray-50', hover: { bgColor: 'gray-200' } }} />
 ```
+
+### State variants — `dataAttr`, `ariaAttr`, `has`, `not`
+
+A fourth kind of nesting: a selector fragment on the element's **own** compound selector, so a state your code sets — a menu that is open, a row that is selected, a step that is loading — is styled in CSS instead of with a ternary in the markup. The record _key_ is the selector.
+
+| Prop       | Key                                                       | Selector it builds                                                                       |
+| ---------- | --------------------------------------------------------- | ---------------------------------------------------------------------------------------- |
+| `dataAttr` | `'state=open'` / `'loading'`                              | `[data-state="open"]` / `[data-loading]`                                                 |
+| `ariaAttr` | `'selected'` / `'sort=ascending'`                         | `[aria-selected="true"]` — a bare key means `="true"` — / `[aria-sort="ascending"]`      |
+| `has`      | `':checked'` / `'img[alt]'`                               | `:has(:checked)` / `:has(img[alt])`                                                      |
+| `not`      | a pseudo-class **name**: `hover`, `checked`, `disabled`… | `:not(:hover)`                                                                           |
+
+```tsx
+// The attribute goes in `props`, where every attribute goes; the styling goes in `dataAttr`.
+<Box
+  props={{ 'data-state': state }}
+  dataAttr={{ 'state=busy': { bgColor: 'amber-500' }, 'state=done': { bgColor: 'emerald-500' } }}
+/>
+
+// A bare aria key means ="true", so the attribute that makes the tab list correct is the one that colours it
+<Button props={{ role: 'tab', 'aria-selected': isCurrent }} ariaAttr={{ selected: { bgColor: 'indigo-500' } }} />
+
+// A container reacting to its own contents, and the inverse of a state
+<Box has={{ 'input:checked': { borderColor: 'indigo-500' } }} />
+<Box hoverGroup={{ deck: { not: { hover: { opacity: 0.5 } } } }} />
+
+// Everything else nests around them, in either direction — the class name is built from the set
+// rather than the order, so these two resolve to one class and one rule
+<Box md={{ dataAttr: { 'state=open': { hover: { color: 'red-500' } } } }} />
+<Box md={{ hover: { dataAttr: { 'state=open': { color: 'red-500' } } } }} />
+```
+
+- **A variant needs no cascade rank of its own**: `.a[data-state="open"]` is 0,2,0 against a plain class's 0,1,0, so it already outranks the rule it overrides.
+- **A key the grammar rejects drops its whole block** — no rule and no class name, the same failure mode as an unmatched prop value. An attribute name that is not one, a value carrying a quote, an unbalanced `:has()`.
+- **The library sets two attributes itself**: `data-state="open" | "closed"` on whatever `<Presence>` is holding, so `Tooltip`, the `Dropdown` popup and the DataGrid column menu all carry it; and `data-theme` on the element `Box.Theme` writes to.
 
 ### Accessibility preferences
 
@@ -1044,6 +1081,7 @@ function TrendCell({ cell }: { cell: CellModel<Row> }) {
 13. **`style` is top-level only** — never inside breakpoints (`sm={{ style: ... }}`), pseudo-classes, or theme objects
 14. **A CSS variable is a prop**: `vars={{ 'color-x': 'sky-500' }}` declares `--color-x` for everything inside — and a third-party chart goes in `<ChartContainer series={['revenue']}>` so it names no colour at all
 15. **All sizing props use divider 4** — `width`, `height`, `minWidth`, `maxWidth`, `minHeight`, `maxHeight` are NOT direct pixels. `height={10}` = 2.5rem = 40px
+16. **A state your own code sets is a nested prop too**: `dataAttr={{ 'state=open': { … } }}` → `[data-state="open"]`, `ariaAttr={{ selected: { … } }}` → `[aria-selected="true"]`, `has={{ ':checked': { … } }}`, `not={{ hover: { … } }}`. The attribute itself still goes in `props`
 
 ---
 

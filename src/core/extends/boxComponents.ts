@@ -485,6 +485,32 @@ const boxComponents = {
           },
         },
       },
+      // Forced colours flatten the palette, so a state signalled by fill alone reads identically on and
+      // off — and the white thumb can disappear into the track. The APG answer is `ButtonText` on
+      // `ButtonFace` with the pair inverted when checked, which system colours are what make sayable.
+      forcedColors: {
+        bgColor: 'ButtonFace',
+        b: 1,
+        borderColor: 'ButtonText',
+        before: { bgColor: 'ButtonText' },
+        hover: { bgColor: 'ButtonFace' },
+        checked: {
+          bgColor: 'ButtonText',
+          hover: { bgColor: 'ButtonText' },
+          before: { bgColor: 'ButtonFace' },
+        },
+        disabled: {
+          bgColor: 'ButtonFace',
+          borderColor: 'GrayText',
+          before: { bgColor: 'GrayText' },
+          hover: { bgColor: 'ButtonFace' },
+          checked: {
+            bgColor: 'GrayText',
+            hover: { bgColor: 'GrayText' },
+            before: { bgColor: 'ButtonFace' },
+          },
+        },
+      },
       theme: {
         dark: {
           bgColor: 'gray-600',

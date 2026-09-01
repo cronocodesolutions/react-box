@@ -23,6 +23,7 @@ import defaultBoxComponents, { BoxComponent, Components } from '../extends/boxCo
 import { resolveComponentStyles } from '../extends/useComponents';
 import { stableHash } from '../hash';
 import Variables from '../variables';
+import Variants from '../variants';
 import { createFlushCoordinator, FlushScheduler, microtaskScheduler } from './flushScheduler';
 import createKeyframesRegistry, { KeyframeStops, Keyframes } from './keyframes';
 import { createSink, RULE_PRECEDENCE, SinkMode, SortedRule, StyleElementDescriptor, StyleSink } from './styleSink';
@@ -178,6 +179,23 @@ function startingLayerName(rank: number): string {
   return `${BASE_LAYER}_s${rank.toString(36)}`;
 }
 
+/**
+ * Where a rule lands, as opposed to what it declares: everything the nesting keys accumulate on the way
+ * down. One object rather than a seventh positional argument, which is how the wrong one gets passed.
+ */
+interface StyleContext {
+  /** The pseudo-class keys collected so far; the weight the class name is built from encodes this set. */
+  pseudoClasses: PseudoClassesType[];
+  /** Which `@media` block the rule belongs in: `normal`, a breakpoint, or a preference feature. */
+  media: string;
+  /** The group or theme class the selector hangs off — `theme|group` when a group is nested in a theme. */
+  parentName?: string;
+  /** A selector to style instead of a generated class (`addGlobalStyles`). */
+  rootSelector?: string;
+  /** Compiled variant fragments on the element's own compound selector, in canonical order. */
+  variants: readonly Variants.Variant[];
+}
+
 /** What the class-name cache holds per style signature. `elements` is null outside element mode. */
 interface ResolvedStyles {
   classNames: string[];
@@ -284,7 +302,8 @@ export function createStyleEngine(options: StyleEngineOptions = {}): StyleEngine
       ObjectUtils.isKeyOf(key, mediaFeatures) ||
       ObjectUtils.isKeyOf(key, pseudoGroupClasses) ||
       ObjectUtils.isKeyOf(key, themeGroupClass) ||
-      ObjectUtils.isKeyOf(key, startingStyleKey)
+      ObjectUtils.isKeyOf(key, startingStyleKey) ||
+      ObjectUtils.isKeyOf(key, Variants.variantKeys)
     );
   }
 
@@ -314,27 +333,26 @@ export function createStyleEngine(options: StyleEngineOptions = {}): StyleEngine
     }
   }
 
-  function addClassNames(
-    props: BoxStyleProps<any>,
-    classNames: string[],
-    currentPseudoClasses: PseudoClassesType[],
-    media?: string,
-    pseudoClassParentName?: string,
-    rootSelector?: string,
-  ) {
+  /** The context a walk starts from: nothing nested yet. */
+  function rootContext(): StyleContext {
+    return { pseudoClasses: [], media: 'normal', variants: [] };
+  }
+
+  function addClassNames(props: BoxStyleProps<any>, classNames: string[], context: StyleContext) {
     Object.entries(props).forEach(([key, value]) => {
       if (value === undefined || value === null) return;
       if (ObjectUtils.isKeyOf(key, cssStyles)) {
-        addClassName(key, value, classNames, currentPseudoClasses, media, pseudoClassParentName, rootSelector);
+        addClassName(key, value, classNames, context);
       } else if (ObjectUtils.isKeyOf(key, pseudo1)) {
-        addClassNames(value as BoxStyleProps, classNames, [...currentPseudoClasses, key], media, pseudoClassParentName, rootSelector);
+        addClassNames(value as BoxStyleProps, classNames, { ...context, pseudoClasses: [...context.pseudoClasses, key] });
       } else if (ObjectUtils.isKeyOf(key, pseudo2)) {
+        const nested = { ...context, pseudoClasses: [...context.pseudoClasses, key] };
         if (Array.isArray(value)) {
           const [_, styles] = value as [unknown, BoxStyleProps];
-          addClassNames(styles, classNames, [...currentPseudoClasses, key], media, pseudoClassParentName, rootSelector);
+          addClassNames(styles, classNames, nested);
         }
         if (ObjectUtils.isObject(value)) {
-          addClassNames(value as BoxStyleProps, classNames, [...currentPseudoClasses, key], media, pseudoClassParentName, rootSelector);
+          addClassNames(value as BoxStyleProps, classNames, nested);
         }
       } else if (ObjectUtils.isKeyOf(key, startingStyleKey)) {
         // Plain props only. The block wraps a whole rule, so a media query or a selector nested *inside*
@@ -342,41 +360,48 @@ export function createStyleEngine(options: StyleEngineOptions = {}): StyleEngine
         Object.entries(value as BoxStyles).forEach(([startingKey, startingValue]) => {
           if (!ObjectUtils.isKeyOf(startingKey, cssStyles)) return;
 
-          addClassName(startingKey, startingValue, classNames, currentPseudoClasses, media, pseudoClassParentName, rootSelector, true);
+          addClassName(startingKey, startingValue, classNames, context, true);
         });
       } else if (ObjectUtils.isKeyOf(key, breakpoints) || ObjectUtils.isKeyOf(key, mediaFeatures)) {
         // Both fill the same slot — one `@media` block per rule — and the types already refuse the nesting.
-        addClassNames(value as BoxStyleProps, classNames, currentPseudoClasses, key, pseudoClassParentName, rootSelector);
+        addClassNames(value as BoxStyleProps, classNames, { ...context, media: key });
+      } else if (ObjectUtils.isKeyOf(key, Variants.variantKeys)) {
+        Object.entries(value as Record<string, BoxStyleProps>).forEach(([name, variantProps]) => {
+          const variant = Variants.variant(key, name);
+          // A key the grammar rejects drops its whole block: no rule and no class name, the way an
+          // unmatched prop value does. A typo is invisible rather than a selector nobody wrote.
+          if (!variant) return;
+
+          addClassNames(variantProps, classNames, { ...context, variants: Variants.add(context.variants, variant) });
+        });
       } else if (ObjectUtils.isKeyOf(key, pseudoGroupClasses)) {
         Object.entries(value).forEach(([name, pseudoClassProps]) => {
-          addClassNames(
-            pseudoClassProps as BoxStyles,
-            classNames,
-            [...currentPseudoClasses, pseudoGroupClasses[key]],
-            media,
-            name,
-            rootSelector,
-          );
+          addClassNames(pseudoClassProps as BoxStyles, classNames, {
+            ...context,
+            pseudoClasses: [...context.pseudoClasses, pseudoGroupClasses[key]],
+            parentName: name,
+          });
         });
       } else if (ObjectUtils.isKeyOf(key, themeGroupClass)) {
         Object.entries(value).forEach(([name, themeProps]) => {
-          const themePseudoClasses = [...currentPseudoClasses, themeGroupClass[key]];
+          const themePseudoClasses = [...context.pseudoClasses, themeGroupClass[key]];
           // Handle nested pseudoGroupClasses inside theme
           Object.entries(themeProps as BoxStyleProps).forEach(([themeKey, themeValue]) => {
             if (ObjectUtils.isKeyOf(themeKey, pseudoGroupClasses)) {
               Object.entries(themeValue).forEach(([groupName, groupProps]) => {
-                addClassNames(
-                  groupProps as BoxStyles,
-                  classNames,
-                  [...themePseudoClasses, pseudoGroupClasses[themeKey]],
-                  media,
+                addClassNames(groupProps as BoxStyles, classNames, {
+                  ...context,
+                  pseudoClasses: [...themePseudoClasses, pseudoGroupClasses[themeKey]],
                   // Use | as separator to distinguish theme from group name
-                  `${name}|${groupName}`,
-                  rootSelector,
-                );
+                  parentName: `${name}|${groupName}`,
+                });
               });
             } else {
-              addClassNames({ [themeKey]: themeValue } as BoxStyles, classNames, themePseudoClasses, media, name, rootSelector);
+              addClassNames({ [themeKey]: themeValue } as BoxStyles, classNames, {
+                ...context,
+                pseudoClasses: themePseudoClasses,
+                parentName: name,
+              });
             }
           });
         });
@@ -388,24 +413,23 @@ export function createStyleEngine(options: StyleEngineOptions = {}): StyleEngine
     key: TKey,
     value: TValue | undefined | null,
     classNames: string[],
-    currentPseudoClasses: PseudoClassesType[],
-    media: string = 'normal',
-    pseudoClassParentName?: string,
-    rootSelector?: string,
+    context: StyleContext,
     startingStyle?: boolean,
   ) {
     if (value === undefined || value === null) return;
 
-    const weight = currentPseudoClasses.reduce((sum, pseudoClass) => sum + pseudoClassesWeight[pseudoClass], 0);
-    const className = createClassName(key, value, weight, media, pseudoClassParentName, startingStyle);
+    const { media, parentName, rootSelector, variants } = context;
+    const weight = context.pseudoClasses.reduce((sum, pseudoClass) => sum + pseudoClassesWeight[pseudoClass], 0);
+    const className = createClassName(key, value, weight, context, startingStyle);
 
     const serializedValue = serializeValue(value);
-    const ruleKey = `${media}-${weight}-${key}-${serializedValue}-${pseudoClassParentName ?? ''}-${rootSelector ?? ''}-${startingStyle ? 'start' : ''}`;
+    const variantKey = variants.map((variant) => variant.name).join('_');
+    const ruleKey = `${media}-${weight}-${key}-${serializedValue}-${parentName ?? ''}-${rootSelector ?? ''}-${startingStyle ? 'start' : ''}-${variantKey}`;
 
     if (!generatedRules.has(ruleKey)) {
       generatedRules.add(ruleKey);
 
-      const result = generateRule(key, value as BoxStyleValue, weight, media, pseudoClassParentName, rootSelector, startingStyle);
+      const result = generateRule(key, value as BoxStyleValue, weight, context, startingStyle);
       if (result) {
         pendingRules.push([result.sortIndex, result.mediaOrder, result.rule]);
         requireFlush = true;
@@ -511,11 +535,10 @@ export function createStyleEngine(options: StyleEngineOptions = {}): StyleEngine
     key: string,
     value: BoxStyleValue,
     weight: number,
-    media: string,
-    pseudoClassParentName?: string,
-    rootSelector?: string,
+    context: StyleContext,
     startingStyle?: boolean,
   ): { rule: string; sortIndex: number; mediaOrder: number } | null {
+    const { media, parentName: pseudoClassParentName, rootSelector } = context;
     const itemValue = findDefinition(key, value);
     if (!itemValue) return null;
 
@@ -549,9 +572,30 @@ export function createStyleEngine(options: StyleEngineOptions = {}): StyleEngine
       };
     }
 
+    /**
+     * The rule body — with every starting declaration marked important. `STARTING_RANK` puts a starting
+     * rule after every ordinary one, but source order settles a *tie* in specificity and nothing else: a
+     * starting rule at `.x` (0,1,0) loses to the value it is supposed to start from at `.x[data-state=…]`
+     * or `.dark .x` (0,2,0), and the entrance then silently never runs. Importance is the one thing that
+     * outranks specificity, and inside `@starting-style` it reaches nothing but the before-change style.
+     */
+    function body(definition: BoxStyle): string {
+      const rule = declarations(definition, key, value);
+
+      return startingStyle
+        ? rule
+            .split(';')
+            .map((declaration) => `${declaration}!important`)
+            .join(';')
+        : rule;
+    }
+
     const className = escapeClassName(
-      createClassName(key as keyof BoxStyles, value as BoxStyles[keyof BoxStyles], weight, media, pseudoClassParentName, startingStyle),
+      createClassName(key as keyof BoxStyles, value as BoxStyles[keyof BoxStyles], weight, context, startingStyle),
     );
+    // The variants describe *this* element, so they join its own compound selector — before any
+    // pseudo-element, and on the last compound when a group or a theme puts an ancestor in front.
+    const variantSelector = context.variants.map((variant) => variant.selector).join('');
 
     if (pseudoClassParentName) {
       const pseudoClassList = pseudoClassesOfWeight(weight);
@@ -568,30 +612,30 @@ export function createStyleEngine(options: StyleEngineOptions = {}): StyleEngine
         if (hasThemeAndGroup) return null;
         if (hasTheme) {
           // Theme on same element as rootSelector → compound selector
-          defaultSelector = `${rootSelector}.${escapeClassName(pseudoClassParentName)}${pseudoClassesToUse}`;
+          defaultSelector = `${rootSelector}.${escapeClassName(pseudoClassParentName)}${variantSelector}${pseudoClassesToUse}`;
         } else {
           return null;
         }
       } else if (hasThemeAndGroup) {
         // Combined theme + group: .themeName .groupName:hover .className
         const [themeName, groupName] = pseudoClassParentName.split('|');
-        defaultSelector = `.${escapeClassName(themeName)} .${escapeClassName(groupName)}${pseudoClassesToUse} .${className}`;
+        defaultSelector = `.${escapeClassName(themeName)} .${escapeClassName(groupName)}${pseudoClassesToUse} .${className}${variantSelector}`;
       } else if (hasTheme) {
         // Theme only: .themeName .className:hover
-        defaultSelector = `.${escapeClassName(pseudoClassParentName)} .${className}${pseudoClassesToUse}`;
+        defaultSelector = `.${escapeClassName(pseudoClassParentName)} .${className}${variantSelector}${pseudoClassesToUse}`;
       } else {
         // Group only: .groupName:hover .className
-        defaultSelector = `.${escapeClassName(pseudoClassParentName)}${pseudoClassesToUse} .${className}`;
+        defaultSelector = `.${escapeClassName(pseudoClassParentName)}${pseudoClassesToUse} .${className}${variantSelector}`;
       }
       const selector = itemValue.selector?.(defaultSelector, '') ?? defaultSelector;
 
-      return finish(`${selector}{${declarations(itemValue, key, value)}}`);
+      return finish(`${selector}{${body(itemValue)}}`);
     } else {
       const pseudoClassesToUse = pseudoSelector(pseudoClassesOfWeight(weight));
-      const baseSelector = rootSelector ?? `.${className}`;
+      const baseSelector = `${rootSelector ?? `.${className}`}${variantSelector}`;
       const selector = itemValue.selector?.(baseSelector, pseudoClassesToUse) ?? `${baseSelector}${pseudoClassesToUse}`;
 
-      return finish(`${selector}{${declarations(itemValue, key, value)}}`);
+      return finish(`${selector}{${body(itemValue)}}`);
     }
   }
 
@@ -599,14 +643,15 @@ export function createStyleEngine(options: StyleEngineOptions = {}): StyleEngine
     key: TKey,
     value: TValue,
     weight: number,
-    media: string,
-    pseudoClassParentName?: string,
+    context: StyleContext,
     startingStyle?: boolean,
   ) {
+    const { media, parentName, variants } = context;
     const pseudoClassList = pseudoClassesOfWeight(weight);
     const serializedValue = serializeValue(value);
+    const variantNames = variants.map((variant) => `${variant.name}-`).join('');
 
-    const className = `${media === 'normal' ? '' : `${media}-`}${startingStyle ? 'starting-' : ''}${pseudoClassList.map((p) => `${p}-`).join('')}${pseudoClassParentName ? `${pseudoClassParentName}-` : ''}${key}-${serializedValue}`;
+    const className = `${media === 'normal' ? '' : `${media}-`}${startingStyle ? 'starting-' : ''}${pseudoClassList.map((p) => `${p}-`).join('')}${variantNames}${parentName ? `${parentName}-` : ''}${key}-${serializedValue}`;
 
     switch (namingMode()) {
       case 'readable':
@@ -635,8 +680,10 @@ export function createStyleEngine(options: StyleEngineOptions = {}): StyleEngine
     }
 
     // Last, and one name per media rank rather than one per rank and prop: every `@starting-style` rule
-    // has to outrank every ordinary one, whatever property it is about.
-    for (let rank = 0; rank < STARTING_RANK; rank++) {
+    // has to outrank every ordinary one, whatever property it is about. **Descending**, because every
+    // starting declaration is `!important` and layer order reverses for those — a preference's starting
+    // value has to come first here to keep beating a breakpoint's.
+    for (let rank = STARTING_RANK - 1; rank >= 0; rank--) {
       names.push(startingLayerName(rank));
     }
 
@@ -818,7 +865,7 @@ export function createStyleEngine(options: StyleEngineOptions = {}): StyleEngine
       const propsToUse = componentStyles ? ObjectUtils.mergeDeep(componentStyles, props) : props;
 
       const classNames = [isSvg ? svgClassName : boxClassName];
-      resolved = { classNames, elements: collect(() => addClassNames(propsToUse, classNames, [])) };
+      resolved = { classNames, elements: collect(() => addClassNames(propsToUse, classNames, rootContext())) };
 
       if (signature !== null) styleCache.set(signature, resolved);
     }
@@ -845,7 +892,7 @@ export function createStyleEngine(options: StyleEngineOptions = {}): StyleEngine
 
     addGlobalStyles(props: BoxStyleProps<any>, selector: string) {
       const throwawayClassNames: string[] = [];
-      const elements = collect(() => addClassNames(props, throwawayClassNames, [], undefined, undefined, selector));
+      const elements = collect(() => addClassNames(props, throwawayClassNames, { ...rootContext(), rootSelector: selector }));
 
       return elements ? withBaseElement(elements) : undefined;
     },

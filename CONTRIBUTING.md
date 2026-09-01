@@ -1294,10 +1294,14 @@ fails if anything but a comment changed.
 
 ### Add a New Pseudo-Class
 
-1. Add to `pseudoClasses` or `pseudo1`/`pseudo2` in `boxStyles.ts`
-2. Assign weight in `pseudoClassesWeight`
-3. Add to `pseudoClassesByWeight`
+1. Add to `pseudo1` (nested styles only) or `pseudo2` (also settable as a boolean) in `boxStyles.ts`
+2. Weights and the reverse lookup come from the declaration order — `pseudoClassesWeight` and `pseudoClassesOfWeight` derive from `pseudoClasses`, so there is nothing to update by hand. It is a 32-bit mask, so the map cannot grow past 31 keys
+3. A pseudo-_element_ also goes in `pseudoElements`, which is what keeps it last in a compound selector
 4. Types auto-generate
+
+### Add a New State Variant
+
+The four in `src/core/variants.ts` (`dataAttr`, `ariaAttr`, `has`, `not`) are a different dimension from a pseudo-class: the record _key_ is the selector, so there is no weight and no bit. A fifth means a key in `variantKeys`, a case in `selectorOf` — **with a grammar that rejects anything it cannot turn into a selector**, since the key becomes rule text — and a type in `src/types.ts`. The engine's `addClassNames` dispatches on `variantKeys` and needs no change.
 
 ### Add Dark Theme Support to a Component
 

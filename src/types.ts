@@ -13,6 +13,7 @@ import {
 import { ClassNameType } from './core/classNames';
 import { BoxStyle, BoxStylesType, ExtractKeys, ExtractTupleValues } from './core/coreTypes';
 import boxComponents from './core/extends/boxComponents';
+import Variants from './core/variants';
 
 export type ArrayType<T> = T extends (infer U)[] ? U : T;
 
@@ -48,7 +49,19 @@ type BoxPseudoClassesStyles2TopLevel = ExtractKeys<typeof pseudo2, boolean | [bo
  * a pseudo-class belongs *around* it (`md: { startingStyle: … }`), where the rule can still carry both.
  */
 type BoxStartingStyles = ExtractKeys<typeof startingStyleKey, BoxStyles>;
-export interface BoxStylesWithPseudoClasses extends BoxStyles, BoxPseudoClassesStyles1, BoxPseudoClassesStyles2Nested, BoxStartingStyles {}
+/**
+ * The nesting keys that hang off the element's own selector. The record *key* is the selector —
+ * `dataAttr={{ 'state=open': … }}` — and a key the grammar rejects is dropped whole, the way an
+ * unmatched prop value is. `not` is keyed by pseudo-class name instead, so it stays typed.
+ */
+type BoxAttributeVariantStyles = ExtractKeys<Omit<typeof Variants.variantKeys, 'not'>, Record<string, BoxStylesWithPseudoClasses>>;
+type BoxNotVariantStyles = ExtractKeys<
+  Pick<typeof Variants.variantKeys, 'not'>,
+  Partial<Record<Variants.NotKey, BoxStylesWithPseudoClasses>>
+>;
+export interface BoxVariantStyles extends BoxAttributeVariantStyles, BoxNotVariantStyles {}
+export interface BoxStylesWithPseudoClasses
+  extends BoxStyles, BoxPseudoClassesStyles1, BoxPseudoClassesStyles2Nested, BoxStartingStyles, BoxVariantStyles {}
 
 type BoxPseudoGroupClassesStyles = ExtractKeys<typeof pseudoGroupClasses, Record<string, BoxStylesWithPseudoClasses>>;
 type BoxThemeGroupClassStyles = ExtractKeys<
@@ -116,6 +129,7 @@ export interface ComponentProps<TKey extends keyof ComponentsAndVariants = never
 export type BoxStyleProps<TKey extends keyof ComponentsAndVariants = never> = Simplify<
   BoxStyles &
     BoxStartingStyles &
+    BoxVariantStyles &
     BoxPseudoClassesStyles1 &
     BoxPseudoClassesStyles2TopLevel &
     BoxPseudoGroupClassesStyles &

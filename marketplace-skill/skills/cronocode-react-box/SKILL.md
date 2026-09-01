@@ -124,7 +124,9 @@ fractions, percentages) both feed one `translate` and still transition _and_ ani
 properties — only `flip` and `scale` collide, both writing `scale`. **`startingStyle` is an entrance with no JavaScript**: a nested block of
 plain props (`startingStyle={{ opacity: 0, translateY: 2 }}`) saying what they start from the first time the element is styled — mounted, or
 shown from `display: none`. It compiles to `@starting-style`, nests inside a breakpoint/pseudo-class/theme rather than around one
-(`md: { startingStyle: … }`), and a browser without the at-rule shows the element finished. `Tooltip` and the `Dropdown` popup already carry
+(`md: { startingStyle: … }`), and a browser without the at-rule shows the element finished. Its declarations are emitted `!important` — a
+starting rule at `.x` would otherwise lose on specificity to the value it starts from at `.dark .x` or `.x[data-state="open"]` and nothing
+would transition at all; the importance reaches nothing but the before-change style. `Tooltip` and the `Dropdown` popup already carry
 one. For the way back out React unmounts too fast to animate, so either hide instead — `transitionBehavior="allow-discrete"` lets `display`
 transition, flipping it at the _end_, so `<Box display={open ? 'block' : 'none'} opacity={open ? 1 : 0} transitionBehavior="allow-discrete"
 startingStyle={{ opacity: 0 }} />` animates both directions — or hold the node with **`<Presence present>`**
@@ -138,7 +140,7 @@ what the base class transitions, before the first render.
 
 **Effects**: `shadow` (`'small'`/`'medium'`/`'large'`/`'xl'`/`'none'`), `opacity`, `cursor`, `pointerEvents`, `userSelect`, `overflow`
 
-## Pseudo-Classes & Breakpoints
+## Pseudo-Classes, Breakpoints & State Variants
 
 ```tsx
 <Box bgColor="blue-500" hover={{ bgColor: 'blue-600' }} disabled={{ opacity: 0.5 }} />
@@ -153,6 +155,17 @@ what the base class transitions, before the first render.
 // Reduced motion is already the default — the preference sets --transitionTime to 0s, so every
 // Box stops animating. Declare motionReduce only to replace a movement or keep a safe one.
 <Box transitionDuration={150} motionReduce={{ transition: 'none' }} forcedColors={{ b: 1 }} />
+// Forced colours keep only the system colours, so they are values on every colour prop: Canvas,
+// CanvasText, ButtonFace, ButtonText, Highlight, HighlightText, GrayText, LinkText (keywords, not tokens).
+<Box forcedColors={{ bgColor: 'ButtonFace', color: 'ButtonText' }} />
+// State variants — a selector fragment on the element's own class, so a state your code sets is CSS,
+// not a ternary. Record key = the selector; a key the grammar rejects drops its block, like a bad value.
+//   dataAttr {'state=open'} → [data-state="open"], {'loading'} → [data-loading]
+//   ariaAttr {'selected'} → [aria-selected="true"] (bare key means ="true"), {'sort=ascending'}
+//   has {':checked'} → :has(:checked)   ·   not {hover} → :not(:hover), keyed by pseudo name
+// The attribute itself still goes in `props`. Everything else nests around them, either direction.
+<Box props={{ 'data-state': state }} dataAttr={{ 'state=busy': { bgColor: 'amber-500' } }}
+  md={{ hover: { ariaAttr: { selected: { color: 'white' } } } }} />
 ```
 
 ## Theme System
