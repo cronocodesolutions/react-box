@@ -1,6 +1,7 @@
 import React, { forwardRef, memo, Ref, RefAttributes, useMemo, useState } from 'react';
 import getDefaultEngine from './core/engine/defaultEngine';
 import BoxExtends from './core/extends/boxExtends';
+import Springs from './core/springs';
 import boxClassNames, { BoxClassNames } from './react/boxClassNames';
 import { BoxClassNameProps, BoxCoreProps } from './react/boxProps';
 import buildTagProps from './react/boxTagProps';
@@ -49,6 +50,8 @@ interface BoxType {
   extend: typeof BoxExtends.extend;
   components: typeof BoxExtends.components;
   keyframes: typeof BoxExtends.keyframes;
+  /** A spring of your own, sampled into `{ easing, duration }` — the two halves the timing and duration props take. */
+  spring: typeof Springs.spring;
   Theme: typeof Theme;
   useTheme: typeof Theme.useTheme;
   getVariableValue: (name: string) => string;
@@ -62,6 +65,7 @@ const Box = memo(forwardRef(BoxComponent)) as unknown as BoxType;
 Box.extend = BoxExtends.extend;
 Box.components = BoxExtends.components;
 Box.keyframes = BoxExtends.keyframes;
+Box.spring = Springs.spring;
 Box.Theme = Theme;
 Box.useTheme = Theme.useTheme;
 Box.getVariableValue = (name: string) => getDefaultEngine().getVariableValue(name);

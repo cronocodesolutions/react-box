@@ -588,8 +588,8 @@ React is a thin adapter on top of it:
 
 |                                                            | Files | Lines | Share    |
 | ---------------------------------------------------------- | ----- | ----- | -------- |
-| Core engine (`src/core/`, `core.ts`)                       | 20    | 5,208 | 90.2%    |
-| React binding (`src/react/`, `box.ts`, `rsc.ts`, `ssg.ts`) | 14    | 564   | **9.8%** |
+| Core engine (`src/core/`, `core.ts`)                       | 23    | 5,702 | 90.9%    |
+| React binding (`src/react/`, `box.ts`, `rsc.ts`, `ssg.ts`) | 14    | 573   | **9.1%** |
 
 The binding is the whole React-specific surface: resolve class names during render, flush the
 pending rules from `useInsertionEffect`, render the style elements of the Server-Component path,

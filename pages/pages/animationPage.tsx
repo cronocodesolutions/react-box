@@ -5,6 +5,8 @@ import Button from '../../src/components/button';
 import Flex from '../../src/components/flex';
 import Icon from '../../src/components/icon';
 import { H2 } from '../../src/components/semantics';
+import { Line, Path, Svg } from '../../src/components/svg';
+import Springs from '../../src/core/springs';
 import Code from '../components/code';
 import PageHeader from '../components/pageHeader';
 import Reveal from '../components/reveal';
@@ -26,6 +28,7 @@ Box.keyframes({
 export default function AnimationPage() {
   useTableOfContents(sidebarLinks);
   const [runId, setRunId] = useState(0);
+  const [sprung, setSprung] = useState(false);
 
   return (
     <Box>
@@ -180,6 +183,88 @@ export default function AnimationPage() {
             </Flex>
           </Code>
 
+          <Section id="springs" title="Springs, sampled into a curve">
+            A spring is physics, and CSS cannot do physics — but it can follow a curve, so the four presets are a damped oscillator sampled
+            once into a <Mono>linear()</Mono> curve, which is a value like any other. <Mono>spring</Mono>, <Mono>spring-gentle</Mono>,{' '}
+            <Mono>spring-bouncy</Mono> and <Mono>spring-snappy</Mono> are values on <Mono>transitionTimingFunction</Mono> and{' '}
+            <Mono>animationTimingFunction</Mono>; the same four names are values on <Mono>transitionDuration</Mono> and{' '}
+            <Mono>animationDuration</Mono>, because a spring is a curve <em>and</em> the time it takes to settle. Name both and the physics
+            is what the numbers say.
+          </Section>
+
+          <Code
+            id="springs-curves"
+            label="The four curves"
+            language="jsx"
+            code={`// Both halves of a spring come from the same name.
+<Box transition="transform" transitionTimingFunction="spring-bouncy" transitionDuration="spring-bouncy" hover={{ scale: 1.1 }} />`}
+          >
+            <Flex gap={6} flexWrap="wrap">
+              {Springs.presetNames.map((name) => (
+                <SpringCurve key={name} name={name} />
+              ))}
+            </Flex>
+          </Code>
+
+          <Code
+            id="springs-demo"
+            label="Same distance, four springs"
+            language="jsx"
+            context="declare const sprung: boolean;"
+            code={`<Box
+  width={8}
+  height={8}
+  bgImage="gradient-primary"
+  transition="transform"
+  transitionTimingFunction="spring-snappy"
+  transitionDuration="spring-snappy"
+  translateX={sprung ? 40 : 0}
+/>`}
+          >
+            <Flex d="column" gap={4}>
+              {Springs.presetNames.map((name) => (
+                <Flex key={name} ai="center" gap={4}>
+                  <Box width={32} fontSize={12} theme={{ dark: { color: 'slate-400' }, light: { color: 'slate-600' } }}>
+                    {name}
+                  </Box>
+                  <Box
+                    width={8}
+                    height={8}
+                    borderRadius={2}
+                    bgImage="gradient-primary"
+                    transition="transform"
+                    transitionTimingFunction={name}
+                    transitionDuration={name}
+                    translateX={sprung ? 40 : 0}
+                  />
+                </Flex>
+              ))}
+              <Button variant="secondary" onClick={() => setSprung((moved) => !moved)}>
+                {sprung ? 'Send them back' : 'Let them go'}
+              </Button>
+            </Flex>
+          </Code>
+
+          <Section id="springs-honest" title="What a sampled spring is not">
+            The curve is fixed once it is a string, which is the honest limit: a real spring carries its velocity into whatever interrupts
+            it, and this one restarts. Reverse a transition halfway and the shape plays back rather than continuing from where it was — good
+            enough for a hover, a panel or a toggle, not for a drag. That is <Mono>framer-motion</Mono>'s job, and it composes with Box
+            styling perfectly well. The other limit is browser support: <Mono>linear()</Mono> is missing in about one browser in eight, so
+            every curve this library writes carries an <Mono>ease-out</Mono> declaration underneath it — the older browser keeps that one,
+            and the animation still happens.
+          </Section>
+
+          <Code
+            id="springs-custom"
+            label="A spring of your own"
+            language="jsx"
+            codeOnly
+            code={`// Stiffness, damping, mass and an initial velocity — sampled once, at module scope.
+const wobble = Box.spring({ stiffness: 120, damping: 8 });
+
+<Box transition="transform" transitionTimingFunction={wobble.easing} transitionDuration={wobble.duration} hover={{ translateY: -2 }} />`}
+          />
+
           <Section id="transforms" title="The transform props compose">
             <Mono>translateX</Mono>, <Mono>translateY</Mono>, <Mono>rotate</Mono> and <Mono>scale</Mono> are the CSS longhands rather than
             one <Mono>transform</Mono> declaration, so setting several of them means several of them happen. The two translate axes used to
@@ -260,6 +345,28 @@ Box.configure({ transition: false });`}
   );
 }
 
+/** One preset's curve, drawn from the points the CSS gets: time across, progress up, the target dashed. */
+function SpringCurve({ name }: { name: Springs.PresetName }) {
+  const { easing, duration } = Springs.preset(name);
+  const points = easing.slice('linear('.length, -1).split(',').map(Number);
+  const d = points
+    .map((value, index) => `${index ? 'L' : 'M'}${(2 + (index / (points.length - 1)) * 96).toFixed(1)},${(88 - value * 60).toFixed(1)}`)
+    .join(' ');
+
+  return (
+    <Flex d="column" gap={2}>
+      <Svg viewBox="0 0 100 100" width={132} height={132} label={`The ${name} curve`}>
+        <Line x1={2} y1={28} x2={98} y2={28} stroke="slate-400" strokeWidth={0.6} strokeDasharray="3 3" />
+        <Line x1={2} y1={88} x2={98} y2={88} stroke="slate-400" strokeWidth={0.6} />
+        <Path d={d} fill="none" stroke="sky-500" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" />
+      </Svg>
+      <Box fontSize={12} theme={{ dark: { color: 'slate-400' }, light: { color: 'slate-600' } }}>
+        {name} · {duration}ms
+      </Box>
+    </Flex>
+  );
+}
+
 function Section({ id, title, children }: { id: string; title: string; children: ReactNode }) {
   return (
     <Box id={id}>
@@ -294,6 +401,8 @@ const sidebarLinks = [
   { id: 'keyframes', label: 'Box.keyframes()' },
   { id: 'longhands', label: 'One prop per property' },
   { id: 'transitions', label: 'Transitions' },
+  { id: 'springs', label: 'Springs' },
+  { id: 'springs-honest', label: 'What a spring is not' },
   { id: 'transforms', label: 'Composing transforms' },
   { id: 'drawing', label: 'Animating any prop' },
   { id: 'server', label: 'On a server' },

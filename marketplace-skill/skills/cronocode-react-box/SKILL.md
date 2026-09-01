@@ -110,7 +110,12 @@ unasked. `animation` takes a preset — `'spin'`/`'pulse'`/`'bounce'`/`'ping'`/`
 own reduced motion: add `motionReduce={{ animationName: 'none' }}`. `transition` narrows what transitions to a group — `'colors'`,
 `'opacity'`, `'shadow'`, `'transform'`, `'size'`, `'filter'` (or `'all'`/`'none'`) — with `transitionDuration`/`transitionDelay` in ms and
 `transitionTimingFunction` taking the keywords plus computed curves (`'cubic-bezier(0.4, 0, 0.6, 1)'`, `'steps(4, end)'`,
-`'linear(0, 0.5, 1)'`; a typo emits no rule). **`Box.keyframes()`** registers sequences whose steps are Box props —
+`'linear(0, 0.5, 1)'`; a typo emits no rule). **Springs** are four sampled curves — `'spring'` (540ms), `'spring-gentle'` (660ms),
+`'spring-bouncy'` (880ms, 20% overshoot), `'spring-snappy'` (420ms) — and a spring is a curve _and_ a settling time, so name it on both
+props: `<Box transition="transform" transitionTimingFunction="spring-bouncy" transitionDuration="spring-bouncy" hover={{ scale: 1.1 }} />`.
+The durations ride `--transitionTime`, so reduced motion stops a spring too; `Box.spring({ stiffness, damping, mass, velocity })` returns
+`{ easing, duration }` for one of your own. The curve is fixed once sampled (an interrupted transition restarts rather than carrying its
+velocity — that is framer-motion's job), and every `linear()` is written with an `ease-out` under it for the ~13% of browsers without it. **`Box.keyframes()`** registers sequences whose steps are Box props —
 `Box.keyframes({ 'slide-in': { from: { opacity: 0, translateY: 3 }, to: { opacity: 1, translateY: 0 } } })`, stops keyed `'from'`/`'to'`/`'50%'`
 — written into the stylesheet the first time a rule names one, and exactly once, so an unused sequence costs nothing; it reaches
 `getStyles()` and element mode, so a Server Component animates with no client JS. **Transforms compose**: `translateX`/`translateY` (÷4,

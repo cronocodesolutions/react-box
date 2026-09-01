@@ -207,11 +207,11 @@ Five things enforce it, because one is not enough:
 The same command prints the adapter ratio published in the README:
 
 ```
-✔ src/core and everything src/core.ts reaches are framework-free (20 files, 4738 lines, zero React references)
-  React binding: 13 files, 524 lines — 10.0% of core + binding
-  React feature hooks: 9 files, 697 lines (shared by components, outside the binding)
-✔ src/rsc.ts renders with no client hooks (23 modules in its graph)
-✔ 9 pre-built components render on a server; 6 are client-only and say so
+✔ src/core and everything src/core.ts reaches are framework-free (23 files, 5702 lines, zero React references)
+  React binding: 14 files, 573 lines — 9.1% of core + binding
+  React feature hooks: 12 files, 911 lines (shared by components, outside the binding)
+✔ src/rsc.ts renders with no client hooks (27 modules in its graph)
+✔ 12 pre-built components render on a server; 9 are client-only and say so
 ```
 
 ### The chunk split

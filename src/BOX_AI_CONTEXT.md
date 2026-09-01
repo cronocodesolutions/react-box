@@ -227,17 +227,17 @@ import { Circle, Path, Rect, Svg, SvgText } from '@cronocode/react-box/component
 Every Box already transitions `all` its properties over `--transitionTime` (0.25s), which is why a
 `hover` colour fades without being asked. On top of that:
 
-| Prop                                                              | CSS Property        | Notes                                                                                                                            |
-| ----------------------------------------------------------------- | ------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
-| `animation`                                                       | animation           | One of four presets: `'spin'`, `'pulse'`, `'bounce'`, `'ping'`, or `'none'`. Keyframes come with the engine                      |
-| `animationName`                                                   | animation-name      | A sequence registered with `Box.keyframes()`, a preset name, or a name from any stylesheet                                       |
-| `animationDuration` / `animationDelay`                            | ms                  | **Milliseconds, no divider**: `animationDuration={1100}` → `1100ms`                                                              |
-| `animationIterationCount`                                         | number              | A number or `'infinite'`                                                                                                         |
-| `animationDirection` / `animationFillMode` / `animationPlayState` | keywords            | `'normal'`/`'reverse'`/`'alternate'`/`'alternate-reverse'`; `'none'`/`'forwards'`/`'backwards'`/`'both'`; `'running'`/`'paused'` |
-| `animationTimingFunction` / `transitionTimingFunction`            | timing function     | Keywords plus computed curves: `'cubic-bezier(0.4, 0, 0.6, 1)'`, `'steps(4, end)'`, `'linear(0, 0.5, 1)'`                        |
-| `transition`                                                      | transition-property | `'all'`, `'none'`, or a group: `'colors'`, `'opacity'`, `'shadow'`, `'transform'`, `'size'`, `'filter'`                          |
-| `transitionDuration` / `transitionDelay`                          | ms                  | Milliseconds, same as the animation pair                                                                                         |
-| `translateX` / `translateY` / `rotate` / `scale` / `flip`         | transform longhands | Each writes its own CSS property, so they compose. `scale={1.05}` is unitless; `rotate={45}` is degrees                          |
+| Prop                                                              | CSS Property        | Notes                                                                                                                                                                                    |
+| ----------------------------------------------------------------- | ------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `animation`                                                       | animation           | One of four presets: `'spin'`, `'pulse'`, `'bounce'`, `'ping'`, or `'none'`. Keyframes come with the engine                                                                              |
+| `animationName`                                                   | animation-name      | A sequence registered with `Box.keyframes()`, a preset name, or a name from any stylesheet                                                                                               |
+| `animationDuration` / `animationDelay`                            | ms                  | **Milliseconds, no divider**: `animationDuration={1100}` → `1100ms`                                                                                                                      |
+| `animationIterationCount`                                         | number              | A number or `'infinite'`                                                                                                                                                                 |
+| `animationDirection` / `animationFillMode` / `animationPlayState` | keywords            | `'normal'`/`'reverse'`/`'alternate'`/`'alternate-reverse'`; `'none'`/`'forwards'`/`'backwards'`/`'both'`; `'running'`/`'paused'`                                                         |
+| `animationTimingFunction` / `transitionTimingFunction`            | timing function     | Keywords, the four springs (`'spring'`, `'spring-gentle'`, `'spring-bouncy'`, `'spring-snappy'`), or a curve: `'cubic-bezier(0.4, 0, 0.6, 1)'`, `'steps(4, end)'`, `'linear(0, 0.5, 1)'` |
+| `transition`                                                      | transition-property | `'all'`, `'none'`, or a group: `'colors'`, `'opacity'`, `'shadow'`, `'transform'`, `'size'`, `'filter'`                                                                                  |
+| `transitionDuration` / `transitionDelay`                          | ms                  | Milliseconds, same as the animation pair. Both duration props also take a spring name — that spring's settling time                                                                      |
+| `translateX` / `translateY` / `rotate` / `scale` / `flip`         | transform longhands | Each writes its own CSS property, so they compose. `scale={1.05}` is unitless; `rotate={45}` is degrees                                                                                  |
 
 ```tsx
 // A preset: no registration, and it stops under prefers-reduced-motion on its own
@@ -255,6 +255,14 @@ Box.keyframes({
 
 // Narrow what transitions, and compose transforms on hover
 <Box transition="transform" transitionDuration={300} hover={{ translateX: 2, translateY: -2, scale: 1.05 }} />
+
+// A spring: the same name on both props, because a spring is a curve *and* a settling time
+<Box transition="transform" transitionTimingFunction="spring-bouncy" transitionDuration="spring-bouncy" hover={{ scale: 1.1 }} />
+
+// One of your own — sampled once, at module scope
+const wobble = Box.spring({ stiffness: 120, damping: 8 });
+
+<Box transition="transform" transitionTimingFunction={wobble.easing} transitionDuration={wobble.duration} hover={{ translateY: -2 }} />
 ```
 
 - **`Box.keyframes({ name: { from, '50%', to } })`** registers sequences; stop keys are `'from'`,
@@ -273,6 +281,16 @@ Box.keyframes({
   animates (the base stylesheet registers both axes with `@property`, without which a keyframe
   moving them would jump rather than interpolate). `rotate` and `scale` are their own properties
   too. The one collision left: `flip` and `scale` both write `scale`.
+- **A spring is a sampled curve, so it is two props.** The four presets are a damped oscillator
+  sampled into `linear()`: `spring` (540ms, barely a bounce), `spring-gentle` (660ms),
+  `spring-bouncy` (880ms, 20% past the target), `spring-snappy` (420ms). Name one on the timing
+  function and the same one on the duration — the duration is the spring's settling time, counted in
+  `--transitionTime` units, so reduced motion stops a spring too. For a spring of your own,
+  `Box.spring()` takes `stiffness`, `damping`, `mass` and `velocity` and returns `{ easing, duration }`.
+- **What a sampled spring is not**: the curve is fixed once it is a string, so an interrupted
+  transition restarts rather than carrying its velocity across — fine for hover, a panel or a toggle,
+  not for a drag (that is framer-motion's job). `linear()` is missing in roughly one browser in
+  eight, so every curve is written with an `ease-out` declaration underneath it.
 - **`Box.configure({ transition })`** changes what the base class transitions for the whole engine:
   a group name, or `false` to declare nothing at all and leave transitions entirely to the props.
   Call it before the first render.
