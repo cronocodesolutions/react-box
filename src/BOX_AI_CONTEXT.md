@@ -279,6 +279,20 @@ const wobble = Box.spring({ stiffness: 120, damping: 8 });
   transitionDuration={260}
 />
 
+// Or really unmounting, once the exit has run: <Presence> holds the node until its CSS is finished
+<Presence present={open}>
+  {({ present, ref, props }) => (
+    <Box
+      ref={ref}
+      props={props}
+      opacity={present ? 1 : 0}
+      translateY={present ? 0 : -2}
+      startingStyle={{ opacity: 0, translateY: -2 }}
+      transitionDuration={320}
+    />
+  )}
+</Presence>
+
 // height: auto, animated — the container opts its subtree in
 <Box interpolateSize="allow-keywords">
   <Box height={expanded ? 'auto' : 0} overflow="hidden" transition="size" transitionDuration={300}>
@@ -321,10 +335,18 @@ const wobble = Box.spring({ stiffness: 120, damping: 8 });
   finished. `Tooltip` and the `Dropdown` popup already carry one.
 - **An exit needs someone to hold the node.** `@starting-style` runs when an element is first
   rendered — mounted, or shown from `display: none`. Going the other way, React unmounts the node
-  immediately and there is nothing left to animate, so hide it instead: `display` plus
-  `transitionBehavior="allow-discrete"` flips `display` at the _end_ of the transition, and the element
-  animates out as well as in. Holding an unmounting node is a React problem this library does not solve
-  yet.
+  immediately and there is nothing left to animate. Two answers: hide it instead — `display` plus
+  `transitionBehavior="allow-discrete"` flips `display` at the _end_ of the transition — or, when the
+  node really has to leave, `<Presence>`.
+- **`<Presence present>` (`components/presence`) is the exit.** It keeps rendering its child with
+  `present: false` until the child's own CSS says the transition is over, then lets React remove it. A
+  render prop, handed `{ present, state, ref, props }`: `ref` goes on the element that carries the
+  transition (it is the one whose computed style the wait is measured from), `props` is
+  `{ 'data-state': 'open' | 'closed' }`. The wait is the element's computed `transition-duration` /
+  `animation-duration`, not a `transitionend` listener — which fires once per property with no way to
+  know how many are coming. So a reader on `prefers-reduced-motion` measures `0s` and the node leaves in
+  the same commit, with nothing to configure. `Tooltip`, the `Dropdown` popup and the DataGrid column
+  menu are all built on it, and each expresses its exit as a `closed` variant in its component styles.
 - **`Box.configure({ transition })`** changes what the base class transitions for the whole engine:
   a group name, or `false` to declare nothing at all and leave transitions entirely to the props.
   Call it before the first render.
@@ -1016,7 +1038,7 @@ function TrendCell({ cell }: { cell: CellModel<Row> }) {
 7. **Colors are Tailwind-like**: `'gray-500'`, `'blue-600'`
 8. **Breakpoints are mobile-first**: base → sm → md → lg → xl → xxl
 9. **Theme styles nest**: `theme={{ dark: { hover: { ... } } }}`
-10. **HTML attributes go in `props` prop**: `<Link props={{ href: '/about' }}>` not `<Link href>`
+10. **HTML attributes go in `props` prop**: `<Link props={{ href: '/about' }}>` not `<Link href>`. `data-*` and `aria-*` go there too — a `data-state` written at the top level typechecks and is then dropped
 11. **Size shortcuts**: `width="fit"` = 100%, `width="fit-screen"` = 100vw, `width="1/2"` = 50%
 12. **Box is memoized** with `React.memo`
 13. **`style` is top-level only** — never inside breakpoints (`sm={{ style: ... }}`), pseudo-classes, or theme objects

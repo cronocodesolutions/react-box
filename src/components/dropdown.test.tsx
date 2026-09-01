@@ -1,4 +1,4 @@
-import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { act, cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { ignoreLogs } from '../../dev/tests';
 import Dropdown from './dropdown';
@@ -82,6 +82,27 @@ describe('Dropdown', () => {
       // from whatever has focus, but an event dispatched straight at `window` never goes back down.
       fireEvent.keyDown(document, { key: 'Escape' });
       expect(screen.queryByText('Alpha')).toBeNull();
+    });
+
+    it('holds the popup in the DOM while its exit runs, and says which way it is going', () => {
+      vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] });
+
+      try {
+        // A duration of its own: happy-dom does not expand the base `transition` shorthand the
+        // popup's 250ms really comes from.
+        renderDropdown({ itemsProps: { transitionDuration: 200 } });
+        openDropdown();
+        expect(screen.getByRole('listbox')).toHaveAttribute('data-state', 'open');
+
+        openDropdown();
+        expect(screen.getByRole('listbox')).toHaveAttribute('data-state', 'closed');
+
+        act(() => vi.advanceTimersByTime(250));
+
+        expect(screen.queryByRole('listbox')).toBeNull();
+      } finally {
+        vi.useRealTimers();
+      }
     });
   });
 

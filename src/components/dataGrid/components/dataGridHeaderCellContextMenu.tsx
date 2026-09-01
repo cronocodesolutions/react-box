@@ -13,6 +13,7 @@ import { isBrowser } from '../../../utils/environment/environmentUtils';
 import Button from '../../button';
 import Flex from '../../flex';
 import Overlay from '../../overlay';
+import Presence from '../../presence';
 import { Span } from '../../semantics';
 import ColumnModel from '../models/columnModel';
 
@@ -193,50 +194,54 @@ export default function DataGridHeaderCellContextMenu<TRow>(props: Props<TRow>) 
         <Span component={`${grid.componentName}.header.cell.contextMenu.icon` as never}>
           <DotsIcon fill="currentColor" />
         </Span>
-        {isOpen && (
-          <Overlay
-            component={`${grid.componentName}.header.cell.contextMenu.tooltip` as never}
-            onPositionChange={setTooltipPosition}
-            ref={popupRef}
-            adjustTranslateX={openLeft ? '-100%' : '-21px'}
-            adjustTranslateY="16px"
-            id={identifier}
-            props={{ role: 'menu', 'aria-label': `Column options for ${columnName}`, onKeyDown: roving.onKeyDown }}
-          >
-            {items.map((item, index) => {
-              const { ref, tabIndex, onFocus } = roving.itemProps(index);
+        <Presence present={isOpen}>
+          {(presence) => (
+            <Overlay
+              component={`${grid.componentName}.header.cell.contextMenu.tooltip` as never}
+              variant={{ closed: !presence.present } as never}
+              onPositionChange={setTooltipPosition}
+              ref={popupRef}
+              contentRef={presence.ref}
+              adjustTranslateX={openLeft ? '-100%' : '-21px'}
+              adjustTranslateY="16px"
+              id={identifier}
+              props={{ role: 'menu', 'aria-label': `Column options for ${columnName}`, onKeyDown: roving.onKeyDown, ...presence.props }}
+            >
+              {items.map((item, index) => {
+                const { ref, tabIndex, onFocus } = roving.itemProps(index);
 
-              return (
-                <Fragment key={item.key}>
-                  {item.startsSection && (
-                    <Box
-                      bb={1}
-                      my={2}
-                      borderColor="gray-300"
-                      component={`${grid.componentName}.header.cell.contextMenu.tooltip.item.separator` as never}
-                    />
-                  )}
-                  <Button
-                    component={`${grid.componentName}.header.cell.contextMenu.tooltip.item` as never}
-                    ref={ref}
-                    type="button"
-                    onClick={(event) => {
-                      // The popup is portalled out of the DOM but not out of the React tree, so a
-                      // click in it still reaches the trigger's own toggle on the way up.
-                      event.stopPropagation();
-                      item.run();
-                      close();
-                    }}
-                    props={{ role: 'menuitem', tabIndex, onFocus }}
-                  >
-                    {item.icon}
-                    {item.label}
-                  </Button>
-                </Fragment>
-              );
-            })}
-          </Overlay>
-        )}
+                return (
+                  <Fragment key={item.key}>
+                    {item.startsSection && (
+                      <Box
+                        bb={1}
+                        my={2}
+                        borderColor="gray-300"
+                        component={`${grid.componentName}.header.cell.contextMenu.tooltip.item.separator` as never}
+                      />
+                    )}
+                    <Button
+                      component={`${grid.componentName}.header.cell.contextMenu.tooltip.item` as never}
+                      ref={ref}
+                      type="button"
+                      onClick={(event) => {
+                        // The popup is portalled out of the DOM but not out of the React tree, so a
+                        // click in it still reaches the trigger's own toggle on the way up.
+                        event.stopPropagation();
+                        item.run();
+                        close();
+                      }}
+                      props={{ role: 'menuitem', tabIndex, onFocus }}
+                    >
+                      {item.icon}
+                      {item.label}
+                    </Button>
+                  </Fragment>
+                );
+              })}
+            </Overlay>
+          )}
+        </Presence>
       </Button>
     </Flex>
   );

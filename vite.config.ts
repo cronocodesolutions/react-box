@@ -138,6 +138,9 @@ export default defineConfig(({ mode }) => {
                   // `platform` must stay React-free — the `/core` entry reaches it — hence the effect helpers are separate.
                   if (module.startsWith('src/utils/environment/') || module.startsWith('src/utils/dom/')) return 'platform';
                   if (module === 'src/react/effects.ts') return 'effects';
+                  // `<Presence>` and the timing model behind it, shared by the three layers that animate out
+                  // and by nothing else. In `client` the whole library would carry an exit nobody asked for.
+                  if (module.startsWith('src/react/animation/') || module.startsWith('src/utils/animation/')) return 'motion';
 
                   // A leaf only one component reaches goes in that component's own chunk: every group below is shared with
                   // something everybody imports, so a private leaf in one is paid for by consumers who cannot reach it.
