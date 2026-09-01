@@ -59,7 +59,8 @@ react-box/
 │   ├── core/                     # Core styling engine — ZERO react imports (enforced)
 │   │   ├── boxStyles.ts          # CSS property definitions (155 props)
 │   │   ├── boxStylesFormatters.ts # Value formatters (px, rem, etc.)
-│   │   ├── variables.ts          # CSS variables (colors, sizes)
+│   │   ├── variables.ts          # Where a value becomes a variable: the registry, bgImages, shadows
+│   │   ├── palette.ts            # Tailwind's OKLCH palette (26 families) + the `token/alpha` grammar
 │   │   ├── containers.ts         # The `cq` key grammar: sizes, complements, named containers
 │   │   ├── classNames.ts         # Conditional className utility
 │   │   ├── coreTypes.ts          # Core TypeScript types (framework-free)
@@ -406,19 +407,25 @@ export namespace BoxStylesFormatters {
 - `p={3}` → 0.75rem = 12px
 - `p={4}` → 1rem = 16px
 
-### 3. CSS Variables (variables.ts)
+### 3. CSS Variables (variables.ts, palette.ts)
 
-Color palette and other variables are defined as CSS custom properties:
+Every value that becomes a CSS custom property. The colours live in `palette.ts` — Tailwind's OKLCH
+palette, twenty-six families of eleven steps, packed one string per family and expanded at load because
+the table ships in every bundle. It owns the `token/alpha` grammar too (`bgColor="blue-500/40"`), since
+that is knowledge about colours rather than about the registry:
 
 ```typescript
-// src/core/variables.ts
+// src/core/palette.ts
+const families = {
+  red: '97.1 .013 17.4,93.6 .032 17.7,…', // L C H per step, in `steps` order
+  // ... twenty-five more
+};
+
+export const colors = expand(); // { 'red-500': 'oklch(63.7% .237 25.3)', … } plus the keywords
+
+// src/core/variables.ts — where a value becomes a *variable*
 namespace Variables {
-  export const colors = {
-    'gray-50': '#f9fafb',
-    'gray-100': '#f3f4f6',
-    // ... Tailwind-like color palette
-    'violet-500': '#8b5cf6',
-  };
+  export const colors = Palette.colors;
 
   export const percentages = {
     '1/2': '50%',
@@ -1322,6 +1329,14 @@ The sizes in `src/core/containers.ts` are a scale, not a list of keys: adding on
 1. Add the size to `containerSizes` **in ascending order** — `rankKeys` names the sizes ascending and their complements descending, and `queryKeys` in `boxStyles.ts` splices that list between the breakpoints and the preferences
 2. Nothing else: the condition, the `maxXx` key, the class-name segment and the type (`Containers.QueryKey`) all follow
 3. Note that every new rank is one more cascade layer _and_ one more repeat of the prop order statement in element mode — cheap gzipped, but not free
+
+### Add a Colour Family
+
+The palette in `src/core/palette.ts` is a packed table, one string per family: `L C H` per step, comma-separated, in `steps` order. Adding a family is one line, and the token names, the types and the swatch grid on the docs site all follow from it.
+
+1. Add the family to `families` with **eleven** entries — the lightness as a percentage without its sign, a chroma with no leading zero, a hue (or `none` for a pure grey). Keep the values in the notation Tailwind publishes, rounding the hue to a tenth of a degree: the table ships in every bundle
+2. Nothing else: `Palette.Token`, `ColorName`, `Variables.colorValues` and the `token/alpha` type are all derived, and `/colors` groups the swatches off the table
+3. A colour that is not a family — a keyword, one end of the greyscale — goes in `keywords` instead, where the value is written out as it stands
 
 ### Add a New State Variant
 

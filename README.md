@@ -46,6 +46,22 @@ export default function Component(props: Props) {
 four — `fontSize` divides by 16 (`fontSize={14}` is `0.875rem`), and border widths and `lineHeight`
 are plain pixels (`b={1}` is 1px).
 
+## Colours
+
+The palette is Tailwind's, in OKLCH: twenty-six families of eleven steps — `slate-50` through
+`rose-950`, the four Tailwind 4.3 added (`mauve`, `mist`, `olive`, `taupe`) included — declared as CSS
+variables the first time a page asks for one. Any colour value takes an opacity modifier:
+
+```JS
+<Box bgColor="blue-500/40" borderColor="black/10" hover={{ bgColor: 'blue-500/60' }} />
+```
+
+That compiles to `color-mix(in oklab, var(--blue-500) 40%, transparent)`: the mix wraps the
+**variable**, so a themed token is still themed and everything asking for the same value still shares
+one class. It is not `opacity`, which fades the element, its text and its children — this fades one
+declaration. Every colour prop takes it (`color`, `bgColor`, `borderColor`, `outlineColor`, `fill`,
+`stroke`), as does a `vars` entry and a variable of your own from `Box.extend()`.
+
 ## Components
 
 Every component here is a `Box` underneath — the same style props, the same theming, the same

@@ -169,7 +169,7 @@ export const siteRoutes = [
   {
     path: '/colors',
     name: 'Colors',
-    description: 'The complete colour palette — over 200 CSS variables usable from any colour prop.',
+    description: "Tailwind's OKLCH palette — twenty-six families of eleven steps, and the opacity modifier every colour value takes.",
   },
   {
     path: '/ai-context',

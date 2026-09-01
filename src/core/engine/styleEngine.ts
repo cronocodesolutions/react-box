@@ -30,6 +30,7 @@ import { BoxStyle, BoxStyleValue } from '../coreTypes';
 import defaultBoxComponents, { BoxComponent, Components } from '../extends/boxComponents';
 import { resolveComponentStyles } from '../extends/useComponents';
 import { stableHash } from '../hash';
+import Palette from '../palette';
 import Variables from '../variables';
 import Variants from '../variants';
 import { createFlushCoordinator, FlushScheduler, microtaskScheduler } from './flushScheduler';
@@ -529,9 +530,13 @@ export function createStyleEngine(options: StyleEngineOptions = {}): StyleEngine
       return typeof value === typeof x.values;
     });
 
-    if (!itemValue && typeof value === 'string' && variables.isUserVariable(value)) {
-      // `Box.extend({ variables })` tokens are accepted on the props whose values resolve to `var(--token)`.
-      itemValue = item.find((x) => variableBackedValues.has(x.values));
+    if (!itemValue && typeof value === 'string') {
+      // `Box.extend({ variables })` tokens are accepted on the props whose values resolve to `var(--token)`,
+      // and so is an opacity modifier on one — the mix applies to the variable, whatever it was declared as.
+      const alpha = Palette.alphaOf(value);
+
+      if (alpha && variables.isUserVariable(alpha.color)) itemValue = item.find((x) => x.match === Palette.isAlpha);
+      else if (variables.isUserVariable(value)) itemValue = item.find((x) => variableBackedValues.has(x.values));
     }
 
     return itemValue ?? null;

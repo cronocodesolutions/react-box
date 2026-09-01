@@ -28,7 +28,9 @@ interface BoxStyleNumber {
 
 interface BoxStyleString {
   values: string;
-  valueFormat?: (value: string) => string;
+  // The same formatter its array sibling takes: a definition whose `values` is a template type still names
+  // colours (`bgColor="blue-500/40"`), and resolving one means reaching the variable registry.
+  valueFormat?: (value: string, getVariableValue: (name: string) => string, styleName?: string) => string;
 }
 
 interface BoxStyleTupleArrays {
