@@ -16,6 +16,7 @@
  */
 export { classNames } from './core/classNames';
 export type { ClassNameType } from './core/classNames';
+export { default as Springs } from './core/springs';
 export { createStyleEngine, DEFAULT_STYLE_ELEMENT_ID } from './core/engine/styleEngine';
 export type { StyleEngine, StyleEngineOptions, StylesConfiguration } from './core/engine/styleEngine';
 export { manualScheduler, microtaskScheduler, syncScheduler } from './core/engine/flushScheduler';

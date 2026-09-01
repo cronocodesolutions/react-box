@@ -172,11 +172,12 @@ function classNameValue(value: unknown): string {
 }
 
 /**
- * The declarations a definition is expected to emit. Normally its `styleName`s; a definition that
- * writes its own declarations (`vars`) names one custom property per key of the value it is given.
+ * The declarations a definition is expected to emit. Normally its `styleName`s — an easing writes two of
+ * them and still names one; a definition that writes its own and names none (`vars`, the translate axes)
+ * builds the property names out of the value.
  */
 function styleNamesOf(def: BoxStyle, prop: string, value: unknown): string[] {
-  if (def.declarations) {
+  if (def.declarations && !def.styleName) {
     if (typeof value === 'object' && value !== null) return Object.keys(value).map((name) => `--${name}`);
 
     // The other shape: an axis of the composed `translate`, which names its own variable and the
@@ -552,10 +553,48 @@ describe('animation and transition props', () => {
     expect(generatedRulesFor({ transitionTimingFunction: 'cubic-bezier(0.4,0,0.6,1)' }, 'easing-bezier')).toContain(
       '{transition-timing-function:cubic-bezier(0.4,0,0.6,1)}',
     );
-    // What AN2's sampled springs will be: a `linear()` curve is a value, not a special case.
+    // A `linear()` curve is a value, not a special case — and the one easing that carries a fallback under it.
     expect(generatedRulesFor({ animationTimingFunction: 'linear(0,0.5,1)' }, 'easing-linear')).toContain(
-      '{animation-timing-function:linear(0,0.5,1)}',
+      '{animation-timing-function:ease-out;animation-timing-function:linear(0,0.5,1)}',
     );
+  });
+
+  /**
+   * A spring is a curve and a duration, and both props take the same four names. The curve is sampled
+   * once per name; the duration is in `--transitionTime` units, so reduced motion stops a spring too.
+   */
+  describe('spring presets', () => {
+    it('writes the sampled curve, with ease-out underneath it for the browsers without linear()', () => {
+      const rule = generatedRulesFor({ transitionTimingFunction: 'spring-snappy' }, 'spring-curve');
+
+      expect(rule).toContain('{transition-timing-function:ease-out;transition-timing-function:linear(0,0.074,');
+      expect(rule).toContain(',1.008,1)}');
+    });
+
+    it.each([
+      ['spring', '2.16'],
+      ['spring-gentle', '2.64'],
+      ['spring-bouncy', '3.52'],
+      ['spring-snappy', '1.68'],
+    ] as const)('%s takes %s of --transitionTime to settle', (name, units) => {
+      expect(generatedRulesFor({ transitionDuration: name }, `spring-duration-${name}`)).toContain(
+        `{transition-duration:calc(${units} * var(--transitionTime))}`,
+      );
+      expect(generatedRulesFor({ animationDuration: name }, `spring-animation-${name}`)).toContain(
+        `{animation-duration:calc(${units} * var(--transitionTime))}`,
+      );
+    });
+
+    it('leaves a duration in milliseconds alone, spring or not', () => {
+      expect(generatedRulesFor({ transitionDuration: 580 }, 'ms-transitionDuration')).toContain('{transition-duration:580ms}');
+    });
+
+    it('is one shared class per name, whatever names it', () => {
+      const engine = makeEngine('spring-shared');
+      const classNames = renderStyles(engine, { transitionTimingFunction: 'spring-bouncy', animationTimingFunction: 'spring-bouncy' });
+
+      expect(classNames).toEqual(['_b', 'transitionTimingFunction-spring-bouncy', 'animationTimingFunction-spring-bouncy']);
+    });
   });
 
   // The template type rejects it at compile time too — the cast is what a JavaScript caller does.

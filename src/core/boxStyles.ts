@@ -59,12 +59,17 @@ export const cssStyles = {
       styleName: 'animation-direction',
     },
   ],
-  /** The animation-duration CSS property sets the length of time that an animation takes to complete one cycle. Milliseconds: `animationDuration={1100}` is `1100ms`, and it names its own time, so reduced motion cannot reach it — say so with `motionReduce`. */
+  /** The animation-duration CSS property sets the length of time that an animation takes to complete one cycle. Milliseconds: `animationDuration={1100}` is `1100ms`, and it names its own time, so reduced motion cannot reach it — say so with `motionReduce`. A spring name is that spring's settling time. */
   animationDuration: [
     {
       values: 0,
       styleName: 'animation-duration',
       valueFormat: BoxStylesFormatters.Value.ms,
+    },
+    {
+      values: [...Animations.springNames] as const,
+      styleName: 'animation-duration',
+      valueFormat: (value: string) => Animations.springDuration(value as Animations.SpringName),
     },
   ],
   /** The animation-fill-mode CSS property sets how a CSS animation applies styles to its target before and after its execution. */
@@ -104,16 +109,26 @@ export const cssStyles = {
       styleName: 'animation-play-state',
     },
   ],
-  /** The animation-timing-function CSS property sets how an animation progresses through the duration of each cycle. `cubic-bezier()`, `steps()` and `linear()` are values too. */
+  /**
+   * How an animation progresses through each cycle: a keyword, one of the four sampled springs, or a curve
+   * of your own — `cubic-bezier()`, `steps()` and `linear()` are values. A spring names its duration too.
+   */
   animationTimingFunction: [
     {
       values: ['linear', 'ease', 'ease-in', 'ease-in-out', 'ease-out', 'step-start', 'step-end'] as const,
       styleName: 'animation-timing-function',
     },
     {
+      values: [...Animations.springNames] as const,
+      styleName: 'animation-timing-function',
+      declarations: (value) =>
+        Animations.easingDeclarations('animation-timing-function', Animations.springEasing(value as Animations.SpringName)),
+    },
+    {
       values: Animations.timingFunction,
       match: Animations.isTimingFunction,
       styleName: 'animation-timing-function',
+      declarations: (value) => Animations.easingDeclarations('animation-timing-function', value as string),
     },
   ],
   /** The border-width shorthand CSS property sets the width of an element's border. */
@@ -1186,24 +1201,44 @@ export const cssStyles = {
       valueFormat: BoxStylesFormatters.Value.ms,
     },
   ],
-  /** The transition-duration CSS property sets the length of time a transition animation should take to complete. By default, the value is 0s, meaning that no animation will occur. */
+  /**
+   * How long a transition takes. Milliseconds, like every other time here — or a spring name, which is
+   * that spring's settling time in `--transitionTime` units, so a spring stops under reduced motion.
+   */
   transitionDuration: [
     {
       styleName: 'transition-duration',
-      values: [50, 100, 150, 200, 250, 300, 350, 400, 450, 500, 550, 600, 650, 700, 750, 800, 850, 900, 950, 1000] as const,
-      valueFormat: (value: number) => `${value}ms`,
+      values: 0,
+      valueFormat: BoxStylesFormatters.Value.ms,
+    },
+    {
+      styleName: 'transition-duration',
+      values: [...Animations.springNames] as const,
+      valueFormat: (value: string) => Animations.springDuration(value as Animations.SpringName),
     },
   ],
-  /** The transition-timing-function CSS property sets how intermediate values are calculated for CSS properties being affected by a transition effect. `cubic-bezier()`, `steps()` and `linear()` are values too. */
+  /**
+   * How a transition gets from one value to the other: a keyword, one of the four sampled springs
+   * (`spring`, `spring-gentle`, `spring-bouncy`, `spring-snappy`), or a curve — `cubic-bezier()`,
+   * `steps()` and `linear()` are values. A spring's other half is `transitionDuration`, which takes the
+   * same four names.
+   */
   transitionTimingFunction: [
     {
       styleName: 'transition-timing-function',
       values: ['linear', 'ease', 'ease-in', 'ease-in-out', 'ease-out', 'step-start', 'step-end'] as const,
     },
     {
+      values: [...Animations.springNames] as const,
       styleName: 'transition-timing-function',
+      declarations: (value) =>
+        Animations.easingDeclarations('transition-timing-function', Animations.springEasing(value as Animations.SpringName)),
+    },
+    {
       values: Animations.timingFunction,
       match: Animations.isTimingFunction,
+      styleName: 'transition-timing-function',
+      declarations: (value) => Animations.easingDeclarations('transition-timing-function', value as string),
     },
   ],
   /** The user-select CSS property controls whether the user can select text. This doesn't have any effect on content loaded as part of a browser's user interface (its chrome), except in textboxes. */

@@ -2,6 +2,7 @@ import React from 'react';
 import getDefaultEngine from './core/engine/defaultEngine';
 import { StylesConfiguration } from './core/engine/styleEngine';
 import BoxExtends from './core/extends/boxExtends';
+import Springs from './core/springs';
 import boxClassNames, { BoxClassNames } from './react/boxClassNames';
 import { BoxClassNameProps, BoxCoreProps } from './react/boxProps';
 import buildTagProps from './react/boxTagProps';
@@ -48,6 +49,8 @@ interface RscBoxType {
   extend: typeof BoxExtends.extend;
   components: typeof BoxExtends.components;
   keyframes: typeof BoxExtends.keyframes;
+  /** A spring of your own, sampled into `{ easing, duration }`. Pure arithmetic, so a Server Component can call it. */
+  spring: typeof Springs.spring;
   getVariableValue: (name: string) => string;
   /** Explicit engine configuration. Element mode is already on; this is for the rest of it. */
   configure: (config: StylesConfiguration) => void;
@@ -58,6 +61,7 @@ const RscBox = Box as RscBoxType;
 RscBox.extend = BoxExtends.extend;
 RscBox.components = BoxExtends.components;
 RscBox.keyframes = BoxExtends.keyframes;
+RscBox.spring = Springs.spring;
 RscBox.getVariableValue = (name: string) => getDefaultEngine().getVariableValue(name);
 RscBox.configure = (config: StylesConfiguration) => getDefaultEngine().configure(config);
 

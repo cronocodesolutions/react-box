@@ -1,10 +1,14 @@
 import { BoxStyleValue } from './coreTypes';
+import Springs from './springs';
 
 /**
  * The values the animation and transition props take that are more than a CSS keyword: the four presets,
  * the easing escape hatch, and the property groups `transition` accepts.
  */
 namespace Animations {
+  /** What `--transitionTime` is worth, in the milliseconds a sampled spring counts its settling in. */
+  const transitionTimeMs = 250;
+
   /** A preset's duration as a multiple of `--transitionTime` (0.25s), so reduced motion zeroes it too. */
   function scaled(units: number): string {
     return `calc(${units} * var(--transitionTime))`;
@@ -33,6 +37,33 @@ namespace Animations {
   export type TimingFunction = `cubic-bezier(${string})` | `steps(${string})` | `linear(${string})`;
 
   export const timingFunction = '' as TimingFunction;
+
+  export const springNames = Springs.presetNames;
+
+  export type SpringName = Springs.PresetName;
+
+  /** The curve half of a spring preset, sampled once and shared by every rule that names it. */
+  export function springEasing(name: SpringName): string {
+    return Springs.preset(name).easing;
+  }
+
+  /**
+   * The other half: a sampled spring has a fixed settling time, and naming it on the duration prop is what
+   * makes the physics look right. Counted in `--transitionTime` units, so reduced motion stops a spring too.
+   */
+  export function springDuration(name: SpringName): string {
+    return scaled(Math.round((Springs.preset(name).duration / transitionTimeMs) * 100) / 100);
+  }
+
+  /**
+   * An easing declaration, and under a `linear()` curve the `ease-out` it degrades to: the ~13% of browsers
+   * without `linear()` drop the second line and keep the first. `cubic-bezier()` and `steps()` need no such thing.
+   */
+  export function easingDeclarations(styleName: string, value: string): string {
+    const declaration = `${styleName}:${value}`;
+
+    return value.startsWith('linear(') ? `${styleName}:ease-out;${declaration}` : declaration;
+  }
 
   const timingFunctionPattern = /^(cubic-bezier|steps|linear)\([^()]*\)$/;
 
