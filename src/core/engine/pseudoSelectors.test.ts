@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { generatedRulesOf, makeEngine, renderStyles } from '../../../dev/engineHarness';
 import { BoxStyleProps } from '../../types';
+import { pseudoClasses, pseudoClassesOfWeight, pseudoClassesWeight } from '../boxStyles';
 
 /**
  * How a nested pseudo prop becomes a compound selector — specifically where the pseudo-*element* ends up.
@@ -100,5 +101,26 @@ describe('pseudo-element ordering in a compound selector', () => {
     // A pseudo-element followed by anything but the start of the declaration block is the shape
     // that gets a rule thrown away, whatever the rest of the selector happens to be.
     expect(generatedRulesOf(engine)).not.toMatch(/::(before|after|placeholder)[^{,\s]/);
+  });
+});
+
+/**
+ * A weight is a bitmask of the pseudo keys a rule nests under. It used to index a table of *every*
+ * subset — 2²² arrays built at import time, whether a page styled anything or not — and it is decoded on
+ * demand now, so what these assert is that the decoding is the same list in the same order.
+ */
+describe('pseudo-class weights', () => {
+  it('decodes one weight into its keys, in declaration order', () => {
+    expect(pseudoClassesOfWeight(0)).toEqual([]);
+    expect(pseudoClassesOfWeight(pseudoClassesWeight.hover)).toEqual(['hover']);
+    // Declaration order, not the order the props were written in: `before` is declared after `checked`.
+    expect(pseudoClassesOfWeight(pseudoClassesWeight.checked + pseudoClassesWeight.before)).toEqual(['before', 'checked']);
+  });
+
+  it('holds every key at once, which is the combination the old table cost 1.5 GB to hold', () => {
+    const everyKey = Object.keys(pseudoClasses) as (keyof typeof pseudoClasses)[];
+    const everyWeight = everyKey.reduce((sum, key) => sum + pseudoClassesWeight[key], 0);
+
+    expect(pseudoClassesOfWeight(everyWeight)).toEqual(everyKey);
   });
 });

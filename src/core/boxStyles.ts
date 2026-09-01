@@ -448,6 +448,17 @@ export const cssStyles = {
       valueFormat: () => 'inline-block',
     },
   ],
+  /**
+   * Whether `height`/`width` may interpolate to and from a keyword — `auto`, `min-content`, `fit-content`.
+   * Inherited, so it belongs on the container and every size inside it animates; Chromium-only for now,
+   * and elsewhere a `height: auto` transition simply snaps, which is what it already does today.
+   */
+  interpolateSize: [
+    {
+      styleName: 'interpolate-size',
+      values: ['numeric-only', 'allow-keywords'] as const,
+    },
+  ],
   /** The CSS justify-content property defines how the browser distributes space between and around content items along the main axis of a flex container and the inline axis of grid and multicol containers. */
   jc: [
     {
@@ -1193,6 +1204,17 @@ export const cssStyles = {
       valueFormat: (value: string) => Animations.propertyGroups[value as Animations.PropertyGroup] ?? value,
     },
   ],
+  /**
+   * Whether the properties that cannot be interpolated transition at all: `display`, `overlay`,
+   * `content-visibility`. `allow-discrete` flips them at the *end* of the transition instead of the start,
+   * which is what keeps an element in the DOM long enough to animate out of it.
+   */
+  transitionBehavior: [
+    {
+      styleName: 'transition-behavior',
+      values: ['normal', 'allow-discrete'] as const,
+    },
+  ],
   /** The transition-delay CSS property specifies the duration to wait before starting a property's transition effect when its value changes. Milliseconds. */
   transitionDelay: [
     {
@@ -1752,17 +1774,26 @@ export const pseudoClassesWeight = Object.entries(pseudoClasses).reduce(
   {} as Record<keyof typeof pseudoClasses, number>,
 );
 
-export const pseudoClassesByWeight = Object.entries(pseudoClasses).reduce(
-  (acc, [key]) => {
-    const weight = pseudoClassesWeight[key as keyof typeof pseudoClasses];
-    Object.entries(acc).forEach(([prevWeight, pseudoClassesToUse]) => {
-      acc[+prevWeight + weight] = [...pseudoClassesToUse, key as keyof typeof pseudoClasses];
-    });
+// The keys in declaration order — the order a weight decodes back into, so a class name built from one
+// reads the way it always has. A 32-bit mask, so this map cannot grow past 31 keys.
+const pseudoClassKeys = Object.keys(pseudoClasses) as (keyof typeof pseudoClasses)[];
 
-    return acc;
-  },
-  { 0: [] } as { [key: number]: (keyof typeof pseudoClasses)[] },
-);
+const pseudoClassesCache = new Map<number, (keyof typeof pseudoClasses)[]>();
+
+/**
+ * The pseudo keys one weight stands for, decoded from the bitmask and kept — a page asks for the same
+ * few combinations over and over. This used to be a table of *every* subset: 2²² arrays, 1.5 GB of heap
+ * and 1.4 s, built at import time, whether a page styled anything or not.
+ */
+export function pseudoClassesOfWeight(weight: number): (keyof typeof pseudoClasses)[] {
+  const cached = pseudoClassesCache.get(weight);
+  if (cached) return cached;
+
+  const keys = pseudoClassKeys.filter((key) => weight & pseudoClassesWeight[key]);
+  pseudoClassesCache.set(weight, keys);
+
+  return keys;
+}
 
 export const pseudoGroupClasses = {
   hoverGroup: 'hover',
@@ -1775,6 +1806,17 @@ export const pseudoGroupClasses = {
 export const themeGroupClass = {
   theme: 'theme',
 } satisfies { [key: string]: keyof typeof pseudoClasses };
+
+/**
+ * The one nesting key that is neither a selector nor a media query: `@starting-style` holds the values a
+ * property had *before* the element's first style change, which is the whole difference between an element
+ * appearing already finished and one transitioning in. Wraps the rule rather than joining the selector, so
+ * it composes with every other kind of nesting.
+ */
+export const startingStyleKey = {
+  /** What these props start from the first time this element is styled — an entrance, with no JavaScript. */
+  startingStyle: '@starting-style',
+};
 
 export const breakpoints = {
   /** Styles applied for small screens and larger. >= 640 */
