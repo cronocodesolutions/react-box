@@ -126,6 +126,18 @@ describe('Switch', () => {
     expect(css).toMatch(/@media \(prefers-reduced-motion: reduce\)\{\.\S+::before\{transition-property:none\}\}/);
   });
 
+  it('says on and off in system colours, where the palette is gone', () => {
+    render(<Switch name="notify" label="Email notifications" />);
+
+    const css = (document.getElementById('crono-styles') as HTMLStyleElement | null)?.textContent ?? '';
+
+    // Forced colours flatten indigo and gray to the same fill, so the two states read identically and
+    // the white thumb can vanish into the track. `ButtonText` on `ButtonFace`, inverted when checked.
+    expect(css).toMatch(/@media \(forced-colors: active\)\{\.\S+\{background-color:ButtonFace\}\}/);
+    expect(css).toMatch(/@media \(forced-colors: active\)\{\.\S+:checked\{background-color:ButtonText\}\}/);
+    expect(css).toMatch(/@media \(forced-colors: active\)\{\.\S+:checked::before\{background-color:ButtonFace\}\}/);
+  });
+
   it('reports its change to onChange like any other control', async () => {
     const onChange = vi.fn();
     const user = keyboard();

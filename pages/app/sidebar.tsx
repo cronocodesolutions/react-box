@@ -18,6 +18,7 @@ import {
   Rows3,
   Server,
   Shapes,
+  SlidersHorizontal,
   Sparkles,
   Spline,
   Sun,
@@ -179,6 +180,9 @@ export default function Sidebar({ toggleTheme, onClose }: SidebarProps) {
           </MenuItem>
           <MenuItem to="/animation" icon={<Sparkles />}>
             Animation
+          </MenuItem>
+          <MenuItem to="/variants" icon={<SlidersHorizontal />}>
+            State Variants
           </MenuItem>
         </MenuSection>
 

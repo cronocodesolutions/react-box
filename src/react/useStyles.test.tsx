@@ -230,7 +230,7 @@ describe('useStyles', () => {
 
     it('applies outline with px formatter', () => {
       const { element, styleElement } = act({ outline: 2 });
-      expect(styleElement.innerText).toContain('.outline-2{outline-width:2px}');
+      expect(styleElement.innerText).toContain('.outline-2{outline-width:2px;outline-style:solid}');
       expect(element.classList).toContain('outline-2');
     });
 

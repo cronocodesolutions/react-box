@@ -348,6 +348,33 @@ namespace Variables {
   export const percentString = '' as PercentString;
 
   /**
+   * Whether a value really is the percentage its definition claims to take. `percentString` is a plain
+   * string, and a scalar `values` is matched by `typeof` alone — which made all thirty props declaring it
+   * an unvalidated catch-all: `width="banana"` reached CSS verbatim (bug #31).
+   */
+  export function isPercentString(value: unknown): value is PercentString {
+    return typeof value === 'string' && /^-?(\d+|\d*\.\d+)%$/.test(value);
+  }
+
+  /**
+   * The CSS system colours: the one palette a forced-colors mode does not throw away. Keywords rather
+   * than tokens — they resolve to whatever the user's high-contrast theme says — so they are written out
+   * unformatted, which is what lets `forcedColors={{ … }}` restore a state that colour alone was signalling.
+   */
+  export const systemColors = [
+    'Highlight',
+    'HighlightText',
+    'Canvas',
+    'CanvasText',
+    'ButtonFace',
+    'ButtonText',
+    'GrayText',
+    'LinkText',
+  ] as const;
+  export type SystemColorType = (typeof systemColors)[number];
+  export const systemColorValues: readonly SystemColorType[] = systemColors;
+
+  /**
    * A value CSS resolves for itself rather than one of this library's tokens: `url(#sky)` for a gradient,
    * pattern or clip path, `var(--chart-1)` for somebody else's variable. SVG paint is the reason it exists
    * — written as an attribute the paint would leave the prop system, losing theme, breakpoint and `hover`.

@@ -74,6 +74,12 @@ export const siteRoutes = [
       'Sparklines, progress rings, gauges and mini donuts as Boxes — no chart library — plus the container that themes a Recharts chart with the variables it reads.',
   },
   {
+    path: '/variants',
+    name: 'State Variants',
+    description:
+      'Style by a data-* or aria-* attribute, by what an element contains, or by a state it is not in — four nesting keys, one rule per state.',
+  },
+  {
     path: '/animation',
     name: 'Animation',
     description:
