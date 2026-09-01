@@ -1,4 +1,3 @@
-import { AnimatePresence, motion } from 'framer-motion';
 import { Menu, Moon, Sun, X } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
@@ -6,6 +5,9 @@ import Box from '../../src/box';
 import Button from '../../src/components/button';
 import Flex from '../../src/components/flex';
 import Icon from '../../src/components/icon';
+import Presence from '../../src/components/presence';
+import IconSwap from '../components/iconSwap';
+import Reveal from '../components/reveal';
 import TableOfContents from '../components/tableOfContents';
 import PageContext, { TocEntry } from '../pageContext';
 import DocumentHead from '../site/documentHead';
@@ -89,24 +91,22 @@ export default function Layout({ children }: LayoutProps) {
       </Box>
 
       <Flex>
-        {/* Sidebar Overlay (Mobile) */}
-        <AnimatePresence>
-          {sidebarOpen && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.2 }}
-              onClick={() => setSidebarOpen(false)}
-              style={{
-                position: 'fixed',
-                inset: 0,
-                backgroundColor: 'rgba(0, 0, 0, 0.5)',
-                zIndex: 4,
-              }}
+        {/* Sidebar Overlay (Mobile) — the site's own use of `<Presence>`, so the scrim fades both ways. */}
+        <Presence present={sidebarOpen}>
+          {(presence) => (
+            <Box
+              ref={presence.ref}
+              position="fixed"
+              inset={0}
+              bgColor="black"
+              opacity={presence.present ? 0.5 : 0}
+              zIndex={4}
+              startingStyle={{ opacity: 0 }}
+              transitionDuration={200}
+              props={{ ...presence.props, onClick: () => setSidebarOpen(false) }}
             />
           )}
-        </AnimatePresence>
+        </Presence>
 
         {/* Sidebar */}
         <Box
@@ -118,7 +118,9 @@ export default function Layout({ children }: LayoutProps) {
           width={70}
           translateX={sidebarOpen ? 0 : -70}
           lg={{ position: 'sticky', translateX: 0, zIndex: 3 }}
-          style={{ transition: 'transform 0.3s ease-in-out' }}
+          transition="transform"
+          transitionDuration={300}
+          transitionTimingFunction="ease-in-out"
         >
           <Sidebar toggleTheme={toggleTheme} onClose={() => setSidebarOpen(false)} />
         </Box>
@@ -127,19 +129,12 @@ export default function Layout({ children }: LayoutProps) {
         <PageContext.Provider value={{ tocEntries, setTocEntries }}>
           <Box flex1 minWidth={0} minHeight="fit-screen">
             <Box maxWidth={300} mx="auto" px={4} sm={{ px: 8 }} py={8} lg={{ py: 12 }}>
-              {/* `initial={false}`: the page under this is prerendered, so on the first paint there is
-                  nothing to fade in — only a navigation is a transition. */}
-              <AnimatePresence mode="wait" initial={false}>
-                <motion.div
-                  key={location.pathname}
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -10 }}
-                  transition={{ duration: 0.2 }}
-                >
-                  {children}
-                </motion.div>
-              </AnimatePresence>
+              {/* Keyed on the route, so a navigation is a fresh mount and `Reveal` has something to
+                  reveal. The page under this is prerendered, which is why the entrance is gated on
+                  hydration rather than running on the first paint. */}
+              <Reveal key={location.pathname} y={2.5}>
+                {children}
+              </Reveal>
             </Box>
           </Box>
           {tocEntries.length > 0 && (
@@ -167,23 +162,16 @@ function ThemeToggle({ theme, toggleTheme }: { theme: string; toggleTheme: () =>
       }}
       onClick={toggleTheme}
     >
-      <AnimatePresence mode="wait" initial={false}>
-        <motion.div
-          key={theme}
-          initial={{ rotate: -90, opacity: 0 }}
-          animate={{ rotate: 0, opacity: 1 }}
-          exit={{ rotate: 90, opacity: 0 }}
-          transition={{ duration: 0.15 }}
+      {/* Keyed on the theme, so each icon is a mount and `startingStyle` is its spin-in. */}
+      <IconSwap key={theme} rotate={-90}>
+        <Icon
+          size={4.5}
+          color={theme === 'dark' ? 'amber-400' : 'indigo-500'}
+          label={theme === 'dark' ? 'Switch to the light theme' : 'Switch to the dark theme'}
         >
-          <Icon
-            size={4.5}
-            color={theme === 'dark' ? 'amber-400' : 'indigo-500'}
-            label={theme === 'dark' ? 'Switch to the light theme' : 'Switch to the dark theme'}
-          >
-            {theme === 'dark' ? <Sun /> : <Moon />}
-          </Icon>
-        </motion.div>
-      </AnimatePresence>
+          {theme === 'dark' ? <Sun /> : <Moon />}
+        </Icon>
+      </IconSwap>
     </Button>
   );
 }

@@ -1,4 +1,3 @@
-import { motion } from 'framer-motion';
 import { ArrowRight, Box as BoxIcon, Code2, Layers, Palette, Sparkles, Zap } from 'lucide-react';
 import { NavLink } from 'react-router-dom';
 import { version } from '../../package.json';
@@ -234,7 +233,7 @@ interface FeatureCardProps {
 
 function FeatureCard({ icon, title, description }: FeatureCardProps) {
   return (
-    <motion.div whileHover={{ y: -4 }} transition={{ duration: 0.2 }}>
+    <Box hover={{ translateY: -1 }} transition="transform" transitionDuration={200}>
       <Box
         p={5}
         theme={{
@@ -256,6 +255,6 @@ function FeatureCard({ icon, title, description }: FeatureCardProps) {
           {description}
         </Box>
       </Box>
-    </motion.div>
+    </Box>
   );
 }
