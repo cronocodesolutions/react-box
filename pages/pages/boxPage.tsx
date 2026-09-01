@@ -1,9 +1,9 @@
-import { AnimatePresence, motion } from 'framer-motion';
 import { ArrowRight, Box as BoxIcon, Eye, Grid3X3, Layers, Maximize2, MousePointer, Move, Palette, Type } from 'lucide-react';
 import { ReactNode, useState } from 'react';
 import Box from '../../src/box';
 import Flex from '../../src/components/flex';
 import Grid from '../../src/components/grid';
+import Presence from '../../src/components/presence';
 import Code from '../components/code';
 import PageHeader from '../components/pageHeader';
 import Reveal from '../components/reveal';
@@ -35,6 +35,8 @@ function DemoCard({ title, description, children, code }: { title: string; descr
         borderRadius={2}
         overflow="hidden"
         theme={{ dark: { bgColor: 'slate-800', borderColor: 'slate-700' }, light: { bgColor: 'white', borderColor: 'slate-200' } }}
+        // Inherited, so declaring it on the card is what lets the panel below animate to `height: auto`.
+        interpolateSize="allow-keywords"
       >
         <Flex p={4} d="column" gap={1} theme={{ dark: { bgColor: 'slate-900' }, light: { bgColor: 'slate-50' } }} bb={1}>
           <Box fontSize={14} fontWeight={600} theme={{ dark: { color: 'slate-200' }, light: { color: 'slate-800' } }}>
@@ -68,15 +70,25 @@ function DemoCard({ title, description, children, code }: { title: string; descr
             {showCode ? 'Hide' : 'Show'} code
           </Box>
         </Flex>
-        <AnimatePresence>
-          {showCode && (
-            <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }}>
+        {/* Mounted only while it is open — every card on this page would otherwise run Prism over a
+            block nobody asked to see — so the collapse needs `<Presence>` to have a node to run on. */}
+        <Presence present={showCode}>
+          {(presence) => (
+            <Box
+              ref={presence.ref}
+              props={presence.props}
+              height={presence.present ? 'auto' : 0}
+              opacity={presence.present ? 1 : 0}
+              overflow="hidden"
+              startingStyle={{ height: 0, opacity: 0 }}
+              transitionDuration={200}
+            >
               <Box bt={1} theme={{ dark: { borderColor: 'slate-700' }, light: { borderColor: 'slate-200' } }}>
                 <Code language="jsx" code={`<Box ${code}>content</Box>`} />
               </Box>
-            </motion.div>
+            </Box>
           )}
-        </AnimatePresence>
+        </Presence>
       </Flex>
     </Reveal>
   );
@@ -975,37 +987,35 @@ export default function BoxPage() {
                 const Icon = cat.icon;
                 const isActive = activeCategory === cat.id;
                 return (
-                  <motion.div key={cat.id} whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-                    <Flex
-                      d="column"
-                      ai="center"
-                      gap={2}
-                      p={3}
-                      borderRadius={2}
-                      cursor="pointer"
-                      b={1}
-                      transitionDuration={150}
-                      theme={{
-                        dark: {
-                          bgColor: isActive ? 'violet-950' : 'slate-800',
-                          borderColor: isActive ? 'violet-500' : 'slate-700',
-                        },
-                        light: {
-                          bgColor: isActive ? 'violet-50' : 'white',
-                          borderColor: isActive ? 'violet-400' : 'slate-200',
-                        },
-                      }}
-                      hover={{
-                        borderColor: 'violet-500',
-                      }}
-                      props={{ onClick: () => setActiveCategory(cat.id) }}
-                    >
-                      <Icon size={20} />
-                      <Box fontSize={11} fontWeight={500} textAlign="center">
-                        {cat.name}
-                      </Box>
-                    </Flex>
-                  </motion.div>
+                  <Flex
+                    key={cat.id}
+                    d="column"
+                    ai="center"
+                    gap={2}
+                    p={3}
+                    borderRadius={2}
+                    cursor="pointer"
+                    b={1}
+                    transitionDuration={150}
+                    theme={{
+                      dark: {
+                        bgColor: isActive ? 'violet-950' : 'slate-800',
+                        borderColor: isActive ? 'violet-500' : 'slate-700',
+                      },
+                      light: {
+                        bgColor: isActive ? 'violet-50' : 'white',
+                        borderColor: isActive ? 'violet-400' : 'slate-200',
+                      },
+                    }}
+                    hover={{ borderColor: 'violet-500', scale: 1.02 }}
+                    active={{ scale: 0.98 }}
+                    props={{ onClick: () => setActiveCategory(cat.id) }}
+                  >
+                    <Icon size={20} />
+                    <Box fontSize={11} fontWeight={500} textAlign="center">
+                      {cat.name}
+                    </Box>
+                  </Flex>
                 );
               })}
             </Grid>
@@ -1022,17 +1032,9 @@ export default function BoxPage() {
                 Interactive demos
               </Box>
             </Flex>
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={activeCategory}
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -20 }}
-                transition={{ duration: 0.2 }}
-              >
-                <ActiveContent />
-              </motion.div>
-            </AnimatePresence>
+            <Reveal key={activeCategory} x={5} y={0}>
+              <ActiveContent />
+            </Reveal>
           </Box>
         </Flex>
       </Reveal>

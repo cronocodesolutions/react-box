@@ -1,4 +1,3 @@
-import { motion } from 'framer-motion';
 import {
   AlignLeft,
   BookOpen,
@@ -285,8 +284,10 @@ interface MenuSectionProps {
 function MenuSection({ label, children, defaultOpen = true }: MenuSectionProps) {
   const [isOpen, setIsOpen] = useState(defaultOpen);
 
+  // `interpolateSize` inherits, so declaring it on the group is what lets the panel below animate to
+  // `height: auto`. Chromium-only; elsewhere the group snaps open.
   return (
-    <Box mb={4}>
+    <Box mb={4} interpolateSize="allow-keywords">
       <Flex
         ai="center"
         jc="space-between"
@@ -306,20 +307,16 @@ function MenuSection({ label, children, defaultOpen = true }: MenuSectionProps) 
         >
           {label}
         </Box>
-        <motion.div animate={{ rotate: isOpen ? 0 : -90 }} transition={{ duration: 0.2 }}>
+        <Box rotate={isOpen ? 0 : -90} transition="transform" transitionDuration={200}>
           <Icon size={3.5} theme={{ dark: { color: 'slate-500' }, light: { color: 'slate-400' } }}>
             <ChevronDown />
           </Icon>
-        </motion.div>
+        </Box>
       </Flex>
-      <motion.div
-        initial={false}
-        animate={{ height: isOpen ? 'auto' : 0, opacity: isOpen ? 1 : 0 }}
-        transition={{ duration: 0.2 }}
-        style={{ overflow: 'hidden' }}
-      >
+      {/* No `transition` group: the height *and* the opacity move, which is what the base `all` is. */}
+      <Box height={isOpen ? 'auto' : 0} opacity={isOpen ? 1 : 0} overflow="hidden" transitionDuration={200}>
         <Box mt={1}>{children}</Box>
-      </motion.div>
+      </Box>
     </Box>
   );
 }
