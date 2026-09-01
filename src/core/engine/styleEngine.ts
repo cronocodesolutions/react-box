@@ -5,11 +5,12 @@ import ObjectUtils from '../../utils/object/objectUtils';
 import Animations from '../animations';
 import {
   breakpoints,
+  containerQuery,
   cssStyles as defaultCssStyles,
   generatesContent,
-  mediaCondition,
   mediaFeatures,
-  mediaKeys,
+  mediaQuery,
+  NO_QUERY,
   pseudo1,
   pseudo2,
   pseudoClassesOfWeight,
@@ -18,10 +19,13 @@ import {
   PseudoElementKey,
   pseudoGroupClasses,
   pseudoSelector,
+  queryKeys,
   reachesDescendants,
   startingStyleKey,
+  StyleQuery,
   themeGroupClass,
 } from '../boxStyles';
+import Containers from '../containers';
 import { BoxStyle, BoxStyleValue } from '../coreTypes';
 import defaultBoxComponents, { BoxComponent, Components } from '../extends/boxComponents';
 import { resolveComponentStyles } from '../extends/useComponents';
@@ -146,31 +150,29 @@ function serializeValue(value: unknown): string {
   return String(value);
 }
 
-// `normal`, then the breakpoints ascending, then the preference features: the major half of the cascade
-// order, so a responsive rule beats the base one and a preference beats both.
-const mediaRank: Record<string, number> = mediaKeys.reduce<Record<string, number>>((acc, key, index) => {
-  acc[key] = index;
-
-  return acc;
-}, {});
-
 /**
- * Where `@starting-style` ranks: after every ordinary rule, keeping the media order inside its own half.
+ * Where `@starting-style` ranks: after every ordinary rule, keeping the query order inside its own half.
  * The browser computes the before-change style from the whole cascade, so a starting declaration that lands
  * *before* the ordinary declaration of the same property loses and nothing transitions at all — proved in
  * a browser, because no test in this repo can see it.
  */
-const STARTING_RANK = mediaKeys.length;
+const STARTING_RANK = queryKeys.length;
 
 /** The layer the base rules live in — the reset has to lose against every generated rule. */
 const BASE_LAYER = 'rb';
 
+/** The layer one rank owns. Base36 keeps it one character, so `rb1` and `rb10` cannot be the same name. */
+function rankLayerName(rank: number): string {
+  return `${BASE_LAYER}${rank.toString(36)}`;
+}
+
 /**
- * The cascade layer of one generated rule: rank-major, then prop declaration order. The rank is base36 so
- * it stays one character — `rb1` + `0` and `rb10` + `0` would otherwise be the same layer.
+ * The cascade layer of one generated rule: rank-major, then prop declaration order — and the prop is a
+ * *sub-layer* of the rank rather than a name of its own. That is what keeps `layerOrder()` from naming
+ * rank × prop layers: the inner order is one identical statement per rank (see `layerOrder`).
  */
 function layerName(rank: number, sortIndex: number): string {
-  return `${BASE_LAYER}${rank.toString(36)}${sortIndex.toString(36)}`;
+  return `${rankLayerName(rank)}.p${sortIndex.toString(36)}`;
 }
 
 /**
@@ -196,8 +198,8 @@ interface StyleContext {
    * puts an ancestor in front of it.
    */
   element?: PseudoElementKey;
-  /** Which `@media` block the rule belongs in: `normal`, a breakpoint, or a preference feature. */
-  media: string;
+  /** Which at-rule block the rule belongs in: none, a breakpoint, a preference feature, or a container query. */
+  query: StyleQuery;
   /** The group or theme class the selector hangs off — `theme|group` when a group is nested in a theme. */
   parentName?: string;
   /** A selector to style instead of a generated class (`addGlobalStyles`). */
@@ -311,6 +313,7 @@ export function createStyleEngine(options: StyleEngineOptions = {}): StyleEngine
       ObjectUtils.isKeyOf(key, pseudoElements) ||
       ObjectUtils.isKeyOf(key, breakpoints) ||
       ObjectUtils.isKeyOf(key, mediaFeatures) ||
+      ObjectUtils.isKeyOf(key, Containers.containerQueryKey) ||
       ObjectUtils.isKeyOf(key, pseudoGroupClasses) ||
       ObjectUtils.isKeyOf(key, themeGroupClass) ||
       ObjectUtils.isKeyOf(key, startingStyleKey) ||
@@ -346,7 +349,7 @@ export function createStyleEngine(options: StyleEngineOptions = {}): StyleEngine
 
   /** The context a walk starts from: nothing nested yet. */
   function rootContext(): StyleContext {
-    return { pseudoClasses: [], media: 'normal', variants: [] };
+    return { pseudoClasses: [], query: NO_QUERY, variants: [] };
   }
 
   function addClassNames(props: BoxStyleProps<any>, classNames: string[], context: StyleContext) {
@@ -388,7 +391,16 @@ export function createStyleEngine(options: StyleEngineOptions = {}): StyleEngine
         });
       } else if (ObjectUtils.isKeyOf(key, breakpoints) || ObjectUtils.isKeyOf(key, mediaFeatures)) {
         // Both fill the same slot — one `@media` block per rule — and the types already refuse the nesting.
-        addClassNames(value as BoxStyleProps, classNames, { ...context, media: key });
+        addClassNames(value as BoxStyleProps, classNames, { ...context, query: mediaQuery(key) });
+      } else if (ObjectUtils.isKeyOf(key, Containers.containerQueryKey)) {
+        Object.entries(value as Record<string, BoxStyleProps>).forEach(([queryKey, queryProps]) => {
+          // The same one slot a breakpoint fills, so a container query cannot nest in one or the other
+          // way round. A key the grammar rejects drops its whole block, the way a variant's does.
+          const query = containerQuery(queryKey);
+          if (!query) return;
+
+          addClassNames(queryProps, classNames, { ...context, query });
+        });
       } else if (ObjectUtils.isKeyOf(key, Variants.variantKeys)) {
         Object.entries(value as Record<string, BoxStyleProps>).forEach(([name, variantProps]) => {
           const variant = Variants.variant(key, name);
@@ -442,13 +454,13 @@ export function createStyleEngine(options: StyleEngineOptions = {}): StyleEngine
   ) {
     if (value === undefined || value === null) return;
 
-    const { media, parentName, rootSelector, variants, element } = context;
+    const { query, parentName, rootSelector, variants, element } = context;
     const weight = context.pseudoClasses.reduce((sum, pseudoClass) => sum + pseudoClassesWeight[pseudoClass], 0);
     const className = createClassName(key, value, weight, context, startingStyle);
 
     const serializedValue = serializeValue(value);
     const variantKey = variants.map((variant) => variant.name).join('_');
-    const ruleKey = `${media}-${weight}-${element ?? ''}-${key}-${serializedValue}-${parentName ?? ''}-${rootSelector ?? ''}-${startingStyle ? 'start' : ''}-${variantKey}`;
+    const ruleKey = `${query.key}-${weight}-${element ?? ''}-${key}-${serializedValue}-${parentName ?? ''}-${rootSelector ?? ''}-${startingStyle ? 'start' : ''}-${variantKey}`;
 
     if (!generatedRules.has(ruleKey)) {
       generatedRules.add(ruleKey);
@@ -562,7 +574,7 @@ export function createStyleEngine(options: StyleEngineOptions = {}): StyleEngine
     context: StyleContext,
     startingStyle?: boolean,
   ): { rule: string; sortIndex: number; mediaOrder: number } | null {
-    const { media, parentName: pseudoClassParentName, rootSelector } = context;
+    const { query, parentName: pseudoClassParentName, rootSelector } = context;
     const itemValue = findDefinition(key, value);
     if (!itemValue) return null;
 
@@ -573,20 +585,18 @@ export function createStyleEngine(options: StyleEngineOptions = {}): StyleEngine
     }
 
     const sortIndex = cssStylesIndex[key] ?? 0;
-    const rank = mediaRank[media] ?? 0;
-    // The rank a starting rule is pushed into — see `STARTING_RANK`. It is the same dimension the media
-    // query uses, so a preference still beats a breakpoint inside each half.
+    const rank = query.rank;
+    // The rank a starting rule is pushed into — see `STARTING_RANK`. It is the same dimension the query
+    // uses, so a preference still beats a breakpoint inside each half.
     const mediaOrder = rank + (startingStyle ? STARTING_RANK : 0);
-    const condition = mediaCondition(media);
 
     /**
-     * The finished rule: inside `@starting-style` when that is what was asked for, in its media query, and
-     * in element mode in its cascade layer. The space after `@media` matters — the CSS parsers in
-     * happy-dom and jsdom drop `@media(...)` rules outright.
+     * The finished rule: inside `@starting-style` when that is what was asked for, in its `@media` or
+     * `@container` block, and in element mode in its cascade layer.
      */
     function finish(rule: string) {
       const starting = startingStyle ? `@starting-style{${rule}}` : rule;
-      const wrapped = condition === null ? starting : `@media ${condition}{${starting}}`;
+      const wrapped = query.prelude === null ? starting : `${query.prelude}{${starting}}`;
       const layer = startingStyle ? startingLayerName(rank) : layerName(rank, sortIndex);
 
       return {
@@ -690,12 +700,12 @@ export function createStyleEngine(options: StyleEngineOptions = {}): StyleEngine
     context: StyleContext,
     startingStyle?: boolean,
   ) {
-    const { media, parentName, variants, element } = context;
+    const { query, parentName, variants, element } = context;
     const pseudoClassList = pseudoClassesOfWeight(weight);
     const serializedValue = serializeValue(value);
     const variantNames = variants.map((variant) => `${variant.name}-`).join('');
 
-    const className = `${media === 'normal' ? '' : `${media}-`}${startingStyle ? 'starting-' : ''}${pseudoClassList.map((p) => `${p}-`).join('')}${element ? `${element}-` : ''}${variantNames}${parentName ? `${parentName}-` : ''}${key}-${serializedValue}`;
+    const className = `${query.prelude === null ? '' : `${query.key}-`}${startingStyle ? 'starting-' : ''}${pseudoClassList.map((p) => `${p}-`).join('')}${element ? `${element}-` : ''}${variantNames}${parentName ? `${parentName}-` : ''}${key}-${serializedValue}`;
 
     switch (namingMode()) {
       case 'readable':
@@ -710,20 +720,19 @@ export function createStyleEngine(options: StyleEngineOptions = {}): StyleEngine
   }
 
   /**
-   * Every cascade layer, in cascade order, in one statement. Element mode gives up control of where a rule
-   * lands in `<head>` (React hoists in render order), so one layer per (media, prop) makes element order
-   * irrelevant. A prop `extend()` registers after the first render lands after every layer named here.
+   * Every cascade layer, in cascade order: one statement naming the ranks, then each rank's own naming the
+   * props inside it. Element mode gives up control of where a rule lands in `<head>` (React hoists in
+   * render order), so a layer per (rank, prop) is what makes element order irrelevant. A prop `extend()`
+   * registers after the first render lands after every prop named here, inside its rank.
    */
   function layerOrder(): string {
     const names = [BASE_LAYER];
 
     for (let rank = 0; rank < STARTING_RANK; rank++) {
-      for (let index = 0; index < Object.keys(cssStyles).length; index++) {
-        names.push(layerName(rank, index));
-      }
+      names.push(rankLayerName(rank));
     }
 
-    // Last, and one name per media rank rather than one per rank and prop: every `@starting-style` rule
+    // Last, and one name per query rank rather than one per rank and prop: every `@starting-style` rule
     // has to outrank every ordinary one, whatever property it is about. **Descending**, because every
     // starting declaration is `!important` and layer order reverses for those — a preference's starting
     // value has to come first here to keep beating a breakpoint's.
@@ -731,7 +740,18 @@ export function createStyleEngine(options: StyleEngineOptions = {}): StyleEngine
       names.push(startingLayerName(rank));
     }
 
-    return `@layer ${names.join(',')};`;
+    // The prop order *inside* each rank, as the same statement repeated once per rank. Naming every
+    // (rank, prop) pair up front was 3,277 names and 6.6 KB gz once the container queries added twelve
+    // ranks; one repeated block is 0.6 KB, because what gzip stores is the repetition.
+    const props = Object.keys(cssStyles)
+      .map((_, index) => `p${index.toString(36)}`)
+      .join(',');
+    const ranks = names
+      .slice(1, STARTING_RANK + 1)
+      .map((rank) => `@layer ${rank}{@layer ${props};}`)
+      .join('');
+
+    return `@layer ${names.join(',')};${ranks}`;
   }
 
   /** What the base classes transition, as a declaration — empty when the engine was told to declare none. */

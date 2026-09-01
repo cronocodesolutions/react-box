@@ -10,14 +10,19 @@ import { StyleElementDescriptor } from './styleSink';
  * and content-hashed names, so a class resolved in one process matches the one another resolves.
  */
 
-/** The `@layer` order statement, which is the first thing in the base element. */
+/** The `@layer` order statement, which is the first thing in the base element: one name per query rank. */
 function layerStatement(css: string): string[] {
   return css.slice(css.indexOf(' ') + 1, css.indexOf(';')).split(',');
 }
 
-/** The layer a rule element was wrapped in. */
-function layerOf(element: StyleElementDescriptor): string {
-  return /^@layer ([^{]+)\{/.exec(element.css)![1];
+/** The prop order declared *inside* one rank's layer — the same statement, repeated once per rank. */
+function propOrderIn(css: string, rank: string): string[] {
+  return new RegExp(`@layer ${rank}\\{@layer ([^;]+);\\}`).exec(css)![1].split(',');
+}
+
+/** The layer a rule element was wrapped in, as its rank layer and the prop sub-layer inside it. */
+function layerOf(element: StyleElementDescriptor): [string, string] {
+  return /^@layer ([^{]+)\{/.exec(element.css)![1].split('.') as [string, string];
 }
 
 function elementsOf(engine: StyleEngine, props: Parameters<StyleEngine['resolveClassNames']>[0]) {
@@ -44,20 +49,22 @@ describe('element mode', () => {
 
     // Layer names are derived from prop declaration order, so they are matched by shape: what the
     // test is about is that `p` comes back before `px`, each in a layer of its own.
-    expect(rules[0].css).toMatch(/^@layer rb0\w+\{\.p-4\{padding:1rem\}\}$/);
-    expect(rules[1].css).toMatch(/^@layer rb0\w+\{\.px-2\{padding-inline:0\.5rem\}\}$/);
+    expect(rules[0].css).toMatch(/^@layer rb0\.p\w+\{\.p-4\{padding:1rem\}\}$/);
+    expect(rules[1].css).toMatch(/^@layer rb0\.p\w+\{\.px-2\{padding-inline:0\.5rem\}\}$/);
     expect(rules.every((rule) => rule.precedence === 'rb')).toBe(true);
     expect(rules.every((rule) => rule.href.startsWith('rb-'))).toBe(true);
   });
 
   it('layers a shorthand ahead of the longhand that must override it', () => {
     // `p` and `px` both write padding, and today's cascade resolves them by prop declaration
-    // order. A hoisted element cannot rely on its position in `<head>`, so the layer statement is
-    // what has to carry that order.
+    // order. A hoisted element cannot rely on its position in `<head>`, so the layer statements are
+    // what has to carry that order — for two props in the same rank, the rank's own inner statement.
     const { base, rules } = elementsOf(makeEngine('elements-order', { sink: 'element' }), { px: 2, p: 4 });
-    const layers = layerStatement(base.css);
+    const [shorthand, longhand] = rules.map(layerOf);
+    const props = propOrderIn(base.css, shorthand[0]);
 
-    expect(layers.indexOf(layerOf(rules[0]))).toBeLessThan(layers.indexOf(layerOf(rules[1])));
+    expect(shorthand[0]).toBe(longhand[0]);
+    expect(props.indexOf(shorthand[1])).toBeLessThan(props.indexOf(longhand[1]));
   });
 
   it('layers every breakpoint after every base rule', () => {
@@ -65,8 +72,9 @@ describe('element mode', () => {
     const layers = layerStatement(base.css);
     const [normal, responsive] = rules;
 
-    expect(responsive.css).toMatch(/^@layer rb1\w+\{@media \(min-width: 640px\)\{\.sm-px-2\{padding-inline:0\.5rem\}\}\}$/);
-    expect(layers.indexOf(layerOf(responsive))).toBeGreaterThan(layers.indexOf(layerOf(normal)));
+    expect(responsive.css).toMatch(/^@layer rb1\.p\w+\{@media \(min-width: 640px\)\{\.sm-px-2\{padding-inline:0\.5rem\}\}\}$/);
+    // The rank is the outer layer, so a breakpoint outranks every base rule whatever prop it is about.
+    expect(layers.indexOf(layerOf(responsive)[0])).toBeGreaterThan(layers.indexOf(layerOf(normal)[0]));
     // The responsive rule sorts after the base one whatever order the two Boxes rendered in.
     expect(responsive.sortKey).toBeGreaterThan(normal.sortKey);
   });
@@ -114,7 +122,7 @@ describe('element mode', () => {
     const css = engine.getStyles();
 
     expect(css).toContain('@layer rb{:root{');
-    expect(css).toMatch(/@layer rb0\w+\{\.p-4\{padding:1rem\}\}/);
+    expect(css).toMatch(/@layer rb0\.p\w+\{\.p-4\{padding:1rem\}\}/);
   });
 
   it('hands back global styles as elements too', () => {
@@ -122,7 +130,7 @@ describe('element mode', () => {
     const elements = engine.addGlobalStyles({ p: 4 }, 'html')!;
 
     expect(elements[0].precedence).toBe('rb-base');
-    expect(elements[1].css).toMatch(/^@layer rb0\w+\{html\{padding:1rem\}\}$/);
+    expect(elements[1].css).toMatch(/^@layer rb0\.p\w+\{html\{padding:1rem\}\}$/);
   });
 
   it('starts over after clear(), the way a server does between requests', () => {
@@ -137,7 +145,7 @@ describe('element mode', () => {
     // request two gets its own base element and its own rule elements, not leftovers.
     expect(second.rules.map((rule) => rule.href)).toEqual(first.rules.map((rule) => rule.href));
     expect(second.base.href).toBe(first.base.href);
-    expect(engine.getStyles()).toMatch(/@layer rb0\w+\{\.p-4\{padding:1rem\}\}/);
+    expect(engine.getStyles()).toMatch(/@layer rb0\.p\w+\{\.p-4\{padding:1rem\}\}/);
   });
 
   it('produces no elements — and no layers — in every other mode', () => {

@@ -1,6 +1,6 @@
 # @cronocode/react-box - AI Assistant Context
 
-Runtime CSS-in-JS library. `Box` component accepts 152 CSS props and generates CSS classes at runtime. Same prop values share a single class.
+Runtime CSS-in-JS library. `Box` component accepts 155 CSS props and generates CSS classes at runtime. Same prop values share a single class.
 
 ---
 
@@ -106,6 +106,7 @@ height="fit" // 100%    height="fit-screen" // 100vh    width="1/2" // 50%
 | `ai`                       | align-items                    | `'center'`, `'start'`, `'end'`, `'stretch'`, `'baseline'`                  |
 | `jc`                       | justify-content                | `'center'`, `'start'`, `'end'`, `'between'`, `'around'`, `'evenly'`        |
 | `flex` / `grow` / `shrink` | flex / flex-grow / flex-shrink | number or string                                                           |
+| `container`                | container(-type)               | `true`, or a name — makes the element a query container (see `cq` below)   |
 
 ### Sizing
 
@@ -118,23 +119,23 @@ All sizing, spacing, and positioning props also accept percentage strings: `p="5
 
 ### Visual
 
-| Prop                                                                             | CSS Property                            | Notes                                                                                                                                                                           |
-| -------------------------------------------------------------------------------- | --------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Prop                                                                             | CSS Property                            | Notes                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| -------------------------------------------------------------------------------- | --------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `bgColor` / `color` / `borderColor`                                              | background-color / color / border-color | Tailwind palette: `'gray-50'`..`'gray-900'`, same for red/orange/yellow/green/teal/blue/indigo/purple/pink/violet. Also `'white'`, `'black'`, `'transparent'`, `'currentColor'`. Plus the CSS **system colours** (`'Canvas'`, `'CanvasText'`, `'ButtonFace'`, `'ButtonText'`, `'Highlight'`, `'HighlightText'`, `'GrayText'`, `'LinkText'`) — keywords rather than tokens, and the one palette a forced-colors mode keeps |
-| `b` / `bx` / `by` / `bt` / `br` / `bb` / `bl`                                    | border-width                            | direct px                                                                                                                                                                       |
-| `borderRadius`                                                                   | border-radius                           | divider 4 (spacing scale)                                                                                                                                                       |
-| `borderStyle`                                                                    | border-style                            | `'solid'`, `'dashed'`, `'dotted'`, `'none'`                                                                                                                                     |
-| `fontSize`                                                                       | font-size                               | divider 16                                                                                                                                                                      |
-| `fontWeight`                                                                     | font-weight                             | `400`, `500`, `600`, `700`, etc.                                                                                                                                                |
-| `lineHeight`                                                                     | line-height                             | direct px                                                                                                                                                                       |
-| `textAlign` / `textDecoration` / `textTransform` / `whiteSpace` / `textOverflow` | text properties                         | string values                                                                                                                                                                   |
-| `overflow`                                                                       | overflow                                | `'hidden'`, `'auto'`, `'scroll'`, `'visible'`                                                                                                                                   |
-| `position`                                                                       | position                                | `'relative'`, `'absolute'`, `'fixed'`, `'sticky'`                                                                                                                               |
-| `top` / `right` / `bottom` / `left` / `inset`                                    | positioning offsets                     | number or string                                                                                                                                                                |
-| `zIndex`                                                                         | z-index                                 | number                                                                                                                                                                          |
-| `shadow`                                                                         | box-shadow                              | `'small'`, `'medium'`, `'large'`, `'xl'`, `'none'`                                                                                                                              |
-| `opacity`                                                                        | opacity                                 | number                                                                                                                                                                          |
-| `cursor` / `pointerEvents` / `userSelect`                                        | misc                                    | string values. For `transition`, `animation` and the transform props see _Animation and transitions_ below                                                                      |
+| `b` / `bx` / `by` / `bt` / `br` / `bb` / `bl`                                    | border-width                            | direct px                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| `borderRadius`                                                                   | border-radius                           | divider 4 (spacing scale)                                                                                                                                                                                                                                                                                                                                                                                                 |
+| `borderStyle`                                                                    | border-style                            | `'solid'`, `'dashed'`, `'dotted'`, `'none'`                                                                                                                                                                                                                                                                                                                                                                               |
+| `fontSize`                                                                       | font-size                               | divider 16                                                                                                                                                                                                                                                                                                                                                                                                                |
+| `fontWeight`                                                                     | font-weight                             | `400`, `500`, `600`, `700`, etc.                                                                                                                                                                                                                                                                                                                                                                                          |
+| `lineHeight`                                                                     | line-height                             | direct px                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| `textAlign` / `textDecoration` / `textTransform` / `whiteSpace` / `textOverflow` | text properties                         | string values                                                                                                                                                                                                                                                                                                                                                                                                             |
+| `overflow`                                                                       | overflow                                | `'hidden'`, `'auto'`, `'scroll'`, `'visible'`                                                                                                                                                                                                                                                                                                                                                                             |
+| `position`                                                                       | position                                | `'relative'`, `'absolute'`, `'fixed'`, `'sticky'`                                                                                                                                                                                                                                                                                                                                                                         |
+| `top` / `right` / `bottom` / `left` / `inset`                                    | positioning offsets                     | number or string                                                                                                                                                                                                                                                                                                                                                                                                          |
+| `zIndex`                                                                         | z-index                                 | number                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| `shadow`                                                                         | box-shadow                              | `'small'`, `'medium'`, `'large'`, `'xl'`, `'none'`                                                                                                                                                                                                                                                                                                                                                                        |
+| `opacity`                                                                        | opacity                                 | number                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| `cursor` / `pointerEvents` / `userSelect`                                        | misc                                    | string values. For `transition`, `animation` and the transform props see _Animation and transitions_ below                                                                                                                                                                                                                                                                                                                |
 
 ### Custom properties (`vars`)
 
@@ -375,12 +376,12 @@ const wobble = Box.spring({ stiffness: 120, damping: 8 });
 
 A fourth kind of nesting: a selector fragment on the element's **own** compound selector, so a state your code sets — a menu that is open, a row that is selected, a step that is loading — is styled in CSS instead of with a ternary in the markup. The record _key_ is the selector.
 
-| Prop       | Key                                                       | Selector it builds                                                                       |
-| ---------- | --------------------------------------------------------- | ---------------------------------------------------------------------------------------- |
-| `dataAttr` | `'state=open'` / `'loading'`                              | `[data-state="open"]` / `[data-loading]`                                                 |
-| `ariaAttr` | `'selected'` / `'sort=ascending'`                         | `[aria-selected="true"]` — a bare key means `="true"` — / `[aria-sort="ascending"]`      |
-| `has`      | `':checked'` / `'img[alt]'`                               | `:has(:checked)` / `:has(img[alt])`                                                      |
-| `not`      | a pseudo-class **name**: `hover`, `checked`, `disabled`… | `:not(:hover)`                                                                           |
+| Prop       | Key                                                      | Selector it builds                                                                  |
+| ---------- | -------------------------------------------------------- | ----------------------------------------------------------------------------------- |
+| `dataAttr` | `'state=open'` / `'loading'`                             | `[data-state="open"]` / `[data-loading]`                                            |
+| `ariaAttr` | `'selected'` / `'sort=ascending'`                        | `[aria-selected="true"]` — a bare key means `="true"` — / `[aria-sort="ascending"]` |
+| `has`      | `':checked'` / `'img[alt]'`                              | `:has(:checked)` / `:has(img[alt])`                                                 |
+| `not`      | a pseudo-class **name**: `hover`, `checked`, `disabled`… | `:not(:hover)`                                                                      |
 
 ```tsx
 // The attribute goes in `props`, where every attribute goes; the styling goes in `dataAttr`.
@@ -410,14 +411,14 @@ A fourth kind of nesting: a selector fragment on the element's **own** compound 
 
 A fifth kind of nesting, and the only one CSS allows **one** of: a pseudo-element is a slot, not a list, and it is appended last to whatever the other keys build.
 
-| Prop                                        | Element                  | Notes                                                                       |
-| ------------------------------------------- | ------------------------ | --------------------------------------------------------------------------- |
-| `before` / `after`                          | `::before` / `::after`   | Generate a box, so they come with `content` (below)                         |
-| `placeholder`                               | `::placeholder`          | On `Textbox`/`Textarea` a **string** is the attribute, an object the styles |
-| `selection`                                 | `::selection`            | Names descendants too — the text may be in a child                          |
-| `marker`                                    | `::marker`               | Same: write it on the `<Ul>`, it reaches the `<Li>`                          |
-| `firstLine` / `firstLetter`                 | `::first-line` / `-letter` | Typography only, per CSS                                                  |
-| `backdrop` / `fileButton`                   | `::backdrop` / `::file-selector-button` | A `<dialog>`/popover, and an `<input type="file">`      |
+| Prop                        | Element                                 | Notes                                                                       |
+| --------------------------- | --------------------------------------- | --------------------------------------------------------------------------- |
+| `before` / `after`          | `::before` / `::after`                  | Generate a box, so they come with `content` (below)                         |
+| `placeholder`               | `::placeholder`                         | On `Textbox`/`Textarea` a **string** is the attribute, an object the styles |
+| `selection`                 | `::selection`                           | Names descendants too — the text may be in a child                          |
+| `marker`                    | `::marker`                              | Same: write it on the `<Ul>`, it reaches the `<Li>`                         |
+| `firstLine` / `firstLetter` | `::first-line` / `-letter`              | Typography only, per CSS                                                    |
+| `backdrop` / `fileButton`   | `::backdrop` / `::file-selector-button` | A `<dialog>`/popover, and an `<input type="file">`                          |
 
 ```tsx
 // A ::before with no `content` generates no box at all, so declaring one supplies content: '' —
@@ -472,6 +473,48 @@ Three more media keys, shaped exactly like a breakpoint — they nest pseudo-cla
 ```
 
 **They do not nest inside a breakpoint, or inside each other** — one rule lives in one `@media` block, so `md={{ motionReduce: {...} }}` is a type error rather than a query that silently drops half of what was asked.
+
+### Container queries — `cq`
+
+The same question a breakpoint asks, addressed to the element's own container: the card is wide in a page and narrow in a sidebar, and the viewport says nothing about which. `container` makes an element a container, `cq` queries one.
+
+| Prop            | CSS                            | Notes                                                                             |
+| --------------- | ------------------------------ | --------------------------------------------------------------------------------- |
+| `container`     | `container-type` / `container` | `true` → `inline-size`; a name → `container: <name> / inline-size`                |
+| `containerName` | `container-name`               | The longhand, for a name beside `containerType="size"`                            |
+| `containerType` | `container-type`               | `'inline-size'`, `'size'` (both axes, needs its own block size), `'normal'` (off) |
+| `cq`            | `@container`                   | Keyed by size: `md`, its complement `maxMd`, or `'name/md'` for a named container |
+
+| Size  | Query                      | Complement                         |
+| ----- | -------------------------- | ---------------------------------- |
+| `xs`  | `(min-width: 20rem)` 320px | `maxXs` → `not (min-width: 20rem)` |
+| `sm`  | `(min-width: 24rem)` 384px | `maxSm`                            |
+| `md`  | `(min-width: 28rem)` 448px | `maxMd`                            |
+| `lg`  | `(min-width: 32rem)` 512px | `maxLg`                            |
+| `xl`  | `(min-width: 36rem)` 576px | `maxXl`                            |
+| `xxl` | `(min-width: 42rem)` 672px | `maxXxl`                           |
+
+```tsx
+// A card that lays itself out from the space it was given — the window never comes into it
+<Flex container>
+  <Flex d="column" cq={{ sm: { d: 'row', ai: 'center' } }} gap={4} p={4}>…</Flex>
+</Flex>
+
+// A name, for when a card sits inside a card. `cq` queries the *nearest* container by default.
+<Flex container="page">
+  <Flex container="card">
+    <Box cq={{ md: { fontSize: 16 }, 'page/xl': { fontSize: 18 }, maxSm: { display: 'none' } }} />
+  </Flex>
+</Flex>
+
+// Everything a breakpoint nests, nests here too
+<Box cq={{ md: { hover: { color: 'indigo-500' }, theme: { dark: { bgColor: 'slate-800' } }, before: { content: 'Wide' } } }} />
+```
+
+- **The cascade puts a container query after every breakpoint and before every preference** — the element's own space is the more local statement, and neither is a reason to override `motionReduce`. Sizes ascend, the `max` keys descend, so the narrower one wins where two overlap.
+- **One at-rule block per rule**, so `cq` does not nest inside a breakpoint and a breakpoint does not nest inside `cq` — a type error, the same way two breakpoints are.
+- **The container name is validated** because it lands in an at-rule prelude: anything that is not a CSS identifier, or a word the prelude uses (`not`, `and`, `or`), drops the whole block — no rule and no class name.
+- `container` costs something: an inline-size container's width no longer depends on its contents. That is what makes the query possible, and the reason not to declare it everywhere.
 
 ### Theme System
 

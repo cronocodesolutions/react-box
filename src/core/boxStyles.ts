@@ -1,5 +1,6 @@
 import Animations from './animations';
 import { BoxStylesFormatters } from './boxStylesFormatters';
+import Containers from './containers';
 import Content from './content';
 import { BoxStyle, BoxStyleValue } from './coreTypes';
 import Variables from './variables';
@@ -457,6 +458,45 @@ export const cssStyles = {
       values: [true] as const,
       styleName: 'display',
       valueFormat: () => 'inline-block',
+    },
+  ],
+  /**
+   * Makes this element a query container, so the `cq` styles inside it answer to *its* width: `container`
+   * alone is an anonymous one (the nearest container `cq={{ md: … }}` finds), a name is what
+   * `cq={{ 'sidebar/md': … }}` addresses. Both mean `container-type: inline-size` — the only type that
+   * does not need the element to have a size of its own. The three props are declared shorthand-first, so
+   * `containerType` beside `container` overrides the type and keeps the name.
+   */
+  container: [
+    {
+      values: [true] as const,
+      styleName: 'container-type',
+      valueFormat: () => 'inline-size',
+    },
+    {
+      values: '' as string,
+      match: Containers.isContainerName,
+      styleName: 'container',
+      valueFormat: (value: string) => `${value} / inline-size`,
+    },
+  ],
+  /** The name `cq={{ 'sidebar/md': … }}` addresses. Only a query container answers, so pair it with `containerType`. */
+  containerName: [
+    {
+      values: '' as string,
+      match: Containers.isContainerName,
+      styleName: 'container-name',
+    },
+  ],
+  /**
+   * What may be asked about this container: `inline-size` (its width, what `container` sets), `size` (both
+   * axes — which needs the element to have a block size of its own, or its content stops laying it out),
+   * or `normal` to stop being a query container at all.
+   */
+  containerType: [
+    {
+      values: ['inline-size', 'size', 'normal'] as const,
+      styleName: 'container-type',
     },
   ],
   /**
@@ -1956,14 +1996,55 @@ export const mediaFeatures = {
 };
 
 /**
- * Every key that puts a rule in an `@media` block, in cascade order with `normal` (no query) first. The
- * engine ranks rules by this and names their cascade layer from it.
+ * Where a rule's at-rule block sits: what its prelude says, and where it lands in the cascade. One slot
+ * per rule — a breakpoint, a preference and a container query all fill it, and the types refuse to nest
+ * one inside another, because a rule lives in exactly one block.
  */
-export const mediaKeys: readonly string[] = ['normal', ...Object.keys(breakpoints), ...Object.keys(mediaFeatures)];
+export interface StyleQuery {
+  /** The key as written: the class-name segment, and part of the rule key. */
+  key: string;
+  /** Cascade position — the dimension `@starting-style` is pushed past in its entirety. */
+  rank: number;
+  /** The at-rule prelude, or null for a rule that needs no block. */
+  prelude: string | null;
+}
 
-/** The `@media` condition one media key stands for, or null for `normal`, which needs no query. */
-export function mediaCondition(key: string): string | null {
-  if (key in breakpoints) return `(min-width: ${breakpoints[key as keyof typeof breakpoints]}px)`;
+/** A rule with no at-rule block around it, which is where every walk starts. */
+export const NO_QUERY: StyleQuery = { key: 'normal', rank: 0, prelude: null };
 
-  return mediaFeatures[key as keyof typeof mediaFeatures] ?? null;
+/**
+ * Every cascade slot an at-rule block can take, in order: no query, the breakpoints ascending, the
+ * container queries, then the preference features — a screen wide enough for `xxl` is not a reason to
+ * override a statement about the reader, and neither is a container. The engine ranks rules by this and
+ * names their cascade layer from it.
+ */
+export const queryKeys: readonly string[] = ['normal', ...Object.keys(breakpoints), ...Containers.rankKeys, ...Object.keys(mediaFeatures)];
+
+const queryRanks = new Map<string, number>(queryKeys.map((key, index) => [key, index]));
+
+// The space after `@media` matters: the CSS parsers in happy-dom and jsdom drop `@media(...)` outright.
+const mediaQueries = new Map<string, StyleQuery>(
+  [...Object.entries(breakpoints).map(([key, width]) => [key, `(min-width: ${width}px)`] as const), ...Object.entries(mediaFeatures)].map(
+    ([key, condition]) => [key, { key, rank: queryRanks.get(key) ?? 0, prelude: `@media ${condition}` }],
+  ),
+);
+
+/** The `@media` block one breakpoint or preference key stands for. */
+export function mediaQuery(key: string): StyleQuery {
+  return mediaQueries.get(key) ?? NO_QUERY;
+}
+
+// Compiled `cq` keys, kept: they come from source code, so a page asks for the same few over and over.
+const containerQueries = new Map<string, StyleQuery | null>();
+
+/** The `@container` block one `cq` key stands for, or null when its grammar rejects it. */
+export function containerQuery(key: string): StyleQuery | null {
+  const cached = containerQueries.get(key);
+  if (cached !== undefined) return cached;
+
+  const compiled = Containers.query(key);
+  const query = compiled ? { key: compiled.key, rank: queryRanks.get(compiled.rankKey) ?? 0, prelude: compiled.prelude } : null;
+  containerQueries.set(key, query);
+
+  return query;
 }

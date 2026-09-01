@@ -167,7 +167,7 @@ export default function AiContextPage() {
             <FeatureItem
               icon={<Code2 size={18} />}
               title="Complete prop reference"
-              description="All 152 props with their CSS mappings and accepted values"
+              description="All 155 props with their CSS mappings and accepted values"
             />
             <FeatureItem
               icon={<Zap size={18} />}

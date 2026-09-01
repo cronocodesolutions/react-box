@@ -156,7 +156,7 @@ describe('numeric dividers', () => {
  * Candidates offered to a definition that declares `match`: the walk uses the first one it says yes to,
  * which also proves the predicate accepts anything at all. A new `match` definition needs its shape here.
  */
-const matchCandidates = ['url(#sample)', 'var(--sample)', '50%', 'none', 4, { 'sample-var': 'red-500' }, 'linear(0,1)'] as const;
+const matchCandidates = ['url(#sample)', 'var(--sample)', '50%', 'none', 4, { 'sample-var': 'red-500' }, 'linear(0,1)', 'sample'] as const;
 
 /** A sample value as text, so a record reads as itself rather than as `[object Object]`. */
 function label(value: unknown): string {
@@ -233,7 +233,7 @@ describe('every declared prop value produces a rule', () => {
   // description, BOX_AI_CONTEXT.md, both skill files and two places on the docs site. Every one of
   // those was written by hand and none of them was ever checked, so the figure drifted to '~144'
   // against a registry of 117 (bug #71). Adding a prop now fails here until they are updated.
-  const PROP_COUNT = 152;
+  const PROP_COUNT = 155;
 
   it('holds exactly the number of props the docs claim', () => {
     expect(Object.keys(cssStyles).length).toBe(PROP_COUNT);
