@@ -1,5 +1,6 @@
 import { forwardRef, Ref, RefAttributes } from 'react';
 import Box, { BoxProps, BoxTagProps } from '../box';
+import { OmitTagProps } from '../react/boxProps';
 import LabelledControl from '../react/forms/labelledControl';
 import { ComponentsAndVariants } from '../types';
 import ObjectUtils from '../utils/object/objectUtils';
@@ -8,7 +9,7 @@ const tagProps = ['name', 'onInput', 'onChange', 'value', 'autoFocus', 'readOnly
 type TagPropsType = (typeof tagProps)[number];
 
 type RadioButtonProps<TKey extends keyof ComponentsAndVariants> = Omit<BoxProps<'input', TKey>, 'tag' | 'props'>;
-type RadioButtonTagProps = Omit<BoxTagProps<'input'>, TagPropsType | 'type'>;
+type RadioButtonTagProps = OmitTagProps<BoxTagProps<'input'>, TagPropsType | 'type'>;
 
 interface Props<TKey extends keyof ComponentsAndVariants> extends RadioButtonProps<TKey> {
   name?: string;

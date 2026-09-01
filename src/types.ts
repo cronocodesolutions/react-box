@@ -6,6 +6,7 @@ import {
   pseudo1,
   pseudo2,
   pseudoClasses,
+  pseudoElements,
   pseudoGroupClasses,
   startingStyleKey,
   themeGroupClass,
@@ -41,8 +42,17 @@ export type ExtractBoxStyles<T extends Record<string, BoxStyle[]>> = {
 export type PseudoClassesType = keyof typeof pseudoClasses;
 export type BoxStyles = ExtractBoxStylesInternal<typeof cssStyles> & Augmented.BoxProps;
 
+/**
+ * The nesting keys, as one generic each, because there are two families of them: what a Box takes, and
+ * what a *pseudo-element* block takes — the same thing minus a second pseudo-element, since a compound
+ * selector holds one and CSS puts it last.
+ */
+type BoxPseudoClassesNesting<T> = ExtractKeys<typeof pseudo1, T> & ExtractKeys<typeof pseudo2, T>;
+type BoxVariantNesting<T> = ExtractKeys<Omit<typeof Variants.variantKeys, 'not'>, Record<string, T>> &
+  ExtractKeys<Pick<typeof Variants.variantKeys, 'not'>, Partial<Record<Variants.NotKey, T>>>;
+type BoxPseudoElementNesting<T> = ExtractKeys<typeof pseudoElements, T>;
+
 type BoxPseudoClassesStyles1 = ExtractKeys<typeof pseudo1, BoxStylesWithPseudoClasses>;
-type BoxPseudoClassesStyles2Nested = ExtractKeys<typeof pseudo2, BoxStylesWithPseudoClasses>;
 type BoxPseudoClassesStyles2TopLevel = ExtractKeys<typeof pseudo2, boolean | [boolean, BoxStylesWithPseudoClasses]>;
 /**
  * `startingStyle` takes plain props and nothing else: the block wraps a finished rule, so a breakpoint or
@@ -54,14 +64,21 @@ type BoxStartingStyles = ExtractKeys<typeof startingStyleKey, BoxStyles>;
  * `dataAttr={{ 'state=open': … }}` — and a key the grammar rejects is dropped whole, the way an
  * unmatched prop value is. `not` is keyed by pseudo-class name instead, so it stays typed.
  */
-type BoxAttributeVariantStyles = ExtractKeys<Omit<typeof Variants.variantKeys, 'not'>, Record<string, BoxStylesWithPseudoClasses>>;
-type BoxNotVariantStyles = ExtractKeys<
-  Pick<typeof Variants.variantKeys, 'not'>,
-  Partial<Record<Variants.NotKey, BoxStylesWithPseudoClasses>>
->;
-export interface BoxVariantStyles extends BoxAttributeVariantStyles, BoxNotVariantStyles {}
+export interface BoxVariantStyles extends BoxVariantNesting<BoxStylesWithPseudoClasses> {}
+/**
+ * What a pseudo-element block takes: plain props, pseudo-classes, variants and `startingStyle` — the
+ * element is appended to whatever they build, so all of it still resolves to one compound selector.
+ * A second pseudo-element is not offered: `::before::after` matches nothing at all.
+ */
+export interface BoxPseudoElementStyles
+  extends BoxStyles, BoxStartingStyles, BoxPseudoClassesNesting<BoxPseudoElementStyles>, BoxVariantNesting<BoxPseudoElementStyles> {}
 export interface BoxStylesWithPseudoClasses
-  extends BoxStyles, BoxPseudoClassesStyles1, BoxPseudoClassesStyles2Nested, BoxStartingStyles, BoxVariantStyles {}
+  extends
+    BoxStyles,
+    BoxStartingStyles,
+    BoxPseudoClassesNesting<BoxStylesWithPseudoClasses>,
+    BoxVariantNesting<BoxStylesWithPseudoClasses>,
+    BoxPseudoElementNesting<BoxPseudoElementStyles> {}
 
 type BoxPseudoGroupClassesStyles = ExtractKeys<typeof pseudoGroupClasses, Record<string, BoxStylesWithPseudoClasses>>;
 type BoxThemeGroupClassStyles = ExtractKeys<
@@ -131,6 +148,7 @@ export type BoxStyleProps<TKey extends keyof ComponentsAndVariants = never> = Si
     BoxStartingStyles &
     BoxVariantStyles &
     BoxPseudoClassesStyles1 &
+    BoxPseudoElementNesting<BoxPseudoElementStyles> &
     BoxPseudoClassesStyles2TopLevel &
     BoxPseudoGroupClassesStyles &
     BoxThemeGroupClassStyles &

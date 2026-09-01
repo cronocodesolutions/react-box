@@ -1296,8 +1296,16 @@ fails if anything but a comment changed.
 
 1. Add to `pseudo1` (nested styles only) or `pseudo2` (also settable as a boolean) in `boxStyles.ts`
 2. Weights and the reverse lookup come from the declaration order — `pseudoClassesWeight` and `pseudoClassesOfWeight` derive from `pseudoClasses`, so there is nothing to update by hand. It is a 32-bit mask, so the map cannot grow past 31 keys
-3. A pseudo-_element_ also goes in `pseudoElements`, which is what keeps it last in a compound selector
-4. Types auto-generate
+3. Types auto-generate
+
+### Add a New Pseudo-Element
+
+A different dimension from a pseudo-class, because CSS allows **one** per compound selector and it has to be last: they live in the `pseudoElements` record and travel as a `StyleContext.element` slot, not as a bit in the weight mask.
+
+1. Add the key and its selector to `pseudoElements` in `boxStyles.ts`
+2. If it generates a box of its own, add it to `generatedElements` — the walk supplies `content: ''` for those unless the block declares one, since a generated element with no `content` renders nothing at all
+3. If it belongs to a descendant (`::marker` is the list item's, `::selection` is whatever holds the text), add it to `inheritedElements`: its rule then names `.x *::el` as well, the two selectors Tailwind's `marker:`/`selection:` variants emit
+4. Types auto-generate — `BoxPseudoElementStyles` is the family that offers everything except a second pseudo-element
 
 ### Add a New State Variant
 

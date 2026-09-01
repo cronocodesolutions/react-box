@@ -80,6 +80,12 @@ export const siteRoutes = [
       'Style by a data-* or aria-* attribute, by what an element contains, or by a state it is not in — four nesting keys, one rule per state.',
   },
   {
+    path: '/pseudo-elements',
+    name: 'Pseudo-Elements',
+    description:
+      'before, after, placeholder, selection, marker and four more as nested props — with the content a generated element needs supplied for you.',
+  },
+  {
     path: '/animation',
     name: 'Animation',
     description:

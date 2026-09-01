@@ -37,6 +37,10 @@ export const Section = semantic('section');
 export const Summary = semantic('summary');
 export const Time = semantic('time');
 export const P = semantic('p');
+// A list, because `marker` is a prop now and `::marker` applies to nothing else.
+export const Ul = semantic('ul');
+export const Ol = semantic('ol');
+export const Li = semantic('li');
 export const H1 = semantic('h1');
 export const H2 = semantic('h2');
 export const H3 = semantic('h3');

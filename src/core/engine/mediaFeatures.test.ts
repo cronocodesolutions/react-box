@@ -25,14 +25,17 @@ describe('accessibility media features', () => {
     ]);
   });
 
-  it('nests pseudo-classes the way a breakpoint does', () => {
+  it('nests pseudo-classes and pseudo-elements the way a breakpoint does', () => {
     const engine = makeEngine('media-features-pseudo');
 
     renderStyles(engine, { motionReduce: { hover: { opacity: 1 }, before: { transition: 'none' } } });
 
+    // The `content` comes with the `::before` and lands in the same block: a generated element renders
+    // nothing without one, and it exists in exactly the states it was styled in.
     expect(ruleList(engine)).toEqual([
       '@media (prefers-reduced-motion: reduce){.motionReduce-hover-opacity-1:hover{opacity:1}}',
       '@media (prefers-reduced-motion: reduce){.motionReduce-before-transition-none::before{transition-property:none}}',
+      "@media (prefers-reduced-motion: reduce){.motionReduce-before-content-empty::before{content:''}}",
     ]);
   });
 
