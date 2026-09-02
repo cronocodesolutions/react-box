@@ -44,6 +44,24 @@ const percentValue = {
 } satisfies BoxStyle;
 
 /**
+ * A ratio written compactly — `aspectRatio="4/3"` — spaced out into the `4 / 3` CSS reads. It carries its
+ * own `match` for the reason every template type does: a scalar `values` is matched by `typeof` alone, so
+ * `"4:3"` would otherwise reach CSS verbatim and the box would size itself off nothing (bug #31).
+ */
+const ratioValue = {
+  values: Variables.ratio,
+  match: Variables.isRatio,
+  valueFormat: (value: string) => value.replace('/', ' / '),
+} satisfies BoxStyle;
+
+/**
+ * The overflow-safe alignments, on every alignment prop: `safe center` centres until the content stops
+ * fitting and then aligns to `start`. Plain `center` overflows both edges, and the half above the
+ * scrollable origin cannot be reached at all — a centred dialog taller than the viewport loses its top.
+ */
+const safeAlignments = ['safe center', 'safe start', 'safe end', 'unsafe center', 'unsafe start', 'unsafe end'] as const;
+
+/**
  * One axis of the composed `translate`. Both axes used to write `transform`, so a Box asking for both kept
  * whichever rule landed last; each now sets its own custom property and both write the same declaration,
  * which still transitions because `var()` substitutes at computed-value time.
@@ -360,6 +378,9 @@ export const cssStyles = {
       valueFormat: BoxStylesFormatters.Value.rem,
     },
     {
+      values: ['auto'] as const,
+    },
+    {
       values: Variables.percentages,
       valueFormat: BoxStylesFormatters.Value.fraction,
     },
@@ -376,6 +397,9 @@ export const cssStyles = {
     {
       values: 0,
       valueFormat: BoxStylesFormatters.Value.rem,
+    },
+    {
+      values: ['auto'] as const,
     },
     {
       values: Variables.percentages,
@@ -396,6 +420,9 @@ export const cssStyles = {
       valueFormat: BoxStylesFormatters.Value.rem,
     },
     {
+      values: ['auto'] as const,
+    },
+    {
       values: Variables.percentages,
       valueFormat: BoxStylesFormatters.Value.fraction,
     },
@@ -412,6 +439,9 @@ export const cssStyles = {
     {
       values: 0,
       valueFormat: BoxStylesFormatters.Value.rem,
+    },
+    {
+      values: ['auto'] as const,
     },
     {
       values: Variables.percentages,
@@ -432,7 +462,70 @@ export const cssStyles = {
       valueFormat: BoxStylesFormatters.Value.rem,
     },
     {
+      values: ['auto'] as const,
+    },
+    {
+      values: Variables.percentages,
+      valueFormat: BoxStylesFormatters.Value.fraction,
+    },
+    {
+      values: Variables.negativePercentages,
+      valueFormat: BoxStylesFormatters.Value.fraction,
+    },
+    {
       ...percentValue,
+    },
+  ],
+  /** The inset-inline CSS shorthand sets both insets on the inline axis: `insetX` is `left` and `right` in a left-to-right writing mode, the way `mx` is `margin-inline`. */
+  insetX: [
+    {
+      values: 0,
+      styleName: 'inset-inline',
+      valueFormat: BoxStylesFormatters.Value.rem,
+    },
+    {
+      values: ['auto'] as const,
+      styleName: 'inset-inline',
+    },
+    {
+      values: Variables.percentages,
+      styleName: 'inset-inline',
+      valueFormat: BoxStylesFormatters.Value.fraction,
+    },
+    {
+      values: Variables.negativePercentages,
+      styleName: 'inset-inline',
+      valueFormat: BoxStylesFormatters.Value.fraction,
+    },
+    {
+      ...percentValue,
+      styleName: 'inset-inline',
+    },
+  ],
+  /** The inset-block CSS shorthand sets both insets on the block axis — `top` and `bottom` in a horizontal writing mode. */
+  insetY: [
+    {
+      values: 0,
+      styleName: 'inset-block',
+      valueFormat: BoxStylesFormatters.Value.rem,
+    },
+    {
+      values: ['auto'] as const,
+      styleName: 'inset-block',
+    },
+    {
+      values: Variables.percentages,
+      styleName: 'inset-block',
+      valueFormat: BoxStylesFormatters.Value.fraction,
+    },
+    {
+      values: Variables.negativePercentages,
+      styleName: 'inset-block',
+      valueFormat: BoxStylesFormatters.Value.fraction,
+    },
+    {
+      ...percentValue,
+      styleName: 'inset-block',
     },
   ],
   /** The `box-sizing` CSS property sets how the total width and height of an element is calculated. */
@@ -595,6 +688,7 @@ export const cssStyles = {
         'space-around',
         'space-evenly',
         'stretch',
+        ...safeAlignments,
       ] as const,
     },
   ],
@@ -602,13 +696,62 @@ export const cssStyles = {
   ai: [
     {
       styleName: 'align-items',
-      values: ['stretch', 'flex-start', 'flex-end', 'center', 'baseline', 'start', 'end', 'self-start', 'self-end'] as const,
+      values: [
+        'stretch',
+        'flex-start',
+        'flex-end',
+        'center',
+        'baseline',
+        'start',
+        'end',
+        'self-start',
+        'self-end',
+        ...safeAlignments,
+      ] as const,
+    },
+  ],
+  /** The CSS justify-items property sets the `justify-self` of every item in the box: in a grid, where each one sits on the inline axis of its own area. */
+  justifyItems: [
+    {
+      styleName: 'justify-items',
+      values: [
+        'normal',
+        'start',
+        'end',
+        'center',
+        'stretch',
+        'baseline',
+        'left',
+        'right',
+        'self-start',
+        'self-end',
+        ...safeAlignments,
+      ] as const,
+    },
+  ],
+  /** The place-items CSS shorthand sets `align-items` and `justify-items` in one declaration — `placeItems="center"` is the whole of grid centring. */
+  placeItems: [
+    {
+      styleName: 'place-items',
+      values: ['normal', 'start', 'end', 'center', 'stretch', 'baseline', 'self-start', 'self-end', ...safeAlignments] as const,
     },
   ],
   placeContent: [
     {
       styleName: 'place-content',
-      values: ['start', 'end', 'flex-start', 'flex-end', 'center', 'space-between', 'space-around', 'space-evenly', 'stretch'] as const,
+      values: [
+        'start',
+        'end',
+        'flex-start',
+        'flex-end',
+        'center',
+        'space-between',
+        'space-around',
+        'space-evenly',
+        'stretch',
+        'baseline',
+        ...safeAlignments,
+      ] as const,
     },
   ],
   /** The CSS align-content property sets the distribution of space between and around content items along a flexbox's cross axis, or a grid or block-level element's block axis. */
@@ -626,6 +769,8 @@ export const cssStyles = {
         'start',
         'end',
         'baseline',
+        'normal',
+        ...safeAlignments,
       ] as const,
     },
   ],
@@ -669,14 +814,40 @@ export const cssStyles = {
   alignSelf: [
     {
       styleName: 'align-self',
-      values: ['auto', 'flex-start', 'flex-end', 'center', 'baseline', 'stretch'] as const,
+      values: [
+        'auto',
+        'flex-start',
+        'flex-end',
+        'center',
+        'baseline',
+        'stretch',
+        'start',
+        'end',
+        'self-start',
+        'self-end',
+        ...safeAlignments,
+      ] as const,
     },
   ],
   /** The CSS justify-self property sets the way a box is justified inside its alignment container along the appropriate axis. */
   justifySelf: [
     {
       styleName: 'justify-self',
-      values: ['auto', 'flex-start', 'flex-end', 'center', 'baseline', 'stretch'] as const,
+      values: [
+        'auto',
+        'flex-start',
+        'flex-end',
+        'center',
+        'baseline',
+        'stretch',
+        'start',
+        'end',
+        'left',
+        'right',
+        'self-start',
+        'self-end',
+        ...safeAlignments,
+      ] as const,
     },
   ],
   /** The font-size CSS property sets the size of the font. Changing the font size also updates the sizes of the font size-relative <length> units, such as em, ex, and so forth. */
@@ -896,6 +1067,26 @@ export const cssStyles = {
     {
       styleName: 'max-width',
       ...percentValue,
+    },
+  ],
+  /**
+   * The aspect-ratio CSS property sets a preferred ratio for the box, which the sizing props then fill in
+   * one axis of: `aspectRatio="video" width="fit"` is a 16/9 embed. Two names (`square`, `video`), a ratio
+   * written compactly (`'4/3'`), or a number — the only prop taking both a fraction string and a division.
+   */
+  aspectRatio: [
+    {
+      styleName: 'aspect-ratio',
+      values: ['auto', 'square', 'video'] as const,
+      valueFormat: (value: string) => Variables.aspectRatios[value] ?? value,
+    },
+    {
+      styleName: 'aspect-ratio',
+      ...ratioValue,
+    },
+    {
+      styleName: 'aspect-ratio',
+      values: 0,
     },
   ],
   /** The letter-spacing CSS property sets the horizontal spacing behavior between text characters. This value is added to the natural spacing between characters while rendering the text. Positive values of letter-spacing causes characters to spread farther apart, while negative values of letter-spacing bring characters closer together. */
@@ -1420,10 +1611,23 @@ export const cssStyles = {
       declarations: (value) => Animations.easingDeclarations('transition-timing-function', value as string),
     },
   ],
+  /**
+   * The will-change CSS property warns the browser that a property is about to change, so it can promote
+   * the element first instead of mid-animation. A hint with a real cost — a promoted layer holds memory
+   * and can force text off subpixel rendering — so it belongs on the few elements that animate, not on a list.
+   */
+  willChange: [
+    {
+      styleName: 'will-change',
+      values: ['auto', 'scroll-position', 'contents', 'transform', 'opacity', 'filter'] as const,
+    },
+  ],
   /** The user-select CSS property controls whether the user can select text. This doesn't have any effect on content loaded as part of a browser's user interface (its chrome), except in textboxes. */
   userSelect: [
     {
       styleName: 'user-select',
+      // `contain` is deliberately absent: no engine implements it — Chrome computes it to `auto`, measured —
+      // and a typed value that does nothing is the one promise this library must not make.
       values: ['none', 'auto', 'text', 'all'] as const,
     },
   ],
@@ -1577,6 +1781,54 @@ export const cssStyles = {
       styleName: 'outline-color',
     },
     { ...colorAlphaValue, styleName: 'outline-color' },
+  ],
+  /**
+   * The accent-color CSS property tints the parts of a native control the page does not draw: a checkbox's
+   * tick, a radio's dot, a range track, a progress bar. The one way to brand them without `appearance="none"`
+   * and a rebuild, and it inherits — set it once on a form.
+   */
+  accentColor: [
+    {
+      values: Variables.colorValues,
+      valueFormat: (value, getVariableValue) => getVariableValue(value),
+      styleName: 'accent-color',
+    },
+    {
+      values: Variables.systemColorValues,
+      styleName: 'accent-color',
+    },
+    { ...colorAlphaValue, styleName: 'accent-color' },
+  ],
+  /** The caret-color CSS property sets the colour of the insertion caret in a text field or any editable element. */
+  caretColor: [
+    {
+      values: Variables.colorValues,
+      valueFormat: (value, getVariableValue) => getVariableValue(value),
+      styleName: 'caret-color',
+    },
+    {
+      values: Variables.systemColorValues,
+      styleName: 'caret-color',
+    },
+    { ...colorAlphaValue, styleName: 'caret-color' },
+  ],
+  /**
+   * The color-scheme CSS property tells the browser which schemes the element is *built* for, and native
+   * UI follows it: scrollbars, form controls, the spellcheck underline, `Canvas`/`CanvasText`. A dark theme
+   * that leaves this alone gets light scrollbars over its dark page — `Box.Theme` sets it on the root.
+   */
+  colorScheme: [
+    {
+      styleName: 'color-scheme',
+      values: ['normal', 'light', 'dark', 'light dark', 'only light', 'only dark'] as const,
+    },
+  ],
+  /** The field-sizing CSS property lets a form control size itself to its content: `fieldSizing="content"` is a textarea that grows as it is typed into, with no JavaScript measuring anything. */
+  fieldSizing: [
+    {
+      styleName: 'field-sizing',
+      values: ['content', 'fixed'] as const,
+    },
   ],
   /** The fill CSS property defines how SVG text content and the interior canvas of SVG shapes are filled or painted. If present, it overrides the element's fill attribute. Takes a colour token, a paint server the document defines (`fill="url(#sky)"` — a `<LinearGradient>` or a pattern) or a variable somebody else declared (`fill="var(--chart-1)"`). */
   fill: [
@@ -2043,6 +2295,17 @@ export const cssStyles = {
       values: [Variables.colorValues, Variables.colorValues] as const,
       styleName: 'scrollbar-color',
       valueFormat: (value, getVariableValue) => `${getVariableValue(value[0] as string)} ${getVariableValue(value[1] as string)}`,
+    },
+  ],
+  /**
+   * The scrollbar-gutter CSS property reserves the space a scrollbar would take before there is one, so a
+   * panel does not shift sideways the moment its content overflows. `stable` reserves the end edge,
+   * `stable both-edges` both — which is what keeps centred content centred.
+   */
+  scrollbarGutter: [
+    {
+      styleName: 'scrollbar-gutter',
+      values: ['auto', 'stable', 'stable both-edges'] as const,
     },
   ],
   /**

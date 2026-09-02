@@ -111,6 +111,17 @@ namespace Variables {
     return typeof value === 'string' && /^-?(\d+|\d*\.\d+)%$/.test(value);
   }
 
+  /** The two ratios worth a name — CSS has neither, and Tailwind's `aspect-video` is the same 16/9. */
+  export const aspectRatios: Readonly<Record<string, string>> = { square: '1 / 1', video: '16 / 9' };
+
+  export type Ratio = `${number}/${number}`;
+  export const ratio = '' as Ratio;
+
+  /** Whether a value really is a ratio: `4/3` and `1.85/1`, not `4:3` and not a fraction with a unit. */
+  export function isRatio(value: unknown): value is Ratio {
+    return typeof value === 'string' && /^\d+(\.\d+)?\/\d+(\.\d+)?$/.test(value);
+  }
+
   /**
    * The CSS system colours: the one palette a forced-colors mode does not throw away. Keywords rather
    * than tokens — they resolve to whatever the user's high-contrast theme says — so they are written out

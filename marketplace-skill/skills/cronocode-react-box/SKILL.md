@@ -5,7 +5,7 @@ description: '@cronocode/react-box expert — runtime CSS-in-JS library. Use whe
 
 # @cronocode/react-box AI Skill
 
-Runtime CSS-in-JS library. `Box` accepts 186 CSS props → generates CSS classes at runtime. Same values share a class.
+Runtime CSS-in-JS library. `Box` accepts 197 CSS props → generates CSS classes at runtime. Same values share a class.
 
 ## Installation & Package Management
 
@@ -66,12 +66,12 @@ expect, not a check against the fields.
 ## Props
 
 **Spacing**: `p`/`px`/`py`/`pt`/`pr`/`pb`/`pl`, `m`/`mx`/`my`/`mt`/`mr`/`mb`/`ml`, `gap`
-**Layout**: `display`, `d` (flex-direction), `wrap`, `ai` (align-items), `jc` (justify-content), `flex`/`grow`/`shrink`, `container`/`containerName`/`containerType` (a query container — see `cq`)
+**Layout**: `display`, `d` (flex-direction), `wrap`, `ai` (align-items), `jc` (justify-content), `justifyItems`/`placeItems`/`placeContent`/`alignContent`/`alignSelf`/`justifySelf`, `flex`/`grow`/`shrink`, `container`/`containerName`/`containerType` (a query container — see `cq`). Every alignment prop also takes the **overflow-safe** forms — `'safe center'`, `'safe start'`, `'safe end'` and the `'unsafe …'` twins: `safe center` centres until the content stops fitting and then aligns to `start`, where plain `center` overflows both edges and the half above the scrollable origin cannot be reached at all. `aspectRatio` is `'square'` (1/1), `'video'` (16/9), a compact ratio (`'4/3'`), a number, or `'auto'`
 **Sizing**: `width`/`height` — number (÷4=rem), `'auto'`, `'fit'` (100%), `'fit-screen'` (100vw/vh), fractions (`'1/2'`…), `'33%'`. `minWidth`/`maxWidth`/`minHeight`/`maxHeight` same. All accept `"5%"`.
 **Colors**: `bgColor`/`color`/`borderColor`/`outlineColor`/`fill`/`stroke` — Tailwind's OKLCH palette, 26 families × 11 steps `'50'`..`'950'` (slate/gray/zinc/neutral/stone/mauve/mist/olive/taupe/red/orange/amber/yellow/lime/green/emerald/teal/cyan/sky/blue/indigo/violet/purple/fuchsia/pink/rose), plus `'white'`/`'black'`/`'transparent'`/`'currentColor'`. **Opacity modifier on any colour value**: `bgColor="blue-500/40"` → `color-mix(in oklab, var(--blue-500) 40%, transparent)` — the mix wraps the _variable_, so it stays themed and shared; unlike `opacity` it fades one declaration, not the element. Works in `vars` and on a `Box.extend()` variable (`"brand/30"`); an unknown token or a percentage outside 0–100 emits nothing
 **Borders**: `b`/`bx`/`by`/`bt`/`br`/`bb`/`bl` (px), `borderRadius` (÷4), `borderStyle`
 **Text**: `fontSize` (÷16), `fontWeight`, `lineHeight` (px), `textAlign`/`textDecoration`/`textTransform`/`whiteSpace`/`textOverflow`, `textWrap`
-**Position**: `position`, `top`/`right`/`bottom`/`left`/`inset`, `zIndex`
+**Position**: `position`, `top`/`right`/`bottom`/`left`/`inset`/`insetX`/`insetY`, `zIndex` — number (÷4), `'auto'`, fractions (`'1/2'`, `'-1/3'`) or a percentage; `insetX`/`insetY` are `inset-inline`/`inset-block`, the way `mx`/`my` are `margin-inline`/`margin-block`
 **SVG paint & stroke**: `fill`/`stroke` (a colour variable, or a reference CSS resolves itself — `url(#sky)` for a gradient, pattern or `<ClipPath>`, `var(--chart-1)` for somebody else's variable; `clipPath` takes `url(#…)` the same way, and anything else emits no rule at all), `fillOpacity`/`strokeOpacity` (0–1 in tenths), `fillRule`, `strokeWidth`/`strokeDasharray`/`strokeDashoffset`/`strokeMiterlimit` (**user units — no divider**; a dash pattern with a gap is a string, `"12 4"`), `strokeLinecap`, `strokeLinejoin`, `paintOrder`, `vectorEffect`, `shapeRendering`. All inherited except `vectorEffect`, so set them on the `<svg>` (`Svg`) rather than on every shape.
 
 **SVG text**: `textAnchor` (`start`/`middle`/`end` — which part of a label sits on its `x`) and `dominantBaseline` (`alphabetic`/`central`/`hanging`/… — which part sits on its `y`). `textAnchor` is inherited; `dominantBaseline` is not, so like `vectorEffect` its rule targets the element _and_ its descendants and still works on the `<svg>`.
@@ -183,6 +183,8 @@ gradient becomes lettering — the pairing is deliberately not automatic.
 
 **Effects**: `opacity`, `cursor`, `pointerEvents`, `userSelect`, `overflow`
 
+**Native controls**: `accentColor` tints the parts of a checkbox, radio, range or progress bar the page does not draw — the palette, its opacity modifier and the system colours, and it inherits, so a form sets it once instead of every control giving up `appearance`. `caretColor` is the text caret. `colorScheme` (`'light'`, `'dark'`, `'light dark'`, `'only light'`, `'only dark'`, `'normal'`) is what native UI follows: scrollbars, form controls, the spellcheck underline — a dark theme that leaves it alone gets light scrollbars over a dark page. `fieldSizing="content"` is a control that grows with what is typed into it, with nothing measuring anything. `scrollbarGutter="stable"` (or `'stable both-edges'`) reserves the scrollbar's space before there is one, so a panel does not shift when its content overflows; `scrollbarWidth`/`scrollbarColor` style the bar itself. `willChange` (`'transform'`, `'opacity'`, `'filter'`, `'scroll-position'`, `'contents'`) promotes an element before it animates rather than during — a hint with a real cost, so it goes on the few elements that move, never on a list
+
 ## Pseudo-Classes, Breakpoints, State Variants & Container Queries
 
 ```tsx
@@ -271,7 +273,7 @@ export const components = Box.components({
 ```tsx
 export const { extendedProps, extendedPropTypes } = Box.extend(
   { 'brand-primary': '#ff6600' }, // CSS variables
-  { aspectRatio: [{ values: ['16/9'] as const, styleName: 'aspect-ratio', valueFormat: (v) => v }] }, // New props
+  { imageRendering: [{ values: ['pixelated'] as const, styleName: 'image-rendering' }] }, // New props (`aspectRatio` is built in)
   {
     bgColor: [
       {
