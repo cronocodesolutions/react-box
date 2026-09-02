@@ -43,17 +43,14 @@ describe('DocumentHead', () => {
     expect(document.head.querySelectorAll('meta[name="description"]')).toHaveLength(1);
   });
 
-  it('asks crawlers not to index an unlisted demo, or an address the router does not serve', () => {
-    renderAt('/fido-enrollment');
-    expect(meta('name', 'robots')).toBe('noindex, follow');
-
+  it('asks crawlers not to index an address the router does not serve', () => {
     renderAt('/nothing-here');
     expect(document.title).toBe('Page not found — React Box');
     expect(meta('name', 'robots')).toBe('noindex, follow');
   });
 
   it('drops the noindex again once a published route renders', () => {
-    renderAt('/fido-enrollment');
+    renderAt('/nothing-here');
     renderAt('/colors');
 
     expect(document.head.querySelector('meta[name="robots"]')).toBeNull();

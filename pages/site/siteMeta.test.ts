@@ -33,7 +33,7 @@ describe('the route table', () => {
 
   // The sidebar is written by hand and the route table drives the prerender, so the two can disagree:
   // C5 added /gradients-shadows, which prerendered and was reachable by URL but had no menu entry at
-  // all (bug #112). An unlisted route is the one exception, and it says so with `indexable: false`.
+  // all (bug #112). A route that opts out with `indexable: false` is the one exception.
   it('gives every listed route a link in the sidebar', () => {
     const sidebar = readFileSync(resolve(process.cwd(), 'pages/app/sidebar.tsx'), 'utf8');
     const linked = new Set([...sidebar.matchAll(/to="([^"]+)"/g)].map((match) => match[1]));
@@ -83,9 +83,15 @@ describe('buildSitemap', () => {
     expect(sitemap.startsWith('<?xml version="1.0" encoding="UTF-8"?>')).toBe(true);
   });
 
-  it('leaves the unlisted demos out', () => {
-    expect(buildSitemap()).not.toContain('/fido-enrollment');
-    expect(indexableRoutes().length).toBe(siteRoutes.length - 1);
+  it('lists every route while none of them opts out', () => {
+    expect(indexableRoutes().length).toBe(siteRoutes.length);
+  });
+
+  // The filter itself, which no route exercises now that the FIDO demo is gone. It is still reached
+  // by the not-found shell, and it is what an unlisted demo would rely on.
+  it('would leave a route out as soon as one declared itself unlisted', () => {
+    expect(pageMeta({ ...siteRoutes[0], indexable: false }).indexable).toBe(false);
+    expect(pageMeta(siteRoutes[0]).indexable).toBe(true);
   });
 
   it('follows the site address, so the domain cutover is one constant', () => {
@@ -103,7 +109,7 @@ describe('buildRobotsTxt', () => {
     expect(robots).toContain('User-agent: GPTBot\nAllow: /');
   });
 
-  it('crawls the unlisted demo rather than blocking it, so its noindex can be read', () => {
+  it('blocks nothing, so a noindex is always reachable to be read', () => {
     expect(buildRobotsTxt()).not.toContain('Disallow');
   });
 });
@@ -119,7 +125,9 @@ describe('buildHeadHtml', () => {
   });
 
   it('marks an unlisted route noindex, and leaves the not-found shell without a canonical', () => {
-    expect(buildHeadHtml(pageMeta(routeFor('/fido-enrollment')!))).toContain('<meta name="robots" content="noindex, follow" />');
+    const unlisted = pageMeta({ ...siteRoutes[0], path: '/unlisted-demo', indexable: false });
+
+    expect(buildHeadHtml(unlisted)).toContain('<meta name="robots" content="noindex, follow" />');
 
     const notFound = buildHeadHtml(notFoundMeta);
 

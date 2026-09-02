@@ -183,12 +183,6 @@ export const siteRoutes = [
     name: 'AI Assistant Context',
     description: 'One file that teaches an AI assistant the whole prop surface, the formatter rules and the patterns that trip it up.',
   },
-  {
-    path: '/fido-enrollment',
-    name: 'FIDO Enrollment',
-    description: 'An unlisted DataGrid demo built on mock enrollment data.',
-    indexable: false,
-  },
 ] as const satisfies readonly SiteRoute[];
 
 /** The union of every path the site serves — `app.tsx` keys its route components by it. */
