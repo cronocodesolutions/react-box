@@ -142,8 +142,10 @@ describe('useStyles', () => {
       expect(styleElement.innerText).toContain(
         '.parent[aria-selected="true"] .selected-parent-bgColor-blue-100{background-color:var(--blue-100)}',
       );
+      // The nested `hover` is *this* element's, not the group's (bug #115): both states used to share
+      // the pseudo-class mask, so the group came out `:hover[aria-selected="true"]` and the element bare.
       expect(styleElement.innerText).toContain(
-        '.parent:hover[aria-selected="true"] .hover-selected-parent-bgColor-blue-200{background-color:var(--blue-200)}',
+        '.parent[aria-selected="true"] .hover-selected-parent-bgColor-blue-200:hover{background-color:var(--blue-200)}',
       );
 
       expect(element.classList).toContain('selected-parent-bgColor-blue-100');
@@ -548,10 +550,12 @@ describe('useStyles', () => {
       const element = document.getElementById(testElementId)!;
       const styleElement = document.getElementById('crono-styles')! as unknown as HTMLStyleElement;
 
+      // Two parents in nesting order, and no `|` to tell them apart any more: each compiles to its own
+      // selector, so the class name is just the two segments.
       expect(styleElement.innerText).toContain(
-        '.dark .parent:hover .hover-theme-dark\\|parent-bgColor-gray-100{background-color:var(--gray-100)}',
+        '.dark .parent:hover .theme-dark-hover-parent-bgColor-gray-100{background-color:var(--gray-100)}',
       );
-      expect(element.classList).toContain('hover-theme-dark|parent-bgColor-gray-100');
+      expect(element.classList).toContain('theme-dark-hover-parent-bgColor-gray-100');
     });
   });
 

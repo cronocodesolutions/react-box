@@ -77,7 +77,7 @@ export const siteRoutes = [
     path: '/variants',
     name: 'State Variants',
     description:
-      'Style by a data-* or aria-* attribute, by what an element contains, or by a state it is not in — four nesting keys, one rule per state.',
+      'Style by a data-* or aria-* attribute, by what an element contains, by where it sits among its siblings, or by what an ancestor or a sibling is doing.',
   },
   {
     path: '/pseudo-elements',
@@ -90,6 +90,12 @@ export const siteRoutes = [
     name: 'Container Queries',
     description:
       'A component that answers to the space it was given rather than to the window: cq, six sizes and their complements, against the nearest container or a named one.',
+  },
+  {
+    path: '/tailwind-parity',
+    name: 'Tailwind Parity',
+    description:
+      'Every Tailwind v4.3 utility family against the props this library ships — what is covered, what is partial, and the one-line answer for the rest.',
   },
   {
     path: '/animation',

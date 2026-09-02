@@ -164,7 +164,7 @@ describe('startingStyle', () => {
       // Layer order reverses for `!important`: the *earliest* layer wins. So a preference's starting
       // value has to be named before a breakpoint's to keep outranking it, which is the opposite of
       // how the ordinary layers run.
-      expect(starting[0]).toBe('rb_sk');
+      expect(starting[0]).toBe('rb_sm');
       expect(starting[starting.length - 1]).toBe('rb_s0');
     });
   });

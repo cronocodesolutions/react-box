@@ -36,8 +36,10 @@ export interface TooltipTrigger {
 }
 
 // `content` shadows the CSS prop of the same name, which is the right trade: the CSS one is for
-// generated content on a pseudo-element, and the tooltip has no pseudo-element to generate onto.
-type TooltipBoxProps<TKey extends keyof ComponentsAndVariants> = Omit<BoxProps<'div', TKey>, 'children' | 'content'>;
+// generated content on a pseudo-element, and the tooltip has no pseudo-element to generate onto. `open`
+// shadows the pseudo-class nesting key for the same reason — the component owns that state, and the way
+// to style it here is the `data-state` `<Presence>` already sets.
+type TooltipBoxProps<TKey extends keyof ComponentsAndVariants> = Omit<BoxProps<'div', TKey>, 'children' | 'content' | 'open'>;
 
 interface Props<TKey extends keyof ComponentsAndVariants> extends TooltipBoxProps<TKey> {
   /** The description itself. Nothing renders while this is empty. */

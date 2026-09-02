@@ -810,9 +810,9 @@ Generates:
 }
 ```
 
-### Group Hover with Themes (hoverGroup)
+### Group and Peer with Themes
 
-For parent-child hover relationships (e.g., highlighting a cell when row is hovered):
+For parent-child relationships (e.g., highlighting a cell when its row is hovered). `group` reaches an ancestor, `peer` a preceding sibling, and the key is `name/state` — any pseudo-class, or a `data-`/`aria-` prefixed attribute the ancestor carries:
 
 ```tsx
 // Parent element defines the group
@@ -820,14 +820,14 @@ For parent-child hover relationships (e.g., highlighting a cell when row is hove
   {/* Child responds to parent hover */}
   <Box
     bgColor="white"
-    hoverGroup={{
-      'grid-row': { bgColor: 'gray-100' },
+    group={{
+      'grid-row/hover': { bgColor: 'gray-100' },
     }}
     theme={{
       dark: {
         bgColor: 'gray-900',
-        hoverGroup: {
-          'grid-row': { bgColor: 'gray-800' },
+        group: {
+          'grid-row/hover': { bgColor: 'gray-800' },
         },
       },
     }}
@@ -1332,8 +1332,17 @@ fails if anything but a comment changed.
 ### Add a New Pseudo-Class
 
 1. Add to `pseudo1` (nested styles only) or `pseudo2` (also settable as a boolean) in `boxStyles.ts`
-2. Weights and the reverse lookup come from the declaration order — `pseudoClassesWeight` and `pseudoClassesOfWeight` derive from `pseudoClasses`, so there is nothing to update by hand. It is a 32-bit mask, so the map cannot grow past 31 keys
-3. Types auto-generate
+2. Weights and the reverse lookup come from the declaration order — `pseudoClassesWeight` and `pseudoClassesOfWeight` derive from `pseudoClasses`, so there is nothing to update by hand. It is a 32-bit mask, so the map cannot grow past 31 keys (26 as of C9)
+3. Types auto-generate — and the new key is a `not`, `group` and `peer` state for free, since all three read `pseudoClasses` through `Variants.stateSelector`
+4. A state whose selector needs an **argument** (`:nth-child(2n+1)`) cannot be a bit in a mask: make it a variant key instead, the way `nth` is
+
+### Add a Variant or Group Key
+
+A variant is a fragment on the element's **own** compound selector (`src/core/variants.ts`); a group is a selector in **front** of it (`src/core/groups.ts`). Both compile a record key, and both drop the whole block when the grammar rejects it — the key becomes rule text.
+
+1. For a variant: add the key to `Variants.variantKeys`, a `case` to `selectorOf`, and the key's own type slice to `BoxVariantNesting` in `src/types.ts` if the keys are a closed set (`not` and `nth` are; the two attribute keys take a free string)
+2. For a group: `Groups.groupKeys` maps the key to the **combinator** it puts between the ancestor and the element, and `Groups.parent` does the rest. The class-name segment must come from the compiled parts rather than the key as written, or two spellings of one selector emit two identical rules
+3. The engine's `isStyleKey` has to know the new key, or `computeSignature` will hash two different Boxes to one cache entry
 
 ### Add a New Pseudo-Element
 

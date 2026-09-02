@@ -201,7 +201,7 @@ export default function DataGridHeaderCellResizer<TRow>(props: Props<TRow>) {
         <Box
           component={`${column.grid.componentName}.header.cell.resizer` as never}
           opacity={resizerStyle !== 'visible' ? 0 : undefined}
-          hoverGroup={resizerStyle === 'hover' ? ({ 'header-cell': { opacity: 1 } } as never) : undefined}
+          group={resizerStyle === 'hover' ? ({ 'header-cell/hover': { opacity: 1 } } as never) : undefined}
           props={{
             role: 'separator',
             'aria-label': headerCell.resizerLabel,
