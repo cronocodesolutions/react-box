@@ -29,6 +29,7 @@ import Containers from '../containers';
 import { BoxStyle, BoxStyleValue } from '../coreTypes';
 import defaultBoxComponents, { BoxComponent, Components } from '../extends/boxComponents';
 import { resolveComponentStyles } from '../extends/useComponents';
+import Filters from '../filters';
 import { stableHash } from '../hash';
 import Palette from '../palette';
 import Shadows from '../shadows';
@@ -794,6 +795,10 @@ export function createStyleEngine(options: StyleEngineOptions = {}): StyleEngine
       // elevation. The universal syntax with no initial value is deliberate — anything else makes the
       // property always valid, and the `var()` fallback carrying each step's own alpha unreachable.
       ...Shadows.properties,
+      // The eighteen filter functions, for the same reason: `filter` is inherited by nobody, but a custom
+      // property is, so an unregistered `--boxBlur` would blur every descendant that names any filter of
+      // its own a second time.
+      ...Filters.properties,
       `#crono-box {position: absolute;top: 0;left: 0;height: 0;z-index:99999;}`,
       `html{font-size: 16px;font-family: Arial, sans-serif;}`,
       `body{margin: 0;line-height: var(--lineHeight);font-size: var(--fontSize);}`,

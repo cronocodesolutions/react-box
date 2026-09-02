@@ -66,6 +66,12 @@ const PROVIDED = {
   Tooltip: "import Tooltip from '@cronocode/react-box/components/tooltip';",
   VisuallyHidden: "import VisuallyHidden from '@cronocode/react-box/components/visuallyHidden';",
   // The semantic tags a snippet writes prose with, all from the one entry.
+  H1: "import { H1 } from '@cronocode/react-box/components/semantics';",
+  H2: "import { H2 } from '@cronocode/react-box/components/semantics';",
+  H3: "import { H3 } from '@cronocode/react-box/components/semantics';",
+  H4: "import { H4 } from '@cronocode/react-box/components/semantics';",
+  H5: "import { H5 } from '@cronocode/react-box/components/semantics';",
+  H6: "import { H6 } from '@cronocode/react-box/components/semantics';",
   Li: "import { Li } from '@cronocode/react-box/components/semantics';",
   Ol: "import { Ol } from '@cronocode/react-box/components/semantics';",
   P: "import { P } from '@cronocode/react-box/components/semantics';",

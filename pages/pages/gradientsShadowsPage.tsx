@@ -1,8 +1,9 @@
 import { Blend } from 'lucide-react';
 import { ReactNode } from 'react';
-import Box from '../../src/box';
+import Box, { BoxProps } from '../../src/box';
 import Flex from '../../src/components/flex';
 import { H2, P } from '../../src/components/semantics';
+import { Polygon, Svg } from '../../src/components/svg';
 import Code from '../components/code';
 import PageHeader from '../components/pageHeader';
 import Reveal from '../components/reveal';
@@ -15,8 +16,8 @@ export default function GradientsShadowsPage() {
     <Box>
       <PageHeader
         icon={Blend}
-        title="Gradients & Shadows"
-        description="A gradient written as a value, so its stops are palette colours — and four shadows that stack on one box-shadow instead of overwriting each other."
+        title="Gradients & Effects"
+        description="A gradient written as a value, so its stops are palette colours — four shadows that stack on one box-shadow, and nine filter functions that stack the same way."
         badge="NEW"
       />
 
@@ -242,11 +243,158 @@ export default function GradientsShadowsPage() {
             value is deliberate too — anything else makes the property always valid, and the fallback carrying each step of its own alpha
             would never be reached.
           </Section>
+
+          <Section id="filters" title="Nine functions, one filter">
+            <Mono>filter</Mono> is a list, and its functions apply in sequence — which is the same problem the shadows have, solved the same
+            way. <Mono>blur</Mono>, <Mono>brightness</Mono>, <Mono>contrast</Mono>, <Mono>grayscale</Mono>, <Mono>hueRotate</Mono>,{' '}
+            <Mono>invert</Mono>, <Mono>saturate</Mono>, <Mono>sepia</Mono> and <Mono>dropShadow</Mono> each set a layer of their own and all
+            nine write the same composed declaration, so a blur and a desaturation coexist instead of overwriting each other. The order is
+            the grammar&apos;s rather than yours: fixing it is what lets two elements naming the same two functions share one class.
+          </Section>
+
+          <Code
+            id="filters-demo"
+            label="The same tile, filtered"
+            language="jsx"
+            code={`<Box bgGradient={{ linear: 'br', colors: ['amber-400', 'rose-600'] }} blur="xs" />
+<Box bgGradient={{ linear: 'br', colors: ['amber-400', 'rose-600'] }} grayscale={100} />
+<Box bgGradient={{ linear: 'br', colors: ['amber-400', 'rose-600'] }} hueRotate={140} />
+<Box bgGradient={{ linear: 'br', colors: ['amber-400', 'rose-600'] }} blur="xs" saturate={40} />`}
+          >
+            <Flex gap={4} flexWrap="wrap">
+              {filterDemos.map(({ caption, ...boxProps }) => (
+                <Swatch key={caption} bgGradient={sample} caption={caption} {...boxProps} />
+              ))}
+            </Flex>
+          </Code>
+
+          <Section id="units" title="A number is the function's own unit">
+            Six of them are a percentage — <Mono>brightness={'{110}'}</Mono> is ten percent brighter, <Mono>grayscale={'{100}'}</Mono>{' '}
+            removes colour entirely — <Mono>hueRotate</Mono> is degrees, and <Mono>blur</Mono> is a radius in pixels with Tailwind&apos;s
+            scale beside it, <Mono>xs</Mono> (4px) through <Mono>xxxl</Mono> (64px). <Mono>none</Mono> clears one function and leaves the
+            other eight painting, the way <Mono>none</Mono> clears one shadow layer.
+          </Section>
+
+          <Section id="drop-shadow" title="A drop shadow follows the shape">
+            <Mono>shadow</Mono> is cast by the box; <Mono>dropShadow</Mono> is cast by what is actually drawn — the outline of an SVG path,
+            the opaque part of a transparent PNG. It is a filter function rather than a fifth shadow layer, which is exactly why the two can
+            be told apart: put both on a triangle and one of them is a rectangle. <Mono>xs</Mono> through <Mono>xxl</Mono>, with{' '}
+            <Mono>dropShadowColor</Mono> beside it.
+          </Section>
+
+          <Code
+            id="drop-shadow-demo"
+            label="box-shadow and drop-shadow on the same triangle"
+            language="jsx"
+            code={`<Svg viewBox="0 0 64 56" width="64px" fill="indigo-500" shadow="xl">
+  <Polygon points="32,4 60,52 4,52" />
+</Svg>
+<Svg viewBox="0 0 64 56" width="64px" fill="indigo-500" dropShadow="xl">
+  <Polygon points="32,4 60,52 4,52" />
+</Svg>`}
+          >
+            <Flex gap={8} flexWrap="wrap" py={3}>
+              <Shape caption="shadow — the box" shadow="xl" />
+              <Shape caption="dropShadow — the shape" dropShadow="xl" />
+              <Shape caption="dropShadowColor" dropShadow="xl" dropShadowColor="indigo-500/60" />
+            </Flex>
+          </Code>
+
+          <Section id="backdrop" title="And the same nine behind the element">
+            <Mono>backdropBlur</Mono> and its eight siblings filter what is <em>behind</em> the element rather than the element itself,
+            which is the whole of glassmorphism: something translucent in front, the page blurred and pushed behind it. There is a{' '}
+            <Mono>backdropOpacity</Mono> that <Mono>filter</Mono> has no use for and no <Mono>backdropDropShadow</Mono>, because neither one
+            means anything on the other side.
+          </Section>
+
+          <Code
+            id="backdrop-demo"
+            label="Glass over a gradient"
+            language="jsx"
+            code={`<Box backdropBlur="sm" backdropSaturate={180} bgColor="white/20" insetRing={1} insetRingColor="white/40">
+  Frosted
+</Box>`}
+          >
+            <Box
+              position="relative"
+              height={40}
+              borderRadius={3}
+              overflow="hidden"
+              bgGradient={{ linear: 'br', colors: ['violet-500', 'cyan-400', 'amber-300'] }}
+            >
+              <Flex position="absolute" inset={0} ai="center" jc="center" gap={4}>
+                <Glass caption="backdropBlur" backdropBlur="sm" />
+                <Glass caption="+ saturate" backdropBlur="sm" backdropSaturate={180} />
+                <Glass caption="+ grayscale" backdropBlur="sm" backdropGrayscale={100} />
+              </Flex>
+            </Box>
+          </Code>
+
+          <Section id="mask" title="A mask is a gradient again">
+            <Mono>maskImage</Mono> takes the same record <Mono>bgGradient</Mono> does, and reads its alpha channel: where the gradient is
+            transparent the element is not painted. A fade to <Mono>transparent</Mono> is the whole edge-fade recipe — the one a scrolling
+            list wants at its bottom edge — and because the value is the gradient grammar it takes tokens, positions and interpolation like
+            any other. A <Mono>url(#id)</Mono> masks by a shape the document defines. One mask, not a stack.
+          </Section>
+
+          <Code
+            id="mask-demo"
+            label="Fading an edge"
+            language="jsx"
+            code={`<Box
+  bgGradient={{ linear: 'r', colors: ['sky-500', 'indigo-600'] }}
+  maskImage={{ linear: 'b', colors: ['black', ['black', '55%'], 'transparent'] }}
+/>`}
+          >
+            <Flex gap={6} flexWrap="wrap" py={3}>
+              <Faded caption="no mask" />
+              <Faded caption="fade to bottom" maskImage={{ linear: 'b', colors: ['black', ['black', '55%'], 'transparent'] }} />
+              <Faded caption="radial vignette" maskImage={{ radial: 'circle', colors: ['black', ['black', '45%'], 'transparent'] }} />
+            </Flex>
+          </Code>
+
+          <Section id="clip" title="And a gradient can be the letters">
+            <Mono>bgClip=&quot;text&quot;</Mono> clips the background to the glyphs, which is how a gradient becomes type. It needs{' '}
+            <Mono>color=&quot;transparent&quot;</Mono> beside it — the text paints over its own background otherwise — and that pairing is
+            deliberately not automatic: <Mono>bgClip</Mono> is the CSS property, not a recipe.
+          </Section>
+
+          <Code
+            id="clip-demo"
+            label="Gradient type"
+            language="jsx"
+            code={`<H2 fontSize={40} fontWeight={800} color="transparent" bgClip="text" bgGradient={{ linear: 'r', colors: ['violet-500', 'cyan-400'] }}>
+  Painted by the background
+</H2>`}
+          >
+            <Box
+              fontSize={40}
+              fontWeight={800}
+              color="transparent"
+              bgClip="text"
+              bgGradient={{ linear: 'r', colors: ['violet-500', 'cyan-400'] }}
+            >
+              Painted by the background
+            </Box>
+          </Code>
         </Flex>
       </Reveal>
     </Box>
   );
 }
+
+/** The tile every filter demo is applied to, so the only difference between them is the filter. */
+const sample = { linear: 'br', colors: ['amber-400', 'rose-600'] } as const;
+
+const filterDemos = [
+  { caption: 'no filter' },
+  { caption: 'blur="xs"', blur: 'xs' },
+  { caption: 'grayscale={100}', grayscale: 100 },
+  { caption: 'sepia={80}', sepia: 80 },
+  { caption: 'hueRotate={140}', hueRotate: 140 },
+  { caption: 'invert={100}', invert: 100 },
+  { caption: 'blur + saturate', blur: 'xs', saturate: 40 },
+] as const satisfies readonly ({ caption: string } & BoxProps)[];
 
 /** A gradient swatch with its shape written under it. */
 function Swatch({ caption, ...boxProps }: { caption: string } & Parameters<typeof Box>[0]) {
@@ -277,6 +425,62 @@ function Tile({ caption, ...boxProps }: { caption: string } & Parameters<typeof 
   return (
     <Flex d="column" gap={2}>
       <Box width={28} height={18} borderRadius={3} theme={{ dark: { bgColor: 'slate-800' }, light: { bgColor: 'white' } }} {...boxProps} />
+      <Box fontSize={12} color="slate-500">
+        {caption}
+      </Box>
+    </Flex>
+  );
+}
+
+/** A triangle, which is where a box shadow and a drop shadow stop looking alike. */
+function Shape({ caption, ...svgProps }: { caption: string } & Parameters<typeof Svg>[0]) {
+  return (
+    <Flex d="column" gap={3}>
+      <Svg
+        viewBox="0 0 64 56"
+        width="64px"
+        height="56px"
+        theme={{ dark: { fill: 'indigo-400' }, light: { fill: 'indigo-500' } }}
+        {...svgProps}
+      >
+        <Polygon points="32,4 60,52 4,52" />
+      </Svg>
+      <Box fontSize={12} color="slate-500">
+        {caption}
+      </Box>
+    </Flex>
+  );
+}
+
+/** A translucent pane, so the only thing showing is what its backdrop filter did to the gradient behind it. */
+function Glass({ caption, ...boxProps }: { caption: string } & BoxProps) {
+  return (
+    <Flex
+      d="column"
+      ai="center"
+      jc="center"
+      gap={1}
+      width={28}
+      height={24}
+      borderRadius={2}
+      bgColor="white/20"
+      insetRing={1}
+      insetRingColor="white/40"
+      color="white"
+      fontSize={11}
+      textShadow="xs"
+      {...boxProps}
+    >
+      {caption}
+    </Flex>
+  );
+}
+
+/** A band the mask demo eats away at, so what is missing is the point. */
+function Faded({ caption, ...boxProps }: { caption: string } & BoxProps) {
+  return (
+    <Flex d="column" gap={2}>
+      <Box width={36} height={24} borderRadius={2} bgGradient={{ linear: 'r', colors: ['sky-500', 'indigo-600'] }} {...boxProps} />
       <Box fontSize={12} color="slate-500">
         {caption}
       </Box>
@@ -323,4 +527,10 @@ const sidebarLinks = [
   { id: 'colors', label: 'Recolouring a layer' },
   { id: 'text', label: 'textShadow' },
   { id: 'layers', label: 'Why they are registered' },
+  { id: 'filters', label: 'Nine functions, one filter' },
+  { id: 'units', label: 'A number is its unit' },
+  { id: 'drop-shadow', label: 'dropShadow' },
+  { id: 'backdrop', label: 'Behind the element' },
+  { id: 'mask', label: 'A mask is a gradient' },
+  { id: 'clip', label: 'Gradient type' },
 ];
