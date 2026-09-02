@@ -1,4 +1,4 @@
-import { cleanup, render, screen } from '@testing-library/react';
+import { cleanup, render, screen, waitFor } from '@testing-library/react';
 import { afterEach, describe, expect, it } from 'vitest';
 import { expectFocusOn, keyboard } from '../../dev/a11y/keyboard';
 import { ignoreLogs } from '../../dev/tests';
@@ -378,7 +378,7 @@ describe('DataGrid accessibility', () => {
       await user.press('Enter');
 
       expect(headers()[0].getAttribute('aria-sort')).toBe('ascending');
-      expect(screen.queryAllByRole('menuitem')).toHaveLength(0);
+      await waitFor(() => expect(screen.queryAllByRole('menuitem')).toHaveLength(0));
     });
 
     it('closes on Escape and puts focus back on the trigger', async () => {
@@ -388,7 +388,7 @@ describe('DataGrid accessibility', () => {
       await openMenu(user);
       await user.press('Escape');
 
-      expect(screen.queryAllByRole('menuitem')).toHaveLength(0);
+      await waitFor(() => expect(screen.queryAllByRole('menuitem')).toHaveLength(0));
       expectFocusOn(screen.getByRole('button', { name: 'Column options for Name' }));
     });
   });

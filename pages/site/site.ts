@@ -53,7 +53,7 @@ export const siteRoutes = [
   {
     path: '/box',
     name: 'Box',
-    description: 'The foundational component: 155 CSS properties as type-safe props, with the numeric formatters explained.',
+    description: 'The foundational component: 165 CSS properties as type-safe props, with the numeric formatters explained.',
   },
   {
     path: '/svg',
@@ -173,15 +173,15 @@ export const siteRoutes = [
       'The complete colour palette in OKLCH — twenty-six families of eleven steps — and the opacity modifier every colour value takes.',
   },
   {
+    path: '/gradients-shadows',
+    name: 'Gradients & Shadows',
+    description:
+      'A gradient written as a value, with palette tokens for stops and OKLCH interpolation — and four shadow layers that stack on one box-shadow.',
+  },
+  {
     path: '/ai-context',
     name: 'AI Assistant Context',
     description: 'One file that teaches an AI assistant the whole prop surface, the formatter rules and the patterns that trip it up.',
-  },
-  {
-    path: '/fido-enrollment',
-    name: 'FIDO Enrollment',
-    description: 'An unlisted DataGrid demo built on mock enrollment data.',
-    indexable: false,
   },
 ] as const satisfies readonly SiteRoute[];
 

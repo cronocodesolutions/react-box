@@ -3,7 +3,9 @@ import { BoxStylesFormatters } from './boxStylesFormatters';
 import Containers from './containers';
 import Content from './content';
 import { BoxStyle, BoxStyleValue } from './coreTypes';
+import Gradients from './gradients';
 import Palette from './palette';
+import Shadows from './shadows';
 import Variables from './variables';
 
 /** The opacity scale shared by `opacity`, `fillOpacity` and `strokeOpacity`. */
@@ -47,6 +49,31 @@ const percentValue = {
  */
 function translate(axis: 'X' | 'Y', format: (value: BoxStyleValue) => string) {
   return (value: BoxStyleValue) => `--boxTranslate${axis}:${format(value)};translate:var(--boxTranslateX, 0) var(--boxTranslateY, 0)`;
+}
+
+/**
+ * One shadow layer's colour, as the three definitions every colour prop has. It lands in a custom
+ * property rather than a CSS one, so it shows nothing until the layer that reads it is painted —
+ * `shadowColor` alone is as inert as `borderColor` with no border width.
+ */
+function shadowColor(layer: Shadows.Layer | 'TextShadow') {
+  return [
+    {
+      values: Variables.colorValues,
+      declarations: (value: BoxStyleValue, getVariableValue: (name: string) => string) =>
+        Shadows.colorDeclaration(layer, getVariableValue(value as string)),
+    },
+    {
+      values: Variables.systemColorValues,
+      declarations: (value: BoxStyleValue) => Shadows.colorDeclaration(layer, value as string),
+    },
+    {
+      values: Palette.alpha,
+      match: Palette.isAlpha,
+      declarations: (value: BoxStyleValue, getVariableValue: (name: string) => string) =>
+        Shadows.colorDeclaration(layer, Palette.mix(value, getVariableValue)),
+    },
+  ];
 }
 
 export const cssStyles = {
@@ -1752,14 +1779,77 @@ export const cssStyles = {
       styleName: 'background-image',
     },
   ],
-  /** The box-shadow CSS property adds shadow effects around an element's frame */
-  shadow: [
+  /**
+   * A gradient written as a value: the key names the kind and carries its geometry (`linear` a direction
+   * or an angle, `radial` a shape, `conic` an angle to start from), `colors` are the stops in order — a
+   * palette token, one with an opacity modifier, or a `[colour, position]` pair. `interpolate="oklch"` is
+   * what keeps a two-stop gradient out of the grey middle sRGB runs it through. Writes `background-image`,
+   * so it and `bgImage` are the same property: use one.
+   */
+  bgGradient: [
     {
-      values: Variables.shadowValues,
-      valueFormat: (value, getVariableValue) => getVariableValue(value),
-      styleName: 'box-shadow',
+      values: {} as Gradients.Gradient,
+      match: Gradients.isGradient,
+      declarations: (value, getVariableValue) => `background-image:${Gradients.css(value, getVariableValue)}`,
     },
   ],
+  /**
+   * The elevation of the box: `xxs` through `xxl` on Tailwind's scale, or one of the three original
+   * presets (`small`, `medium`, `large`, which carry their own colour). `shadowColor` recolours the
+   * scale, and the shadow stacks with `ring`, `insetRing` and `insetShadow` rather than replacing them.
+   */
+  shadow: [
+    {
+      values: Shadows.boxSizes,
+      declarations: (value) => Shadows.shadow('Shadow', value as string),
+    },
+    {
+      values: Variables.shadowValues,
+      declarations: (value, getVariableValue) => Shadows.layerDeclarations('Shadow', getVariableValue(value as string)),
+    },
+  ],
+  /** What colour `shadow` draws in — the scale's own translucent black otherwise. Shows nothing on its own. */
+  shadowColor: shadowColor('Shadow'),
+  /** A shadow drawn inside the border box: `xxs`, `xs` or `sm`. Its own layer, so it composes with `shadow`. */
+  insetShadow: [
+    {
+      values: Shadows.insetSizes,
+      declarations: (value) => Shadows.shadow('InsetShadow', value as string),
+    },
+  ],
+  /** What colour `insetShadow` draws in. Shows nothing on its own. */
+  insetShadowColor: shadowColor('InsetShadow'),
+  /**
+   * A hard-edged shadow outside the border box, in px — `ring={2}`. Unlike `outline` it takes part in the
+   * shadow stack, so a ring and an elevation coexist; it follows `borderRadius` and costs no layout.
+   */
+  ring: [
+    {
+      values: 0,
+      declarations: (value) => Shadows.ring('Ring', value as number),
+    },
+  ],
+  /** What colour `ring` draws in. `currentColor` otherwise, the way Tailwind's is. */
+  ringColor: shadowColor('Ring'),
+  /** The same ring, drawn inside the border box: an inner hairline that needs no second element. */
+  insetRing: [
+    {
+      values: 0,
+      declarations: (value) => Shadows.ring('InsetRing', value as number),
+    },
+  ],
+  /** What colour `insetRing` draws in. `currentColor` otherwise. */
+  insetRingColor: shadowColor('InsetRing'),
+  /** A shadow behind the text rather than the box: `xxs` through `lg`, recoloured by `textShadowColor`. */
+  textShadow: [
+    {
+      values: Shadows.textSizes,
+      styleName: 'text-shadow',
+      valueFormat: (value: string) => Shadows.textShadow(value),
+    },
+  ],
+  /** What colour `textShadow` draws in. Shows nothing on its own. */
+  textShadowColor: shadowColor('TextShadow'),
   /** Moves an element horizontally on the 2D plane, on the ÷4 spacing scale, as a fraction of its own width (`'1/2'`) or as a percentage. Composes with `translateY`. */
   translateX: [
     {

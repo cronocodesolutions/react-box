@@ -44,11 +44,29 @@ describe('Presence', () => {
   });
 
   it('unmounts in the same commit when the child declares no exit', () => {
+    const { rerender } = renderPresence(true, 0);
+    rerender(
+      <Presence present={false}>
+        {(presence) => <Box ref={presence.ref} transitionDuration={0} props={{ ...presence.props, 'data-testid': 'node' }} />}
+      </Presence>,
+    );
+
+    expect(node()).toBeNull();
+  });
+
+  // "Declares no exit" means the duration is actually zero. A Box that says nothing still carries the
+  // base class's `all var(--transitionTime)`, so the measured wait is 250ms and the node stays a while
+  // (bug #110) — the suite could not see this until the base transition became longhands.
+  it('waits the base transition out for a child that overrides nothing', () => {
+    vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] });
     const { rerender } = renderPresence(true);
     rerender(
       <Presence present={false}>{(presence) => <Box ref={presence.ref} props={{ ...presence.props, 'data-testid': 'node' }} />}</Presence>,
     );
 
+    expect(node()).not.toBeNull();
+
+    act(() => vi.advanceTimersByTime(300));
     expect(node()).toBeNull();
   });
 

@@ -34,8 +34,8 @@ const loaders: Record<SiteRoutePath, () => Promise<{ default: ComponentType }>> 
   '/grid': () => import('../pages/gridPage'),
   '/style-grouping': () => import('../pages/textStylePage'),
   '/colors': () => import('../pages/colorPage'),
+  '/gradients-shadows': () => import('../pages/gradientsShadowsPage'),
   '/ai-context': () => import('../pages/aiContextPage'),
-  '/fido-enrollment': () => import('../pages/fidoEnrollmentPage'),
 };
 
 // Modules resolved before rendering starts. `React.lazy` always suspends on its first render, and a

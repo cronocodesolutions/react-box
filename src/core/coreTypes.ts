@@ -44,17 +44,18 @@ type BoxStyleScalar = (BoxStyleArrayString | BoxStyleArrayBoolean | BoxStyleArra
 };
 
 /**
- * A definition whose value is a record — the shape a custom property needs, since the names it declares
- * come out of the value. It has no `styleName`, so it writes its own `declarations`. `vars` is the only one.
+ * A definition whose value is a record: either an open map, where the property names come out of the
+ * value (`vars`), or a fixed shape the grammar names (`bgGradient`). Both write their own `declarations`
+ * rather than a `styleName`, and both validate with a `match` — a record cannot be judged by `typeof`.
  */
 interface BoxStyleRecord {
-  values: Readonly<Record<string, string | number>>;
+  values: Readonly<Record<string, unknown>>;
   tuple?: never;
   valueFormat?: never;
 }
 
 /** Every shape a prop value can take, and so everything `match` and `declarations` are handed. */
-export type BoxStyleValue = string | number | boolean | readonly (string | number | boolean)[] | Readonly<Record<string, string | number>>;
+export type BoxStyleValue = string | number | boolean | readonly (string | number | boolean)[] | Readonly<Record<string, unknown>>;
 
 export type BoxStyle = (BoxStyleScalar | BoxStyleTupleArrays | BoxStyleRecord) & {
   styleName?: string | string[];

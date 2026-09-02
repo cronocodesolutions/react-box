@@ -7,9 +7,12 @@ import { BoxStyleProps } from '../src/types';
  * assert exact rule text, and an explicit element id, so each test owns its own `<style>` element.
  */
 
-/** The last rule the engine writes when it initializes — everything after it is generated CSS. */
-export const LAST_BASE_RULE =
-  '._s path,._s circle,._s ellipse,._s rect,._s line,._s polygon,._s polyline,._s text {transition: all var(--svgTransitionTime);}';
+/**
+ * The selector of the last rule the engine writes when it initializes — everything past its closing
+ * brace is generated CSS. The selector rather than the whole rule, because what is inside it is the base
+ * transition, and changing those declarations once detached every engine test at once (bug #109).
+ */
+export const LAST_BASE_SELECTOR = '._s path,._s circle,._s ellipse,._s rect,._s line,._s polygon,._s polyline,._s text {';
 
 export function makeEngine(styleElementId: string, options: StyleEngineOptions = {}): StyleEngine {
   return createStyleEngine({ classNames: 'readable', sink: 'textContent', styleElementId, ...options });
@@ -24,9 +27,12 @@ export function rulesOf(engine: StyleEngine): string {
 
 /** Only the rules generated from props — the base reset and `:root` blocks are dropped. */
 export function generatedRulesIn(css: string): string {
-  const index = css.indexOf(LAST_BASE_RULE);
+  const index = css.indexOf(LAST_BASE_SELECTOR);
+  if (index === -1) return css;
 
-  return index === -1 ? css : css.slice(index + LAST_BASE_RULE.length);
+  const end = css.indexOf('}', index + LAST_BASE_SELECTOR.length);
+
+  return end === -1 ? css : css.slice(end + 1);
 }
 
 /** Only the rules generated from props, read out of the engine's style element. */
