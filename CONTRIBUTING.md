@@ -57,7 +57,7 @@ react-box/
 │   ├── ssg.ts                    # Server-side rendering support (entry point)
 │   │
 │   ├── core/                     # Core styling engine — ZERO react imports (enforced)
-│   │   ├── boxStyles.ts          # CSS property definitions (186 props)
+│   │   ├── boxStyles.ts          # CSS property definitions (197 props)
 │   │   ├── boxStylesFormatters.ts # Value formatters (px, rem, etc.)
 │   │   ├── variables.ts          # Where a value becomes a variable: the registry, bgImages, shadows
 │   │   ├── palette.ts            # Tailwind's OKLCH palette (26 families) + the `token/alpha` grammar
@@ -916,15 +916,11 @@ npm run lint
 export const cssStyles = {
   // ... existing props
 
-  /** The aspect-ratio CSS property */
-  aspectRatio: [
+  /** The image-rendering CSS property sets how a scaled image is smoothed. */
+  imageRendering: [
     {
-      values: ['auto', '1/1', '16/9', '4/3', '3/2', '21/9'] as const,
-      styleName: 'aspect-ratio',
-    },
-    {
-      values: 0, // Also accept numbers
-      styleName: 'aspect-ratio',
+      values: ['auto', 'pixelated', 'crisp-edges'] as const,
+      styleName: 'image-rendering',
     },
   ],
 };
@@ -932,13 +928,31 @@ export const cssStyles = {
 
 ### Step 2: Add Value Formatter (if needed)
 
+A definition with no `valueFormat` writes its value as it stands. One that transforms it declares a formatter — and one whose
+`values` is a **template type** rather than a list must declare `match` beside it: a scalar `values` is matched by `typeof`
+alone, so without it the prop takes every string of that shape and a typo reaches CSS verbatim (bug #31). `aspectRatio` is
+the shipped example of both — three definitions, one of them a ratio:
+
+```typescript
+// src/core/boxStyles.ts
+aspectRatio: [
+  { styleName: 'aspect-ratio', values: ['auto', 'square', 'video'] as const, valueFormat: (value: string) => Variables.aspectRatios[value] ?? value },
+  { styleName: 'aspect-ratio', values: Variables.ratio, match: Variables.isRatio, valueFormat: (value: string) => value.replace('/', ' / ') },
+  { styleName: 'aspect-ratio', values: 0 },
+],
+```
+
+The shared formatters (the three dividers) live in `src/core/boxStylesFormatters.ts`:
+
 ```typescript
 // src/core/boxStylesFormatters.ts
 
 export namespace BoxStylesFormatters {
   export namespace Value {
-    // Add new formatter if values need transformation
-    export const aspectRatio = (v: string) => v.replace('/', ' / ');
+    /** Spacing scale: divides by 4, so `p={4}` is `1rem`. */
+    export function rem(value: number) {
+      return `${value / DEFAULT_REM_DIVIDER}rem`;
+    }
   }
 }
 ```
@@ -961,13 +975,18 @@ export type BoxStyles = ExtractBoxStylesInternal<typeof cssStyles>;
 // src/core/variables.ts
 
 namespace Variables {
-  export const aspectRatios = {
-    square: '1 / 1',
-    video: '16 / 9',
-    // ...
-  };
+  /** The two ratios worth a name — CSS has neither. */
+  export const aspectRatios: Readonly<Record<string, string>> = { square: '1 / 1', video: '16 / 9' };
 }
 ```
+
+### Step 5: Update the Prop Count
+
+The registry's size is quoted in ten hand-written places — this file, the README, CLAUDE.md, ARTICLE.md, the npm
+description, `src/BOX_AI_CONTEXT.md`, both skill files, and two on the docs site. `src/core/boxStyles.test.ts` reads all
+ten and fails until they agree with the registry, so a new prop means bumping `PROP_COUNT` there and the ten copies. It
+is checked because it drifted twice on its own: once to `~144` against a registry of 117 (bug #71), and once with the
+npm description left at 165 while everything else said 186 (bug #114).
 
 ---
 

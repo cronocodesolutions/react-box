@@ -1,9 +1,11 @@
 import { ArrowRight, Box as BoxIcon, Eye, Grid3X3, Layers, Maximize2, MousePointer, Move, Palette, Type } from 'lucide-react';
 import { ReactNode, useState } from 'react';
 import Box from '../../src/box';
+import Checkbox from '../../src/components/checkbox';
 import Flex from '../../src/components/flex';
 import Grid from '../../src/components/grid';
 import Presence from '../../src/components/presence';
+import Textbox from '../../src/components/textbox';
 import Code from '../components/code';
 import PageHeader from '../components/pageHeader';
 import Reveal from '../components/reveal';
@@ -307,6 +309,53 @@ function LayoutDemo() {
           </Flex>
         </Flex>
       </DemoCard>
+
+      <DemoCard
+        title="Item Alignment (placeItems, justifyItems)"
+        description="Aligns every child at once — and safe alignment keeps an overflowing one reachable"
+        code='placeItems="center"'
+      >
+        <Flex gap={4} flexWrap="wrap">
+          {(['center', 'start', 'end', 'safe center'] as const).map((placeItems) => (
+            <Flex key={placeItems} d="column" gap={1}>
+              <Box fontSize={10} theme={{ dark: { color: 'slate-400' }, light: { color: 'slate-500' } }}>
+                placeItems="{placeItems}"
+              </Box>
+              <Grid
+                placeItems={placeItems}
+                gridTemplateColumns={2}
+                width={28}
+                height={20}
+                gap={1}
+                p={1}
+                b={1}
+                borderStyle="dashed"
+                theme={{ dark: { borderColor: 'slate-600' }, light: { borderColor: 'slate-300' } }}
+              >
+                <DemoBox p={1} />
+                <DemoBox p={1} />
+              </Grid>
+            </Flex>
+          ))}
+        </Flex>
+      </DemoCard>
+
+      <DemoCard
+        title="Aspect Ratio (aspectRatio)"
+        description="A preferred ratio the sizing props fill in one axis of: two names, a compact ratio, or a number"
+        code='aspectRatio="video" width="fit"'
+      >
+        <Flex gap={4} flexWrap="wrap" ai="flex-start">
+          {(['square', 'video', '4/3', 3] as const).map((aspectRatio) => (
+            <Flex key={aspectRatio} d="column" gap={1} width={28}>
+              <Box fontSize={10} theme={{ dark: { color: 'slate-400' }, light: { color: 'slate-500' } }}>
+                aspectRatio={typeof aspectRatio === 'number' ? `{${aspectRatio}}` : `"${aspectRatio}"`}
+              </Box>
+              <DemoBox aspectRatio={aspectRatio} width="fit" p={0} />
+            </Flex>
+          ))}
+        </Flex>
+      </DemoCard>
     </Flex>
   );
 }
@@ -403,6 +452,45 @@ function PositionDemo() {
               <DemoBox p={2} rotate={90} label="90°" />
               <DemoBox p={2} rotate={180} label="180°" />
             </Flex>
+          </Flex>
+        </Flex>
+      </DemoCard>
+
+      <DemoCard
+        title="Logical Insets (insetX, insetY)"
+        description="Both insets on one axis — inset-inline and inset-block, the way mx and my are the margin shorthands"
+        code='position="absolute" insetX={0} insetY={2}'
+      >
+        <Flex gap={4} flexWrap="wrap">
+          <Flex d="column" gap={1}>
+            <Box fontSize={10} theme={{ dark: { color: 'slate-400' }, light: { color: 'slate-500' } }}>
+              insetX={'{0}'} insetY={'{2}'}
+            </Box>
+            <Box
+              position="relative"
+              width={28}
+              height={20}
+              b={1}
+              borderStyle="dashed"
+              theme={{ dark: { borderColor: 'slate-600' }, light: { borderColor: 'slate-300' } }}
+            >
+              <DemoBox position="absolute" insetX={0} insetY={2} p={0} label="insetX / insetY" fontSize={10} />
+            </Box>
+          </Flex>
+          <Flex d="column" gap={1}>
+            <Box fontSize={10} theme={{ dark: { color: 'slate-400' }, light: { color: 'slate-500' } }}>
+              inset="1/4"
+            </Box>
+            <Box
+              position="relative"
+              width={28}
+              height={20}
+              b={1}
+              borderStyle="dashed"
+              theme={{ dark: { borderColor: 'slate-600' }, light: { borderColor: 'slate-300' } }}
+            >
+              <DemoBox position="absolute" inset="1/4" p={0} label="a quarter in" fontSize={10} />
+            </Box>
           </Flex>
         </Flex>
       </DemoCard>
@@ -819,6 +907,31 @@ function InteractionDemo() {
           </Box>
         </Flex>
       </DemoCard>
+
+      <DemoCard
+        title="Native Controls (accentColor, caretColor, colorScheme, fieldSizing)"
+        description="The parts of a control the page does not draw: a tick, a caret, and the scheme native UI follows"
+        code='accentColor="violet-500" caretColor="violet-500"'
+      >
+        <Flex d="column" gap={3}>
+          <Flex gap={4} ai="center" flexWrap="wrap">
+            <Checkbox accentColor="violet-500" label="accentColor" defaultChecked />
+            <Checkbox accentColor="emerald-500" label="emerald-500" defaultChecked />
+            <Checkbox label="the browser's own" defaultChecked />
+          </Flex>
+          <Textbox
+            caretColor="violet-500"
+            fieldSizing="content"
+            placeholder="fieldSizing=content — type and watch it grow"
+            minWidth={40}
+            theme={{ dark: { bgColor: 'slate-800', color: 'white' } }}
+          />
+          <Box fontSize={11} theme={{ dark: { color: 'slate-400' }, light: { color: 'slate-500' } }}>
+            <code>colorScheme="light dark"</code> is what makes the scrollbars, the form controls and the spellcheck underline follow the
+            theme — <code>Box.Theme</code> already sets it on the root.
+          </Box>
+        </Flex>
+      </DemoCard>
     </Flex>
   );
 }
@@ -936,6 +1049,39 @@ function MiscDemo() {
         <Box fontSize={11} mt={2} theme={{ dark: { color: 'slate-400' }, light: { color: 'slate-500' } }}>
           Each box fills in when its preference is on — set them in your OS, or emulate all three in Chrome DevTools ▸ Rendering. Reduced
           motion is already handled without any of this: it sets --transitionTime to 0s, so every Box stops animating.
+        </Box>
+      </DemoCard>
+
+      <DemoCard
+        title="Scrollbar Gutter & Will Change (scrollbarGutter, willChange)"
+        description="Reserve the scrollbar's space before there is one, and promote an element before it animates rather than during"
+        code='scrollbarGutter="stable" willChange="transform"'
+      >
+        <Flex gap={4} flexWrap="wrap">
+          {(['auto', 'stable'] as const).map((scrollbarGutter) => (
+            <Flex key={scrollbarGutter} d="column" gap={1}>
+              <Box fontSize={10} theme={{ dark: { color: 'slate-400' }, light: { color: 'slate-500' } }}>
+                scrollbarGutter="{scrollbarGutter}"
+              </Box>
+              <Box
+                width={32}
+                height={16}
+                overflow="auto"
+                scrollbarGutter={scrollbarGutter}
+                b={1}
+                borderStyle="dashed"
+                fontSize={11}
+                p={1}
+                theme={{ dark: { borderColor: 'slate-600', color: 'slate-300' }, light: { borderColor: 'slate-300', color: 'slate-700' } }}
+              >
+                Short text — the gutter is reserved even with nothing to scroll, so the text does not shift when there is.
+              </Box>
+            </Flex>
+          ))}
+        </Flex>
+        <Box fontSize={11} mt={2} theme={{ dark: { color: 'slate-400' }, light: { color: 'slate-500' } }}>
+          `willChange` is a hint with a real cost — a promoted layer holds memory and can take text off subpixel rendering — so it belongs
+          on the few elements that move, never on a list.
         </Box>
       </DemoCard>
     </Flex>

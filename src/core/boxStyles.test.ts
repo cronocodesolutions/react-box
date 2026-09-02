@@ -1,3 +1,5 @@
+import { readFileSync } from 'fs';
+import { resolve } from 'path';
 import { describe, expect, it } from 'vitest';
 import { generatedRulesOf, makeEngine, renderStyles } from '../../dev/engineHarness';
 import { BoxStyleProps } from '../types';
@@ -166,6 +168,7 @@ const matchCandidates = [
   'linear(0,1)',
   'red-500/50',
   'sample',
+  '16/9',
   // Last, so every definition already served keeps the candidate it was matching: a gradient is the one
   // record with a shape of its own, and `bgGradient` is the only definition that accepts it.
   { linear: 'r', colors: ['red-500', 'blue-500'] },
@@ -242,15 +245,38 @@ const definitions = Object.entries(cssStyles).flatMap(([prop, defs]) =>
 );
 
 describe('every declared prop value produces a rule', () => {
-  // The prop count is quoted in the README, CLAUDE.md, CONTRIBUTING.md, ARTICLE.md, the npm
-  // description, BOX_AI_CONTEXT.md, both skill files and two places on the docs site. Every one of
-  // those was written by hand and none of them was ever checked, so the figure drifted to '~144'
-  // against a registry of 117 (bug #71). Adding a prop now fails here until they are updated.
-  const PROP_COUNT = 186;
+  // This number used to be the eleventh hand-written copy of the figure, which is how C5 raised it here
+  // and left the npm description claiming 165 (bug #114) — the first drift being bug #71's '~144' against
+  // a registry of 117. The ten copies are read out of the files now, so adding a prop fails until they agree.
+  const PROP_COUNT = 197;
+
+  // A file that stops quoting the figure fails too, so a rewording is noticed rather than silently exempt.
+  const quotingFiles = [
+    'README.md',
+    'CLAUDE.md',
+    'CONTRIBUTING.md',
+    'ARTICLE.md',
+    'package.json',
+    'src/BOX_AI_CONTEXT.md',
+    '.claude/skills/cronocode-react-box/SKILL.md',
+    'marketplace-skill/skills/cronocode-react-box/SKILL.md',
+    'pages/site/site.ts',
+    'pages/pages/aiContextPage.tsx',
+  ];
+
+  // `186 typed CSS props`, `186 CSS properties`, `**186** props`: the number, any emphasis, then the noun.
+  const quotedCount = /(\d{2,4})\**\s+(?:typed\s+)?(?:CSS\s+)?(?:propert(?:y|ies)|props?)\b/g;
 
   it('holds exactly the number of props the docs claim', () => {
     expect(Object.keys(cssStyles).length).toBe(PROP_COUNT);
     expect(definitions.length).toBeGreaterThan(PROP_COUNT);
+  });
+
+  it.each(quotingFiles)('%s quotes the count the registry holds', (file) => {
+    const quoted = [...readFileSync(resolve(process.cwd(), file), 'utf8').matchAll(quotedCount)].map((match) => Number(match[1]));
+
+    expect(quoted.length).toBeGreaterThan(0);
+    expect([...new Set(quoted)]).toEqual([PROP_COUNT]);
   });
 
   it('declares at least one value definition for every prop', () => {
