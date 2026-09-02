@@ -44,10 +44,10 @@ export default function DataGridGroupRow<TRow>(props: Props<TRow>) {
                 columnIndex={navColumn}
                 ariaColIndex={columnIndex + 1}
                 ariaColSpan={cell.gridColumnSpan}
-                style={{ width: cell.widthVar, right: cell.isRightPinned ? '0' : undefined }}
-                br={cell.hasGroupingBorder ? 1 : undefined}
+                style={{ width: cell.widthVar, insetInlineEnd: cell.isEndPinned ? '0' : undefined }}
+                be={cell.hasGroupingBorder ? 1 : undefined}
                 gridColumn={cell.gridColumnSpan}
-                pl={cell.depthPadding}
+                ps={cell.depthPadding}
                 overflow="auto"
               >
                 <Box textWrap="nowrap" px={3}>

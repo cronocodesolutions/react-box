@@ -17,7 +17,7 @@ const data: Person[] = [
 ];
 
 const def: GridDefinition<Person> = {
-  columns: [{ key: 'parent', pin: 'LEFT', columns: [{ key: 'firstName' }, { key: 'lastName' }] }],
+  columns: [{ key: 'parent', pin: 'START', columns: [{ key: 'firstName' }, { key: 'lastName' }] }],
 };
 
 function getGrid() {
@@ -32,8 +32,38 @@ describe('ColumnModel', () => {
     const firstName = ArrayUtils.findOrThrow(grid.columns.value.flat, (c) => c.key === 'firstName');
     const lastName = ArrayUtils.findOrThrow(grid.columns.value.flat, (c) => c.key === 'lastName');
 
-    expect(firstName.pin).toEqual('LEFT');
-    expect(lastName.pin).toEqual('LEFT');
+    expect(firstName.pin).toEqual('START');
+    expect(lastName.pin).toEqual('START');
+  });
+
+  /**
+   * `LEFT`/`RIGHT` were the whole vocabulary before the sides became logical, so they still say
+   * what they always said — and they say it in the one spelling the rest of the grid works in.
+   */
+  it('takes the physical spelling of a pin and stores the logical side', () => {
+    const grid = new GridModel<Person>({
+      data,
+      def: { columns: [{ key: 'firstName', pin: 'LEFT' }, { key: 'lastName', pin: 'RIGHT' }, { key: 'day' }] },
+    });
+    const pinOf = (key: string) => ArrayUtils.findOrThrow(grid.columns.value.flat, (c) => c.key === key).pin;
+
+    expect(pinOf('firstName')).toEqual('START');
+    expect(pinOf('lastName')).toEqual('END');
+    expect(pinOf('day')).toBeUndefined();
+  });
+
+  it('takes it from a later pin too, and from a parent that spreads it down', () => {
+    const grid = new GridModel<Person>({
+      data,
+      def: { columns: [{ key: 'parent', pin: 'RIGHT', columns: [{ key: 'firstName' }] }, { key: 'day' }] },
+    });
+    const column = (key: string) => ArrayUtils.findOrThrow(grid.columns.value.flat, (c) => c.key === key);
+
+    expect(column('firstName').pin).toEqual('END');
+
+    column('day').pinColumn('LEFT');
+
+    expect(column('day').pin).toEqual('START');
   });
 
   it('initializes inline width for leafs', () => {

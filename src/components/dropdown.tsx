@@ -540,7 +540,7 @@ function DropdownImpl<TVal>(props: Props<TVal>, ref: Ref<HTMLInputElement>): Rea
       component="dropdown"
       props={{ onClick: toggleOpen }}
       position="relative"
-      pr={!hideIcon ? 6 : undefined}
+      pe={!hideIcon ? 6 : undefined}
       minWidth={isOpen ? 36 : undefined}
       width="fit-content"
       {...restProps}
@@ -577,7 +577,7 @@ function DropdownImpl<TVal>(props: Props<TVal>, ref: Ref<HTMLInputElement>): Rea
       type="button"
       props={{ tabIndex: 0, role: 'combobox', ...comboboxProps }}
       position="relative"
-      pr={!hideIcon ? 6 : undefined}
+      pe={!hideIcon ? 6 : undefined}
       width="fit-content"
       {...restProps}
       id={triggerId}

@@ -62,12 +62,12 @@ export default class GroupRowCellModel<TRow> {
     return `var(${this.column.groupColumnWidthVarName})`;
   }
 
-  public get isRightPinned(): boolean {
-    return this.column.pin === 'RIGHT';
+  public get isEndPinned(): boolean {
+    return this.column.pin === 'END';
   }
 
   /** Grouping cell shows a right border only when the grouping column is left-pinned. */
   public get hasGroupingBorder(): boolean {
-    return this.row.groupingColumn.pin === 'LEFT';
+    return this.row.groupingColumn.pin === 'START';
   }
 }

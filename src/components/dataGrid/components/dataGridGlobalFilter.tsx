@@ -59,14 +59,14 @@ export default function DataGridGlobalFilter<TRow>(props: Props<TRow>) {
         </Box>
       )}
       <Flex position="relative" ai="center">
-        <Flex position="absolute" left={3} pointerEvents="none" color="gray-400" theme={{ dark: { color: 'gray-500' } }}>
+        <Flex position="absolute" insetStart={3} pointerEvents="none" color="gray-400" theme={{ dark: { color: 'gray-500' } }}>
           <SearchIcon fill="currentColor" width="14px" />
         </Flex>
-        <Textbox placeholder="Search..." variant="compact" value={localValue} onChange={handleChange} pl={8} pr={localValue ? 8 : 3} />
+        <Textbox placeholder="Search..." variant="compact" value={localValue} onChange={handleChange} ps={8} pe={localValue ? 8 : 3} />
         {localValue && (
           <Box
             position="absolute"
-            right={2}
+            insetEnd={2}
             cursor="pointer"
             p={1}
             color="gray-400"

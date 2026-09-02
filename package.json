@@ -2,7 +2,9 @@
   "name": "@cronocode/react-box",
   "version": "3.3.3",
   "type": "module",
-  "sideEffects": ["pages/**"],
+  "sideEffects": [
+    "pages/**"
+  ],
   "main": "./box.cjs",
   "module": "./box.mjs",
   "types": "./box.d.ts",
@@ -101,7 +103,7 @@
         "react-dom"
       ],
       "gzip": true,
-      "limit": "3 KB"
+      "limit": "3.13 KB"
     },
     {
       "name": "Core engine (no React)",
@@ -117,7 +119,7 @@
         "react-dom"
       ],
       "gzip": true,
-      "limit": "53.93 KB"
+      "limit": "54.29 KB"
     },
     {
       "name": "Full library (Box + ssg + every component)",
@@ -127,7 +129,7 @@
         "react-dom"
       ],
       "gzip": true,
-      "limit": "60.16 KB"
+      "limit": "60.51 KB"
     }
   ],
   "repository": {

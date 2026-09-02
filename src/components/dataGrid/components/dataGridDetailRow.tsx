@@ -32,7 +32,7 @@ export default function DataGridDetailRow<TRow>(props: Props<TRow>) {
         ref={ref}
         component={`${grid.componentName}.body.detailRow.content` as never}
         position="sticky"
-        left={0}
+        insetStart={0}
         overflowX="auto"
         overflowY="hidden"
         // One cell across every column: the panel is what the row holds, and a row may hold

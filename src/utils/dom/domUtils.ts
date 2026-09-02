@@ -35,3 +35,16 @@ export function isEventInside(event: Event, elements: readonly ElementLike[]): b
     return path.includes(element) || (event.target instanceof Node && element.contains(event.target));
   });
 }
+
+/**
+ * Whether this element reads right to left — the direction the browser *resolved*, which is the only
+ * form of the answer that accounts for a `dir="auto"` or a `<bdi>` above it. Nothing but
+ * `getComputedStyle` knows it, and jsdom computes no direction at all, so a test environment reads as
+ * left to right — which is the initial value anyway.
+ */
+export function isRtl(value: ElementLike): boolean {
+  const element = elementOf(value);
+  const view = element?.ownerDocument?.defaultView;
+
+  return !!element && !!view && view.getComputedStyle(element).direction === 'rtl';
+}

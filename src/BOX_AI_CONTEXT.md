@@ -125,6 +125,13 @@ Every axis prop was already logical — `mx` is `margin-inline`, `px` is `paddin
 <Box props={{ dir: 'rtl' }} rtl={{ flip: 'xAxis' }} not={{ rtl: { ms: 2 } }} md={{ rtl: { textAlign: 'end' } }} />
 ```
 
+**The pre-built components come with it**, so one `dir` is the whole change:
+
+- **The arrow keys follow the reading order.** `useRovingFocus` reads the element's _resolved_ direction when a sideways arrow arrives, so in a right-to-left list or grid `ArrowLeft` moves to the **next** item — which is what APG asks for. Nothing is configured; a `dir` anywhere above the list is enough, and a vertical list pays nothing. Tab, Home and End never flip.
+- **A DataGrid column pins to `'START'` or `'END'`** of the inline axis rather than to a screen side, so it stays where the reading begins under either direction; `'LEFT'`/`'RIGHT'` are the older spelling of those two. `align` gained `'start'`/`'end'`, the resize handle grows a column towards the reading end, and the column menu's _Pin Left_ reads _Pin Right_ when that is the side it would pin to.
+- **A popup carries the direction out of the tree with it.** `Overlay` portals into a container that is a child of the body, where nothing of the declaration site is inherited, so it measures the direction it was declared in and writes it back on as `dir` — `Tooltip`, the `Dropdown` popup and the grid's column menu all get that.
+- **What stays physical, on purpose**: `Overlay` positions its layer with a transform in page coordinates, so its box is anchored at the page's own origin either way, and the grid's loading bar sweeps the same way in both. A measured pixel has no reading order.
+
 ### Layout
 
 | Prop                                                                                          | CSS Property                                                                            | Values                                                                                                                                                                                                                                                                                                                                                                                                                  |
@@ -1386,11 +1393,11 @@ import DataGrid from '@cronocode/react-box/components/dataGrid';
       { key: 'age', header: 'Age', width: 80, align: 'right', filterable: { type: 'number' } },
       { key: 'email', header: 'Email', width: 250, filterable: true },
       { key: 'status', header: 'Status', filterable: { type: 'multiselect' } },
-      { key: 'country', header: 'Country', pin: 'RIGHT' },
+      { key: 'country', header: 'Country', pin: 'END' },
       {
         key: 'actions',
         header: '',
-        pin: 'RIGHT',
+        pin: 'END',
         width: 80,
         sortable: false,
         resizable: false,
@@ -1445,19 +1452,19 @@ import DataGrid from '@cronocode/react-box/components/dataGrid';
 
 ### ColumnType
 
-| Prop                     | Type                            | Default  | Description                                                                                           |
-| ------------------------ | ------------------------------- | -------- | ----------------------------------------------------------------------------------------------------- |
-| `key`                    | `Key`                           | required | Column identifier (maps to TRow property)                                                             |
-| `header`                 | `string`                        | —        | Header text                                                                                           |
-| `width`                  | `number`                        | `200`    | Base width in px                                                                                      |
-| `align`                  | `'left' \| 'right' \| 'center'` | `'left'` | Cell alignment                                                                                        |
-| `pin`                    | `'LEFT' \| 'RIGHT'`             | —        | Pin to edge (sticky on scroll)                                                                        |
-| `columns`                | `ColumnType[]`                  | —        | Nested columns (grouped header)                                                                       |
-| `Cell`                   | `({ cell }) => ReactNode`       | —        | Custom renderer. `cell`: `{ value, row, column, grid }`                                               |
-| `sortable` / `resizable` | `boolean`                       | inherits | Override grid-level setting                                                                           |
-| `flexible`               | `boolean`                       | `true`   | Participate in flex width distribution                                                                |
-| `filterable`             | `boolean \| FilterConfig`       | —        | `true` (text), `{ type: 'number', min?, max? }`, `{ type: 'multiselect', options? }`                  |
-| `contextMenu`            | `boolean \| ContextMenuConfig`  | inherits | Override grid-level context menu. `false` hides entirely. `{ sort?, pin?, group? }` controls sections |
+| Prop                     | Type                                                | Default  | Description                                                                                                                                     |
+| ------------------------ | --------------------------------------------------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| `key`                    | `Key`                                               | required | Column identifier (maps to TRow property)                                                                                                       |
+| `header`                 | `string`                                            | —        | Header text                                                                                                                                     |
+| `width`                  | `number`                                            | `200`    | Base width in px                                                                                                                                |
+| `align`                  | `'start' \| 'end' \| 'center' \| 'left' \| 'right'` | `'left'` | Cell alignment. `start`/`end` follow the reading order; `left`/`right` stay on the screen side they name                                        |
+| `pin`                    | `'START' \| 'END'` (also `'LEFT'`/`'RIGHT'`)        | —        | Pin to an edge of the **inline axis** (sticky on scroll), so it holds under either `dir`. `LEFT`/`RIGHT` are the older spelling of the same two |
+| `columns`                | `ColumnType[]`                                      | —        | Nested columns (grouped header)                                                                                                                 |
+| `Cell`                   | `({ cell }) => ReactNode`                           | —        | Custom renderer. `cell`: `{ value, row, column, grid }`                                                                                         |
+| `sortable` / `resizable` | `boolean`                                           | inherits | Override grid-level setting                                                                                                                     |
+| `flexible`               | `boolean`                                           | `true`   | Participate in flex width distribution                                                                                                          |
+| `filterable`             | `boolean \| FilterConfig`                           | —        | `true` (text), `{ type: 'number', min?, max? }`, `{ type: 'multiselect', options? }`                                                            |
+| `contextMenu`            | `boolean \| ContextMenuConfig`                      | inherits | Override grid-level context menu. `false` hides entirely. `{ sort?, pin?, group? }` controls sections                                           |
 
 ### RowDetailConfig
 
@@ -1466,17 +1473,17 @@ import DataGrid from '@cronocode/react-box/components/dataGrid';
 | `content`            | `(row: TRow) => ReactNode`            | required | Render function for the detail panel          |
 | `height`             | `'auto' \| number \| (row) => number` | `'auto'` | Detail row height                             |
 | `expandOnRowClick`   | `boolean`                             | `false`  | Click anywhere on the row to toggle expansion |
-| `pinned`             | `boolean`                             | `false`  | Pin the expand column to LEFT                 |
+| `pinned`             | `boolean`                             | `false`  | Pin the expand column to the reading start    |
 | `expandColumnWidth`  | `number`                              | `50`     | Width of the expand column in px              |
 | `expandColumnHeader` | `string`                              | `''`     | Header text for the expand column             |
 
 ### ContextMenuConfig
 
-| Prop    | Type      | Default | Description                                        |
-| ------- | --------- | ------- | -------------------------------------------------- |
-| `sort`  | `boolean` | `true`  | Show Sort Ascending / Sort Descending / Clear Sort |
-| `pin`   | `boolean` | `true`  | Show Pin Left / Pin Right / Unpin                  |
-| `group` | `boolean` | `true`  | Show Group By / Un-Group All                       |
+| Prop    | Type      | Default | Description                                                               |
+| ------- | --------- | ------- | ------------------------------------------------------------------------- |
+| `sort`  | `boolean` | `true`  | Show Sort Ascending / Sort Descending / Clear Sort                        |
+| `pin`   | `boolean` | `true`  | Show the two pin actions and Unpin, each labelled by the side it lands on |
+| `group` | `boolean` | `true`  | Show Group By / Un-Group All                                              |
 
 ### Server-Side Pagination
 

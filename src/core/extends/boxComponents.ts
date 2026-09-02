@@ -439,7 +439,7 @@ const boxComponents = {
       before: {
         position: 'absolute',
         top: 0.5,
-        left: 0.5,
+        insetStart: 0.5,
         width: 4,
         height: 4,
         borderRadius: 4,
@@ -462,6 +462,7 @@ const boxComponents = {
         },
         before: {
           translateX: 4,
+          rtl: { translateX: -4 },
         },
       },
       // The only component that names its own duration, so the library-wide default cannot reach
@@ -547,7 +548,7 @@ const boxComponents = {
       overflow: 'hidden',
       whiteSpace: 'nowrap',
       textOverflow: 'ellipsis',
-      textAlign: 'left',
+      textAlign: 'start',
       gap: 2,
       p: 3,
       cursor: 'pointer',
@@ -850,7 +851,7 @@ const boxComponents = {
         styles: {
           position: 'absolute',
           top: 0,
-          right: 0,
+          insetEnd: 0,
           height: 'fit',
           px: 1.5,
         },
@@ -878,12 +879,12 @@ const boxComponents = {
         styles: {},
       },
       // The indeterminate loading bar. The sticky wrapper is zero-height so toggling `loading` shifts no
-      // layout; the 3px track overflows down over the first row, and sticky + left:0 + width:fit keeps the rail
-      // spanning the visible width during a horizontal scroll.
+      // layout; the 3px track overflows down over the first row, and sticky + inset-start + width:fit keeps
+      // the rail spanning the visible width during a horizontal scroll.
       loader: {
         styles: {
           position: 'sticky',
-          left: 0,
+          insetStart: 0,
           width: 'fit',
           height: 0,
           zIndex: 2,
@@ -893,8 +894,7 @@ const boxComponents = {
             styles: {
               position: 'absolute',
               top: 0,
-              left: 0,
-              right: 0,
+              insetX: 0,
               overflow: 'hidden',
               bgColor: 'indigo-100',
               theme: {
@@ -909,7 +909,7 @@ const boxComponents = {
                   position: 'absolute',
                   top: 0,
                   bottom: 0,
-                  left: 0,
+                  insetStart: 0,
                   bgColor: 'indigo-500',
                   animationName: 'rb-datagrid-loader',
                   animationDuration: 1100,
@@ -1006,8 +1006,8 @@ const boxComponents = {
                   bgColor: 'white',
                   borderRadius: 2,
                   py: 2,
-                  pl: 3,
-                  pr: 2,
+                  ps: 3,
+                  pe: 2,
                   color: 'gray-800',
                   fontSize: 14,
                   fontWeight: 500,
@@ -1102,9 +1102,9 @@ const boxComponents = {
                   },
                 },
               },
-              isFirstLeftPinned: {},
-              isLastLeftPinned: {
-                br: 1,
+              isFirstStartPinned: {},
+              isLastStartPinned: {
+                be: 1,
                 borderColor: 'gray-200',
                 theme: {
                   dark: {
@@ -1112,8 +1112,8 @@ const boxComponents = {
                   },
                 },
               },
-              isFirstRightPinned: {
-                bl: 1,
+              isFirstEndPinned: {
+                bs: 1,
                 borderColor: 'gray-200',
                 theme: {
                   dark: {
@@ -1121,7 +1121,7 @@ const boxComponents = {
                   },
                 },
               },
-              isLastRightPinned: {},
+              isLastEndPinned: {},
             },
             children: {
               input: {
@@ -1211,9 +1211,9 @@ const boxComponents = {
                   },
                 },
               },
-              isFirstLeftPinned: {},
-              isLastLeftPinned: {
-                br: 1,
+              isFirstStartPinned: {},
+              isLastStartPinned: {
+                be: 1,
                 borderColor: 'gray-200',
                 theme: {
                   dark: {
@@ -1221,8 +1221,8 @@ const boxComponents = {
                   },
                 },
               },
-              isFirstRightPinned: {
-                bl: 1,
+              isFirstEndPinned: {
+                bs: 1,
                 borderColor: 'gray-200',
                 theme: {
                   dark: {
@@ -1230,7 +1230,7 @@ const boxComponents = {
                   },
                 },
               },
-              isLastRightPinned: {},
+              isLastEndPinned: {},
               isSortable: {
                 cursor: 'pointer',
                 hover: {
@@ -1420,9 +1420,9 @@ const boxComponents = {
                   },
                 },
               },
-              isFirstLeftPinned: {},
-              isLastLeftPinned: {
-                br: 1,
+              isFirstStartPinned: {},
+              isLastStartPinned: {
+                be: 1,
                 borderColor: 'gray-200',
                 theme: {
                   dark: {
@@ -1430,8 +1430,8 @@ const boxComponents = {
                   },
                 },
               },
-              isFirstRightPinned: {
-                bl: 1,
+              isFirstEndPinned: {
+                bs: 1,
                 borderColor: 'gray-200',
                 theme: {
                   dark: {
@@ -1439,8 +1439,8 @@ const boxComponents = {
                   },
                 },
               },
-              isLastRightPinned: {},
-              isRowNumber: { jc: 'right' },
+              isLastEndPinned: {},
+              isRowNumber: { jc: 'end' },
               isRowSelection: {},
               isRowSelected: {},
               isFirstLeaf: {},

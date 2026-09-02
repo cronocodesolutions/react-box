@@ -56,7 +56,7 @@ function DropdownRowRendererImpl<TVal>({ row, index }: Props<TVal>) {
           <>
             {/* Decoration, not a control: `aria-selected` on the option already carries the state,
                 and a real focusable input inside an option is one interactive widget inside another. */}
-            <Checkbox readOnly checked={isSelected} mr={2} props={{ tabIndex: -1, 'aria-hidden': true }} />
+            <Checkbox readOnly checked={isSelected} me={2} props={{ tabIndex: -1, 'aria-hidden': true }} />
             {children}
           </>
         ) : (

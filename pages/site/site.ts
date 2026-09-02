@@ -92,6 +92,12 @@ export const siteRoutes = [
       'A component that answers to the space it was given rather than to the window: cq, six sizes and their complements, against the nearest container or a named one.',
   },
   {
+    path: '/rtl',
+    name: 'Right to Left',
+    description:
+      'One dir attribute mirrors the whole page: logical sides, arrow keys that follow the reading order, and pinned grid columns that hold their edges.',
+  },
+  {
     path: '/tailwind-parity',
     name: 'Tailwind Parity',
     description:
