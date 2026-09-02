@@ -12,6 +12,7 @@ import {
   Download,
   Layers,
   LayoutGrid,
+  Languages,
   ListChecks,
   MessageSquare,
   Moon,
@@ -196,6 +197,9 @@ export default function Sidebar({ toggleTheme, onClose }: SidebarProps) {
           </MenuItem>
           <MenuItem to="/gradients-shadows" icon={<Blend />}>
             Gradients & Effects
+          </MenuItem>
+          <MenuItem to="/rtl" icon={<Languages />}>
+            Right to Left
           </MenuItem>
           <MenuItem to="/tailwind-parity" icon={<ListChecks />}>
             Tailwind Parity

@@ -127,6 +127,12 @@ const roving = useRovingFocus({
 </ul>;
 ```
 
+**A sideways arrow follows the reading order.** APG asks for it and a right-to-left list reverses it, so
+`ArrowLeft` is the _next_ item there and `ArrowRight` the previous one. Nothing configures it: the hook
+asks the element for its _resolved_ direction (`getComputedStyle`, so a `dir="auto"` or a `<bdi>` above it
+counts) the moment one of those two keys arrives, which is why a vertical list pays nothing for it. The
+vertical axis, Tab, Home and End never flip — Home is the first item in the reading order either way.
+
 Keys: arrows per `orientation`, Home/End (skipping disabled items), Enter and Space to select,
 printable characters for typeahead. A single character — or the same character repeated — moves to
 the next item starting with it; a longer buffer narrows instead of hopping. Space belongs to an

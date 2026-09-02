@@ -391,7 +391,7 @@ export default function DataGridPage() {
                   },
                   { key: 'country', header: 'Country', filterable: { type: 'multiselect' } },
                   { key: 'gender', header: 'Gender', width: 120, filterable: { type: 'multiselect' } },
-                  { key: 'city', header: 'City', pin: 'RIGHT' },
+                  { key: 'city', header: 'City', pin: 'END' },
                 ],
               }}
             />

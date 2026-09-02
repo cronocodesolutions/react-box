@@ -8,6 +8,8 @@ import {
   Key,
   NumberFilterValue,
   PinPosition,
+  PinPositionInput,
+  pinPositionOf,
   SortDirection,
 } from '../contracts/dataGridContract';
 import GridModel, { GROUPING_CELL_KEY, ROW_DETAIL_CELL_KEY, ROW_NUMBER_CELL_KEY, ROW_SELECTION_CELL_KEY } from './gridModel';
@@ -28,7 +30,7 @@ export default class ColumnModel<TRow> {
       // Use stored width if available (survives memo recreation), otherwise use def.width or default
       const storedWidth = this.grid.columnWidths.get(this.key);
       this._inlineWidth = storedWidth ?? this.def.width ?? this.grid.DEFAULT_COLUMN_WIDTH_PX;
-      this._pin = def.pin;
+      this._pin = pinPositionOf(def.pin);
     }
   }
 
@@ -74,16 +76,16 @@ export default class ColumnModel<TRow> {
 
   public readonly pinFlags = memo(
     () => {
-      const isLeftPinned = this.pin === 'LEFT';
-      const isRightPinned = this.pin === 'RIGHT';
+      const isStartPinned = this.pin === 'START';
+      const isEndPinned = this.pin === 'END';
       return {
-        isLeftPinned,
-        isRightPinned,
-        isPinned: isLeftPinned || isRightPinned,
-        isFirstLeftPinned: isLeftPinned && this.left === 0,
-        isLastLeftPinned: isLeftPinned && this.isEdge,
-        isFirstRightPinned: isRightPinned && this.isEdge,
-        isLastRightPinned: isRightPinned && this.right === 0,
+        isStartPinned,
+        isEndPinned,
+        isPinned: isStartPinned || isEndPinned,
+        isFirstStartPinned: isStartPinned && this.startOffset === 0,
+        isLastStartPinned: isStartPinned && this.isEdge,
+        isFirstEndPinned: isEndPinned && this.isEdge,
+        isLastEndPinned: isEndPinned && this.endOffset === 0,
       };
     },
     () => [this.grid.columns],
@@ -92,13 +94,13 @@ export default class ColumnModel<TRow> {
   /** Variant flags for the body cell that depend only on the column (not the row). */
   public readonly cellVariant = memo(
     () => {
-      const { isPinned, isFirstLeftPinned, isLastLeftPinned, isFirstRightPinned, isLastRightPinned } = this.pinFlags.value;
+      const { isPinned, isFirstStartPinned, isLastStartPinned, isFirstEndPinned, isLastEndPinned } = this.pinFlags.value;
       return {
         isPinned,
-        isFirstLeftPinned,
-        isLastLeftPinned,
-        isFirstRightPinned,
-        isLastRightPinned,
+        isFirstStartPinned,
+        isLastStartPinned,
+        isFirstEndPinned,
+        isLastEndPinned,
         isRowSelection: this.isRowSelection,
         isRowNumber: this.isRowNumber,
         isFirstLeaf: this.isFirstLeaf,
@@ -112,12 +114,12 @@ export default class ColumnModel<TRow> {
   /** Static CSS-var references for the body/filter cell (stable string identity). */
   public readonly cellStyleVars = memo(
     () => {
-      const { isLeftPinned, isRightPinned } = this.pinFlags.value;
+      const { isStartPinned, isEndPinned } = this.pinFlags.value;
       return {
         width: `var(${this.widthVarName})`,
         height: `var(${this.grid.rowHeightVarName})`,
-        left: isLeftPinned ? `var(${this.leftVarName})` : undefined,
-        right: isRightPinned ? `var(${this.rightVarName})` : undefined,
+        insetInlineStart: isStartPinned ? `var(${this.inlineStartVarName})` : undefined,
+        insetInlineEnd: isEndPinned ? `var(${this.inlineEndVarName})` : undefined,
       };
     },
     () => [this.pinFlags],
@@ -154,6 +156,11 @@ export default class ColumnModel<TRow> {
   public get align() {
     return this.def.align;
   }
+  /** End-aligned either way it is spelled — `right` is the physical name of `end` in a left-to-right grid. */
+  public get isEndAligned(): boolean {
+    return this.align === 'end' || this.align === 'right';
+  }
+
   /** Whether an explicit `align` was provided (mirrors the original `'align' in def` check). */
   public get hasAlign(): boolean {
     return 'align' in this.def;
@@ -339,27 +346,27 @@ export default class ColumnModel<TRow> {
     return ArrayUtils.sumBy(sizes, (s) => s);
   }
 
-  public get left() {
+  public get startOffset() {
     let sum = 0;
 
     if (this.parent) {
-      const { visibleColumns, left: parentLeft } = this.parent;
+      const { visibleColumns, startOffset: parentStart } = this.parent;
 
       const colIndex = visibleColumns.findIndex((c) => c === this);
       sum += ArrayUtils.sumBy(visibleColumns, (c, index) => (index < colIndex ? (c.inlineWidth ?? 0) : 0));
 
-      sum += parentLeft;
+      sum += parentStart;
     } else {
-      const leftVisibleColumns = this.grid.columns.value.left.filter((c) => c.isVisible);
+      const startColumns = this.grid.columns.value.start.filter((c) => c.isVisible);
 
-      const colIndex = leftVisibleColumns.findIndex((c) => c === this);
-      sum += ArrayUtils.sumBy(leftVisibleColumns, (c, index) => (index < colIndex ? (c.inlineWidth ?? 0) : 0));
+      const colIndex = startColumns.findIndex((c) => c === this);
+      sum += ArrayUtils.sumBy(startColumns, (c, index) => (index < colIndex ? (c.inlineWidth ?? 0) : 0));
     }
 
     return sum;
   }
 
-  public get right() {
+  public get endOffset() {
     let sum = 0;
 
     if (this.parent) {
@@ -368,11 +375,11 @@ export default class ColumnModel<TRow> {
       const colIndex = reverse.findIndex((c) => c === this);
       sum += ArrayUtils.sumBy(reverse, (c, index) => (index < colIndex ? (c.inlineWidth ?? 0) : 0));
 
-      sum += this.parent.right;
+      sum += this.parent.endOffset;
     } else {
-      const rightVisibleColumns = this.grid.columns.value.right.filter((c) => c.isVisible);
+      const endColumns = this.grid.columns.value.end.filter((c) => c.isVisible);
 
-      const reverse = rightVisibleColumns.reverse();
+      const reverse = endColumns.reverse();
       const colIndex = reverse.findIndex((c) => c === this);
       sum += ArrayUtils.sumBy(reverse, (c, index) => (index < colIndex ? (c.inlineWidth ?? 0) : 0));
     }
@@ -385,14 +392,14 @@ export default class ColumnModel<TRow> {
 
     if (this.parent) {
       const { visibleColumns } = this.parent;
-      const item = (this.pin === 'LEFT' ? visibleColumns.at(-1) : visibleColumns.at(0)) as ColumnModel<TRow>;
+      const item = (this.pin === 'START' ? visibleColumns.at(-1) : visibleColumns.at(0)) as ColumnModel<TRow>;
       return item === this && this.parent.isEdge;
     }
 
     const item = (
-      this.pin === 'LEFT'
-        ? this.grid.columns.value.left.filter((x) => x.isVisible).at(-1)
-        : this.grid.columns.value.right.filter((x) => x.isVisible).at(0)
+      this.pin === 'START'
+        ? this.grid.columns.value.start.filter((x) => x.isVisible).at(-1)
+        : this.grid.columns.value.end.filter((x) => x.isVisible).at(0)
     ) as ColumnModel<TRow>;
     return item === this;
   }
@@ -417,11 +424,11 @@ export default class ColumnModel<TRow> {
   public get widthVarName(): string {
     return `--${this.uniqueKey}-width`;
   }
-  public get leftVarName() {
-    return `--${this.uniqueKey}-left`;
+  public get inlineStartVarName() {
+    return `--${this.uniqueKey}-inline-start`;
   }
-  public get rightVarName() {
-    return `--${this.uniqueKey}-right`;
+  public get inlineEndVarName() {
+    return `--${this.uniqueKey}-inline-end`;
   }
 
   public get gridRows() {
@@ -445,13 +452,24 @@ export default class ColumnModel<TRow> {
   };
 
   /**
+   * A pointer moves in screen coordinates and a column grows along the inline axis, so turning one into
+   * the other takes both facts: which edge the separator sits on, and which way the reading runs. The two
+   * flips compose — an end-pinned column in a right-to-left grid resizes the way an unpinned one does.
+   */
+  private get resizeSign(): 1 | -1 {
+    const flipped = (this.pin === 'END') !== this.grid.isRtl;
+
+    return flipped ? -1 : 1;
+  }
+
+  /**
    * Apply the drag to a new pointer x-coordinate, distributing the delta across leafs.
    * Does NOT notify — the caller decides how to reflect the change (the React adapter
    * writes the resulting width CSS variables straight to the DOM for a 60fps drag).
    */
   public applyResize = (currentX: number): void => {
     const { MIN_COLUMN_WIDTH_PX } = this.grid;
-    const dragDistance = (currentX - this._resizeStartX) * (this.pin === 'RIGHT' ? -1 : 1);
+    const dragDistance = (currentX - this._resizeStartX) * this.resizeSign;
 
     this.leafs.forEach((leaf) => {
       const width = this._resizeSizes[leaf.key];
@@ -493,12 +511,12 @@ export default class ColumnModel<TRow> {
   public resizeWidthTo = (width: number): void => {
     const current = this.inlineWidth ?? this.baseWidth;
 
-    this.moveResizer((width - current) * (this.pin === 'RIGHT' ? -1 : 1));
+    this.moveResizer((width - current) * this.resizeSign);
   };
 
-  public pinColumn = (pin?: PinPosition) => {
+  public pinColumn = (pin?: PinPositionInput) => {
     if (this.isLeaf) {
-      this._pin = pin;
+      this._pin = pinPositionOf(pin);
     } else {
       this.columns.forEach((c) => c.pinColumn(pin));
     }

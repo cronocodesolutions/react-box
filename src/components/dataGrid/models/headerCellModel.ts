@@ -137,25 +137,26 @@ export default class HeaderCellModel<TRow> {
     return Math.max(this.grid.containerWidth || UNMEASURED_MAX_WIDTH_PX, this.width, this.minWidth);
   }
 
-  public get paddingLeft(): number | undefined {
+  /** Room for the sort icon, which sits where the reading ends — so an end-aligned header needs it in front. */
+  public get paddingStart(): number | undefined {
     if (this.column.isRowSelection) return undefined;
-    return this.column.align === 'right' ? 10 : 3;
+    return this.column.isEndAligned ? 10 : 3;
   }
 
-  public get paddingRight(): number | undefined {
+  public get paddingEnd(): number | undefined {
     if (this.column.isRowSelection) return undefined;
     return this.column.align === 'center' ? 3 : undefined;
   }
 
   /** Variant flags for the header cell. */
   public get variant() {
-    const { isPinned, isFirstLeftPinned, isLastLeftPinned, isFirstRightPinned, isLastRightPinned } = this.column.pinFlags.value;
+    const { isPinned, isFirstStartPinned, isLastStartPinned, isFirstEndPinned, isLastEndPinned } = this.column.pinFlags.value;
     return {
       isPinned,
-      isFirstLeftPinned,
-      isLastLeftPinned,
-      isFirstRightPinned,
-      isLastRightPinned,
+      isFirstStartPinned,
+      isLastStartPinned,
+      isFirstEndPinned,
+      isLastEndPinned,
       isSortable: this.isSortable,
       isRowNumber: this.column.isRowNumber,
       isFirstLeaf: this.column.isFirstLeaf,
@@ -165,13 +166,13 @@ export default class HeaderCellModel<TRow> {
 
   /** Variant flags for the context-menu trigger button. */
   public get contextMenuButtonVariant() {
-    const { isPinned, isFirstLeftPinned, isLastLeftPinned, isFirstRightPinned, isLastRightPinned } = this.column.pinFlags.value;
+    const { isPinned, isFirstStartPinned, isLastStartPinned, isFirstEndPinned, isLastEndPinned } = this.column.pinFlags.value;
     return {
       isPinned,
-      isFirstLeftPinned,
-      isLastLeftPinned,
-      isFirstRightPinned,
-      isLastRightPinned,
+      isFirstStartPinned,
+      isLastStartPinned,
+      isFirstEndPinned,
+      isLastEndPinned,
       isSortable: this.isSortable,
       isRowNumber: this.column.isRowNumber,
     };
@@ -207,12 +208,12 @@ export default class HeaderCellModel<TRow> {
     return this.sections.sort && this.column.isLeaf && this.column.sortable && this.grid.sortColumn === this.column.key;
   }
 
-  public get canPinLeft(): boolean {
-    return this.sections.pin && this.column.pin !== 'LEFT';
+  public get canPinStart(): boolean {
+    return this.sections.pin && this.column.pin !== 'START';
   }
 
-  public get canPinRight(): boolean {
-    return this.sections.pin && this.column.pin !== 'RIGHT';
+  public get canPinEnd(): boolean {
+    return this.sections.pin && this.column.pin !== 'END';
   }
 
   public get canUnpin(): boolean {
@@ -232,7 +233,7 @@ export default class HeaderCellModel<TRow> {
   }
 
   public get hasPinSection(): boolean {
-    return this.canPinLeft || this.canPinRight || this.canUnpin;
+    return this.canPinStart || this.canPinEnd || this.canUnpin;
   }
 
   public get hasGroupSection(): boolean {

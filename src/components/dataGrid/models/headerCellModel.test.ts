@@ -100,15 +100,15 @@ describe('HeaderCellModel', () => {
   describe('pin context-menu availability', () => {
     it('unpinned column can pin left/right but not unpin', () => {
       const hc = leaf(getGrid(), 'firstName').headerCell;
-      expect(hc.canPinLeft).toBe(true);
-      expect(hc.canPinRight).toBe(true);
+      expect(hc.canPinStart).toBe(true);
+      expect(hc.canPinEnd).toBe(true);
       expect(hc.canUnpin).toBe(false);
     });
 
     it('left-pinned column cannot pin left and can unpin', () => {
-      const grid = getGrid({ columns: [{ key: 'firstName', pin: 'LEFT' }, { key: 'age' }] });
+      const grid = getGrid({ columns: [{ key: 'firstName', pin: 'START' }, { key: 'age' }] });
       const hc = leaf(grid, 'firstName').headerCell;
-      expect(hc.canPinLeft).toBe(false);
+      expect(hc.canPinStart).toBe(false);
       expect(hc.canUnpin).toBe(true);
     });
   });

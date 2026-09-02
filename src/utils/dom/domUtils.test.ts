@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it } from 'vitest';
-import { elementOf, htmlElementOf, isEventInside } from './domUtils';
+import { elementOf, htmlElementOf, isEventInside, isRtl } from './domUtils';
 
 describe('DomUtils', () => {
   afterEach(() => {
@@ -11,6 +11,31 @@ describe('DomUtils', () => {
 
     return document.body.firstElementChild as HTMLElement;
   }
+
+  /**
+   * The test environment resolves no `dir` attribute at all — only a `direction` in a style does it,
+   * and it inherits from there. Which is exactly why the real check for this is a browser one.
+   */
+  describe('isRtl', () => {
+    it('is false for an element with no direction anywhere above it', () => {
+      expect(isRtl(render('<div></div>'))).toBe(false);
+    });
+
+    it('reads the resolved direction, not the element that declares it', () => {
+      const outer = render('<div style="direction: rtl"><span id="inner">x</span></div>');
+
+      expect(isRtl(outer)).toBe(true);
+      expect(isRtl(document.getElementById('inner'))).toBe(true);
+    });
+
+    it('takes a ref, and answers false for nothing at all', () => {
+      const element = render('<div style="direction: rtl"></div>');
+
+      expect(isRtl({ current: element })).toBe(true);
+      expect(isRtl(null)).toBe(false);
+      expect(isRtl({ current: null })).toBe(false);
+    });
+  });
 
   describe('elementOf', () => {
     it('takes an element as it is', () => {

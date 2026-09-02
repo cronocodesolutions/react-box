@@ -56,7 +56,7 @@ function PageSizeSelector<TRow>({ grid, pageSize }: { grid: GridModel<TRow>; pag
   if (!options || options.length === 0) return null;
 
   return (
-    <Flex ai="center" gap={1} mr={1}>
+    <Flex ai="center" gap={1} me={1}>
       <Box
         component={`${grid.componentName}.bottomBar.pagination.pageSize` as never}
         tag="select"

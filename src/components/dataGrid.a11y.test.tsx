@@ -42,6 +42,17 @@ describe('DataGrid accessibility', () => {
   const renderGrid = (def?: Partial<Definition>, data: Person[] = people) =>
     render(<DataGrid<Person> data={data} def={{ rowKey: 'id', columns, visibleRowsCount: 'all', ...def } as Definition} />);
 
+  /**
+   * The same grid, read right to left. The direction has to be a `direction` in a style: the test
+   * environment resolves no `dir` attribute at all, so a real one was measured in Chrome instead.
+   */
+  const renderRtlGrid = (def?: Partial<Definition>) =>
+    render(
+      <div style={{ direction: 'rtl' }}>
+        <DataGrid<Person> data={people} def={{ rowKey: 'id', columns, visibleRowsCount: 'all', ...def } as Definition} />
+      </div>,
+    );
+
   const grid = () => screen.getByRole('grid');
   const headers = () => screen.getAllByRole('columnheader');
   const rows = () => screen.getAllByRole('row');
@@ -175,6 +186,37 @@ describe('DataGrid accessibility', () => {
       // APG: at the left-most cell, Left moves nothing.
       await user.pressArrow('Left');
       expectFocusOn(headers()[0]);
+    });
+
+    it('counts a sideways arrow in the reading order, so Left is forward in a right-to-left grid', async () => {
+      const user = keyboard();
+      renderRtlGrid();
+
+      await user.pressTab();
+      expectFocusOn(headers()[0]);
+
+      await user.pressArrow('Left');
+      expectFocusOn(headers()[1]);
+
+      await user.pressArrow('Right');
+      expectFocusOn(headers()[0]);
+
+      // Still APG's rule at the end of the row — it is just the other end of the screen.
+      await user.pressArrow('Right');
+      expectFocusOn(headers()[0]);
+    });
+
+    it('leaves the vertical axis, Home and End alone in a right-to-left grid', async () => {
+      const user = keyboard();
+      renderRtlGrid();
+
+      await user.pressTab();
+      await user.pressArrow('Left');
+      await user.pressArrow('Down');
+      expect(document.activeElement?.textContent).toBe('London');
+
+      await user.press('Home');
+      expectFocusOn(cellsOf(rows()[1])[0]);
     });
 
     it('moves between rows with Down and Up, keeping the column', async () => {

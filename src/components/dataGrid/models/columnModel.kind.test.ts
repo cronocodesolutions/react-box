@@ -52,10 +52,10 @@ describe('ColumnModel kind + layout', () => {
   });
 
   it('pinFlags reflect pinning', () => {
-    const grid = getGrid({ columns: [{ key: 'firstName', pin: 'LEFT' }, { key: 'age' }] });
+    const grid = getGrid({ columns: [{ key: 'firstName', pin: 'START' }, { key: 'age' }] });
     const flags = leaf(grid, 'firstName').pinFlags.value;
-    expect(flags.isLeftPinned).toBe(true);
-    expect(flags.isFirstLeftPinned).toBe(true);
+    expect(flags.isStartPinned).toBe(true);
+    expect(flags.isFirstStartPinned).toBe(true);
   });
 });
 

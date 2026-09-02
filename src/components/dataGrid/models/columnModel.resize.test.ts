@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it } from 'vitest';
 import { ignoreLogs } from '../../../../dev/tests';
 import ArrayUtils from '../../../utils/array/arrayUtils';
 import { GridDefinition } from '../contracts/dataGridContract';
@@ -17,6 +17,53 @@ function getGrid(def: GridDefinition<Person>) {
 
 describe('ColumnModel resize (headless)', () => {
   ignoreLogs();
+
+  afterEach(() => {
+    document.body.innerHTML = '';
+  });
+
+  /**
+   * The grid reads its direction off the element the widths are written to. A `dir` attribute is not
+   * enough here — the test environment resolves none — so the style says it instead.
+   */
+  function rtlSizingElement(grid: GridModel<Person>) {
+    document.body.innerHTML = '<div style="direction: rtl"></div>';
+    grid.setSizingElement(document.body.firstElementChild as HTMLElement);
+  }
+
+  describe('in a right-to-left grid', () => {
+    it('widens a column as the pointer drags *left*, because that is where its inline end is', () => {
+      const grid = getGrid({ columns: [{ key: 'firstName', width: 200 }] });
+      rtlSizingElement(grid);
+      const col = ArrayUtils.findOrThrow(grid.columns.value.leafs, (c) => c.key === 'firstName');
+
+      col.beginResize(100);
+      col.resizeTo(40); // 60px to the left
+
+      expect(col.inlineWidth).toBe(260);
+    });
+
+    it('resizes an end-pinned column the way an unpinned one goes, both flips having cancelled', () => {
+      const grid = getGrid({ columns: [{ key: 'firstName', width: 200, pin: 'END' }] });
+      rtlSizingElement(grid);
+      const col = ArrayUtils.findOrThrow(grid.columns.value.leafs, (c) => c.key === 'firstName');
+
+      col.beginResize(100);
+      col.resizeTo(160); // +60px, and an end-pinned column in a right-to-left grid grows with it
+
+      expect(col.inlineWidth).toBe(260);
+    });
+
+    it('lands on an exact width from either direction', () => {
+      const grid = getGrid({ columns: [{ key: 'firstName', width: 200 }] });
+      rtlSizingElement(grid);
+      const col = ArrayUtils.findOrThrow(grid.columns.value.leafs, (c) => c.key === 'firstName');
+
+      col.resizeWidthTo(320);
+
+      expect(col.inlineWidth).toBe(320);
+    });
+  });
 
   it('widens a column as the pointer drags right', () => {
     const grid = getGrid({ columns: [{ key: 'firstName', width: 200 }] });
@@ -39,7 +86,7 @@ describe('ColumnModel resize (headless)', () => {
   });
 
   it('inverts drag direction for RIGHT-pinned columns', () => {
-    const grid = getGrid({ columns: [{ key: 'firstName', width: 200, pin: 'RIGHT' }] });
+    const grid = getGrid({ columns: [{ key: 'firstName', width: 200, pin: 'END' }] });
     const col = ArrayUtils.findOrThrow(grid.columns.value.leafs, (c) => c.key === 'firstName');
 
     col.beginResize(100);
@@ -77,7 +124,7 @@ describe('ColumnModel resize (headless)', () => {
     });
 
     it('moves the separator, so rightwards narrows a RIGHT-pinned column', () => {
-      const grid = getGrid({ columns: [{ key: 'firstName', width: 200, pin: 'RIGHT' }] });
+      const grid = getGrid({ columns: [{ key: 'firstName', width: 200, pin: 'END' }] });
       const col = ArrayUtils.findOrThrow(grid.columns.value.leafs, (c) => c.key === 'firstName');
 
       col.moveResizer(16);
@@ -89,7 +136,7 @@ describe('ColumnModel resize (headless)', () => {
       const grid = getGrid({
         columns: [
           { key: 'firstName', width: 200 },
-          { key: 'lastName', width: 200, pin: 'RIGHT' },
+          { key: 'lastName', width: 200, pin: 'END' },
         ],
       });
       const [first, last] = ['firstName', 'lastName'].map((key) => ArrayUtils.findOrThrow(grid.columns.value.leafs, (c) => c.key === key));

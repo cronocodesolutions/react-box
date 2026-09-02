@@ -25,7 +25,7 @@ function ClearFilterButton(props: { columnName: React.ReactNode; onClear: () => 
       clean
       type="button"
       position="absolute"
-      right={2}
+      insetEnd={2}
       top="1/2"
       translateY="-1/2"
       cursor="pointer"

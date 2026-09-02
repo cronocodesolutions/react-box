@@ -1,5 +1,6 @@
 import { ComponentsAndVariants } from '../../../types';
 import ArrayUtils from '../../../utils/array/arrayUtils';
+import { isRtl } from '../../../utils/dom/domUtils';
 import memo from '../../../utils/memo';
 import { fuzzySearch } from '../../../utils/string/fuzzySearch';
 import DataGridCellRowDetail from '../components/dataGridCellRowDetail';
@@ -12,6 +13,8 @@ import {
   NO_PIN,
   PaginationState,
   PinPosition,
+  PinPositionInput,
+  pinPositionOf,
   ServerState,
   SortDirection,
 } from '../contracts/dataGridContract';
@@ -139,7 +142,7 @@ export default class GridModel<TRow> {
 
     // add row selection column
     if (def.rowSelection) {
-      const pin: PinPosition | undefined = typeof def.rowSelection === 'object' && def.rowSelection.pinned ? 'LEFT' : undefined;
+      const pin: PinPosition | undefined = typeof def.rowSelection === 'object' && def.rowSelection.pinned ? 'START' : undefined;
 
       sourceColumns.unshift(
         new ColumnModel({ key: ROW_SELECTION_CELL_KEY, pin, width: 50, align: 'center', Cell: DataGridCellRowSelection }, this),
@@ -151,16 +154,16 @@ export default class GridModel<TRow> {
       let pin: PinPosition | undefined;
       let width: number | undefined = DEFAULT_ROW_NUMBER_COLUMN_WIDTH;
       if (typeof def.showRowNumber === 'object') {
-        def.showRowNumber.pinned && (pin = 'LEFT');
+        def.showRowNumber.pinned && (pin = 'START');
         width = def.showRowNumber.width ?? DEFAULT_ROW_NUMBER_COLUMN_WIDTH;
       }
 
-      sourceColumns.unshift(new ColumnModel({ key: ROW_NUMBER_CELL_KEY, pin, width, align: 'right' }, this));
+      sourceColumns.unshift(new ColumnModel({ key: ROW_NUMBER_CELL_KEY, pin, width, align: 'end' }, this));
     }
 
     // add row detail expand column
     if (def.rowDetail) {
-      const pin: PinPosition | undefined = def.rowDetail.pinned ? 'LEFT' : undefined;
+      const pin: PinPosition | undefined = def.rowDetail.pinned ? 'START' : undefined;
       const width = def.rowDetail.expandColumnWidth ?? 50;
       const header = def.rowDetail.expandColumnHeader ?? '';
 
@@ -174,10 +177,10 @@ export default class GridModel<TRow> {
 
   public readonly columns = memo(
     () => {
-      const left = this.sourceColumns.value.map((c) => c.getPinnedColumn('LEFT')).filter((c) => !!c);
+      const start = this.sourceColumns.value.map((c) => c.getPinnedColumn('START')).filter((c) => !!c);
       const middle = this.sourceColumns.value.map((c) => c.getPinnedColumn()).filter((c) => !!c);
-      const right = this.sourceColumns.value.map((c) => c.getPinnedColumn('RIGHT')).filter((c) => !!c);
-      const flat = [...left, ...middle, ...right].flatMap((c) => c.flatColumns);
+      const end = this.sourceColumns.value.map((c) => c.getPinnedColumn('END')).filter((c) => !!c);
+      const flat = [...start, ...middle, ...end].flatMap((c) => c.flatColumns);
       const leafs = flat.filter((x) => x.isLeaf);
       const visibleLeafs = flat.filter((x) => x.isLeaf && x.isVisible);
       const userVisibleLeafs = visibleLeafs.filter(
@@ -186,9 +189,9 @@ export default class GridModel<TRow> {
       const maxDeath = ArrayUtils.maxBy(flat, (x) => x.death) + 1;
 
       return {
-        left,
+        start,
         middle,
-        right,
+        end,
         flat,
         leafs,
         visibleLeafs,
@@ -213,9 +216,9 @@ export default class GridModel<TRow> {
         );
 
         return [
-          ...(cols.LEFT?.filter((c) => c.isVisible) ?? []),
+          ...(cols.START?.filter((c) => c.isVisible) ?? []),
           ...(cols.NO_PIN?.filter((c) => c.isVisible) ?? []),
-          ...(cols.RIGHT?.filter((c) => c.isVisible) ?? []),
+          ...(cols.END?.filter((c) => c.isVisible) ?? []),
         ];
       });
     },
@@ -226,13 +229,13 @@ export default class GridModel<TRow> {
     () => {
       const { visibleLeafs } = this.columns.value;
 
-      const rightPinnedColumnsCount = ArrayUtils.sumBy(visibleLeafs, (x) => (x.pin === 'RIGHT' ? 1 : 0));
-      const leftAndMiddleCount = visibleLeafs.length - rightPinnedColumnsCount;
+      const endPinnedColumnsCount = ArrayUtils.sumBy(visibleLeafs, (x) => (x.pin === 'END' ? 1 : 0));
+      const startAndMiddleCount = visibleLeafs.length - endPinnedColumnsCount;
 
-      const left = leftAndMiddleCount > 0 ? `repeat(${leftAndMiddleCount}, max-content)` : '';
-      const right = rightPinnedColumnsCount > 0 ? `repeat(${rightPinnedColumnsCount}, max-content)` : '';
+      const start = startAndMiddleCount > 0 ? `repeat(${startAndMiddleCount}, max-content)` : '';
+      const end = endPinnedColumnsCount > 0 ? `repeat(${endPinnedColumnsCount}, max-content)` : '';
 
-      return `${left} ${right}`.trim();
+      return `${start} ${end}`.trim();
     },
     () => [this.columns],
   );
@@ -583,19 +586,19 @@ export default class GridModel<TRow> {
           acc[c.widthVarName] = `${c.inlineWidth}px`;
         }
 
-        if (c.pin === 'LEFT') {
-          acc[c.leftVarName] = `${c.left}px`;
+        if (c.pin === 'START') {
+          acc[c.inlineStartVarName] = `${c.startOffset}px`;
         }
 
-        if (c.pin === 'RIGHT') {
-          acc[c.rightVarName] = `${c.right}px`;
+        if (c.pin === 'END') {
+          acc[c.inlineEndVarName] = `${c.endOffset}px`;
         }
 
         return acc;
       }, {});
 
       size[this.rowHeightVarName] = `${this.rowHeight}px`;
-      size[this.leftEdgeVarName] = `${this.leftEdge}px`;
+      size[this.inlineStartEdgeVarName] = `${this.inlineStartEdge}px`;
       if (this._containerWidth > 0) {
         size[this.viewportWidthVarName] = `${this._containerWidth}px`;
       }
@@ -643,6 +646,14 @@ export default class GridModel<TRow> {
   public setSizingElement = (el: HTMLElement | null): void => {
     this._sizingElement = el;
   };
+
+  /**
+   * Which way the grid reads, resolved off the element the widths are written to. A model with no
+   * element yet — a server render, a headless host — reads as left to right, the initial value.
+   */
+  public get isRtl(): boolean {
+    return isRtl(this._sizingElement);
+  }
 
   public setContainerWidth = (width: number) => {
     if (this._containerWidth !== width) {
@@ -884,13 +895,13 @@ export default class GridModel<TRow> {
   }
 
   public selectedRows: Set<Key> = new Set();
-  public get leftEdge() {
-    return ArrayUtils.sumBy(this.columns.value.left, (c) => c.inlineWidth ?? 0);
+  public get inlineStartEdge() {
+    return ArrayUtils.sumBy(this.columns.value.start, (c) => c.inlineWidth ?? 0);
   }
-  public get rightEdge() {
-    return ArrayUtils.sumBy(this.columns.value.right, (c) => c.inlineWidth ?? 0);
+  public get inlineEndEdge() {
+    return ArrayUtils.sumBy(this.columns.value.end, (c) => c.inlineWidth ?? 0);
   }
-  public readonly leftEdgeVarName = '--left-edge';
+  public readonly inlineStartEdgeVarName = '--inline-start-edge';
   public readonly rowHeightVarName = '--row-height';
   public readonly viewportWidthVarName = '--viewport-width';
 
@@ -949,10 +960,13 @@ export default class GridModel<TRow> {
     this.notify();
   };
 
-  public pinColumn = (uniqueKey: string, pin?: PinPosition) => {
+  public pinColumn = (uniqueKey: string, pin?: PinPositionInput) => {
+    // The column and the grid call each other, and this equality is the only thing that stops them —
+    // so it has to compare the side, not the spelling the caller happened to use.
+    const side = pinPositionOf(pin);
     const column = ArrayUtils.findOrThrow(this.columns.value.flat, (c) => c.uniqueKey === uniqueKey);
-    if (column.pin !== pin) {
-      column.pinColumn(pin);
+    if (column.pin !== side) {
+      column.pinColumn(side);
     }
 
     this.columns.clear(); // cascades to headerRows/gridTemplateColumns/flexWidths/sizes/rows/flatRows/rowOffsets

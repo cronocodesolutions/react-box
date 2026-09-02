@@ -20,9 +20,9 @@ interface Props<TRow> {
 export default function DataGridHeaderCell<TRow>(props: Props<TRow>) {
   const { column, row, columnIndex } = props;
   const { grid } = column;
-  const { isLeftPinned, isRightPinned } = column.pinFlags.value;
+  const { isStartPinned, isEndPinned } = column.pinFlags.value;
   const headerCell = column.headerCell;
-  const { isSortable, showResizer, showContextMenu, paddingLeft, paddingRight } = headerCell;
+  const { isSortable, showResizer, showContextMenu, paddingStart, paddingEnd } = headerCell;
   const navigation = useGridNavigationContext();
   const { ref, tabIndex, onFocus } = navigation?.cellProps(row, columnIndex) ?? {};
   // The resizer is a separator, and a separator names the pane it resizes — which is this cell.
@@ -69,8 +69,8 @@ export default function DataGridHeaderCell<TRow>(props: Props<TRow>) {
       gridColumn={headerCell.gridColumn}
       style={{
         width: `var(${column.widthVarName})`,
-        left: isLeftPinned ? `var(${column.leftVarName})` : undefined,
-        right: isRightPinned ? `var(${column.rightVarName})` : undefined,
+        insetInlineStart: isStartPinned ? `var(${column.inlineStartVarName})` : undefined,
+        insetInlineEnd: isEndPinned ? `var(${column.inlineEndVarName})` : undefined,
       }}
     >
       {
@@ -81,21 +81,21 @@ export default function DataGridHeaderCell<TRow>(props: Props<TRow>) {
               position={column.isLeaf ? undefined : 'sticky'}
               ai="center"
               transition="none"
-              pl={paddingLeft}
-              pr={paddingRight}
+              ps={paddingStart}
+              pe={paddingEnd}
               style={{
-                left: !column.pin ? `var(${grid.leftEdgeVarName})` : undefined,
+                insetInlineStart: !column.pin ? `var(${grid.inlineStartEdgeVarName})` : undefined,
               }}
             >
               <Box overflow="hidden" textOverflow="ellipsis" textWrap="nowrap">
                 {value}
               </Box>
               {headerCell.isSorted && (
-                <Box pl={(column.inlineWidth ?? 0) < 58 ? 0 : 2}>
+                <Box ps={(column.inlineWidth ?? 0) < 58 ? 0 : 2}>
                   <SortIcon width="16px" rotate={headerCell.sortDirection === 'ASC' ? 0 : 180} fill="currentColor" />
                 </Box>
               )}
-              {showContextMenu && <Box minWidth={column.align === 'right' ? 4 : 10} />}
+              {showContextMenu && <Box minWidth={column.isEndAligned ? 4 : 10} />}
             </Flex>
           </Flex>
 

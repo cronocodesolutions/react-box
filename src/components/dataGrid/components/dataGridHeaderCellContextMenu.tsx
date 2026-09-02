@@ -33,13 +33,30 @@ interface Props<TRow> {
 }
 
 /**
+ * Which screen side a pin lands on depends on the reading order, so both names are rendered and
+ * `:dir()` picks one — no measurement and no state. The name that loses is `display: none`, which
+ * takes it out of the item's accessible name as well as out of the picture.
+ */
+function PinLabel(props: { side: 'start' | 'end' }) {
+  const ltr = props.side === 'start' ? 'Left' : 'Right';
+  const rtl = props.side === 'start' ? 'Right' : 'Left';
+
+  return (
+    <>
+      <Span rtl={{ display: 'none' }}>Pin {ltr}</Span>
+      <Span ltr={{ display: 'none' }}>Pin {rtl}</Span>
+    </>
+  );
+}
+
+/**
  * The column's menu — APG's menu button, on top of `Overlay`. The items are data rather than JSX because
  * the pattern needs them as a list: `useRovingFocus` numbers them for the arrows and the typeahead, and
  * which exist changes with the column's state. Sections are a rendering detail on top of that list.
  */
 export default function DataGridHeaderCellContextMenu<TRow>(props: Props<TRow>) {
   const { column } = props;
-  const { grid, align, header, key } = column;
+  const { grid, isEndAligned, header, key } = column;
   const hc = column.headerCell;
   const columnName = header ?? key;
 
@@ -53,15 +70,16 @@ export default function DataGridHeaderCellContextMenu<TRow>(props: Props<TRow>) 
   // question with no answer there — and `window` is not a thing that exists to ask (bug #85).
   const openLeft = useMemo(() => isBrowser() && tooltipPosition.left > window.innerWidth / 2, [tooltipPosition.left]);
 
-  const positionLeft = align === 'right' ? 2 : undefined;
-  const positionRight = align === 'right' ? undefined : column.pin === 'RIGHT' ? 2.5 : 4;
+  const positionStart = isEndAligned ? 2 : undefined;
+  const positionEnd = isEndAligned ? undefined : column.pin === 'END' ? 2.5 : 4;
 
   const items = useMemo(() => {
     const iconSlot = (children: React.ReactNode) => (
       <Span component={`${grid.componentName}.header.cell.contextMenu.tooltip.item.icon` as never}>{children}</Span>
     );
     const sortIcon = (rotate?: 0 | 180) => iconSlot(<SortIcon width="100%" fill="currentColor" rotate={rotate} />);
-    const pinIcon = (rotate?: 0 | -90) => iconSlot(<PinIcon width="100%" fill="currentColor" rotate={rotate} />);
+    const pinIcon = (rotate: 0 | -90, rtlRotate: 0 | -90) =>
+      iconSlot(<PinIcon width="100%" fill="currentColor" rotate={rotate} rtl={{ rotate: rtlRotate }} />);
     const groupIcon = iconSlot(<GroupingIcon width="100%" fill="currentColor" />);
     // Items with no icon keep the label aligned with the ones that have one.
     const noIcon = <Box width={4} />;
@@ -91,13 +109,21 @@ export default function DataGridHeaderCellContextMenu<TRow>(props: Props<TRow>) 
         },
       ],
       [
-        hc.canPinLeft && { key: 'pin-left', icon: pinIcon(), label: 'Pin Left', text: 'Pin Left', run: () => column.pinColumn('LEFT') },
-        hc.canPinRight && {
-          key: 'pin-right',
-          icon: pinIcon(-90),
-          label: 'Pin Right',
+        hc.canPinStart && {
+          key: 'pin-start',
+          icon: pinIcon(0, -90),
+          label: <PinLabel side="start" />,
+          // The typeahead needs one string, and the physical name of the start is the left in the
+          // reading order most of these grids are in.
+          text: 'Pin Left',
+          run: () => column.pinColumn('START'),
+        },
+        hc.canPinEnd && {
+          key: 'pin-end',
+          icon: pinIcon(-90, 0),
+          label: <PinLabel side="end" />,
           text: 'Pin Right',
-          run: () => column.pinColumn('RIGHT'),
+          run: () => column.pinColumn('END'),
         },
         hc.canUnpin && { key: 'unpin', icon: noIcon, label: 'Unpin', text: 'Unpin', run: () => column.pinColumn() },
       ],
@@ -176,7 +202,7 @@ export default function DataGridHeaderCellContextMenu<TRow>(props: Props<TRow>) 
   });
 
   return (
-    <Flex position="absolute" left={positionLeft} right={positionRight} top="1/2" translateY={-3} ai="center">
+    <Flex position="absolute" insetStart={positionStart} insetEnd={positionEnd} top="1/2" translateY={-3} ai="center">
       <Button
         ref={triggerRef}
         component={`${grid.componentName}.header.cell.contextMenu` as never}

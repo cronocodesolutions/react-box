@@ -1,4 +1,5 @@
 import { useCallback, useRef, useState } from 'react';
+import { isRtl } from '../../utils/dom/domUtils';
 import { useLatest } from './callbacks';
 import useControllableState, { ChangeDetails, ChangeHandler } from './useControllableState';
 
@@ -364,11 +365,15 @@ export default function useRovingFocus(options: RovingFocusOptions): RovingFocus
 
       const toEnd = Number.MAX_SAFE_INTEGER;
 
+      // A sideways arrow follows the *reading* order, which APG asks for and a right-to-left grid
+      // reverses: there, ArrowLeft is the next cell. Asked only of the two keys that care about it.
+      const inlineStep = () => (isRtl(event.currentTarget) ? -1 : 1);
+
       switch (event.key) {
         case 'ArrowRight':
-          return move(row, column + 1);
+          return move(row, column + inlineStep());
         case 'ArrowLeft':
-          return move(row, column - 1);
+          return move(row, column - inlineStep());
         case 'ArrowDown':
           return moveRow(row + 1);
         case 'ArrowUp':
@@ -408,12 +413,20 @@ export default function useRovingFocus(options: RovingFocusOptions): RovingFocus
         if (focusItems) focusItem(target);
       };
 
-      if ((event.key === 'ArrowDown' && vertical) || (event.key === 'ArrowRight' && horizontal)) {
+      // Sideways first, because which item it moves to depends on the reading order: in a
+      // right-to-left list ArrowLeft is the next one. The vertical axis never flips.
+      if (horizontal && (event.key === 'ArrowRight' || event.key === 'ArrowLeft')) {
+        const forward = (event.key === 'ArrowRight') !== isRtl(event.currentTarget);
+        move(step(activeIndex, forward ? 1 : -1, count, loop, isDisabled), 'keyboard');
+        return;
+      }
+
+      if (event.key === 'ArrowDown' && vertical) {
         move(step(activeIndex, 1, count, loop, isDisabled), 'keyboard');
         return;
       }
 
-      if ((event.key === 'ArrowUp' && vertical) || (event.key === 'ArrowLeft' && horizontal)) {
+      if (event.key === 'ArrowUp' && vertical) {
         move(step(activeIndex, -1, count, loop, isDisabled), 'keyboard');
         return;
       }

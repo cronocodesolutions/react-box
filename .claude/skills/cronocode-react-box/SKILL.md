@@ -201,6 +201,11 @@ gradient becomes lettering — the pairing is deliberately not automatic.
 //   hovers; ranked below the three preferences), motionReduce (prefers-reduced-motion: reduce),
 //   forcedColors (forced-colors: active), contrastMore (prefers-contrast: more).
 //   Not nestable in a breakpoint or in each other.
+// The pre-built components come with one dir and no configuration: useRovingFocus reads the element's
+// resolved direction when a sideways arrow arrives, so ArrowLeft is the *next* item in a right-to-left
+// list or grid (APG's rule; Tab/Home/End never flip); a DataGrid column pins to 'START'/'END' of the
+// inline axis; and Overlay measures the direction it was declared in and writes it onto the portalled
+// layer as dir, since a portal inherits nothing. Physical on purpose: Overlay's page coordinates.
 // Reduced motion is already the default — the preference sets --transitionTime to 0s, so every
 // Box stops animating. Declare motionReduce only to replace a movement or keep a safe one.
 <Box transitionDuration={150} motionReduce={{ transition: 'none' }} forcedColors={{ b: 1 }} />
@@ -367,7 +372,7 @@ import DataGrid from '@cronocode/react-box/components/dataGrid';
       { key: 'name', header: 'Name', filterable: true },
       { key: 'age', header: 'Age', width: 80, align: 'right', filterable: { type: 'number' } },
       { key: 'status', header: 'Status', filterable: { type: 'multiselect' } },
-      { key: 'country', header: 'Country', pin: 'RIGHT' },
+      { key: 'country', header: 'Country', pin: 'END' },
       {
         key: 'actions',
         header: '',
@@ -389,7 +394,7 @@ import DataGrid from '@cronocode/react-box/components/dataGrid';
 
 **GridDefinition**: `columns` (required), `rowKey`, `rowHeight` (px, default 48), `visibleRowsCount` (number/`'all'`), `showRowNumber` (bool/`{ pinned?, width? }`), `rowSelection` (bool/`{ pinned? }`), `rowDetail` (`{ content, height?, expandOnRowClick?, pinned?, expandColumnWidth?, expandColumnHeader? }`), `pagination` (`{ totalCount, pageSize? }`), `topBar`/`bottomBar`, `title`/`topBarContent`, `globalFilter`, `globalFilterKeys`, `sortable`/`resizable` (default true), `contextMenu` (bool/`{ sort?, pin?, group? }`, default true), `resizerStyle` (`'visible'`/`'hover'`/`'hidden'`), `noDataComponent`.
 
-**ColumnType**: `key`, `header`, `width` (px, default 200), `align`, `pin` (`'LEFT'`/`'RIGHT'`), `columns` (grouped headers), `Cell` (`({ cell }) => ReactNode`), `sortable`/`resizable` (override grid), `flexible`, `filterable` (`true`=text, `{ type: 'number' }`, `{ type: 'multiselect' }`), `contextMenu` (override grid).
+**ColumnType**: `key`, `header`, `width` (px, default 200), `align` (`'start'`/`'end'`/`'center'`, or the physical `'left'`/`'right'`), `pin` (`'START'`/`'END'` — an edge of the **inline axis**, so a pinned column holds under either `dir`; `'LEFT'`/`'RIGHT'` are the older spelling of the same two), `columns` (grouped headers), `Cell` (`({ cell }) => ReactNode`), `sortable`/`resizable` (override grid), `flexible`, `filterable` (`true`=text, `{ type: 'number' }`, `{ type: 'multiselect' }`), `contextMenu` (override grid).
 
 **Server-side**: `def={{ pagination: { totalCount }, bottomBar: true }}` + `page={page}` + `onServerStateChange={fetchData}`.
 

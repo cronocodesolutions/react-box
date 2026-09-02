@@ -10,16 +10,23 @@ describe('useRovingFocus', () => {
 
   const names = ['Ada', 'Grace', 'Alan', 'Anita'];
 
-  type ListProps = Partial<RovingFocusOptions> & { items?: string[] };
+  type ListProps = Partial<RovingFocusOptions> & { items?: string[]; rtl?: boolean };
+
+  /**
+   * A right-to-left subtree, for the arrows that follow the reading order. It has to be a
+   * `direction` in a style, because the test environment resolves no `dir` attribute at all — which
+   * is why the same behaviour was measured in a real browser as well.
+   */
+  const rtlStyle = (rtl?: boolean) => (rtl ? ({ direction: 'rtl' } as const) : undefined);
 
   /** The roving-tabindex half of the APG list patterns: DOM focus moves with the active item. */
-  function List({ items = names, ...options }: ListProps) {
+  function List({ items = names, rtl, ...options }: ListProps) {
     const roving = useRovingFocus({ count: items.length, ...options });
 
     return (
       <>
         <button>Before</button>
-        <ul onKeyDown={roving.onKeyDown}>
+        <ul onKeyDown={roving.onKeyDown} style={rtlStyle(rtl)}>
           {items.map((item, index) => (
             <li key={item}>
               <button {...roving.itemProps(index)}>{item}</button>
@@ -142,6 +149,28 @@ describe('useRovingFocus', () => {
 
       await user.pressArrow('Left');
       expectFocusOn(item('Ada'));
+    });
+
+    it('follows the reading order in a right-to-left list', async () => {
+      const user = keyboard();
+      render(<List orientation="horizontal" rtl />);
+      await tabIntoList(user);
+
+      // Left is *forward* here, which is what APG means by the arrows following the reading order.
+      await user.pressArrow('Left');
+      expectFocusOn(item('Grace'));
+
+      await user.pressArrow('Right');
+      expectFocusOn(item('Ada'));
+    });
+
+    it('leaves the vertical axis alone in a right-to-left list', async () => {
+      const user = keyboard();
+      render(<List rtl />);
+      await tabIntoList(user);
+
+      await user.pressArrow('Down');
+      expectFocusOn(item('Grace'));
     });
 
     it('takes all four when the list is a grid', async () => {
@@ -418,13 +447,13 @@ describe('useRovingFocus', () => {
      */
     const widthOf = (row: number) => (row === 2 ? 1 : 3);
 
-    function DataGridLike(options?: Partial<RovingFocusOptions>) {
+    function DataGridLike({ rtl, ...options }: Partial<RovingFocusOptions> & { rtl?: boolean } = {}) {
       const roving = useRovingFocus({ count: 4, columns: widthOf, ...options });
 
       return (
         <>
           <button>Before</button>
-          <div role="grid" onKeyDown={roving.onKeyDown}>
+          <div role="grid" onKeyDown={roving.onKeyDown} style={rtlStyle(rtl)}>
             {[0, 1, 2, 3].map((row) => (
               <div key={row} role="row">
                 {Array.from({ length: widthOf(row) }, (_, column) => (
@@ -474,6 +503,23 @@ describe('useRovingFocus', () => {
 
       await user.pressArrow('Up');
       expectFocusOn(cell('r0c0'));
+    });
+
+    it('counts a sideways arrow in the reading order', async () => {
+      const user = keyboard();
+      render(<DataGridLike rtl />);
+
+      await tabIntoGrid(user);
+      // Cell 0 is the one the reading starts at, so it is the rightmost of the row — and Left is
+      // the way further into it.
+      await user.pressArrow('Left');
+      expectFocusOn(cell('r0c1'));
+
+      await user.pressArrow('Down');
+      expectFocusOn(cell('r1c1'));
+
+      await user.pressArrow('Right');
+      expectFocusOn(cell('r1c0'));
     });
 
     it('stops at the edges instead of wrapping, which is where a grid differs from a list', async () => {

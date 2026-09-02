@@ -4,7 +4,21 @@ import CellModel from '../models/cellModel';
 
 export type { SortDirection };
 export type Key = string | number;
-export type PinPosition = 'LEFT' | 'RIGHT';
+/**
+ * Which edge a column is pinned to, named by the reading order rather than by the screen: `START` is the
+ * left edge of a left-to-right grid and the right edge of a right-to-left one, so a pinned column stays
+ * where the reading starts under either `dir`. `LEFT`/`RIGHT` are the older spelling of the same two.
+ */
+export type PinPosition = 'START' | 'END';
+/** What `pin` accepts — the logical pair, plus the physical names it used to be spelled with. */
+export type PinPositionInput = PinPosition | 'LEFT' | 'RIGHT';
+
+/** The logical side behind whichever spelling the caller used. */
+export function pinPositionOf(pin?: PinPositionInput): PinPosition | undefined {
+  if (!pin) return undefined;
+
+  return pin === 'LEFT' ? 'START' : pin === 'RIGHT' ? 'END' : pin;
+}
 export const NO_PIN = 'NO_PIN';
 export type SortColumnType<TRow> = { key: keyof TRow; dir: SortDirection };
 export type KeysMatching<T, V> = { [K in keyof T]-?: T[K] extends V ? K : never }[keyof T];
@@ -106,7 +120,7 @@ export interface RowDetailConfig<TRow> {
 export interface ContextMenuConfig {
   /** Show sort actions (Sort Ascending, Sort Descending, Clear Sort). Default: true */
   sort?: boolean;
-  /** Show pin actions (Pin Left, Pin Right, Unpin). Default: true */
+  /** Show pin actions (pin to start, pin to end, unpin). Default: true */
   pin?: boolean;
   /** Show group actions (Group By, Un-Group All). Default: true */
   group?: boolean;
@@ -117,10 +131,11 @@ export interface ContextMenuConfig {
 export interface ColumnType<TRow> {
   key: Key;
   header?: string;
-  pin?: PinPosition;
+  pin?: PinPositionInput;
   width?: number;
   columns?: ColumnType<TRow>[];
-  align?: 'left' | 'right' | 'center';
+  /** `start`/`end` follow the reading order; `left`/`right` stay on the screen side they name. */
+  align?: 'start' | 'end' | 'center' | 'left' | 'right';
   Cell?: React.ComponentType<{ cell: CellModel<TRow> }>;
   /** Enable filtering for this column. Set to true for default text filter, or provide config */
   filterable?: boolean | ColumnFilterConfig;

@@ -258,15 +258,15 @@ describe('DataGrid', () => {
 
     const firstNameStyles = window.getComputedStyle(firstNameEl);
     expect(firstNameStyles.position).toBe('sticky');
-    expect(firstNameStyles.left).toBe('0px');
-    expect(firstNameStyles.right).toBe('');
+    expect(firstNameStyles.insetInlineStart).toBe('0px');
+    expect(firstNameStyles.insetInlineEnd).toBe('');
 
     const progressEl = screen.getByText('Progress').closest('[role="columnheader"]')!;
     expect(progressEl).toBeDefined();
 
     const progressStyles = window.getComputedStyle(progressEl);
     expect(progressStyles.position).toBe('sticky');
-    expect(progressStyles.left).toBe('');
-    expect(progressStyles.right).toBe('0px');
+    expect(progressStyles.insetInlineStart).toBe('');
+    expect(progressStyles.insetInlineEnd).toBe('0px');
   });
 });

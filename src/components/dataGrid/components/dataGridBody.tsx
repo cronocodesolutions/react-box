@@ -55,7 +55,7 @@ export default function DataGridBody<TRow>(props: Props<TRow>) {
         ai="center"
         width="fit"
         position="sticky"
-        left={0}
+        insetStart={0}
         props={{ role: 'row' }}
         style={{ height: viewport.emptyHeight }}
       >

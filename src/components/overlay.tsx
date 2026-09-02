@@ -4,7 +4,7 @@ import Box, { BoxProps } from '../box';
 import usePortalContainer from '../react/hooks/usePortalContainer';
 import { ExtractElementFromTag } from '../react/reactTypes';
 import { ComponentsAndVariants } from '../types';
-import { ElementLike, htmlElementOf } from '../utils/dom/domUtils';
+import { ElementLike, htmlElementOf, isRtl } from '../utils/dom/domUtils';
 
 const positionDigitsAfterComma = 2;
 
@@ -56,7 +56,7 @@ function OverlayImpl(props: Props, ref: Ref<HTMLDivElement>) {
 
   const positionRef = useRef<HTMLDivElement>(null);
   const [position, setPosition] = useState<
-    { top: number; left: number; width?: number; windowScrollX: number; windowScrollY: number } | undefined
+    { top: number; left: number; width?: number; windowScrollX: number; windowScrollY: number; rtl: boolean } | undefined
   >();
   const portalContainer = usePortalContainer();
 
@@ -91,15 +91,19 @@ function OverlayImpl(props: Props, ref: Ref<HTMLDivElement>) {
       const left = Math.round((rect.left + window.scrollX) * positionDigitsAfterComma) / positionDigitsAfterComma;
       const windowScrollX = window.scrollX;
       const windowScrollY = window.scrollY;
+      // The portal container is a child of the body, so nothing of the direction the layer was
+      // declared in reaches it by inheritance — it is measured here and written back on as `dir`.
+      const rtl = isRtl(el);
 
       if (
         position?.top !== top ||
         position?.left !== left ||
         position?.windowScrollX !== windowScrollX ||
-        position?.windowScrollY !== windowScrollY
+        position?.windowScrollY !== windowScrollY ||
+        position?.rtl !== rtl
       ) {
         onPositionChange?.({ top, left, windowScrollX, windowScrollY });
-        setPosition({ top, left, width: rect.width > 0 ? rect.width : undefined, windowScrollX, windowScrollY });
+        setPosition({ top, left, width: rect.width > 0 ? rect.width : undefined, windowScrollX, windowScrollY, rtl });
       }
     },
     [anchorSide, position, onPositionChange],
@@ -131,8 +135,11 @@ function OverlayImpl(props: Props, ref: Ref<HTMLDivElement>) {
             ref={ref}
             position="absolute"
             top={0}
+            // Physical on purpose: the transform below is in page coordinates, so the box it moves
+            // from has to be the page's own origin in both directions.
             left={0}
             transition="none"
+            props={{ dir: position.rtl ? 'rtl' : 'ltr' }}
             style={{
               transform: `translate3d(calc(${position.left}px + ${adjustTranslateX}),calc(${position.top}px + ${adjustTranslateY}), 0)`,
               willChange: 'transform',

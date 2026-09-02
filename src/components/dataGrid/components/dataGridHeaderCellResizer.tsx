@@ -186,8 +186,8 @@ export default function DataGridHeaderCellResizer<TRow>(props: Props<TRow>) {
       height="fit"
       ai="center"
       position="absolute"
-      right={column.pin === 'RIGHT' ? undefined : 0}
-      left={column.pin !== 'RIGHT' ? undefined : 0}
+      insetEnd={column.pin === 'END' ? undefined : 0}
+      insetStart={column.pin !== 'END' ? undefined : 0}
       py={3}
     >
       <Box

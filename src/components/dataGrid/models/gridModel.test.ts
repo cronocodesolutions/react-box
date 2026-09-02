@@ -97,23 +97,23 @@ describe('GridModel', () => {
       const yearColumn = ArrayUtils.findOrThrow(grid.columns.value.flat, (c) => c.key === 'year');
       const firstNameColumn = ArrayUtils.findOrThrow(grid.columns.value.flat, (c) => c.key === 'firstName');
 
-      expect(yearColumn.left).to.eq(400);
-      expect(firstNameColumn.left).to.eq(600);
+      expect(yearColumn.startOffset).to.eq(400);
+      expect(firstNameColumn.startOffset).to.eq(600);
     });
 
-    it('calculates correct right distance', () => {
+    it('calculates correct end distance', () => {
       const grid = getGridModel();
 
       const firstNameColumn = ArrayUtils.findOrThrow(grid.columns.value.flat, (c) => c.key === 'firstName');
       const monthColumn = ArrayUtils.findOrThrow(grid.columns.value.flat, (c) => c.key === 'month');
 
-      expect(firstNameColumn.right).to.eq(grid.DEFAULT_COLUMN_WIDTH_PX * 1); // lastName
-      expect(monthColumn.right).to.eq(grid.DEFAULT_COLUMN_WIDTH_PX * 3); // year, firstName, lastName
+      expect(firstNameColumn.endOffset).to.eq(grid.DEFAULT_COLUMN_WIDTH_PX * 1); // lastName
+      expect(monthColumn.endOffset).to.eq(grid.DEFAULT_COLUMN_WIDTH_PX * 3); // year, firstName, lastName
     });
 
     it('moves parent header to the right pin position', () => {
       const grid = getGridModel({ gridDef: { columns: [{ key: 'parent', columns: [{ key: 'firstName' }] }] } });
-      grid.pinColumn('firstName', 'LEFT');
+      grid.pinColumn('firstName', 'START');
 
       const parentColumns = grid.columns.value.flat.filter((c) => c.key === 'parent');
       expect(parentColumns).toHaveLength(1);
@@ -122,8 +122,8 @@ describe('GridModel', () => {
     it('moves parent header to the right pin position', () => {
       const grid = getGridModel({ gridDef: { columns: [{ key: 'parent', columns: [{ key: 'firstName' }] }] } });
 
-      grid.pinColumn('parent', 'LEFT');
-      grid.pinColumn('firstNameLEFT');
+      grid.pinColumn('parent', 'START');
+      grid.pinColumn('firstNameSTART');
 
       const parentColumn = ArrayUtils.findOrThrow(grid.columns.value.flat, (c) => c.key === 'parent');
       expect(parentColumn.pin).toBeUndefined();
@@ -321,7 +321,7 @@ describe('GridModel', () => {
       expect(rowNumberColumn).toBeDefined();
 
       expect(rowNumberColumn?.inlineWidth).toEqual(129);
-      expect(rowNumberColumn?.pin).toEqual('LEFT');
+      expect(rowNumberColumn?.pin).toEqual('START');
     });
   });
 
