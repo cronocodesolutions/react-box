@@ -68,7 +68,7 @@ expect, not a check against the fields.
 **Spacing**: `p`/`px`/`py`/`pt`/`pr`/`pb`/`pl`, `m`/`mx`/`my`/`mt`/`mr`/`mb`/`ml`, `gap`
 **Layout**: `display`, `d` (flex-direction), `wrap`, `ai` (align-items), `jc` (justify-content), `flex`/`grow`/`shrink`, `container`/`containerName`/`containerType` (a query container — see `cq`)
 **Sizing**: `width`/`height` — number (÷4=rem), `'auto'`, `'fit'` (100%), `'fit-screen'` (100vw/vh), fractions (`'1/2'`…), `'33%'`. `minWidth`/`maxWidth`/`minHeight`/`maxHeight` same. All accept `"5%"`.
-**Colors**: `bgColor`/`color`/`borderColor` — Tailwind palette `'gray-50'`..`'gray-900'`, red/orange/yellow/green/teal/blue/indigo/purple/pink/violet, `'white'`/`'black'`/`'transparent'`/`'currentColor'`
+**Colors**: `bgColor`/`color`/`borderColor`/`outlineColor`/`fill`/`stroke` — Tailwind's OKLCH palette, 26 families × 11 steps `'50'`..`'950'` (slate/gray/zinc/neutral/stone/mauve/mist/olive/taupe/red/orange/amber/yellow/lime/green/emerald/teal/cyan/sky/blue/indigo/violet/purple/fuchsia/pink/rose), plus `'white'`/`'black'`/`'transparent'`/`'currentColor'`. **Opacity modifier on any colour value**: `bgColor="blue-500/40"` → `color-mix(in oklab, var(--blue-500) 40%, transparent)` — the mix wraps the *variable*, so it stays themed and shared; unlike `opacity` it fades one declaration, not the element. Works in `vars` and on a `Box.extend()` variable (`"brand/30"`); an unknown token or a percentage outside 0–100 emits nothing
 **Borders**: `b`/`bx`/`by`/`bt`/`br`/`bb`/`bl` (px), `borderRadius` (÷4), `borderStyle`
 **Text**: `fontSize` (÷16), `fontWeight`, `lineHeight` (px), `textAlign`/`textDecoration`/`textTransform`/`whiteSpace`/`textOverflow`, `textWrap`
 **Position**: `position`, `top`/`right`/`bottom`/`left`/`inset`, `zIndex`

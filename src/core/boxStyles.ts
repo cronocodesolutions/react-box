@@ -3,6 +3,7 @@ import { BoxStylesFormatters } from './boxStylesFormatters';
 import Containers from './containers';
 import Content from './content';
 import { BoxStyle, BoxStyleValue } from './coreTypes';
+import Palette from './palette';
 import Variables from './variables';
 
 /** The opacity scale shared by `opacity`, `fillOpacity` and `strokeOpacity`. */
@@ -16,6 +17,17 @@ const opacityValues = [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1] as con
 const referenceValues = {
   values: Variables.reference,
   match: Variables.isReference,
+} satisfies BoxStyle;
+
+/**
+ * The opacity modifier every colour prop takes: `bgColor="blue-500/40"` is the token mixed with
+ * `transparent`. It carries its own `match` because `values` is a template type, and a scalar `values` is
+ * matched by `typeof` alone — which would take every string, the way it did before bug #31.
+ */
+const colorAlphaValue = {
+  values: Palette.alpha,
+  match: Palette.isAlpha,
+  valueFormat: (value: string, getVariableValue: (name: string) => string) => Palette.mix(value, getVariableValue),
 } satisfies BoxStyle;
 
 /**
@@ -1468,6 +1480,7 @@ export const cssStyles = {
       // tokens, and they are the only palette a forced-colors mode keeps (bug #65).
       values: Variables.systemColorValues,
     },
+    colorAlphaValue,
   ],
   /** The background-color CSS property sets the background color of an element. */
   bgColor: [
@@ -1480,6 +1493,7 @@ export const cssStyles = {
       values: Variables.systemColorValues,
       styleName: 'background-color',
     },
+    { ...colorAlphaValue, styleName: 'background-color' },
   ],
   /** The border-color shorthand CSS property sets the color of an element's border. */
   borderColor: [
@@ -1492,6 +1506,7 @@ export const cssStyles = {
       values: Variables.systemColorValues,
       styleName: 'border-color',
     },
+    { ...colorAlphaValue, styleName: 'border-color' },
   ],
   /** The outline-color CSS property sets the color of an element's outline. */
   outlineColor: [
@@ -1504,6 +1519,7 @@ export const cssStyles = {
       values: Variables.systemColorValues,
       styleName: 'outline-color',
     },
+    { ...colorAlphaValue, styleName: 'outline-color' },
   ],
   /** The fill CSS property defines how SVG text content and the interior canvas of SVG shapes are filled or painted. If present, it overrides the element's fill attribute. Takes a colour token, a paint server the document defines (`fill="url(#sky)"` — a `<LinearGradient>` or a pattern) or a variable somebody else declared (`fill="var(--chart-1)"`). */
   fill: [
@@ -1514,6 +1530,7 @@ export const cssStyles = {
     {
       values: Variables.systemColorValues,
     },
+    colorAlphaValue,
     referenceValues,
   ],
   /** The fill-opacity CSS property defines the opacity of the paint applied to the interior of an SVG shape or to SVG text. */
@@ -1539,6 +1556,7 @@ export const cssStyles = {
     {
       values: Variables.systemColorValues,
     },
+    colorAlphaValue,
     referenceValues,
   ],
   /** The stroke-opacity CSS property defines the opacity of the paint applied to an SVG element's stroke. */

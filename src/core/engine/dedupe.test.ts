@@ -169,7 +169,7 @@ describe('variables', () => {
 
     const all = rulesOf(engine);
     expect(all.split('--red-500:')).toHaveLength(2);
-    expect(all).toContain('--blue-500: #3b82f6;');
+    expect(all).toContain('--blue-500: oklch(62.3% .214 259.8);');
     expect(generatedRulesOf(engine)).toContain('.bgColor-red-500{background-color:var(--red-500)}');
   });
 
@@ -180,7 +180,7 @@ describe('variables', () => {
     expect(rulesOf(engine)).not.toContain('--red-500');
 
     renderStyles(engine, { bgColor: 'red-500' });
-    expect(rulesOf(engine)).toContain('--red-500: #ef4444;');
+    expect(rulesOf(engine)).toContain('--red-500: oklch(63.7% .237 25.3);');
   });
 });
 

@@ -103,7 +103,7 @@ The styling engine works differently from what you might expect. When you write 
 
 The key insight is **deduplication**. If 50 components across your app all use `p={4}`, there's still only one CSS rule. An internal `IdentityFactory` ensures each unique value gets exactly one class. Your stylesheet stays small no matter how many components you have.
 
-The library ships with 200+ color variables (a Tailwind-like palette), but they're loaded lazily. Navigate to a page that uses `violet-500` for the first time? The CSS variable gets injected on the fly. Colors you never use never touch the DOM.
+The library ships with 286 color variables (Tailwind's OKLCH palette, twenty-six families), but they're loaded lazily. Navigate to a page that uses `violet-500` for the first time? The CSS variable gets injected on the fly. Colors you never use never touch the DOM.
 
 And there's no build step for styles. It works with Vite, Webpack, Next.js — whatever you use. `npm install @cronocode/react-box` and you're done. The entire main Box component is 99 lines of code.
 

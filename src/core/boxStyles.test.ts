@@ -156,7 +156,17 @@ describe('numeric dividers', () => {
  * Candidates offered to a definition that declares `match`: the walk uses the first one it says yes to,
  * which also proves the predicate accepts anything at all. A new `match` definition needs its shape here.
  */
-const matchCandidates = ['url(#sample)', 'var(--sample)', '50%', 'none', 4, { 'sample-var': 'red-500' }, 'linear(0,1)', 'sample'] as const;
+const matchCandidates = [
+  'url(#sample)',
+  'var(--sample)',
+  '50%',
+  'none',
+  4,
+  { 'sample-var': 'red-500' },
+  'linear(0,1)',
+  'red-500/50',
+  'sample',
+] as const;
 
 /** A sample value as text, so a record reads as itself rather than as `[object Object]`. */
 function label(value: unknown): string {

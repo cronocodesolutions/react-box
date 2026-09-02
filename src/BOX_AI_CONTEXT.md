@@ -121,7 +121,7 @@ All sizing, spacing, and positioning props also accept percentage strings: `p="5
 
 | Prop                                                                             | CSS Property                            | Notes                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | -------------------------------------------------------------------------------- | --------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `bgColor` / `color` / `borderColor`                                              | background-color / color / border-color | Tailwind palette: `'gray-50'`..`'gray-900'`, same for red/orange/yellow/green/teal/blue/indigo/purple/pink/violet. Also `'white'`, `'black'`, `'transparent'`, `'currentColor'`. Plus the CSS **system colours** (`'Canvas'`, `'CanvasText'`, `'ButtonFace'`, `'ButtonText'`, `'Highlight'`, `'HighlightText'`, `'GrayText'`, `'LinkText'`) — keywords rather than tokens, and the one palette a forced-colors mode keeps |
+| `bgColor` / `color` / `borderColor`                                              | background-color / color / border-color | Tailwind's OKLCH palette, 26 families × 11 steps: `'gray-50'`..`'gray-950'`, same for slate/zinc/neutral/stone/mauve/mist/olive/taupe/red/orange/amber/yellow/lime/green/emerald/teal/cyan/sky/blue/indigo/violet/purple/fuchsia/pink/rose. Also `'white'`, `'black'`, `'transparent'`, `'currentColor'`. Any of them takes an **opacity modifier** — `bgColor="blue-500/40"`. Plus the CSS **system colours** (`'Canvas'`, `'CanvasText'`, `'ButtonFace'`, `'ButtonText'`, `'Highlight'`, `'HighlightText'`, `'GrayText'`, `'LinkText'`) — keywords rather than tokens, and the one palette a forced-colors mode keeps |
 | `b` / `bx` / `by` / `bt` / `br` / `bb` / `bl`                                    | border-width                            | direct px                                                                                                                                                                                                                                                                                                                                                                                                                 |
 | `borderRadius`                                                                   | border-radius                           | divider 4 (spacing scale)                                                                                                                                                                                                                                                                                                                                                                                                 |
 | `borderStyle`                                                                    | border-style                            | `'solid'`, `'dashed'`, `'dotted'`, `'none'`                                                                                                                                                                                                                                                                                                                                                                               |
@@ -137,6 +137,32 @@ All sizing, spacing, and positioning props also accept percentage strings: `p="5
 | `opacity`                                                                        | opacity                                 | number                                                                                                                                                                                                                                                                                                                                                                                                                    |
 | `cursor` / `pointerEvents` / `userSelect`                                        | misc                                    | string values. For `transition`, `animation` and the transform props see _Animation and transitions_ below                                                                                                                                                                                                                                                                                                                |
 
+### Colours, and the opacity modifier
+
+The palette is **Tailwind 4.3's, in OKLCH**: twenty-six families of eleven steps (`50`–`950`) — the five
+neutrals (`slate`, `gray`, `zinc`, `neutral`, `stone`), the four Tailwind 4.3 added (`mauve`, `mist`,
+`olive`, `taupe`) and seventeen hues (`red`, `orange`, `amber`, `yellow`, `lime`, `green`, `emerald`,
+`teal`, `cyan`, `sky`, `blue`, `indigo`, `violet`, `purple`, `fuchsia`, `pink`, `rose`). Each token is a
+CSS variable declared in `:root` the first time something uses it, so a colour you never write costs
+nothing.
+
+Any colour value takes a slash and a percentage:
+
+```tsx
+<Box bgColor="blue-500/40" borderColor="black/10" color="currentColor/60" />
+<Box theme={{ dark: { bgColor: 'sky-400/25' } }} hover={{ bgColor: 'blue-500/60' }} />
+<Flex vars={{ 'color-grid': 'slate-500/20' }} />
+```
+
+- It compiles to `color-mix(in oklab, var(--blue-500) 40%, transparent)`. The mix wraps the
+  **variable**, so a themed token is still themed and every element asking for the same value shares
+  one class. `oklab` because mixing towards transparency in a polar space drags the hue along.
+- Not `opacity`, which fades the element, its text and its children. The modifier fades one declaration.
+- Works on `color`, `bgColor`, `borderColor`, `outlineColor`, `fill`, `stroke` and on a `vars` entry —
+  and on a variable declared through `Box.extend()` (`bgColor="brand/30"`).
+- A token the palette does not have, or a percentage outside 0–100, produces **no rule and no class
+  name** — the same silence every unmatched value gets.
+
 ### Custom properties (`vars`)
 
 The one prop whose declaration _names_ come from its value, for styling markup this library never
@@ -148,7 +174,8 @@ rendered — a chart library, a third-party widget, a subtree with its own token
 </Flex>
 ```
 
-- A **colour token** resolves to the variable behind it (`--color-revenue: var(--sky-500)`), so it
+- A **colour token** resolves to the variable behind it (`--color-revenue: var(--sky-500)`), and one
+  carrying an opacity modifier to the mix that applies it (`slate-500/20`), so it
   follows the palette. Every other value is written out as it stands: a length, a number, a
   `var(--x)`/`url(#x)` reference, a colour of your own. Names may carry a leading `--` or not.
 - It is an ordinary prop: it nests in `theme`, `hover`, `md` and a group selector like all the others,
@@ -1154,7 +1181,7 @@ function TrendCell({ cell }: { cell: CellModel<Row> }) {
 4. **fontSize divider is 16** (not 4). `fontSize={14}` → 14px
 5. **Spacing divider is 4**. `p={4}` → 16px (1rem)
 6. **Border width and lineHeight are direct px**. `b={1}` → 1px. **borderRadius uses divider 4**: `borderRadius={2}` → 8px
-7. **Colors are Tailwind-like**: `'gray-500'`, `'blue-600'`
+7. **Colors are Tailwind's OKLCH palette**: `'gray-500'`, `'blue-600'` — 26 families × 11 steps, and an opacity modifier on any of them: `bgColor="blue-500/40"` (a `color-mix`, not `opacity`)
 8. **Breakpoints are mobile-first**: base → sm → md → lg → xl → xxl
 9. **Theme styles nest**: `theme={{ dark: { hover: { ... } } }}`
 10. **HTML attributes go in `props` prop**: `<Link props={{ href: '/about' }}>` not `<Link href>`. `data-*` and `aria-*` go there too — a `data-state` written at the top level typechecks and is then dropped
