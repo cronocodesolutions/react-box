@@ -1,9 +1,10 @@
-import { SlidersHorizontal } from 'lucide-react';
+import { ArrowRight, SlidersHorizontal } from 'lucide-react';
 import { ReactNode, useState } from 'react';
 import Box from '../../src/box';
 import Button from '../../src/components/button';
 import Checkbox from '../../src/components/checkbox';
 import Flex from '../../src/components/flex';
+import Icon from '../../src/components/icon';
 import Presence from '../../src/components/presence';
 import { H2 } from '../../src/components/semantics';
 import Textbox from '../../src/components/textbox';
@@ -19,6 +20,7 @@ export default function VariantsPage() {
   const [agreed, setAgreed] = useState(false);
   const [shown, setShown] = useState(false);
   const [amount, setAmount] = useState('5');
+  const [dir, setDir] = useState<'ltr' | 'rtl'>('ltr');
 
   return (
     <Box>
@@ -350,6 +352,80 @@ export default function VariantsPage() {
 </Button>`}
           />
 
+          <Section id="direction" title="rtl and ltr — the direction the reader is going">
+            The logical props do most of a translation on their own: <Mono>ps</Mono>/<Mono>pe</Mono>, <Mono>ms</Mono>/<Mono>me</Mono>,{' '}
+            <Mono>bs</Mono>/<Mono>be</Mono>, <Mono>insetStart</Mono>/<Mono>insetEnd</Mono> and <Mono>borderRadiusStart</Mono>/
+            <Mono>borderRadiusEnd</Mono> swap sides the moment <Mono>dir="rtl"</Mono> is set on any ancestor, because the browser resolves
+            them and nothing has to re-render. These two keys are for what is left: an arrow that has to point the other way, a shadow that
+            has to fall the other way. The selector is <Mono>:dir(rtl)</Mono> rather than the <Mono>[dir="rtl"] &amp;</Mono> Tailwind emits
+            — direction is a property of <em>this</em> element, so a <Mono>&lt;bdi&gt;</Mono> or a <Mono>dir="auto"</Mono> that flipped one
+            paragraph is seen. The consequence worth knowing: with no <Mono>dir</Mono> anywhere the document is left-to-right, so{' '}
+            <Mono>ltr</Mono> matches. It is a state, not an attribute you have to write.
+          </Section>
+
+          <Code
+            id="direction-demo"
+            label="One card, both directions"
+            language="jsx"
+            context="declare const dir: 'ltr' | 'rtl';"
+            code={`import { ArrowRight } from 'lucide-react';
+
+<Flex
+  props={{ dir }}
+  ai="center"
+  gap={3}
+  ps={4}
+  pe={3}
+  py={3}
+  bs={4}
+  borderStyle="solid"
+  borderColor="indigo-500"
+  borderRadiusEnd={2}
+>
+  <Box flex1 fontSize={14}>
+    Your order is on its way
+  </Box>
+  <Box color="indigo-500" rtl={{ flip: 'xAxis' }}>
+    <Icon size={5}>
+      <ArrowRight />
+    </Icon>
+  </Box>
+</Flex>`}
+          >
+            <Flex d="column" gap={3} ai="start">
+              <Flex gap={2}>
+                {(['ltr', 'rtl'] as const).map((next) => (
+                  <Button key={next} variant="secondary" onClick={() => setDir(next)}>
+                    dir="{next}"
+                  </Button>
+                ))}
+              </Flex>
+              <Flex
+                props={{ dir }}
+                width="fit"
+                ai="center"
+                gap={3}
+                ps={4}
+                pe={3}
+                py={3}
+                bs={4}
+                borderStyle="solid"
+                borderColor="indigo-500"
+                borderRadiusEnd={2}
+                theme={{ dark: { bgColor: 'slate-800' }, light: { bgColor: 'slate-100' } }}
+              >
+                <Box flex1 fontSize={14}>
+                  Your order is on its way
+                </Box>
+                <Box color="indigo-500" rtl={{ flip: 'xAxis' }}>
+                  <Icon size={5}>
+                    <ArrowRight />
+                  </Icon>
+                </Box>
+              </Flex>
+            </Flex>
+          </Code>
+
           <Section id="composing" title="Everything else nests around them, in either direction">
             A variant is a fragment on the element's own compound selector, so it composes with all three of the other nesting kinds: a
             breakpoint or a preference wraps the rule, a theme or a group puts an ancestor in front of it, and a pseudo-class joins the same
@@ -487,6 +563,7 @@ const sidebarLinks = [
   { id: 'group', label: 'group & peer' },
   { id: 'states', label: 'Browser states' },
   { id: 'pointer', label: 'Pointer features' },
+  { id: 'direction', label: 'rtl & ltr' },
   { id: 'composing', label: 'Composing' },
   { id: 'presence', label: 'Presence + dataAttr' },
   { id: 'attributes', label: 'What the library sets' },

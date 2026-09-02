@@ -5,7 +5,7 @@ description: '@cronocode/react-box expert — runtime CSS-in-JS library. Use whe
 
 # @cronocode/react-box AI Skill
 
-Runtime CSS-in-JS library. `Box` accepts 197 CSS props → generates CSS classes at runtime. Same values share a class.
+Runtime CSS-in-JS library. `Box` accepts 211 CSS props → generates CSS classes at runtime. Same values share a class.
 
 ## Installation & Package Management
 
@@ -34,7 +34,7 @@ Check latest: `npm view @cronocode/react-box version`
 | Spacing (`p`,`m`,`gap`,`px`,`py`…)                      | 4       | `p={4}` → 1rem (16px)                              |
 | fontSize                                                | **16**  | `fontSize={14}` → 0.875rem (14px)                  |
 | width/height/min/max (numeric)                          | 4       | `width={20}` → 5rem (80px)                         |
-| Border (`b`,`bx`,`by`…)                                 | px      | `b={1}` → 1px                                      |
+| Border (`b`,`bx`,`by`,`bs`,`be`…)                       | px      | `b={1}` → 1px                                      |
 | borderRadius                                            | 4       | `borderRadius={2}` → 0.5rem (8px)                  |
 | lineHeight / letterSpacing                              | px      | `lineHeight={24}` → 24px                           |
 | SVG lengths (`strokeWidth`,`strokeDasharray`,`r`,`cx`…) | none    | `strokeWidth={2}` → `stroke-width: 2` (user units) |
@@ -65,13 +65,13 @@ expect, not a check against the fields.
 
 ## Props
 
-**Spacing**: `p`/`px`/`py`/`pt`/`pr`/`pb`/`pl`, `m`/`mx`/`my`/`mt`/`mr`/`mb`/`ml`, `gap`
+**Spacing**: `p`/`px`/`py`/`pt`/`pr`/`pb`/`pl`/`ps`/`pe`, `m`/`mx`/`my`/`mt`/`mr`/`mb`/`ml`/`ms`/`me`, `gap` — the axis pair is already logical (`px` is `padding-inline`) and `ps`/`pe`, `ms`/`me` are its two sides
 **Layout**: `display`, `d` (flex-direction), `wrap`, `ai` (align-items), `jc` (justify-content), `justifyItems`/`placeItems`/`placeContent`/`alignContent`/`alignSelf`/`justifySelf`, `flex`/`grow`/`shrink`, `container`/`containerName`/`containerType` (a query container — see `cq`). Every alignment prop also takes the **overflow-safe** forms — `'safe center'`, `'safe start'`, `'safe end'` and the `'unsafe …'` twins: `safe center` centres until the content stops fitting and then aligns to `start`, where plain `center` overflows both edges and the half above the scrollable origin cannot be reached at all. `aspectRatio` is `'square'` (1/1), `'video'` (16/9), a compact ratio (`'4/3'`), a number, or `'auto'`
 **Sizing**: `width`/`height` — number (÷4=rem), `'auto'`, `'fit'` (100%), `'fit-screen'` (100vw/vh), fractions (`'1/2'`…), `'33%'`. `minWidth`/`maxWidth`/`minHeight`/`maxHeight` same. All accept `"5%"`.
 **Colors**: `bgColor`/`color`/`borderColor`/`outlineColor`/`fill`/`stroke` — Tailwind's OKLCH palette, 26 families × 11 steps `'50'`..`'950'` (slate/gray/zinc/neutral/stone/mauve/mist/olive/taupe/red/orange/amber/yellow/lime/green/emerald/teal/cyan/sky/blue/indigo/violet/purple/fuchsia/pink/rose), plus `'white'`/`'black'`/`'transparent'`/`'currentColor'`. **Opacity modifier on any colour value**: `bgColor="blue-500/40"` → `color-mix(in oklab, var(--blue-500) 40%, transparent)` — the mix wraps the _variable_, so it stays themed and shared; unlike `opacity` it fades one declaration, not the element. Works in `vars` and on a `Box.extend()` variable (`"brand/30"`); an unknown token or a percentage outside 0–100 emits nothing
-**Borders**: `b`/`bx`/`by`/`bt`/`br`/`bb`/`bl` (px), `borderRadius` (÷4), `borderStyle`
-**Text**: `fontSize` (÷16), `fontWeight`, `lineHeight` (px), `textAlign`/`textDecoration`/`textTransform`/`whiteSpace`/`textOverflow`, `textWrap`
-**Position**: `position`, `top`/`right`/`bottom`/`left`/`inset`/`insetX`/`insetY`, `zIndex` — number (÷4), `'auto'`, fractions (`'1/2'`, `'-1/3'`) or a percentage; `insetX`/`insetY` are `inset-inline`/`inset-block`, the way `mx`/`my` are `margin-inline`/`margin-block`
+**Borders**: `b`/`bx`/`by`/`bt`/`br`/`bb`/`bl`/`bs`/`be` (px — `bs`/`be` are the logical sides), `borderRadius` (÷4) and its nine physical corners plus six logical ones (`borderRadiusStart`/`borderRadiusEnd`, and `borderRadiusStartStart`/`StartEnd`/`EndEnd`/`EndStart` — **block axis first, inline axis second**), `borderStyle`
+**Text**: `fontSize` (÷16), `fontWeight`, `lineHeight` (px), `textAlign` (`'start'`/`'end'` follow the text direction where `'left'`/`'right'` do not)/`textDecoration`/`textTransform`/`whiteSpace`/`textOverflow`, `textWrap`
+**Position**: `position`, `top`/`right`/`bottom`/`left`/`inset`/`insetX`/`insetY`/`insetStart`/`insetEnd`, `zIndex` — number (÷4), `'auto'`, fractions (`'1/2'`, `'-1/3'`) or a percentage; `insetX`/`insetY` are `inset-inline`/`inset-block`, the way `mx`/`my` are `margin-inline`/`margin-block`, and `insetStart`/`insetEnd` are that axis's two sides
 **SVG paint & stroke**: `fill`/`stroke` (a colour variable, or a reference CSS resolves itself — `url(#sky)` for a gradient, pattern or `<ClipPath>`, `var(--chart-1)` for somebody else's variable; `clipPath` takes `url(#…)` the same way, and anything else emits no rule at all), `fillOpacity`/`strokeOpacity` (0–1 in tenths), `fillRule`, `strokeWidth`/`strokeDasharray`/`strokeDashoffset`/`strokeMiterlimit` (**user units — no divider**; a dash pattern with a gap is a string, `"12 4"`), `strokeLinecap`, `strokeLinejoin`, `paintOrder`, `vectorEffect`, `shapeRendering`. All inherited except `vectorEffect`, so set them on the `<svg>` (`Svg`) rather than on every shape.
 
 **SVG text**: `textAnchor` (`start`/`middle`/`end` — which part of a label sits on its `x`) and `dominantBaseline` (`alphabetic`/`central`/`hanging`/… — which part sits on its `y`). `textAnchor` is inherited; `dominantBaseline` is not, so like `vectorEffect` its rule targets the element _and_ its descendants and still works on the `<svg>`.
@@ -192,7 +192,8 @@ gradient becomes lettering — the pairing is deliberately not automatic.
 // Pseudo: hover, focus (:focus-within), focusVisible, hasFocus, active, valid, invalid, optional,
 //   disabled, checked, indeterminate, required, selected, hasChecked, hasRequired, hasDisabled,
 //   visited (colour props only — the privacy rule), target, open (an [open] element, a popover or a
-//   <select>'s picker), placeholderShown, autofill, inRange, outOfRange, inert (the subtree too)
+//   <select>'s picker), placeholderShown, autofill, inRange, outOfRange, inert (the subtree too),
+//   rtl / ltr (:dir() — this element's own resolved direction, so ltr matches with no dir set anywhere)
 // Responsive (mobile-first): sm(640) md(768) lg(1024) xl(1280) xxl(1536)
 <Box p={2} md={{ p: 4, hover: { bgColor: 'gray-200' } }} />
 // Device + a11y media keys, same shape as a breakpoint, and they beat every breakpoint in the cascade:
