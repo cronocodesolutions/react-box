@@ -118,7 +118,11 @@ function DemoBox(props: Parameters<typeof Box>[0] & { label?: string }) {
 function SpacingDemo() {
   return (
     <Flex d="column" gap={6}>
-      <DemoCard title="Margin (m, mx, my, mt, mr, mb, ml)" description="Controls space outside the element" code="m={4} mx={2} mt={6}">
+      <DemoCard
+        title="Margin (m, mx, my, mt, mr, mb, ml, ms, me)"
+        description="Controls space outside the element"
+        code="m={4} mx={2} mt={6}"
+      >
         <Flex gap={4} ai="center" flexWrap="wrap">
           <Flex theme={{ dark: { bgColor: 'slate-700' }, light: { bgColor: 'slate-200' } }} borderRadius={1}>
             <DemoBox m={0} label="m={0}" />
@@ -135,7 +139,7 @@ function SpacingDemo() {
         </Flex>
       </DemoCard>
 
-      <DemoCard title="Padding (p, px, py, pt, pr, pb, pl)" description="Controls space inside the element" code="p={4} px={6}">
+      <DemoCard title="Padding (p, px, py, pt, pr, pb, pl, ps, pe)" description="Controls space inside the element" code="p={4} px={6}">
         <Flex gap={4} ai="center" flexWrap="wrap">
           <DemoBox p={1} label="p={1}" />
           <DemoBox p={3} label="p={3}" />
@@ -494,6 +498,39 @@ function PositionDemo() {
           </Flex>
         </Flex>
       </DemoCard>
+
+      <DemoCard
+        title="Logical Sides (ps, pe, ms, me, bs, be, insetStart, insetEnd, borderRadiusStart, borderRadiusEnd)"
+        description="The two sides of the inline axis: start is left in a left-to-right reading and right in a right-to-left one, so a translation needs no second stylesheet"
+        code="ps={4} bs={4} borderRadiusEnd={2}"
+      >
+        <Flex gap={4} flexWrap="wrap">
+          {(['ltr', 'rtl'] as const).map((direction) => (
+            <Flex key={direction} d="column" gap={1}>
+              <Box fontSize={10} theme={{ dark: { color: 'slate-400' }, light: { color: 'slate-500' } }}>
+                dir="{direction}"
+              </Box>
+              <Flex
+                props={{ dir: direction }}
+                width={56}
+                ai="center"
+                gap={2}
+                ps={4}
+                pe={2}
+                py={2}
+                bs={4}
+                borderStyle="solid"
+                borderColor="violet-500"
+                borderRadiusEnd={2}
+                fontSize={11}
+                theme={{ dark: { bgColor: 'violet-950', color: 'slate-200' }, light: { bgColor: 'violet-100', color: 'slate-800' } }}
+              >
+                <Box flex1>The accent stays on the start edge</Box>
+              </Flex>
+            </Flex>
+          ))}
+        </Flex>
+      </DemoCard>
     </Flex>
   );
 }
@@ -681,7 +718,7 @@ function VisualDemo() {
 function BorderDemo() {
   return (
     <Flex d="column" gap={6}>
-      <DemoCard title="Border Width (b, bt, br, bb, bl)" description="Control border thickness" code="b={2} bt={4}">
+      <DemoCard title="Border Width (b, bt, br, bb, bl, bs, be)" description="Control border thickness" code="b={2} bt={4}">
         <Flex gap={4} flexWrap="wrap">
           <DemoBox b={1} label="b={1}" />
           <DemoBox b={2} label="b={2}" />

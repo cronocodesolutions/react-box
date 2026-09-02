@@ -286,6 +286,22 @@ export const cssStyles = {
       valueFormat: BoxStylesFormatters.Value.px,
     },
   ],
+  /** The border-inline-start-width CSS property sets the width of the border on the side the text starts from: `bl` in a left-to-right writing mode, `br` in a right-to-left one. */
+  bs: [
+    {
+      values: 0,
+      styleName: 'border-inline-start-width',
+      valueFormat: BoxStylesFormatters.Value.px,
+    },
+  ],
+  /** The border-inline-end-width CSS property sets the width of the border on the side the text ends at: `br` in a left-to-right writing mode, `bl` in a right-to-left one. */
+  be: [
+    {
+      values: 0,
+      styleName: 'border-inline-end-width',
+      valueFormat: BoxStylesFormatters.Value.px,
+    },
+  ],
   /** The border-style shorthand CSS property sets the line style for all four sides of an element's border. */
   borderStyle: [
     {
@@ -362,6 +378,54 @@ export const cssStyles = {
     {
       values: 0,
       styleName: 'border-bottom-left-radius',
+      valueFormat: BoxStylesFormatters.Value.rem,
+    },
+  ],
+  /** Rounds both corners on the side the text starts from: the left ones in a left-to-right writing mode, the right ones in a right-to-left one. */
+  borderRadiusStart: [
+    {
+      values: 0,
+      styleName: ['border-start-start-radius', 'border-end-start-radius'],
+      valueFormat: BoxStylesFormatters.Value.rem,
+    },
+  ],
+  /** Rounds both corners on the side the text ends at: the right ones in a left-to-right writing mode, the left ones in a right-to-left one. */
+  borderRadiusEnd: [
+    {
+      values: 0,
+      styleName: ['border-start-end-radius', 'border-end-end-radius'],
+      valueFormat: BoxStylesFormatters.Value.rem,
+    },
+  ],
+  /** Rounds the block-start, inline-start corner: top-left in a left-to-right writing mode, top-right in a right-to-left one. */
+  borderRadiusStartStart: [
+    {
+      values: 0,
+      styleName: 'border-start-start-radius',
+      valueFormat: BoxStylesFormatters.Value.rem,
+    },
+  ],
+  /** Rounds the block-start, inline-end corner: top-right in a left-to-right writing mode, top-left in a right-to-left one. */
+  borderRadiusStartEnd: [
+    {
+      values: 0,
+      styleName: 'border-start-end-radius',
+      valueFormat: BoxStylesFormatters.Value.rem,
+    },
+  ],
+  /** Rounds the block-end, inline-end corner: bottom-right in a left-to-right writing mode, bottom-left in a right-to-left one. */
+  borderRadiusEndEnd: [
+    {
+      values: 0,
+      styleName: 'border-end-end-radius',
+      valueFormat: BoxStylesFormatters.Value.rem,
+    },
+  ],
+  /** Rounds the block-end, inline-start corner: bottom-left in a left-to-right writing mode, bottom-right in a right-to-left one. */
+  borderRadiusEndStart: [
+    {
+      values: 0,
+      styleName: 'border-end-start-radius',
       valueFormat: BoxStylesFormatters.Value.rem,
     },
   ],
@@ -526,6 +590,58 @@ export const cssStyles = {
     {
       ...percentValue,
       styleName: 'inset-block',
+    },
+  ],
+  /** The inset-inline-start CSS property sets the distance from the edge the text starts at: `left` in a left-to-right writing mode, `right` in a right-to-left one. */
+  insetStart: [
+    {
+      values: 0,
+      styleName: 'inset-inline-start',
+      valueFormat: BoxStylesFormatters.Value.rem,
+    },
+    {
+      values: ['auto'] as const,
+      styleName: 'inset-inline-start',
+    },
+    {
+      values: Variables.percentages,
+      valueFormat: BoxStylesFormatters.Value.fraction,
+      styleName: 'inset-inline-start',
+    },
+    {
+      values: Variables.negativePercentages,
+      valueFormat: BoxStylesFormatters.Value.fraction,
+      styleName: 'inset-inline-start',
+    },
+    {
+      ...percentValue,
+      styleName: 'inset-inline-start',
+    },
+  ],
+  /** The inset-inline-end CSS property sets the distance from the edge the text ends at: `right` in a left-to-right writing mode, `left` in a right-to-left one. */
+  insetEnd: [
+    {
+      values: 0,
+      styleName: 'inset-inline-end',
+      valueFormat: BoxStylesFormatters.Value.rem,
+    },
+    {
+      values: ['auto'] as const,
+      styleName: 'inset-inline-end',
+    },
+    {
+      values: Variables.percentages,
+      valueFormat: BoxStylesFormatters.Value.fraction,
+      styleName: 'inset-inline-end',
+    },
+    {
+      values: Variables.negativePercentages,
+      valueFormat: BoxStylesFormatters.Value.fraction,
+      styleName: 'inset-inline-end',
+    },
+    {
+      ...percentValue,
+      styleName: 'inset-inline-end',
     },
   ],
   /** The `box-sizing` CSS property sets how the total width and height of an element is calculated. */
@@ -1299,6 +1415,58 @@ export const cssStyles = {
       styleName: 'margin-left',
     },
   ],
+  /** The margin-inline-start CSS property sets the margin on the side the text starts from: `ml` in a left-to-right writing mode, `mr` in a right-to-left one. */
+  ms: [
+    {
+      values: 0,
+      styleName: 'margin-inline-start',
+      valueFormat: BoxStylesFormatters.Value.rem,
+    },
+    {
+      values: ['auto'] as const,
+      styleName: 'margin-inline-start',
+    },
+    {
+      values: Variables.percentages,
+      valueFormat: BoxStylesFormatters.Value.fraction,
+      styleName: 'margin-inline-start',
+    },
+    {
+      values: Variables.negativePercentages,
+      valueFormat: BoxStylesFormatters.Value.fraction,
+      styleName: 'margin-inline-start',
+    },
+    {
+      ...percentValue,
+      styleName: 'margin-inline-start',
+    },
+  ],
+  /** The margin-inline-end CSS property sets the margin on the side the text ends at: `mr` in a left-to-right writing mode, `ml` in a right-to-left one. */
+  me: [
+    {
+      values: 0,
+      styleName: 'margin-inline-end',
+      valueFormat: BoxStylesFormatters.Value.rem,
+    },
+    {
+      values: ['auto'] as const,
+      styleName: 'margin-inline-end',
+    },
+    {
+      values: Variables.percentages,
+      valueFormat: BoxStylesFormatters.Value.fraction,
+      styleName: 'margin-inline-end',
+    },
+    {
+      values: Variables.negativePercentages,
+      valueFormat: BoxStylesFormatters.Value.fraction,
+      styleName: 'margin-inline-end',
+    },
+    {
+      ...percentValue,
+      styleName: 'margin-inline-end',
+    },
+  ],
   /** The padding CSS shorthand property sets the padding area on all four sides of an element at once. */
   p: [
     {
@@ -1418,6 +1586,40 @@ export const cssStyles = {
       styleName: 'padding-left',
     },
   ],
+  /** The padding-inline-start CSS property sets the padding on the side the text starts from: `pl` in a left-to-right writing mode, `pr` in a right-to-left one. */
+  ps: [
+    {
+      values: 0,
+      styleName: 'padding-inline-start',
+      valueFormat: BoxStylesFormatters.Value.rem,
+    },
+    {
+      values: Variables.percentages,
+      valueFormat: BoxStylesFormatters.Value.fraction,
+      styleName: 'padding-inline-start',
+    },
+    {
+      ...percentValue,
+      styleName: 'padding-inline-start',
+    },
+  ],
+  /** The padding-inline-end CSS property sets the padding on the side the text ends at: `pr` in a left-to-right writing mode, `pl` in a right-to-left one. */
+  pe: [
+    {
+      values: 0,
+      styleName: 'padding-inline-end',
+      valueFormat: BoxStylesFormatters.Value.rem,
+    },
+    {
+      values: Variables.percentages,
+      valueFormat: BoxStylesFormatters.Value.fraction,
+      styleName: 'padding-inline-end',
+    },
+    {
+      ...percentValue,
+      styleName: 'padding-inline-end',
+    },
+  ],
   /** The object-fit CSS property sets how the content of a replaced element, such as an <img> or <video>, should be resized to fit its container. */
   objectFit: [
     {
@@ -1509,11 +1711,14 @@ export const cssStyles = {
       values: 0,
     },
   ],
-  /** The text-align CSS property sets the horizontal alignment of the inline-level content inside a block element or table-cell box. This means it works like vertical-align but in the horizontal direction. */
+  /**
+   * The text-align CSS property sets the horizontal alignment of the inline-level content inside a block
+   * element or table-cell box. `start`/`end` follow the text direction where `left`/`right` do not.
+   */
   textAlign: [
     {
       styleName: 'text-align',
-      values: ['left', 'right', 'center', 'justify'] as const,
+      values: ['left', 'right', 'start', 'end', 'center', 'justify'] as const,
     },
   ],
   /** The text-decoration shorthand CSS property sets the appearance of decorative lines on text. It is a shorthand for text-decoration-line, text-decoration-color, text-decoration-style, and the newer text-decoration-thickness property. */
@@ -2360,6 +2565,15 @@ export const pseudo1 = {
   outOfRange: ':out-of-range',
   /** Made inert, the subtree included: `[inert]` does not inherit, but inertness does. */
   inert: ':is([inert],[inert] *)',
+  /**
+   * The element's own resolved direction, which is what `dir` on any ancestor (usually `<html>`) settles.
+   * `:dir()` rather than Tailwind's `[dir="rtl"] &`, because direction is a property of *this* element and
+   * an ancestor selector cannot see a `<bdi>` or a `dir="auto"` that flipped it. Note the consequence:
+   * with no `dir` anywhere the document is left-to-right, so `ltr` matches — it is the state, not an attribute.
+   */
+  rtl: ':dir(rtl)',
+  /** The other half of the pair: what a left-to-right reader sees, and the default with no `dir` set. */
+  ltr: ':dir(ltr)',
 };
 
 export const pseudo2 = {
