@@ -1,5 +1,5 @@
 /**
- * The four shadows an element can carry at once, and the two scales they come from.
+ * The four shadows an element can carry at once, and the four scales they come from.
  *
  * `box-shadow` is one property, so an inset shadow, an inset ring, a ring and a drop shadow each set
  * their own custom property and all four write the same composed declaration — the `translate` trick,
@@ -15,6 +15,12 @@ namespace Shadows {
   export const layers = ['InsetShadow', 'InsetRing', 'Ring', 'Shadow'] as const;
   export type Layer = (typeof layers)[number];
 
+  /**
+   * The two shadows that are not `box-shadow` layers but take a colour the same way: `text-shadow` is its
+   * own property, and `drop-shadow` is a filter function, composed by `filters.ts` rather than here.
+   */
+  export type Colored = Layer | 'TextShadow' | 'DropShadow';
+
   /** A shadow that paints nothing, so an unset layer — or one turned off — costs no pixels. */
   const empty = '0 0 #0000';
 
@@ -28,6 +34,7 @@ namespace Shadows {
       `@property --box${layer}Color{syntax: "*";inherits: false;}`,
     ]),
     `@property --boxTextShadowColor{syntax: "*";inherits: false;}`,
+    `@property --boxDropShadowColor{syntax: "*";inherits: false;}`,
   ];
 
   const boxShadows = {
@@ -54,17 +61,29 @@ namespace Shadows {
     lg: '0px 1px 2px @.1,0px 3px 2px @.1,0px 4px 8px @.1',
   };
 
+  // Every step is a single shadow, because `drop-shadow()` takes one — no comma list and no spread.
+  const dropShadows = {
+    xs: '0 1px 1px @.05',
+    sm: '0 1px 2px @.15',
+    md: '0 3px 3px @.12',
+    lg: '0 4px 4px @.15',
+    xl: '0 9px 7px @.1',
+    xxl: '0 25px 25px @.15',
+  };
+
   export type BoxSize = keyof typeof boxShadows | 'none';
   export type InsetSize = keyof typeof insetShadows | 'none';
   export type TextSize = keyof typeof textShadows | 'none';
+  export type DropSize = keyof typeof dropShadows | 'none';
 
   export const boxSizes = [...Object.keys(boxShadows), 'none'] as BoxSize[];
   export const insetSizes = [...Object.keys(insetShadows), 'none'] as InsetSize[];
   export const textSizes = [...Object.keys(textShadows), 'none'] as TextSize[];
+  export const dropSizes = [...Object.keys(dropShadows), 'none'] as DropSize[];
 
   // `var(--boxShadowColor, rgb(0 0 0 / .1))`: the fallback is the step's own alpha, and it is reached only
   // because the layer's colour is registered with the universal syntax and no initial value.
-  function paint(template: string, layer: Layer | 'TextShadow'): string {
+  function paint(template: string, layer: Colored): string {
     return template.replace(/@([\d.]+)/g, (_, alpha) => `var(--box${layer}Color, rgb(0 0 0 / ${alpha}))`);
   }
 
@@ -74,7 +93,7 @@ namespace Shadows {
   }
 
   /** A layer's colour, which is a custom property and nothing else — an unpainted layer shows none of it. */
-  export function colorDeclaration(layer: Layer | 'TextShadow', color: string): string {
+  export function colorDeclaration(layer: Colored, color: string): string {
     return `--box${layer}Color:${color}`;
   }
 
@@ -95,6 +114,11 @@ namespace Shadows {
   /** `text-shadow` is one property with one contributor, so it needs no composing — only a colour to read. */
   export function textShadow(size: string): string {
     return size === 'none' ? 'none' : paint(textShadows[size as keyof typeof textShadows], 'TextShadow');
+  }
+
+  /** A step of the drop-shadow scale as the filter function itself, for `filters.ts` to put in its layer. */
+  export function dropShadow(size: string): string {
+    return `drop-shadow(${paint(dropShadows[size as keyof typeof dropShadows], 'DropShadow')})`;
   }
 }
 

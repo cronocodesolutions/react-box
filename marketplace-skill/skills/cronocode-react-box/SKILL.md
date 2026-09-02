@@ -5,7 +5,7 @@ description: '@cronocode/react-box expert — runtime CSS-in-JS library. Use whe
 
 # @cronocode/react-box AI Skill
 
-Runtime CSS-in-JS library. `Box` accepts 165 CSS props → generates CSS classes at runtime. Same values share a class.
+Runtime CSS-in-JS library. `Box` accepts 186 CSS props → generates CSS classes at runtime. Same values share a class.
 
 ## Installation & Package Management
 
@@ -68,7 +68,7 @@ expect, not a check against the fields.
 **Spacing**: `p`/`px`/`py`/`pt`/`pr`/`pb`/`pl`, `m`/`mx`/`my`/`mt`/`mr`/`mb`/`ml`, `gap`
 **Layout**: `display`, `d` (flex-direction), `wrap`, `ai` (align-items), `jc` (justify-content), `flex`/`grow`/`shrink`, `container`/`containerName`/`containerType` (a query container — see `cq`)
 **Sizing**: `width`/`height` — number (÷4=rem), `'auto'`, `'fit'` (100%), `'fit-screen'` (100vw/vh), fractions (`'1/2'`…), `'33%'`. `minWidth`/`maxWidth`/`minHeight`/`maxHeight` same. All accept `"5%"`.
-**Colors**: `bgColor`/`color`/`borderColor`/`outlineColor`/`fill`/`stroke` — Tailwind's OKLCH palette, 26 families × 11 steps `'50'`..`'950'` (slate/gray/zinc/neutral/stone/mauve/mist/olive/taupe/red/orange/amber/yellow/lime/green/emerald/teal/cyan/sky/blue/indigo/violet/purple/fuchsia/pink/rose), plus `'white'`/`'black'`/`'transparent'`/`'currentColor'`. **Opacity modifier on any colour value**: `bgColor="blue-500/40"` → `color-mix(in oklab, var(--blue-500) 40%, transparent)` — the mix wraps the *variable*, so it stays themed and shared; unlike `opacity` it fades one declaration, not the element. Works in `vars` and on a `Box.extend()` variable (`"brand/30"`); an unknown token or a percentage outside 0–100 emits nothing
+**Colors**: `bgColor`/`color`/`borderColor`/`outlineColor`/`fill`/`stroke` — Tailwind's OKLCH palette, 26 families × 11 steps `'50'`..`'950'` (slate/gray/zinc/neutral/stone/mauve/mist/olive/taupe/red/orange/amber/yellow/lime/green/emerald/teal/cyan/sky/blue/indigo/violet/purple/fuchsia/pink/rose), plus `'white'`/`'black'`/`'transparent'`/`'currentColor'`. **Opacity modifier on any colour value**: `bgColor="blue-500/40"` → `color-mix(in oklab, var(--blue-500) 40%, transparent)` — the mix wraps the _variable_, so it stays themed and shared; unlike `opacity` it fades one declaration, not the element. Works in `vars` and on a `Box.extend()` variable (`"brand/30"`); an unknown token or a percentage outside 0–100 emits nothing
 **Borders**: `b`/`bx`/`by`/`bt`/`br`/`bb`/`bl` (px), `borderRadius` (÷4), `borderStyle`
 **Text**: `fontSize` (÷16), `fontWeight`, `lineHeight` (px), `textAlign`/`textDecoration`/`textTransform`/`whiteSpace`/`textOverflow`, `textWrap`
 **Position**: `position`, `top`/`right`/`bottom`/`left`/`inset`, `zIndex`
@@ -139,7 +139,7 @@ child's own CSS says the transition is over, then lets React remove it. `ref` go
 `height: auto` animate inside it (inherited; Chromium-only, elsewhere it snaps). `Box.configure({ transition: 'colors' | false })` changes
 what the base class transitions, before the first render.
 
-**Gradients**: `bgGradient` — a gradient as a *value*, written as a record, so its stops are palette tokens and it is
+**Gradients**: `bgGradient` — a gradient as a _value_, written as a record, so its stops are palette tokens and it is
 themed, takes the opacity modifier and shares one class. The key names the kind and carries its geometry:
 `{ linear: 'r', colors: ['blue-500', 'pink-500'] }` (a direction `t`/`tr`/`r`/`br`/`b`/`bl`/`l`/`tl`, or a number of
 degrees — `{ linear: 135, … }`), `{ radial: 'circle' | 'ellipse' | true, at: 'top left', … }`, `{ conic: 45 | true, … }`.
@@ -161,6 +161,25 @@ joins the stack, follows `borderRadius` and costs no layout. Each layer takes a 
 (`shadowColor="blue-500/40"`). A colour prop **shows nothing on its own**, the way `borderColor` does with no border
 width. `'none'` — or `0` on a ring — clears just that layer. `textShadow` (`'xxs'`…`'lg'`, `'none'`) with
 `textShadowColor` is the text-side pair, and `transition="shadow"` covers `box-shadow` and `text-shadow` both.
+
+**Filters stack, nine at a time**, for the reason the shadows do: `filter` is one property whose value is a list, so
+each function sets its own custom property and all nine write the same composed declaration. `blur`, `brightness`,
+`contrast`, `grayscale`, `hueRotate`, `invert`, `saturate`, `sepia`, `dropShadow`. **A number is the function's own
+unit**: a percentage for the six that take one (`brightness={110}`, `grayscale={100}`), degrees for `hueRotate`, px for
+`blur` — which also takes Tailwind's scale, `'xs'` (4px) `'sm'` (8px) `'md'` (12px) `'lg'` (16px) `'xl'` (24px)
+`'xxl'` (40px) `'xxxl'` (64px). `dropShadow` is `'xs'`…`'xxl'` with `dropShadowColor`, and it is cast by the **shape** —
+an SVG path, the opaque part of a transparent PNG — where `shadow` draws a rectangle round the box. `'none'` clears
+just that function. The nine `backdrop*` props (`backdropBlur`, `backdropBrightness`, `backdropContrast`,
+`backdropGrayscale`, `backdropHueRotate`, `backdropInvert`, `backdropOpacity`, `backdropSaturate`, `backdropSepia`) are
+the same functions on `backdrop-filter`, which is the glassmorphism half; there is no `backdropDropShadow` and no
+`opacity` filter, because neither means anything on the other side. The older `backdropFilter` prop writes that
+property directly — it and the nine are the same declaration, so use one. `transition="filter"` covers both properties.
+
+**Masks and clipping**: `maskImage` takes the same record `bgGradient` does and reads its alpha channel — where the
+gradient is transparent the element is not painted, so `maskImage={{ linear: 'b', colors: ['black', 'transparent'] }}`
+is the whole edge-fade recipe. It also takes `'url(#id)'`, `'var(--name)'` and `'none'`; one mask, not a stack.
+`bgClip` is `'border'`/`'padding'`/`'content'`/`'text'`, and `bgClip="text"` with `color="transparent"` is how a
+gradient becomes lettering — the pairing is deliberately not automatic.
 
 **Effects**: `opacity`, `cursor`, `pointerEvents`, `userSelect`, `overflow`
 

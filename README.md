@@ -5,7 +5,7 @@
 [![Tests](https://github.com/box-kite/box-kite/actions/workflows/test.yml/badge.svg)](https://github.com/box-kite/box-kite/actions/workflows/test.yml)
 [![license](https://img.shields.io/npm/l/@cronocode/react-box)](LICENSE)
 
-`Box` is a single React component with 165 typed CSS props. It generates the CSS for the values you
+`Box` is a single React component with 186 typed CSS props. It generates the CSS for the values you
 pass at runtime and caches every rule by its content, so the same value anywhere in the app reuses
 one class — a project styles itself in TypeScript, with no CSS files to write and no class-name
 convention to remember.
@@ -62,7 +62,7 @@ one class. It is not `opacity`, which fades the element, its text and its childr
 declaration. Every colour prop takes it (`color`, `bgColor`, `borderColor`, `outlineColor`, `fill`,
 `stroke`), as does a `vars` entry and a variable of your own from `Box.extend()`.
 
-## Gradients and shadows
+## Gradients, shadows and filters
 
 A gradient is a value, not a string you assemble: the key names the kind and carries its geometry, and
 the stops are palette colours, so the whole thing is themed, takes the opacity modifier and shares one
@@ -93,6 +93,33 @@ px. A ring follows `borderRadius` and costs no layout, which is what makes it di
 `outline`. Each layer has its own colour prop — `shadowColor`, `ringColor`, and so on — which shows
 nothing until the layer it belongs to is painted, exactly as `borderColor` needs a border width.
 `textShadow` and `textShadowColor` are the text-side pair.
+
+Filters stack the same way, and for the same reason: `filter` is one property whose value is a list, so
+each of the nine functions sets a layer of its own and all nine write one composed declaration.
+
+```JS
+<Box blur="sm" grayscale={100} />
+<Box brightness={110} saturate={150} hueRotate={90} />
+<Box dropShadow="lg" dropShadowColor="indigo-500/40" />
+<Box backdropBlur="sm" backdropSaturate={180} bgColor="white/20" />
+```
+
+A number is the function's own unit — a percentage for `brightness`, `contrast`, `grayscale`,
+`invert`, `saturate` and `sepia`, degrees for `hueRotate`, pixels for `blur`, which takes Tailwind's
+`xs`–`xxxl` scale too. `dropShadow` is cast by the _shape_ rather than the box, which is what a
+transparent PNG or an SVG path wants. The nine `backdrop*` props are the same functions applied to
+what is behind the element — the glassmorphism half.
+
+`maskImage` takes the gradient record over again and reads its alpha channel, so a fade to
+`transparent` is an edge fade; and `bgClip="text"` with `color="transparent"` is how a gradient
+becomes lettering.
+
+```JS
+<Box maskImage={{ linear: 'b', colors: ['black', ['black', '55%'], 'transparent'] }} />
+<H1 color="transparent" bgClip="text" bgGradient={{ linear: 'r', colors: ['violet-500', 'cyan-400'] }}>
+  Painted by the background
+</H1>
+```
 
 ## Components
 
@@ -625,7 +652,7 @@ A complete page — props, pseudo-classes, breakpoints, themes, `extend`, `compo
 
 ## Architecture
 
-The styling engine is framework-free. Everything that generates CSS — the 165 prop definitions,
+The styling engine is framework-free. Everything that generates CSS — the 186 prop definitions,
 the value formatters, class-name generation, rule ordering, the style sinks (CSSOM, `textContent`,
 string for SSR, style elements for React 19), the flush scheduler, CSS variables and the theme
 runtime — lives in `src/core/` and imports no React at all. CI fails the build if it ever does

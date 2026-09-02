@@ -194,7 +194,7 @@ export default function Sidebar({ toggleTheme, onClose }: SidebarProps) {
             Container Queries
           </MenuItem>
           <MenuItem to="/gradients-shadows" icon={<Blend />}>
-            Gradients & Shadows
+            Gradients & Effects
           </MenuItem>
         </MenuSection>
 

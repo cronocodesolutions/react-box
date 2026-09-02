@@ -3,6 +3,7 @@ import { BoxStylesFormatters } from './boxStylesFormatters';
 import Containers from './containers';
 import Content from './content';
 import { BoxStyle, BoxStyleValue } from './coreTypes';
+import Filters from './filters';
 import Gradients from './gradients';
 import Palette from './palette';
 import Shadows from './shadows';
@@ -56,7 +57,7 @@ function translate(axis: 'X' | 'Y', format: (value: BoxStyleValue) => string) {
  * property rather than a CSS one, so it shows nothing until the layer that reads it is painted —
  * `shadowColor` alone is as inert as `borderColor` with no border width.
  */
-function shadowColor(layer: Shadows.Layer | 'TextShadow') {
+function shadowColor(layer: Shadows.Colored) {
   return [
     {
       values: Variables.colorValues,
@@ -73,6 +74,35 @@ function shadowColor(layer: Shadows.Layer | 'TextShadow') {
       declarations: (value: BoxStyleValue, getVariableValue: (name: string) => string) =>
         Shadows.colorDeclaration(layer, Palette.mix(value, getVariableValue)),
     },
+  ];
+}
+
+/**
+ * One filter function as a prop: its own custom property, and the composed declaration every layer of that
+ * property shares. A number is the function's own unit — a percentage for the six that take one, degrees
+ * for `hue-rotate` — and `none` clears just this function, the way it clears just one shadow layer.
+ */
+function filterFunction(layer: Filters.Layer, name: string, unit: string) {
+  return [
+    {
+      values: ['none'] as const,
+      declarations: () => Filters.layerDeclarations(layer, Filters.cleared),
+    },
+    {
+      values: 0,
+      declarations: (value: BoxStyleValue) => Filters.layerDeclarations(layer, `${name}(${value}${unit})`),
+    },
+  ];
+}
+
+/** The blur function, which has a scale beside its number: Tailwind's steps, `xs` (4px) to `xxxl` (64px). */
+function blurFunction(layer: 'Blur' | 'BackdropBlur') {
+  return [
+    {
+      values: Filters.blurScale,
+      declarations: (value: BoxStyleValue) => Filters.layerDeclarations(layer, `blur(${Filters.blur(value as string)}px)`),
+    },
+    ...filterFunction(layer, 'blur', 'px'),
   ];
 }
 
@@ -1850,6 +1880,88 @@ export const cssStyles = {
   ],
   /** What colour `textShadow` draws in. Shows nothing on its own. */
   textShadowColor: shadowColor('TextShadow'),
+  /**
+   * How far the element's own pixels are blurred: a step of Tailwind's scale (`xs` 4px through `xxxl` 64px)
+   * or a radius in px. One of nine functions that compose into a single `filter`, so a blur and a
+   * `brightness` coexist; `none` clears this one and leaves the rest.
+   */
+  blur: blurFunction('Blur'),
+  /** How bright the element is rendered, as a percentage: `brightness={110}` is 10% brighter, `{50}` is half. */
+  brightness: filterFunction('Brightness', 'brightness', '%'),
+  /** How much contrast the element is rendered with, as a percentage — `100` being the element as it is. */
+  contrast: filterFunction('Contrast', 'contrast', '%'),
+  /** How far the element is desaturated, as a percentage: `grayscale={100}` removes colour entirely. */
+  grayscale: filterFunction('Grayscale', 'grayscale', '%'),
+  /** How far every hue in the element is rotated round the colour circle, in degrees. */
+  hueRotate: filterFunction('HueRotate', 'hue-rotate', 'deg'),
+  /** How far the element's colours are inverted, as a percentage: `invert={100}` is a photographic negative. */
+  invert: filterFunction('Invert', 'invert', '%'),
+  /** How saturated the element is rendered, as a percentage — over `100` to push the colour, under to drain it. */
+  saturate: filterFunction('Saturate', 'saturate', '%'),
+  /** How far the element is pushed towards sepia, as a percentage. */
+  sepia: filterFunction('Sepia', 'sepia', '%'),
+  /**
+   * A shadow cast by the element's *shape* rather than its box — the one that follows a transparent PNG's
+   * outline or an SVG's path, where `shadow` would draw a rectangle. `xs` through `xxl`, recoloured by
+   * `dropShadowColor`. It is a filter function, so it composes with `blur` and the rest rather than with
+   * the shadow stack.
+   */
+  dropShadow: [
+    {
+      values: Shadows.dropSizes,
+      declarations: (value) =>
+        Filters.layerDeclarations('DropShadow', value === 'none' ? Filters.cleared : Shadows.dropShadow(value as string)),
+    },
+  ],
+  /** What colour `dropShadow` draws in. Shows nothing on its own. */
+  dropShadowColor: shadowColor('DropShadow'),
+  /** How far what is *behind* the element is blurred — the glassmorphism half. Needs something translucent in front of it. */
+  backdropBlur: blurFunction('BackdropBlur'),
+  /** How bright what is behind the element is rendered, as a percentage. */
+  backdropBrightness: filterFunction('BackdropBrightness', 'brightness', '%'),
+  /** How much contrast what is behind the element is rendered with, as a percentage. */
+  backdropContrast: filterFunction('BackdropContrast', 'contrast', '%'),
+  /** How far what is behind the element is desaturated, as a percentage. */
+  backdropGrayscale: filterFunction('BackdropGrayscale', 'grayscale', '%'),
+  /** How far every hue behind the element is rotated round the colour circle, in degrees. */
+  backdropHueRotate: filterFunction('BackdropHueRotate', 'hue-rotate', 'deg'),
+  /** How far the colours behind the element are inverted, as a percentage. */
+  backdropInvert: filterFunction('BackdropInvert', 'invert', '%'),
+  /** How opaque what is behind the element is rendered, as a percentage. `filter` has no use for this one, so there is no `opacity` twin. */
+  backdropOpacity: filterFunction('BackdropOpacity', 'opacity', '%'),
+  /** How saturated what is behind the element is rendered, as a percentage. */
+  backdropSaturate: filterFunction('BackdropSaturate', 'saturate', '%'),
+  /** How far what is behind the element is pushed towards sepia, as a percentage. */
+  backdropSepia: filterFunction('BackdropSepia', 'sepia', '%'),
+  /**
+   * What the element is masked by: the alpha channel of an image decides which of its pixels are painted.
+   * Takes the same gradient record `bgGradient` does — so a fade to `transparent` is the whole edge-fade
+   * recipe — or a `url(#id)`/`var(--name)` somebody else defined. One mask, not a stack.
+   */
+  maskImage: [
+    {
+      values: ['none'] as const,
+      styleName: 'mask-image',
+    },
+    { ...referenceValues, styleName: 'mask-image' },
+    {
+      values: {} as Gradients.Gradient,
+      match: Gradients.isGradient,
+      declarations: (value, getVariableValue) => `mask-image:${Gradients.css(value, getVariableValue)}`,
+    },
+  ],
+  /**
+   * Which box the background is painted inside — and `text`, which clips it to the glyphs themselves. That
+   * is how a gradient becomes lettering, and it needs `color="transparent"` beside it or the text paints
+   * over its own background.
+   */
+  bgClip: [
+    {
+      values: ['border', 'padding', 'content', 'text'] as const,
+      styleName: 'background-clip',
+      valueFormat: (value: string) => (value === 'text' ? value : `${value}-box`),
+    },
+  ],
   /** Moves an element horizontally on the 2D plane, on the ÷4 spacing scale, as a fraction of its own width (`'1/2'`) or as a percentage. Composes with `translateY`. */
   translateX: [
     {
@@ -1908,6 +2020,10 @@ export const cssStyles = {
       valueFormat: Content.quote,
     },
   ],
+  /**
+   * The whole `backdrop-filter` at once, written as CSS. Superseded by the nine `backdrop*` props, which
+   * compose — this one writes the same property, so it and they are the same declaration: use one.
+   */
   backdropFilter: [
     {
       values: ['none', 'blur(12px)', 'blur(8px)', 'blur(4px)'] as const,

@@ -53,7 +53,7 @@ export const siteRoutes = [
   {
     path: '/box',
     name: 'Box',
-    description: 'The foundational component: 165 CSS properties as type-safe props, with the numeric formatters explained.',
+    description: 'The foundational component: 186 CSS properties as type-safe props, with the numeric formatters explained.',
   },
   {
     path: '/svg',
@@ -174,9 +174,9 @@ export const siteRoutes = [
   },
   {
     path: '/gradients-shadows',
-    name: 'Gradients & Shadows',
+    name: 'Gradients & Effects',
     description:
-      'A gradient written as a value, with palette tokens for stops and OKLCH interpolation — and four shadow layers that stack on one box-shadow.',
+      'A gradient written as a value, with palette tokens for stops — plus the shadow layers, filter functions and masks that stack instead of overwriting each other.',
   },
   {
     path: '/ai-context',
