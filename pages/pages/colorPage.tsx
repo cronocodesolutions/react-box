@@ -31,7 +31,7 @@ export default function ColorPage() {
       <PageHeader
         icon={PaletteIcon}
         title="Colors"
-        description="Tailwind's palette in OKLCH — twenty-six families of eleven steps — and the one modifier a colour value takes."
+        description="Every colour token in OKLCH — twenty-six families of eleven steps — and the one modifier a colour value takes."
         badge="NEW"
       />
 
