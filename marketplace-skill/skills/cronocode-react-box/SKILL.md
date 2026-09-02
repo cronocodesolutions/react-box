@@ -5,7 +5,7 @@ description: '@cronocode/react-box expert — runtime CSS-in-JS library. Use whe
 
 # @cronocode/react-box AI Skill
 
-Runtime CSS-in-JS library. `Box` accepts 155 CSS props → generates CSS classes at runtime. Same values share a class.
+Runtime CSS-in-JS library. `Box` accepts 165 CSS props → generates CSS classes at runtime. Same values share a class.
 
 ## Installation & Package Management
 
@@ -139,7 +139,30 @@ child's own CSS says the transition is over, then lets React remove it. `ref` go
 `height: auto` animate inside it (inherited; Chromium-only, elsewhere it snaps). `Box.configure({ transition: 'colors' | false })` changes
 what the base class transitions, before the first render.
 
-**Effects**: `shadow` (`'small'`/`'medium'`/`'large'`/`'xl'`/`'none'`), `opacity`, `cursor`, `pointerEvents`, `userSelect`, `overflow`
+**Gradients**: `bgGradient` — a gradient as a *value*, written as a record, so its stops are palette tokens and it is
+themed, takes the opacity modifier and shares one class. The key names the kind and carries its geometry:
+`{ linear: 'r', colors: ['blue-500', 'pink-500'] }` (a direction `t`/`tr`/`r`/`br`/`b`/`bl`/`l`/`tl`, or a number of
+degrees — `{ linear: 135, … }`), `{ radial: 'circle' | 'ellipse' | true, at: 'top left', … }`, `{ conic: 45 | true, … }`.
+Exactly one kind; `at` centres a radial or conic gradient, never a linear one. A stop is any colour value —
+`'blue-500/40'`, `'transparent'`, `'var(--chart-1)'` — or a `[colour, position]` pair (`['sky-500', '20%']`), **two
+minimum**. `interpolate` names the space: `'srgb'`, `'hsl'`, `'oklab'`, `'oklch'`, `'hsl-longer'`, `'oklch-longer'` —
+`'oklch'` is what keeps two stops out of the grey middle sRGB drags them through, and a `-longer` hue turns two stops
+into a spectrum. The record is judged **whole**: one unknown stop, one misspelt key (`interpolat`), two kinds at once,
+and the value emits no rule and no class name. It writes `background-image`, so `bgGradient` and `bgImage` are the
+same property — use one.
+
+**Shadows stack, four at a time**: `box-shadow` is one property, so each layer sets its own custom property and all
+four write the same composed declaration — a ring and an elevation coexist instead of the last rule winning.
+`shadow`: `'xxs'`/`'xs'`/`'sm'`/`'md'`/`'lg'`/`'xl'`/`'xxl'` on Tailwind's elevation scale, plus the three original presets
+`'small'`/`'medium'`/`'large'` (which carry their own colour), plus `'none'`. `insetShadow`: `'xxs'`/`'xs'`/`'sm'`, drawn
+inside the border box. `ring`/`insetRing` are a **width in px**, not a scale — `ring={2}` — and unlike `outline` a ring
+joins the stack, follows `borderRadius` and costs no layout. Each layer takes a colour of its own: `shadowColor`,
+`insetShadowColor`, `ringColor` (`currentColor` by default), `insetRingColor` — every colour value, modifier included
+(`shadowColor="blue-500/40"`). A colour prop **shows nothing on its own**, the way `borderColor` does with no border
+width. `'none'` — or `0` on a ring — clears just that layer. `textShadow` (`'xxs'`…`'lg'`, `'none'`) with
+`textShadowColor` is the text-side pair, and `transition="shadow"` covers `box-shadow` and `text-shadow` both.
+
+**Effects**: `opacity`, `cursor`, `pointerEvents`, `userSelect`, `overflow`
 
 ## Pseudo-Classes, Breakpoints, State Variants & Container Queries
 

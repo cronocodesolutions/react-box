@@ -122,7 +122,9 @@ describe('a variable declared through extend() is a usable value', () => {
     const rules = generatedRulesOf(engine);
     expect(rules).toContain('.color-token{color:var(--token)}');
     expect(rules).toContain('.borderColor-token{border-color:var(--token)}');
-    expect(rules).toContain('.shadow-token{box-shadow:var(--token)}');
+    // A shadow is a layer now, so a variable lands in the layer's own property and the composed
+    // declaration reads it alongside the other three.
+    expect(rules).toContain('.shadow-token{--boxShadow:var(--token);box-shadow:var(--boxInsetShadow,');
     expect(rules).toContain('.bgImage-token{background-image:var(--token)}');
   });
 

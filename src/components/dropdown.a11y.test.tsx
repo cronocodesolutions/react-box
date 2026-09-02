@@ -1,4 +1,4 @@
-import { cleanup, render, screen } from '@testing-library/react';
+import { cleanup, render, screen, waitFor } from '@testing-library/react';
 import { afterEach, describe, expect, it } from 'vitest';
 import { expectNoAxeViolations } from '../../dev/a11y/axe';
 import { expectFocusOn, keyboard } from '../../dev/a11y/keyboard';
@@ -396,7 +396,9 @@ describe('Dropdown accessibility', () => {
 
       await user.press('Enter');
       expect(isOpen()).toBe(false);
-      expect(selected()).toEqual([]);
+      // Once the popup has actually left: while it animates out its rows are still in the tree, and
+      // the Unselect row reads as the selected one whenever nothing is chosen.
+      await waitFor(() => expect(selected()).toEqual([]));
     });
 
     it('holds a no-break space when it has nothing to show, so it keeps its line box', () => {

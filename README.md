@@ -5,7 +5,7 @@
 [![Tests](https://github.com/box-kite/box-kite/actions/workflows/test.yml/badge.svg)](https://github.com/box-kite/box-kite/actions/workflows/test.yml)
 [![license](https://img.shields.io/npm/l/@cronocode/react-box)](LICENSE)
 
-`Box` is a single React component with 155 typed CSS props. It generates the CSS for the values you
+`Box` is a single React component with 165 typed CSS props. It generates the CSS for the values you
 pass at runtime and caches every rule by its content, so the same value anywhere in the app reuses
 one class — a project styles itself in TypeScript, with no CSS files to write and no class-name
 convention to remember.
@@ -61,6 +61,38 @@ That compiles to `color-mix(in oklab, var(--blue-500) 40%, transparent)`: the mi
 one class. It is not `opacity`, which fades the element, its text and its children — this fades one
 declaration. Every colour prop takes it (`color`, `bgColor`, `borderColor`, `outlineColor`, `fill`,
 `stroke`), as does a `vars` entry and a variable of your own from `Box.extend()`.
+
+## Gradients and shadows
+
+A gradient is a value, not a string you assemble: the key names the kind and carries its geometry, and
+the stops are palette colours, so the whole thing is themed, takes the opacity modifier and shares one
+class with every other element asking for it.
+
+```JS
+<Box bgGradient={{ linear: 'r', colors: ['blue-500', 'pink-500'] }} />
+<Box bgGradient={{ radial: 'circle', at: 'top left', colors: [['sky-500', '20%'], 'indigo-900'] }} />
+<Box bgGradient={{ conic: 45, colors: ['red-500', 'yellow-500', 'red-500'], interpolate: 'oklch' }} />
+```
+
+`interpolate` is worth knowing: sRGB drags a two-stop gradient through a grey middle, and `oklch` does
+not. `oklch-longer` takes the long way round the hue circle, which is what turns two stops into a
+spectrum. A gradient is judged whole — one unknown stop or one misspelt key and it emits no rule at
+all, rather than quietly painting something else.
+
+`box-shadow` is one CSS property, which normally means one shadow wins. Here it is **four layers** that
+compose, so an elevation, a ring and an inner hairline coexist:
+
+```JS
+<Box shadow="md" ring={2} ringColor="indigo-500" borderRadius={2} />
+<Box insetShadow="sm" insetRing={1} shadow="lg" shadowColor="blue-500/40" />
+```
+
+`shadow` is Tailwind's elevation scale (`xxs` through `xxl`, and the older `small`/`medium`/`large`
+presets still work), `insetShadow` draws inside the border box, and `ring`/`insetRing` are a width in
+px. A ring follows `borderRadius` and costs no layout, which is what makes it different from
+`outline`. Each layer has its own colour prop — `shadowColor`, `ringColor`, and so on — which shows
+nothing until the layer it belongs to is painted, exactly as `borderColor` needs a border width.
+`textShadow` and `textShadowColor` are the text-side pair.
 
 ## Components
 
@@ -593,7 +625,7 @@ A complete page — props, pseudo-classes, breakpoints, themes, `extend`, `compo
 
 ## Architecture
 
-The styling engine is framework-free. Everything that generates CSS — the 155 prop definitions,
+The styling engine is framework-free. Everything that generates CSS — the 165 prop definitions,
 the value formatters, class-name generation, rule ordering, the style sinks (CSSOM, `textContent`,
 string for SSR, style elements for React 19), the flush scheduler, CSS variables and the theme
 runtime — lives in `src/core/` and imports no React at all. CI fails the build if it ever does

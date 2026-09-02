@@ -185,10 +185,12 @@ namespace Variables {
   }
 
   /**
-   * One `vars` value that names a colour, resolved: a token becomes the variable behind it and a token with
-   * an opacity modifier the mix that applies it, so a chart's colour follows the palette either way.
+   * A value that names a colour, resolved: a token becomes the variable behind it and a token with an
+   * opacity modifier the mix that applies it, so a chart's colour — or a gradient stop — follows the
+   * palette either way. Anything else is written out as it stands: a system colour and a `var()`
+   * reference are already CSS, and neither is ours to resolve.
    */
-  function colorValue(entry: string, getVariableValue: (name: string) => string): string {
+  export function colorValue(entry: string, getVariableValue: (name: string) => string): string {
     if (entry in colors) return getVariableValue(entry);
 
     return Palette.isAlpha(entry) ? Palette.mix(entry, getVariableValue) : entry;

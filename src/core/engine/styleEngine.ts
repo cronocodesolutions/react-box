@@ -31,6 +31,7 @@ import defaultBoxComponents, { BoxComponent, Components } from '../extends/boxCo
 import { resolveComponentStyles } from '../extends/useComponents';
 import { stableHash } from '../hash';
 import Palette from '../palette';
+import Shadows from '../shadows';
 import Variables from '../variables';
 import Variants from '../variants';
 import { createFlushCoordinator, FlushScheduler, microtaskScheduler } from './flushScheduler';
@@ -759,13 +760,17 @@ export function createStyleEngine(options: StyleEngineOptions = {}): StyleEngine
     return `@layer ${names.join(',')};${ranks}`;
   }
 
-  /** What the base classes transition, as a declaration — empty when the engine was told to declare none. */
+  /**
+   * What the base classes transition, as a declaration — empty when the engine was told to declare none.
+   * The longhands, not the shorthand: a group is a *list* of properties, and `transition: a, b var(--t)`
+   * reads the duration as part of the last item, leaving every other one at 0s (bug #109).
+   */
   function baseTransitionOf(time: string): string {
     if (baseTransition === false) return '';
 
     const property = Animations.propertyGroups[baseTransition as Animations.PropertyGroup] ?? baseTransition;
 
-    return `transition: ${property} var(${time});`;
+    return `transition-property: ${property};transition-duration: var(${time});`;
   }
 
   /** The reset + `:root` block every engine writes before its first generated rule. */
@@ -784,6 +789,11 @@ export function createStyleEngine(options: StyleEngineOptions = {}): StyleEngine
       // unregistered custom property animates discretely — the loading bar sat at -100% and teleported.
       `@property --boxTranslateX{syntax: "<length-percentage>";inherits: false;initial-value: 0;}`,
       `@property --boxTranslateY{syntax: "<length-percentage>";inherits: false;initial-value: 0;}`,
+      // The four shadow layers and their colours. Registering them is what stops them *inheriting*: a child
+      // asking for a ring would otherwise read its parent's `--boxShadow` through the fallback and wear its
+      // elevation. The universal syntax with no initial value is deliberate — anything else makes the
+      // property always valid, and the `var()` fallback carrying each step's own alpha unreachable.
+      ...Shadows.properties,
       `#crono-box {position: absolute;top: 0;left: 0;height: 0;z-index:99999;}`,
       `html{font-size: 16px;font-family: Arial, sans-serif;}`,
       `body{margin: 0;line-height: var(--lineHeight);font-size: var(--fontSize);}`,

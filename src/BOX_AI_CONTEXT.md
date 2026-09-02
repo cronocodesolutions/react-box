@@ -1,6 +1,6 @@
 # @cronocode/react-box - AI Assistant Context
 
-Runtime CSS-in-JS library. `Box` component accepts 155 CSS props and generates CSS classes at runtime. Same prop values share a single class.
+Runtime CSS-in-JS library. `Box` component accepts 165 CSS props and generates CSS classes at runtime. Same prop values share a single class.
 
 ---
 
@@ -133,7 +133,9 @@ All sizing, spacing, and positioning props also accept percentage strings: `p="5
 | `position`                                                                       | position                                | `'relative'`, `'absolute'`, `'fixed'`, `'sticky'`                                                                                                                                                                                                                                                                                                                                                                         |
 | `top` / `right` / `bottom` / `left` / `inset`                                    | positioning offsets                     | number or string                                                                                                                                                                                                                                                                                                                                                                                                          |
 | `zIndex`                                                                         | z-index                                 | number                                                                                                                                                                                                                                                                                                                                                                                                                    |
-| `shadow`                                                                         | box-shadow                              | `'small'`, `'medium'`, `'large'`, `'xl'`, `'none'`                                                                                                                                                                                                                                                                                                                                                                        |
+| `shadow` / `insetShadow` / `ring` / `insetRing`                                  | box-shadow (four stacking layers)       | `shadow`: `'xxs'`..`'xxl'` on Tailwind's scale, the presets `'small'`/`'medium'`/`'large'`, or `'none'`. `insetShadow`: `'xxs'`/`'xs'`/`'sm'`. `ring`/`insetRing`: a width in px. Each is its own layer, so they stack. `shadowColor`/`insetShadowColor`/`ringColor`/`insetRingColor` recolour one. See _Gradients, shadows and rings_ |
+| `textShadow` / `textShadowColor`                                                 | text-shadow                             | `'xxs'`..`'lg'` or `'none'`; the colour is a separate prop, as with the box shadows                                                                                                                                                                                                                                                                                                                                             |
+| `bgGradient`                                                                       | background-image                        | A gradient as a record: `{ linear: 'r', colors: ['blue-500', 'pink-500'] }`. Same property as `bgImage` — use one                                                                                                                                                                                                                                                                                                                |                                                                                                                                                                                                                                                                                                                                                                        |
 | `opacity`                                                                        | opacity                                 | number                                                                                                                                                                                                                                                                                                                                                                                                                    |
 | `cursor` / `pointerEvents` / `userSelect`                                        | misc                                    | string values. For `transition`, `animation` and the transform props see _Animation and transitions_ below                                                                                                                                                                                                                                                                                                                |
 
@@ -162,6 +164,48 @@ Any colour value takes a slash and a percentage:
   and on a variable declared through `Box.extend()` (`bgColor="brand/30"`).
 - A token the palette does not have, or a percentage outside 0–100, produces **no rule and no class
   name** — the same silence every unmatched value gets.
+
+### Gradients, shadows and rings
+
+A gradient is a **value**, written as a record — so its stops are palette tokens, it takes the opacity
+modifier, it is themed, and two elements asking for the same one share a class.
+
+```tsx
+// The key names the kind and carries its geometry; `colors` are the stops in order.
+<Box bgGradient={{ linear: 'r', colors: ['blue-500', 'pink-500'] }} />
+<Box bgGradient={{ linear: 135, colors: ['blue-500/40', 'transparent'] }} />
+<Box bgGradient={{ radial: 'circle', at: 'top left', colors: [['sky-500', '20%'], 'indigo-900'] }} />
+<Box bgGradient={{ conic: 45, colors: ['red-500', 'yellow-500', 'red-500'] }} />
+
+// Interpolation is what keeps two stops out of the grey middle sRGB runs them through.
+<Box bgGradient={{ linear: 'r', colors: ['blue-500', 'pink-500'], interpolate: 'oklch' }} />
+```
+
+- `linear` takes `t`/`tr`/`r`/`br`/`b`/`bl`/`l`/`tl` or a number of degrees; `radial` takes
+  `'circle'`/`'ellipse'`/`true`; `conic` takes a start angle or `true`. Exactly one of the three.
+- `at` centres a `radial` or `conic` gradient (not a `linear` one, which runs in a direction).
+- `interpolate`: `'srgb'`, `'hsl'`, `'oklab'`, `'oklch'`, `'hsl-longer'`, `'oklch-longer'`.
+- A stop is any colour value — a token, `blue-500/40`, a system colour, `var(--chart-1)` — or a
+  `[colour, position]` pair. **Two stops minimum**, and the record is judged whole: one bad stop, one
+  unknown key, two kinds at once, and the whole value emits no rule and no class name.
+- It writes `background-image`, so `bgGradient` and `bgImage` are the same property.
+
+**Four shadows stack**, because each sets its own custom property and all four write one composed
+`box-shadow`. A ring and an elevation coexist instead of the last one winning:
+
+```tsx
+<Box shadow="md" ring={2} ringColor="indigo-500" />
+<Box insetShadow="sm" insetRing={1} shadow="lg" shadowColor="blue-500/40" />
+<P textShadow="sm" textShadowColor="black/20" />
+```
+
+- `shadow`: `xxs` `xs` `sm` `md` `lg` `xl` `xxl`, Tailwind's elevation scale — plus the three original
+  presets `small`/`medium`/`large`, which carry their own colour. `insetShadow`: `xxs`/`xs`/`sm`.
+- `ring`/`insetRing` are a **width in px**, not a scale: `ring={2}`. Unlike `outline` a ring joins the
+  shadow stack, follows `borderRadius` and costs no layout. `currentColor` unless recoloured.
+- `none` on `shadow` or `insetShadow` — and `0` on a ring — clears **just that layer**.
+- A colour prop shows nothing on its own, the way `borderColor` does with no border width.
+- `transition="shadow"` covers `box-shadow` and `text-shadow` both.
 
 ### Custom properties (`vars`)
 

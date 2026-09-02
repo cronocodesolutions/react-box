@@ -1,4 +1,4 @@
-import { act, cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { ignoreLogs } from '../../dev/tests';
 import Dropdown from './dropdown';
@@ -66,30 +66,30 @@ describe('Dropdown', () => {
       expect(screen.getByText('Charlie')).toBeTruthy();
     });
 
-    it('closes dropdown on second click', () => {
+    it('closes dropdown on second click', async () => {
       renderDropdown();
       openDropdown();
       expect(screen.getByText('Alpha')).toBeTruthy();
       openDropdown();
-      expect(screen.queryByText('Alpha')).toBeNull();
+      await waitFor(() => expect(screen.queryByText('Alpha')).toBeNull());
     });
 
-    it('closes on Escape key', () => {
+    it('closes on Escape key', async () => {
       renderDropdown();
       openDropdown();
       expect(screen.getByText('Alpha')).toBeTruthy();
       // On `document`, which is where `useDismiss` listens — a real Escape reaches it by bubbling
       // from whatever has focus, but an event dispatched straight at `window` never goes back down.
       fireEvent.keyDown(document, { key: 'Escape' });
-      expect(screen.queryByText('Alpha')).toBeNull();
+      await waitFor(() => expect(screen.queryByText('Alpha')).toBeNull());
     });
 
     it('holds the popup in the DOM while its exit runs, and says which way it is going', () => {
       vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] });
 
       try {
-        // A duration of its own: happy-dom does not expand the base `transition` shorthand the
-        // popup's 250ms really comes from.
+        // A duration of its own, shorter than the base 250ms this popup would otherwise measure,
+        // so the wait under test is the one the test names.
         renderDropdown({ itemsProps: { transitionDuration: 200 } });
         openDropdown();
         expect(screen.getByRole('listbox')).toHaveAttribute('data-state', 'open');
@@ -171,10 +171,13 @@ describe('Dropdown', () => {
   });
 
   describe('Single Selection', () => {
-    it('selects an item on click', () => {
+    it('selects an item on click', async () => {
       renderDropdown();
       openDropdown();
       fireEvent.click(screen.getByText('Beta'));
+
+      // Only once the option has left: until then 'Beta' is both the trigger's label and the option.
+      await waitFor(() => expect(screen.queryByRole('listbox')).toBeNull());
       expect(screen.getByText('Beta')).toBeTruthy();
     });
 
@@ -186,12 +189,12 @@ describe('Dropdown', () => {
       expect(onChange).toHaveBeenCalledWith('b', ['b']);
     });
 
-    it('closes after selection in single mode', () => {
+    it('closes after selection in single mode', async () => {
       renderDropdown();
       openDropdown();
       fireEvent.click(screen.getByText('Beta'));
-      // After selection, dropdown should close — items not visible
-      expect(screen.queryByText('Alpha')).toBeNull();
+      // After selection, dropdown should close — items not visible once the exit has run
+      await waitFor(() => expect(screen.queryByText('Alpha')).toBeNull());
       expect(screen.queryByText('Charlie')).toBeNull();
     });
 

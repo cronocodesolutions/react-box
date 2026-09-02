@@ -57,11 +57,13 @@ react-box/
 │   ├── ssg.ts                    # Server-side rendering support (entry point)
 │   │
 │   ├── core/                     # Core styling engine — ZERO react imports (enforced)
-│   │   ├── boxStyles.ts          # CSS property definitions (155 props)
+│   │   ├── boxStyles.ts          # CSS property definitions (165 props)
 │   │   ├── boxStylesFormatters.ts # Value formatters (px, rem, etc.)
 │   │   ├── variables.ts          # Where a value becomes a variable: the registry, bgImages, shadows
 │   │   ├── palette.ts            # Tailwind's OKLCH palette (26 families) + the `token/alpha` grammar
 │   │   ├── containers.ts         # The `cq` key grammar: sizes, complements, named containers
+│   │   ├── gradients.ts          # The `bgGradient` record grammar: kinds, stops, interpolation
+│   │   ├── shadows.ts            # The four stacking shadow layers and the Tailwind elevation scales
 │   │   ├── classNames.ts         # Conditional className utility
 │   │   ├── coreTypes.ts          # Core TypeScript types (framework-free)
 │   │   ├── boxConstants.ts       # Constants (REM divider, etc.)

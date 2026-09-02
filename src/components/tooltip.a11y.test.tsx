@@ -1,4 +1,4 @@
-import { act, cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { expectNoAxeViolations } from '../../dev/a11y/axe';
 import { expectFocusOn, keyboard } from '../../dev/a11y/keyboard';
@@ -98,7 +98,7 @@ describe('Tooltip accessibility', () => {
 
       await user.press('Escape');
 
-      expect(tooltip()).toBeNull();
+      await waitFor(() => expect(tooltip()).toBeNull());
       expectFocusOn(trigger());
     });
 
@@ -108,7 +108,7 @@ describe('Tooltip accessibility', () => {
       await user.hover(trigger());
 
       await user.press('Escape');
-      expect(tooltip()).toBeNull();
+      await waitFor(() => expect(tooltip()).toBeNull());
 
       // Still hovering: re-showing here would trap the user in the tooltip they just dismissed.
       await user.hover(trigger());
@@ -126,7 +126,7 @@ describe('Tooltip accessibility', () => {
 
       await user.pressTab();
 
-      expect(tooltip()).toBeNull();
+      await waitFor(() => expect(tooltip()).toBeNull());
     });
 
     it('adds nothing to the tab order, so Tab still reaches the next control', async () => {
@@ -189,6 +189,9 @@ describe('Tooltip accessibility', () => {
 
       fireEvent.pointerOut(screen.getByRole('tooltip'));
       advance(150);
+
+      // Closed, but still mounted: <Presence> holds the bubble for the transition it measured.
+      advance(300);
       expect(tooltip()).toBeNull();
     });
 

@@ -80,7 +80,7 @@ namespace Animations {
   export const propertyGroups = {
     colors: 'color, background-color, border-color, outline-color, text-decoration-color, fill, stroke',
     opacity: 'opacity',
-    shadow: 'box-shadow',
+    shadow: 'box-shadow, text-shadow',
     transform: 'transform, translate, rotate, scale',
     size: 'width, height',
     filter: 'filter, backdrop-filter',

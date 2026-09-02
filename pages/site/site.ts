@@ -53,7 +53,7 @@ export const siteRoutes = [
   {
     path: '/box',
     name: 'Box',
-    description: 'The foundational component: 155 CSS properties as type-safe props, with the numeric formatters explained.',
+    description: 'The foundational component: 165 CSS properties as type-safe props, with the numeric formatters explained.',
   },
   {
     path: '/svg',
@@ -171,6 +171,12 @@ export const siteRoutes = [
     name: 'Colors',
     description:
       'The complete colour palette in OKLCH — twenty-six families of eleven steps — and the opacity modifier every colour value takes.',
+  },
+  {
+    path: '/gradients-shadows',
+    name: 'Gradients & Shadows',
+    description:
+      'A gradient written as a value, with palette tokens for stops and OKLCH interpolation — and four shadow layers that stack on one box-shadow.',
   },
   {
     path: '/ai-context',

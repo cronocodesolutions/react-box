@@ -140,6 +140,10 @@ describe('createStyleEngine', () => {
   /**
    * `transition: all` on every Box is a default, not a law: an engine can name a narrower group or
    * declare nothing at all, which is what a consumer that owns its own transitions wants.
+   *
+   * The longhands, not the shorthand. A group is a *list* of properties, and `transition: a, b var(--t)`
+   * parses as two transitions of which only the last has a duration — so every property but the final one
+   * sat at 0s (bug #109). Invisible while the default was the single-item `all`.
    */
   describe('the base transition is configurable', () => {
     it('narrows the base class to one property group', () => {
@@ -147,8 +151,8 @@ describe('createStyleEngine', () => {
 
       renderStyles(engine, { p: 4 });
 
-      expect(rulesOf(engine)).toContain('transition: color, background-color');
-      expect(rulesOf(engine)).not.toContain('transition: all');
+      expect(rulesOf(engine)).toContain('transition-property: color, background-color');
+      expect(rulesOf(engine)).not.toContain('transition-property: all');
     });
 
     it('declares no transition at all when told to', () => {
