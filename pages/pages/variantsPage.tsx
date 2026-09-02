@@ -6,6 +6,7 @@ import Checkbox from '../../src/components/checkbox';
 import Flex from '../../src/components/flex';
 import Presence from '../../src/components/presence';
 import { H2 } from '../../src/components/semantics';
+import Textbox from '../../src/components/textbox';
 import Code from '../components/code';
 import PageHeader from '../components/pageHeader';
 import Reveal from '../components/reveal';
@@ -17,13 +18,14 @@ export default function VariantsPage() {
   const [selected, setSelected] = useState('Overview');
   const [agreed, setAgreed] = useState(false);
   const [shown, setShown] = useState(false);
+  const [amount, setAmount] = useState('5');
 
   return (
     <Box>
       <PageHeader
         icon={SlidersHorizontal}
         title="State Variants"
-        description="Style an element by an attribute it carries, by what it contains, or by a state it is not in — data-*, aria-*, :has() and :not() as nested props."
+        description="Style an element by an attribute it carries, by what it contains, by where it sits, by a state it is not in — or by what an ancestor, a sibling, the browser or the device is doing."
         badge="NEW"
       />
 
@@ -32,13 +34,14 @@ export default function VariantsPage() {
           <Section id="concept" title="A state somebody else set is still a prop">
             <Mono>hover</Mono> and <Mono>checked</Mono> describe states the browser knows about. Everything else — a menu that is open, a
             row that is selected, a step that is loading — is a state <em>your</em> code knows about, and until now the only way to style it
-            was a ternary in the markup. The four keys on this page put it back in CSS: they add a fragment to the element's own selector,
-            so one rule covers every element in that state instead of a new class per render.
+            was a ternary in the markup. The keys on this page put it back in CSS: five that add a fragment to the element's own selector,
+            two that hang the rule off an ancestor or a sibling. One rule covers every element in that state, instead of a new class per
+            render.
           </Section>
 
           <Code
             id="concept-code"
-            label="The four keys"
+            label="The five keys"
             language="jsx"
             codeOnly
             code={`<Box
@@ -46,6 +49,7 @@ export default function VariantsPage() {
   ariaAttr={{ selected: { bgColor: 'indigo-500' } }}                        // [aria-selected="true"]
   has={{ ':checked': { borderColor: 'indigo-500' } }}                       // :has(:checked)
   not={{ hover: { opacity: 0.7 } }}                                         // :not(:hover)
+  nth={{ odd: { bgColor: 'slate-50' } }}                                    // :nth-child(odd)
 />`}
           />
 
@@ -162,8 +166,9 @@ export default function VariantsPage() {
           <Section id="not" title="not — the state you are not in">
             <Mono>not</Mono> is keyed by pseudo-class name rather than by a selector, so it stays typed and autocompletes: every key{' '}
             <Mono>hover</Mono>, <Mono>checked</Mono>, <Mono>disabled</Mono> and the rest already accept, minus the ones a{' '}
-            <Mono>:not()</Mono> cannot hold. It is the honest way to say "dim everything that is not the one being pointed at" without
-            writing the positive rule twice.
+            <Mono>:not()</Mono> cannot hold. An attribute is negated the same way, with the prefix that says so —{' '}
+            <Mono>{`not={{ 'data-loading': … }}`}</Mono>. It is the honest way to say "dim everything that is not the one being pointed at"
+            without writing the positive rule twice.
           </Section>
 
           <Code
@@ -171,7 +176,178 @@ export default function VariantsPage() {
             label="not"
             language="jsx"
             codeOnly
-            code={`<Box hoverGroup={{ deck: { not: { hover: { opacity: 0.5 } } } }} />`}
+            code={`<Box group={{ 'deck/hover': { not: { hover: { opacity: 0.5 } } } }} />`}
+          />
+
+          <Section id="nth" title="nth — where the element sits among its siblings">
+            The fifth key is a position rather than a state: <Mono>first</Mono>, <Mono>last</Mono>, <Mono>only</Mono>, <Mono>odd</Mono>,{' '}
+            <Mono>even</Mono>, an <Mono>An+B</Mono> formula, or any of those counted from the end — <Mono>'last 2'</Mono> is the
+            second-to-last child. Striping a list and dropping the divider under its last row is two records and no index arithmetic in the
+            markup, so a row does not have to know how many rows there are.
+          </Section>
+
+          <Code
+            id="nth-demo"
+            label="nth"
+            language="jsx"
+            code={`{['Design', 'Build', 'Ship', 'Measure'].map((step) => (
+  <Box
+    key={step}
+    px={4}
+    py={3}
+    bb={1}
+    borderColor="slate-500/20"
+    nth={{ odd: { bgColor: 'slate-500/10' }, 'last 1': { bb: 0 } }}
+  >
+    {step}
+  </Box>
+))}`}
+          >
+            <Box b={1} borderRadius={2} borderColor="slate-300" overflow="hidden" width={64}>
+              {['Design', 'Build', 'Ship', 'Measure'].map((step) => (
+                <Box
+                  key={step}
+                  px={4}
+                  py={3}
+                  bb={1}
+                  fontSize={14}
+                  borderColor="slate-500/20"
+                  theme={{ dark: { color: 'slate-300' }, light: { color: 'slate-700' } }}
+                  nth={{ odd: { bgColor: 'slate-500/10' }, 'last 1': { bb: 0 } }}
+                >
+                  {step}
+                </Box>
+              ))}
+            </Box>
+          </Code>
+
+          <Section id="group" title="group and peer — a state that belongs to somebody else">
+            Every key above is about the element itself. <Mono>group</Mono> is about an <em>ancestor</em> and <Mono>peer</Mono> about a
+            preceding <em>sibling</em>: the record key is the state, either on the default class (<Mono>group</Mono>, <Mono>peer</Mono> —
+            the names Tailwind uses) or on one you name, <Mono>'card/hover'</Mono>. The state vocabulary is <Mono>not</Mono>'s, so any
+            pseudo-class works, and a <Mono>data-</Mono>/<Mono>aria-</Mono> prefix reaches an attribute the ancestor carries instead.
+          </Section>
+
+          <Code
+            id="group-demo"
+            label="group"
+            language="jsx"
+            code={`<Flex className="card" ai="center" p={4} b={1} borderRadius={2}>
+  <Box>Quarterly report</Box>
+  <Box ml="auto" opacity={0} group={{ 'card/hover': { opacity: 1 } }}>
+    Edit
+  </Box>
+</Flex>`}
+          >
+            <Flex
+              className="card"
+              ai="center"
+              p={4}
+              b={1}
+              borderRadius={2}
+              width="fit"
+              maxWidth={96}
+              borderColor="slate-300"
+              theme={{ dark: { borderColor: 'slate-700' } }}
+            >
+              <Box fontSize={14} theme={{ dark: { color: 'slate-300' }, light: { color: 'slate-700' } }}>
+                Quarterly report
+              </Box>
+              <Box ml="auto" fontSize={13} color="indigo-500" opacity={0} group={{ 'card/hover': { opacity: 1 } }}>
+                Edit
+              </Box>
+            </Flex>
+          </Code>
+
+          <Code
+            id="peer-demo"
+            label="peer"
+            language="jsx"
+            context="declare const agreed: boolean;declare const setAgreed: (value: boolean) => void;"
+            code={`<Checkbox
+  className="agree"
+  checked={agreed}
+  onChange={(event) => setAgreed(event.target.checked)}
+  label={<Box peer={{ 'agree/checked': { color: 'emerald-500' } }}>I agree to the terms</Box>}
+/>`}
+          >
+            <Checkbox
+              className="agree"
+              checked={agreed}
+              onChange={(event) => setAgreed(event.target.checked)}
+              label={
+                <Box
+                  fontSize={14}
+                  theme={{ dark: { color: 'slate-400' }, light: { color: 'slate-600' } }}
+                  peer={{ 'agree/checked': { color: 'emerald-500', fontWeight: 600 } }}
+                >
+                  I agree to the terms
+                </Box>
+              }
+            />
+          </Code>
+
+          <Section id="states" title="The states the browser already knows">
+            Eight more pseudo-class keys, each one a state the platform tracks and nothing else can see: <Mono>open</Mono> (a{' '}
+            <Mono>&lt;details&gt;</Mono>, a <Mono>&lt;dialog&gt;</Mono>, a popover, a <Mono>&lt;select&gt;</Mono>'s picker),{' '}
+            <Mono>placeholderShown</Mono>, <Mono>autofill</Mono>, <Mono>inRange</Mono>/<Mono>outOfRange</Mono>, <Mono>visited</Mono>,{' '}
+            <Mono>target</Mono> and <Mono>inert</Mono>. They nest like <Mono>hover</Mono>, negate under <Mono>not</Mono>, and go on a group.
+            Two of them come with a caveat worth knowing: <Mono>visited</Mono> takes <em>colour</em> properties only — the browser refuses
+            the rest, and lies about them, so that a page cannot read a reader's history — and <Mono>inert</Mono> matches the whole inert
+            subtree, because inertness is inherited where the attribute is not.
+          </Section>
+
+          <Code
+            id="states-demo"
+            label="inRange / outOfRange"
+            language="jsx"
+            context="declare const amount: string;declare const setAmount: (value: string) => void;"
+            code={`<Textbox
+  type="number"
+  value={amount}
+  onChange={(event) => setAmount(event.target.value)}
+  props={{ min: 1, max: 10, 'aria-label': 'Seats' }}
+  b={2}
+  borderStyle="solid"
+  inRange={{ borderColor: 'emerald-500' }}
+  outOfRange={{ borderColor: 'red-500' }}
+/>`}
+          >
+            <Flex ai="center" gap={3}>
+              <Textbox
+                type="number"
+                value={amount}
+                onChange={(event) => setAmount(event.target.value)}
+                props={{ min: 1, max: 10, 'aria-label': 'Seats' }}
+                width={24}
+                b={2}
+                borderStyle="solid"
+                borderColor="slate-300"
+                inRange={{ borderColor: 'emerald-500' }}
+                outOfRange={{ borderColor: 'red-500' }}
+              />
+              <Box fontSize={13} theme={{ dark: { color: 'slate-400' }, light: { color: 'slate-600' } }}>
+                1 to 10 seats
+              </Box>
+            </Flex>
+          </Code>
+
+          <Section id="pointer" title="pointerCoarse and pointerFine — what the device can do">
+            The two device features sit beside the accessibility preferences (<Mono>motionReduce</Mono>, <Mono>forcedColors</Mono>,{' '}
+            <Mono>contrastMore</Mono>) and behave exactly like a breakpoint: one <Mono>@media</Mono> block around one rule. A finger needs a
+            bigger target than a mouse pointer, and a control that only appears on hover needs to be permanent where there is no hover at
+            all. They rank <em>below</em> the preferences — what the pointer can do is a fact about the device, and what the reader asked
+            for still wins.
+          </Section>
+
+          <Code
+            id="pointer-code"
+            label="pointerCoarse"
+            language="jsx"
+            codeOnly
+            code={`<Button py={2} pointerCoarse={{ py: 3, fontSize: 16 }}>
+  Add to cart
+</Button>`}
           />
 
           <Section id="composing" title="Everything else nests around them, in either direction">
@@ -307,6 +483,10 @@ const sidebarLinks = [
   { id: 'aria', label: 'ariaAttr' },
   { id: 'has', label: 'has' },
   { id: 'not', label: 'not' },
+  { id: 'nth', label: 'nth' },
+  { id: 'group', label: 'group & peer' },
+  { id: 'states', label: 'Browser states' },
+  { id: 'pointer', label: 'Pointer features' },
   { id: 'composing', label: 'Composing' },
   { id: 'presence', label: 'Presence + dataAttr' },
   { id: 'attributes', label: 'What the library sets' },

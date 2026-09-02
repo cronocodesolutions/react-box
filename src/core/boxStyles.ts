@@ -2340,6 +2340,26 @@ export const pseudo1 = {
   hasChecked: ':has(:checked)',
   hasRequired: ':has(:required)',
   hasDisabled: ':has([disabled])',
+  /** A link the browser has been to. **Colour properties only** — the privacy rule, and the browser lies about the rest. */
+  visited: ':visited',
+  /** The element the URL fragment points at, so a deep link can highlight what it landed on. */
+  target: ':target',
+  /**
+   * Open, whichever way the element says so: a `<details>`/`<dialog>` with the attribute, a popover, or
+   * the native `:open` a `<select>` gets. One `:is()` because it is one state, and a forgiving list — a
+   * browser without `:open` keeps the other two rather than dropping the rule.
+   */
+  open: ':is([open],:popover-open,:open)',
+  /** An empty field still showing its placeholder — the label-inside-the-input trick, with no JavaScript. */
+  placeholderShown: ':placeholder-shown',
+  /** A field the browser filled in itself. */
+  autofill: ':autofill',
+  /** A numeric or date field inside its `min`/`max`. */
+  inRange: ':in-range',
+  /** Outside it — the pair `inRange` is worth nothing without. */
+  outOfRange: ':out-of-range',
+  /** Made inert, the subtree included: `[inert]` does not inherit, but inertness does. */
+  inert: ':is([inert],[inert] *)',
 };
 
 export const pseudo2 = {
@@ -2350,11 +2370,7 @@ export const pseudo2 = {
   selected: '[aria-selected="true"]',
 };
 
-const theme = {
-  theme: '',
-};
-
-export const pseudoClasses = { ...pseudo1, ...pseudo2, ...theme };
+export const pseudoClasses = { ...pseudo1, ...pseudo2 };
 
 /**
  * The pseudo-*elements*, and their own dimension rather than more pseudo-class keys: a compound selector
@@ -2431,17 +2447,33 @@ export function pseudoClassesOfWeight(weight: number): (keyof typeof pseudoClass
   return keys;
 }
 
+/**
+ * The five original group keys, one state each. They are `group` with the state written into the prop
+ * name, and the engine rewrites them into it — `hoverGroup={{ card: … }}` is `group={{ 'card/hover': … }}`
+ * and shares its class. Kept because they are in every consumer's markup; `group` is where new states are.
+ */
 export const pseudoGroupClasses = {
+  /** @deprecated `group={{ 'card/hover': … }}` — the same rule, and every other state beside it. */
   hoverGroup: 'hover',
+  /** @deprecated `group={{ 'card/focus': … }}`. */
   focusGroup: 'focus',
+  /** @deprecated `group={{ 'card/active': … }}`. */
   activeGroup: 'active',
+  /** @deprecated `group={{ 'card/disabled': … }}`. */
   disabledGroup: 'disabled',
+  /** @deprecated `group={{ 'card/selected': … }}`. */
   selectedGroup: 'selected',
 } satisfies { [key: string]: keyof typeof pseudoClasses };
 
+/**
+ * The theme nesting key. A theme is an *ancestor class* rather than a state of this element, which is why
+ * it is no longer a pseudo-class key with an empty selector: `Groups.theme()` compiles it beside a group
+ * and a peer, and the mask keeps the bit.
+ */
 export const themeGroupClass = {
+  /** Styles for one theme: `theme={{ dark: { bgColor: 'gray-900' } }}` → `.dark .className`. */
   theme: 'theme',
-} satisfies { [key: string]: keyof typeof pseudoClasses };
+};
 
 /**
  * The one nesting key that is neither a selector nor a media query: `@starting-style` holds the values a
@@ -2468,12 +2500,21 @@ export const breakpoints = {
 };
 
 /**
- * The preferences a user sets once in their OS, shaped exactly like a breakpoint and ranked *after* every
- * breakpoint: a screen wide enough for `xxl` is not a reason to override a statement about the reader.
+ * What the device can do and what the reader asked for, shaped exactly like a breakpoint and ranked
+ * *after* every breakpoint: a screen wide enough for `xxl` is not a reason to override either. The
+ * pointer pair comes first, so a preference outranks a device capability where both apply.
  * `motionReduce` has a default behind it — the base rule transitions on `var(--transitionTime)`, which
  * `prefers-reduced-motion` zeroes, so declaring it is how you opt back *in*.
  */
 export const mediaFeatures = {
+  /**
+   * Styles applied on a touch or pen device — a bigger hit target, a control that is never hovered.
+   * `@media (pointer: coarse)`. Ranked *below* the three preferences: what the pointer can do is a fact
+   * about the device, and a statement about the reader still outranks it.
+   */
+  pointerCoarse: '(pointer: coarse)',
+  /** Styles applied where the primary pointer is a mouse or a trackpad. `@media (pointer: fine)` */
+  pointerFine: '(pointer: fine)',
   /** Styles applied when the user asked for less motion. `@media (prefers-reduced-motion: reduce)` */
   motionReduce: '(prefers-reduced-motion: reduce)',
   /** Styles applied in a forced-colors mode, e.g. Windows High Contrast. `@media (forced-colors: active)` */

@@ -492,8 +492,13 @@ const wobble = Box.spring({ stiffness: 120, damping: 8 });
 ```tsx
 // Pseudo-classes: hover, focus (:focus-within), focusVisible, hasFocus, active, valid, invalid,
 //   optional, disabled, checked, indeterminate, required, selected, hasChecked, hasRequired,
-//   hasDisabled, hasValid, hasInvalid
+//   hasDisabled, hasValid, hasInvalid — plus the eight states the browser tracks and nothing
+//   else can see: visited, target, open, placeholderShown, autofill, inRange, outOfRange, inert
 <Box bgColor="blue-500" hover={{ bgColor: 'blue-600' }} disabled={{ opacity: 0.5 }} />
+
+// `open` is a <details>/<dialog> with the attribute, a popover, or a <select>'s picker; `inert`
+// matches the whole inert subtree; `visited` takes colour properties only (the privacy rule)
+<Box open={{ rotate: 180 }} placeholderShown={{ color: 'gray-400' }} inRange={{ borderColor: 'emerald-500' }} />
 
 // Responsive breakpoints (mobile-first): sm(640) md(768) lg(1024) xl(1280) xxl(1536)
 <Box p={2} md={{ p: 4 }} lg={{ p: 6 }} />
@@ -502,16 +507,17 @@ const wobble = Box.spring({ stiffness: 120, damping: 8 });
 <Box bgColor="white" hover={{ bgColor: 'gray-100' }} md={{ bgColor: 'gray-50', hover: { bgColor: 'gray-200' } }} />
 ```
 
-### State variants — `dataAttr`, `ariaAttr`, `has`, `not`
+### State variants — `dataAttr`, `ariaAttr`, `has`, `not`, `nth`
 
 A fourth kind of nesting: a selector fragment on the element's **own** compound selector, so a state your code sets — a menu that is open, a row that is selected, a step that is loading — is styled in CSS instead of with a ternary in the markup. The record _key_ is the selector.
 
-| Prop       | Key                                                      | Selector it builds                                                                  |
-| ---------- | -------------------------------------------------------- | ----------------------------------------------------------------------------------- |
-| `dataAttr` | `'state=open'` / `'loading'`                             | `[data-state="open"]` / `[data-loading]`                                            |
-| `ariaAttr` | `'selected'` / `'sort=ascending'`                        | `[aria-selected="true"]` — a bare key means `="true"` — / `[aria-sort="ascending"]` |
-| `has`      | `':checked'` / `'img[alt]'`                              | `:has(:checked)` / `:has(img[alt])`                                                 |
-| `not`      | a pseudo-class **name**: `hover`, `checked`, `disabled`… | `:not(:hover)`                                                                      |
+| Prop       | Key                                                    | Selector it builds                                                                  |
+| ---------- | ------------------------------------------------------ | ----------------------------------------------------------------------------------- |
+| `dataAttr` | `'state=open'` / `'loading'`                           | `[data-state="open"]` / `[data-loading]`                                            |
+| `ariaAttr` | `'selected'` / `'sort=ascending'`                      | `[aria-selected="true"]` — a bare key means `="true"` — / `[aria-sort="ascending"]` |
+| `has`      | `':checked'` / `'img[alt]'`                            | `:has(:checked)` / `:has(img[alt])`                                                 |
+| `not`      | a **state**: `hover`, `checked`, `'data-loading'`…     | `:not(:hover)` / `:not([data-loading])`                                             |
+| `nth`      | `'first'`, `'last'`, `'only'`, `'odd'`, `'even'`, `'3'`, `'2n+1'`, `'-n+3'`, `'last 2'` | `:first-child` / `:nth-child(2n+1)` / `:nth-last-child(2)`             |
 
 ```tsx
 // The attribute goes in `props`, where every attribute goes; the styling goes in `dataAttr`.
@@ -525,7 +531,10 @@ A fourth kind of nesting: a selector fragment on the element's **own** compound 
 
 // A container reacting to its own contents, and the inverse of a state
 <Box has={{ 'input:checked': { borderColor: 'indigo-500' } }} />
-<Box hoverGroup={{ deck: { not: { hover: { opacity: 0.5 } } } }} />
+<Box group={{ 'deck/hover': { not: { hover: { opacity: 0.5 } } } }} />
+
+// A position among siblings: striping a list and dropping the last divider, with no index in the markup
+<Box bb={1} nth={{ odd: { bgColor: 'slate-500/10' }, 'last 1': { bb: 0 } }} />
 
 // Everything else nests around them, in either direction — the class name is built from the set
 // rather than the order, so these two resolve to one class and one rule
@@ -536,6 +545,30 @@ A fourth kind of nesting: a selector fragment on the element's **own** compound 
 - **A variant needs no cascade rank of its own**: `.a[data-state="open"]` is 0,2,0 against a plain class's 0,1,0, so it already outranks the rule it overrides.
 - **A key the grammar rejects drops its whole block** — no rule and no class name, the same failure mode as an unmatched prop value. An attribute name that is not one, a value carrying a quote, an unbalanced `:has()`.
 - **The library sets two attributes itself**: `data-state="open" | "closed"` on whatever `<Presence>` is holding, so `Tooltip`, the `Dropdown` popup and the DataGrid column menu all carry it; and `data-theme` on the element `Box.Theme` writes to.
+
+### Somebody else's state — `group` and `peer`
+
+Every key above is about the element itself. `group` is about an **ancestor** and `peer` about a preceding **sibling**: the record key is a state, on the default class (`group`/`peer` — the names Tailwind uses) or on one you name, `'card/hover'`. The state vocabulary is `not`'s, so any pseudo-class works and a `data-`/`aria-` prefix reaches an attribute the ancestor carries.
+
+```tsx
+// `.group:hover .x` — the ancestor carries the class itself
+<Flex className="card">
+  <Box opacity={0} group={{ 'card/hover': { opacity: 1 } }}>Edit</Box>
+</Flex>
+
+// `.peer:checked ~ .x` — what styles a label from the input before it, with no JavaScript
+<Checkbox className="agree" label={<Box peer={{ 'agree/checked': { color: 'emerald-500' } }}>I agree</Box>} />
+
+// A state this library never sets, on the ancestor
+<Box group={{ 'row/data-state=open': { rotate: 90 }, 'row/aria-selected': { bgColor: 'sky-100' } }} />
+
+// The element's own states still belong to the element: `.card:hover .x:hover`
+<Box group={{ 'card/hover': { opacity: 0.6, hover: { opacity: 1 } } }} />
+```
+
+- `hoverGroup`, `focusGroup`, `activeGroup`, `disabledGroup` and `selectedGroup` are the older spelling of the same thing — `hoverGroup={{ card: … }}` is `group={{ 'card/hover': … }}` and compiles to the same class. They still work; new states go on `group`.
+- **The group name is validated**: it lands in rule text as a class selector, so it has to be a CSS identifier. A key the grammar rejects drops its whole block, no rule and no class name.
+- A group means nothing in `Box.addGlobalStyles` — `<html>` has no ancestor to name — so it is dropped there. A theme is the exception: its class is on the same element (`html.dark`).
 
 ### Pseudo-elements — `before`, `after`, `placeholder`, `selection`, `marker`…
 
@@ -565,7 +598,7 @@ A fifth kind of nesting, and the only one CSS allows **one** of: a pseudo-elemen
 
 // Everything nests around them, and the element still lands last and on the target
 <Box md={{ dataAttr: { 'state=open': { after: { opacity: 1 } } } }} />   // @media … .x[data-state="open"]::after
-<Box hoverGroup={{ card: { before: { opacity: 1 } } }} />                // .card:hover .x::before
+<Box group={{ 'card/hover': { before: { opacity: 1 } } }} />              // .card:hover .x::before
 
 // On an input the name means both things; both at once puts the text where attributes go
 <Textbox props={{ placeholder: 'Search…' }} placeholder={{ color: 'slate-400', fontStyle: 'italic' }} />
@@ -575,15 +608,19 @@ A fifth kind of nesting, and the only one CSS allows **one** of: a pseudo-elemen
 - **`content` is the one prop whose value is text**, so text is quoted and escaped, a value written as CSS is scanned instead (every quote closed, parentheses balanced, no `;`, `}` or `@` outside a string), and one that fails produces no rule and no class name.
 - `placeholderStyles` is the old name for `placeholder` and still works.
 
-### Accessibility preferences
+### Device and accessibility preferences
 
-Three more media keys, shaped exactly like a breakpoint — they nest pseudo-classes, themes and group selectors the same way, and they win the cascade against every breakpoint.
+Five more media keys, shaped exactly like a breakpoint — they nest pseudo-classes, themes and group selectors the same way, and they win the cascade against every breakpoint.
 
-| Prop           | Media query                      | When it applies                                    |
-| -------------- | -------------------------------- | -------------------------------------------------- |
-| `motionReduce` | `prefers-reduced-motion: reduce` | The user asked their OS for less motion            |
-| `forcedColors` | `forced-colors: active`          | A forced-colors mode is on (Windows High Contrast) |
-| `contrastMore` | `prefers-contrast: more`         | The user asked their OS for more contrast          |
+| Prop            | Media query                      | When it applies                                    |
+| --------------- | -------------------------------- | -------------------------------------------------- |
+| `pointerCoarse` | `pointer: coarse`                | A finger or a pen — a bigger target, and no hover  |
+| `pointerFine`   | `pointer: fine`                  | A mouse or a trackpad                              |
+| `motionReduce`  | `prefers-reduced-motion: reduce` | The user asked their OS for less motion            |
+| `forcedColors`  | `forced-colors: active`          | A forced-colors mode is on (Windows High Contrast) |
+| `contrastMore`  | `prefers-contrast: more`         | The user asked their OS for more contrast          |
+
+The pointer pair ranks **below** the three preferences: what the pointer can do is a fact about the device, and what the reader asked for still wins where both apply.
 
 ```tsx
 // Reduced motion is already the default: every Box transitions on --transitionTime, and the
@@ -695,7 +732,7 @@ setTheme(null);     // reset to system auto-detection (clears localStorage)
 </Box.Theme>
 ```
 
-Accepts the same shape as Box style props (including theme-keyed values, pseudo-classes, breakpoints). Rules are emitted directly on `html` — useful for inheritable CSS like `scrollbar-color`/`scrollbar-width`/`fontFamily`/`color`. Group selectors (e.g. `hoverGroup`) are not supported here since `<html>` has no group parent.
+Accepts the same shape as Box style props (including theme-keyed values, pseudo-classes, breakpoints). Rules are emitted directly on `html` — useful for inheritable CSS like `scrollbar-color`/`scrollbar-width`/`fontFamily`/`color`. Group selectors (`group`/`peer`) are not supported here since `<html>` has no ancestor to name.
 
 ---
 
@@ -902,11 +939,11 @@ undefined and rendering it costs nothing, so write the line either way. Pass `{ 
 second argument for an element inside an `<svg>`. `<Icon>` is this hook plus that flag — reach for
 `Icon` for an icon and this only for everything else.
 
-### Group Hover (hoverGroup)
+### Group and Peer
 
 ```tsx
 <Flex className="card-row" gap={2}>
-  <Box opacity={0} hoverGroup={{ 'card-row': { opacity: 1 } }}>
+  <Box opacity={0} group={{ 'card-row/hover': { opacity: 1 } }}>
     Actions
   </Box>
 </Flex>
@@ -1292,7 +1329,8 @@ function TrendCell({ cell }: { cell: CellModel<Row> }) {
 13. **`style` is top-level only** — never inside breakpoints (`sm={{ style: ... }}`), pseudo-classes, or theme objects
 14. **A CSS variable is a prop**: `vars={{ 'color-x': 'sky-500' }}` declares `--color-x` for everything inside — and a third-party chart goes in `<ChartContainer series={['revenue']}>` so it names no colour at all
 15. **All sizing props use divider 4** — `width`, `height`, `minWidth`, `maxWidth`, `minHeight`, `maxHeight` are NOT direct pixels. `height={10}` = 2.5rem = 40px
-16. **A state your own code sets is a nested prop too**: `dataAttr={{ 'state=open': { … } }}` → `[data-state="open"]`, `ariaAttr={{ selected: { … } }}` → `[aria-selected="true"]`, `has={{ ':checked': { … } }}`, `not={{ hover: { … } }}`. The attribute itself still goes in `props`
+16. **A state your own code sets is a nested prop too**: `dataAttr={{ 'state=open': { … } }}` → `[data-state="open"]`, `ariaAttr={{ selected: { … } }}` → `[aria-selected="true"]`, `has={{ ':checked': { … } }}`, `not={{ hover: { … } }}`, `nth={{ odd: { … } }}`. The attribute itself still goes in `props`
+17. **Somebody else's state is `group`/`peer`**: `group={{ 'card/hover': { … } }}` → `.card:hover .x`, `peer={{ 'agree/checked': { … } }}` → `.agree:checked ~ .x`. The ancestor or sibling carries the class via `className`; `hoverGroup` and its four siblings are the older spelling
 
 ---
 

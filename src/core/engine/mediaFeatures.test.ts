@@ -2,12 +2,12 @@ import { describe, expect, it } from 'vitest';
 import { makeEngine, renderStyles, ruleList, rulesOf } from '../../../dev/engineHarness';
 
 /**
- * The accessibility preferences as props: `motionReduce`, `forcedColors` and `contrastMore` fill
- * the same slot a breakpoint does — one `@media` block around one rule — so everything a
- * breakpoint composes with composes with them too, and the cascade puts them after every
+ * The device and the reader as props: `pointerCoarse`/`pointerFine`, `motionReduce`, `forcedColors` and
+ * `contrastMore` fill the same slot a breakpoint does — one `@media` block around one rule — so
+ * everything a breakpoint composes with composes with them too, and the cascade puts them after every
  * breakpoint.
  */
-describe('accessibility media features', () => {
+describe('device and accessibility media features', () => {
   it('wraps each feature in its own media query', () => {
     const engine = makeEngine('media-features-basics');
 
@@ -22,6 +22,19 @@ describe('accessibility media features', () => {
       '@media (prefers-reduced-motion: reduce){.motionReduce-transition-none{transition-property:none}}',
       '@media (forced-colors: active){.forcedColors-borderColor-gray-500{border-color:var(--gray-500)}}',
       '@media (prefers-contrast: more){.contrastMore-color-gray-900{color:var(--gray-900)}}',
+    ]);
+  });
+
+  it('asks what the pointer can do, and ranks the answer below what the reader asked for', () => {
+    const engine = makeEngine('media-features-pointer');
+
+    renderStyles(engine, { pointerFine: { p: 1 }, contrastMore: { p: 3 }, pointerCoarse: { p: 2 } });
+
+    // A touch target is a fact about the device; a preference is about the person, and wins where both apply.
+    expect(ruleList(engine)).toEqual([
+      '@media (pointer: coarse){.pointerCoarse-p-2{padding:0.5rem}}',
+      '@media (pointer: fine){.pointerFine-p-1{padding:0.25rem}}',
+      '@media (prefers-contrast: more){.contrastMore-p-3{padding:0.75rem}}',
     ]);
   });
 
@@ -97,8 +110,8 @@ describe('accessibility media features', () => {
 
     const { styleElements } = engine.resolveClassNames({ motionReduce: { p: 4 } }, false);
 
-    // Rank 18, base36 'i': the first after the five breakpoints and the twelve container-query slots.
-    expect(styleElements!.at(-1)!.css).toMatch(/^@layer rbi\.p\w+\{@media \(prefers-reduced-motion: reduce\)\{\.motionReduce-p-4\{/);
+    // Rank 20, base36 'k': after the five breakpoints, the twelve container-query slots and the pointer pair.
+    expect(styleElements!.at(-1)!.css).toMatch(/^@layer rbk\.p\w+\{@media \(prefers-reduced-motion: reduce\)\{\.motionReduce-p-4\{/);
     expect(styleElements![0].css.startsWith('@layer rb,')).toBe(true);
   });
 });

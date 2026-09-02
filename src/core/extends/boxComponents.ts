@@ -1357,7 +1357,7 @@ const boxComponents = {
                   width: 0.5,
                   height: 'fit',
                   bgColor: 'gray-400',
-                  hoverGroup: { resizer: { bgColor: 'gray-600' } },
+                  group: { 'resizer/hover': { bgColor: 'gray-600' } },
                   // The separator is its own tab stop, and a bar two pixels wide has no room for a ring inside it, so the
                   // outline sits around it. `opacity` is here rather than on the element because a resizer that only
                   // appears on hover is a tab stop nobody could follow, and a pseudo rule outranks the base one.
@@ -1391,11 +1391,7 @@ const boxComponents = {
               borderColor: 'gray-200',
               transition: 'none',
               ai: 'center',
-              hoverGroup: {
-                'grid-row': {
-                  bgColor: 'gray-100',
-                },
-              },
+              group: { 'grid-row/hover': { bgColor: 'gray-100' } },
               // Same ring as the header cell: in a grid the cell is the thing that holds focus.
               focusVisible: {
                 outline: 2,
@@ -1406,11 +1402,7 @@ const boxComponents = {
               theme: {
                 dark: {
                   borderColor: 'gray-800',
-                  hoverGroup: {
-                    'grid-row': {
-                      bgColor: 'gray-700',
-                    },
-                  },
+                  group: { 'grid-row/hover': { bgColor: 'gray-700' } },
                   focusVisible: {
                     outlineColor: 'indigo-400',
                   },

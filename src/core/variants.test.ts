@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import Variants from './variants';
 
 /**
- * The grammar behind the four variant keys. Everything here is a pure string → selector question, so it
+ * The grammar behind the five variant keys. Everything here is a pure string → selector question, so it
  * is tested without an engine; what the engine does with the answer is `engine/variants.test.ts`.
  */
 describe('Variants.variant', () => {
@@ -22,6 +22,33 @@ describe('Variants.variant', () => {
     expect(Variants.variant('not', 'hover')?.selector).toBe(':not(:hover)');
     // `disabled` and `selected` are attribute selectors rather than pseudo-classes — negated all the same.
     expect(Variants.variant('not', 'disabled')?.selector).toBe(':not([disabled])');
+  });
+
+  it('negates an attribute as readily as a pseudo-class: one state vocabulary', () => {
+    expect(Variants.variant('not', 'data-loading')?.selector).toBe(':not([data-loading])');
+    expect(Variants.variant('not', 'data-state=open')?.selector).toBe(':not([data-state="open"])');
+    expect(Variants.variant('not', 'aria-selected')?.selector).toBe(':not([aria-selected="true"])');
+  });
+
+  it('counts a position among siblings, from either end', () => {
+    expect(Variants.variant('nth', 'first')).toEqual({ name: 'nth-first', selector: ':first-child' });
+    expect(Variants.variant('nth', 'last')?.selector).toBe(':last-child');
+    expect(Variants.variant('nth', 'only')?.selector).toBe(':only-child');
+    expect(Variants.variant('nth', 'odd')?.selector).toBe(':nth-child(odd)');
+    expect(Variants.variant('nth', '3')?.selector).toBe(':nth-child(3)');
+    expect(Variants.variant('nth', '2n+1')?.selector).toBe(':nth-child(2n+1)');
+    expect(Variants.variant('nth', '-n+3')?.selector).toBe(':nth-child(-n+3)');
+    // `last` in front counts from the end, which is the only thing `:nth-last-child()` is for.
+    expect(Variants.variant('nth', 'last 2')?.selector).toBe(':nth-last-child(2)');
+    expect(Variants.variant('nth', 'last even')?.selector).toBe(':nth-last-child(even)');
+  });
+
+  it('rejects a formula it would have to guess at', () => {
+    // The whitespace CSS allows inside `An+B` is not offered: a class name holds the key as written.
+    expect(Variants.variant('nth', '2n + 1')).toBeNull();
+    expect(Variants.variant('nth', 'third')).toBeNull();
+    expect(Variants.variant('nth', '2)')).toBeNull();
+    expect(Variants.variant('nth', 'last')?.selector).not.toContain('nth');
   });
 
   it('names the variant key in the class-name segment', () => {

@@ -190,12 +190,16 @@ gradient becomes lettering — the pairing is deliberately not automatic.
 ```tsx
 <Box bgColor="blue-500" hover={{ bgColor: 'blue-600' }} disabled={{ opacity: 0.5 }} />
 // Pseudo: hover, focus (:focus-within), focusVisible, hasFocus, active, valid, invalid, optional,
-//   disabled, checked, indeterminate, required, selected, hasChecked, hasRequired, hasDisabled
+//   disabled, checked, indeterminate, required, selected, hasChecked, hasRequired, hasDisabled,
+//   visited (colour props only — the privacy rule), target, open (an [open] element, a popover or a
+//   <select>'s picker), placeholderShown, autofill, inRange, outOfRange, inert (the subtree too)
 // Responsive (mobile-first): sm(640) md(768) lg(1024) xl(1280) xxl(1536)
 <Box p={2} md={{ p: 4, hover: { bgColor: 'gray-200' } }} />
-// A11y preferences, same shape as a breakpoint, and they beat every breakpoint in the cascade:
-//   motionReduce (prefers-reduced-motion: reduce), forcedColors (forced-colors: active),
-//   contrastMore (prefers-contrast: more). Not nestable in a breakpoint or in each other.
+// Device + a11y media keys, same shape as a breakpoint, and they beat every breakpoint in the cascade:
+//   pointerCoarse / pointerFine (pointer: coarse|fine — a finger needs a bigger target, and never
+//   hovers; ranked below the three preferences), motionReduce (prefers-reduced-motion: reduce),
+//   forcedColors (forced-colors: active), contrastMore (prefers-contrast: more).
+//   Not nestable in a breakpoint or in each other.
 // Reduced motion is already the default — the preference sets --transitionTime to 0s, so every
 // Box stops animating. Declare motionReduce only to replace a movement or keep a safe one.
 <Box transitionDuration={150} motionReduce={{ transition: 'none' }} forcedColors={{ b: 1 }} />
@@ -206,10 +210,22 @@ gradient becomes lettering — the pairing is deliberately not automatic.
 // not a ternary. Record key = the selector; a key the grammar rejects drops its block, like a bad value.
 //   dataAttr {'state=open'} → [data-state="open"], {'loading'} → [data-loading]
 //   ariaAttr {'selected'} → [aria-selected="true"] (bare key means ="true"), {'sort=ascending'}
-//   has {':checked'} → :has(:checked)   ·   not {hover} → :not(:hover), keyed by pseudo name
+//   has {':checked'} → :has(:checked)   ·   not {hover} / {'data-loading'} → :not(:hover) / :not([data-loading])
+//   nth {first|last|only|odd|even|'3'|'2n+1'|'-n+3'|'last 2'} → :first-child … :nth-last-child(2)
 // The attribute itself still goes in `props`. Everything else nests around them, either direction.
 <Box props={{ 'data-state': state }} dataAttr={{ 'state=busy': { bgColor: 'amber-500' } }}
   md={{ hover: { ariaAttr: { selected: { color: 'white' } } } }} />
+<Box bb={1} nth={{ odd: { bgColor: 'slate-500/10' }, 'last 1': { bb: 0 } }} />
+// Somebody else's state: group = an ancestor, peer = a preceding sibling. The key is a state, on the
+// default class (group/peer, Tailwind's names) or on one you name — 'card/hover', 'row/data-state=open'.
+// The ancestor carries the class through `className`; the element's own states stay on the element.
+// hoverGroup/focusGroup/activeGroup/disabledGroup/selectedGroup are the older spelling of the same
+// rule (hoverGroup={{ card }} === group={{ 'card/hover' }}) and share its class. A name that is not a
+// CSS identifier drops the block; a group means nothing in addGlobalStyles.
+<Flex className="card">
+  <Box opacity={0} group={{ 'card/hover': { opacity: 1 } }} />
+</Flex>
+<Checkbox className="agree" label={<Box peer={{ 'agree/checked': { color: 'emerald-500' } }}>I agree</Box>} />
 // Pseudo-elements — CSS allows ONE per selector, so it is a slot: a second nested one is a type error,
 // and it lands last on the element's own compound (on the target, not on a group's ancestor).
 //   before, after (both come with content: '' — a generated element with none renders nothing),
@@ -390,7 +406,7 @@ import DataGrid from '@cronocode/react-box/components/dataGrid';
 <Box overflow="hidden" textOverflow="ellipsis" whiteSpace="nowrap" />
 ```
 
-**Group hover**: `<Box hoverGroup={{ 'parent-class': { opacity: 1 } }}>`
+**Group hover**: `<Box group={{ 'parent-class/hover': { opacity: 1 } }}>`
 **SSR**: `import { getStyles, resetStyles } from '@cronocode/react-box/ssg'` — render, read `getStyles()` into `<style id="crono-styles">`, then `resetStyles()`. Needs no DOM.
 **Server Components (React 19)**: works with no `'use client'` and no setup — the `react-server` entry renders Box hook-free and its CSS ships as `<style href precedence>` elements React hoists into `<head>`. Client components in the same app: `Box.configure({ sink: 'element' })` once in a `'use client'` module. Hook-free components (`Flex`, `Grid`, `Button`, `Textbox`, `Textarea`, `RadioButton`, `Icon`, the SVG elements, semantic tags) render on the server too — import them straight into a Server Component; `Dropdown`/`Tooltip`/`Overlay`/`DataGrid`/`Checkbox`/`Switch`/`RadioGroup`/`Select`/`Form` ship a `'use client'` banner, so importing one just opens a client boundary. Client-only: hover-callback children, `Box.Theme` — but `theme={{ dark: {...} }}` styles work server-side (set the theme class on `<html>`). Element-mode rules are in `@layer`, so your own unlayered CSS wins. React 18: keep the default sink.
 **Accessible behaviour** (`@cronocode/react-box/a11y`, 2.2 KB gz, client-only): `useControllableState` (controlled/uncontrolled with `onChange(value, { reason, event })` — `'escape'`, `'outside-pointer'`, yours), `useDismiss({ enabled, inside: [triggerRef, popupRef], onDismiss })` (Escape reaches the innermost layer only; pass the trigger or it dismisses and reopens in one press), `useFocusReturn({ enabled, returnTo })`, `useRovingFocus({ count, orientation, textOf, onSelect })` → `{ activeIndex, onKeyDown, itemProps(i), activeItem() }` (arrows, Home/End, typeahead, disabled skipped; `focusItems: false` for `aria-activedescendant`), `useIdentifier('select')` (React's `useId`, usable as a selector). They supply mechanics, never roles or ARIA. `VisuallyHidden` (`@cronocode/react-box/components/visuallyHidden`) is a Box that clips itself away instead of hiding, so it stays in the accessibility tree — and it renders on a server.

@@ -88,8 +88,8 @@ describe('attribute and relational variants', () => {
     });
 
     expect(ruleList(engine)).toEqual([
-      '.card:hover .hover-dataAttr-on-card-opacity-1[data-on]{opacity:1}',
-      '.dark .theme-dataAttr-state\\=open-dark-color-red-500[data-state="open"]{color:var(--red-500)}',
+      '.card:hover .dataAttr-on-hover-card-opacity-1[data-on]{opacity:1}',
+      '.dark .dataAttr-state\\=open-theme-dark-color-red-500[data-state="open"]{color:var(--red-500)}',
     ]);
   });
 

@@ -71,7 +71,7 @@ describe('a pseudo-element in a compound selector', () => {
 
     const rules = generatedRulesOf(engine);
 
-    expect(rules).toContain('.dark .checked-theme-before-dark-opacity-0\\.5:checked::before{opacity:0.5}');
+    expect(rules).toContain('.dark .checked-before-theme-dark-opacity-0\\.5:checked::before{opacity:0.5}');
     expect(rules).not.toContain('::before:checked');
   });
 
@@ -87,7 +87,7 @@ describe('a pseudo-element in a compound selector', () => {
 
     const rules = generatedRulesOf(engine);
 
-    expect(rules).toContain('.card:hover .hover-after-card-opacity-0\\.5::after{opacity:0.5}');
+    expect(rules).toContain('.card:hover .after-hover-card-opacity-0\\.5::after{opacity:0.5}');
     expect(rules).not.toContain(':hover::after .');
   });
 
@@ -96,7 +96,7 @@ describe('a pseudo-element in a compound selector', () => {
 
     renderStyles(engine, { theme: { dark: { hoverGroup: { card: { after: { opacity: 0.5 } } } } } });
 
-    expect(generatedRulesOf(engine)).toContain('.dark .card:hover .hover-theme-after-dark\\|card-opacity-0\\.5::after{opacity:0.5}');
+    expect(generatedRulesOf(engine)).toContain('.dark .card:hover .after-theme-dark-hover-card-opacity-0\\.5::after{opacity:0.5}');
   });
 
   it('sits after a variant on the same element, in both nesting directions', () => {
@@ -165,7 +165,7 @@ describe('a pseudo-element in a compound selector', () => {
     renderStyles(engine, { hoverGroup: { card: { marker: { color: 'red-500' } } } });
 
     expect(generatedRulesOf(engine)).toContain(
-      '.card:hover .hover-marker-card-color-red-500 *::marker,.card:hover .hover-marker-card-color-red-500::marker{color:var(--red-500)}',
+      '.card:hover .marker-hover-card-color-red-500 *::marker,.card:hover .marker-hover-card-color-red-500::marker{color:var(--red-500)}',
     );
   });
 

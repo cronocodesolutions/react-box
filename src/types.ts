@@ -15,6 +15,7 @@ import { ClassNameType } from './core/classNames';
 import Containers from './core/containers';
 import { BoxStyle, BoxStylesType, ExtractKeys, ExtractTupleValues } from './core/coreTypes';
 import boxComponents from './core/extends/boxComponents';
+import Groups from './core/groups';
 import Variants from './core/variants';
 
 export type ArrayType<T> = T extends (infer U)[] ? U : T;
@@ -49,8 +50,14 @@ export type BoxStyles = ExtractBoxStylesInternal<typeof cssStyles> & Augmented.B
  * selector holds one and CSS puts it last.
  */
 type BoxPseudoClassesNesting<T> = ExtractKeys<typeof pseudo1, T> & ExtractKeys<typeof pseudo2, T>;
-type BoxVariantNesting<T> = ExtractKeys<Omit<typeof Variants.variantKeys, 'not'>, Record<string, T>> &
-  ExtractKeys<Pick<typeof Variants.variantKeys, 'not'>, Partial<Record<Variants.NotKey, T>>>;
+/**
+ * The record key is the selector, so only the two attribute keys take a free string: `not` is keyed by
+ * the shared state vocabulary and `nth` by a position, both typed so a typo is a compile error rather
+ * than a block the grammar silently drops.
+ */
+type BoxVariantNesting<T> = ExtractKeys<Omit<typeof Variants.variantKeys, 'not' | 'nth'>, Record<string, T>> &
+  ExtractKeys<Pick<typeof Variants.variantKeys, 'not'>, Partial<Record<Variants.StateKey, T>>> &
+  ExtractKeys<Pick<typeof Variants.variantKeys, 'nth'>, Partial<Record<Variants.NthKey, T>>>;
 type BoxPseudoElementNesting<T> = ExtractKeys<typeof pseudoElements, T>;
 
 type BoxPseudoClassesStyles1 = ExtractKeys<typeof pseudo1, BoxStylesWithPseudoClasses>;
@@ -63,7 +70,7 @@ type BoxStartingStyles = ExtractKeys<typeof startingStyleKey, BoxStyles>;
 /**
  * The nesting keys that hang off the element's own selector. The record *key* is the selector —
  * `dataAttr={{ 'state=open': … }}` — and a key the grammar rejects is dropped whole, the way an
- * unmatched prop value is. `not` is keyed by pseudo-class name instead, so it stays typed.
+ * unmatched prop value is. `not` and `nth` are keyed by a closed set instead, so they stay typed.
  */
 export interface BoxVariantStyles extends BoxVariantNesting<BoxStylesWithPseudoClasses> {}
 /**
@@ -82,22 +89,28 @@ export interface BoxStylesWithPseudoClasses
     BoxPseudoElementNesting<BoxPseudoElementStyles> {}
 
 type BoxPseudoGroupClassesStyles = ExtractKeys<typeof pseudoGroupClasses, Record<string, BoxStylesWithPseudoClasses>>;
+/**
+ * `group`/`peer`: what an *ancestor* or a preceding *sibling* is doing, keyed by a state — on the default
+ * class (`hover`) or on a named one (`'card/hover'`). The state vocabulary is `not`'s, so a pseudo-class
+ * name is typed and a `data-`/`aria-` attribute is written out.
+ */
+type BoxGroupStyles = ExtractKeys<typeof Groups.groupKeys, Partial<Record<Groups.ParentKey, BoxStylesWithPseudoClasses>>>;
 type BoxThemeGroupClassStyles = ExtractKeys<
   typeof themeGroupClass,
-  Record<string, BoxStylesWithPseudoClasses & BoxPseudoGroupClassesStyles>
+  Record<string, BoxStylesWithPseudoClasses & BoxPseudoGroupClassesStyles & BoxGroupStyles>
 >;
 type BoxBreakpointsStyles = ExtractKeys<
   typeof breakpoints,
-  BoxStylesWithPseudoClasses & BoxPseudoGroupClassesStyles & BoxThemeGroupClassStyles
+  BoxStylesWithPseudoClasses & BoxPseudoGroupClassesStyles & BoxGroupStyles & BoxThemeGroupClassStyles
 >;
 /**
- * The accessibility-preference media features (`motionReduce`, `forcedColors`, `contrastMore`).
- * Deliberately the same shape as a breakpoint and, like a breakpoint, not offered inside one: a
- * rule lives in one `@media` block, so nesting the two would have to drop half of what was asked.
+ * The device and accessibility-preference media features (`pointerCoarse`/`pointerFine`, `motionReduce`,
+ * `forcedColors`, `contrastMore`). Deliberately the same shape as a breakpoint and, like a breakpoint,
+ * not offered inside one: a rule lives in one `@media` block, so nesting two would drop half the ask.
  */
 type BoxMediaFeatureStyles = ExtractKeys<
   typeof mediaFeatures,
-  BoxStylesWithPseudoClasses & BoxPseudoGroupClassesStyles & BoxThemeGroupClassStyles
+  BoxStylesWithPseudoClasses & BoxPseudoGroupClassesStyles & BoxGroupStyles & BoxThemeGroupClassStyles
 >;
 /**
  * `cq`: the same value shape a breakpoint takes, keyed by a container-query size instead — `md`, its
@@ -106,7 +119,7 @@ type BoxMediaFeatureStyles = ExtractKeys<
  */
 type BoxContainerQueryStyles = ExtractKeys<
   typeof Containers.containerQueryKey,
-  Partial<Record<Containers.QueryKey, BoxStylesWithPseudoClasses & BoxPseudoGroupClassesStyles & BoxThemeGroupClassStyles>>
+  Partial<Record<Containers.QueryKey, BoxStylesWithPseudoClasses & BoxPseudoGroupClassesStyles & BoxGroupStyles & BoxThemeGroupClassStyles>>
 >;
 
 type ExtractVariants<T> = T extends { variants?: infer Variants }
@@ -161,6 +174,7 @@ export type BoxStyleProps<TKey extends keyof ComponentsAndVariants = never> = Si
     BoxPseudoElementNesting<BoxPseudoElementStyles> &
     BoxPseudoClassesStyles2TopLevel &
     BoxPseudoGroupClassesStyles &
+    BoxGroupStyles &
     BoxThemeGroupClassStyles &
     BoxBreakpointsStyles &
     BoxMediaFeatureStyles &
@@ -173,5 +187,6 @@ export type BoxComponentStyles = Simplify<
     BoxMediaFeatureStyles &
     BoxContainerQueryStyles &
     BoxPseudoGroupClassesStyles &
+    BoxGroupStyles &
     BoxThemeGroupClassStyles
 >;

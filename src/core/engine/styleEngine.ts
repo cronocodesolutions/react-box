@@ -30,6 +30,7 @@ import { BoxStyle, BoxStyleValue } from '../coreTypes';
 import defaultBoxComponents, { BoxComponent, Components } from '../extends/boxComponents';
 import { resolveComponentStyles } from '../extends/useComponents';
 import Filters from '../filters';
+import Groups from '../groups';
 import { stableHash } from '../hash';
 import Palette from '../palette';
 import Shadows from '../shadows';
@@ -203,8 +204,13 @@ interface StyleContext {
   element?: PseudoElementKey;
   /** Which at-rule block the rule belongs in: none, a breakpoint, a preference feature, or a container query. */
   query: StyleQuery;
-  /** The group or theme class the selector hangs off — `theme|group` when a group is nested in a theme. */
-  parentName?: string;
+  /**
+   * What stands in front of the element's own selector, outermost first: the theme class, an ancestor in
+   * a state (`group`), a sibling in one (`peer`). A list rather than a name, which is what keeps a
+   * group's state off the element's own compound — nested in the pseudo-class mask the two collapsed
+   * into one bit, and `hoverGroup={{ card: { hover: … } }}` silently styled the group's hover twice.
+   */
+  parents: readonly Groups.Parent[];
   /** A selector to style instead of a generated class (`addGlobalStyles`). */
   rootSelector?: string;
   /** Compiled variant fragments on the element's own compound selector, in canonical order. */
@@ -317,6 +323,7 @@ export function createStyleEngine(options: StyleEngineOptions = {}): StyleEngine
       ObjectUtils.isKeyOf(key, breakpoints) ||
       ObjectUtils.isKeyOf(key, mediaFeatures) ||
       ObjectUtils.isKeyOf(key, Containers.containerQueryKey) ||
+      ObjectUtils.isKeyOf(key, Groups.groupKeys) ||
       ObjectUtils.isKeyOf(key, pseudoGroupClasses) ||
       ObjectUtils.isKeyOf(key, themeGroupClass) ||
       ObjectUtils.isKeyOf(key, startingStyleKey) ||
@@ -352,7 +359,7 @@ export function createStyleEngine(options: StyleEngineOptions = {}): StyleEngine
 
   /** The context a walk starts from: nothing nested yet. */
   function rootContext(): StyleContext {
-    return { pseudoClasses: [], query: NO_QUERY, variants: [] };
+    return { pseudoClasses: [], query: NO_QUERY, variants: [], parents: [] };
   }
 
   function addClassNames(props: BoxStyleProps<any>, classNames: string[], context: StyleContext) {
@@ -413,36 +420,32 @@ export function createStyleEngine(options: StyleEngineOptions = {}): StyleEngine
 
           addClassNames(variantProps, classNames, { ...context, variants: Variants.add(context.variants, variant) });
         });
+      } else if (ObjectUtils.isKeyOf(key, Groups.groupKeys)) {
+        Object.entries(value as Record<string, BoxStyleProps>).forEach(([name, groupProps]) => {
+          const parent = Groups.parent(key, name);
+          // A key the grammar rejects drops its whole block, the way a variant's does: the ancestor's
+          // class name lands in rule text, so it is validated before it becomes any.
+          if (!parent) return;
+
+          addClassNames(groupProps, classNames, { ...context, parents: [...context.parents, parent] });
+        });
       } else if (ObjectUtils.isKeyOf(key, pseudoGroupClasses)) {
-        Object.entries(value).forEach(([name, pseudoClassProps]) => {
-          addClassNames(pseudoClassProps as BoxStyles, classNames, {
-            ...context,
-            pseudoClasses: [...context.pseudoClasses, pseudoGroupClasses[key]],
-            parentName: name,
-          });
+        // The five original spellings, rewritten into the general one: `hoverGroup={{ card: … }}` is
+        // `group={{ 'card/hover': … }}`, and both compile to the same parent, so they share a class.
+        Object.entries(value as Record<string, BoxStyleProps>).forEach(([name, groupProps]) => {
+          const parent = Groups.parent('group', `${name}/${pseudoGroupClasses[key]}`);
+          if (!parent) return;
+
+          addClassNames(groupProps, classNames, { ...context, parents: [...context.parents, parent] });
         });
       } else if (ObjectUtils.isKeyOf(key, themeGroupClass)) {
-        Object.entries(value).forEach(([name, themeProps]) => {
-          const themePseudoClasses = [...context.pseudoClasses, themeGroupClass[key]];
-          // Handle nested pseudoGroupClasses inside theme
-          Object.entries(themeProps as BoxStyleProps).forEach(([themeKey, themeValue]) => {
-            if (ObjectUtils.isKeyOf(themeKey, pseudoGroupClasses)) {
-              Object.entries(themeValue).forEach(([groupName, groupProps]) => {
-                addClassNames(groupProps as BoxStyles, classNames, {
-                  ...context,
-                  pseudoClasses: [...themePseudoClasses, pseudoGroupClasses[themeKey]],
-                  // Use | as separator to distinguish theme from group name
-                  parentName: `${name}|${groupName}`,
-                });
-              });
-            } else {
-              addClassNames({ [themeKey]: themeValue } as BoxStyles, classNames, {
-                ...context,
-                pseudoClasses: themePseudoClasses,
-                parentName: name,
-              });
-            }
-          });
+        Object.entries(value as Record<string, BoxStyleProps>).forEach(([name, themeProps]) => {
+          const parent = Groups.theme(name);
+          if (!parent) return;
+
+          // A group nested inside a theme needs no special case any more: it pushes a second parent, and
+          // the two come out in nesting order — `.dark .card:hover .className`.
+          addClassNames(themeProps, classNames, { ...context, parents: [...context.parents, parent] });
         });
       }
     });
@@ -457,13 +460,14 @@ export function createStyleEngine(options: StyleEngineOptions = {}): StyleEngine
   ) {
     if (value === undefined || value === null) return;
 
-    const { query, parentName, rootSelector, variants, element } = context;
+    const { query, parents, rootSelector, variants, element } = context;
     const weight = context.pseudoClasses.reduce((sum, pseudoClass) => sum + pseudoClassesWeight[pseudoClass], 0);
     const className = createClassName(key, value, weight, context, startingStyle);
 
     const serializedValue = serializeValue(value);
     const variantKey = variants.map((variant) => variant.name).join('_');
-    const ruleKey = `${query.key}-${weight}-${element ?? ''}-${key}-${serializedValue}-${parentName ?? ''}-${rootSelector ?? ''}-${startingStyle ? 'start' : ''}-${variantKey}`;
+    const parentKey = parents.map((parent) => parent.name).join('_');
+    const ruleKey = `${query.key}-${weight}-${element ?? ''}-${key}-${serializedValue}-${parentKey}-${rootSelector ?? ''}-${startingStyle ? 'start' : ''}-${variantKey}`;
 
     if (!generatedRules.has(ruleKey)) {
       generatedRules.add(ruleKey);
@@ -581,7 +585,7 @@ export function createStyleEngine(options: StyleEngineOptions = {}): StyleEngine
     context: StyleContext,
     startingStyle?: boolean,
   ): { rule: string; sortIndex: number; mediaOrder: number } | null {
-    const { query, parentName: pseudoClassParentName, rootSelector } = context;
+    const { query, parents, rootSelector } = context;
     const itemValue = findDefinition(key, value);
     if (!itemValue) return null;
 
@@ -653,51 +657,19 @@ export function createStyleEngine(options: StyleEngineOptions = {}): StyleEngine
       return reachesDescendants(context.element) ? `${target} *${elementSelector},${own}` : own;
     }
 
-    if (pseudoClassParentName) {
-      const pseudoClassList = pseudoClassesOfWeight(weight);
-      const hasTheme = pseudoClassList.includes('theme');
-      const otherPseudoClasses = hasTheme ? pseudoClassList.filter((p) => p !== 'theme') : pseudoClassList;
-      const pseudoClassesToUse = pseudoSelector(otherPseudoClasses);
+    // A theme is the one parent a root selector can express, and it goes *on* it (`html.dark`): a group
+    // or a peer describes another element, and a root rule has nobody else to name.
+    const themeOnRoot = !!rootSelector && parents.length === 1 && parents[0].kind === 'theme';
+    if (rootSelector && parents.length > 0 && !themeOnRoot) return null;
 
-      // Check if pseudoClassParentName contains both theme and group (format: themeName|groupName)
-      const hasThemeAndGroup = pseudoClassParentName.includes('|');
-      let defaultSelector: string;
+    const ancestors = themeOnRoot ? '' : parents.map((parent) => `${parent.selector}${parent.combinator}`).join('');
+    const pseudoClassesToUse = pseudoSelector(pseudoClassesOfWeight(weight));
+    const baseSelector = `${ancestors}${rootSelector ?? `.${className}`}${themeOnRoot ? parents[0].selector : ''}${variantSelector}`;
+    // The element goes in the suffix the `selector` hook is handed, so whatever it builds keeps it last.
+    const selector =
+      itemValue.selector?.(baseSelector, `${pseudoClassesToUse}${elementSelector}`) ?? withElement(`${baseSelector}${pseudoClassesToUse}`);
 
-      if (rootSelector) {
-        // Global mode targets the root selector directly, where a group selector means nothing.
-        if (hasThemeAndGroup) return null;
-        if (hasTheme) {
-          // Theme on same element as rootSelector → compound selector
-          defaultSelector = withElement(`${rootSelector}.${escapeClassName(pseudoClassParentName)}${variantSelector}${pseudoClassesToUse}`);
-        } else {
-          return null;
-        }
-      } else if (hasThemeAndGroup) {
-        // Combined theme + group: .themeName .groupName:hover .className
-        const [themeName, groupName] = pseudoClassParentName.split('|');
-        defaultSelector = withElement(
-          `.${escapeClassName(themeName)} .${escapeClassName(groupName)}${pseudoClassesToUse} .${className}${variantSelector}`,
-        );
-      } else if (hasTheme) {
-        // Theme only: .themeName .className:hover
-        defaultSelector = withElement(`.${escapeClassName(pseudoClassParentName)} .${className}${variantSelector}${pseudoClassesToUse}`);
-      } else {
-        // Group only: .groupName:hover .className
-        defaultSelector = withElement(`.${escapeClassName(pseudoClassParentName)}${pseudoClassesToUse} .${className}${variantSelector}`);
-      }
-      const selector = itemValue.selector?.(defaultSelector, '') ?? defaultSelector;
-
-      return finish(`${selector}{${body(itemValue)}}`);
-    } else {
-      // The element goes in the suffix the `selector` hook is handed, so whatever it builds keeps it last.
-      const pseudoClassesToUse = pseudoSelector(pseudoClassesOfWeight(weight));
-      const baseSelector = `${rootSelector ?? `.${className}`}${variantSelector}`;
-      const selector =
-        itemValue.selector?.(baseSelector, `${pseudoClassesToUse}${elementSelector}`) ??
-        withElement(`${baseSelector}${pseudoClassesToUse}`);
-
-      return finish(`${selector}{${body(itemValue)}}`);
-    }
+    return finish(`${selector}{${body(itemValue)}}`);
   }
 
   function createClassName<TKey extends keyof BoxStyles, TValue extends BoxStyles[TKey]>(
@@ -707,12 +679,13 @@ export function createStyleEngine(options: StyleEngineOptions = {}): StyleEngine
     context: StyleContext,
     startingStyle?: boolean,
   ) {
-    const { query, parentName, variants, element } = context;
+    const { query, parents, variants, element } = context;
     const pseudoClassList = pseudoClassesOfWeight(weight);
     const serializedValue = serializeValue(value);
     const variantNames = variants.map((variant) => `${variant.name}-`).join('');
+    const parentNames = parents.map((parent) => `${parent.name}-`).join('');
 
-    const className = `${query.prelude === null ? '' : `${query.key}-`}${startingStyle ? 'starting-' : ''}${pseudoClassList.map((p) => `${p}-`).join('')}${element ? `${element}-` : ''}${variantNames}${parentName ? `${parentName}-` : ''}${key}-${serializedValue}`;
+    const className = `${query.prelude === null ? '' : `${query.key}-`}${startingStyle ? 'starting-' : ''}${pseudoClassList.map((p) => `${p}-`).join('')}${element ? `${element}-` : ''}${variantNames}${parentNames}${key}-${serializedValue}`;
 
     switch (namingMode()) {
       case 'readable':
