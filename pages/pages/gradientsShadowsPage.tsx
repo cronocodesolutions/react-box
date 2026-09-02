@@ -1,4 +1,4 @@
-import { Layers } from 'lucide-react';
+import { Blend } from 'lucide-react';
 import { ReactNode } from 'react';
 import Box from '../../src/box';
 import Flex from '../../src/components/flex';
@@ -14,7 +14,7 @@ export default function GradientsShadowsPage() {
   return (
     <Box>
       <PageHeader
-        icon={Layers}
+        icon={Blend}
         title="Gradients & Shadows"
         description="A gradient written as a value, so its stops are palette colours — and four shadows that stack on one box-shadow instead of overwriting each other."
         badge="NEW"

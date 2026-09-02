@@ -1,3 +1,5 @@
+import { readFileSync } from 'fs';
+import { resolve } from 'path';
 import { describe, expect, it } from 'vitest';
 import { SITE_URL, siteRoutes } from './site';
 import {
@@ -27,6 +29,19 @@ describe('the route table', () => {
     const tooLong = siteRoutes.filter((route) => route.description.length > 160);
 
     expect(tooLong.map((route) => route.path)).toEqual([]);
+  });
+
+  // The sidebar is written by hand and the route table drives the prerender, so the two can disagree:
+  // C5 added /gradients-shadows, which prerendered and was reachable by URL but had no menu entry at
+  // all (bug #112). An unlisted route is the one exception, and it says so with `indexable: false`.
+  it('gives every listed route a link in the sidebar', () => {
+    const sidebar = readFileSync(resolve(process.cwd(), 'pages/app/sidebar.tsx'), 'utf8');
+    const linked = new Set([...sidebar.matchAll(/to="([^"]+)"/g)].map((match) => match[1]));
+    const missing = indexableRoutes()
+      .map((route) => route.path)
+      .filter((path) => !linked.has(path));
+
+    expect(missing).toEqual([]);
   });
 });
 
