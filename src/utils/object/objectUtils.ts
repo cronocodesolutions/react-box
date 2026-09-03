@@ -1,6 +1,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { pseudo2 } from '../../core/boxStyles';
 
+/**
+ * Object helpers that know nothing about the prop registry — which is what lets both packages import
+ * this file. `mergeDeep` used to live here and does not any more: it reads `pseudo2`, so it belongs in
+ * `src/core/mergeDeep.ts` (see the note there).
+ */
 namespace ObjectUtils {
   export function buildProps<T extends { props?: object }, TKey extends keyof T>(props: T, keys: Readonly<TKey[]>, extraTagProps?: object) {
     const newProps = { ...props };
@@ -27,36 +31,6 @@ namespace ObjectUtils {
 
   export function isObject(value: unknown): value is object {
     return !!value && typeof value === 'object';
-  }
-
-  export function mergeDeep<T>(...objects: T[]) {
-    return objects.reduce((prev, obj) => {
-      Object.keys(obj ?? {}).forEach((key) => {
-        const pVal = (prev as any)[key];
-        const oVal = (obj as any)[key];
-
-        if (oVal === undefined) {
-          // An absent prop is exactly what JSX means by `undefined`, so it must not erase what it is
-          // merging into: `hoverGroup={cond ? {…} : undefined}` — the shape every component here uses —
-          // used to delete the component style's own block for that prop (bug #61). `clean` is still the
-          // way to drop a component's styles on purpose.
-        } else if (isObject(oVal) && 'clean' in oVal && oVal.clean) {
-          (prev as any)[key] = oVal;
-        } else if (key in pseudo2 && typeof oVal === 'boolean') {
-          // skip overriding object of styles with a boolean
-        } else if (key in pseudo2 && Array.isArray(oVal)) {
-          (prev as any)[key] = mergeDeep(pVal, oVal[1] ?? {});
-        } else if (Array.isArray(pVal) && Array.isArray(oVal)) {
-          (prev as any)[key] = pVal.concat(...oVal);
-        } else if (isObject(pVal) && isObject(oVal)) {
-          (prev as any)[key] = mergeDeep(pVal, oVal);
-        } else {
-          (prev as any)[key] = oVal;
-        }
-      });
-
-      return prev;
-    }, {} as T);
   }
 
   export function isKeyOf<T extends object>(key: any, obj: T): key is keyof T {

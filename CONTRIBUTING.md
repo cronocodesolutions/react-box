@@ -51,7 +51,7 @@ box-kite/
 ├── src/                          # Library source (published to npm)
 │   ├── box.ts                    # Main Box component (entry point)
 │   ├── a11y.ts                   # Behaviour primitives (`@box-kite/react/a11y`)
-│   ├── core.ts                   # The engine with no React (`@box-kite/react/core`)
+│   ├── core.ts                   # The engine with no React (`@box-kite/core`)
 │   ├── rsc.ts                    # Box for Server Components (the `react-server` entry, hook-free)
 │   ├── types.ts                  # TypeScript type exports
 │   ├── ssg.ts                    # Server-side rendering support (entry point)
@@ -165,7 +165,7 @@ box-kite/
 The split is not cosmetic. The engine — prop definitions, formatters, class-name generation, the
 rule registry, the sinks, the flush scheduler, the variables, the theme runtime — has no idea a
 component tree exists. It is the future `@box-kite/core` package, it already ships as the
-`@box-kite/react/core` entry (`src/core.ts`), and it is what makes the library embeddable in
+`@box-kite/core` entry (`src/core.ts`), and it is what makes the library embeddable in
 places React is not: a vanilla-DOM page, an iframe widget, another framework's adapter, a
 build-time compiler. `examples/vanilla` is that claim as a running page.
 
@@ -1109,9 +1109,9 @@ Users extend via declaration merging:
 
 ```typescript
 // user's types.d.ts
-import '@box-kite/react/types';
+import '@box-kite/core/types';
 
-declare module '@box-kite/react/types' {
+declare module '@box-kite/core/types' {
   namespace Augmented {
     interface BoxPropTypes {
       bgColor: 'brand-primary' | 'brand-secondary';

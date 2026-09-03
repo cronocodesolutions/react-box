@@ -5,6 +5,7 @@ import { defineConfig } from 'vitest/config';
 import {
   CLIENT_ONLY_COMPONENTS,
   CLIENT_ONLY_ENTRIES,
+  CORE_PACKAGE,
   PACKAGE_NAME,
   SERVER_SAFE_COMPONENTS,
   componentPrivateModules,
@@ -27,8 +28,6 @@ const entry = {
   box: path.resolve(import.meta.dirname, './src/box.ts'),
   // The behaviour primitives the accessible components are built from — see src/a11y.ts.
   a11y: path.resolve(import.meta.dirname, './src/a11y.ts'),
-  // The engine on its own, for consumers with no React at all — see src/core.ts.
-  core: path.resolve(import.meta.dirname, './src/core.ts'),
   // The `react-server` condition of the main entry: the hook-free Box a Server Component gets.
   rsc: path.resolve(import.meta.dirname, './src/rsc.ts'),
   ssg: path.resolve(import.meta.dirname, './src/ssg.ts'),
@@ -42,13 +41,59 @@ const extensions = {
 
 // The chunk split is derived from what the entries actually reach — the same walks `check:boundaries`
 // uses, so a new module cannot be forgotten by one and not the other.
-const frameworkFree = new Set(coreGraph().modules.keys());
+// What `@box-kite/core` owns, as opposed to what is merely framework-free: the shared leaves under
+// `src/utils/` are core-free now, so both packages may carry a copy, but anything under `src/core/` in
+// this build is a second engine.
+const coreOwned = new Set([...coreGraph().modules.keys()].filter((module) => module.startsWith('src/core') || module === 'src/types.ts'));
 // The leaves a single component owns — see `componentPrivateModules`.
 const componentPrivate = componentPrivateModules();
 const serverSafe = serverSafeModules();
 
 const componentFile = (name: string) => path.resolve(import.meta.dirname, 'src/components', `${name}.tsx`);
 const serverSafeFiles = new Set(SERVER_SAFE_COMPONENTS.map(componentFile));
+
+const CORE_ENTRY = path.resolve(import.meta.dirname, 'src/core.ts');
+const TYPES_ENTRY = path.resolve(import.meta.dirname, 'src/types.ts');
+
+/**
+ * `src/core.ts` and `src/types.ts` are `@box-kite/core` — a dependency of this package, not part of
+ * it. Rewriting the relative import to the package specifier is what stops rollup inlining the engine:
+ * a second copy would mean a second style element, a second class-name counter and duplicated rules in
+ * any app that also installs the core package directly. Both are resolved to absolute paths and
+ * compared, so every spelling (`./core`, `../core`, `../../core`) is caught and no deep import
+ * (`../core/classNames`) is caught by accident.
+ */
+const corePackageReference = {
+  name: 'core-package-reference',
+  enforce: 'pre' as const,
+  apply: 'build' as const,
+  resolveId(source: string, importer?: string) {
+    if (!importer || !source.startsWith('.')) return null;
+
+    const resolved = path.resolve(path.dirname(importer), source);
+
+    if (resolved === CORE_ENTRY || `${resolved}.ts` === CORE_ENTRY) return { id: CORE_PACKAGE, external: true };
+    if (resolved === TYPES_ENTRY || `${resolved}.ts` === TYPES_ENTRY) return { id: `${CORE_PACKAGE}/types`, external: true };
+
+    return null;
+  },
+};
+
+/**
+ * The same repointing for declarations. `src/` is shallow, so the only relative spellings that can name
+ * the two entries are these six — and a deep import (`./core/classNames`) is a different string, so an
+ * exact match on the quoted specifier cannot catch one by accident.
+ */
+function repointCoreImports(content: string): string {
+  let out = content;
+
+  for (const prefix of ['./', '../', '../../']) {
+    out = out.split(`from '${prefix}core'`).join(`from '${CORE_PACKAGE}'`);
+    out = out.split(`from '${prefix}types'`).join(`from '${CORE_PACKAGE}/types'`);
+  }
+
+  return out;
+}
 
 /**
  * The pre-built components resolve Box through the package's own name. A relative import in a published
@@ -93,7 +138,28 @@ let currentFormat;
 
 export default defineConfig(({ mode }) => {
   return {
-    plugins: [dts({ entryRoot: './src', exclude: ['./pages/**', './src/**/*.test.*', './dev/**'] }), boxSelfReference, useClientBanner],
+    plugins: [
+      dts({
+        entryRoot: './src',
+        exclude: ['./pages/**', './src/**/*.test.*', './dev/**'],
+        // The runtime side is handled by `corePackageReference`; declarations are text the dts plugin
+        // writes itself, so the same two modules are repointed here — and their own declarations are
+        // dropped, because they ship from the core package and two copies would be two `Augmented`
+        // namespaces, only one of which a consumer's `declare module` reaches.
+        beforeWriteFile(filePath: string, content: string) {
+          const name = filePath.split(path.sep).join('/');
+          // The core package's own declarations: its two entries, and the tree they reference.
+          const belongsToCore = name.endsWith('/core.d.ts') || name.endsWith('/types.d.ts') || name.includes('/core/');
+
+          if (belongsToCore) return false;
+
+          return { filePath, content: repointCoreImports(content) };
+        },
+      }),
+      corePackageReference,
+      boxSelfReference,
+      useClientBanner,
+    ],
     build: {
       minify: mode !== 'dev',
       lib: {
@@ -105,7 +171,16 @@ export default defineConfig(({ mode }) => {
         formats: ['es', 'cjs'],
       },
       rollupOptions: {
-        external: [PACKAGE_NAME, 'react', 'react-dom', 'react/jsx-runtime', 'react-dom/server', 'use-sync-external-store/shim'],
+        external: [
+          PACKAGE_NAME,
+          CORE_PACKAGE,
+          `${CORE_PACKAGE}/types`,
+          'react',
+          'react-dom',
+          'react/jsx-runtime',
+          'react-dom/server',
+          'use-sync-external-store/shim',
+        ],
         // Required by `codeSplitting.includeDependenciesRecursively: false` below. Entry exports are
         // unaffected — an entry chunk is merely allowed to carry more than the entry declares.
         preserveEntrySignatures: 'allow-extension',
@@ -133,9 +208,11 @@ export default defineConfig(({ mode }) => {
                   // Component entries keep the chunks rolldown gives them, one per component.
                   if (module.startsWith('src/components/')) return null;
 
-                  // Two leaves several groups need, pulled out rather than left to fall into `engine` or `client`: a module
-                  // lives in one chunk, so `behavior` would otherwise import the whole engine to ask for a `document`.
-                  // `platform` must stay React-free — the `/core` entry reaches it — hence the effect helpers are separate.
+                  // Two leaves several groups need, pulled out rather than left to fall into `client`: a module lives in
+                  // one chunk, so `behavior` would otherwise import half the library to ask for a `document`. Both are
+                  // framework-free and core-free, so each package carries its own copy of ~1 KB of pure functions.
+                  // `src/utils/object/` is deliberately *not* here: only five components reach it, and in `platform` it
+                  // taxed the `/a11y` entry 85 B for something no behaviour primitive uses.
                   if (module.startsWith('src/utils/environment/') || module.startsWith('src/utils/dom/')) return 'platform';
                   if (module === 'src/react/effects.ts') return 'effects';
                   // `<Presence>` and the timing model behind it, shared by the three layers that animate out
@@ -152,9 +229,10 @@ export default defineConfig(({ mode }) => {
                   // `semantics.mjs` reading `StringUtils` before it was defined.
                   if (module.startsWith('src/react/forms/')) return 'forms';
 
-                  // 'engine', not 'core': `core` is an entry name now (src/core.ts), and a chunk
-                  // sharing it would fight the entry for `core.mjs`.
-                  if (frameworkFree.has(module)) return 'engine';
+                  // A tripwire, not a chunk anybody wants. The engine ships as `@box-kite/core`, so nothing core owns
+                  // should reach this build at all — a module that does is a second copy of it. Naming the group makes
+                  // that visible as `dist/engine.mjs`, whose existence `postbuild.mjs` fails on.
+                  if (coreOwned.has(module)) return 'engine';
 
                   // The behaviour primitives reach nothing but React and each other. In `client` they would be correct and
                   // useless: `/a11y` would import the styling binding and the theme provider, so anyone wanting

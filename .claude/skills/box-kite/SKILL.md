@@ -315,7 +315,7 @@ export const { extendedProps, extendedPropTypes } = Box.extend(
     ],
   },
 );
-// TypeScript: declare module '@box-kite/react/types' { namespace Augmented {
+// TypeScript: declare module '@box-kite/core/types' { namespace Augmented {
 //   interface BoxProps extends ExtractBoxStyles<typeof extendedProps> {}
 //   interface BoxPropTypes extends ExtractBoxStyles<typeof extendedPropTypes> {}
 //   interface ComponentsTypes extends ExtractComponentsAndVariants<typeof components> {} }}

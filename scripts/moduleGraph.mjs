@@ -17,6 +17,9 @@ export const BOX_ENTRY = 'src/box.ts';
 /** The package's own name — what the `../box` edge becomes in the built server-safe components. */
 export const PACKAGE_NAME = '@box-kite/react';
 
+/** The engine's package — what `src/core.ts` and `src/types.ts` become in this one's built output. */
+export const CORE_PACKAGE = '@box-kite/core';
+
 /**
  * The pre-built components a Server Component can render *on the server*: no hook, no effect, just props
  * forwarded to Box. Their chunks import the package by name rather than `../box.mjs`, so the

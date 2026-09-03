@@ -1,9 +1,12 @@
 // size-limit fixture: one entry importing every public export so shared chunks are
 // counted once (listing the entries directly in size-limit sums the shared core per file).
 // Add a line here when a new component entry is added to the build.
+//
+// The engine comes from its own package now, so this measures what a React consumer actually
+// downloads: @box-kite/react plus the @box-kite/core it depends on.
 import * as box from '../dist/box.mjs';
 import * as a11y from '../dist/a11y.mjs';
-import * as core from '../dist/core.mjs';
+import * as core from '@box-kite/core';
 import * as ssg from '../dist/ssg.mjs';
 import * as baseSvg from '../dist/components/baseSvg.mjs';
 import * as button from '../dist/components/button.mjs';

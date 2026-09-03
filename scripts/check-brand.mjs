@@ -81,9 +81,16 @@ function walk(dir) {
 }
 
 const tracked = execSync('git ls-files', { cwd: root, encoding: 'utf8' }).trim().split('\n');
-// The bridge keeps the old specifier resolving by design — it is published, not purged.
-const sources = tracked.filter((path) => !BINARY.test(path) && !path.startsWith('bridge/'));
-const shipped = existsSync(join(root, 'dist')) ? walk('dist').filter((path) => !BINARY.test(path)) : [];
+// Two exemptions that are structural rather than editorial. The bridge keeps the old specifier
+// resolving by design — it is published, not purged. And this file cannot be judged by its own rule:
+// naming the forbidden strings is what it is for, in the patterns, in the allowlist and in the message
+// it prints. An allowlist entry would have to quote every one of them and grow with each new one.
+const SELF = 'scripts/check-brand.mjs';
+const sources = tracked.filter((path) => !BINARY.test(path) && !path.startsWith('bridge/') && path !== SELF);
+const shipped = ['dist', 'dist-core']
+  .filter((dir) => existsSync(join(root, dir)))
+  .flatMap((dir) => walk(dir))
+  .filter((path) => !BINARY.test(path));
 
 const violations = [];
 
@@ -97,7 +104,7 @@ for (const path of [...sources, ...shipped]) {
   }
 
   // `dist/README.md` is `README.md` — postbuild copies it, so it inherits its allowance.
-  const source = path.startsWith('dist/') ? path.slice('dist/'.length) : path;
+  const source = path.replace(/^dist(-core)?[/]/, '');
 
   for (const entry of ALLOWED.filter((allowed) => allowed.file === source)) {
     for (const allowed of entry.strings) text = text.split(allowed).join('');
@@ -119,6 +126,6 @@ if (violations.length > 0) {
 
 const where =
   shipped.length > 0
-    ? `${sources.length} tracked files and ${shipped.length} in dist/`
+    ? `${sources.length} tracked files and ${shipped.length} in the two built packages`
     : `${sources.length} tracked files (dist/ not built)`;
 console.log(`✔ no "crono" and no "react-box" in ${where} — ${ALLOWED.length} allowlisted strings, each with a reason`);

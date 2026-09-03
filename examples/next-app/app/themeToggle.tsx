@@ -1,7 +1,7 @@
 'use client';
+import { createThemeController, type ThemeController } from '@box-kite/core';
 import Box from '@box-kite/react';
 import Button from '@box-kite/react/components/button';
-import { createThemeController, type ThemeController } from '@box-kite/react/core';
 import { useEffect, useRef, useState } from 'react';
 import './elementMode';
 

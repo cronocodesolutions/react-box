@@ -23,6 +23,7 @@ const target = JSON.parse(readFileSync(join(root, 'dist', 'package.json'), 'utf8
 const TARGET_NAME = target.name;
 const BRIDGE_NAME = '@cronocode/react-box';
 const BRIDGE_VERSION = '3.4.0';
+const CORE_NAME = '@box-kite/core';
 
 const components = readdirSync(join(root, 'src', 'components'))
   .filter((name) => name.endsWith('.tsx') && !name.includes('.test'))
@@ -33,11 +34,13 @@ const entries = ['box', 'rsc', 'a11y', 'core', 'ssg', ...components];
 rmSync(out, { recursive: true, force: true });
 
 for (const entry of entries) {
-  const module = await import(pathToFileURL(join(root, 'dist', `${entry}.mjs`)).href);
+  const built = entry === 'core' ? join(root, 'dist-core', 'core.mjs') : join(root, 'dist', `${entry}.mjs`);
+  const module = await import(pathToFileURL(built).href);
   const hasDefault = Object.keys(module).includes('default');
   // `/rsc` is named explicitly rather than left to the consumer's conditions: the bridge's own `.`
   // export already routes react-server here, and an explicit `/rsc` import must not get the client Box.
-  const from = entry === 'box' ? TARGET_NAME : `${TARGET_NAME}/${entry}`;
+  // `/core` went to a package of its own, so the old subpath forwards across the family.
+  const from = entry === 'box' ? TARGET_NAME : entry === 'core' ? CORE_NAME : `${TARGET_NAME}/${entry}`;
 
   const esm = [`export * from '${from}';`, hasDefault ? `export { default } from '${from}';` : ''].filter(Boolean).join('\n');
   const cjs = `module.exports = require('${from}');`;
@@ -57,7 +60,7 @@ for (const entry of entries) {
 // Types-only entry: it carries no runtime, and a consumer's `declare module` cannot be forwarded
 // through a re-export — which is why the README names it as the one thing the bridge does not cover.
 mkdirSync(out, { recursive: true });
-writeFileSync(join(out, 'types.d.ts'), `export * from '${TARGET_NAME}/types';\n`);
+writeFileSync(join(out, 'types.d.ts'), `export * from '${CORE_NAME}/types';\n`);
 
 const manifest = {
   name: BRIDGE_NAME,
@@ -81,8 +84,9 @@ const manifest = {
     './components/*': { types: './components/*.d.ts', import: './components/*.mjs', require: './components/*.cjs' },
     './types': { types: './types.d.ts' },
   },
-  // Exact, not a range: the bridge forwards one published surface and nothing else.
-  dependencies: { [TARGET_NAME]: target.version },
+  // Exact, not a range: the bridge forwards one published surface and nothing else. Both packages,
+  // because `/core` and `/types` now resolve across the family.
+  dependencies: { [CORE_NAME]: target.version, [TARGET_NAME]: target.version },
   peerDependencies: target.peerDependencies,
   repository: target.repository,
   bugs: target.bugs,

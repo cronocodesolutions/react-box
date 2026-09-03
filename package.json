@@ -29,11 +29,6 @@
       "import": "./a11y.mjs",
       "require": "./a11y.cjs"
     },
-    "./core": {
-      "types": "./core.d.ts",
-      "import": "./core.mjs",
-      "require": "./core.cjs"
-    },
     "./ssg": {
       "types": "./ssg.d.ts",
       "import": "./ssg.mjs",
@@ -43,9 +38,6 @@
       "types": "./components/*.d.ts",
       "import": "./components/*.mjs",
       "require": "./components/*.cjs"
-    },
-    "./types": {
-      "types": "./types.d.ts"
     }
   },
   "scripts": {
@@ -60,10 +52,11 @@
     "build:pages": "vite build ./pages --config ./pages.vite.config.ts --outDir ../dist-pages --mode production && npm run prerender:pages",
     "prerender:pages": "node scripts/prerender-pages.mjs",
     "preview": "vite preview ./pages --config ./pages.vite.config.ts --outDir ../dist-pages",
-    "build": "vite build",
+    "build": "npm run build:core && vite build",
+    "build:core": "vite build --config vite.core.config.ts && node scripts/postbuild-core.mjs",
     "postbuild": "node scripts/postbuild.mjs",
     "build:bridge": "node scripts/build-bridge.mjs",
-    "build:dev": "vite build --mode dev",
+    "build:dev": "npm run build:core && vite build --mode dev",
     "compile": "tsc --noEmit --skipLibCheck",
     "test": "vitest run",
     "test:coverage": "vitest run --coverage",
@@ -75,7 +68,7 @@
     "check:docs": "node scripts/check-docs-snippets.mjs",
     "check:props": "node scripts/check-props-api.mjs",
     "docs:props": "node scripts/check-props-api.mjs --fix",
-    "check:package": "publint dist && attw --pack dist --ignore-rules false-esm cjs-resolves-to-esm internal-resolution-error",
+    "check:package": "publint dist && attw --pack dist --ignore-rules false-esm cjs-resolves-to-esm internal-resolution-error && publint dist-core && attw --pack dist-core --ignore-rules false-esm cjs-resolves-to-esm internal-resolution-error",
     "size": "size-limit"
   },
   "size-limit": [
@@ -87,7 +80,7 @@
         "react-dom"
       ],
       "gzip": true,
-      "limit": "26.13 KB"
+      "limit": "26.20 KB"
     },
     {
       "name": "Box in a Server Component (react-server entry)",
@@ -97,7 +90,7 @@
         "react-dom"
       ],
       "gzip": true,
-      "limit": "24.60 KB"
+      "limit": "24.70 KB"
     },
     {
       "name": "Behavior primitives (a11y entry)",
@@ -110,8 +103,8 @@
       "limit": "3.13 KB"
     },
     {
-      "name": "Core engine (no React)",
-      "path": "dist/core.mjs",
+      "name": "Core engine (@box-kite/core, no React)",
+      "path": "dist-core/core.mjs",
       "gzip": true,
       "limit": "24.10 KB"
     },
@@ -123,7 +116,7 @@
         "react-dom"
       ],
       "gzip": true,
-      "limit": "54.44 KB"
+      "limit": "54.55 KB"
     },
     {
       "name": "Full library (Box + ssg + every component)",
@@ -133,7 +126,7 @@
         "react-dom"
       ],
       "gzip": true,
-      "limit": "60.67 KB"
+      "limit": "60.85 KB"
     }
   ],
   "repository": {
@@ -167,6 +160,7 @@
     "react-dom": "^16.14.0 || ^17.0.0 || ^18.0.0 || ^19.0.0"
   },
   "dependencies": {
+    "@box-kite/core": "1.0.0",
     "csstype": "^3.2.3",
     "use-sync-external-store": "^1.6.0"
   },

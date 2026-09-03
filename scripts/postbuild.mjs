@@ -3,9 +3,9 @@
 // reach a client hook through any chunk it imports.
 // Uses Node's fs (not shell cp/mkdir) so it runs identically on macOS, Linux, and Windows.
 import { spawnSync } from 'node:child_process';
-import { cpSync, mkdirSync, readFileSync } from 'node:fs';
+import { cpSync, existsSync, mkdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { CLIENT_ONLY_COMPONENTS, CLIENT_ONLY_ENTRIES, PACKAGE_NAME, SERVER_SAFE_COMPONENTS } from './moduleGraph.mjs';
+import { CLIENT_ONLY_COMPONENTS, CLIENT_ONLY_ENTRIES, CORE_PACKAGE, PACKAGE_NAME, SERVER_SAFE_COMPONENTS } from './moduleGraph.mjs';
 
 // Ensure target directories exist (recursive = cross-platform `mkdir -p`).
 mkdirSync('dist/.claude/skills/box-kite', { recursive: true });
@@ -102,7 +102,7 @@ console.log(
 const REACT_SPECIFIER = /(?:from\s*|require\(\s*)["'](react(?:-dom)?(?:\/[^"']*)?)["']/g;
 
 /** The chunk, plus every chunk it imports, as `[path, source]`. */
-function chunkGraph(entry) {
+function chunkGraph(entry, dir) {
   const seen = new Map();
   const queue = [entry];
 
@@ -110,7 +110,7 @@ function chunkGraph(entry) {
     const file = queue.shift();
     if (seen.has(file)) continue;
 
-    const code = readFileSync(join('dist', file), 'utf8');
+    const code = readFileSync(join(dir, file), 'utf8');
     seen.set(file, code);
 
     for (const [, specifier] of code.matchAll(/(?:from\s*|require\(\s*)["'](\.\/[^"']+)["']/g)) {
@@ -122,16 +122,36 @@ function chunkGraph(entry) {
 }
 
 for (const entry of ['core.mjs', 'core.cjs']) {
-  const offenders = [...chunkGraph(entry)]
+  const offenders = [...chunkGraph(entry, 'dist-core')]
     .flatMap(([file, code]) => [...code.matchAll(REACT_SPECIFIER)].map(([, specifier]) => `${file} imports '${specifier}'`))
     .filter((value, index, all) => all.indexOf(value) === index);
 
   if (offenders.length) {
-    console.error(`\n✖ the framework-free entry (${entry}) reaches React through its chunks:\n`);
+    console.error(`\n✖ @box-kite/core (${entry}) reaches React through its chunks:\n`);
     for (const offender of offenders) console.error(`  ${offender}`);
-    console.error('\nFix the chunk split in vite.config.ts (codeSplitting.groups). See CONTRIBUTING.md, "The core boundary".\n');
+    console.error('\nFix the chunk split in vite.core.config.ts. See CONTRIBUTING.md, "The core boundary".\n');
     process.exit(1);
   }
 }
 
-console.log('✔ the /core entry bundles no React (ESM and CJS)');
+console.log('✔ @box-kite/core bundles no React (ESM and CJS)');
+
+// The mirror of it: the React package must not carry the engine. A spelling the rewrite in
+// `corePackageReference` misses inlines a second copy, and two engines mean two style elements, two
+// class-name counters and every rule written twice — silently, in any app that installs core directly.
+for (const entry of ['box.mjs', 'box.cjs']) {
+  const importsCore = [...chunkGraph(entry, 'dist').values()].some((code) => code.includes(CORE_PACKAGE));
+
+  if (!importsCore) {
+    console.error(`\n✖ dist/${entry} does not import ${CORE_PACKAGE} — the engine was inlined into the React package.\n`);
+    console.error('A spelling of the core entry went unrewritten: see corePackageReference in vite.config.ts.\n');
+    process.exit(1);
+  }
+}
+
+if (existsSync(join('dist', 'engine.mjs'))) {
+  console.error('\n✖ dist/engine.mjs exists — the engine is being bundled into the React package again.\n');
+  process.exit(1);
+}
+
+console.log(`✔ ${PACKAGE_NAME} imports ${CORE_PACKAGE} rather than carrying a second copy of it`);

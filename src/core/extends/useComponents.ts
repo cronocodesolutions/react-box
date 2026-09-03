@@ -1,6 +1,6 @@
 import { BoxComponentStyles, BoxStyleProps, ComponentsAndVariants } from '../../types';
-import ObjectUtils from '../../utils/object/objectUtils';
 import { classNames } from '../classNames';
+import { mergeDeep } from '../mergeDeep';
 import { BoxComponent, Components } from './boxComponents';
 
 /**
@@ -37,9 +37,9 @@ export function resolveComponentStyles<TKey extends keyof ComponentsAndVariants 
   const variantNames = classNames(variant);
   if (variantNames.length === 0) return componentStyles.styles;
 
-  const variantStyles = ObjectUtils.mergeDeep(...variantNames.map((v) => componentStyles.variants?.[v] as BoxComponentStyles));
+  const variantStyles = mergeDeep(...variantNames.map((v) => componentStyles.variants?.[v] as BoxComponentStyles));
 
   if (!componentStyles.styles) return variantStyles;
 
-  return ObjectUtils.mergeDeep<BoxComponentStyles>(componentStyles.styles, variantStyles);
+  return mergeDeep<BoxComponentStyles>(componentStyles.styles, variantStyles);
 }

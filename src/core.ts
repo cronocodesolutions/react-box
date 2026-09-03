@@ -1,9 +1,9 @@
 /**
- * `@box-kite/react/core` — the styling engine, without React. Everything under `src/core` imports
+ * `@box-kite/core` — the styling engine, without React. Everything under `src/core` imports
  * no framework (CI enforces it), so a plain-DOM app, a Web Component or another framework can use it:
  *
  * ```js
- * import { createStyleEngine } from '@box-kite/react/core';
+ * import { createStyleEngine } from '@box-kite/core';
  *
  * const engine = createStyleEngine();
  * document.querySelector('#card').className = engine.classNames({ p: 4, bgColor: 'blue-500' });
@@ -16,6 +16,7 @@
  */
 export { classNames } from './core/classNames';
 export type { ClassNameType } from './core/classNames';
+export { mergeDeep } from './core/mergeDeep';
 export { default as Springs } from './core/springs';
 export { createStyleEngine, DEFAULT_STYLE_ELEMENT_ID } from './core/engine/styleEngine';
 export { default as getDefaultEngine } from './core/engine/defaultEngine';

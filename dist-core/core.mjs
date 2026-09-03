@@ -1,0 +1,4812 @@
+//#region src/core/classNames.ts
+function e(...t) {
+	return t.reduce((t, n) => n ? typeof n == "string" ? (t.push(n), t) : Array.isArray(n) ? (t.push(...e(...n)), t) : (Object.entries(n).forEach(([e, n]) => {
+		n && t.push(e);
+	}), t) : t, []);
+}
+//#endregion
+//#region src/utils/object/objectUtils.ts
+var t;
+(function(e) {
+	function t(e, t, n) {
+		let r = { ...e }, i = r.props || {};
+		return t.forEach((e) => {
+			e in r && (i[e] = r[e], delete r[e]);
+		}), n && Object.entries(n).forEach(([e, t]) => {
+			i[e] = t;
+		}), r.props = i, r;
+	}
+	e.buildProps = t;
+	function n(e) {
+		return !!e && typeof e == "object";
+	}
+	e.isObject = n;
+	function r(e, t) {
+		return e in t;
+	}
+	e.isKeyOf = r;
+})(t ||= {});
+var n = t, r;
+(function(e) {
+	function t({ stiffness: e, damping: t, mass: n, velocity: r }) {
+		let i = Math.sqrt(e / n), a = t / (2 * Math.sqrt(e * n));
+		if (a < 1) {
+			let e = i * Math.sqrt(1 - a * a), t = (a * i - r) / e;
+			return (n) => Math.exp(-a * i * n) * (Math.cos(e * n) + t * Math.sin(e * n));
+		}
+		if (a === 1) return (e) => Math.exp(-i * e) * (1 + (i - r) * e);
+		let o = i * Math.sqrt(a * a - 1), s = -a * i + o, c = -a * i - o, l = (-r - c) / (s - c);
+		return (e) => l * Math.exp(s * e) + (1 - l) * Math.exp(c * e);
+	}
+	function n(e) {
+		for (let t = 1e4; t >= 20; t -= 10) if (Math.abs(e(t / 1e3)) >= .005) return t + 10;
+		return 20;
+	}
+	function r(e) {
+		return Math.round(e * 1e3) / 1e3;
+	}
+	function i(e = {}) {
+		let { stiffness: i = 180, damping: a = 20, mass: o = 1, velocity: s = 0 } = e, c = t({
+			stiffness: i,
+			damping: a,
+			mass: o,
+			velocity: s
+		}), l = n(c), u = Math.min(32, Math.max(12, Math.ceil(l / 25))), d = [];
+		for (let e = 0; e <= u; e++) d.push(String(r(1 - c(e / u * (l / 1e3)))));
+		return d[0] = "0", d[u] = "1", {
+			easing: `linear(${d.join(",")})`,
+			duration: l
+		};
+	}
+	e.spring = i, e.presetNames = [
+		"spring",
+		"spring-gentle",
+		"spring-bouncy",
+		"spring-snappy"
+	];
+	let a = {
+		spring: {
+			stiffness: 180,
+			damping: 20
+		},
+		"spring-gentle": {
+			stiffness: 120,
+			damping: 18
+		},
+		"spring-bouncy": {
+			stiffness: 180,
+			damping: 12
+		},
+		"spring-snappy": {
+			stiffness: 300,
+			damping: 26
+		}
+	}, o = /* @__PURE__ */ new Map();
+	function s(e) {
+		let t = o.get(e);
+		return t || o.set(e, t = i(a[e])), t;
+	}
+	e.preset = s;
+})(r ||= {});
+var i = r, a;
+(function(e) {
+	function t(e) {
+		return `calc(${e} * var(--transitionTime))`;
+	}
+	e.presetNames = [
+		"spin",
+		"pulse",
+		"bounce",
+		"ping"
+	], e.presets = {
+		spin: `spin ${t(4)} linear infinite`,
+		pulse: `pulse ${t(8)} cubic-bezier(0.4, 0, 0.6, 1) infinite`,
+		bounce: `bounce ${t(4)} infinite`,
+		ping: `ping ${t(4)} cubic-bezier(0, 0, 0.2, 1) infinite`
+	}, e.timingFunction = "", e.springNames = i.presetNames;
+	function n(e) {
+		return i.preset(e).easing;
+	}
+	e.springEasing = n;
+	function r(e) {
+		return t(Math.round(i.preset(e).duration / 250 * 100) / 100);
+	}
+	e.springDuration = r;
+	function a(e, t) {
+		let n = `${e}:${t}`;
+		return t.startsWith("linear(") ? `${e}:ease-out;${n}` : n;
+	}
+	e.easingDeclarations = a;
+	let o = /^(cubic-bezier|steps|linear)\([^()]*\)$/;
+	function s(e) {
+		return typeof e == "string" && o.test(e);
+	}
+	e.isTimingFunction = s;
+	let c = e.propertyGroups = {
+		colors: "color, background-color, border-color, outline-color, text-decoration-color, fill, stroke",
+		opacity: "opacity",
+		shadow: "box-shadow, text-shadow",
+		transform: "transform, translate, rotate, scale",
+		size: "width, height",
+		filter: "filter, backdrop-filter"
+	};
+	e.propertyGroupNames = Object.keys(c);
+})(a ||= {});
+var o = a, s;
+(function(e) {
+	let t;
+	(function(e) {
+		function t(e) {
+			return `${e / 4}rem`;
+		}
+		e.rem = t;
+		function n(e) {
+			return `${e}px`;
+		}
+		e.px = n;
+		function r(e) {
+			return `${e}ms`;
+		}
+		e.ms = r;
+		function i(e) {
+			let [t, n] = e.split("/");
+			return `${t / +n * 100}%`;
+		}
+		e.fraction = i;
+	})(t ||= e.Value ||= {});
+})(s ||= {});
+//#endregion
+//#region src/core/containers.ts
+var c;
+(function(e) {
+	e.containerQueryKey = { cq: "@container" };
+	let t = e.containerSizes = {
+		xs: 20,
+		sm: 24,
+		md: 28,
+		lg: 32,
+		xl: 36,
+		xxl: 42
+	}, n = Object.keys(t);
+	function r(e) {
+		return `max${e[0].toUpperCase()}${e.slice(1)}`;
+	}
+	let i = new Map(n.flatMap((e) => [[e, `(min-width: ${t[e]}rem)`], [r(e), `not (min-width: ${t[e]}rem)`]]));
+	e.rankKeys = [...n.map((e) => `cq-${e}`), ...[...n].reverse().map((e) => `cq-${r(e)}`)];
+	let a = /^[a-zA-Z_][\w-]*$/, o = /* @__PURE__ */ new Set([
+		"none",
+		"and",
+		"or",
+		"not",
+		"normal",
+		"initial",
+		"inherit",
+		"unset",
+		"revert",
+		"revert-layer",
+		"default"
+	]);
+	function s(e) {
+		return typeof e == "string" && a.test(e) && !o.has(e.toLowerCase());
+	}
+	e.isContainerName = s;
+	function c(e) {
+		let t = e.trim(), n = t.lastIndexOf("/"), r = n === -1 ? null : t.slice(0, n), a = i.get(n === -1 ? t : t.slice(n + 1));
+		return !a || r !== null && !s(r) ? null : {
+			key: `cq-${t}`,
+			rankKey: `cq-${n === -1 ? t : t.slice(n + 1)}`,
+			prelude: `@container ${r ? `${r} ` : ""}${a}`
+		};
+	}
+	e.query = c;
+})(c ||= {});
+var l = c, u;
+(function(e) {
+	e.keywords = [
+		"empty",
+		"none",
+		"normal",
+		"open-quote",
+		"close-quote",
+		"no-open-quote",
+		"no-close-quote"
+	], e.cssValue = "", e.text = "";
+	let t = /^(attr|counter|counters|url|var|image-set|linear-gradient)\(/;
+	function n(e) {
+		if (typeof e != "string") return !1;
+		let n = e.trim();
+		return (n.startsWith("\"") || n.startsWith("'") || t.test(n)) && i(n);
+	}
+	e.isCssValue = n;
+	let r = /* @__PURE__ */ new Set([
+		";",
+		"{",
+		"}",
+		"@",
+		"\\"
+	]);
+	function i(e) {
+		let t = null, n = 0;
+		for (let i = 0; i < e.length; i++) {
+			let a = e[i];
+			if (t) {
+				if (a === "\\") i++;
+				else if (a === t) t = null;
+				else if (a === "\n") return !1;
+			} else if (a === "\"" || a === "'") t = a;
+			else if (a === "(") n++;
+			else if (a === ")") {
+				if (--n < 0) return !1;
+			} else if (r.has(a)) return !1;
+		}
+		return t === null && n === 0;
+	}
+	function a(e) {
+		return `"${String(e).replace(/[\\"]/g, (e) => `\\${e}`).replace(/\r?\n/g, "\\A ")}"`;
+	}
+	e.quote = a;
+	function o(e) {
+		return e === "empty" ? "''" : String(e);
+	}
+	e.keyword = o;
+})(u ||= {});
+var d = u, f;
+(function(e) {
+	let t = e.steps = [
+		50,
+		100,
+		200,
+		300,
+		400,
+		500,
+		600,
+		700,
+		800,
+		900,
+		950
+	], n = {
+		slate: "98.4 .003 247.9,96.8 .007 247.9,92.9 .013 255.5,86.9 .022 252.9,70.4 .04 256.8,55.4 .046 257.4,44.6 .043 257.3,37.2 .044 257.3,27.9 .041 260,20.8 .042 265.8,12.9 .042 264.7",
+		gray: "98.5 .002 247.8,96.7 .003 264.5,92.8 .006 264.5,87.2 .01 258.3,70.7 .022 261.3,55.1 .027 264.4,44.6 .03 256.8,37.3 .034 259.7,27.8 .033 256.8,21 .034 264.7,13 .028 261.7",
+		zinc: "98.5 0 none,96.7 .001 286.4,92 .004 286.3,87.1 .006 286.3,70.5 .015 286.1,55.2 .016 285.9,44.2 .017 285.8,37 .013 285.8,27.4 .006 286,21 .006 285.9,14.1 .005 285.8",
+		neutral: "98.5 0 none,97 0 none,92.2 0 none,87 0 none,70.8 0 none,55.6 0 none,43.9 0 none,37.1 0 none,26.9 0 none,20.5 0 none,14.5 0 none",
+		stone: "98.5 .001 106.4,97 .001 106.4,92.3 .003 48.7,86.9 .005 56.4,70.9 .01 56.3,55.3 .013 58.1,44.4 .011 73.6,37.4 .01 67.6,26.8 .007 34.3,21.6 .006 56,14.7 .004 49.3",
+		mauve: "98.5 0 none,96 .003 325.6,92.2 .005 325.6,86.5 .012 325.7,71.1 .019 323,54.2 .034 322.5,43.5 .029 321.8,36.4 .029 323.9,26.3 .024 320.1,21.2 .019 322.1,14.5 .008 326",
+		mist: "98.7 .002 197.1,96.3 .002 197.1,92.5 .005 214.3,87.2 .007 219.6,72.3 .014 214.4,56 .021 213.5,45 .017 213.2,37.8 .015 216,27.5 .011 216.9,21.8 .008 223.9,14.8 .004 228.8",
+		olive: "98.8 .003 106.5,96.6 .005 106.5,93 .007 106.5,88 .011 106.6,73.7 .021 106.9,58 .031 107.3,46.6 .025 107.3,39.4 .023 107.4,28.6 .016 107.4,22.8 .013 107.4,15.3 .006 107.1",
+		taupe: "98.6 .002 67.8,96 .002 17.2,92.2 .005 34.3,86.8 .007 39.5,71.4 .014 41.2,54.7 .021 43.1,43.8 .017 39.3,36.7 .016 35.7,26.8 .011 36.5,21.4 .009 43.1,14.7 .004 49.3",
+		red: "97.1 .013 17.4,93.6 .032 17.7,88.5 .062 18.3,80.8 .114 19.6,70.4 .191 22.2,63.7 .237 25.3,57.7 .245 27.3,50.5 .213 27.5,44.4 .177 26.9,39.6 .141 25.7,25.8 .092 26",
+		orange: "98 .016 73.7,95.4 .038 75.2,90.1 .076 70.7,83.7 .128 66.3,75 .183 55.9,70.5 .213 47.6,64.6 .222 41.1,55.3 .195 38.4,47 .157 37.3,40.8 .123 38.2,26.6 .079 36.3",
+		amber: "98.7 .022 95.3,96.2 .059 95.6,92.4 .12 95.7,87.9 .169 91.6,82.8 .189 84.4,76.9 .188 70.1,66.6 .179 58.3,55.5 .163 49,47.3 .137 46.2,41.4 .112 45.9,27.9 .077 45.6",
+		yellow: "98.7 .026 102.2,97.3 .071 103.2,94.5 .129 101.5,90.5 .182 98.1,85.2 .199 91.9,79.5 .184 86,68.1 .162 75.8,55.4 .135 66.4,47.6 .114 61.9,42.1 .095 57.7,28.6 .066 53.8",
+		lime: "98.6 .031 120.8,96.7 .067 122.3,93.8 .127 124.3,89.7 .196 126.7,84.1 .238 128.9,76.8 .233 130.9,64.8 .2 131.7,53.2 .157 131.6,45.3 .124 130.9,40.5 .101 131.1,27.4 .072 132.1",
+		green: "98.2 .018 155.8,96.2 .044 156.7,92.5 .084 156,87.1 .15 154.4,79.2 .209 151.7,72.3 .219 149.6,62.7 .194 149.2,52.7 .154 150.1,44.8 .119 151.3,39.3 .095 152.5,26.6 .065 152.9",
+		emerald: "97.9 .021 166.1,95 .052 163.1,90.5 .093 164.2,84.5 .143 165,76.5 .177 163.2,69.6 .17 162.5,59.6 .145 163.2,50.8 .118 165.6,43.2 .095 166.9,37.8 .077 168.9,26.2 .051 172.6",
+		teal: "98.4 .014 180.7,95.3 .051 180.8,91 .096 180.4,85.5 .138 181.1,77.7 .152 181.9,70.4 .14 182.5,60 .118 184.7,51.1 .096 186.4,43.7 .078 188.2,38.6 .063 188.4,27.7 .046 192.5",
+		cyan: "98.4 .019 200.9,95.6 .045 203.4,91.7 .08 205,86.5 .127 207.1,78.9 .154 211.5,71.5 .143 215.2,60.9 .126 221.7,52 .105 223.1,45 .085 224.3,39.8 .07 227.4,30.2 .056 229.7",
+		sky: "97.7 .013 236.6,95.1 .026 236.8,90.1 .058 230.9,82.8 .111 230.3,74.6 .16 232.7,68.5 .169 237.3,58.8 .158 242,50 .134 242.7,44.3 .11 240.8,39.1 .09 240.9,29.3 .066 243.2",
+		blue: "97 .014 254.6,93.2 .032 255.6,88.2 .059 254.1,80.9 .105 251.8,70.7 .165 254.6,62.3 .214 259.8,54.6 .245 262.9,48.8 .243 264.4,42.4 .199 265.6,37.9 .146 265.5,28.2 .091 267.9",
+		indigo: "96.2 .018 272.3,93 .034 272.8,87 .065 274,78.5 .115 274.7,67.3 .182 276.9,58.5 .233 277.1,51.1 .262 277,45.7 .24 277,39.8 .195 277.4,35.9 .144 278.7,25.7 .09 281.3",
+		violet: "96.9 .016 293.8,94.3 .029 294.6,89.4 .057 293.3,81.1 .111 293.6,70.2 .183 293.5,60.6 .25 292.7,54.1 .281 293,49.1 .27 292.6,43.2 .232 292.8,38 .189 293.7,28.3 .141 291.1",
+		purple: "97.7 .014 308.3,94.6 .033 307.2,90.2 .063 306.7,82.7 .119 306.4,71.4 .203 305.5,62.7 .265 303.9,55.8 .288 302.3,49.6 .265 301.9,43.8 .218 303.7,38.1 .176 305,29.1 .149 302.7",
+		fuchsia: "97.7 .017 320.1,95.2 .037 318.9,90.3 .076 319.6,83.3 .145 321.4,74 .238 322.2,66.7 .295 322.2,59.1 .293 322.9,51.8 .253 323.9,45.2 .211 324.6,40.1 .17 325.6,29.3 .136 325.7",
+		pink: "97.1 .014 343.2,94.8 .028 342.3,89.9 .061 343.2,82.3 .12 346,71.8 .202 349.8,65.6 .241 354.3,59.2 .249 .6,52.5 .223 4,45.9 .187 3.8,40.8 .153 2.4,28.4 .109 3.9",
+		rose: "96.9 .015 12.4,94.1 .03 12.6,89.2 .058 10,81 .117 11.6,71.2 .194 13.4,64.5 .246 16.4,58.6 .253 17.6,51.4 .222 16.9,45.5 .188 13.7,41 .159 10.3,27.1 .105 12.1"
+	}, r = {
+		currentColor: "currentColor",
+		transparent: "transparent",
+		green: "green",
+		red: "red",
+		blue: "blue",
+		gray: "gray",
+		black: "#000",
+		white: "#fff",
+		vi: "#7949FF"
+	};
+	function i() {
+		let e = { ...r };
+		for (let [r, i] of Object.entries(n)) i.split(",").forEach((n, i) => {
+			let [a, o, s] = n.split(" ");
+			e[`${r}-${t[i]}`] = `oklch(${a}% ${o} ${s})`;
+		});
+		return e;
+	}
+	let a = e.colors = i();
+	e.alpha = "";
+	let o = /^(.+)\/(\d{1,3}(?:\.\d+)?)$/;
+	function s(e) {
+		if (typeof e != "string") return null;
+		let t = o.exec(e);
+		return t && Number(t[2]) <= 100 ? {
+			color: t[1],
+			percent: t[2]
+		} : null;
+	}
+	e.alphaOf = s;
+	function c(e) {
+		let t = s(e);
+		return t !== null && t.color in a;
+	}
+	e.isAlpha = c;
+	function l(e, t) {
+		let n = s(e);
+		return n ? `color-mix(in oklab, ${t(n.color)} ${n.percent}%, transparent)` : "";
+	}
+	e.mix = l;
+})(f ||= {});
+var p = f, m;
+(function(e) {
+	let t = e.colors = p.colors;
+	(e.colorValues = Object.keys(m.colors)).push("none");
+	let n = e.bgImages = {
+		"gradient-primary": "linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #a855f7 100%)",
+		"gradient-aurora-light": "radial-gradient(900px circle at 18% 18%, rgba(99, 102, 241, 0.12), transparent 46%), radial-gradient(780px circle at 82% 12%, rgba(14, 165, 233, 0.1), transparent 45%), radial-gradient(960px circle at 48% 78%, rgba(236, 72, 153, 0.08), transparent 55%), linear-gradient(180deg, rgba(255, 255, 255, 0.92) 0%, rgba(248, 250, 252, 0.88) 100%)",
+		"gradient-aurora-dark": "radial-gradient(900px circle at 18% 18%, rgba(129, 140, 248, 0.16), transparent 46%), radial-gradient(820px circle at 82% 10%, rgba(45, 212, 191, 0.12), transparent 48%), radial-gradient(980px circle at 50% 80%, rgba(59, 130, 246, 0.12), transparent 55%), linear-gradient(180deg, rgba(15, 23, 42, 0.96) 0%, rgba(15, 23, 42, 0.9) 100%)",
+		"gradient-accent": "linear-gradient(135deg, #06b6d4 0%, #3b82f6 50%, #6366f1 100%)",
+		"bg-img-checked": "url(\"data:image/svg+xml,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20width%3D'100%25'%20viewBox%3D'0%200%2020%2020'%3E%3Cpath%20fill%3D'none'%20stroke%3D'%23FFF'%20stroke-linecap%3D'round'%20stroke-linejoin%3D'round'%20stroke-width%3D'2'%20d%3D'M6%2010l3%203l6-6'%2F%3E%3C%2Fsvg%3E\")",
+		"bg-img-indeterminate": `url("data:image/svg+xml,${encodeURIComponent(`<svg xmlns='http://www.w3.org/2000/svg' width='100%' viewBox='0 0 20 20'><line stroke='${t["violet-400"]}' x1='4' y1='10' x2='16' y2='10' stroke-width='1' /></svg>`)}")`,
+		"bg-img-radio": "url(\"data:image/svg+xml,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20width%3D'100%25'%20viewBox%3D'0%200%2020%2020'%3E%3Ccircle%20fill%3D'%23FFF'%20cx%3D'10'%20cy%3D'10'%20r%3D'5'%2F%3E%3C%2Fsvg%3E\")"
+	};
+	(e.bgImageValues = Object.keys(m.bgImages)).push("none");
+	let r = e.shadows = {
+		small: "rgba(0, 0, 0, 0.16) 0px 1px 4px",
+		medium: "rgba(0, 0, 0, 0.24) 0px 3px 8px",
+		large: "rgba(17, 17, 26, 0.1) 0px 4px 16px, rgba(17, 17, 26, 0.05) 0px 8px 32px"
+	};
+	(e.shadowValues = Object.keys(m.shadows)).push("none"), e.percentages = /* @__PURE__ */ "1/1.1/2.1/3.2/3.1/4.2/4.3/4.1/5.2/5.3/5.4/5.1/6.2/6.3/6.4/6.5/6.1/12.2/12.3/12.4/12.5/12.6/12.7/12.8/12.9/12.10/12.11/12".split("."), e.negativePercentages = /* @__PURE__ */ "-1/1.-1/2.-1/3.-2/3.-1/4.-2/4.-3/4.-1/5.-2/5.-3/5.-4/5.-1/6.-2/6.-3/6.-4/6.-5/6.-1/12.-2/12.-3/12.-4/12.-5/12.-6/12.-7/12.-8/12.-9/12.-10/12.-11/12".split("."), e.percentString = "";
+	function i(e) {
+		return typeof e == "string" && /^-?(\d+|\d*\.\d+)%$/.test(e);
+	}
+	e.isPercentString = i, e.aspectRatios = {
+		square: "1 / 1",
+		video: "16 / 9"
+	}, e.ratio = "";
+	function a(e) {
+		return typeof e == "string" && /^\d+(\.\d+)?\/\d+(\.\d+)?$/.test(e);
+	}
+	e.isRatio = a, e.systemColorValues = e.systemColors = [
+		"Highlight",
+		"HighlightText",
+		"Canvas",
+		"CanvasText",
+		"ButtonFace",
+		"ButtonText",
+		"GrayText",
+		"LinkText"
+	], e.reference = "";
+	function o(e) {
+		return typeof e == "string" && /^(url\(#[^\s()]+\)|var\(--[^\s()]+\))$/.test(e);
+	}
+	e.isReference = o;
+	let s = /^(--)?[A-Za-z_][\w-]*$/;
+	function c(e) {
+		return typeof e == "number" ? Number.isFinite(e) : typeof e == "string" && e.trim().length > 0 && !/[;{}]/.test(e);
+	}
+	e.isUsableValue = c;
+	function l([e, t]) {
+		return s.test(e) && c(t);
+	}
+	function u(e) {
+		return typeof e != "object" || !e || Array.isArray(e) ? !1 : Object.entries(e).some(l);
+	}
+	e.isCustomProperties = u;
+	function d(e, n) {
+		return e in t ? n(e) : p.isAlpha(e) ? p.mix(e, n) : e;
+	}
+	e.colorValue = d;
+	function f(e, t) {
+		return Object.entries(e).filter(l).map(([e, n]) => {
+			let r = typeof n == "string" ? d(n, t) : n;
+			return `--${e.replace(/^--/, "")}:${r}`;
+		}).join(";");
+	}
+	e.customProperties = f;
+	let h = {
+		inherit: "inherit",
+		none: "none",
+		...t,
+		...n,
+		...r
+	};
+	function g() {
+		let e = {}, t = {}, n = {};
+		return {
+			getVariableValue(r) {
+				return r in e || (r in n ? (t[r] = n[r], e[r] = n[r]) : r in h ? (t[r] = h[r], e[r] = h[r]) : (t[r] = r, e[r] = r)), `var(--${r})`;
+			},
+			generateVariables() {
+				return Object.entries(e).map(([e, t]) => `--${e}: ${t};`).join("");
+			},
+			getPendingVariables() {
+				let e = { ...t };
+				return Object.keys(t).forEach((e) => delete t[e]), e;
+			},
+			hasPendingVariables() {
+				return Object.keys(t).length > 0;
+			},
+			isUserVariable(e) {
+				return e in n;
+			},
+			reset() {
+				Object.keys(e).forEach((t) => delete e[t]), Object.keys(t).forEach((e) => delete t[e]);
+			},
+			setUserVariables(e) {
+				n = {
+					...n,
+					...e
+				};
+			}
+		};
+	}
+	e.createRegistry = g;
+})(m ||= {});
+var h = m, g;
+(function(e) {
+	let t = /^(--)?[A-Za-z_][\w-]*$/;
+	function n(e) {
+		if (e.includes("-")) return e;
+		let t = e.replace(/[A-Z]/g, (e) => `-${e.toLowerCase()}`);
+		return t.startsWith("ms-") ? `-${t}` : t;
+	}
+	e.toPropertyName = n;
+	function r([e, n]) {
+		return t.test(e) && h.isUsableValue(n);
+	}
+	function i(e) {
+		return typeof e != "object" || !e || Array.isArray(e) ? !1 : Object.entries(e).some(r);
+	}
+	e.isDeclarations = i;
+	function a(e, t) {
+		return Object.entries(e).filter(r).map(([e, r]) => `${n(e)}:${typeof r == "string" ? h.colorValue(r, t) : r}`).join(";");
+	}
+	e.declarations = a;
+})(g ||= {});
+var _ = g, v;
+(function(e) {
+	let t = e.filterLayers = [
+		"Blur",
+		"Brightness",
+		"Contrast",
+		"Grayscale",
+		"HueRotate",
+		"Invert",
+		"Saturate",
+		"Sepia",
+		"DropShadow"
+	], n = e.backdropLayers = [
+		"BackdropBlur",
+		"BackdropBrightness",
+		"BackdropContrast",
+		"BackdropGrayscale",
+		"BackdropHueRotate",
+		"BackdropInvert",
+		"BackdropOpacity",
+		"BackdropSaturate",
+		"BackdropSepia"
+	], r = {
+		filter: `filter:${t.map((e) => `var(--box${e},)`).join(" ")}`,
+		backdrop: `backdrop-filter:${n.map((e) => `var(--box${e},)`).join(" ")}`
+	};
+	e.properties = [...t, ...n].map((e) => `@property --box${e}{syntax: "*";inherits: false;}`), e.cleared = "initial";
+	function i(e, t) {
+		return `--box${e}:${t};${r[e.startsWith("Backdrop") ? "backdrop" : "filter"]}`;
+	}
+	e.layerDeclarations = i;
+	let a = {
+		xs: 4,
+		sm: 8,
+		md: 12,
+		lg: 16,
+		xl: 24,
+		xxl: 40,
+		xxxl: 64
+	};
+	e.blurScale = Object.keys(a);
+	function o(e) {
+		return a[e];
+	}
+	e.blur = o;
+})(v ||= {});
+var y = v, b;
+(function(e) {
+	let t = {
+		t: "to top",
+		tr: "to top right",
+		r: "to right",
+		br: "to bottom right",
+		b: "to bottom",
+		bl: "to bottom left",
+		l: "to left",
+		tl: "to top left"
+	}, n = [
+		"center",
+		"top",
+		"right",
+		"bottom",
+		"left",
+		"top left",
+		"top right",
+		"bottom left",
+		"bottom right"
+	], r = {
+		srgb: "in srgb",
+		hsl: "in hsl",
+		oklab: "in oklab",
+		oklch: "in oklch",
+		"hsl-longer": "in hsl longer hue",
+		"oklch-longer": "in oklch longer hue"
+	}, i = [
+		"linear",
+		"radial",
+		"conic"
+	], a = /* @__PURE__ */ new Set([
+		...i,
+		"at",
+		"colors",
+		"interpolate"
+	]);
+	function o(e) {
+		return typeof e == "string" ? e in p.colors || e === "none" || h.systemColorValues.includes(e) || p.isAlpha(e) || h.isReference(e) : !1;
+	}
+	function s(e) {
+		return Array.isArray(e) ? e.length === 2 && o(e[0]) && h.isPercentString(e[1]) : o(e);
+	}
+	function c(e) {
+		if (i.filter((t) => t in e).length !== 1) return null;
+		if ("linear" in e) {
+			let n = e.linear;
+			return "at" in e ? null : typeof n == "number" ? Number.isFinite(n) ? `${n}deg` : null : typeof n == "string" && n in t ? t[n] : null;
+		}
+		if ("radial" in e) {
+			let t = e.radial;
+			return t === !0 ? "" : t === "circle" || t === "ellipse" ? t : null;
+		}
+		let n = e.conic;
+		return n === !0 ? "" : typeof n == "number" && Number.isFinite(n) ? `from ${n}deg` : null;
+	}
+	function l(e) {
+		if (typeof e != "object" || !e || Array.isArray(e)) return !1;
+		let t = e;
+		return Object.keys(t).some((e) => !a.has(e)) || !Array.isArray(t.colors) || t.colors.length < 2 || !t.colors.every(s) || t.interpolate !== void 0 && !(typeof t.interpolate == "string" && t.interpolate in r) || t.at !== void 0 && !n.includes(t.at) ? !1 : c(t) !== null;
+	}
+	e.isGradient = l;
+	function u(e, t) {
+		let [n, r] = Array.isArray(e) ? e : [e, ""];
+		return `${h.colorValue(n, t)}${r ? ` ${r}` : ""}`;
+	}
+	function d(e, t) {
+		let n = e, a = i.find((e) => e in n) ?? "linear", o = typeof n.at == "string" ? `at ${n.at}` : "", s = n.interpolate ? r[n.interpolate] : "", l = [
+			c(n) ?? "",
+			o,
+			s
+		].filter(Boolean).join(" "), d = n.colors.map((e) => u(e, t)).join(",");
+		return `${a}-gradient(${l ? `${l},` : ""}${d})`;
+	}
+	e.css = d;
+})(b ||= {});
+var x = b, S;
+(function(e) {
+	let t = e.layers = [
+		"InsetShadow",
+		"InsetRing",
+		"Ring",
+		"Shadow"
+	], n = "0 0 #0000", r = `box-shadow:${t.map((e) => `var(--box${e}, ${n})`).join(",")}`;
+	e.properties = [
+		...t.flatMap((e) => [`@property --box${e}{syntax: "*";inherits: false;}`, `@property --box${e}Color{syntax: "*";inherits: false;}`]),
+		"@property --boxTextShadowColor{syntax: \"*\";inherits: false;}",
+		"@property --boxDropShadowColor{syntax: \"*\";inherits: false;}"
+	];
+	let i = {
+		xxs: "0 1px @.05",
+		xs: "0 1px 2px 0 @.05",
+		sm: "0 1px 3px 0 @.1,0 1px 2px -1px @.1",
+		md: "0 4px 6px -1px @.1,0 2px 4px -2px @.1",
+		lg: "0 10px 15px -3px @.1,0 4px 6px -4px @.1",
+		xl: "0 20px 25px -5px @.1,0 8px 10px -6px @.1",
+		xxl: "0 25px 50px -12px @.25"
+	}, a = {
+		xxs: "inset 0 1px @.05",
+		xs: "inset 0 1px 1px @.05",
+		sm: "inset 0 2px 4px @.05"
+	}, o = {
+		xxs: "0px 1px 0px @.15",
+		xs: "0px 1px 1px @.2",
+		sm: "0px 1px 0px @.075,0px 1px 1px @.075,0px 2px 2px @.075",
+		md: "0px 1px 1px @.1,0px 1px 2px @.1,0px 2px 4px @.1",
+		lg: "0px 1px 2px @.1,0px 3px 2px @.1,0px 4px 8px @.1"
+	}, s = {
+		xs: "0 1px 1px @.05",
+		sm: "0 1px 2px @.15",
+		md: "0 3px 3px @.12",
+		lg: "0 4px 4px @.15",
+		xl: "0 9px 7px @.1",
+		xxl: "0 25px 25px @.15"
+	};
+	e.boxSizes = [...Object.keys(i), "none"], e.insetSizes = [...Object.keys(a), "none"], e.textSizes = [...Object.keys(o), "none"], e.dropSizes = [...Object.keys(s), "none"];
+	function c(e, t) {
+		return e.replace(/@([\d.]+)/g, (e, n) => `var(--box${t}Color, rgb(0 0 0 / ${n}))`);
+	}
+	function l(e, t) {
+		return `--box${e}:${t};${r}`;
+	}
+	e.layerDeclarations = l;
+	function u(e, t) {
+		return `--box${e}Color:${t}`;
+	}
+	e.colorDeclaration = u;
+	function d(e, t) {
+		return l(e, t === "none" ? n : c((e === "Shadow" ? i : a)[t], e));
+	}
+	e.shadow = d;
+	function f(e, t) {
+		return l(e, t === 0 ? n : `${e === "InsetRing" ? "inset " : ""}0 0 0 ${t}px var(--box${e}Color, currentColor)`);
+	}
+	e.ring = f;
+	function p(e) {
+		return e === "none" ? "none" : c(o[e], "TextShadow");
+	}
+	e.textShadow = p;
+	function m(e) {
+		return `drop-shadow(${c(s[e], "DropShadow")})`;
+	}
+	e.dropShadow = m;
+})(S ||= {});
+var C = S, w = [
+	0,
+	.1,
+	.2,
+	.3,
+	.4,
+	.5,
+	.6,
+	.7,
+	.8,
+	.9,
+	1
+], T = {
+	values: h.reference,
+	match: h.isReference
+}, E = {
+	values: p.alpha,
+	match: p.isAlpha,
+	valueFormat: (e, t) => p.mix(e, t)
+}, D = {
+	values: h.percentString,
+	match: h.isPercentString
+}, O = {
+	values: h.ratio,
+	match: h.isRatio,
+	valueFormat: (e) => e.replace("/", " / ")
+}, k = [
+	"safe center",
+	"safe start",
+	"safe end",
+	"unsafe center",
+	"unsafe start",
+	"unsafe end"
+];
+function A(e, t) {
+	return (n) => `--boxTranslate${e}:${t(n)};translate:var(--boxTranslateX, 0) var(--boxTranslateY, 0)`;
+}
+function j(e) {
+	return [
+		{
+			values: h.colorValues,
+			declarations: (t, n) => C.colorDeclaration(e, n(t))
+		},
+		{
+			values: h.systemColorValues,
+			declarations: (t) => C.colorDeclaration(e, t)
+		},
+		{
+			values: p.alpha,
+			match: p.isAlpha,
+			declarations: (t, n) => C.colorDeclaration(e, p.mix(t, n))
+		}
+	];
+}
+function M(e, t, n) {
+	return [{
+		values: ["none"],
+		declarations: () => y.layerDeclarations(e, y.cleared)
+	}, {
+		values: 0,
+		declarations: (r) => y.layerDeclarations(e, `${t}(${r}${n})`)
+	}];
+}
+function ee(e) {
+	return [{
+		values: y.blurScale,
+		declarations: (t) => y.layerDeclarations(e, `blur(${y.blur(t)}px)`)
+	}, ...M(e, "blur", "px")];
+}
+var te = {
+	appearance: [{ values: [
+		"none",
+		"auto",
+		"menulist-button",
+		"textfield",
+		"button",
+		"checkbox"
+	] }],
+	animation: [{
+		values: [...o.presetNames, "none"],
+		valueFormat: (e) => o.presets[e] ?? "none",
+		keyframes: (e) => [e]
+	}],
+	animationDelay: [{
+		values: 0,
+		styleName: "animation-delay",
+		valueFormat: s.Value.ms
+	}],
+	animationDirection: [{
+		values: [
+			"normal",
+			"reverse",
+			"alternate",
+			"alternate-reverse"
+		],
+		styleName: "animation-direction"
+	}],
+	animationDuration: [{
+		values: 0,
+		styleName: "animation-duration",
+		valueFormat: s.Value.ms
+	}, {
+		values: [...o.springNames],
+		styleName: "animation-duration",
+		valueFormat: (e) => o.springDuration(e)
+	}],
+	animationFillMode: [{
+		values: [
+			"none",
+			"forwards",
+			"backwards",
+			"both"
+		],
+		styleName: "animation-fill-mode"
+	}],
+	animationIterationCount: [{
+		values: ["infinite"],
+		styleName: "animation-iteration-count"
+	}, {
+		values: 0,
+		styleName: "animation-iteration-count"
+	}],
+	animationName: [{
+		values: "",
+		styleName: "animation-name",
+		keyframes: (e) => String(e).split(/[\s,]+/)
+	}],
+	animationPlayState: [{
+		values: ["running", "paused"],
+		styleName: "animation-play-state"
+	}],
+	animationTimingFunction: [
+		{
+			values: [
+				"linear",
+				"ease",
+				"ease-in",
+				"ease-in-out",
+				"ease-out",
+				"step-start",
+				"step-end"
+			],
+			styleName: "animation-timing-function"
+		},
+		{
+			values: [...o.springNames],
+			styleName: "animation-timing-function",
+			declarations: (e) => o.easingDeclarations("animation-timing-function", o.springEasing(e))
+		},
+		{
+			values: o.timingFunction,
+			match: o.isTimingFunction,
+			styleName: "animation-timing-function",
+			declarations: (e) => o.easingDeclarations("animation-timing-function", e)
+		}
+	],
+	b: [{
+		values: 0,
+		styleName: "border-width",
+		valueFormat: s.Value.px
+	}],
+	bx: [{
+		values: 0,
+		styleName: "border-inline-width",
+		valueFormat: s.Value.px
+	}],
+	by: [{
+		values: 0,
+		styleName: "border-block-width",
+		valueFormat: s.Value.px
+	}],
+	bt: [{
+		values: 0,
+		styleName: "border-top-width",
+		valueFormat: s.Value.px
+	}],
+	br: [{
+		values: 0,
+		styleName: "border-right-width",
+		valueFormat: s.Value.px
+	}],
+	bb: [{
+		values: 0,
+		styleName: "border-bottom-width",
+		valueFormat: s.Value.px
+	}],
+	bl: [{
+		values: 0,
+		styleName: "border-left-width",
+		valueFormat: s.Value.px
+	}],
+	bs: [{
+		values: 0,
+		styleName: "border-inline-start-width",
+		valueFormat: s.Value.px
+	}],
+	be: [{
+		values: 0,
+		styleName: "border-inline-end-width",
+		valueFormat: s.Value.px
+	}],
+	borderStyle: [{
+		styleName: "border-style",
+		values: [
+			"solid",
+			"dashed",
+			"dotted",
+			"double",
+			"groove",
+			"ridge",
+			"inset",
+			"outset",
+			"none",
+			"hidden"
+		]
+	}],
+	borderRadius: [{
+		styleName: "border-radius",
+		values: 0,
+		valueFormat: s.Value.rem
+	}],
+	borderRadiusTop: [{
+		values: 0,
+		styleName: ["border-top-left-radius", "border-top-right-radius"],
+		valueFormat: s.Value.rem
+	}],
+	borderRadiusRight: [{
+		values: 0,
+		styleName: ["border-top-right-radius", "border-bottom-right-radius"],
+		valueFormat: s.Value.rem
+	}],
+	borderRadiusBottom: [{
+		values: 0,
+		styleName: ["border-bottom-left-radius", "border-bottom-right-radius"],
+		valueFormat: s.Value.rem
+	}],
+	borderRadiusLeft: [{
+		values: 0,
+		styleName: ["border-top-left-radius", "border-bottom-left-radius"],
+		valueFormat: s.Value.rem
+	}],
+	borderRadiusTopLeft: [{
+		values: 0,
+		styleName: "border-top-left-radius",
+		valueFormat: s.Value.rem
+	}],
+	borderRadiusTopRight: [{
+		values: 0,
+		styleName: "border-top-right-radius",
+		valueFormat: s.Value.rem
+	}],
+	borderRadiusBottomRight: [{
+		values: 0,
+		styleName: "border-bottom-right-radius",
+		valueFormat: s.Value.rem
+	}],
+	borderRadiusBottomLeft: [{
+		values: 0,
+		styleName: "border-bottom-left-radius",
+		valueFormat: s.Value.rem
+	}],
+	borderRadiusStart: [{
+		values: 0,
+		styleName: ["border-start-start-radius", "border-end-start-radius"],
+		valueFormat: s.Value.rem
+	}],
+	borderRadiusEnd: [{
+		values: 0,
+		styleName: ["border-start-end-radius", "border-end-end-radius"],
+		valueFormat: s.Value.rem
+	}],
+	borderRadiusStartStart: [{
+		values: 0,
+		styleName: "border-start-start-radius",
+		valueFormat: s.Value.rem
+	}],
+	borderRadiusStartEnd: [{
+		values: 0,
+		styleName: "border-start-end-radius",
+		valueFormat: s.Value.rem
+	}],
+	borderRadiusEndEnd: [{
+		values: 0,
+		styleName: "border-end-end-radius",
+		valueFormat: s.Value.rem
+	}],
+	borderRadiusEndStart: [{
+		values: 0,
+		styleName: "border-end-start-radius",
+		valueFormat: s.Value.rem
+	}],
+	position: [{ values: [
+		"static",
+		"relative",
+		"absolute",
+		"fixed",
+		"sticky"
+	] }],
+	top: [
+		{
+			values: 0,
+			valueFormat: s.Value.rem
+		},
+		{ values: ["auto"] },
+		{
+			values: h.percentages,
+			valueFormat: s.Value.fraction
+		},
+		{
+			values: h.negativePercentages,
+			valueFormat: s.Value.fraction
+		},
+		{ ...D }
+	],
+	right: [
+		{
+			values: 0,
+			valueFormat: s.Value.rem
+		},
+		{ values: ["auto"] },
+		{
+			values: h.percentages,
+			valueFormat: s.Value.fraction
+		},
+		{
+			values: h.negativePercentages,
+			valueFormat: s.Value.fraction
+		},
+		{ ...D }
+	],
+	bottom: [
+		{
+			values: 0,
+			valueFormat: s.Value.rem
+		},
+		{ values: ["auto"] },
+		{
+			values: h.percentages,
+			valueFormat: s.Value.fraction
+		},
+		{
+			values: h.negativePercentages,
+			valueFormat: s.Value.fraction
+		},
+		{ ...D }
+	],
+	left: [
+		{
+			values: 0,
+			valueFormat: s.Value.rem
+		},
+		{ values: ["auto"] },
+		{
+			values: h.percentages,
+			valueFormat: s.Value.fraction
+		},
+		{
+			values: h.negativePercentages,
+			valueFormat: s.Value.fraction
+		},
+		{ ...D }
+	],
+	inset: [
+		{
+			values: 0,
+			valueFormat: s.Value.rem
+		},
+		{ values: ["auto"] },
+		{
+			values: h.percentages,
+			valueFormat: s.Value.fraction
+		},
+		{
+			values: h.negativePercentages,
+			valueFormat: s.Value.fraction
+		},
+		{ ...D }
+	],
+	insetX: [
+		{
+			values: 0,
+			styleName: "inset-inline",
+			valueFormat: s.Value.rem
+		},
+		{
+			values: ["auto"],
+			styleName: "inset-inline"
+		},
+		{
+			values: h.percentages,
+			styleName: "inset-inline",
+			valueFormat: s.Value.fraction
+		},
+		{
+			values: h.negativePercentages,
+			styleName: "inset-inline",
+			valueFormat: s.Value.fraction
+		},
+		{
+			...D,
+			styleName: "inset-inline"
+		}
+	],
+	insetY: [
+		{
+			values: 0,
+			styleName: "inset-block",
+			valueFormat: s.Value.rem
+		},
+		{
+			values: ["auto"],
+			styleName: "inset-block"
+		},
+		{
+			values: h.percentages,
+			styleName: "inset-block",
+			valueFormat: s.Value.fraction
+		},
+		{
+			values: h.negativePercentages,
+			styleName: "inset-block",
+			valueFormat: s.Value.fraction
+		},
+		{
+			...D,
+			styleName: "inset-block"
+		}
+	],
+	insetStart: [
+		{
+			values: 0,
+			styleName: "inset-inline-start",
+			valueFormat: s.Value.rem
+		},
+		{
+			values: ["auto"],
+			styleName: "inset-inline-start"
+		},
+		{
+			values: h.percentages,
+			valueFormat: s.Value.fraction,
+			styleName: "inset-inline-start"
+		},
+		{
+			values: h.negativePercentages,
+			valueFormat: s.Value.fraction,
+			styleName: "inset-inline-start"
+		},
+		{
+			...D,
+			styleName: "inset-inline-start"
+		}
+	],
+	insetEnd: [
+		{
+			values: 0,
+			styleName: "inset-inline-end",
+			valueFormat: s.Value.rem
+		},
+		{
+			values: ["auto"],
+			styleName: "inset-inline-end"
+		},
+		{
+			values: h.percentages,
+			valueFormat: s.Value.fraction,
+			styleName: "inset-inline-end"
+		},
+		{
+			values: h.negativePercentages,
+			valueFormat: s.Value.fraction,
+			styleName: "inset-inline-end"
+		},
+		{
+			...D,
+			styleName: "inset-inline-end"
+		}
+	],
+	boxSizing: [{
+		values: ["border-box", "content-box"],
+		styleName: "box-sizing"
+	}],
+	contentVisibility: [{
+		values: ["visible", "hidden"],
+		styleName: "content-visibility"
+	}],
+	clipPath: [{
+		values: ["inset(50%)", "none"],
+		styleName: "clip-path"
+	}, {
+		...T,
+		styleName: "clip-path"
+	}],
+	cursor: [{ values: /* @__PURE__ */ "auto.default.none.context-menu.help.pointer.progress.wait.cell.crosshair.text.vertical-text.alias.copy.move.no-drop.not-allowed.e-resize.n-resize.ne-resize.nw-resize.s-resize.se-resize.sw-resize.w-resize.ew-resize.ns-resize.nesw-resize.nwse-resize.col-resize.row-resize.all-scroll.zoom-in.zoom-out.grab.grabbing".split(".") }],
+	display: [{ values: [
+		"none",
+		"block",
+		"inline",
+		"inline-block",
+		"flex",
+		"inline-flex",
+		"grid",
+		"inline-grid",
+		"contents",
+		"table",
+		"table-header-group",
+		"table-row-group",
+		"table-row",
+		"table-cell"
+	] }],
+	inline: [{
+		values: [!0],
+		styleName: "display",
+		valueFormat: () => "inline-block"
+	}],
+	container: [{
+		values: [!0],
+		styleName: "container-type",
+		valueFormat: () => "inline-size"
+	}, {
+		values: "",
+		match: l.isContainerName,
+		styleName: "container",
+		valueFormat: (e) => `${e} / inline-size`
+	}],
+	containerName: [{
+		values: "",
+		match: l.isContainerName,
+		styleName: "container-name"
+	}],
+	containerType: [{
+		values: [
+			"inline-size",
+			"size",
+			"normal"
+		],
+		styleName: "container-type"
+	}],
+	interpolateSize: [{
+		styleName: "interpolate-size",
+		values: ["numeric-only", "allow-keywords"]
+	}],
+	jc: [{
+		styleName: "justify-content",
+		values: [
+			"start",
+			"end",
+			"flex-start",
+			"flex-end",
+			"center",
+			"left",
+			"right",
+			"space-between",
+			"space-around",
+			"space-evenly",
+			"stretch",
+			...k
+		]
+	}],
+	ai: [{
+		styleName: "align-items",
+		values: [
+			"stretch",
+			"flex-start",
+			"flex-end",
+			"center",
+			"baseline",
+			"start",
+			"end",
+			"self-start",
+			"self-end",
+			...k
+		]
+	}],
+	justifyItems: [{
+		styleName: "justify-items",
+		values: [
+			"normal",
+			"start",
+			"end",
+			"center",
+			"stretch",
+			"baseline",
+			"left",
+			"right",
+			"self-start",
+			"self-end",
+			...k
+		]
+	}],
+	placeItems: [{
+		styleName: "place-items",
+		values: [
+			"normal",
+			"start",
+			"end",
+			"center",
+			"stretch",
+			"baseline",
+			"self-start",
+			"self-end",
+			...k
+		]
+	}],
+	placeContent: [{
+		styleName: "place-content",
+		values: [
+			"start",
+			"end",
+			"flex-start",
+			"flex-end",
+			"center",
+			"space-between",
+			"space-around",
+			"space-evenly",
+			"stretch",
+			"baseline",
+			...k
+		]
+	}],
+	alignContent: [{
+		styleName: "align-content",
+		values: [
+			"flex-start",
+			"flex-end",
+			"center",
+			"space-between",
+			"space-around",
+			"space-evenly",
+			"stretch",
+			"start",
+			"end",
+			"baseline",
+			"normal",
+			...k
+		]
+	}],
+	flex1: [{
+		styleName: "flex",
+		values: [!0],
+		valueFormat: () => "1"
+	}],
+	d: [{
+		styleName: "flex-direction",
+		values: [
+			"row",
+			"row-reverse",
+			"column",
+			"column-reverse"
+		]
+	}],
+	flexWrap: [{
+		styleName: "flex-wrap",
+		values: [
+			"nowrap",
+			"wrap",
+			"wrap-reverse"
+		]
+	}],
+	flexGrow: [{
+		styleName: "flex-grow",
+		values: 0
+	}],
+	flexShrink: [{
+		styleName: "flex-shrink",
+		values: 0
+	}],
+	alignSelf: [{
+		styleName: "align-self",
+		values: [
+			"auto",
+			"flex-start",
+			"flex-end",
+			"center",
+			"baseline",
+			"stretch",
+			"start",
+			"end",
+			"self-start",
+			"self-end",
+			...k
+		]
+	}],
+	justifySelf: [{
+		styleName: "justify-self",
+		values: [
+			"auto",
+			"flex-start",
+			"flex-end",
+			"center",
+			"baseline",
+			"stretch",
+			"start",
+			"end",
+			"left",
+			"right",
+			"self-start",
+			"self-end",
+			...k
+		]
+	}],
+	fontSize: [{
+		styleName: "font-size",
+		values: 0,
+		valueFormat: (e) => `${e / 16}rem`
+	}, {
+		styleName: "font-size",
+		values: ["inherit"]
+	}],
+	fontStyle: [{
+		styleName: "font-style",
+		values: [
+			"italic",
+			"normal",
+			"oblique"
+		]
+	}],
+	fontWeight: [{
+		styleName: "font-weight",
+		values: [
+			100,
+			200,
+			300,
+			400,
+			500,
+			600,
+			700,
+			800,
+			900
+		]
+	}],
+	gap: [{
+		values: 0,
+		valueFormat: s.Value.rem
+	}, { ...D }],
+	rowGap: [{
+		styleName: "row-gap",
+		values: 0,
+		valueFormat: s.Value.rem
+	}, {
+		styleName: "row-gap",
+		...D
+	}],
+	columnGap: [{
+		styleName: "column-gap",
+		values: 0,
+		valueFormat: s.Value.rem
+	}, {
+		styleName: "column-gap",
+		...D
+	}],
+	order: [{
+		styleName: "order",
+		values: 0
+	}],
+	height: [
+		{
+			values: 0,
+			valueFormat: s.Value.rem
+		},
+		{
+			values: ["fit"],
+			valueFormat: () => "100%"
+		},
+		{
+			values: ["fit-screen"],
+			valueFormat: () => "100vh"
+		},
+		{
+			values: h.percentages,
+			valueFormat: s.Value.fraction
+		},
+		{ values: [
+			"auto",
+			"fit-content",
+			"max-content",
+			"min-content"
+		] },
+		{ ...D }
+	],
+	minHeight: [
+		{
+			styleName: "min-height",
+			values: 0,
+			valueFormat: s.Value.rem
+		},
+		{
+			styleName: "min-height",
+			values: ["fit"],
+			valueFormat: () => "100%"
+		},
+		{
+			styleName: "min-height",
+			values: ["fit-screen"],
+			valueFormat: () => "100vh"
+		},
+		{
+			styleName: "min-height",
+			values: h.percentages,
+			valueFormat: s.Value.fraction
+		},
+		{
+			styleName: "min-height",
+			values: [
+				"auto",
+				"fit-content",
+				"max-content",
+				"min-content"
+			]
+		},
+		{
+			styleName: "min-height",
+			...D
+		}
+	],
+	maxHeight: [
+		{
+			styleName: "max-height",
+			values: 0,
+			valueFormat: s.Value.rem
+		},
+		{
+			styleName: "max-height",
+			values: ["fit"],
+			valueFormat: () => "100%"
+		},
+		{
+			styleName: "max-height",
+			values: ["fit-screen"],
+			valueFormat: () => "100vh"
+		},
+		{
+			styleName: "max-height",
+			values: h.percentages,
+			valueFormat: s.Value.fraction
+		},
+		{
+			styleName: "max-height",
+			values: [
+				"auto",
+				"fit-content",
+				"max-content",
+				"min-content"
+			]
+		},
+		{
+			styleName: "max-height",
+			...D
+		}
+	],
+	width: [
+		{
+			values: 0,
+			valueFormat: s.Value.rem
+		},
+		{
+			values: ["fit"],
+			valueFormat: () => "100%"
+		},
+		{
+			values: ["fit-screen"],
+			valueFormat: () => "100vw"
+		},
+		{
+			values: h.percentages,
+			valueFormat: s.Value.fraction
+		},
+		{ values: [
+			"auto",
+			"fit-content",
+			"max-content",
+			"min-content"
+		] },
+		{ ...D }
+	],
+	minWidth: [
+		{
+			styleName: "min-width",
+			values: 0,
+			valueFormat: s.Value.rem
+		},
+		{
+			styleName: "min-width",
+			values: ["fit"],
+			valueFormat: () => "100%"
+		},
+		{
+			styleName: "min-width",
+			values: ["fit-screen"],
+			valueFormat: () => "100vw"
+		},
+		{
+			styleName: "min-width",
+			values: h.percentages,
+			valueFormat: s.Value.fraction
+		},
+		{
+			styleName: "min-width",
+			values: [
+				"auto",
+				"fit-content",
+				"max-content",
+				"min-content"
+			]
+		},
+		{
+			styleName: "min-width",
+			...D
+		}
+	],
+	maxWidth: [
+		{
+			styleName: "max-width",
+			values: 0,
+			valueFormat: s.Value.rem
+		},
+		{
+			styleName: "max-width",
+			values: ["fit"],
+			valueFormat: () => "100%"
+		},
+		{
+			styleName: "max-width",
+			values: ["fit-screen"],
+			valueFormat: () => "100vw"
+		},
+		{
+			styleName: "max-width",
+			values: h.percentages,
+			valueFormat: s.Value.fraction
+		},
+		{
+			styleName: "max-width",
+			values: [
+				"auto",
+				"fit-content",
+				"max-content",
+				"min-content"
+			]
+		},
+		{
+			styleName: "max-width",
+			...D
+		}
+	],
+	aspectRatio: [
+		{
+			styleName: "aspect-ratio",
+			values: [
+				"auto",
+				"square",
+				"video"
+			],
+			valueFormat: (e) => h.aspectRatios[e] ?? e
+		},
+		{
+			styleName: "aspect-ratio",
+			...O
+		},
+		{
+			styleName: "aspect-ratio",
+			values: 0
+		}
+	],
+	letterSpacing: [{
+		styleName: "letter-spacing",
+		values: 0,
+		valueFormat: s.Value.px
+	}],
+	lineHeight: [{
+		styleName: "line-height",
+		values: 0,
+		valueFormat: s.Value.px
+	}, {
+		styleName: "line-height",
+		values: ["font-size"],
+		valueFormat: () => "1"
+	}],
+	listStyle: [{
+		styleName: "list-style",
+		values: [
+			"square",
+			"inside",
+			"outside",
+			"none"
+		]
+	}],
+	m: [
+		{
+			values: 0,
+			styleName: "margin",
+			valueFormat: s.Value.rem
+		},
+		{
+			values: ["auto"],
+			styleName: "margin"
+		},
+		{
+			styleName: "margin",
+			values: h.percentages,
+			valueFormat: s.Value.fraction
+		},
+		{
+			styleName: "margin",
+			values: h.negativePercentages,
+			valueFormat: s.Value.fraction
+		},
+		{
+			...D,
+			styleName: "margin"
+		}
+	],
+	mx: [
+		{
+			values: 0,
+			styleName: "margin-inline",
+			valueFormat: s.Value.rem
+		},
+		{
+			values: ["auto"],
+			styleName: "margin-inline"
+		},
+		{
+			styleName: "margin-inline",
+			values: h.percentages,
+			valueFormat: s.Value.fraction
+		},
+		{
+			styleName: "margin-inline",
+			values: h.negativePercentages,
+			valueFormat: s.Value.fraction
+		},
+		{
+			...D,
+			styleName: "margin-inline"
+		}
+	],
+	my: [
+		{
+			values: 0,
+			styleName: "margin-block",
+			valueFormat: s.Value.rem
+		},
+		{
+			values: ["auto"],
+			styleName: "margin-block"
+		},
+		{
+			styleName: "margin-block",
+			values: h.percentages,
+			valueFormat: s.Value.fraction
+		},
+		{
+			styleName: "margin-block",
+			values: h.negativePercentages,
+			valueFormat: s.Value.fraction
+		},
+		{
+			...D,
+			styleName: "margin-block"
+		}
+	],
+	mt: [
+		{
+			values: 0,
+			styleName: "margin-top",
+			valueFormat: s.Value.rem
+		},
+		{
+			values: ["auto"],
+			styleName: "margin-top"
+		},
+		{
+			values: h.percentages,
+			valueFormat: s.Value.fraction,
+			styleName: "margin-top"
+		},
+		{
+			values: h.negativePercentages,
+			valueFormat: s.Value.fraction,
+			styleName: "margin-top"
+		},
+		{
+			...D,
+			styleName: "margin-top"
+		}
+	],
+	mr: [
+		{
+			values: 0,
+			styleName: "margin-right",
+			valueFormat: s.Value.rem
+		},
+		{
+			values: ["auto"],
+			styleName: "margin-right"
+		},
+		{
+			values: h.percentages,
+			valueFormat: s.Value.fraction,
+			styleName: "margin-right"
+		},
+		{
+			values: h.negativePercentages,
+			valueFormat: s.Value.fraction,
+			styleName: "margin-right"
+		},
+		{
+			...D,
+			styleName: "margin-right"
+		}
+	],
+	mb: [
+		{
+			values: 0,
+			styleName: "margin-bottom",
+			valueFormat: s.Value.rem
+		},
+		{
+			values: ["auto"],
+			styleName: "margin-bottom"
+		},
+		{
+			values: h.percentages,
+			valueFormat: s.Value.fraction,
+			styleName: "margin-bottom"
+		},
+		{
+			values: h.negativePercentages,
+			valueFormat: s.Value.fraction,
+			styleName: "margin-bottom"
+		},
+		{
+			...D,
+			styleName: "margin-bottom"
+		}
+	],
+	ml: [
+		{
+			values: 0,
+			styleName: "margin-left",
+			valueFormat: s.Value.rem
+		},
+		{
+			values: ["auto"],
+			styleName: "margin-left"
+		},
+		{
+			values: h.percentages,
+			valueFormat: s.Value.fraction,
+			styleName: "margin-left"
+		},
+		{
+			values: h.negativePercentages,
+			valueFormat: s.Value.fraction,
+			styleName: "margin-left"
+		},
+		{
+			...D,
+			styleName: "margin-left"
+		}
+	],
+	ms: [
+		{
+			values: 0,
+			styleName: "margin-inline-start",
+			valueFormat: s.Value.rem
+		},
+		{
+			values: ["auto"],
+			styleName: "margin-inline-start"
+		},
+		{
+			values: h.percentages,
+			valueFormat: s.Value.fraction,
+			styleName: "margin-inline-start"
+		},
+		{
+			values: h.negativePercentages,
+			valueFormat: s.Value.fraction,
+			styleName: "margin-inline-start"
+		},
+		{
+			...D,
+			styleName: "margin-inline-start"
+		}
+	],
+	me: [
+		{
+			values: 0,
+			styleName: "margin-inline-end",
+			valueFormat: s.Value.rem
+		},
+		{
+			values: ["auto"],
+			styleName: "margin-inline-end"
+		},
+		{
+			values: h.percentages,
+			valueFormat: s.Value.fraction,
+			styleName: "margin-inline-end"
+		},
+		{
+			values: h.negativePercentages,
+			valueFormat: s.Value.fraction,
+			styleName: "margin-inline-end"
+		},
+		{
+			...D,
+			styleName: "margin-inline-end"
+		}
+	],
+	p: [
+		{
+			values: 0,
+			styleName: "padding",
+			valueFormat: s.Value.rem
+		},
+		{
+			values: h.percentages,
+			valueFormat: s.Value.fraction,
+			styleName: "padding"
+		},
+		{
+			...D,
+			styleName: "padding"
+		}
+	],
+	px: [
+		{
+			values: 0,
+			styleName: "padding-inline",
+			valueFormat: s.Value.rem
+		},
+		{
+			values: h.percentages,
+			valueFormat: s.Value.fraction,
+			styleName: "padding-inline"
+		},
+		{
+			...D,
+			styleName: "padding-inline"
+		}
+	],
+	py: [
+		{
+			values: 0,
+			styleName: "padding-block",
+			valueFormat: s.Value.rem
+		},
+		{
+			values: h.percentages,
+			valueFormat: s.Value.fraction,
+			styleName: "padding-block"
+		},
+		{
+			...D,
+			styleName: "padding-block"
+		}
+	],
+	pt: [
+		{
+			values: 0,
+			styleName: "padding-top",
+			valueFormat: s.Value.rem
+		},
+		{
+			values: h.percentages,
+			valueFormat: s.Value.fraction,
+			styleName: "padding-top"
+		},
+		{
+			...D,
+			styleName: "padding-top"
+		}
+	],
+	pr: [
+		{
+			values: 0,
+			styleName: "padding-right",
+			valueFormat: s.Value.rem
+		},
+		{
+			values: h.percentages,
+			valueFormat: s.Value.fraction,
+			styleName: "padding-right"
+		},
+		{
+			...D,
+			styleName: "padding-right"
+		}
+	],
+	pb: [
+		{
+			values: 0,
+			styleName: "padding-bottom",
+			valueFormat: s.Value.rem
+		},
+		{
+			values: h.percentages,
+			valueFormat: s.Value.fraction,
+			styleName: "padding-bottom"
+		},
+		{
+			...D,
+			styleName: "padding-bottom"
+		}
+	],
+	pl: [
+		{
+			values: 0,
+			styleName: "padding-left",
+			valueFormat: s.Value.rem
+		},
+		{
+			values: h.percentages,
+			valueFormat: s.Value.fraction,
+			styleName: "padding-left"
+		},
+		{
+			...D,
+			styleName: "padding-left"
+		}
+	],
+	ps: [
+		{
+			values: 0,
+			styleName: "padding-inline-start",
+			valueFormat: s.Value.rem
+		},
+		{
+			values: h.percentages,
+			valueFormat: s.Value.fraction,
+			styleName: "padding-inline-start"
+		},
+		{
+			...D,
+			styleName: "padding-inline-start"
+		}
+	],
+	pe: [
+		{
+			values: 0,
+			styleName: "padding-inline-end",
+			valueFormat: s.Value.rem
+		},
+		{
+			values: h.percentages,
+			valueFormat: s.Value.fraction,
+			styleName: "padding-inline-end"
+		},
+		{
+			...D,
+			styleName: "padding-inline-end"
+		}
+	],
+	objectFit: [{
+		styleName: "object-fit",
+		values: [
+			"fill",
+			"contain",
+			"cover",
+			"scale-down",
+			"none"
+		]
+	}],
+	opacity: [{ values: w }],
+	outline: [{
+		values: 0,
+		declarations: (e) => `outline-width:${s.Value.px(e)};outline-style:solid`
+	}],
+	outlineStyle: [{
+		styleName: "outline-style",
+		values: [
+			"solid",
+			"dashed",
+			"dotted",
+			"double",
+			"groove",
+			"ridge",
+			"inset",
+			"outset",
+			"none",
+			"hidden"
+		]
+	}],
+	outlineOffset: [{
+		styleName: "outline-offset",
+		values: 0,
+		valueFormat: s.Value.px
+	}],
+	overflow: [{ values: [
+		"auto",
+		"hidden",
+		"scroll",
+		"visible"
+	] }],
+	overflowX: [{
+		styleName: "overflow-x",
+		values: [
+			"auto",
+			"hidden",
+			"scroll",
+			"visible"
+		]
+	}],
+	overflowY: [{
+		styleName: "overflow-y",
+		values: [
+			"auto",
+			"hidden",
+			"scroll",
+			"visible"
+		]
+	}],
+	pointerEvents: [{
+		styleName: "pointer-events",
+		values: [
+			"none",
+			"auto",
+			"all"
+		]
+	}],
+	resize: [{ values: [
+		"none",
+		"both",
+		"horizontal",
+		"vertical",
+		"block",
+		"inline"
+	] }],
+	rotate: [{
+		values: [
+			0,
+			45,
+			90,
+			135,
+			180,
+			270,
+			360,
+			-45,
+			-90,
+			-135,
+			-180,
+			-270
+		],
+		valueFormat: (e) => `${e}deg`
+	}],
+	flip: [{
+		styleName: "scale",
+		values: ["xAxis", "yAxis"],
+		valueFormat: (e) => e === "xAxis" ? "-1 1" : "1 -1"
+	}],
+	scale: [{ values: 0 }],
+	textAlign: [{
+		styleName: "text-align",
+		values: [
+			"left",
+			"right",
+			"start",
+			"end",
+			"center",
+			"justify"
+		]
+	}],
+	textDecoration: [{
+		styleName: "text-decoration",
+		values: [
+			"none",
+			"underline",
+			"overline",
+			"line-through"
+		]
+	}],
+	textOverflow: [{
+		styleName: "text-overflow",
+		values: ["clip", "ellipsis"]
+	}],
+	textTransform: [{
+		styleName: "text-transform",
+		values: [
+			"none",
+			"capitalize",
+			"lowercase",
+			"uppercase"
+		]
+	}],
+	textWrap: [{
+		styleName: "text-wrap",
+		values: [
+			"wrap",
+			"nowrap",
+			"balance",
+			"pretty"
+		]
+	}],
+	transition: [{
+		styleName: "transition-property",
+		values: [
+			"none",
+			"all",
+			...o.propertyGroupNames
+		],
+		valueFormat: (e) => o.propertyGroups[e] ?? e
+	}],
+	transitionBehavior: [{
+		styleName: "transition-behavior",
+		values: ["normal", "allow-discrete"]
+	}],
+	transitionDelay: [{
+		styleName: "transition-delay",
+		values: 0,
+		valueFormat: s.Value.ms
+	}],
+	transitionDuration: [{
+		styleName: "transition-duration",
+		values: 0,
+		valueFormat: s.Value.ms
+	}, {
+		styleName: "transition-duration",
+		values: [...o.springNames],
+		valueFormat: (e) => o.springDuration(e)
+	}],
+	transitionTimingFunction: [
+		{
+			styleName: "transition-timing-function",
+			values: [
+				"linear",
+				"ease",
+				"ease-in",
+				"ease-in-out",
+				"ease-out",
+				"step-start",
+				"step-end"
+			]
+		},
+		{
+			values: [...o.springNames],
+			styleName: "transition-timing-function",
+			declarations: (e) => o.easingDeclarations("transition-timing-function", o.springEasing(e))
+		},
+		{
+			values: o.timingFunction,
+			match: o.isTimingFunction,
+			styleName: "transition-timing-function",
+			declarations: (e) => o.easingDeclarations("transition-timing-function", e)
+		}
+	],
+	willChange: [{
+		styleName: "will-change",
+		values: [
+			"auto",
+			"scroll-position",
+			"contents",
+			"transform",
+			"opacity",
+			"filter"
+		]
+	}],
+	userSelect: [{
+		styleName: "user-select",
+		values: [
+			"none",
+			"auto",
+			"text",
+			"all"
+		]
+	}],
+	visibility: [{
+		styleName: "visibility",
+		values: [
+			"visible",
+			"hidden",
+			"collapse"
+		]
+	}],
+	whiteSpace: [{
+		styleName: "white-space",
+		values: [
+			"break-spaces",
+			"normal",
+			"nowrap",
+			"pre",
+			"pre-line",
+			"pre-wrap"
+		]
+	}],
+	zIndex: [{
+		styleName: "z-index",
+		values: [
+			1,
+			2,
+			3,
+			4,
+			5,
+			10,
+			11,
+			12,
+			13,
+			14,
+			15,
+			100,
+			101,
+			102,
+			103,
+			104,
+			105,
+			1e3,
+			1001,
+			1002,
+			1003,
+			1004,
+			1005
+		]
+	}],
+	gridTemplateColumns: [{
+		styleName: "grid-template-columns",
+		values: 0,
+		valueFormat: (e) => `repeat(${e},minmax(0,1fr))`
+	}, {
+		styleName: "grid-template-columns",
+		values: ["subgrid"]
+	}],
+	gridTemplateRows: [{
+		styleName: "grid-template-rows",
+		values: 0,
+		valueFormat: (e) => `repeat(${e},minmax(0,1fr))`
+	}, {
+		styleName: "grid-template-rows",
+		values: ["subgrid"]
+	}],
+	gridColumn: [{
+		styleName: "grid-column",
+		values: 0,
+		valueFormat: (e) => `span ${e}/span ${e}`
+	}, {
+		styleName: "grid-column",
+		values: ["full-row"],
+		valueFormat: () => "1/-1"
+	}],
+	gridColumnStart: [{
+		styleName: "grid-column-start",
+		values: 0
+	}],
+	gridColumnEnd: [{
+		styleName: "grid-column-end",
+		values: 0
+	}],
+	gridRow: [{
+		styleName: "grid-row",
+		values: 0,
+		valueFormat: (e) => `span ${e}/span ${e}`
+	}, {
+		styleName: "grid-row",
+		values: ["full-column"],
+		valueFormat: () => "1/-1"
+	}],
+	gridRowStart: [{
+		styleName: "grid-row-start",
+		values: 0
+	}],
+	gridRowEnd: [{
+		styleName: "grid-row-end",
+		values: 0
+	}],
+	color: [
+		{
+			values: h.colorValues,
+			valueFormat: (e, t) => t(e)
+		},
+		{ values: h.systemColorValues },
+		E
+	],
+	bgColor: [
+		{
+			values: h.colorValues,
+			valueFormat: (e, t) => t(e),
+			styleName: "background-color"
+		},
+		{
+			values: h.systemColorValues,
+			styleName: "background-color"
+		},
+		{
+			...E,
+			styleName: "background-color"
+		}
+	],
+	borderColor: [
+		{
+			values: h.colorValues,
+			valueFormat: (e, t) => t(e),
+			styleName: "border-color"
+		},
+		{
+			values: h.systemColorValues,
+			styleName: "border-color"
+		},
+		{
+			...E,
+			styleName: "border-color"
+		}
+	],
+	outlineColor: [
+		{
+			values: h.colorValues,
+			valueFormat: (e, t) => t(e),
+			styleName: "outline-color"
+		},
+		{
+			values: h.systemColorValues,
+			styleName: "outline-color"
+		},
+		{
+			...E,
+			styleName: "outline-color"
+		}
+	],
+	accentColor: [
+		{
+			values: h.colorValues,
+			valueFormat: (e, t) => t(e),
+			styleName: "accent-color"
+		},
+		{
+			values: h.systemColorValues,
+			styleName: "accent-color"
+		},
+		{
+			...E,
+			styleName: "accent-color"
+		}
+	],
+	caretColor: [
+		{
+			values: h.colorValues,
+			valueFormat: (e, t) => t(e),
+			styleName: "caret-color"
+		},
+		{
+			values: h.systemColorValues,
+			styleName: "caret-color"
+		},
+		{
+			...E,
+			styleName: "caret-color"
+		}
+	],
+	colorScheme: [{
+		styleName: "color-scheme",
+		values: [
+			"normal",
+			"light",
+			"dark",
+			"light dark",
+			"only light",
+			"only dark"
+		]
+	}],
+	fieldSizing: [{
+		styleName: "field-sizing",
+		values: ["content", "fixed"]
+	}],
+	fill: [
+		{
+			values: h.colorValues,
+			valueFormat: (e, t) => t(e)
+		},
+		{ values: h.systemColorValues },
+		E,
+		T
+	],
+	fillOpacity: [{
+		values: w,
+		styleName: "fill-opacity"
+	}],
+	fillRule: [{
+		values: ["nonzero", "evenodd"],
+		styleName: "fill-rule"
+	}],
+	stroke: [
+		{
+			values: h.colorValues,
+			valueFormat: (e, t) => t(e)
+		},
+		{ values: h.systemColorValues },
+		E,
+		T
+	],
+	strokeOpacity: [{
+		values: w,
+		styleName: "stroke-opacity"
+	}],
+	strokeWidth: [{
+		values: 0,
+		styleName: "stroke-width"
+	}],
+	strokeLinecap: [{
+		values: [
+			"butt",
+			"round",
+			"square"
+		],
+		styleName: "stroke-linecap"
+	}],
+	strokeLinejoin: [{
+		values: [
+			"miter",
+			"round",
+			"bevel"
+		],
+		styleName: "stroke-linejoin"
+	}],
+	strokeMiterlimit: [{
+		values: 0,
+		styleName: "stroke-miterlimit"
+	}],
+	strokeDasharray: [{
+		values: 0,
+		styleName: "stroke-dasharray"
+	}, {
+		values: "",
+		match: (e) => typeof e == "string" && /^\s*[\d.]+%?(\s*[\s,]\s*[\d.]+%?)*\s*$/.test(e),
+		styleName: "stroke-dasharray"
+	}],
+	strokeDashoffset: [{
+		values: 0,
+		styleName: "stroke-dashoffset"
+	}, {
+		...D,
+		styleName: "stroke-dashoffset"
+	}],
+	paintOrder: [{
+		values: [
+			"normal",
+			"fill",
+			"stroke",
+			"markers"
+		],
+		styleName: "paint-order"
+	}],
+	vectorEffect: [{
+		values: ["none", "non-scaling-stroke"],
+		styleName: "vector-effect",
+		selector: (e, t) => `${e}${t},${e}${t} *`
+	}],
+	shapeRendering: [{
+		values: [
+			"auto",
+			"optimizeSpeed",
+			"crispEdges",
+			"geometricPrecision"
+		],
+		styleName: "shape-rendering"
+	}],
+	textAnchor: [{
+		values: [
+			"start",
+			"middle",
+			"end"
+		],
+		styleName: "text-anchor"
+	}],
+	dominantBaseline: [{
+		values: [
+			"auto",
+			"text-bottom",
+			"alphabetic",
+			"ideographic",
+			"middle",
+			"central",
+			"mathematical",
+			"hanging",
+			"text-top"
+		],
+		styleName: "dominant-baseline",
+		selector: (e, t) => `${e}${t},${e}${t} *`
+	}],
+	cx: [{ values: 0 }, { ...D }],
+	cy: [{ values: 0 }, { ...D }],
+	r: [{ values: 0 }, { ...D }],
+	rx: [
+		{ values: 0 },
+		{ values: ["auto"] },
+		{ ...D }
+	],
+	ry: [
+		{ values: 0 },
+		{ values: ["auto"] },
+		{ ...D }
+	],
+	x: [{ values: 0 }, { ...D }],
+	y: [{ values: 0 }, { ...D }],
+	bgImage: [{
+		values: h.bgImageValues,
+		valueFormat: (e, t) => t(e),
+		styleName: "background-image"
+	}],
+	bgGradient: [{
+		values: {},
+		match: x.isGradient,
+		declarations: (e, t) => `background-image:${x.css(e, t)}`
+	}],
+	shadow: [{
+		values: C.boxSizes,
+		declarations: (e) => C.shadow("Shadow", e)
+	}, {
+		values: h.shadowValues,
+		declarations: (e, t) => C.layerDeclarations("Shadow", t(e))
+	}],
+	shadowColor: j("Shadow"),
+	insetShadow: [{
+		values: C.insetSizes,
+		declarations: (e) => C.shadow("InsetShadow", e)
+	}],
+	insetShadowColor: j("InsetShadow"),
+	ring: [{
+		values: 0,
+		declarations: (e) => C.ring("Ring", e)
+	}],
+	ringColor: j("Ring"),
+	insetRing: [{
+		values: 0,
+		declarations: (e) => C.ring("InsetRing", e)
+	}],
+	insetRingColor: j("InsetRing"),
+	textShadow: [{
+		values: C.textSizes,
+		styleName: "text-shadow",
+		valueFormat: (e) => C.textShadow(e)
+	}],
+	textShadowColor: j("TextShadow"),
+	blur: ee("Blur"),
+	brightness: M("Brightness", "brightness", "%"),
+	contrast: M("Contrast", "contrast", "%"),
+	grayscale: M("Grayscale", "grayscale", "%"),
+	hueRotate: M("HueRotate", "hue-rotate", "deg"),
+	invert: M("Invert", "invert", "%"),
+	saturate: M("Saturate", "saturate", "%"),
+	sepia: M("Sepia", "sepia", "%"),
+	dropShadow: [{
+		values: C.dropSizes,
+		declarations: (e) => y.layerDeclarations("DropShadow", e === "none" ? y.cleared : C.dropShadow(e))
+	}],
+	dropShadowColor: j("DropShadow"),
+	backdropBlur: ee("BackdropBlur"),
+	backdropBrightness: M("BackdropBrightness", "brightness", "%"),
+	backdropContrast: M("BackdropContrast", "contrast", "%"),
+	backdropGrayscale: M("BackdropGrayscale", "grayscale", "%"),
+	backdropHueRotate: M("BackdropHueRotate", "hue-rotate", "deg"),
+	backdropInvert: M("BackdropInvert", "invert", "%"),
+	backdropOpacity: M("BackdropOpacity", "opacity", "%"),
+	backdropSaturate: M("BackdropSaturate", "saturate", "%"),
+	backdropSepia: M("BackdropSepia", "sepia", "%"),
+	maskImage: [
+		{
+			values: ["none"],
+			styleName: "mask-image"
+		},
+		{
+			...T,
+			styleName: "mask-image"
+		},
+		{
+			values: {},
+			match: x.isGradient,
+			declarations: (e, t) => `mask-image:${x.css(e, t)}`
+		}
+	],
+	bgClip: [{
+		values: [
+			"border",
+			"padding",
+			"content",
+			"text"
+		],
+		styleName: "background-clip",
+		valueFormat: (e) => e === "text" ? e : `${e}-box`
+	}],
+	translateX: [
+		{
+			values: 0,
+			declarations: A("X", (e) => s.Value.rem(e))
+		},
+		{
+			values: h.percentages,
+			declarations: A("X", (e) => s.Value.fraction(e))
+		},
+		{
+			values: h.negativePercentages,
+			declarations: A("X", (e) => s.Value.fraction(e))
+		},
+		{
+			...D,
+			declarations: A("X", String)
+		}
+	],
+	translateY: [
+		{
+			values: 0,
+			declarations: A("Y", (e) => s.Value.rem(e))
+		},
+		{
+			values: h.percentages,
+			declarations: A("Y", (e) => s.Value.fraction(e))
+		},
+		{
+			values: h.negativePercentages,
+			declarations: A("Y", (e) => s.Value.fraction(e))
+		},
+		{
+			...D,
+			declarations: A("Y", String)
+		}
+	],
+	content: [
+		{
+			values: d.keywords,
+			valueFormat: d.keyword
+		},
+		{
+			values: d.cssValue,
+			match: d.isCssValue
+		},
+		{
+			values: d.text,
+			valueFormat: d.quote
+		}
+	],
+	backdropFilter: [{
+		values: [
+			"none",
+			"blur(12px)",
+			"blur(8px)",
+			"blur(4px)"
+		],
+		styleName: "backdrop-filter"
+	}],
+	scrollbarWidth: [{
+		values: [
+			"auto",
+			"thin",
+			"none"
+		],
+		styleName: "scrollbar-width"
+	}],
+	scrollbarColor: [{
+		tuple: !0,
+		values: [h.colorValues, h.colorValues],
+		styleName: "scrollbar-color",
+		valueFormat: (e, t) => `${t(e[0])} ${t(e[1])}`
+	}],
+	scrollbarGutter: [{
+		styleName: "scrollbar-gutter",
+		values: [
+			"auto",
+			"stable",
+			"stable both-edges"
+		]
+	}],
+	vars: [{
+		values: {},
+		match: h.isCustomProperties,
+		declarations: h.customProperties
+	}],
+	css: [{
+		values: {},
+		match: _.isDeclarations,
+		declarations: _.declarations
+	}]
+}, ne = {
+	hover: ":hover",
+	focus: ":focus-within",
+	focusVisible: ":focus-visible",
+	hasFocus: ":has(:focus)",
+	active: ":active",
+	valid: ":user-valid",
+	hasValid: ":has(:valid)",
+	invalid: ":user-invalid",
+	hasInvalid: ":has(:user-invalid)",
+	optional: ":optional",
+	hasChecked: ":has(:checked)",
+	hasRequired: ":has(:required)",
+	hasDisabled: ":has([disabled])",
+	visited: ":visited",
+	target: ":target",
+	open: ":is([open],:popover-open,:open)",
+	placeholderShown: ":placeholder-shown",
+	autofill: ":autofill",
+	inRange: ":in-range",
+	outOfRange: ":out-of-range",
+	inert: ":is([inert],[inert] *)",
+	rtl: ":dir(rtl)",
+	ltr: ":dir(ltr)"
+}, N = {
+	indeterminate: ":indeterminate",
+	checked: ":checked",
+	required: ":required",
+	disabled: "[disabled]",
+	selected: "[aria-selected=\"true\"]"
+}, P = {
+	...ne,
+	...N
+}, re = {
+	before: "::before",
+	after: "::after",
+	placeholder: "::placeholder",
+	selection: "::selection",
+	marker: "::marker",
+	firstLine: "::first-line",
+	firstLetter: "::first-letter",
+	backdrop: "::backdrop",
+	fileButton: "::file-selector-button",
+	placeholderStyles: "::placeholder"
+}, F = ["before", "after"];
+function ie(e) {
+	return F.includes(e);
+}
+var I = ["marker", "selection"];
+function ae(e) {
+	return I.includes(e);
+}
+function oe(e) {
+	return e.map((e) => P[e]).join("");
+}
+var se = Object.entries(P).reduce((e, [t], n) => (e[t] = 2 ** n, e), {}), ce = Object.keys(P), L = /* @__PURE__ */ new Map();
+function le(e) {
+	let t = L.get(e);
+	if (t) return t;
+	let n = ce.filter((t) => e & se[t]);
+	return L.set(e, n), n;
+}
+var ue = {
+	hoverGroup: "hover",
+	focusGroup: "focus",
+	activeGroup: "active",
+	disabledGroup: "disabled",
+	selectedGroup: "selected"
+}, de = { theme: "theme" }, fe = { startingStyle: "@starting-style" }, R = {
+	sm: 640,
+	md: 768,
+	lg: 1024,
+	xl: 1280,
+	xxl: 1536
+}, z = {
+	pointerCoarse: "(pointer: coarse)",
+	pointerFine: "(pointer: fine)",
+	motionReduce: "(prefers-reduced-motion: reduce)",
+	forcedColors: "(forced-colors: active)",
+	contrastMore: "(prefers-contrast: more)"
+}, pe = {
+	key: "normal",
+	rank: 0,
+	prelude: null
+}, B = [
+	"normal",
+	...Object.keys(R),
+	...l.rankKeys,
+	...Object.keys(z)
+], me = new Map(B.map((e, t) => [e, t])), he = new Map([...Object.entries(R).map(([e, t]) => [e, `(min-width: ${t}px)`]), ...Object.entries(z)].map(([e, t]) => [e, {
+	key: e,
+	rank: me.get(e) ?? 0,
+	prelude: `@media ${t}`
+}]));
+function ge(e) {
+	return he.get(e) ?? pe;
+}
+var V = /* @__PURE__ */ new Map();
+function _e(e) {
+	let t = V.get(e);
+	if (t !== void 0) return t;
+	let n = l.query(e), r = n ? {
+		key: n.key,
+		rank: me.get(n.rankKey) ?? 0,
+		prelude: n.prelude
+	} : null;
+	return V.set(e, r), r;
+}
+//#endregion
+//#region src/core/mergeDeep.ts
+function H(...e) {
+	return e.reduce((e, t) => (Object.keys(t ?? {}).forEach((r) => {
+		let i = e[r], a = t[r];
+		a === void 0 || (n.isObject(a) && "clean" in a && a.clean ? e[r] = a : r in N && typeof a == "boolean" || (e[r] = r in N && Array.isArray(a) ? H(i, a[1] ?? {}) : Array.isArray(i) && Array.isArray(a) ? i.concat(...a) : n.isObject(i) && n.isObject(a) ? H(i, a) : a));
+	}), e), {});
+}
+//#endregion
+//#region src/core/extends/boxComponents.ts
+var ve = {
+	h1: { styles: { fontSize: 35 } },
+	h2: { styles: { fontSize: 28 } },
+	h3: { styles: { fontSize: 24.5 } },
+	h4: { styles: { fontSize: 21 } },
+	h5: { styles: { fontSize: 17.5 } },
+	h6: { styles: { fontSize: 14 } },
+	span: { styles: { display: "inline-block" } },
+	tooltip: {
+		styles: {
+			display: "inline-block",
+			maxWidth: 72,
+			py: 1.5,
+			px: 2.5,
+			borderRadius: 1.5,
+			fontSize: 13,
+			lineHeight: 18,
+			bgColor: "gray-900",
+			color: "gray-50",
+			theme: { dark: {
+				bgColor: "gray-100",
+				color: "gray-900"
+			} },
+			forcedColors: { b: 1 },
+			startingStyle: {
+				opacity: 0,
+				translateY: -1
+			}
+		},
+		variants: { closed: {
+			opacity: 0,
+			translateY: -1,
+			pointerEvents: "none"
+		} }
+	},
+	button: {
+		styles: {
+			display: "inline-flex",
+			ai: "center",
+			jc: "center",
+			gap: 2,
+			bgColor: "indigo-600",
+			color: "white",
+			fontWeight: 500,
+			py: 2.5,
+			px: 5,
+			borderRadius: 2,
+			b: 0,
+			cursor: "pointer",
+			hover: { bgColor: "indigo-700" },
+			active: { bgColor: "indigo-800" },
+			focus: {
+				outline: 2,
+				outlineOffset: 2,
+				outlineColor: "indigo-200"
+			},
+			disabled: {
+				bgColor: "gray-200",
+				color: "gray-400",
+				cursor: "not-allowed",
+				hover: { bgColor: "gray-200" }
+			},
+			theme: { dark: {
+				bgColor: "indigo-500",
+				hover: { bgColor: "indigo-400" },
+				active: { bgColor: "indigo-600" },
+				focus: { outlineColor: "indigo-800" },
+				disabled: {
+					bgColor: "gray-800",
+					color: "gray-600",
+					hover: { bgColor: "gray-800" }
+				}
+			} }
+		},
+		variants: {
+			secondary: {
+				bgColor: "white",
+				color: "gray-900",
+				b: 1,
+				borderColor: "gray-300",
+				hover: { bgColor: "gray-50" },
+				active: { bgColor: "gray-100" },
+				focus: {
+					borderColor: "indigo-500",
+					outlineColor: "indigo-100"
+				},
+				disabled: {
+					bgColor: "gray-50",
+					color: "gray-400",
+					borderColor: "gray-200"
+				},
+				theme: { dark: {
+					bgColor: "gray-800",
+					color: "gray-100",
+					borderColor: "gray-700",
+					hover: { bgColor: "gray-700" },
+					active: { bgColor: "gray-600" },
+					focus: {
+						borderColor: "indigo-400",
+						outlineColor: "indigo-900"
+					},
+					disabled: {
+						bgColor: "gray-900",
+						color: "gray-600",
+						borderColor: "gray-800"
+					}
+				} }
+			},
+			ghost: {
+				bgColor: "transparent",
+				color: "gray-700",
+				hover: { bgColor: "gray-100" },
+				active: { bgColor: "gray-200" },
+				disabled: {
+					bgColor: "transparent",
+					color: "gray-400"
+				},
+				theme: { dark: {
+					bgColor: "transparent",
+					color: "gray-300",
+					hover: { bgColor: "gray-800" },
+					active: { bgColor: "gray-700" },
+					disabled: {
+						bgColor: "transparent",
+						color: "gray-600"
+					}
+				} }
+			}
+		}
+	},
+	textbox: {
+		styles: {
+			display: "inline-block",
+			b: 1,
+			borderColor: "gray-300",
+			bgColor: "white",
+			color: "gray-900",
+			borderRadius: 2,
+			p: 3,
+			px: 4,
+			lineHeight: 20,
+			hover: { borderColor: "gray-400" },
+			focus: {
+				outline: 2,
+				outlineOffset: 0,
+				borderColor: "indigo-500",
+				outlineColor: "indigo-200"
+			},
+			disabled: {
+				cursor: "not-allowed",
+				bgColor: "gray-100",
+				color: "gray-400",
+				borderColor: "gray-200"
+			},
+			theme: { dark: {
+				bgColor: "gray-800",
+				color: "gray-100",
+				borderColor: "gray-700",
+				hover: { borderColor: "gray-600" },
+				focus: {
+					borderColor: "indigo-400",
+					outlineColor: "indigo-900"
+				},
+				disabled: {
+					bgColor: "gray-900",
+					color: "gray-600",
+					borderColor: "gray-800"
+				}
+			} }
+		},
+		variants: { compact: {
+			px: 2,
+			py: 1,
+			fontSize: 13
+		} }
+	},
+	textarea: { styles: {
+		display: "inline-block",
+		b: 1,
+		borderColor: "gray-300",
+		bgColor: "white",
+		color: "gray-900",
+		borderRadius: 2,
+		p: 3,
+		px: 4,
+		hover: { borderColor: "gray-400" },
+		focus: {
+			outline: 2,
+			outlineOffset: 0,
+			borderColor: "indigo-500",
+			outlineColor: "indigo-200"
+		},
+		disabled: {
+			cursor: "not-allowed",
+			bgColor: "gray-100",
+			color: "gray-400",
+			borderColor: "gray-200",
+			resize: "none"
+		},
+		theme: { dark: {
+			bgColor: "gray-800",
+			color: "gray-100",
+			borderColor: "gray-700",
+			hover: { borderColor: "gray-600" },
+			focus: {
+				borderColor: "indigo-400",
+				outlineColor: "indigo-900"
+			},
+			disabled: {
+				bgColor: "gray-900",
+				color: "gray-600",
+				borderColor: "gray-800"
+			}
+		} }
+	} },
+	checkbox: {
+		styles: {
+			display: "inline-block",
+			appearance: "none",
+			b: 2,
+			borderColor: "gray-300",
+			borderRadius: 1,
+			p: 2,
+			cursor: "pointer",
+			hover: { borderColor: "indigo-400" },
+			focus: {
+				outline: 2,
+				outlineOffset: 2,
+				outlineColor: "indigo-200"
+			},
+			checked: {
+				bgColor: "indigo-500",
+				borderColor: "indigo-500",
+				bgImage: "bg-img-checked"
+			},
+			indeterminate: {
+				borderColor: "indigo-500",
+				bgImage: "bg-img-indeterminate"
+			},
+			disabled: {
+				cursor: "not-allowed",
+				borderColor: "gray-200",
+				checked: { bgColor: "gray-300" },
+				hover: { borderColor: "gray-200" }
+			},
+			theme: { dark: {
+				borderColor: "gray-600",
+				hover: { borderColor: "indigo-400" },
+				focus: { outlineColor: "indigo-900" },
+				checked: {
+					bgColor: "indigo-500",
+					borderColor: "indigo-500"
+				},
+				indeterminate: { borderColor: "indigo-500" },
+				disabled: {
+					borderColor: "gray-700",
+					checked: { bgColor: "gray-600" },
+					hover: { borderColor: "gray-700" }
+				}
+			} }
+		},
+		variants: { datagrid: {} }
+	},
+	radioButton: { styles: {
+		appearance: "none",
+		b: 1,
+		borderColor: "gray-300",
+		borderRadius: 3,
+		p: 2,
+		cursor: "pointer",
+		hover: { borderColor: "indigo-400" },
+		focus: {
+			outline: 2,
+			outlineOffset: 2,
+			outlineColor: "indigo-200"
+		},
+		checked: {
+			bgColor: "indigo-500",
+			borderColor: "indigo-500",
+			bgImage: "bg-img-radio"
+		},
+		disabled: {
+			checked: {
+				bgColor: "gray-300",
+				borderColor: "gray-200"
+			},
+			cursor: "not-allowed",
+			borderColor: "gray-200",
+			hover: { borderColor: "gray-200" }
+		},
+		theme: { dark: {
+			borderColor: "gray-600",
+			hover: { borderColor: "indigo-400" },
+			focus: { outlineColor: "indigo-900" },
+			checked: {
+				bgColor: "indigo-500",
+				borderColor: "indigo-500"
+			},
+			disabled: {
+				borderColor: "gray-700",
+				checked: { bgColor: "gray-600" },
+				hover: { borderColor: "gray-700" }
+			}
+		} }
+	} },
+	switch: { styles: {
+		appearance: "none",
+		position: "relative",
+		display: "inline-block",
+		width: 9,
+		height: 5,
+		minWidth: 9,
+		borderRadius: 5,
+		bgColor: "gray-300",
+		cursor: "pointer",
+		transition: "all",
+		transitionDuration: 150,
+		before: {
+			position: "absolute",
+			top: .5,
+			insetStart: .5,
+			width: 4,
+			height: 4,
+			borderRadius: 4,
+			bgColor: "white",
+			transition: "all",
+			transitionDuration: 150
+		},
+		hover: { bgColor: "gray-400" },
+		focus: {
+			outline: 2,
+			outlineOffset: 2,
+			outlineColor: "indigo-200"
+		},
+		checked: {
+			bgColor: "indigo-500",
+			hover: { bgColor: "indigo-600" },
+			before: {
+				translateX: 4,
+				rtl: { translateX: -4 }
+			}
+		},
+		motionReduce: {
+			transition: "none",
+			before: { transition: "none" }
+		},
+		disabled: {
+			cursor: "not-allowed",
+			bgColor: "gray-200",
+			hover: { bgColor: "gray-200" },
+			checked: {
+				bgColor: "gray-300",
+				hover: { bgColor: "gray-300" }
+			}
+		},
+		forcedColors: {
+			bgColor: "ButtonFace",
+			b: 1,
+			borderColor: "ButtonText",
+			before: { bgColor: "ButtonText" },
+			hover: { bgColor: "ButtonFace" },
+			checked: {
+				bgColor: "ButtonText",
+				hover: { bgColor: "ButtonText" },
+				before: { bgColor: "ButtonFace" }
+			},
+			disabled: {
+				bgColor: "ButtonFace",
+				borderColor: "GrayText",
+				before: { bgColor: "GrayText" },
+				hover: { bgColor: "ButtonFace" },
+				checked: {
+					bgColor: "GrayText",
+					hover: { bgColor: "GrayText" },
+					before: { bgColor: "ButtonFace" }
+				}
+			}
+		},
+		theme: { dark: {
+			bgColor: "gray-600",
+			hover: { bgColor: "gray-500" },
+			focus: { outlineColor: "indigo-900" },
+			checked: {
+				bgColor: "indigo-500",
+				hover: { bgColor: "indigo-400" }
+			},
+			disabled: {
+				bgColor: "gray-700",
+				hover: { bgColor: "gray-700" },
+				checked: {
+					bgColor: "gray-600",
+					hover: { bgColor: "gray-600" }
+				}
+			}
+		} }
+	} },
+	dropdown: {
+		styles: {
+			display: "inline-block",
+			overflow: "hidden",
+			whiteSpace: "nowrap",
+			textOverflow: "ellipsis",
+			textAlign: "start",
+			gap: 2,
+			p: 3,
+			cursor: "pointer",
+			bgColor: "white",
+			color: "gray-900",
+			b: 1,
+			borderColor: "gray-300",
+			borderRadius: 2,
+			userSelect: "none",
+			lineHeight: 20,
+			width: "fit-content",
+			transition: "none",
+			hover: { borderColor: "gray-400" },
+			focus: {
+				outline: 2,
+				outlineOffset: 0,
+				borderColor: "indigo-500",
+				outlineColor: "indigo-200"
+			},
+			disabled: {
+				cursor: "not-allowed",
+				bgColor: "gray-100",
+				color: "gray-400",
+				borderColor: "gray-300"
+			},
+			theme: { dark: {
+				bgColor: "gray-800",
+				color: "gray-100",
+				borderColor: "gray-700",
+				hover: { borderColor: "gray-600" },
+				focus: {
+					borderColor: "indigo-400",
+					outlineColor: "indigo-900"
+				},
+				disabled: {
+					bgColor: "gray-900",
+					color: "gray-500",
+					borderColor: "gray-700"
+				}
+			} }
+		},
+		variants: { compact: {
+			px: 2,
+			py: 1,
+			fontSize: 13,
+			height: 7.5
+		} },
+		children: {
+			items: {
+				styles: {
+					display: "flex",
+					d: "column",
+					gap: 1,
+					p: 1,
+					b: 1,
+					borderRadius: 2,
+					position: "relative",
+					bgColor: "white",
+					overflow: "auto",
+					maxHeight: 62,
+					borderColor: "gray-300",
+					color: "gray-900",
+					shadow: "medium",
+					theme: { dark: {
+						bgColor: "gray-800",
+						borderColor: "gray-700",
+						color: "gray-100"
+					} },
+					startingStyle: {
+						opacity: 0,
+						translateY: -1
+					}
+				},
+				variants: {
+					up: { startingStyle: { translateY: 1 } },
+					closed: {
+						opacity: 0,
+						translateY: -1,
+						pointerEvents: "none"
+					},
+					closedUp: {
+						opacity: 0,
+						translateY: 1,
+						pointerEvents: "none"
+					}
+				}
+			},
+			item: {
+				styles: {
+					textWrap: "nowrap",
+					display: "flex",
+					width: "fit",
+					p: 3,
+					cursor: "pointer",
+					borderRadius: 1,
+					lineHeight: 20,
+					hover: { bgColor: "gray-100" },
+					focus: { bgColor: "indigo-50" },
+					selected: {
+						bgColor: "indigo-50",
+						cursor: "default",
+						hover: { bgColor: "indigo-100" }
+					},
+					theme: { dark: {
+						hover: { bgColor: "gray-700" },
+						focus: { bgColor: "gray-700" },
+						selected: {
+							bgColor: "indigo-900",
+							hover: { bgColor: "indigo-800" }
+						}
+					} }
+				},
+				variants: {
+					highlighted: {
+						outline: 2,
+						outlineStyle: "solid",
+						outlineOffset: -2,
+						outlineColor: "indigo-500",
+						theme: { dark: { outlineColor: "indigo-400" } }
+					},
+					compact: {
+						px: 2,
+						py: 1
+					},
+					multiple: { selected: { cursor: "pointer" } }
+				}
+			},
+			unselect: {
+				styles: {
+					display: "flex",
+					width: "fit",
+					p: 3,
+					cursor: "pointer",
+					lineHeight: 20,
+					borderRadius: 1,
+					color: "gray-500",
+					hover: { bgColor: "gray-100" },
+					focus: { bgColor: "gray-100" },
+					selected: {
+						bgColor: "gray-100",
+						cursor: "default"
+					},
+					theme: { dark: {
+						color: "gray-400",
+						hover: { bgColor: "gray-700" },
+						focus: { bgColor: "gray-700" },
+						selected: { bgColor: "gray-700" }
+					} }
+				},
+				variants: {
+					highlighted: {
+						outline: 2,
+						outlineStyle: "solid",
+						outlineOffset: -2,
+						outlineColor: "indigo-500",
+						theme: { dark: { outlineColor: "indigo-400" } }
+					},
+					compact: {
+						px: 2,
+						py: 1
+					}
+				}
+			},
+			selectAll: {
+				styles: {
+					display: "flex",
+					width: "fit",
+					p: 3,
+					cursor: "pointer",
+					lineHeight: 20,
+					borderRadius: 1,
+					color: "gray-500",
+					hover: { bgColor: "gray-100" },
+					focus: { bgColor: "gray-100" },
+					selected: {
+						bgColor: "gray-100",
+						cursor: "default"
+					},
+					theme: { dark: {
+						color: "gray-400",
+						hover: { bgColor: "gray-700" },
+						focus: { bgColor: "gray-700" },
+						selected: { bgColor: "gray-700" }
+					} }
+				},
+				variants: {
+					highlighted: {
+						outline: 2,
+						outlineStyle: "solid",
+						outlineOffset: -2,
+						outlineColor: "indigo-500",
+						theme: { dark: { outlineColor: "indigo-400" } }
+					},
+					compact: {
+						px: 2,
+						py: 1
+					}
+				}
+			},
+			emptyItem: {
+				styles: {
+					display: "flex",
+					width: "fit",
+					p: 3,
+					cursor: "default",
+					lineHeight: 20,
+					borderRadius: 1,
+					color: "gray-400",
+					theme: { dark: { color: "gray-500" } }
+				},
+				variants: { compact: {
+					px: 2,
+					py: 1
+				} }
+			},
+			icon: { styles: {
+				position: "absolute",
+				top: 0,
+				insetEnd: 0,
+				height: "fit",
+				px: 1.5
+			} }
+		}
+	},
+	label: { styles: {} },
+	datagrid: {
+		styles: {
+			b: 1,
+			bgColor: "white",
+			borderColor: "gray-200",
+			overflow: "hidden",
+			borderRadius: 3,
+			shadow: "large",
+			theme: { dark: {
+				bgColor: "gray-900",
+				borderColor: "gray-800"
+			} }
+		},
+		children: {
+			content: { styles: {} },
+			loader: {
+				styles: {
+					position: "sticky",
+					insetStart: 0,
+					width: "fit",
+					height: 0,
+					zIndex: 2
+				},
+				children: { track: {
+					styles: {
+						position: "absolute",
+						top: 0,
+						insetX: 0,
+						overflow: "hidden",
+						bgColor: "indigo-100",
+						theme: { dark: { bgColor: "indigo-950" } }
+					},
+					children: { bar: { styles: {
+						position: "absolute",
+						top: 0,
+						bottom: 0,
+						insetStart: 0,
+						bgColor: "indigo-500",
+						animationName: "rb-datagrid-loader",
+						animationDuration: 1100,
+						animationTimingFunction: "linear",
+						animationIterationCount: "infinite",
+						motionReduce: { animationName: "none" },
+						theme: { dark: { bgColor: "indigo-400" } }
+					} } }
+				} }
+			},
+			topBar: {
+				styles: {
+					py: 3,
+					px: 4,
+					bb: 1,
+					borderColor: "gray-200",
+					color: "gray-800",
+					gap: 3,
+					ai: "center",
+					bgColor: "gray-50",
+					theme: { dark: {
+						bgColor: "gray-800",
+						borderColor: "gray-700",
+						color: "gray-200"
+					} }
+				},
+				children: {
+					globalFilter: {
+						styles: {
+							display: "flex",
+							ai: "center",
+							gap: 2
+						},
+						children: { stats: { styles: {
+							fontSize: 11,
+							fontWeight: 500,
+							px: 2,
+							py: 1,
+							borderRadius: 1,
+							bgColor: "violet-100",
+							color: "violet-700",
+							theme: { dark: {
+								bgColor: "violet-900",
+								color: "violet-300"
+							} },
+							textWrap: "nowrap"
+						} } }
+					},
+					columnGroups: {
+						styles: {
+							gap: 2,
+							ai: "center"
+						},
+						children: {
+							icon: { styles: {
+								color: "gray-700",
+								width: 4,
+								theme: { dark: { color: "gray-300" } }
+							} },
+							separator: { styles: {} },
+							item: {
+								styles: {
+									gap: 2,
+									ai: "center",
+									b: 1,
+									borderColor: "gray-300",
+									bgColor: "white",
+									borderRadius: 2,
+									py: 2,
+									ps: 3,
+									pe: 2,
+									color: "gray-800",
+									fontSize: 14,
+									fontWeight: 500,
+									shadow: "small",
+									theme: { dark: {
+										bgColor: "gray-800",
+										borderColor: "gray-700",
+										color: "gray-200"
+									} }
+								},
+								children: { icon: { styles: {
+									width: 3,
+									color: "gray-500",
+									cursor: "pointer",
+									hover: { color: "gray-700" },
+									theme: { dark: {
+										color: "gray-400",
+										hover: { color: "gray-200" }
+									} }
+								} } }
+							}
+						}
+					},
+					columnVisibility: {
+						styles: {},
+						children: { badge: { styles: {} } }
+					}
+				}
+			},
+			filter: {
+				styles: {},
+				children: {
+					row: { styles: {
+						bgColor: "gray-50",
+						bb: 1,
+						borderColor: "gray-200",
+						theme: { dark: {
+							bgColor: "gray-800",
+							borderColor: "gray-700"
+						} }
+					} },
+					cell: {
+						styles: {
+							display: "flex",
+							ai: "center",
+							p: 2,
+							transition: "none",
+							focusVisible: {
+								outline: 2,
+								outlineStyle: "solid",
+								outlineOffset: -2,
+								outlineColor: "indigo-500"
+							},
+							theme: { dark: { focusVisible: { outlineColor: "indigo-400" } } }
+						},
+						variants: {
+							isPinned: {
+								position: "sticky",
+								bgColor: "gray-50",
+								zIndex: 2,
+								theme: { dark: { bgColor: "gray-800" } }
+							},
+							isFirstStartPinned: {},
+							isLastStartPinned: {
+								be: 1,
+								borderColor: "gray-200",
+								theme: { dark: { borderColor: "gray-700" } }
+							},
+							isFirstEndPinned: {
+								bs: 1,
+								borderColor: "gray-200",
+								theme: { dark: { borderColor: "gray-700" } }
+							},
+							isLastEndPinned: {}
+						},
+						children: { input: { styles: {
+							display: "flex",
+							ai: "center",
+							b: 1,
+							borderColor: "gray-200",
+							borderRadius: 1,
+							position: "relative",
+							width: "fit",
+							focus: {
+								borderColor: "indigo-500",
+								outline: 2,
+								outlineOffset: 0,
+								outlineColor: "indigo-200"
+							},
+							theme: { dark: {
+								borderColor: "gray-700",
+								focus: {
+									borderColor: "indigo-400",
+									outlineColor: "indigo-900"
+								}
+							} }
+						} } }
+					}
+				}
+			},
+			header: {
+				styles: {
+					position: "sticky",
+					top: 0,
+					width: "max-content",
+					minWidth: "fit",
+					zIndex: 1,
+					bgColor: "gray-50",
+					theme: { dark: { bgColor: "gray-800" } }
+				},
+				children: { cell: {
+					styles: {
+						borderColor: "gray-200",
+						bb: 1,
+						minHeight: 12,
+						position: "relative",
+						transition: "none",
+						fontSize: 13,
+						fontWeight: 600,
+						color: "gray-800",
+						py: 3.5,
+						focusVisible: {
+							outline: 2,
+							outlineStyle: "solid",
+							outlineOffset: -2,
+							outlineColor: "indigo-500"
+						},
+						theme: { dark: {
+							borderColor: "gray-700",
+							color: "gray-200",
+							focusVisible: { outlineColor: "indigo-400" }
+						} }
+					},
+					variants: {
+						isPinned: {
+							position: "sticky",
+							zIndex: 2,
+							bgColor: "gray-50",
+							theme: { dark: { bgColor: "gray-800" } }
+						},
+						isFirstStartPinned: {},
+						isLastStartPinned: {
+							be: 1,
+							borderColor: "gray-200",
+							theme: { dark: { borderColor: "gray-700" } }
+						},
+						isFirstEndPinned: {
+							bs: 1,
+							borderColor: "gray-200",
+							theme: { dark: { borderColor: "gray-700" } }
+						},
+						isLastEndPinned: {},
+						isSortable: {
+							cursor: "pointer",
+							hover: { bgColor: "gray-100" },
+							theme: { dark: { hover: { bgColor: "gray-800" } } }
+						},
+						isRowSelected: {},
+						isRowSelection: {},
+						isRowNumber: { jc: "center" },
+						isFirstLeaf: {},
+						isLastLeaf: {},
+						isEmptyCell: {}
+					},
+					children: {
+						contextMenu: {
+							clean: !0,
+							styles: {
+								width: 6,
+								height: 6,
+								cursor: "pointer",
+								userSelect: "none",
+								borderRadius: 1,
+								borderColor: "gray-200",
+								display: "flex",
+								jc: "center",
+								ai: "center",
+								transition: "none",
+								color: "gray-600",
+								hover: { bgColor: "gray-300" },
+								theme: { dark: {
+									color: "gray-400",
+									hover: { bgColor: "gray-700" }
+								} }
+							},
+							children: {
+								icon: { styles: {} },
+								tooltip: {
+									styles: {
+										bgColor: "white",
+										color: "gray-900",
+										width: 56,
+										b: 1,
+										borderColor: "gray-300",
+										borderRadius: 3,
+										display: "flex",
+										d: "column",
+										py: 2,
+										overflow: "hidden",
+										shadow: "medium",
+										theme: { dark: {
+											bgColor: "gray-800",
+											borderColor: "gray-700",
+											color: "gray-100"
+										} },
+										startingStyle: {
+											opacity: 0,
+											translateY: -1
+										}
+									},
+									variants: { closed: {
+										opacity: 0,
+										translateY: -1,
+										pointerEvents: "none"
+									} },
+									children: { item: {
+										clean: !0,
+										styles: {
+											display: "flex",
+											gap: 2,
+											p: 3,
+											cursor: "pointer",
+											color: "gray-900",
+											hover: { bgColor: "violet-50" },
+											theme: { dark: {
+												color: "gray-100",
+												hover: { bgColor: "gray-700" }
+											} }
+										},
+										children: {
+											icon: { styles: {
+												width: 4,
+												color: "violet-950",
+												theme: { dark: { color: "violet-300" } }
+											} },
+											separator: { styles: {
+												bb: 1,
+												my: 2,
+												borderColor: "gray-300",
+												theme: { dark: { borderColor: "gray-700" } }
+											} }
+										}
+									} }
+								}
+							}
+						},
+						resizer: { styles: {
+							width: .5,
+							height: "fit",
+							bgColor: "gray-400",
+							group: { "resizer/hover": { bgColor: "gray-600" } },
+							focusVisible: {
+								opacity: 1,
+								outline: 2,
+								outlineStyle: "solid",
+								outlineColor: "indigo-500",
+								bgColor: "indigo-500"
+							},
+							theme: { dark: { focusVisible: {
+								outlineColor: "indigo-400",
+								bgColor: "indigo-400"
+							} } }
+						} }
+					}
+				} }
+			},
+			body: {
+				styles: {},
+				children: {
+					cell: {
+						styles: {
+							bb: 1,
+							borderColor: "gray-200",
+							transition: "none",
+							ai: "center",
+							group: { "grid-row/hover": { bgColor: "gray-100" } },
+							focusVisible: {
+								outline: 2,
+								outlineStyle: "solid",
+								outlineOffset: -2,
+								outlineColor: "indigo-500"
+							},
+							theme: { dark: {
+								borderColor: "gray-800",
+								group: { "grid-row/hover": { bgColor: "gray-700" } },
+								focusVisible: { outlineColor: "indigo-400" }
+							} }
+						},
+						variants: {
+							isPinned: {
+								position: "sticky",
+								bgColor: "white",
+								zIndex: 1,
+								theme: { dark: { bgColor: "gray-900" } }
+							},
+							isFirstStartPinned: {},
+							isLastStartPinned: {
+								be: 1,
+								borderColor: "gray-200",
+								theme: { dark: { borderColor: "gray-800" } }
+							},
+							isFirstEndPinned: {
+								bs: 1,
+								borderColor: "gray-200",
+								theme: { dark: { borderColor: "gray-800" } }
+							},
+							isLastEndPinned: {},
+							isRowNumber: { jc: "end" },
+							isRowSelection: {},
+							isRowSelected: {},
+							isFirstLeaf: {},
+							isLastLeaf: {},
+							isEmptyCell: {},
+							isRowDetail: {},
+							isExpanded: {},
+							isExpandedFirstLeaf: {},
+							isExpandedLastLeaf: {}
+						},
+						children: {
+							text: { styles: {} },
+							rowDetail: {
+								clean: !0,
+								styles: {},
+								variants: { isExpanded: {} }
+							}
+						}
+					},
+					detailRow: {
+						styles: {
+							bb: 1,
+							borderColor: "gray-200",
+							theme: { dark: { borderColor: "gray-800" } }
+						},
+						children: { content: { styles: {
+							focusVisible: {
+								outline: 2,
+								outlineStyle: "solid",
+								outlineOffset: -2,
+								outlineColor: "indigo-500"
+							},
+							theme: { dark: { focusVisible: { outlineColor: "indigo-400" } } }
+						} } }
+					},
+					row: { styles: {} },
+					groupRow: {
+						styles: {},
+						children: { expandButton: {
+							clean: !0,
+							styles: {}
+						} }
+					},
+					empty: { styles: {} }
+				}
+			},
+			emptyColumns: { styles: {} },
+			bottomBar: {
+				styles: {
+					py: 3,
+					px: 4,
+					lineHeight: 36,
+					bgColor: "gray-50",
+					bt: 1,
+					borderColor: "gray-200",
+					gap: 4,
+					ai: "center",
+					fontSize: 14,
+					color: "gray-800",
+					theme: { dark: {
+						bgColor: "gray-800",
+						borderColor: "gray-700",
+						color: "gray-200"
+					} }
+				},
+				children: {
+					info: { styles: {} },
+					clearFilters: { styles: {} },
+					pagination: {
+						styles: {},
+						children: {
+							button: {
+								clean: !0,
+								styles: {}
+							},
+							info: { styles: {} },
+							pageSize: { styles: {} }
+						}
+					}
+				}
+			}
+		}
+	}
+};
+//#endregion
+//#region src/core/extends/useComponents.ts
+function ye(t, n) {
+	let { clean: r, component: i, variant: a } = t;
+	if (r) return;
+	let o = i?.split(".");
+	if (!o) return;
+	let s = o.reduce((e, t, r) => r === 0 ? n[t] : e?.children?.[t], void 0);
+	if (!s) return;
+	if (!a) return s.styles;
+	let c = e(a);
+	if (c.length === 0) return s.styles;
+	let l = H(...c.map((e) => s.variants?.[e]));
+	return s.styles ? H(s.styles, l) : l;
+}
+//#endregion
+//#region src/core/variants.ts
+var be;
+(function(e) {
+	e.variantKeys = {
+		dataAttr: "data-",
+		ariaAttr: "aria-",
+		has: ":has",
+		not: ":not",
+		nth: ":nth-child"
+	};
+	let t = /^[a-zA-Z][\w-]*$/, r = /^[\w .:/@%-]*$/, i = /^[\w\s.#:,>+~*()[\]="'|^$-]+$/;
+	function a(e) {
+		let t = 0, n = 0;
+		for (let r of e) if (r === "(" ? t++ : r === ")" ? t-- : r === "[" ? n++ : r === "]" && n--, t < 0 || n < 0) return !1;
+		return t === 0 && n === 0;
+	}
+	function o(e, n, i) {
+		let a = n.indexOf("="), o = a === -1 ? n : n.slice(0, a), s = a === -1 ? i : n.slice(a + 1);
+		return t.test(o) ? s === void 0 ? `[${e}${o}]` : r.test(s) ? `[${e}${o}="${s}"]` : null : null;
+	}
+	function s(e) {
+		return e.startsWith("data-") ? o("data-", e.slice(5)) : e.startsWith("aria-") ? o("aria-", e.slice(5), "true") : n.isKeyOf(e, P) ? P[e] : null;
+	}
+	e.stateSelector = s;
+	let c = {
+		first: ":first-child",
+		last: ":last-child",
+		only: ":only-child"
+	}, l = /^(odd|even|[+-]?\d+|[+-]?\d*n([+-]\d+)?)$/;
+	function u(e) {
+		if (n.isKeyOf(e, c)) return c[e];
+		let t = e.startsWith("last "), r = t ? e.slice(5).trim() : e;
+		return l.test(r) ? `:nth-${t ? "last-" : ""}child(${r})` : null;
+	}
+	function d(e, t) {
+		let n = t.trim();
+		if (!n) return null;
+		let r = f(e, n);
+		return r === null ? null : {
+			name: `${e}-${n}`,
+			selector: r
+		};
+	}
+	e.variant = d;
+	function f(e, t) {
+		switch (e) {
+			case "dataAttr": return o("data-", t);
+			case "ariaAttr": return o("aria-", t, "true");
+			case "has": return i.test(t) && a(t) ? `:has(${t})` : null;
+			case "not": {
+				let e = s(t);
+				return e === null ? null : `:not(${e})`;
+			}
+			case "nth": return u(t);
+		}
+	}
+	function p(e, t) {
+		return [...e, t].sort((e, t) => e.name < t.name ? -1 : +(e.name > t.name));
+	}
+	e.add = p;
+})(be ||= {});
+var U = be, W;
+(function(e) {
+	let t = {
+		group: "group",
+		peer: "peer"
+	}, n = e.groupKeys = {
+		group: " ",
+		peer: "~"
+	}, r = /^[a-zA-Z_][\w-]*$/;
+	function i(e) {
+		return r.test(e);
+	}
+	e.isGroupName = i;
+	function a(e, r) {
+		let a = r.trim(), o = a.lastIndexOf("/"), s = o === -1 ? t[e] : a.slice(0, o), c = o === -1 ? a : a.slice(o + 1), l = U.stateSelector(c);
+		return !l || !i(s) ? null : {
+			kind: e,
+			name: `${e === "peer" ? "peer-" : ""}${c}-${s}`,
+			selector: `.${s}${l}`,
+			combinator: n[e]
+		};
+	}
+	e.parent = a;
+	function o(e) {
+		return i(e) ? {
+			kind: "theme",
+			name: `theme-${e}`,
+			selector: `.${e}`,
+			combinator: n.group
+		} : null;
+	}
+	e.theme = o;
+})(W ||= {});
+var G = W;
+//#endregion
+//#region src/core/hash.ts
+function xe(e) {
+	let t = 2166136261, n = 16777619;
+	for (let r = 0; r < e.length; r++) {
+		let i = e.charCodeAt(r);
+		t = Math.imul(t ^ i, 16777619) >>> 0, n = Math.imul(n ^ i, 2166136261) >>> 0;
+	}
+	return `${t.toString(36)}${n.toString(36)}`;
+}
+//#endregion
+//#region src/core/identity.ts
+var Se = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ", K = `${Se}0123456789`, Ce = class {
+	index = 0;
+	cache = {};
+	getIdentity(e) {
+		return this.cache[e] ??= this.getByIndex(this.index++);
+	}
+	getByIndex(e) {
+		let t = e - 52;
+		if (t < 0) return Se[e];
+		let n = Math.floor(t / K.length);
+		return this.getByIndex(n) + K[t - n * K.length];
+	}
+}, we = (e) => queueMicrotask(e), Te = (e) => e(), q = () => {};
+function Ee(e, t) {
+	let n = !1;
+	return function() {
+		n || (n = !0, t(() => {
+			n = !1, e();
+		}));
+	};
+}
+//#endregion
+//#region src/core/engine/keyframes.ts
+var J = {
+	spin: { to: { rotate: 360 } },
+	pulse: { "50%": { opacity: .5 } },
+	bounce: {
+		from: {
+			translateY: "-1/4",
+			animationTimingFunction: "cubic-bezier(0.8, 0, 1, 1)"
+		},
+		"50%": {
+			translateY: 0,
+			animationTimingFunction: "cubic-bezier(0, 0, 0.2, 1)"
+		},
+		to: {
+			translateY: "-1/4",
+			animationTimingFunction: "cubic-bezier(0.8, 0, 1, 1)"
+		}
+	},
+	ping: {
+		"75%": {
+			scale: 2,
+			opacity: 0
+		},
+		to: {
+			scale: 2,
+			opacity: 0
+		}
+	}
+}, De = { "rb-datagrid-loader": {
+	from: { translateX: "-1/1" },
+	to: { translateX: "250%" }
+} }, Oe = /^-?[_a-zA-Z][-_a-zA-Z0-9]*$/;
+function ke() {
+	let e = new Map([...Object.entries(J), ...Object.entries(De)]), t = /* @__PURE__ */ new Map(), n = /* @__PURE__ */ new Set();
+	return {
+		register(r) {
+			for (let [i, a] of Object.entries(r)) {
+				if (!Oe.test(i)) {
+					console.warn(`[box-kite] Box.keyframes() skipped '${i}': a keyframes name has to be a CSS identifier.`);
+					continue;
+				}
+				e.set(i, a), n.delete(i) && t.set(i, a);
+			}
+		},
+		use(r) {
+			for (let i of r) {
+				let r = e.get(i);
+				!r || n.has(i) || t.set(i, r);
+			}
+		},
+		hasPending() {
+			return t.size > 0;
+		},
+		drainPending() {
+			let e = [...t.entries()];
+			return t.clear(), e.forEach(([e]) => n.add(e)), e;
+		},
+		reset() {
+			t.clear(), n.clear();
+		}
+	};
+}
+//#endregion
+//#region src/utils/environment/environmentUtils.ts
+function Y() {
+	return typeof document < "u";
+}
+function X() {
+	return Y() ? document : null;
+}
+function Ae() {
+	return X()?.documentElement ?? null;
+}
+function je() {
+	return X()?.head ?? null;
+}
+function Me(e) {
+	return typeof window > "u" || typeof window.matchMedia != "function" ? null : window.matchMedia(e);
+}
+//#endregion
+//#region src/core/engine/styleSink.ts
+var Ne = "rb-base";
+function Pe(e, t) {
+	let n = 0, r = e.length;
+	for (; n < r;) {
+		let i = n + r >>> 1;
+		t < e[i] ? r = i : n = i + 1;
+	}
+	return n;
+}
+function Fe() {
+	let e = [], t = [], n = [], r = [];
+	return {
+		writeBase(e) {
+			t = [...t, ...e];
+		},
+		writeVariables(t) {
+			e = [t, ...e];
+		},
+		writeRules(e) {
+			for (let { sortKey: t, rule: i } of e) {
+				let e = Pe(r, t);
+				r.splice(e, 0, t), n.splice(e, 0, i);
+			}
+		},
+		getBaseStyles() {
+			return [...e, ...t].join("\n");
+		},
+		getStyles() {
+			return [...e, ...t].join("\n") + n.join("");
+		},
+		reset() {
+			e = [], t = [], n = [], r = [];
+		}
+	};
+}
+function Ie() {
+	let { getBaseStyles: e, ...t } = Fe();
+	return {
+		mode: "string",
+		...t
+	};
+}
+function Le() {
+	let e = Fe(), t = null, n = !0;
+	return {
+		mode: "element",
+		writeBase(t) {
+			e.writeBase(t), n = !0;
+		},
+		writeVariables(t) {
+			e.writeVariables(t), n = !0;
+		},
+		writeRules: e.writeRules,
+		getStyles: e.getStyles,
+		reset() {
+			e.reset(), t = null, n = !0;
+		},
+		baseElement() {
+			if (n) {
+				let r = e.getBaseStyles();
+				t = r ? {
+					href: `${Ne}-${xe(r)}`,
+					css: r,
+					precedence: Ne,
+					sortKey: -1
+				} : null, n = !1;
+			}
+			return t;
+		}
+	};
+}
+function Re(e) {
+	let t = Fe();
+	function n() {
+		e().textContent = t.getStyles();
+	}
+	return {
+		mode: "textContent",
+		writeBase(e) {
+			t.writeBase(e), n();
+		},
+		writeVariables(e) {
+			t.writeVariables(e), n();
+		},
+		writeRules(e) {
+			t.writeRules(e), n();
+		},
+		getStyles: t.getStyles,
+		reset() {
+			t.reset(), n();
+		}
+	};
+}
+function ze(e) {
+	let t = 0, n = [];
+	function r() {
+		return e().sheet ?? null;
+	}
+	return {
+		mode: "cssom",
+		writeBase(e) {
+			let n = r();
+			if (n) for (let r of e) try {
+				n.insertRule(r, t), t++;
+			} catch {}
+		},
+		writeVariables(e) {
+			let n = r();
+			if (n) try {
+				n.insertRule(e, 0), t++;
+			} catch {}
+		},
+		writeRules(e) {
+			let i = r();
+			if (i) for (let { sortKey: r, rule: a } of e) {
+				let e = Pe(n, r);
+				try {
+					i.insertRule(a, t + e), n.splice(e, 0, r);
+				} catch {
+					try {
+						i.insertRule(a, i.cssRules.length), n.push(r);
+					} catch {}
+				}
+			}
+		},
+		getStyles() {
+			let e = r();
+			return e ? [...e.cssRules].map((e) => e.cssText).join("\n") : "";
+		},
+		reset() {
+			let e = r();
+			if (t = 0, n = [], e) for (; e.cssRules.length > 0;) e.deleteRule(0);
+		}
+	};
+}
+function Be() {
+	return !!je();
+}
+function Ve(e) {
+	let t = document.getElementById(e);
+	return t || (t = document.createElement("style"), t.setAttribute("id", e), t.setAttribute("type", "text/css"), document.head.insertBefore(t, document.head.firstChild)), t;
+}
+function He(e, t) {
+	if (t === "element") return Le();
+	if (t === "string" || !Be()) return Ie();
+	let n = () => Ve(e);
+	return t === "textContent" ? Re(n) : n().sheet ? ze(n) : Re(n);
+}
+//#endregion
+//#region src/core/engine/styleEngine.ts
+var Ue = "box-kite-styles", We = /* @__PURE__ */ new Set([
+	h.colorValues,
+	h.bgImageValues,
+	h.shadowValues
+]), Ge = 0, Ke = /[^\w\u00A0-\uFFFF-]/g;
+function qe(e) {
+	return e.replace(Ke, (e) => `\\${e}`);
+}
+function Je(e) {
+	return Array.isArray(e) ? e.join("_") : n.isObject(e) ? Object.entries(e).map(([e, t]) => `${e}-${t}`).join("_") : String(e);
+}
+var Z = B.length, Q = "rb";
+function Ye(e) {
+	return `${Q}${e.toString(36)}`;
+}
+function Xe(e, t) {
+	return `${Ye(e)}.p${t.toString(36)}`;
+}
+function Ze(e) {
+	return `${Q}_s${e.toString(36)}`;
+}
+function Qe(e) {
+	let t = { ...e };
+	for (let [e, n] of Object.entries(t)) {
+		if (!n.extends) continue;
+		let r = t[n.extends];
+		if (!r) continue;
+		let { extends: i, ...a } = n;
+		t[e] = H({}, r, a);
+	}
+	return t;
+}
+function $e(e = {}) {
+	let t = e.styleElementId ?? `box-kite-styles-${++Ge}`, r = new Ce(), i = h.createRegistry(), a = ke(), s = e.transition ?? "all", c = e.classNames, u = e.sink, d;
+	function f() {
+		return d ||= He(t, u), d;
+	}
+	function m() {
+		return u === "element";
+	}
+	function g() {
+		return c ?? (m() ? "stable" : "hashed");
+	}
+	let _ = { ...te }, v = {};
+	function b() {
+		v = Object.keys(_).reduce((e, t, n) => (e[t] = n, e), {});
+	}
+	b();
+	let x = ve, S = /* @__PURE__ */ new Map(), w = /* @__PURE__ */ new Set(), T = /* @__PURE__ */ new Map(), E = null, D = /* @__PURE__ */ new Set(), O = [], k = [], A = !0, j = !1;
+	function M(e) {
+		return n.isKeyOf(e, _) || n.isKeyOf(e, ne) || n.isKeyOf(e, N) || n.isKeyOf(e, re) || n.isKeyOf(e, R) || n.isKeyOf(e, z) || n.isKeyOf(e, l.containerQueryKey) || n.isKeyOf(e, G.groupKeys) || n.isKeyOf(e, ue) || n.isKeyOf(e, de) || n.isKeyOf(e, fe) || n.isKeyOf(e, U.variantKeys);
+	}
+	function ee(e, t) {
+		try {
+			let n = `${t ? "s" : "b"}|${e.clean ? "c" : ""}|${e.component ?? ""}|`;
+			e.variant !== void 0 && (n += JSON.stringify(e.variant)), n += "|";
+			for (let t in e) {
+				if (t === "clean" || t === "component" || t === "variant") continue;
+				let r = e[t];
+				r != null && M(t) && (n += `${t}:${JSON.stringify(r)};`);
+			}
+			return n;
+		} catch {
+			return null;
+		}
+	}
+	function P() {
+		return {
+			pseudoClasses: [],
+			query: pe,
+			variants: [],
+			parents: []
+		};
+	}
+	function F(e, t, r) {
+		Object.entries(e).forEach(([e, i]) => {
+			if (i != null) if (n.isKeyOf(e, _)) I(e, i, t, r);
+			else if (n.isKeyOf(e, ne)) F(i, t, {
+				...r,
+				pseudoClasses: [...r.pseudoClasses, e]
+			});
+			else if (n.isKeyOf(e, re)) {
+				if (r.element) return;
+				let n = {
+					...r,
+					element: e
+				};
+				ie(e) && i.content === void 0 && I("content", "empty", t, n), F(i, t, n);
+			} else if (n.isKeyOf(e, N)) {
+				let a = {
+					...r,
+					pseudoClasses: [...r.pseudoClasses, e]
+				};
+				if (Array.isArray(i)) {
+					let [e, n] = i;
+					F(n, t, a);
+				}
+				n.isObject(i) && F(i, t, a);
+			} else n.isKeyOf(e, fe) ? Object.entries(i).forEach(([e, i]) => {
+				n.isKeyOf(e, _) && I(e, i, t, r, !0);
+			}) : n.isKeyOf(e, R) || n.isKeyOf(e, z) ? F(i, t, {
+				...r,
+				query: ge(e)
+			}) : n.isKeyOf(e, l.containerQueryKey) ? Object.entries(i).forEach(([e, n]) => {
+				let i = _e(e);
+				i && F(n, t, {
+					...r,
+					query: i
+				});
+			}) : n.isKeyOf(e, U.variantKeys) ? Object.entries(i).forEach(([n, i]) => {
+				let a = U.variant(e, n);
+				a && F(i, t, {
+					...r,
+					variants: U.add(r.variants, a)
+				});
+			}) : n.isKeyOf(e, G.groupKeys) ? Object.entries(i).forEach(([n, i]) => {
+				let a = G.parent(e, n);
+				a && F(i, t, {
+					...r,
+					parents: [...r.parents, a]
+				});
+			}) : n.isKeyOf(e, ue) ? Object.entries(i).forEach(([n, i]) => {
+				let a = G.parent("group", `${n}/${ue[e]}`);
+				a && F(i, t, {
+					...r,
+					parents: [...r.parents, a]
+				});
+			}) : n.isKeyOf(e, de) && Object.entries(i).forEach(([e, n]) => {
+				let i = G.theme(e);
+				i && F(n, t, {
+					...r,
+					parents: [...r.parents, i]
+				});
+			});
+		});
+	}
+	function I(e, t, n, r, i) {
+		if (t == null) return;
+		let { query: a, parents: o, rootSelector: s, variants: c, element: l } = r, u = r.pseudoClasses.reduce((e, t) => e + se[t], 0), d = V(e, t, u, r, i), f = Je(t), p = c.map((e) => e.name).join("_"), h = o.map((e) => e.name).join("_"), g = `${a.key}-${u}-${l ?? ""}-${e}-${f}-${h}-${s ?? ""}-${i ? "start" : ""}-${p}`;
+		if (!w.has(g)) {
+			w.add(g);
+			let n = he(e, t, u, r, i);
+			n ? (O.push([
+				n.sortIndex,
+				n.mediaOrder,
+				n.rule
+			]), A = !0, m() && T.set(g, {
+				href: `rb-${xe(n.rule)}`,
+				css: n.rule,
+				precedence: "rb",
+				sortKey: K(n.sortIndex, n.mediaOrder)
+			}), J()) : D.add(g);
+		}
+		if (!D.has(g)) {
+			if (E) {
+				let e = T.get(g);
+				e && E.push(e);
+			}
+			n.push(d);
+		}
+	}
+	function ce(e, t, n) {
+		return e.declarations ? e.declarations(n, i.getVariableValue) : (Array.isArray(e.styleName) ? e.styleName : [e.styleName ?? t]).map((t) => `${t}:${e.valueFormat?.(n, i.getVariableValue, t) ?? n}`).join(";");
+	}
+	function L(e, t) {
+		let n = _[e];
+		if (!n) return null;
+		let r = n.find((e) => e.match ? e.match(t) : Array.isArray(e.values) ? Array.isArray(t) ? e.values.length > 0 && Array.isArray(e.values[0]) ? e.values.length === t.length && e.values.every((e, n) => e.includes(t[n])) : e.values.length === t.length && e.values.every((e, n) => typeof e == typeof t[n]) : e.values.includes(t) : typeof t == typeof e.values);
+		if (!r && typeof t == "string") {
+			let e = p.alphaOf(t);
+			e && i.isUserVariable(e.color) ? r = n.find((e) => e.match === p.isAlpha) : i.isUserVariable(t) && (r = n.find((e) => We.has(e.values)));
+		}
+		return r ?? null;
+	}
+	function B() {
+		if (a.hasPending()) for (let [e, t] of a.drainPending()) k.push(me(e, t));
+	}
+	function me(e, t) {
+		return `@keyframes ${e}{${Object.entries(t).map(([e, t]) => `${e}{${Object.entries(t).map(([e, t]) => {
+			let n = L(e, t);
+			return n ? ce(n, e, t) : null;
+		}).filter(Boolean).join(";")}}`).join("")}}`;
+	}
+	function he(e, t, n, r, i) {
+		let { query: o, parents: s, rootSelector: c } = r, l = L(e, t);
+		if (!l) return null;
+		l.keyframes && (a.use(l.keyframes(t)), B());
+		let u = v[e] ?? 0, d = o.rank, f = d + (i ? Z : 0);
+		function p(e) {
+			let t = i ? `@starting-style{${e}}` : e, n = o.prelude === null ? t : `${o.prelude}{${t}}`, r = i ? Ze(d) : Xe(d, u);
+			return {
+				rule: m() ? `@layer ${r}{${n}}` : n,
+				sortIndex: u,
+				mediaOrder: f
+			};
+		}
+		function h(n) {
+			let r = ce(n, e, t);
+			return i ? r.split(";").map((e) => `${e}!important`).join(";") : r;
+		}
+		let g = qe(V(e, t, n, r, i)), _ = r.variants.map((e) => e.selector).join(""), y = r.element ? re[r.element] : "";
+		function b(e) {
+			if (!r.element) return e;
+			let t = `${e}${y}`;
+			return ae(r.element) ? `${e} *${y},${t}` : t;
+		}
+		let x = !!c && s.length === 1 && s[0].kind === "theme";
+		if (c && s.length > 0 && !x) return null;
+		let S = x ? "" : s.map((e) => `${e.selector}${e.combinator}`).join(""), C = oe(le(n)), w = `${S}${c ?? `.${g}`}${x ? s[0].selector : ""}${_}`;
+		return p(`${l.selector?.(w, `${C}${y}`) ?? b(`${w}${C}`)}{${h(l)}}`);
+	}
+	function V(e, t, n, i, a) {
+		let { query: o, parents: s, variants: c, element: l } = i, u = le(n), d = Je(t), f = c.map((e) => `${e.name}-`).join(""), p = s.map((e) => `${e.name}-`).join(""), m = `${o.prelude === null ? "" : `${o.key}-`}${a ? "starting-" : ""}${u.map((e) => `${e}-`).join("")}${l ? `${l}-` : ""}${f}${p}${e}-${d}`;
+		switch (g()) {
+			case "readable": return m.replace(/\s+/g, "_");
+			case "stable": return `_${xe(m)}`;
+			default: return r.getIdentity(m);
+		}
+	}
+	function be() {
+		let e = [Q];
+		for (let t = 0; t < Z; t++) e.push(Ye(t));
+		for (let t = Z - 1; t >= 0; t--) e.push(Ze(t));
+		let t = Object.keys(_).map((e, t) => `p${t.toString(36)}`).join(","), n = e.slice(1, Z + 1).map((e) => `@layer ${e}{@layer ${t};}`).join("");
+		return `@layer ${e.join(",")};${n}`;
+	}
+	function W(e) {
+		return s === !1 ? "" : `transition-property: ${o.propertyGroups[s] ?? s};transition-duration: var(${e});`;
+	}
+	function Se() {
+		let e = i.generateVariables(), t = [
+			...e ? [`:root{${e}}`] : [],
+			":root{--borderColor: black;--outlineColor: black;--lineHeight: 1.2;--fontSize: 14px;--transitionTime: 0.25s;--svgTransitionTime: 0.3s;}",
+			"@media (prefers-reduced-motion: reduce){:root{--transitionTime: 0s;--svgTransitionTime: 0s;}}",
+			"@property --boxTranslateX{syntax: \"<length-percentage>\";inherits: false;initial-value: 0;}",
+			"@property --boxTranslateY{syntax: \"<length-percentage>\";inherits: false;initial-value: 0;}",
+			...C.properties,
+			...y.properties,
+			"#box-kite-portal {position: absolute;top: 0;left: 0;height: 0;z-index:99999;}",
+			"html{font-size: 16px;font-family: Arial, sans-serif;}",
+			"body{margin: 0;line-height: var(--lineHeight);font-size: var(--fontSize);}",
+			"a,ul{all: unset;}",
+			"button{color: inherit;}",
+			"input[type=\"number\"]{-moz-appearance: textfield;}",
+			"input[type=\"number\"]::-webkit-outer-spin-button,input[type=\"number\"]::-webkit-inner-spin-button{-webkit-appearance: none;margin: 0;}",
+			`._b{display: block;border: 0 solid var(--borderColor);outline: 0px solid var(--outlineColor);margin: 0;padding: 0;background-color: initial;${W("--transitionTime")}box-sizing: border-box;font-family: inherit;font-size: inherit;}`,
+			`._s{display: block;border: 0 solid var(--borderColor);outline: 0px solid var(--outlineColor);margin: 0;padding: 0;${W("--svgTransitionTime")}}`,
+			`._s path,._s circle,._s ellipse,._s rect,._s line,._s polygon,._s polyline,._s text {${W("--svgTransitionTime")}}`
+		];
+		return m() ? [be(), `@layer ${Q}{${t.join("")}}`] : t;
+	}
+	function K(e, t) {
+		return t * 1e5 + e;
+	}
+	function Te() {
+		if (O.length === 0) return [];
+		O.sort((e, t) => e[1] - t[1] || e[0] - t[0]);
+		let e = O.map(([e, t, n]) => ({
+			sortKey: K(e, t),
+			rule: n
+		}));
+		return O.length = 0, e;
+	}
+	function q() {
+		let e = i.hasPendingVariables();
+		if (!A && !e && k.length === 0) return;
+		let t = f();
+		if (!j) t.writeBase(Se()), i.getPendingVariables(), j = !0;
+		else if (e) {
+			let e = i.getPendingVariables();
+			t.writeVariables(`:root{${Object.entries(e).map(([e, t]) => `--${e}: ${t};`).join("")}}`);
+		}
+		k.length > 0 && t.writeBase(k.splice(0, k.length));
+		let n = Te();
+		n.length > 0 && t.writeRules(n), A = !1;
+	}
+	let J = Ee(q, e.scheduler ?? we);
+	function De(e) {
+		if (!m()) return e(), null;
+		let t = [];
+		E = t;
+		try {
+			e();
+		} finally {
+			E = null;
+		}
+		let n = /* @__PURE__ */ new Set();
+		return t.filter((e) => !n.has(e.href) && (n.add(e.href), !0)).sort((e, t) => e.sortKey - t.sortKey);
+	}
+	function Oe(e) {
+		q();
+		let t = f().baseElement?.() ?? null;
+		return t ? [t, ...e] : e;
+	}
+	function Y() {
+		w.clear(), D.clear(), T.clear(), O.length = 0, k.length = 0, j = !1, A = !0, S.clear(), r = new Ce(), i.reset(), a.reset(), d?.reset();
+	}
+	function X(e, t) {
+		let n = ee(e, t), r = n === null ? void 0 : S.get(n);
+		if (!r) {
+			let i = ye(e, x), a = i ? H(i, e) : e, o = [t ? "_s" : "_b"];
+			r = {
+				classNames: o,
+				elements: De(() => F(a, o, P()))
+			}, n !== null && S.set(n, r);
+		}
+		let { classNames: i, elements: a } = r;
+		return a ? {
+			classNames: i,
+			signature: n,
+			styleElements: Oe(a)
+		} : {
+			classNames: i,
+			signature: n
+		};
+	}
+	return {
+		styleElementId: t,
+		resolveClassNames: X,
+		classNames(e, t) {
+			if (m()) throw Error("[box-kite] classNames() has nowhere to put its CSS in element mode: the rules come back from resolveClassNames() as style elements for the adapter to render.");
+			return X(e, t?.svg ?? !1).classNames.join(" ");
+		},
+		addGlobalStyles(e, t) {
+			let n = [], r = De(() => F(e, n, {
+				...P(),
+				rootSelector: t
+			}));
+			return r ? Oe(r) : void 0;
+		},
+		flushSync: q,
+		scheduleFlush: J,
+		getStyles() {
+			return q(), f().getStyles();
+		},
+		clear: Y,
+		configure(e) {
+			e.classNames && (c = e.classNames), e.transition !== void 0 && e.transition !== s && (s = e.transition, j && Y()), e.sink && e.sink !== (d?.mode ?? u) && (d && Y(), d = void 0, u = e.sink), S.clear();
+		},
+		extend(e, t, n) {
+			return i.setUserVariables(e), Object.entries(t).forEach(([e, t]) => {
+				_[e] = t;
+			}), Object.entries(n).forEach(([e, t]) => {
+				let n = _[e];
+				_[e] = n ? [...t, ...n] : t;
+			}), b(), D.forEach((e) => w.delete(e)), D.clear(), S.clear(), {
+				extendedProps: t,
+				extendedPropTypes: n
+			};
+		},
+		components(e) {
+			return x = Qe(H(x, e)), S.clear(), e;
+		},
+		keyframes(e) {
+			return a.register(e), B(), k.length > 0 && J(), e;
+		},
+		getComponentsStyles() {
+			return x;
+		},
+		getVariableValue(e) {
+			let t = i.getVariableValue(e);
+			return J(), t;
+		}
+	};
+}
+//#endregion
+//#region src/core/engine/defaultEngine.ts
+var et;
+function $() {
+	return et ||= $e({ styleElementId: Ue }), et;
+}
+//#endregion
+//#region src/core/extends/boxExtends.ts
+var tt;
+(function(e) {
+	function t(e, t, n) {
+		return $().extend(e, t, n);
+	}
+	e.extend = t;
+	function n(e) {
+		return $().keyframes(e);
+	}
+	e.keyframes = n;
+	function r() {
+		return $().getComponentsStyles();
+	}
+	e.getComponentsStyles = r;
+	function i(e) {
+		return $().components(e);
+	}
+	e.components = i;
+})(tt ||= {});
+var nt = tt, rt = "(prefers-color-scheme: dark)", it = "light";
+function at() {
+	return Me(rt);
+}
+function ot() {
+	return Ae();
+}
+function st() {
+	return at()?.matches ? "dark" : it;
+}
+function ct(e) {
+	let t = at();
+	if (!t) return () => {};
+	let n = (t) => e(t.matches ? "dark" : it);
+	return t.addEventListener("change", n), () => t.removeEventListener("change", n);
+}
+function lt(e, t) {
+	return e.classList.add(t), e.setAttribute("data-theme", t), () => {
+		e.classList.remove(t), e.removeAttribute("data-theme");
+	};
+}
+function ut(e, t) {
+	e.setAttribute("data-theme", t);
+}
+function dt(e) {
+	try {
+		return localStorage.getItem(e);
+	} catch {
+		return null;
+	}
+}
+function ft(e, t) {
+	try {
+		localStorage.setItem(e, t);
+	} catch {}
+}
+function pt(e) {
+	try {
+		localStorage.removeItem(e);
+	} catch {}
+}
+//#endregion
+//#region src/core/theme/themeController.ts
+function mt(e = {}) {
+	let { storageKey: t, theme: n } = e, r = e.target === void 0 ? ot() : e.target, i = !n && t ? dt(t) : null, a = n !== void 0 || i !== null, o = n ?? i ?? st(), s, c = /* @__PURE__ */ new Set();
+	function l(e) {
+		if (e !== o) {
+			o = e, s?.(), s = r ? lt(r, e) : void 0;
+			for (let t of [...c]) t(e);
+		}
+	}
+	let u = ct((e) => {
+		a || l(e);
+	});
+	return s = r ? lt(r, o) : void 0, {
+		get theme() {
+			return o;
+		},
+		get isOverridden() {
+			return a;
+		},
+		set(e) {
+			if (e === null) return t && pt(t), a = !1, l(st());
+			t && ft(t, e), a = !0, l(e);
+		},
+		subscribe(e) {
+			return c.add(e), () => c.delete(e);
+		},
+		destroy() {
+			u(), s?.(), s = void 0, c.clear();
+		}
+	};
+}
+//#endregion
+export { nt as BoxExtends, Ue as DEFAULT_STYLE_ELEMENT_ID, i as Springs, lt as applyThemeToElement, e as classNames, pt as clearStoredTheme, $e as createStyleEngine, mt as createThemeController, it as defaultThemeName, ot as documentRoot, $ as getDefaultEngine, st as getSystemTheme, q as manualScheduler, H as mergeDeep, we as microtaskScheduler, dt as readStoredTheme, ut as setThemeAttribute, Te as syncScheduler, ct as watchSystemTheme, ft as writeStoredTheme };

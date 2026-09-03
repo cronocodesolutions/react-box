@@ -8,8 +8,10 @@ import { spawnSync } from 'node:child_process';
 import { existsSync, mkdirSync, renameSync, rmSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 
-if (!existsSync(join('dist', 'package.json'))) {
-  console.error('\n✖ dist/ is not built — run `npm run build` first.\n');
+for (const dir of ['dist', 'dist-core']) {
+  if (existsSync(join(dir, 'package.json'))) continue;
+
+  console.error(`\n✖ ${dir}/ is not built — run \`npm run build\` first.\n`);
   process.exit(1);
 }
 
@@ -20,28 +22,40 @@ mkdirSync(target, { recursive: true });
 // npm_execpath): Windows cannot spawn `npm.cmd` without a shell, and passing arguments through a
 // shell is what Node 24 deprecates. Called directly with node, it falls back to the shell lookup.
 const npmCli = process.env.npm_execpath;
-const packArgs = ['pack', '--json', '--pack-destination', target];
-const result = npmCli
-  ? spawnSync(process.execPath, [npmCli, ...packArgs], { cwd: 'dist', encoding: 'utf8' })
-  : spawnSync('npm', packArgs, { cwd: 'dist', encoding: 'utf8', shell: true });
 
-if (result.status !== 0) {
-  console.error(`\n✖ npm pack failed:\n${result.stderr?.trim()}\n`);
-  process.exit(1);
+/** Pack one build directory to a stable filename, so the example's dependency path never moves. */
+function pack(dir, name) {
+  const packArgs = ['pack', '--json', '--pack-destination', target];
+  const result = npmCli
+    ? spawnSync(process.execPath, [npmCli, ...packArgs], { cwd: dir, encoding: 'utf8' })
+    : spawnSync('npm', packArgs, { cwd: dir, encoding: 'utf8', shell: true });
+
+  if (result.status !== 0) {
+    console.error(`\n✖ npm pack failed for ${dir}:\n${result.stderr?.trim()}\n`);
+    process.exit(1);
+  }
+
+  // npm names the tarball after the package version; the example's dependency path must not move
+  // every release, so it gets a stable name.
+  const [{ filename }] = JSON.parse(result.stdout.slice(result.stdout.indexOf('[')));
+  const tarball = join(target, name);
+
+  rmSync(tarball, { force: true });
+  renameSync(join(target, filename), tarball);
+
+  return filename;
 }
 
-// npm names the tarball after the package version; the example's dependency path must not move
-// every release, so it gets a stable name.
-const [{ filename }] = JSON.parse(result.stdout.slice(result.stdout.indexOf('[')));
-const tarball = join(target, 'box-kite.tgz');
-
-rmSync(tarball, { force: true });
-renameSync(join(target, filename), tarball);
+// Both packages: @box-kite/react asks for an exact @box-kite/core, and the copy on the registry is
+// still a placeholder. Installed from a path beside it, npm satisfies that requirement locally.
+const filename = pack('dist', 'box-kite.tgz');
+const coreFilename = pack('dist-core', 'box-kite-core.tgz');
 
 // And drop the copy npm already unpacked. The tarball's path and the package's version are both
 // stable across rebuilds, so npm sees an installed dependency that matches what is asked for and
 // keeps it — leaving the example testing whatever `dist/` looked like the first time. Every check
 // downstream (the Next build, the smoke test, CI) would be reading a stale library.
 rmSync(resolve('examples', 'next-app', 'node_modules', '@box-kite', 'react'), { recursive: true, force: true });
+rmSync(resolve('examples', 'next-app', 'node_modules', '@box-kite', 'core'), { recursive: true, force: true });
 
-console.log(`✔ packed ${filename} → ${tarball}`);
+console.log(`✔ packed ${filename} and ${coreFilename} → ${target}`);

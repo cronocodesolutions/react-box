@@ -90,7 +90,7 @@ export default function MigrationPage() {
                 language="jsx"
                 check={false}
                 code={
-                  "// before\ndeclare module '@cronocode/react-box/types' { … }\n\n// after\ndeclare module '@box-kite/react/types' { … }"
+                  "// before\ndeclare module '@cronocode/react-box/types' { … }\n\n// after\ndeclare module '@box-kite/core/types' { … }"
                 }
               />
             </Box>

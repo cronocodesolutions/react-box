@@ -170,10 +170,10 @@ export const components = Box.components({
 });
 
 // box.d.ts — teach TypeScript the name, or variant="outlined" stays a type error.
-import { ExtractComponentsAndVariants } from '@box-kite/react/types';
+import { ExtractComponentsAndVariants } from '@box-kite/core/types';
 import { components } from './boxExtends';
 
-declare module '@box-kite/react/types' {
+declare module '@box-kite/core/types' {
   namespace Augmented {
     interface ComponentsTypes extends ExtractComponentsAndVariants<typeof components> {}
   }

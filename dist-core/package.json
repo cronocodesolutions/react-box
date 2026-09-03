@@ -1,0 +1,40 @@
+{
+  "name": "@box-kite/core",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "The Box Kite styling engine, with no framework at all — runtime atomic CSS for a plain-DOM app, a Web Component or another framework.",
+  "main": "./core.cjs",
+  "module": "./core.mjs",
+  "types": "./core.d.ts",
+  "exports": {
+    ".": {
+      "types": "./core.d.ts",
+      "import": "./core.mjs",
+      "require": "./core.cjs"
+    },
+    "./types": {
+      "types": "./types.d.ts"
+    }
+  },
+  "sideEffects": false,
+  "keywords": [
+    "box-kite",
+    "boxkite",
+    "css-in-js",
+    "atomic-css",
+    "runtime-css",
+    "styling",
+    "design-system",
+    "typescript"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/box-kite/box-kite.git"
+  },
+  "bugs": {
+    "url": "https://github.com/box-kite/box-kite/issues"
+  },
+  "homepage": "https://box-kite.dev",
+  "author": "Maxim Procopenco",
+  "license": "MIT"
+}
