@@ -914,6 +914,8 @@ npm run lint
 | `npm run compile`     | TypeScript type check only        |
 | `npm test`            | Run Vitest tests                  |
 | `npm run lint`        | ESLint check                      |
+| `npm run docs:props`  | Write the prop reference          |
+| `npm run check:props` | Fail if the reference has drifted |
 
 ---
 
@@ -998,6 +1000,25 @@ description, `src/BOX_AI_CONTEXT.md`, both skill files, and two on the docs site
 ten and fails until they agree with the registry, so a new prop means bumping `PROP_COUNT` there and the ten copies. It
 is checked because it drifted twice on its own: once to `~144` against a registry of 117 (bug #71), and once with the
 npm description left at 165 while everything else said 186 (bug #114).
+
+### Step 6: Generate the Prop Reference
+
+```shell
+npm run docs:props    # writes the @example tags and api/props.json
+npm run check:props   # what CI runs: fails when either has drifted
+```
+
+Every prop carries an `@example` in its JSDoc, and that line is **generated**. `docs:props` builds an engine from source,
+styles a sample value with the prop, reads the rule back and writes down what it measured — `p={4} → padding: 1rem`. The tag
+travels from the registry through the mapped type in `types.ts` into `dist/core/boxStyles.d.ts`, so the divider a reader gets
+wrong is in the hover of their editor, from the published package. `api/props.json` is the same measurement as data, for the
+docs site's props tables (G4) and for generated AI context.
+
+The prose is yours to write and is kept byte for byte; only the example line and the JSON are generated. Where the example's
+_value_ is a choice rather than a fact — a keyword that says nothing (`position: static`), a percentage that is a filter's own
+unit (`brightness={110}`) — it comes from `SAMPLES` in `scripts/propsApi.mjs`; everything else takes the first value the
+registry lists, or `4` for a number. A sample the prop does not accept fails loudly, because the prop then writes no rule to
+measure. **Never edit an `@example` by hand**: a changed divider changes 45 of them at once, and the check exists to say so.
 
 ---
 
