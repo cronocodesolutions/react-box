@@ -58,10 +58,12 @@ takes over navigation. The shells carry the metadata; the prerender pass below p
 
 ### Moving the site to another domain
 
-1. Point DNS at GitHub Pages (apex + `www`), set the custom domain in the repository's Pages
-   settings, and wait for the certificate before announcing anything.
-2. Change `SITE_URL`. That is the whole repo-side change: canonicals, `sitemap.xml`, `robots.txt`
-   and `CNAME` all follow, and `npm test` checks they moved together.
+1. Point DNS at GitHub Pages (apex + `www`), and wait for the certificate before announcing
+   anything. Do **not** set the custom domain by hand: the build emits a `CNAME` asset, and a Pages
+   deploy carrying one sets the domain — a setting made ahead of the deploy is overwritten by it.
+2. Change `SITE_URL` **and `SITE_NAME` in the same commit**: canonicals, `sitemap.xml`, `robots.txt`
+   and `CNAME` all follow the address, and `npm test` checks they moved together. The name goes with
+   it because it is the suffix of every `<title>` — flipping it later re-indexes every route twice.
 3. Repoint the links we own that are written by hand: `homepage` in `package.json`, the docs link in
    `README.md`, and `ARTICLE.md`.
 4. Redirect the old host path-preservingly (301) — it cannot live in this repo, because GitHub Pages

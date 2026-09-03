@@ -20,10 +20,10 @@ describe('DocumentHead', () => {
   it('names the route in the title, the description and the canonical URL', () => {
     renderAt('/dropdown');
 
-    expect(document.title).toBe('Dropdown — React Box');
+    expect(document.title).toBe('Dropdown — Box Kite');
     expect(canonical()).toBe(`${SITE_URL}/dropdown/`);
     expect(meta('name', 'description')).toContain('APG select-only combobox');
-    expect(meta('property', 'og:title')).toBe('Dropdown — React Box');
+    expect(meta('property', 'og:title')).toBe('Dropdown — Box Kite');
     expect(meta('property', 'og:url')).toBe(`${SITE_URL}/dropdown/`);
   });
 
@@ -37,7 +37,7 @@ describe('DocumentHead', () => {
 
     await userEvent.click(screen.getByText('Switch'));
 
-    expect(document.title).toBe('Switch — React Box');
+    expect(document.title).toBe('Switch — Box Kite');
     expect(canonical()).toBe(`${SITE_URL}/switch/`);
     expect(document.head.querySelectorAll('link[rel="canonical"]')).toHaveLength(1);
     expect(document.head.querySelectorAll('meta[name="description"]')).toHaveLength(1);
@@ -45,7 +45,7 @@ describe('DocumentHead', () => {
 
   it('asks crawlers not to index an address the router does not serve', () => {
     renderAt('/nothing-here');
-    expect(document.title).toBe('Page not found — React Box');
+    expect(document.title).toBe('Page not found — Box Kite');
     expect(meta('name', 'robots')).toBe('noindex, follow');
   });
 

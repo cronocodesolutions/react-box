@@ -22,7 +22,7 @@ export function canonicalUrl(path: string, siteUrl: string = SITE_URL): string {
   return path === '/' ? `${siteUrl}/` : `${siteUrl}${path}/`;
 }
 
-/** The `<title>` for a route: its own when it carries one, `<name> — React Box` otherwise. */
+/** The `<title>` for a route: its own when it carries one, `<name> — Box Kite` otherwise. */
 export function documentTitle(route: SiteRoute): string {
   return route.title ?? `${route.name} — ${SITE_NAME}`;
 }

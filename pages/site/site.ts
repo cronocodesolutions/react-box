@@ -1,21 +1,21 @@
 /**
  * Where the docs site lives. Everything address-bound is built from `SITE_URL` — the canonical links,
- * `sitemap.xml`, `robots.txt`, the `CNAME` — so moving to box-kite.dev is this constant plus the DNS
- * records (checklist in `docs/WEBSITE.md`). Nothing else in `pages/` may hard-code a host.
+ * `sitemap.xml`, `robots.txt`, the `CNAME` — so a move is this constant plus the DNS records
+ * (checklist in `docs/WEBSITE.md`). Nothing else in `pages/` may hard-code a host.
  */
-export const SITE_URL = 'https://box.cronocode.com';
+export const SITE_URL = 'https://box-kite.dev';
 
 /** Second half of every document title, and the Open Graph site name. */
-export const SITE_NAME = 'React Box';
+export const SITE_NAME = 'Box Kite';
 
 export interface SiteRoute {
   /** The path react-router matches, and the one the sitemap prints. */
   path: string;
-  /** First half of the document title — `Dropdown — React Box`. */
+  /** First half of the document title — `Dropdown — Box Kite`. */
   name: string;
   /** The meta description, and the Open Graph description. */
   description: string;
-  /** The whole `<title>`, for a route the `<name> — React Box` form does not suit. */
+  /** The whole `<title>`, for a route the `<name> — Box Kite` form does not suit. */
   title?: string;
   /** Unlisted demos set this to `false`: out of the sitemap, and `noindex` for crawlers. */
   indexable?: boolean;
@@ -30,7 +30,7 @@ export const siteRoutes = [
   {
     path: '/',
     name: 'Introduction',
-    title: 'React Box — build beautiful UIs without writing CSS',
+    title: 'Box Kite — build beautiful UIs without writing CSS',
     description:
       'A React library where every CSS property is a typed prop. Classes are generated at runtime and shared between components, so there is no stylesheet to import.',
   },
