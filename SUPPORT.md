@@ -2,7 +2,7 @@
 
 ## Versioning
 
-`@cronocode/react-box` follows [Semantic Versioning](https://semver.org/):
+`@box-kite/react` follows [Semantic Versioning](https://semver.org/):
 
 - **Patch** (`3.3.x`) — bug fixes, docs, internal refactors. Always safe to upgrade.
 - **Minor** (`3.x.0`) — new props, new components, new APIs. Backwards compatible.

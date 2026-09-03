@@ -46,9 +46,9 @@ describe('SSG without a DOM', () => {
       </html>,
     );
 
-    expect(result.html).toContain('<style id="crono-styles">');
+    expect(result.html).toContain('<style id="box-kite-styles">');
     expect(result.html).toContain('.p-4{padding:1rem}');
-    expect(result.html.indexOf('<style id="crono-styles">')).toBeLessThan(result.html.indexOf('<title>'));
+    expect(result.html.indexOf('<style id="box-kite-styles">')).toBeLessThan(result.html.indexOf('<title>'));
   });
 
   it('exposes getStyles()/resetStyles() for a request rendered by any React renderer', () => {

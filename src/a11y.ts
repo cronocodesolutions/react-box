@@ -1,5 +1,5 @@
 /**
- * `@cronocode/react-box/a11y` — the behaviour primitives the accessible components are built from. Every
+ * `@box-kite/react/a11y` — the behaviour primitives the accessible components are built from. Every
  * APG pattern needs the same four mechanics (return focus, move through a list, dismiss, hold a value the
  * consumer may own), none of them visible in the markup, so they live here once and are published because
  * this library will never cover every pattern. Client hooks: the entry carries a `'use client'` banner.

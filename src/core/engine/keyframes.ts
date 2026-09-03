@@ -56,7 +56,7 @@ export default function createKeyframesRegistry(): KeyframesRegistry {
     register(keyframes) {
       for (const [name, stops] of Object.entries(keyframes)) {
         if (!cssIdentifier.test(name)) {
-          console.warn(`[react-box] Box.keyframes() skipped '${name}': a keyframes name has to be a CSS identifier.`);
+          console.warn(`[box-kite] Box.keyframes() skipped '${name}': a keyframes name has to be a CSS identifier.`);
           continue;
         }
 

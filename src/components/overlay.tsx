@@ -10,7 +10,7 @@ const positionDigitsAfterComma = 2;
 
 /**
  * A floating layer, rendered into the portal container at the place it is declared: it measures where it
- * sits, then renders its children into `#crono-box` translated to that spot, so they escape
+ * sits, then renders its children into `#box-kite-portal` translated to that spot, so they escape
  * `overflow: hidden` and every clipped ancestor. It owns no open state, no ARIA and no dismissal — a
  * layer is not a pattern, and `Tooltip`, `Dropdown` and the DataGrid menu each need a different one.
  * (This was called `Tooltip` until A3, which is the one thing it is not.)

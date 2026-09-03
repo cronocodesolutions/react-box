@@ -45,8 +45,8 @@ export default function ServerComponentsPage() {
             label="A page with no 'use client'"
             language="jsx"
             code={`// app/page.tsx — a Server Component.
-import Flex from '@cronocode/react-box/components/flex';
-import { H1, P } from '@cronocode/react-box/components/semantics';
+import Flex from '@box-kite/react/components/flex';
+import { H1, P } from '@box-kite/react/components/semantics';
 
 export default function Page() {
   return (
@@ -66,7 +66,7 @@ export default function Page() {
             language="jsx"
             code={`// app/elementMode.ts — imported by every 'use client' module in the app.
 'use client';
-import Box from '@cronocode/react-box';
+import Box from '@box-kite/react';
 
 // The client bundle resolves the client Box, which inserts rules through the CSSOM after
 // hydration — so an island's CSS would be missing from the server-rendered HTML. This puts
@@ -101,7 +101,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             language="jsx"
             code={`// app/themeToggle.tsx — the island that changes it.
 'use client';
-import { createThemeController } from '@cronocode/react-box/core';
+import { createThemeController } from '@box-kite/react/core';
 
 const controller = createThemeController({ storageKey: 'theme', theme: 'dark' });
 

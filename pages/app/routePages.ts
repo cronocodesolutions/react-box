@@ -10,6 +10,7 @@ import { SiteRoutePath } from '../site/site';
 const loaders: Record<SiteRoutePath, () => Promise<{ default: ComponentType }>> = {
   '/': () => import('../pages/homePage'),
   '/installation': () => import('../pages/installationPage'),
+  '/migrating': () => import('../pages/migrationPage'),
   '/theme-setup': () => import('../pages/themeSetupPage'),
   '/server-components': () => import('../pages/serverComponentsPage'),
   '/box': () => import('../pages/boxPage'),

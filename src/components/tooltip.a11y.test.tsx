@@ -65,7 +65,7 @@ describe('Tooltip accessibility', () => {
       await user.hover(trigger());
 
       const bubble = screen.getByRole('tooltip');
-      expect(document.getElementById('crono-box')).toContainElement(bubble);
+      expect(document.getElementById('box-kite-portal')).toContainElement(bubble);
       expect(container).not.toContainElement(bubble);
     });
 

@@ -29,8 +29,8 @@ export default function RadioButtonPage() {
           <Code
             label="Import"
             language="jsx"
-            code={`import RadioGroup from '@cronocode/react-box/components/radioGroup';
-import RadioButton from '@cronocode/react-box/components/radioButton';`}
+            code={`import RadioGroup from '@box-kite/react/components/radioGroup';
+import RadioButton from '@box-kite/react/components/radioButton';`}
           />
 
           <Code

@@ -11,8 +11,8 @@ npm run smoke:next-app   # starts the production server and asserts on the HTML
 npm run dev:next-app     # http://localhost:3010
 ```
 
-The example depends on `@cronocode/react-box` as a **tarball built from `dist/`**
-(`.local/react-box.tgz`, produced by `npm run pack:local`), not on the source. That is the point: it
+The example depends on `@box-kite/react` as a **tarball built from `dist/`**
+(`.local/box-kite.tgz`, produced by `npm run pack:local`), not on the source. That is the point: it
 exercises the published `exports` map, so the `react-server` condition is what decides which Box the
 server graph gets — exactly as it would in a consumer's app. A directory dependency would be
 symlinked and resolve its own copy of React from the repository root.
@@ -26,7 +26,7 @@ symlinked and resolve its own copy of React from the repository root.
 | `app/streamedSection.tsx` | An `async` Server Component behind `<Suspense>` — its markup and its CSS arrive in a later chunk |
 | `app/elementMode.ts`      | The one line a client bundle needs: `Box.configure({ sink: 'element' })`                         |
 | `app/counter.tsx`         | A client island using `Flex`/`Button`, server-rendered with its CSS in the HTML                  |
-| `app/themeToggle.tsx`     | `createThemeController()` from `@cronocode/react-box/core` — theme switching with no provider    |
+| `app/themeToggle.tsx`     | `createThemeController()` from `@box-kite/react/core` — theme switching with no provider         |
 | `app/components/page.tsx` | Server Component. The pre-built components imported straight into it, hook-free and stateful     |
 | `smoke.mjs`               | The CI check: 13 assertions against the served HTML                                              |
 
@@ -56,7 +56,7 @@ after the shell are streamed as `<style media="not all">` and enabled by React o
 `/components` is a Server Component that imports both kinds, which is the whole difference:
 
 - **`Flex`, `Grid`, `Button`, `Textbox`, `Textarea`, `RadioButton`, `Icon`, the SVG elements and the semantic tags**
-  are hook-free wrappers around Box. Their published chunks import `@cronocode/react-box` by name
+  are hook-free wrappers around Box. Their published chunks import `@box-kite/react` by name
   rather than by a relative path, so the `react-server` condition reaches them and they resolve the
   same hook-free Box the page did. They render on the server, CSS in the HTML, no JavaScript behind
   them.

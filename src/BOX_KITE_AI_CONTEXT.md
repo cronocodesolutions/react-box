@@ -1,4 +1,4 @@
-# @cronocode/react-box - AI Assistant Context
+# @box-kite/react - AI Assistant Context
 
 Runtime CSS-in-JS library. `Box` component accepts 212 CSS props and generates CSS classes at runtime. Same prop values share a single class.
 
@@ -53,7 +53,7 @@ NEVER use `<Box tag="...">` when a component exists. NEVER use `<Box display="fl
 | `<Box tag="svg/path/circle/rect">`   | `<Svg>/<Path>/<Circle>/<Rect>`   | `components/svg`       |
 | a lucide/Tabler icon, styled         | `<Icon>`                         | `components/icon`      |
 
-All imports from `@cronocode/react-box/components/...`. Semantics also export: `Mark`, `Figure`, `Figcaption`, `Details`, `Summary`, `Menu`, `Time`.
+All imports from `@box-kite/react/components/...`. Semantics also export: `Mark`, `Figure`, `Figcaption`, `Details`, `Summary`, `Menu`, `Time`.
 
 ---
 
@@ -382,7 +382,7 @@ Twenty-three SVG properties, on any Box, plus twenty element components in `comp
 | `x` / `y`                       | x / y                         | number in user units, or a percentage — `<rect>`, `<image>`, `<use>`, `<foreignObject>`, nested `<svg>`. NOT `<text>`            |
 
 ```tsx
-import { Circle, Path, Rect, Svg, SvgText } from '@cronocode/react-box/components/svg';
+import { Circle, Path, Rect, Svg, SvgText } from '@box-kite/react/components/svg';
 
 // Every property except vectorEffect is inherited, so set it once on the <svg>.
 <Svg viewBox="0 0 200 48" width="200px" fill="none" stroke="violet-500" strokeWidth={3} strokeLinecap="round">
@@ -754,7 +754,7 @@ The same question a breakpoint asks, addressed to the element's own container: t
 ### Theme System
 
 ```tsx
-import Box from '@cronocode/react-box';
+import Box from '@box-kite/react';
 
 // Setup: wrap app in Box.Theme (auto-detects via prefers-color-scheme)
 <Box.Theme>                                      {/* auto light/dark detection */}
@@ -851,7 +851,7 @@ Box.components({
 ### Box.extend() — Add New Props, Colors, Variables
 
 ```tsx
-import Box from '@cronocode/react-box';
+import Box from '@box-kite/react';
 
 export const { extendedProps, extendedPropTypes } = Box.extend(
   { 'brand-primary': '#ff6600', 'brand-secondary': '#0066ff' }, // CSS variables
@@ -917,11 +917,11 @@ Box.extend(
 
 ```typescript
 // types.d.ts — Generic approach (recommended)
-import { ExtractComponentsAndVariants, ExtractBoxStyles } from '@cronocode/react-box/types';
+import { ExtractComponentsAndVariants, ExtractBoxStyles } from '@box-kite/react/types';
 import { components } from './boxComponents';
 import { extendedPropTypes, extendedProps } from './boxExtends';
 
-declare module '@cronocode/react-box/types' {
+declare module '@box-kite/react/types' {
   namespace Augmented {
     interface BoxProps extends ExtractBoxStyles<typeof extendedProps> {}
     interface BoxPropTypes extends ExtractBoxStyles<typeof extendedPropTypes> {}
@@ -930,7 +930,7 @@ declare module '@cronocode/react-box/types' {
 }
 
 // Manual approach (simple cases):
-declare module '@cronocode/react-box/types' {
+declare module '@box-kite/react/types' {
   namespace Augmented {
     interface BoxPropTypes {
       bgColor: 'brand-primary' | 'brand-secondary';
@@ -947,10 +947,10 @@ declare module '@cronocode/react-box/types' {
 ## Common Patterns
 
 ```tsx
-import Flex from '@cronocode/react-box/components/flex';
-import Grid from '@cronocode/react-box/components/grid';
-import Button from '@cronocode/react-box/components/button';
-import Textbox from '@cronocode/react-box/components/textbox';
+import Flex from '@box-kite/react/components/flex';
+import Grid from '@box-kite/react/components/grid';
+import Button from '@box-kite/react/components/button';
+import Textbox from '@box-kite/react/components/textbox';
 
 // Flex layout
 <Flex d="column" gap={4} ai="center" jc="between">{children}</Flex>
@@ -980,7 +980,7 @@ import Textbox from '@cronocode/react-box/components/textbox';
 <Box position="fixed" top={0} left={0} right={0} bottom={0} bgColor="black" opacity={0.5} zIndex={50} />
 ```
 
-**Portals**: `Overlay` (`components/overlay`) renders its children into `#crono-box` at the place it
+**Portals**: `Overlay` (`components/overlay`) renders its children into `#box-kite-portal` at the place it
 is declared, so they escape `overflow: hidden` and clipped ancestors. No ARIA, no open state — it is
 positioning only. For a _description of a control_, use `Tooltip` instead (below): it is the same
 layer with the APG pattern on it.
@@ -992,7 +992,7 @@ renders one, and the only styling channel they offer is `className`. `useClassNa
 same props Box would and gives you the class list to put on them.
 
 ```tsx
-import { useClassNames } from '@cronocode/react-box';
+import { useClassNames } from '@box-kite/react';
 
 const { className, styles } = useClassNames({ color: 'sky-500', hover: { color: 'sky-300' } });
 
@@ -1020,18 +1020,18 @@ second argument for an element inside an `<svg>`. `<Icon>` is this hook plus tha
 ### Server-Side Rendering
 
 ```tsx
-import { getStyles, resetStyles } from '@cronocode/react-box/ssg';
+import { getStyles, resetStyles } from '@box-kite/react/ssg';
 
 const html = renderToString(<App />); // any React server renderer
 const cssString = getStyles(); // the CSS for what was just rendered
-// <style id="crono-styles">{cssString}</style> in the document head
+// <style id="box-kite-styles">{cssString}</style> in the document head
 resetStyles(); // reset before the next request
 ```
 
 Or in one call, which injects the styles into the rendered `<head>` and resets afterwards:
 
 ```tsx
-import { renderToStaticMarkup } from '@cronocode/react-box/ssg';
+import { renderToStaticMarkup } from '@box-kite/react/ssg';
 
 const { html, styles } = renderToStaticMarkup(<App />);
 ```
@@ -1049,8 +1049,8 @@ markup as `<style href precedence>` elements, which React 19 hoists into `<head>
 
 ```tsx
 // app/page.tsx — a Server Component
-import Flex from '@cronocode/react-box/components/flex';
-import { H1 } from '@cronocode/react-box/components/semantics';
+import Flex from '@box-kite/react/components/flex';
+import { H1 } from '@box-kite/react/components/semantics';
 
 export default function Page() {
   return (
@@ -1066,7 +1066,7 @@ call, in a module the root layout imports:
 
 ```tsx
 'use client';
-import Box from '@cronocode/react-box';
+import Box from '@box-kite/react';
 
 Box.configure({ sink: 'element' }); // React 19 only
 ```
@@ -1091,14 +1091,14 @@ Box.configure({ sink: 'element' }); // React 19 only
 
 ---
 
-## Behaviour primitives (`@cronocode/react-box/a11y`)
+## Behaviour primitives (`@box-kite/react/a11y`)
 
 Five client hooks for building accessible components — the mechanics, not the ARIA. 2.2 KB gzipped
 and no styling engine behind them.
 
 ```tsx
-import { useControllableState, useDismiss, useFocusReturn, useIdentifier, useRovingFocus } from '@cronocode/react-box/a11y';
-import VisuallyHidden from '@cronocode/react-box/components/visuallyHidden';
+import { useControllableState, useDismiss, useFocusReturn, useIdentifier, useRovingFocus } from '@box-kite/react/a11y';
+import VisuallyHidden from '@box-kite/react/components/visuallyHidden';
 
 const id = useIdentifier('menu'); // stable id: `${id}-trigger`, `${id}-listbox`
 const [open, setOpen] = useControllableState({ value: props.open, defaultValue: false, onChange: props.onOpenChange });
@@ -1132,10 +1132,10 @@ All three render **real native inputs**, so focus, the checked state, the disabl
 submission come from the platform. What the components add is the part the platform cannot guess.
 
 ```tsx
-import Checkbox from '@cronocode/react-box/components/checkbox';
-import Switch from '@cronocode/react-box/components/switch';
-import RadioGroup from '@cronocode/react-box/components/radioGroup';
-import RadioButton from '@cronocode/react-box/components/radioButton';
+import Checkbox from '@box-kite/react/components/checkbox';
+import Switch from '@box-kite/react/components/switch';
+import RadioGroup from '@box-kite/react/components/radioGroup';
+import RadioButton from '@box-kite/react/components/radioButton';
 
 <Checkbox label="Accept the terms" name="terms" />
 <Checkbox label="Select all rows" name="rows" indeterminate />
@@ -1181,8 +1181,8 @@ a boolean for the state, or the tuple `[state, styles]` for both:
 A `<form>` that reads its own fields when it submits, so a simple form needs no state per input.
 
 ```tsx
-import Form from '@cronocode/react-box/components/form';
-import Textbox from '@cronocode/react-box/components/textbox';
+import Form from '@box-kite/react/components/form';
+import Textbox from '@box-kite/react/components/textbox';
 
 interface Credentials {
   email: string;
@@ -1216,7 +1216,7 @@ next to the markup. Everything else is a Box prop, and `props` takes the `<form>
 ## Tooltip Component
 
 ```tsx
-import Tooltip from '@cronocode/react-box/components/tooltip';
+import Tooltip from '@box-kite/react/components/tooltip';
 
 <Tooltip content="Deletes the row for good">{(trigger) => <Button {...trigger}>Delete</Button>}</Tooltip>;
 ```
@@ -1252,7 +1252,7 @@ a Box — its colour, size, dark mode, hover state and breakpoints are the props
 For a real chart with axes and a tooltip, theme Recharts instead.
 
 ```tsx
-import { Gauge, MiniDonut, ProgressRing, Sparkline } from '@cronocode/react-box/components/chart';
+import { Gauge, MiniDonut, ProgressRing, Sparkline } from '@box-kite/react/components/chart';
 
 // A sparkline stretches to whatever box it is in and keeps its line one width thick.
 <Sparkline data={[4, 9, 6, 12, 10, 15]} width="7rem" color="sky-500" />
@@ -1324,7 +1324,7 @@ The bridge for the chart you did not write. It declares the variables a chart re
 names no colour at all and its dark mode belongs to the page:
 
 ```tsx
-import { ChartContainer } from '@cronocode/react-box/components/chart';
+import { ChartContainer } from '@box-kite/react/components/chart';
 import { Area, AreaChart, CartesianGrid, ResponsiveContainer, XAxis, YAxis } from 'recharts';
 
 <ChartContainer
@@ -1405,7 +1405,7 @@ function TrendCell({ cell }: { cell: CellModel<Row> }) {
 ## DataGrid Component
 
 ```tsx
-import DataGrid from '@cronocode/react-box/components/dataGrid';
+import DataGrid from '@box-kite/react/components/dataGrid';
 
 <DataGrid
   data={users}
@@ -1629,7 +1629,7 @@ stops, as they were before A7.
 ## Dropdown Component
 
 ```tsx
-import Dropdown from '@cronocode/react-box/components/dropdown';
+import Dropdown from '@box-kite/react/components/dropdown';
 ```
 
 ### Usage
@@ -1792,7 +1792,7 @@ Box.components({
 Data-driven dropdown — pass `data` + `def` instead of composing children. Wraps Dropdown internally, shares the same `dropdown.*` style tree.
 
 ```tsx
-import Select from '@cronocode/react-box/components/select';
+import Select from '@box-kite/react/components/select';
 
 // Basic — `label` names the combobox, same as on Dropdown
 <Select<User, number> label="User" data={users} def={{ valueKey: 'id', displayKey: 'name', placeholder: 'Pick...' }}
@@ -1826,8 +1826,8 @@ Also accepts: `data` (TRow[]), `value`/`defaultValue`, `label`/`labelProps`, `mu
 
 ## Debugging Tips
 
-1. **Inspect styles**: `<style id="crono-styles">` in document head
+1. **Inspect styles**: `<style id="box-kite-styles">` in document head
 2. **Class names**: Elements get classes like `_b`, `_2a`, etc.
 3. **CSS variables**: In `:root` rules
 4. **Theme issues**: Ensure `<Box.Theme>` wraps your app
-5. **Portal theming**: Tooltips/dropdowns use `#crono-box` container
+5. **Portal theming**: Tooltips/dropdowns use `#box-kite-portal` container

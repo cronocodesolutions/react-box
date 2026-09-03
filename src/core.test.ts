@@ -3,7 +3,7 @@ import { generatedRulesIn, ruleListIn } from '../dev/engineHarness';
 import { BoxStyleProps, createStyleEngine, createThemeController, defaultThemeName, getSystemTheme, StyleEngine } from './core';
 
 /**
- * The `@cronocode/react-box/core` entry, used the way the docs and `examples/vanilla` use it: an
+ * The `@box-kite/react/core` entry, used the way the docs and `examples/vanilla` use it: an
  * engine, a class name, a DOM element. No React is imported in this file — if the engine ever
  * needs it again, this suite is where it shows up as a failure rather than as a subtle regression.
  */

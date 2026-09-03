@@ -42,8 +42,8 @@ export default function AiContextPage() {
             One file. Infinite possibilities.
           </Box>
           <Box fontSize={16} theme={{ dark: { color: 'slate-400' }, light: { color: 'slate-600' } }} maxWidth={140} lineHeight={26}>
-            The BOX_AI_CONTEXT.md file contains everything an AI assistant needs to write perfect React Box code. No more guessing, no more
-            mistakes.
+            The BOX_KITE_AI_CONTEXT.md file contains everything an AI assistant needs to write perfect Box Kite code. No more guessing, no
+            more mistakes.
           </Box>
         </Flex>
       </Reveal>
@@ -58,7 +58,7 @@ export default function AiContextPage() {
             <ReasonCard
               icon={<Zap size={20} />}
               title="AI assistants don't know your library"
-              description="Without context, AI tools make mistakes. They might use wrong prop names, incorrect values, or miss important patterns. BOX_AI_CONTEXT.md fixes this."
+              description="Without context, AI tools make mistakes. They might use wrong prop names, incorrect values, or miss important patterns. BOX_KITE_AI_CONTEXT.md fixes this."
             />
             <ReasonCard
               icon={<Lightbulb size={20} />}
@@ -68,7 +68,7 @@ export default function AiContextPage() {
             <ReasonCard
               icon={<Rocket size={20} />}
               title="Write code 10x faster"
-              description="When your AI assistant truly understands React Box, it generates production-ready code on the first try. Every time."
+              description="When your AI assistant truly understands Box Kite, it generates production-ready code on the first try. Every time."
             />
           </Flex>
         </Box>
@@ -104,9 +104,9 @@ export default function AiContextPage() {
             <StepCard
               step={1}
               title="Get the context file"
-              description="The BOX_AI_CONTEXT.md file is included in the package. Find it in node_modules/@cronocode/react-box/BOX_AI_CONTEXT.md or copy it to your project root."
+              description="The BOX_KITE_AI_CONTEXT.md file is included in the package. Find it in node_modules/@box-kite/react/BOX_KITE_AI_CONTEXT.md or copy it to your project root."
             >
-              <Code language="shell" code="cp node_modules/@cronocode/react-box/BOX_AI_CONTEXT.md ./BOX_AI_CONTEXT.md" />
+              <Code language="shell" code="cp node_modules/@box-kite/react/BOX_KITE_AI_CONTEXT.md ./BOX_KITE_AI_CONTEXT.md" />
             </StepCard>
 
             <StepCard
@@ -117,7 +117,7 @@ export default function AiContextPage() {
               <Flex d="column" gap={4}>
                 <ToolExample
                   tool="Claude Code / Cursor"
-                  example='Just type @BOX_AI_CONTEXT.md in your prompt or say "Read the BOX_AI_CONTEXT.md file"'
+                  example='Just type @BOX_KITE_AI_CONTEXT.md in your prompt or say "Read the BOX_KITE_AI_CONTEXT.md file"'
                 />
                 <ToolExample tool="GitHub Copilot Chat" example="Attach the file to your conversation or paste the content" />
                 <ToolExample tool="ChatGPT / Claude Web" example="Copy and paste the file content into your first message" />
@@ -127,7 +127,7 @@ export default function AiContextPage() {
             <StepCard
               step={3}
               title="Start coding"
-              description="Your AI assistant now understands React Box deeply. Just describe what you want to build."
+              description="Your AI assistant now understands Box Kite deeply. Just describe what you want to build."
             >
               <Box
                 p={4}
@@ -160,7 +160,7 @@ export default function AiContextPage() {
       <Reveal delay={0.4}>
         <Box mb={12}>
           <Box tag="h3" fontSize={20} fontWeight={600} theme={{ dark: { color: 'white' }, light: { color: 'slate-900' } }} mb={6}>
-            What's inside BOX_AI_CONTEXT.md?
+            What's inside BOX_KITE_AI_CONTEXT.md?
           </Box>
 
           <Flex d="column" gap={3}>
@@ -217,8 +217,8 @@ export default function AiContextPage() {
               Pro tip: Keep it in your project root
             </Box>
             <Box fontSize={14} lineHeight={22} theme={{ dark: { color: 'indigo-300' }, light: { color: 'indigo-700' } }}>
-              Copy BOX_AI_CONTEXT.md to your project root. This way, AI tools like Cursor and Claude Code will automatically include it in
-              their context when you work on your project. No need to reference it every time!
+              Copy BOX_KITE_AI_CONTEXT.md to your project root. This way, AI tools like Cursor and Claude Code will automatically include it
+              in their context when you work on your project. No need to reference it every time!
             </Box>
           </Box>
         </Flex>
@@ -242,7 +242,7 @@ export default function AiContextPage() {
             That's it. Seriously.
           </Box>
           <Box fontSize={15} theme={{ dark: { color: 'slate-400' }, light: { color: 'slate-600' } }} maxWidth={120} lineHeight={24}>
-            Your AI assistant is now a React Box expert. Go build something amazing.
+            Your AI assistant is now a Box Kite expert. Go build something amazing.
           </Box>
         </Flex>
       </Reveal>

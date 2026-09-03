@@ -22,7 +22,7 @@ export default function ButtonPage() {
 
       <Reveal delay={0.1}>
         <Flex d="column" gap={8}>
-          <Code label="Import" language="jsx" code="import Button from '@cronocode/react-box/components/button';" />
+          <Code label="Import" language="jsx" code="import Button from '@box-kite/react/components/button';" />
 
           <Code id="basic" label="Basic Button" language="jsx">
             <Flex gap={4} flexWrap="wrap">

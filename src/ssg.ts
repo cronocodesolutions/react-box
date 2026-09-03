@@ -9,7 +9,7 @@ import { StylesContext } from './react/useStyles';
 
 /**
  * The CSS for everything rendered since the last reset. Flushes first, so it is safe straight after
- * `renderToString` — no effects have run at that point. Goes in a `<style id="crono-styles">` in the head.
+ * `renderToString` — no effects have run at that point. Goes in a `<style id="box-kite-styles">` in the head.
  */
 export function getStyles(): string {
   return StylesContext.getStyles();

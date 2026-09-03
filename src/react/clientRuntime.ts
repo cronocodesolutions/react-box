@@ -5,8 +5,8 @@
  * is for the ways around it: a deep import, a bundler with no condition, a framework mixing the graphs.
  */
 export const CLIENT_RUNTIME_MESSAGE =
-  '[react-box] The client build was loaded into a React Server Component graph, where React has no createContext. ' +
-  "Import '@cronocode/react-box' by its package name — the react-server condition resolves it to a Box that renders on the server — " +
+  '[box-kite] The client build was loaded into a React Server Component graph, where React has no createContext. ' +
+  "Import '@box-kite/react' by its package name — the react-server condition resolves it to a Box that renders on the server — " +
   "and import the components that hold state (Dropdown, Tooltip, DataGrid, Checkbox, Select, Form) from a 'use client' module. " +
   'See https://github.com/box-kite/box-kite#react-server-components-react-19';
 

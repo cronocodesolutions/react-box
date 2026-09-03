@@ -1,13 +1,13 @@
 /* Theme class colors (for Box.Theme and portal containers) */
 .dark,
-#crono-box.dark,
-#crono-box.dark * {
+#box-kite-portal.dark,
+#box-kite-portal.dark * {
   color: #f1f5f9; /* slate-100 */
 }
 
 .light,
-#crono-box.light,
-#crono-box.light * {
+#box-kite-portal.light,
+#box-kite-portal.light * {
   color: #0f172a; /* slate-900 */
 }
 

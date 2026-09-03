@@ -262,7 +262,7 @@ export default function DataGridPage() {
 
       <Reveal delay={0.1}>
         <Flex d="column" gap={8}>
-          <Code label="Import" language="jsx" code="import DataGrid from '@cronocode/react-box/components/dataGrid';" />
+          <Code label="Import" language="jsx" code="import DataGrid from '@box-kite/react/components/dataGrid';" />
 
           <Section id="a11y" title="Keyboard and roles">
             <Box>

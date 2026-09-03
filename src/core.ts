@@ -1,9 +1,9 @@
 /**
- * `@cronocode/react-box/core` — the styling engine, without React. Everything under `src/core` imports
+ * `@box-kite/react/core` — the styling engine, without React. Everything under `src/core` imports
  * no framework (CI enforces it), so a plain-DOM app, a Web Component or another framework can use it:
  *
  * ```js
- * import { createStyleEngine } from '@cronocode/react-box/core';
+ * import { createStyleEngine } from '@box-kite/react/core';
  *
  * const engine = createStyleEngine();
  * document.querySelector('#card').className = engine.classNames({ p: 4, bgColor: 'blue-500' });

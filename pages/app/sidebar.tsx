@@ -18,6 +18,7 @@ import {
   MessageSquare,
   Moon,
   MousePointer2,
+  Package as PackageIcon,
   Paintbrush,
   Palette,
   Proportions,
@@ -105,6 +106,9 @@ export default function Sidebar({ toggleTheme, onClose }: SidebarProps) {
           </MenuItem>
           <MenuItem to="/installation" icon={<Download />}>
             Installation
+          </MenuItem>
+          <MenuItem to="/migrating" icon={<PackageIcon />}>
+            Migrating
           </MenuItem>
           <MenuItem to="/theme-setup" icon={<Paintbrush />}>
             Theme Setup
