@@ -12,7 +12,14 @@ import dts from 'vite-plugin-dts';
  * `core.d.ts` and `types.d.ts` both reference the modules underneath them.
  */
 export default defineConfig(({ mode }) => ({
-  plugins: [dts({ entryRoot: './src', include: ['./src/core.ts', './src/types.ts', './src/core/**', './src/utils/**'] })],
+  plugins: [
+    dts({
+      entryRoot: './src',
+      include: ['./src/core.ts', './src/types.ts', './src/core/**', './src/utils/**'],
+      // Without this the package ships a `.test.d.ts` beside a third of its modules.
+      exclude: ['./src/**/*.test.*'],
+    }),
+  ],
   build: {
     outDir: 'dist-core',
     emptyOutDir: true,

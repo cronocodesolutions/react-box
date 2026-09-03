@@ -29,6 +29,16 @@ npm install @box-kite/react
 React 16.14 or newer, including 18 and 19 (both are covered by CI). TypeScript is optional but the
 props are typed for it.
 
+Two packages ship, and a React project installs one of them:
+
+| Package                                           | What it is                                                        |
+| ------------------------------------------------- | ----------------------------------------------------------------- |
+| **`@box-kite/react`**                             | `Box`, every component, the hooks. Depends on the one below.      |
+| [`@box-kite/core`](#using-the-core-without-react) | The engine and the types, no framework. For an app with no React. |
+
+`@box-kite/core/types` is where a project declares its own props and components — the augmentation
+target lives with the prop registry it extends, not with a binding.
+
 2. Use it
 
 Spacing counts in quarters of a rem: `p={3}` is `0.75rem`, `m={2}` is `0.5rem`. The example below is

@@ -171,7 +171,7 @@ build-time compiler. `examples/vanilla` is that claim as a running page.
 
 | Layer               | Path                                                     | May import React?                         |
 | ------------------- | -------------------------------------------------------- | ----------------------------------------- |
-| Core engine         | `src/core/**`, `src/core.ts`                             | **No** — enforced                         |
+| Core engine         | `src/core/**`, `src/core.ts`, `src/types.ts`             | **No** — enforced, and its own package    |
 | React binding       | `src/react/**`, `src/box.ts`, `src/rsc.ts`, `src/ssg.ts` | Yes (`src/rsc.ts`: no hooks — see below)  |
 | Components, icons   | `src/components/**`, `src/icons/**`                      | Yes                                       |
 | Shared utils, types | `src/utils/**`, `src/types.ts`                           | No — the engine reaches them, so enforced |
@@ -226,7 +226,7 @@ cannot be classified one way by the checks and another by the bundler:
 
 | Chunk          | What is in it                                                                                          | Who imports it                                    |
 | -------------- | ------------------------------------------------------------------------------------------------------ | ------------------------------------------------- |
-| `engine`       | everything `src/core.ts` reaches — framework-free                                                      | every entry                                       |
+| `engine`       | **a tripwire, and empty when the split is intact**: anything `src/core.ts` reaches that leaked in      | nothing — `postbuild.mjs` fails if it exists      |
 | `react-shared` | hook-free React modules, plus what only a server-safe component uses                                   | `box`, `rsc`, components                          |
 | `behavior`     | `src/react/a11y/**` — the primitives, React and nothing else                                           | `a11y`, and the components A3+ build on them      |
 | `platform`     | `src/utils/environment/**`, `src/utils/dom/**` — is there a DOM, and did this event happen inside that | every group, engine included                      |

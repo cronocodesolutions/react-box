@@ -54,13 +54,22 @@ export default function MigrationPage() {
           <Heading>The move</Heading>
           <Code language="shell" label="Install the new package" code={'npm uninstall @cronocode/react-box\nnpm install @box-kite/react'} />
           <Prose>
-            Then replace the specifier across your source. Every subpath keeps its name, so only the prefix changes — <code>/rsc</code>,{' '}
-            <code>/a11y</code>, <code>/core</code>, <code>/ssg</code>, <code>/types</code> and every <code>/components/*</code> import
-            resolve exactly as before.
+            Then replace the specifier across your source. <code>/rsc</code>, <code>/a11y</code>, <code>/ssg</code> and every{' '}
+            <code>/components/*</code> import resolve exactly as before — only the prefix changes.
           </Prose>
           <Box py={2}>
             <Renamed was="@cronocode/react-box" now="@box-kite/react" />
             <Renamed was="@cronocode/react-box/components/flex" now="@box-kite/react/components/flex" />
+          </Box>
+          <Prose>
+            Two moved further than that. The engine is published on its own now, so an app with no React installs{' '}
+            <code>@box-kite/core</code> instead of a React library — and the types go with it, because they are derived from the prop
+            registry rather than from any binding. <code>@box-kite/react</code> depends on <code>@box-kite/core</code>, so installing the
+            React package still gets you both.
+          </Prose>
+          <Box py={2}>
+            <Renamed was="@cronocode/react-box/core" now="@box-kite/core" />
+            <Renamed was="@cronocode/react-box/types" now="@box-kite/core/types" />
           </Box>
           <Prose>
             <strong>You do not have to do it today.</strong> <code>@cronocode/react-box@3.4.0</code> is a compatibility bridge: every entry
