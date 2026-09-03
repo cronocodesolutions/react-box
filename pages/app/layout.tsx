@@ -81,7 +81,7 @@ export default function Layout({ children }: LayoutProps) {
                   </Box>
                 </Box>
                 <Box fontWeight={600} fontSize={18}>
-                  React Box
+                  Box Kite
                 </Box>
               </Flex>
             </NavLink>

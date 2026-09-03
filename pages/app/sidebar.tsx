@@ -74,7 +74,7 @@ export default function Sidebar({ toggleTheme, onClose }: SidebarProps) {
             </Box>
             <Box>
               <Box fontWeight={700} fontSize={16} theme={{ dark: { color: 'white' }, light: { color: 'slate-900' } }}>
-                React Box
+                Box Kite
               </Box>
               <Box fontSize={11} theme={{ dark: { color: 'slate-500' }, light: { color: 'slate-400' } }}>
                 v{version}

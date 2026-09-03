@@ -54,8 +54,8 @@ describe('canonicalUrl', () => {
 
 describe('documentTitle', () => {
   it('suffixes the site name, unless the route brings its own title', () => {
-    expect(documentTitle({ path: '/dropdown', name: 'Dropdown', description: '' })).toBe('Dropdown — React Box');
-    expect(documentTitle({ path: '/', name: 'Introduction', title: 'React Box', description: '' })).toBe('React Box');
+    expect(documentTitle({ path: '/dropdown', name: 'Dropdown', description: '' })).toBe('Dropdown — Box Kite');
+    expect(documentTitle({ path: '/', name: 'Introduction', title: 'Box Kite', description: '' })).toBe('Box Kite');
   });
 });
 
@@ -151,7 +151,7 @@ describe('withHeadHtml', () => {
     const once = withHeadHtml(shell, pageMeta(siteRoutes[0]));
     const twice = withHeadHtml(once, pageMeta(routeFor('/colors')!));
 
-    expect(twice).toContain('<title>Colors — React Box</title>');
+    expect(twice).toContain('<title>Colors — Box Kite</title>');
     expect(twice).not.toContain(documentTitle(siteRoutes[0]));
     expect(twice.match(/<title>/g)).toHaveLength(1);
   });
