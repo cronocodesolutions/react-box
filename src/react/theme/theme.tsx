@@ -10,7 +10,7 @@ import {
   setThemeAttribute,
   watchSystemTheme,
   writeStoredTheme,
-} from '../../core/theme/themeRuntime';
+} from '../../core';
 import { BoxStyleProps } from '../../types';
 import { useGlobalStyles } from '../useStyles';
 import ThemeContext from './themeContext';

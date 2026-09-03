@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import getDefaultEngine from '../core/engine/defaultEngine';
-import { StylesConfiguration } from '../core/engine/styleEngine';
+import { getDefaultEngine, StylesConfiguration } from '../core';
 import { BoxStyleProps } from '../types';
 import { useIsomorphicInsertionEffect } from './effects';
 import resolveStyles, { ResolvedBoxStyles } from './resolveStyles';

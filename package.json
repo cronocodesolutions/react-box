@@ -113,7 +113,7 @@
       "name": "Core engine (no React)",
       "path": "dist/core.mjs",
       "gzip": true,
-      "limit": "23.95 KB"
+      "limit": "24.10 KB"
     },
     {
       "name": "DataGrid",

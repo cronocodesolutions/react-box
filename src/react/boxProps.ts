@@ -1,5 +1,5 @@
 import React from 'react';
-import { ClassNameType } from '../core/classNames';
+import { ClassNameType } from '../core';
 import { BoxStyleProps, ComponentsAndVariants } from '../types';
 
 /**

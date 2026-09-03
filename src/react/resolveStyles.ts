@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import React from 'react';
-import getDefaultEngine from '../core/engine/defaultEngine';
+import { getDefaultEngine } from '../core';
 import { BoxStyleProps } from '../types';
 import styleElementsOf from './styleElements';
 

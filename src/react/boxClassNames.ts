@@ -1,4 +1,4 @@
-import { classNames, ClassNameType } from '../core/classNames';
+import { classNames, ClassNameType } from '../core';
 import { ResolvedBoxStyles } from './resolveStyles';
 
 /**
