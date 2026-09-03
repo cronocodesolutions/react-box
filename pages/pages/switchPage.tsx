@@ -25,7 +25,7 @@ export default function SwitchPage() {
 
       <Reveal delay={0.1}>
         <Flex d="column" gap={10}>
-          <Code label="Import" language="jsx" code="import Switch from '@cronocode/react-box/components/switch';" />
+          <Code label="Import" language="jsx" code="import Switch from '@box-kite/react/components/switch';" />
 
           <Code id="usage" label="Usage" language="jsx" code={`<Switch name="notify" label="Email notifications" defaultChecked />`}>
             <Flex d="column" gap={3}>

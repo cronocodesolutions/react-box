@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import IdentityFactory from '@cronocode/identity-factory';
 import { BoxStyleProps, BoxStyles, PseudoClassesType } from '../../types';
 import ObjectUtils from '../../utils/object/objectUtils';
 import Animations from '../animations';
@@ -32,6 +31,7 @@ import { resolveComponentStyles } from '../extends/useComponents';
 import Filters from '../filters';
 import Groups from '../groups';
 import { stableHash } from '../hash';
+import IdentityFactory from '../identity';
 import Palette from '../palette';
 import Shadows from '../shadows';
 import Variables from '../variables';
@@ -121,7 +121,7 @@ export interface StyleEngine {
   getVariableValue(name: string): string;
 }
 
-export const DEFAULT_STYLE_ELEMENT_ID = 'crono-styles';
+export const DEFAULT_STYLE_ELEMENT_ID = 'box-kite-styles';
 
 // The value lists that hold variable-backed tokens. A `Box.extend({ variables })` token is accepted
 // wherever one of them is declared.
@@ -772,7 +772,7 @@ export function createStyleEngine(options: StyleEngineOptions = {}): StyleEngine
       // property is, so an unregistered `--boxBlur` would blur every descendant that names any filter of
       // its own a second time.
       ...Filters.properties,
-      `#crono-box {position: absolute;top: 0;left: 0;height: 0;z-index:99999;}`,
+      `#box-kite-portal {position: absolute;top: 0;left: 0;height: 0;z-index:99999;}`,
       `html{font-size: 16px;font-family: Arial, sans-serif;}`,
       `body{margin: 0;line-height: var(--lineHeight);font-size: var(--fontSize);}`,
       `a,ul{all: unset;}`,
@@ -940,7 +940,7 @@ export function createStyleEngine(options: StyleEngineOptions = {}): StyleEngine
     classNames(props: BoxStyleProps<any>, options?: { svg?: boolean }) {
       if (isElementMode()) {
         throw new Error(
-          '[react-box] classNames() has nowhere to put its CSS in element mode: the rules come back from resolveClassNames() as style elements for the adapter to render.',
+          '[box-kite] classNames() has nowhere to put its CSS in element mode: the rules come back from resolveClassNames() as style elements for the adapter to render.',
         );
       }
 

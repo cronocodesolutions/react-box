@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-@cronocode/react-box is a React runtime CSS-in-JS library. The core `Box` component accepts 212 CSS props and generates CSS classes at runtime — no CSS files needed. Same prop values across components share a single CSS class.
+@box-kite/react is a React runtime CSS-in-JS library. The core `Box` component accepts 212 CSS props and generates CSS classes at runtime — no CSS files needed. Same prop values across components share a single CSS class.
 
 ## Commands
 
@@ -35,8 +35,8 @@ Node version: v24 (pinned in .nvmrc).
 
 - `src/box.ts` — Main Box component (memoized, forwardRef, polymorphic via `tag` prop)
 - `src/rsc.ts` — The `react-server` build of Box: same props, no hook, no effect, no DOM. Element mode is switched on when it loads, so a Server Component needs no configuration. Enforced by `scripts/check-rsc-boundary.mjs`
-- `src/a11y.ts` — The behaviour primitives (`@cronocode/react-box/a11y`): `useControllableState` (change reasons), `useDismiss` (Escape + outside pointer, layered), `useFocusReturn`, `useRovingFocus` (arrows/Home/End/typeahead, DOM focus or `aria-activedescendant`), `useIdentifier`. Sources in `src/react/a11y/**`, their own `behavior` chunk so the entry pulls in no engine; client-only, so the entry gets a `'use client'` banner. See `docs/a11y-primitives.md`
-- `src/core.ts` — The engine with no React at all (`@cronocode/react-box/core`): `createStyleEngine()`, `engine.classNames(props)`, `createThemeController()`. `examples/vanilla` is a whole page built on it. Both the sources it reaches and the chunks it imports are checked for React
+- `src/a11y.ts` — The behaviour primitives (`@box-kite/react/a11y`): `useControllableState` (change reasons), `useDismiss` (Escape + outside pointer, layered), `useFocusReturn`, `useRovingFocus` (arrows/Home/End/typeahead, DOM focus or `aria-activedescendant`), `useIdentifier`. Sources in `src/react/a11y/**`, their own `behavior` chunk so the entry pulls in no engine; client-only, so the entry gets a `'use client'` banner. See `docs/a11y-primitives.md`
+- `src/core.ts` — The engine with no React at all (`@box-kite/react/core`): `createStyleEngine()`, `engine.classNames(props)`, `createThemeController()`. `examples/vanilla` is a whole page built on it. Both the sources it reaches and the chunks it imports are checked for React
 - `src/core/boxStyles.ts` — All CSS property definitions (212 props). Types auto-generate from these definitions
 - `src/core/boxStylesFormatters.ts` — Value formatters that convert prop values to CSS (rem, px, fractions, etc.)
 - `src/core/engine/styleEngine.ts` — `createStyleEngine()`: all engine state (class-name cache, rule registry, identity factory, variables, prop and component registries) on an instance; generates class names and rules
@@ -108,7 +108,7 @@ Different props have different dividers — this is the #1 source of bugs:
 
 ### Components (src/components/)
 
-Pre-built components wrap Box with the correct HTML tag. Each is a separate entry point (`@cronocode/react-box/components/...`):
+Pre-built components wrap Box with the correct HTML tag. Each is a separate entry point (`@box-kite/react/components/...`):
 
 - `flex.tsx` / `grid.tsx` — Layout (display flex/grid)
 - `button.tsx`, `textbox.tsx`, `textarea.tsx` — Form elements
@@ -182,5 +182,5 @@ CI runs the test suite against React 18 and React 19 — both are in the support
 
 ## Reference Documents
 
-- `src/BOX_AI_CONTEXT.md` — Comprehensive prop reference, usage patterns, DataGrid API, and debugging tips
+- `src/BOX_KITE_AI_CONTEXT.md` — Comprehensive prop reference, usage patterns, DataGrid API, and debugging tips
 - `CONTRIBUTING.md` — Architecture deep-dive, CSS generation engine internals, and contribution workflows

@@ -18,7 +18,7 @@ export default function CheckboxPage() {
 
       <Reveal delay={0.1}>
         <Flex d="column" gap={10}>
-          <Code label="Import" language="jsx" code="import Checkbox from '@cronocode/react-box/components/checkbox';" />
+          <Code label="Import" language="jsx" code="import Checkbox from '@box-kite/react/components/checkbox';" />
 
           <Code id="basic" label="Basic Checkbox" language="jsx" code={`<Checkbox label="Accept the terms" name="terms" defaultChecked />`}>
             <Checkbox label="Accept the terms" name="terms" defaultChecked />

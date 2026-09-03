@@ -21,7 +21,7 @@ function makeEngine(mode: SinkMode, styleElementId: string): StyleEngine {
 // The reduced-motion query is a base rule too: it zeroes `--transitionTime`, which is how the
 // library stops animating on its own. A rule a test wrote under `motionReduce` collapses to the
 // same text here, so assert on those through `ruleList` rather than through `selectorsOf`.
-const baseSelector = /^(:root|html|body|a,ul|button|input|#crono-box|\._b|\._s|@media \(prefers-reduced-motion: reduce\))/;
+const baseSelector = /^(:root|html|body|a,ul|button|input|#box-kite-portal|\._b|\._s|@media \(prefers-reduced-motion: reduce\))/;
 
 /** The selectors in a sheet, in order, base rules dropped and the sink's formatting normalized. */
 function selectorsOf(css: string): string[] {

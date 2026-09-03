@@ -11,16 +11,16 @@ export default function InstallationPage() {
       <PageHeader
         icon={Download}
         title="Installation"
-        description="Get started with React Box in your project. Installation takes less than a minute."
+        description="Get started with Box Kite in your project. Installation takes less than a minute."
       />
 
       <Reveal delay={0.1}>
         <Flex d="column" gap={8}>
-          <Code language="shell" label="Install via npm" code="npm install @cronocode/react-box" />
+          <Code language="shell" label="Install via npm" code="npm install @box-kite/react" />
 
-          <Code language="shell" label="Or with yarn" code="yarn add @cronocode/react-box" />
+          <Code language="shell" label="Or with yarn" code="yarn add @box-kite/react" />
 
-          <Code language="shell" label="Or with pnpm" code="pnpm add @cronocode/react-box" />
+          <Code language="shell" label="Or with pnpm" code="pnpm add @box-kite/react" />
 
           <Box fontSize={14} lineHeight={22} theme={{ dark: { color: 'slate-400' }, light: { color: 'slate-600' } }}>
             React 16.14 or newer is the peer range; 18 and 19 are the versions CI runs the whole test suite against. Nothing else is needed

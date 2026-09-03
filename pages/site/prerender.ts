@@ -4,4 +4,4 @@
  * own id — the engine reuses an element with that id and would insert its rules into the middle of a
  * sheet it did not write. This copy is dropped once hydration has replaced it.
  */
-export const PRERENDERED_STYLE_ID = 'crono-prerendered-styles';
+export const PRERENDERED_STYLE_ID = 'box-kite-prerendered-styles';

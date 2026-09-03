@@ -28,7 +28,7 @@ export default function usePortalContainer() {
     const doc = documentOrNull();
     if (!doc) return null;
 
-    const elId = 'crono-box';
+    const elId = 'box-kite-portal';
     let container = doc.getElementById(elId);
 
     if (!container) {

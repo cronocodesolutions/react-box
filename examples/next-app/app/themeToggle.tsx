@@ -1,7 +1,7 @@
 'use client';
-import Box from '@cronocode/react-box';
-import Button from '@cronocode/react-box/components/button';
-import { createThemeController, type ThemeController } from '@cronocode/react-box/core';
+import Box from '@box-kite/react';
+import Button from '@box-kite/react/components/button';
+import { createThemeController, type ThemeController } from '@box-kite/react/core';
 import { useEffect, useRef, useState } from 'react';
 import './elementMode';
 

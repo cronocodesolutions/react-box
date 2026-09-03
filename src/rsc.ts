@@ -28,7 +28,7 @@ function Box<TTag extends keyof React.JSX.IntrinsicElements = 'div', TKey extend
 
   if (typeof children === 'function') {
     throw new Error(
-      "[react-box] Box children as a function track hover state, which needs the client Box — render it from a 'use client' module.",
+      "[box-kite] Box children as a function track hover state, which needs the client Box — render it from a 'use client' module.",
     );
   }
 

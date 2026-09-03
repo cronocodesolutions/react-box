@@ -4,7 +4,7 @@ My name is Maxim. I've been a full-stack software engineer for my entire career.
 
 I wasn't planning to build an open source library. I was deep in a project, writing React components day after day, and I kept noticing the same pattern: I'd build a component, then go create a CSS file for it. Or wrap it in `styled-components`. Or write a long chain of Tailwind classes. Every time, I felt like I was leaving TypeScript's world — the world where my editor knows everything, catches my mistakes, and guides me — to enter a world of strings where anything goes and nothing is checked.
 
-So I started extracting something. Not for GitHub stars. Not for a product launch. Just because I was tired of repeating myself. That extraction became [@cronocode/react-box](https://github.com/box-kite/box-kite) — a React component library where every CSS property is a typed prop.
+So I started extracting something. Not for GitHub stars. Not for a product launch. Just because I was tired of repeating myself. That extraction became [@box-kite/react](https://github.com/box-kite/box-kite) — a React component library where every CSS property is a typed prop.
 
 ---
 
@@ -30,7 +30,7 @@ Here's the difference in practice:
 ```
 
 ```tsx
-// React Box approach
+// Box Kite approach
 <Flex ai="center" gap={4} p={6} bgColor="indigo-500" color="white" borderRadius={8} hover={{ bgColor: 'indigo-600' }} md={{ p: 8, gap: 6 }}>
   Content
 </Flex>
@@ -49,7 +49,7 @@ At the heart of the library is a single component called `Box`. It accepts 212 C
 The simplest usage looks like this:
 
 ```tsx
-import Box from '@cronocode/react-box';
+import Box from '@box-kite/react';
 
 <Box p={4} bgColor="blue-500" color="white" borderRadius={8}>
   Hello World
@@ -61,9 +61,9 @@ No CSS file. No styled-components setup. No theme provider required. Just import
 But you don't use raw `Box` for everything. The library ships with semantic components that map to the right HTML elements:
 
 ```tsx
-import Flex from '@cronocode/react-box/components/flex';
-import Button from '@cronocode/react-box/components/button';
-import { H1, P } from '@cronocode/react-box/components/semantics';
+import Flex from '@box-kite/react/components/flex';
+import Button from '@box-kite/react/components/button';
+import { H1, P } from '@box-kite/react/components/semantics';
 
 <Flex d="column" gap={4}>
   <H1 fontSize={32} fontWeight={700}>
@@ -105,7 +105,7 @@ The key insight is **deduplication**. If 50 components across your app all use `
 
 The library ships with 286 color variables (Tailwind's OKLCH palette, twenty-six families), but they're loaded lazily. Navigate to a page that uses `violet-500` for the first time? The CSS variable gets injected on the fly. Colors you never use never touch the DOM.
 
-And there's no build step for styles. It works with Vite, Webpack, Next.js — whatever you use. `npm install @cronocode/react-box` and you're done. The entire main Box component is 99 lines of code.
+And there's no build step for styles. It works with Vite, Webpack, Next.js — whatever you use. `npm install @box-kite/react` and you're done. The entire main Box component is 99 lines of code.
 
 ---
 
@@ -114,7 +114,7 @@ And there's no build step for styles. It works with Vite, Webpack, Next.js — w
 The library is designed to be extended, not forked. `Box.extend()` lets you add custom CSS variables and new props:
 
 ```tsx
-import Box from '@cronocode/react-box';
+import Box from '@box-kite/react';
 
 Box.extend(
   { 'brand-primary': '#ff6600' }, // Custom CSS variables
@@ -164,7 +164,7 @@ Here's something I didn't expect to build: an AI context document.
 
 In 2025, I realized that a growing share of code in my projects was being written by AI assistants. And they kept getting my library wrong — using inline styles instead of Box props, writing `<Box tag="button">` instead of `<Button>`, confusing the numeric formatters (fontSize divides by 16, spacing divides by 4).
 
-So I wrote [BOX_AI_CONTEXT.md](https://github.com/box-kite/box-kite/blob/main/src/BOX_AI_CONTEXT.md) — a comprehensive reference document that ships with the npm package. It contains every prop, every formatter rule, every "do this, not that" pattern. It starts with the two most common AI mistakes in bold: **never use inline styles** and **always use component shortcuts**.
+So I wrote [BOX_AI_CONTEXT.md](https://github.com/box-kite/box-kite/blob/main/src/BOX_KITE_AI_CONTEXT.md) — a comprehensive reference document that ships with the npm package. It contains every prop, every formatter rule, every "do this, not that" pattern. It starts with the two most common AI mistakes in bold: **never use inline styles** and **always use component shortcuts**.
 
 Not many npm packages ship with AI-readable documentation as a first-class feature. But in 2026, if your library doesn't explain itself to AI, half the code written against it will be wrong. I'd rather teach the machine once than fix its output every time.
 
@@ -202,7 +202,7 @@ If you're curious, take a look:
 
 - Website: [box-kite.dev](https://box-kite.dev/)
 - GitHub: [github.com/box-kite/box-kite](https://github.com/box-kite/box-kite)
-- npm: [@cronocode/react-box](https://www.npmjs.com/package/@cronocode/react-box)
+- npm: [@box-kite/react](https://www.npmjs.com/package/@box-kite/react)
 
 Or don't. Just go build something of your own. That's the whole point.
 

@@ -1,4 +1,4 @@
-import Box from '@cronocode/react-box';
+import Box from '@box-kite/react';
 
 /**
  * An async Server Component behind a Suspense boundary — the case that made runtime CSS-in-JS awkward. Its

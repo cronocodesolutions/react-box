@@ -1,4 +1,4 @@
-# Contributing to @cronocode/react-box
+# Contributing to @box-kite/react
 
 A comprehensive guide for senior software engineers contributing to this runtime CSS-in-JS library.
 
@@ -21,9 +21,9 @@ A comprehensive guide for senior software engineers contributing to this runtime
 
 ## Architecture Overview
 
-React-Box is a **runtime CSS generation library** that converts React component props into CSS classes. Key architectural decisions:
+Box Kite is a **runtime CSS generation library** that converts React component props into CSS classes. Key architectural decisions:
 
-- **No CSS files**: All styles are generated at runtime and injected into `<style id="crono-styles">` in `document.head` (`#crono-box` is the portal container, a different element)
+- **No CSS files**: All styles are generated at runtime and injected into `<style id="box-kite-styles">` in `document.head` (`#box-kite-portal` is the portal container, a different element)
 - **Single class per value**: If the same prop value (e.g., `p={3}`) is used in multiple components, only ONE CSS class is generated
 - **TypeScript-first**: Deep type extraction provides full IDE autocomplete for all valid prop combinations
 - **Memoized rendering**: Box component uses `React.memo` and `forwardRef` for optimal performance
@@ -47,11 +47,11 @@ Box props → useStyles() → useComponents() → StylesContext → CSS injectio
 ## Project Structure
 
 ```
-react-box/
+box-kite/
 ├── src/                          # Library source (published to npm)
 │   ├── box.ts                    # Main Box component (entry point)
-│   ├── a11y.ts                   # Behaviour primitives (`@cronocode/react-box/a11y`)
-│   ├── core.ts                   # The engine with no React (`@cronocode/react-box/core`)
+│   ├── a11y.ts                   # Behaviour primitives (`@box-kite/react/a11y`)
+│   ├── core.ts                   # The engine with no React (`@box-kite/react/core`)
 │   ├── rsc.ts                    # Box for Server Components (the `react-server` entry, hook-free)
 │   ├── types.ts                  # TypeScript type exports
 │   ├── ssg.ts                    # Server-side rendering support (entry point)
@@ -165,7 +165,7 @@ react-box/
 The split is not cosmetic. The engine — prop definitions, formatters, class-name generation, the
 rule registry, the sinks, the flush scheduler, the variables, the theme runtime — has no idea a
 component tree exists. It is the future `@box-kite/core` package, it already ships as the
-`@cronocode/react-box/core` entry (`src/core.ts`), and it is what makes the library embeddable in
+`@box-kite/react/core` entry (`src/core.ts`), and it is what makes the library embeddable in
 places React is not: a vanilla-DOM page, an iframe widget, another framework's adapter, a
 build-time compiler. `examples/vanilla` is that claim as a running page.
 
@@ -259,7 +259,7 @@ form utilities out of the shared chunks too: the main entry lost 0.5 KB gz it ha
 components it never loads.
 
 `behavior` is a group for a different reason — not correctness but weight. The primitives are
-client code and were correct inside `client`, but that made `@cronocode/react-box/a11y` import the
+client code and were correct inside `client`, but that made `@box-kite/react/a11y` import the
 chunk holding the styling binding and the theme provider: 17.8 KB gzipped for a consumer who wanted
 `useDismiss` alone. Split out, the entry is 2.2 KB and reaches no engine at all. `npm run size` is
 what notices this; the budget is per entry for exactly that reason.
@@ -280,7 +280,7 @@ the component nor the fix (bug #43).
 
 So the server-safe components import the package by its own name instead: `vite.config.ts` has a
 `resolveId` plugin (`box-self-reference`) that turns their `../box` edge into an external
-`@cronocode/react-box`. The consumer's bundler then resolves it under its own conditions, and the
+`@box-kite/react`. The consumer's bundler then resolves it under its own conditions, and the
 same `flex.mjs` gets the hook-free Box in a server graph and the client Box in a client one. The
 graph walk mirrors this: `componentGraph()` stops at `src/box.ts` and records the package name,
 because what lies beyond that edge is not ours to decide.
@@ -684,7 +684,7 @@ The library injects default reset styles on initialization:
 const defaultRules = [
   `:root{${Variables.generateVariables()}}`,
   `:root{--borderColor: black;--outlineColor: black;...}`,
-  `#crono-box {position: absolute;top: 0;left: 0;height: 0;z-index:99999;}`,
+  `#box-kite-portal {position: absolute;top: 0;left: 0;height: 0;z-index:99999;}`,
   `html{font-size: 16px;font-family: Arial, sans-serif;}`,
   `body{margin: 0;line-height: var(--lineHeight);font-size: var(--fontSize);}`,
   `a,ul{all: unset;}`,
@@ -721,7 +721,7 @@ This ensures variables are defined before they're used in CSS rules, even when n
 
 ### Server Rendering
 
-`src/ssg.ts` is the public SSR entry (`@cronocode/react-box/ssg`): `getStyles()` flushes and returns
+`src/ssg.ts` is the public SSR entry (`@box-kite/react/ssg`): `getStyles()` flushes and returns
 the CSS for what was rendered, `resetStyles()` drops it — rules, cached class lists, the class-name
 counter and the resolved variables — so the next request starts blank and identical markup produces
 identical class names. `renderToStaticMarkup()` does the whole cycle in one call. Registration
@@ -996,7 +996,7 @@ namespace Variables {
 ### Step 5: Update the Prop Count
 
 The registry's size is quoted in ten hand-written places — this file, the README, CLAUDE.md, ARTICLE.md, the npm
-description, `src/BOX_AI_CONTEXT.md`, both skill files, and two on the docs site. `src/core/boxStyles.test.ts` reads all
+description, `src/BOX_KITE_AI_CONTEXT.md`, both skill files, and two on the docs site. `src/core/boxStyles.test.ts` reads all
 ten and fails until they agree with the registry, so a new prop means bumping `PROP_COUNT` there and the ten copies. It
 is checked because it drifted twice on its own: once to `~144` against a registry of 117 (bug #71), and once with the
 npm description left at 165 while everything else said 186 (bug #114).
@@ -1109,9 +1109,9 @@ Users extend via declaration merging:
 
 ```typescript
 // user's types.d.ts
-import '@cronocode/react-box/types';
+import '@box-kite/react/types';
 
-declare module '@cronocode/react-box/types' {
+declare module '@box-kite/react/types' {
   namespace Augmented {
     interface BoxPropTypes {
       bgColor: 'brand-primary' | 'brand-secondary';
@@ -1425,18 +1425,18 @@ The four in `src/core/variants.ts` (`dataAttr`, `ariaAttr`, `has`, `not`) are a 
 
 1. Check `core/engine/styleEngine.ts` for class generation logic
 2. Check `boxStyles.ts` for property definition
-3. Verify CSS output in browser DevTools (`<style id="crono-styles">`)
+3. Verify CSS output in browser DevTools (`<style id="box-kite-styles">`)
 4. Add test case
 
 ### Debug CSS Generation Issues
 
-1. **Inspect generated styles**: Open DevTools → Elements → find `<style id="crono-styles">`
+1. **Inspect generated styles**: Open DevTools → Elements → find `<style id="box-kite-styles">`
 2. **Check class names**: Inspect element to see generated class names (e.g., `_b`, `_2a`, etc.)
 3. **Verify CSS variables**: Check `:root` rules in the style tag for variable definitions
 4. **Navigation issues**: If styles don't apply after route change, check:
    - `propsToUse` dependency in useLayoutEffect
    - `hasPendingVariables()` being called in `flush()`
-5. **Portal theming issues**: Verify `#crono-box` container has the correct theme class
+5. **Portal theming issues**: Verify `#box-kite-portal` container has the correct theme class
 
 ---
 

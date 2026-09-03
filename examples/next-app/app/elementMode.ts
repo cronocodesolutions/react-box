@@ -1,5 +1,5 @@
 'use client';
-import Box from '@cronocode/react-box';
+import Box from '@box-kite/react';
 
 /**
  * The one line a client component needs in an RSC app: the client bundle resolves the *client* Box, whose

@@ -1,4 +1,4 @@
-// Pack `dist/` into `examples/next-app/.local/react-box.tgz`.
+// Pack `dist/` into `examples/next-app/.local/box-kite.tgz`.
 //
 // The Next.js example depends on that tarball by path rather than on `../../dist`, because a
 // directory dependency is installed as a symlink: everything inside it would then resolve its
@@ -33,7 +33,7 @@ if (result.status !== 0) {
 // npm names the tarball after the package version; the example's dependency path must not move
 // every release, so it gets a stable name.
 const [{ filename }] = JSON.parse(result.stdout.slice(result.stdout.indexOf('[')));
-const tarball = join(target, 'react-box.tgz');
+const tarball = join(target, 'box-kite.tgz');
 
 rmSync(tarball, { force: true });
 renameSync(join(target, filename), tarball);
@@ -42,6 +42,6 @@ renameSync(join(target, filename), tarball);
 // stable across rebuilds, so npm sees an installed dependency that matches what is asked for and
 // keeps it — leaving the example testing whatever `dist/` looked like the first time. Every check
 // downstream (the Next build, the smoke test, CI) would be reading a stale library.
-rmSync(resolve('examples', 'next-app', 'node_modules', '@cronocode', 'react-box'), { recursive: true, force: true });
+rmSync(resolve('examples', 'next-app', 'node_modules', '@box-kite', 'react'), { recursive: true, force: true });
 
 console.log(`✔ packed ${filename} → ${tarball}`);

@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-empty-object-type */
-import '@cronocode/react-box';
+import '@box-kite/react';
 import { ExtractBoxStyles, ExtractComponentsAndVariants } from '../src/types';
 import { extendedProps, extendedPropTypes, components } from './extends';
 

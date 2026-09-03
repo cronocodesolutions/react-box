@@ -55,9 +55,7 @@ function IconImpl(props: IconProps, ref: Ref<SVGSVGElement>) {
   const { className, styles } = useClassNames({ width: DEFAULT_SIZE, height: DEFAULT_SIZE, ...styleProps, ...sized }, { svg: true });
 
   if (!isValidElement<IconChildProps>(children)) {
-    throw new Error(
-      '[react-box] <Icon> takes exactly one element — the icon to style. For SVG of your own, use <Svg> from components/svg.',
-    );
+    throw new Error('[box-kite] <Icon> takes exactly one element — the icon to style. For SVG of your own, use <Svg> from components/svg.');
   }
 
   /**

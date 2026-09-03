@@ -1,9 +1,9 @@
 ---
-name: cronocode-react-box
-description: '@cronocode/react-box expert — runtime CSS-in-JS library. Use when working with react-box Box component, CSS props, Flex/Grid/Button/Dropdown/DataGrid components, Box.extend(), Box.components(), or theme system. Also handles installation, updates, and package manager detection.'
+name: box-kite
+description: '@box-kite/react expert — runtime CSS-in-JS library. Use when working with the Box Kite Box component, CSS props, Flex/Grid/Button/Dropdown/DataGrid components, Box.extend(), Box.components(), or theme system. Also handles installation, updates, and package manager detection.'
 ---
 
-# @cronocode/react-box AI Skill
+# @box-kite/react AI Skill
 
 Runtime CSS-in-JS library. `Box` accepts 212 CSS props → generates CSS classes at runtime. Same values share a class.
 
@@ -11,14 +11,14 @@ Runtime CSS-in-JS library. `Box` accepts 212 CSS props → generates CSS classes
 
 Detect package manager via lock files: `pnpm-lock.yaml` → pnpm, `yarn.lock` → yarn, `bun.lockb` → bun, else npm.
 
-| Manager | Install                            | Update                              |
-| ------- | ---------------------------------- | ----------------------------------- |
-| npm     | `npm install @cronocode/react-box` | `npm update @cronocode/react-box`   |
-| yarn    | `yarn add @cronocode/react-box`    | `yarn upgrade @cronocode/react-box` |
-| pnpm    | `pnpm add @cronocode/react-box`    | `pnpm update @cronocode/react-box`  |
-| bun     | `bun add @cronocode/react-box`     | `bun update @cronocode/react-box`   |
+| Manager | Install                       | Update                         |
+| ------- | ----------------------------- | ------------------------------ |
+| npm     | `npm install @box-kite/react` | `npm update @box-kite/react`   |
+| yarn    | `yarn add @box-kite/react`    | `yarn upgrade @box-kite/react` |
+| pnpm    | `pnpm add @box-kite/react`    | `pnpm update @box-kite/react`  |
+| bun     | `bun add @box-kite/react`     | `bun update @box-kite/react`   |
 
-Check latest: `npm view @cronocode/react-box version`
+Check latest: `npm view @box-kite/react version`
 
 ## Critical Rules
 
@@ -57,7 +57,7 @@ Check latest: `npm view @cronocode/react-box version`
 | a sparkline, ring, gauge or donut    | `<Sparkline>`/`<ProgressRing>`/…       | `components/chart`                                               |
 | a themed Recharts (or any) chart     | `<ChartContainer>`                     | `components/chart`                                               |
 
-Also: `Mark`, `Figure`, `Figcaption`, `Details`, `Summary`, `Menu`, `Time`. All from `@cronocode/react-box/components/...`.
+Also: `Mark`, `Figure`, `Figcaption`, `Details`, `Summary`, `Menu`, `Time`. All from `@box-kite/react/components/...`.
 
 `<Form<T> onSubmit={(values, e) => …}>` reads its own named fields on submit (after `preventDefault()`): a value per
 named input, a boolean for a lone checkbox/radio, an array for a repeated name, and `name="a.b"` nests. `T` is the shape you
@@ -78,11 +78,11 @@ expect, not a check against the fields.
 
 **SVG geometry** (SVG 2, all **user units — no divider**, or a percentage): `cx`/`cy` (`<circle>`, `<ellipse>`), `r` (`<circle>`), `rx`/`ry` (`<ellipse>` radii, `<rect>` corners; also `auto`), `x`/`y` (`<rect>`, `<image>`, `<use>`, `<foreignObject>`, nested `<svg>` — **not** `<text>`). They are real CSS, so they transition: `<Circle r={38} hover={{ r: 40 }} />` is a whole animation. Not inherited — put them on the shape. A `<rect>`'s `width`/`height` are NOT in this family (those prop names are the ÷4 layout scale), which is why `<Rect>` claims them back as its own attributes — `<Rect width={40} height={40} />`. A path's `d` stays an attribute too (no Safari support), and `<Path d="M…" />` is how you write it.
 
-**SVG elements** (`@cronocode/react-box/components/svg`, 20 components, server-safe): `Svg`, `G`, `Defs`, `Path`, `Circle`, `Ellipse`, `Rect`, `Line`, `Polyline`, `Polygon`, `SvgText`, `TSpan`, `LinearGradient`, `RadialGradient`, `Stop`, `ClipPath`, `Mask`, `Use`, `SvgSymbol`, `Marker` — so a drawing never writes `tag`. Each one is a Box and takes every prop above. **Each also settles the names SVG and Box both use, for its own element**: `Path`'s `d` is path data, `Rect`'s `width`/`height` are user units, `SvgText`/`TSpan`'s `x`/`y`/`dx`/`dy` are attributes (CSS geometry does not apply to text), `RadialGradient`'s `cx`/`cy`/`r` are attributes (nor to a gradient) — while `Circle`'s `cx` stays CSS and transitions. `transform` is a prop on every shape and group. `Svg` takes `viewBox`/`preserveAspectRatio`/`width`/`height` as attributes (so no ÷4 layout `width` on it) and a `label` prop: no label means `aria-hidden`, a label means `role="img"` with that name. A paint server is a value, not an attribute: `fill="url(#sky)"`, `clipPath="url(#frame)"` — themed and hoverable like any other paint. A themed gradient stop is `<Stop stopColor="currentColor" color="amber-300" />`. `BaseSvg` is deprecated — it is `Svg` with a 24×24 preset.
+**SVG elements** (`@box-kite/react/components/svg`, 20 components, server-safe): `Svg`, `G`, `Defs`, `Path`, `Circle`, `Ellipse`, `Rect`, `Line`, `Polyline`, `Polygon`, `SvgText`, `TSpan`, `LinearGradient`, `RadialGradient`, `Stop`, `ClipPath`, `Mask`, `Use`, `SvgSymbol`, `Marker` — so a drawing never writes `tag`. Each one is a Box and takes every prop above. **Each also settles the names SVG and Box both use, for its own element**: `Path`'s `d` is path data, `Rect`'s `width`/`height` are user units, `SvgText`/`TSpan`'s `x`/`y`/`dx`/`dy` are attributes (CSS geometry does not apply to text), `RadialGradient`'s `cx`/`cy`/`r` are attributes (nor to a gradient) — while `Circle`'s `cx` stays CSS and transitions. `transform` is a prop on every shape and group. `Svg` takes `viewBox`/`preserveAspectRatio`/`width`/`height` as attributes (so no ÷4 layout `width` on it) and a `label` prop: no label means `aria-hidden`, a label means `role="img"` with that name. A paint server is a value, not an attribute: `fill="url(#sky)"`, `clipPath="url(#frame)"` — themed and hoverable like any other paint. A themed gradient stop is `<Stop stopColor="currentColor" color="amber-300" />`. `BaseSvg` is deprecated — it is `Svg` with a 24×24 preset.
 
-**Icons** (`@cronocode/react-box/components/icon`, server-safe): `<Icon size={5} color="amber-500" label="Sunny"><Sun /></Icon>` — Box props on an icon somebody else drew, wrapping exactly one element from lucide, Tabler, react-icons, or a raw `<svg>`. It resolves the props to a class and puts that on the icon's own `<svg>`, so it knows no set's API: `size` is the ÷4 scale (`size={6}` is 24px, the default; an icon set's own `size` counts in pixels, so `size={20}` becomes `size={5}`) and it lands in the _class_, where a CSS declaration outranks the `width`/`height` attributes the set writes for itself. `strokeWidth` is likewise the ordinary Box prop, so it can change on hover or at a breakpoint. No `label` means `aria-hidden`, a `label` means `role="img"` — the same rule `Svg` follows. **Prefer `Svg` over wrapping one in `Icon`**: `Svg` takes these props directly. (Wrapping works — `Icon` asks the child which convention it follows and routes `role`/`aria-label` into `props` for a component of ours — but it is a layer nobody needs.) The hook underneath is public — `useClassNames(props)` from the main entry returns `{ className, styles }` for anything Box cannot render (a `motion.div`, a `NavLink`); render `styles` beside the element (it is defined in element mode only). **Beyond lucide**: Iconify's 300k+ icons in 200+ sets reach the same `<Icon>`, the choice being only when the icon becomes markup — paste one icon's SVG (no dependency, server-renders); `unplugin-icons` for a set at build time (`npm i -D unplugin-icons @iconify-json/<set> @svgr/core @svgr/plugin-jsx`, plugin with `{ compiler: 'jsx', jsx: 'react' }`, `/// <reference types="unplugin-icons/types/react" />` in a `.d.ts`, then `import SiGithub from '~icons/simple-icons/github'`); or `@iconify/react` when the name is data — it fetches in the browser, so it is a client component and the server sends no icon. Turbopack runs no unplugin: under Next.js 16 the build-time recipe needs `next build --webpack`.
+**Icons** (`@box-kite/react/components/icon`, server-safe): `<Icon size={5} color="amber-500" label="Sunny"><Sun /></Icon>` — Box props on an icon somebody else drew, wrapping exactly one element from lucide, Tabler, react-icons, or a raw `<svg>`. It resolves the props to a class and puts that on the icon's own `<svg>`, so it knows no set's API: `size` is the ÷4 scale (`size={6}` is 24px, the default; an icon set's own `size` counts in pixels, so `size={20}` becomes `size={5}`) and it lands in the _class_, where a CSS declaration outranks the `width`/`height` attributes the set writes for itself. `strokeWidth` is likewise the ordinary Box prop, so it can change on hover or at a breakpoint. No `label` means `aria-hidden`, a `label` means `role="img"` — the same rule `Svg` follows. **Prefer `Svg` over wrapping one in `Icon`**: `Svg` takes these props directly. (Wrapping works — `Icon` asks the child which convention it follows and routes `role`/`aria-label` into `props` for a component of ours — but it is a layer nobody needs.) The hook underneath is public — `useClassNames(props)` from the main entry returns `{ className, styles }` for anything Box cannot render (a `motion.div`, a `NavLink`); render `styles` beside the element (it is defined in element mode only). **Beyond lucide**: Iconify's 300k+ icons in 200+ sets reach the same `<Icon>`, the choice being only when the icon becomes markup — paste one icon's SVG (no dependency, server-renders); `unplugin-icons` for a set at build time (`npm i -D unplugin-icons @iconify-json/<set> @svgr/core @svgr/plugin-jsx`, plugin with `{ compiler: 'jsx', jsx: 'react' }`, `/// <reference types="unplugin-icons/types/react" />` in a `.d.ts`, then `import SiGithub from '~icons/simple-icons/github'`); or `@iconify/react` when the name is data — it fetches in the browser, so it is a client component and the server sends no icon. Turbopack runs no unplugin: under Next.js 16 the build-time recipe needs `next build --webpack`.
 
-**Charts** (`@cronocode/react-box/components/chart`, server-safe): `Sparkline`, `ProgressRing`, `Gauge`, `MiniDonut` — micro-primitives over the SVG components, **not a chart library** (no axes, no legends, no data transformations; theme Recharts for that). Each is an `Svg`, so `width`/`height` are the attributes, the paint is inherited by the shapes inside (default stroke `currentColor`, so `color="sky-500"` recolours one), and every prop, pseudo-class, breakpoint and theme works. `<Sparkline data={[4, 9, 6, 12]} variant="line|area|bar" min={0} max={20} />` — it fills its box (`preserveAspectRatio="none"` + `vectorEffect="non-scaling-stroke"`, so the line stays one width thick at any size), and `min`/`max` fix the axis so a column of rows is comparable. `<ProgressRing value={0.62} thickness={10} trackOpacity={0.2} />` and `<Gauge value={0.4} sweep={270} start={225} />` (degrees clockwise from twelve o'clock; `sweep={360}` is a ring) draw the value as a dash on the arc — a style prop, so it **eases between values with no animation code**; the fraction is rounded to half a percent, because a dash length lands in a class name. `<MiniDonut data={[5, 3, 2]} colors={['sky-500', 'var(--chart-2)']} />` gives each value its share of the circle. `children` is SVG drawn after the chart (an `SvgText` in the middle, a `Defs` with a gradient); `label` names it `role="img"`, and without one it is `aria-hidden` — leave a sparkline beside its own number unnamed, name one that _is_ the data. Cheap in a grid: the shape is the `d` attribute (no CSS at all, so 10,000 rows share every rule) while the paint is a class. A DataGrid cell renderer is a component — define it outside the render.
+**Charts** (`@box-kite/react/components/chart`, server-safe): `Sparkline`, `ProgressRing`, `Gauge`, `MiniDonut` — micro-primitives over the SVG components, **not a chart library** (no axes, no legends, no data transformations; theme Recharts for that). Each is an `Svg`, so `width`/`height` are the attributes, the paint is inherited by the shapes inside (default stroke `currentColor`, so `color="sky-500"` recolours one), and every prop, pseudo-class, breakpoint and theme works. `<Sparkline data={[4, 9, 6, 12]} variant="line|area|bar" min={0} max={20} />` — it fills its box (`preserveAspectRatio="none"` + `vectorEffect="non-scaling-stroke"`, so the line stays one width thick at any size), and `min`/`max` fix the axis so a column of rows is comparable. `<ProgressRing value={0.62} thickness={10} trackOpacity={0.2} />` and `<Gauge value={0.4} sweep={270} start={225} />` (degrees clockwise from twelve o'clock; `sweep={360}` is a ring) draw the value as a dash on the arc — a style prop, so it **eases between values with no animation code**; the fraction is rounded to half a percent, because a dash length lands in a class name. `<MiniDonut data={[5, 3, 2]} colors={['sky-500', 'var(--chart-2)']} />` gives each value its share of the circle. `children` is SVG drawn after the chart (an `SvgText` in the middle, a `Defs` with a gradient); `label` names it `role="img"`, and without one it is `aria-hidden` — leave a sparkline beside its own number unnamed, name one that _is_ the data. Cheap in a grid: the shape is the `d` attribute (no CSS at all, so 10,000 rows share every rule) while the paint is a class. A DataGrid cell renderer is a component — define it outside the render.
 
 **Theming a chart library** — `<ChartContainer>` (same entry, server-safe): the bridge for Recharts and anything
 else that takes a colour. It declares `--chart-1` … `--chart-6` in both themes plus one `--color-<series>` per
@@ -315,7 +315,7 @@ export const { extendedProps, extendedPropTypes } = Box.extend(
     ],
   },
 );
-// TypeScript: declare module '@cronocode/react-box/types' { namespace Augmented {
+// TypeScript: declare module '@box-kite/react/types' { namespace Augmented {
 //   interface BoxProps extends ExtractBoxStyles<typeof extendedProps> {}
 //   interface BoxPropTypes extends ExtractBoxStyles<typeof extendedPropTypes> {}
 //   interface ComponentsTypes extends ExtractComponentsAndVariants<typeof components> {} }}
@@ -328,7 +328,7 @@ not named by its content, so without one it has no accessible name. Never add `r
 by hand; the component supplies the whole pattern.
 
 ```tsx
-import Dropdown from '@cronocode/react-box/components/dropdown';
+import Dropdown from '@box-kite/react/components/dropdown';
 <Dropdown<string> label="Fruit" defaultValue="a" onChange={(value, values) => {}}>
   <Dropdown.Unselect>Pick...</Dropdown.Unselect>
   <Dropdown.Item value="a">Alpha</Dropdown.Item>
@@ -349,7 +349,7 @@ import Dropdown from '@cronocode/react-box/components/dropdown';
 Data-driven dropdown — `data` + `def` instead of children. Shares `dropdown.*` style tree.
 
 ```tsx
-import Select from '@cronocode/react-box/components/select';
+import Select from '@box-kite/react/components/select';
 <Select<User, number>
   label="User"
   data={users}
@@ -365,7 +365,7 @@ Also: `data`, `label`/`labelProps`, `value`/`defaultValue`, `multiple`, `isSearc
 ## DataGrid
 
 ```tsx
-import DataGrid from '@cronocode/react-box/components/dataGrid';
+import DataGrid from '@box-kite/react/components/dataGrid';
 <DataGrid
   data={users}
   def={{
@@ -422,10 +422,10 @@ import DataGrid from '@cronocode/react-box/components/dataGrid';
 ```
 
 **Group hover**: `<Box group={{ 'parent-class/hover': { opacity: 1 } }}>`
-**SSR**: `import { getStyles, resetStyles } from '@cronocode/react-box/ssg'` — render, read `getStyles()` into `<style id="crono-styles">`, then `resetStyles()`. Needs no DOM.
+**SSR**: `import { getStyles, resetStyles } from '@box-kite/react/ssg'` — render, read `getStyles()` into `<style id="box-kite-styles">`, then `resetStyles()`. Needs no DOM.
 **Server Components (React 19)**: works with no `'use client'` and no setup — the `react-server` entry renders Box hook-free and its CSS ships as `<style href precedence>` elements React hoists into `<head>`. Client components in the same app: `Box.configure({ sink: 'element' })` once in a `'use client'` module. Hook-free components (`Flex`, `Grid`, `Button`, `Textbox`, `Textarea`, `RadioButton`, `Icon`, the SVG elements, semantic tags) render on the server too — import them straight into a Server Component; `Dropdown`/`Tooltip`/`Overlay`/`DataGrid`/`Checkbox`/`Switch`/`RadioGroup`/`Select`/`Form` ship a `'use client'` banner, so importing one just opens a client boundary. Client-only: hover-callback children, `Box.Theme` — but `theme={{ dark: {...} }}` styles work server-side (set the theme class on `<html>`). Element-mode rules are in `@layer`, so your own unlayered CSS wins. React 18: keep the default sink.
-**Accessible behaviour** (`@cronocode/react-box/a11y`, 2.2 KB gz, client-only): `useControllableState` (controlled/uncontrolled with `onChange(value, { reason, event })` — `'escape'`, `'outside-pointer'`, yours), `useDismiss({ enabled, inside: [triggerRef, popupRef], onDismiss })` (Escape reaches the innermost layer only; pass the trigger or it dismisses and reopens in one press), `useFocusReturn({ enabled, returnTo })`, `useRovingFocus({ count, orientation, textOf, onSelect })` → `{ activeIndex, onKeyDown, itemProps(i), activeItem() }` (arrows, Home/End, typeahead, disabled skipped; `focusItems: false` for `aria-activedescendant`), `useIdentifier('select')` (React's `useId`, usable as a selector). They supply mechanics, never roles or ARIA. `VisuallyHidden` (`@cronocode/react-box/components/visuallyHidden`) is a Box that clips itself away instead of hiding, so it stays in the accessibility tree — and it renders on a server.
+**Accessible behaviour** (`@box-kite/react/a11y`, 2.2 KB gz, client-only): `useControllableState` (controlled/uncontrolled with `onChange(value, { reason, event })` — `'escape'`, `'outside-pointer'`, yours), `useDismiss({ enabled, inside: [triggerRef, popupRef], onDismiss })` (Escape reaches the innermost layer only; pass the trigger or it dismisses and reopens in one press), `useFocusReturn({ enabled, returnTo })`, `useRovingFocus({ count, orientation, textOf, onSelect })` → `{ activeIndex, onKeyDown, itemProps(i), activeItem() }` (arrows, Home/End, typeahead, disabled skipped; `focusItems: false` for `aria-activedescendant`), `useIdentifier('select')` (React's `useId`, usable as a selector). They supply mechanics, never roles or ARIA. `VisuallyHidden` (`@box-kite/react/components/visuallyHidden`) is a Box that clips itself away instead of hiding, so it stays in the accessibility tree — and it renders on a server.
 **Config**: `Box.configure({ sink: 'cssom' | 'textContent' | 'string' | 'element', classNames: 'hashed' | 'readable' | 'stable' })` — before the first render.
-**Portals**: `Overlay` (`components/overlay`) renders children into `#crono-box` at the place it is declared — escapes `overflow: hidden` and clipped ancestors, no ARIA and no open state.
+**Portals**: `Overlay` (`components/overlay`) renders children into `#box-kite-portal` at the place it is declared — escapes `overflow: hidden` and clipped ancestors, no ARIA and no open state.
 **Form controls** (`components/checkbox`, `components/switch`, `components/radioGroup`, `components/radioButton`): real native inputs, so focus, the checked state and form submission come from the platform. `label` is the prop that matters — it renders the text inside a `<label>` wrapping the input, so there is no `htmlFor`/`id` pair and the whole row is clickable; `labelProps` styles that label, every other Box prop styles the control. `<Checkbox label="Accept the terms" name="terms" />`, `<Checkbox label="Select all" indeterminate />` (sets the DOM property **and** `aria-checked="mixed"`), `<Switch label="Email notifications" name="notify" />` (`role="switch"`; Space and Enter both toggle, Enter does not submit the form). `<RadioGroup label="Plan" name="plan" defaultValue="free" onChange={(v, { reason }) => …}>` with `<RadioGroup.Item value="free" label="Free" />` children: `role="radiogroup"` named by the label, one shared `name` (generated if omitted), `orientation` `vertical`|`horizontal`, arrows move **and** select with wrapping and disabled items skipped, and Tab enters/leaves the set once — the platform's own tab order is left alone. `RadioButton` alone is a plain radio and still renders on a server. `checked`/`disabled`/`indeterminate` are each a state _and_ a pseudo-class style prop: pass a boolean, or `[state, styles]` for both.
 **Tooltip** (`components/tooltip`): the APG pattern on that layer. `<Tooltip content="Deletes the row">{(trigger) => <Button {...trigger}>Delete</Button>}</Tooltip>` — the child is a render prop because `aria-describedby` has to land on the control itself; the bag is `{ ref, props }`, so one spread on a Box component, or `<button ref={trigger.ref} {...trigger.props}>` on a plain one. The `ref` is what positions the bubble under the trigger. Gives you `role="tooltip"`, the describedby wiring while open, hover **and** focus opening (`openDelay` 300 ms, focus ignores it), Escape with focus left in place, and WCAG 1.4.13: the pointer can travel onto the bubble (`closeDelay` 150 ms) and nothing hides it on a timer. `open`/`defaultOpen`/`onOpenChange(open, { reason })` with reasons `hover`|`focus`|`pointer-leave`|`blur`|`escape`; other Box props style the bubble.

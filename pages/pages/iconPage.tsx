@@ -216,7 +216,7 @@ export default function IconPage() {
           <Section id="install" title="Install a set, import one icon at a time">
             <Box>
               This library ships no icons and never will — <a href="https://lucide.dev">lucide</a> is at 96M downloads a week with 1,500+
-              icons, and it is what AI codegen already emits. Install it beside react-box and import the icons you use, one named import
+              icons, and it is what AI codegen already emits. Install it beside Box Kite and import the icons you use, one named import
               each, so a bundler ships only those.
             </Box>
             <Box mt={4}>
@@ -333,7 +333,7 @@ import SiGithub from '~icons/simple-icons/github';`}
             id="iconify-runtime-code"
             label="Runtime: a name the build never saw"
             language="jsx"
-            code={`import Icon from '@cronocode/react-box/components/icon';
+            code={`import Icon from '@box-kite/react/components/icon';
 import { Icon as IconifyIcon } from '@iconify/react';
 
 function CategoryIcon({ name }: { name: string }) {
@@ -414,7 +414,7 @@ function CategoryIcon({ name }: { name: string }) {
             id="class-names-code"
             label="useClassNames"
             language="jsx"
-            code={`import { useClassNames } from '@cronocode/react-box';
+            code={`import { useClassNames } from '@box-kite/react';
 import { NavLink } from 'react-router-dom';
 
 function ActiveLink({ to, children }: { to: string; children: React.ReactNode }) {

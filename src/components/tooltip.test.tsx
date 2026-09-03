@@ -119,7 +119,7 @@ describe('Tooltip', () => {
     renderTooltip();
     fireEvent.pointerOver(trigger());
 
-    const css = (document.getElementById('crono-styles') as HTMLStyleElement | null)?.textContent ?? '';
+    const css = (document.getElementById('box-kite-styles') as HTMLStyleElement | null)?.textContent ?? '';
 
     // Nothing else separates the bubble from the page once both its colors are forced.
     expect(css).toContain('@media (forced-colors: active){.forcedColors-b-1{border-width:1px}}');

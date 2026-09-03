@@ -1,4 +1,4 @@
-import Box from '@cronocode/react-box';
+import Box from '@box-kite/react';
 import { Suspense } from 'react';
 import Counter from './counter';
 import StreamedSection, { StreamedFallback } from './streamedSection';

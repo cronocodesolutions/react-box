@@ -5,19 +5,22 @@
 import { spawnSync } from 'node:child_process';
 import { cpSync, mkdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { CLIENT_ONLY_COMPONENTS, CLIENT_ONLY_ENTRIES, SERVER_SAFE_COMPONENTS } from './moduleGraph.mjs';
+import { CLIENT_ONLY_COMPONENTS, CLIENT_ONLY_ENTRIES, PACKAGE_NAME, SERVER_SAFE_COMPONENTS } from './moduleGraph.mjs';
 
 // Ensure target directories exist (recursive = cross-platform `mkdir -p`).
-mkdirSync('dist/.claude/skills/cronocode-react-box', { recursive: true });
+mkdirSync('dist/.claude/skills/box-kite', { recursive: true });
 mkdirSync('dist/.claude/rules', { recursive: true });
 
 const copies = [
   ['package.json', 'dist/package.json'],
   ['LICENSE', 'dist/LICENSE'],
   ['README.md', 'dist/README.md'],
-  ['src/BOX_AI_CONTEXT.md', 'dist/BOX_AI_CONTEXT.md'],
-  ['.claude/skills/cronocode-react-box/SKILL.md', 'dist/.claude/skills/cronocode-react-box/SKILL.md'],
-  ['.claude/rules/react-box-rules.md', 'dist/.claude/rules/react-box-rules.md'],
+  ['src/BOX_KITE_AI_CONTEXT.md', 'dist/BOX_KITE_AI_CONTEXT.md'],
+  // The old filename ships beside it for one minor cycle: assistants, posts and the docs page's own
+  // `cp` line reference it verbatim, and a file an AI was told to read is not a path to break quietly.
+  ['src/BOX_KITE_AI_CONTEXT.md', 'dist/BOX_AI_CONTEXT.md'],
+  ['.claude/skills/box-kite/SKILL.md', 'dist/.claude/skills/box-kite/SKILL.md'],
+  ['.claude/rules/box-kite-rules.md', 'dist/.claude/rules/box-kite-rules.md'],
 ];
 
 for (const [from, to] of copies) {
@@ -29,7 +32,7 @@ for (const [from, to] of copies) {
 // `--conditions=react-server` to `react` too, whose server build exports no `useState` at all, so a chunk
 // naming one fails here exactly as it would in a consumer. The specifiers are the ones a consumer writes,
 // which for the components is the whole of the fix — that resolution is what hands them the hook-free Box.
-const specifiers = ['@cronocode/react-box', ...SERVER_SAFE_COMPONENTS.map((name) => `@cronocode/react-box/components/${name}`)];
+const specifiers = [PACKAGE_NAME, ...SERVER_SAFE_COMPONENTS.map((name) => `${PACKAGE_NAME}/components/${name}`)];
 
 const loads = [
   ['ESM', 'module', (specifier) => `assert(Object.keys(await import('${specifier}')).length > 0, '${specifier}');`],
@@ -67,7 +70,7 @@ const bannerViolations = [];
 for (const [names, wanted, directory] of [
   [CLIENT_ONLY_COMPONENTS, true, 'components/'],
   [SERVER_SAFE_COMPONENTS, false, 'components/'],
-  // The hooks entry is client-only for the same reason, one level up: `@cronocode/react-box/a11y`
+  // The hooks entry is client-only for the same reason, one level up: `@box-kite/react/a11y`
   // is `useRef` and effects from top to bottom.
   [CLIENT_ONLY_ENTRIES, true, ''],
 ]) {

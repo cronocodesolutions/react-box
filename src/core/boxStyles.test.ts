@@ -257,9 +257,9 @@ describe('every declared prop value produces a rule', () => {
     'CONTRIBUTING.md',
     'ARTICLE.md',
     'package.json',
-    'src/BOX_AI_CONTEXT.md',
-    '.claude/skills/cronocode-react-box/SKILL.md',
-    'marketplace-skill/skills/cronocode-react-box/SKILL.md',
+    'src/BOX_KITE_AI_CONTEXT.md',
+    '.claude/skills/box-kite/SKILL.md',
+    'marketplace-skill/skills/box-kite/SKILL.md',
     'pages/site/site.ts',
     'pages/pages/aiContextPage.tsx',
   ];

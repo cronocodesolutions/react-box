@@ -1,4 +1,4 @@
-# The behaviour primitives (`@cronocode/react-box/a11y`)
+# The behaviour primitives (`@box-kite/react/a11y`)
 
 Five hooks and one component: the mechanics every accessible widget needs and none of them can be
 seen in the markup. They are what the library's own components are built from, and they are
@@ -6,8 +6,8 @@ published so a consumer building a pattern this library does not ship — a tree
 button, a command palette — does not have to write them again.
 
 ```tsx
-import { useControllableState, useDismiss, useFocusReturn, useIdentifier, useRovingFocus } from '@cronocode/react-box/a11y';
-import VisuallyHidden from '@cronocode/react-box/components/visuallyHidden';
+import { useControllableState, useDismiss, useFocusReturn, useIdentifier, useRovingFocus } from '@box-kite/react/a11y';
+import VisuallyHidden from '@box-kite/react/components/visuallyHidden';
 ```
 
 2.2 KB gzipped for the whole entry, and it pulls in no styling engine: the hooks reach React, two
@@ -168,7 +168,7 @@ Content for screen readers that is not drawn on screen — the name of an icon-o
 heading a region is labelled by, a live region's announcement.
 
 ```tsx
-import VisuallyHidden from '@cronocode/react-box/components/visuallyHidden';
+import VisuallyHidden from '@box-kite/react/components/visuallyHidden';
 
 <Button>
   <VisuallyHidden tag="span">Delete the invoice</VisuallyHidden>

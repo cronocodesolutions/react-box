@@ -575,7 +575,7 @@ export default function SvgPage() {
 
           <Section id="elements" title="Every element is a component">
             <Box>
-              <Mono>@cronocode/react-box/components/svg</Mono> is twenty components, one per element: <Mono>Svg</Mono>, <Mono>G</Mono>,{' '}
+              <Mono>@box-kite/react/components/svg</Mono> is twenty components, one per element: <Mono>Svg</Mono>, <Mono>G</Mono>,{' '}
               <Mono>Defs</Mono>, <Mono>Path</Mono>, <Mono>Circle</Mono>, <Mono>Ellipse</Mono>, <Mono>Rect</Mono>, <Mono>Line</Mono>,{' '}
               <Mono>Polyline</Mono>, <Mono>Polygon</Mono>, <Mono>SvgText</Mono>, <Mono>TSpan</Mono>, <Mono>LinearGradient</Mono>,{' '}
               <Mono>RadialGradient</Mono>, <Mono>Stop</Mono>, <Mono>ClipPath</Mono>, <Mono>Mask</Mono>, <Mono>Use</Mono>,{' '}

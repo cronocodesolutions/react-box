@@ -33,11 +33,6 @@
     // "rootDir": "./",                                  /* Specify the root folder within your source files. */
     "moduleResolution": "bundler" /* Specify how TypeScript looks up a file from a given module specifier. */,
     // "baseUrl": "./",                                  /* Specify the base directory to resolve non-relative module names. */
-    "paths": {
-      // Stopgap: @cronocode/identity-factory's package.json "exports" has no "types" condition,
-      // so bundler resolution can't find its declarations. Remove once that package exports types.
-      "@cronocode/identity-factory": ["./node_modules/@cronocode/identity-factory/dist/index.d.ts"]
-    },
     // "rootDirs": [],                                   /* Allow multiple folders to be treated as one when resolving modules. */
     // "typeRoots": [],                                  /* Specify multiple folders that act like './node_modules/@types'. */
     // "types": [],                                      /* Specify type package names to be included without being referenced in a source file. */

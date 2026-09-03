@@ -22,7 +22,7 @@ body:
   - type: input
     id: version
     attributes:
-      label: react-box version
+      label: Box Kite version
       placeholder: e.g. 3.3.3
     validations:
       required: true

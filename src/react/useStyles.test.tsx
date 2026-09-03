@@ -26,7 +26,7 @@ describe('useStyles', () => {
     expect(element).not.toBeNull();
     expect(element).toBeInstanceOf(HTMLDivElement);
 
-    const styleElement = document.getElementById('crono-styles')! as unknown as HTMLStyleElement;
+    const styleElement = document.getElementById('box-kite-styles')! as unknown as HTMLStyleElement;
 
     return { element, parent: element.parentElement!, styleElement };
   }
@@ -495,7 +495,7 @@ describe('useStyles', () => {
         </Box>,
       );
 
-      const styleElement = document.getElementById('crono-styles')! as unknown as HTMLStyleElement;
+      const styleElement = document.getElementById('box-kite-styles')! as unknown as HTMLStyleElement;
       const content = styleElement.innerText ?? '';
       const matches = content.match(/\.p-4\{padding:1rem\}/g);
       expect(matches).toHaveLength(1);
@@ -559,7 +559,7 @@ describe('useStyles', () => {
       );
 
       const element = document.getElementById(testElementId)!;
-      const styleElement = document.getElementById('crono-styles')! as unknown as HTMLStyleElement;
+      const styleElement = document.getElementById('box-kite-styles')! as unknown as HTMLStyleElement;
 
       // Two parents in nesting order, and no `|` to tell them apart any more: each compiles to its own
       // selector, so the class name is just the two segments.
@@ -607,7 +607,7 @@ describe('useStyles', () => {
       );
 
       const element = document.getElementById(testElementId)!;
-      const styleElement = document.getElementById('crono-styles')! as unknown as HTMLStyleElement;
+      const styleElement = document.getElementById('box-kite-styles')! as unknown as HTMLStyleElement;
 
       // Base padding
       expect(styleElement.innerText).toContain('.p-1{padding:0.25rem}');
@@ -626,7 +626,7 @@ describe('useStyles', () => {
       );
 
       const element = document.getElementById(testElementId)!;
-      const styleElement = document.getElementById('crono-styles')! as unknown as HTMLStyleElement;
+      const styleElement = document.getElementById('box-kite-styles')! as unknown as HTMLStyleElement;
 
       // Base padding
       expect(styleElement.innerText).toContain('.p-1{padding:0.25rem}');
@@ -662,7 +662,7 @@ describe('useStyles', () => {
       );
 
       const element = document.getElementById(testElementId)!;
-      const styleElement = document.getElementById('crono-styles')! as unknown as HTMLStyleElement;
+      const styleElement = document.getElementById('box-kite-styles')! as unknown as HTMLStyleElement;
 
       // Base styles
       expect(styleElement.innerText).toContain('.p-1{padding:0.25rem}');
@@ -703,7 +703,7 @@ describe('useStyles', () => {
       );
 
       const element = document.getElementById(testElementId)!;
-      const styleElement = document.getElementById('crono-styles')! as unknown as HTMLStyleElement;
+      const styleElement = document.getElementById('box-kite-styles')! as unknown as HTMLStyleElement;
 
       // Base padding
       expect(styleElement.innerText).toContain('.p-1{padding:0.25rem}');
@@ -728,7 +728,7 @@ describe('useStyles', () => {
   // happened to commit before it.
   suite('flush scheduling', () => {
     function styleText(): string {
-      return (document.getElementById('crono-styles') as unknown as HTMLStyleElement | null)?.innerText ?? '';
+      return (document.getElementById('box-kite-styles') as unknown as HTMLStyleElement | null)?.innerText ?? '';
     }
 
     function countOccurrences(text: string, needle: string): number {
@@ -799,7 +799,7 @@ describe('useStyles', () => {
           <Box id="cache-c2" p={9} />
         </Box>,
       );
-      const styleElement = document.getElementById('crono-styles')! as unknown as HTMLStyleElement;
+      const styleElement = document.getElementById('box-kite-styles')! as unknown as HTMLStyleElement;
       expect(styleElement.innerText).toContain('.p-4{padding:1rem}');
       expect(styleElement.innerText).toContain('.p-9{padding:2.25rem}');
       expect(document.getElementById('cache-c1')!.classList).toContain('p-4');
@@ -824,14 +824,14 @@ describe('useStyles', () => {
     // Keep last: clear() resets global style state (and the cache) like an SSG render boundary.
     it('regenerates rules after StylesContext.clear() (SSG reset)', () => {
       render(<Box id="cache-before" p={7} />);
-      expect((document.getElementById('crono-styles')! as unknown as HTMLStyleElement).innerText).toContain('.p-7{padding:1.75rem}');
+      expect((document.getElementById('box-kite-styles')! as unknown as HTMLStyleElement).innerText).toContain('.p-7{padding:1.75rem}');
 
       // Simulate an SSG reset: a cached class list must NOT suppress rule regeneration.
       StylesContext.clear();
       cleanup();
 
       render(<Box id="cache-after" p={7} />);
-      const styleElement = document.getElementById('crono-styles')! as unknown as HTMLStyleElement;
+      const styleElement = document.getElementById('box-kite-styles')! as unknown as HTMLStyleElement;
       expect(styleElement.innerText).toContain('.p-7{padding:1.75rem}');
       expect(document.getElementById('cache-after')!.classList).toContain('p-7');
     });

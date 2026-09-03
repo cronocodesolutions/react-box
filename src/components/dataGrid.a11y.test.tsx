@@ -126,7 +126,7 @@ describe('DataGrid accessibility', () => {
 
       // The sweep is the library's only animation, and it repeats forever. It is a Box prop like any
       // other now, so the sequence and the rule that stops it are both in the engine's stylesheet.
-      const css = (document.getElementById('crono-styles') as HTMLStyleElement | null)?.textContent ?? '';
+      const css = (document.getElementById('box-kite-styles') as HTMLStyleElement | null)?.textContent ?? '';
 
       expect(css).toContain('@keyframes rb-datagrid-loader{');
       expect(css).toContain('@media (prefers-reduced-motion: reduce){.motionReduce-animationName-none{animation-name:none}}');

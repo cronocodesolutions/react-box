@@ -25,7 +25,7 @@ export default function TooltipPage() {
 
       <Reveal delay={0.1}>
         <Flex d="column" gap={10}>
-          <Code label="Import" language="jsx" code="import Tooltip from '@cronocode/react-box/components/tooltip';" />
+          <Code label="Import" language="jsx" code="import Tooltip from '@box-kite/react/components/tooltip';" />
 
           <Code
             id="usage"
@@ -142,7 +142,7 @@ export default function TooltipPage() {
               <Code
                 language="jsx"
                 codeOnly
-                code={`import Overlay from '@cronocode/react-box/components/overlay';
+                code={`import Overlay from '@box-kite/react/components/overlay';
 
 <Overlay p={3} bgColor="slate-800">anything, anywhere</Overlay>`}
               />
