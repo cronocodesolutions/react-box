@@ -22,6 +22,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 | `npx vitest run src/path/to/file.test.tsx` | Run a single test file                                                                                       |
 | `npm run lint`                             | ESLint check                                                                                                 |
 | `npm run check:boundaries`                 | Fail if the core engine imports React or the RSC entry reaches a client hook (also prints the adapter ratio) |
+| `npm run docs:props`                       | Write every prop's `@example` (measured from the engine) and `api/props.json`                                |
+| `npm run check:props`                      | Fail if a prop has no JSDoc, an example no longer matches the CSS, or the reference is stale                 |
 
 Node version: v24 (pinned in .nvmrc).
 
@@ -156,14 +158,19 @@ After any code change, all of the following must pass before considering the wor
 3. `npm run check:boundaries` — `src/core/` must stay React-free
 4. `npm run build` — Library build
 5. `npm test` — All tests (or `npm run test:coverage` when touching `src/core/` or `src/react/`, which is what CI runs)
+6. `npm run check:props` — the prop reference, when `src/core/boxStyles.ts` or a formatter changed
 
 CI runs the test suite against React 18 and React 19 — both are in the supported peer range and the engine leans on layout effects, hydration and server rendering, which is exactly what changed between them.
 
 ## Adding New CSS Properties
 
-1. Define in `src/core/boxStyles.ts` with JSDoc comment
+1. Define in `src/core/boxStyles.ts` with JSDoc comment — the prose, not the example
 2. Add formatter in `src/core/boxStylesFormatters.ts` if needed
 3. Types auto-generate — no manual type changes needed
+4. Bump `PROP_COUNT` in `src/core/boxStyles.test.ts` and the ten hand-written copies it checks
+5. `npm run docs:props` — writes the prop's `@example` from the CSS the engine actually emits, and `api/props.json` with it.
+   **Never write or edit an `@example` by hand**: it is generated, `npm run check:props` fails when it drifts, and a changed
+   divider changes forty-five of them at once
 
 ## Build & Publishing
 
