@@ -57,7 +57,7 @@ react-box/
 │   ├── ssg.ts                    # Server-side rendering support (entry point)
 │   │
 │   ├── core/                     # Core styling engine — ZERO react imports (enforced)
-│   │   ├── boxStyles.ts          # CSS property definitions (211 props)
+│   │   ├── boxStyles.ts          # CSS property definitions (212 props)
 │   │   ├── boxStylesFormatters.ts # Value formatters (px, rem, etc.)
 │   │   ├── variables.ts          # Where a value becomes a variable: the registry, bgImages, shadows
 │   │   ├── palette.ts            # Tailwind's OKLCH palette (26 families) + the `token/alpha` grammar
@@ -542,6 +542,17 @@ through `Box.extend()` are usable as values on every prop whose values resolve t
 colours, background images and shadows — so `bgColor="brand-primary"` works from the declaration
 alone. Declaring the value on the prop as well (the third argument above) is what makes TypeScript
 accept it. The merge semantics are pinned down in `src/core/engine/mergeSemantics.test.ts`.
+
+The third way out is the `css` prop (`src/core/css.ts`): a style object for a property the registry
+lacks, compiled into a class through the same pipeline — an escape hatch from the _typed set_, never
+from the engine, which is why it nests, dedupes and renders on a server like any prop. Three things
+about it are deliberate. It is the **last** key in `cssStyles`, so its rule sorts after every typed
+prop's and wins the property both name on one element. Its value grammar is `vars`'
+(`Variables.isUsableValue`, `Variables.colorValue`), so there is one rule for a value that reaches a
+rule unformatted, and a colour token stays themed. And its types are `csstype`'s `Properties` — the
+one dependency `src/core` carries, types only, nothing at runtime — so a misspelt property is a
+compile error and `width: 100` is refused where `zIndex: 3` is not, because a number is written out as
+it stands.
 
 ---
 

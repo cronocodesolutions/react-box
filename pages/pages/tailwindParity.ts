@@ -341,6 +341,12 @@ export const propertyGroups: ParityGroup[] = [
         status: 'has',
         note: 'the answer for markup this library does not render — a chart, a third-party widget',
       },
+      {
+        tailwind: 'arbitrary properties ([mask-type:luminance])',
+        props: ['css'],
+        status: 'has',
+        note: 'the typed escape hatch: a style object compiled to a class, never an inline style — the 5% every other row is not',
+      },
     ],
   },
 ];

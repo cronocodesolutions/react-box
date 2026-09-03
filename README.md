@@ -5,7 +5,7 @@
 [![Tests](https://github.com/box-kite/box-kite/actions/workflows/test.yml/badge.svg)](https://github.com/box-kite/box-kite/actions/workflows/test.yml)
 [![license](https://img.shields.io/npm/l/@cronocode/react-box)](LICENSE)
 
-`Box` is a single React component with 211 typed CSS props. It generates the CSS for the values you
+`Box` is a single React component with 212 typed CSS props. It generates the CSS for the values you
 pass at runtime and caches every rule by its content, so the same value anywhere in the app reuses
 one class — a project styles itself in TypeScript, with no CSS files to write and no class-name
 convention to remember.
@@ -422,6 +422,20 @@ declare module '@cronocode/react-box/types' {
 }
 ```
 
+### The escape hatch
+
+For a one-off property nobody will type twice, `css` takes a style object and compiles it the way
+every other prop is compiled — into a shared class, never a `style` attribute — so it nests wherever
+a prop does and renders on a server:
+
+```JSX
+<Box css={{ mixBlendMode: 'multiply', WebkitLineClamp: 2 }} hover={{ css: { isolation: 'isolate' } }} />
+```
+
+Names are camelCase and typed, values are CSS written as they stand (a colour token resolves to its
+variable, a length wants its unit), and it sorts last so it wins over a typed prop naming the same
+property. Prefer a prop, then `Box.extend()` for anything used twice.
+
 ## Theme for components
 
 In the project root file (main.tsx) use `Theme.setup`
@@ -652,7 +666,7 @@ A complete page — props, pseudo-classes, breakpoints, themes, `extend`, `compo
 
 ## Architecture
 
-The styling engine is framework-free. Everything that generates CSS — the 211 prop definitions,
+The styling engine is framework-free. Everything that generates CSS — the 212 prop definitions,
 the value formatters, class-name generation, rule ordering, the style sinks (CSSOM, `textContent`,
 string for SSR, style elements for React 19), the flush scheduler, CSS variables and the theme
 runtime — lives in `src/core/` and imports no React at all. CI fails the build if it ever does

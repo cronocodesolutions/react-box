@@ -5,7 +5,7 @@ description: '@cronocode/react-box expert — runtime CSS-in-JS library. Use whe
 
 # @cronocode/react-box AI Skill
 
-Runtime CSS-in-JS library. `Box` accepts 211 CSS props → generates CSS classes at runtime. Same values share a class.
+Runtime CSS-in-JS library. `Box` accepts 212 CSS props → generates CSS classes at runtime. Same values share a class.
 
 ## Installation & Package Management
 
@@ -22,7 +22,7 @@ Check latest: `npm view @cronocode/react-box version`
 
 ## Critical Rules
 
-1. **NEVER `style={{ }}`** — use Box props. Missing prop? `Box.extend()`. `style` is top-level only — never inside breakpoints/pseudo-classes/theme
+1. **NEVER `style={{ }}`** — use Box props. Missing prop? `Box.extend()`, or `css={{ mixBlendMode: 'multiply' }}` for a one-off — the typed escape hatch compiles to a class and nests anywhere a prop does. `style` is top-level only — never inside breakpoints/pseudo-classes/theme
 2. **NEVER `<Box tag="...">`** for common elements — use `<Button>`, `<Link>`, `<H1>`, `<P>`, `<Nav>`, etc.
 3. **NEVER `<Box display="flex/grid">`** — use `<Flex>` / `<Grid>`
 4. **HTML attrs in `props`**: `<Link props={{ href: '/about' }}>` not `<Link href>` — `data-*`/`aria-*` too (a top-level `data-state` typechecks and is dropped)
@@ -102,6 +102,15 @@ value is written out as it stands. Names may carry a leading `--` or not. It is 
 `theme`/`hover`/a breakpoint and lands in a **class** — two subtrees declaring the same variables share one rule,
 and nothing needs a `<style>` tag or an `id` to scope it. A name that is not a CSS identifier, or a value
 containing `;` or a brace, is skipped (that entry only, not the whole record).
+
+**Escape hatch**: `css={{ mixBlendMode: 'multiply', WebkitLineClamp: 2 }}` — a style object for the properties with
+no prop, compiled to a **class** through the same pipeline (shared, nests in `hover`/`md`/`theme`/`dataAttr`/`before`/
+`startingStyle`/a keyframes step, renders on a server), never an inline style. camelCase names typed by csstype (a
+misspelling is a compile error, `WebkitLineClamp` → `-webkit-line-clamp`); values are CSS written as they stand — a
+number too, so `width: 100` is a type error while `zIndex: 3` is fine — and a colour token resolves like a `vars`
+value (`outlineColor: 'sky-500'`). Sorted **last**, so on one element it wins the property a typed prop also names.
+A value with `;` or a brace is dropped (that entry only). Prefer a prop, then `Box.extend()` for anything used
+twice; `css` is the one-off.
 
 **Animation & transitions**: every Box already transitions `all` over `--transitionTime` (0.25s), which is why a `hover` colour fades
 unasked. `animation` takes a preset — `'spin'`/`'pulse'`/`'bounce'`/`'ping'`/`'none'`, keyframes included, durations riding

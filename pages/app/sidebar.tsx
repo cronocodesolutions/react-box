@@ -9,6 +9,7 @@ import {
   ChevronDown,
   Circle,
   Highlighter,
+  DoorOpen,
   Download,
   Layers,
   LayoutGrid,
@@ -203,6 +204,9 @@ export default function Sidebar({ toggleTheme, onClose }: SidebarProps) {
           </MenuItem>
           <MenuItem to="/tailwind-parity" icon={<ListChecks />}>
             Tailwind Parity
+          </MenuItem>
+          <MenuItem to="/escape-hatch" icon={<DoorOpen />}>
+            Escape Hatch
           </MenuItem>
         </MenuSection>
 

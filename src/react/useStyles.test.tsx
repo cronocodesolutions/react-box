@@ -31,6 +31,17 @@ describe('useStyles', () => {
     return { element, parent: element.parentElement!, styleElement };
   }
 
+  // The escape hatch is a class like every other prop — the element carries no `style` attribute at all.
+  it('compiles the css prop into a class, not an inline style', () => {
+    const { element, styleElement } = act({ css: { mixBlendMode: 'multiply' }, hover: { css: { isolation: 'isolate' } } });
+
+    expect(element.classList).toContain('css-mixBlendMode-multiply');
+    expect(element.classList).toContain('hover-css-isolation-isolate');
+    expect(element.getAttribute('style')).toBeNull();
+    expect(styleElement.innerText).toContain('.css-mixBlendMode-multiply{mix-blend-mode:multiply}');
+    expect(styleElement.innerText).toContain('.hover-css-isolation-isolate:hover{isolation:isolate}');
+  });
+
   it('applies margin styles', async () => {
     const { element, styleElement } = act({
       m: 8,

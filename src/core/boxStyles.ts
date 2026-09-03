@@ -3,6 +3,7 @@ import { BoxStylesFormatters } from './boxStylesFormatters';
 import Containers from './containers';
 import Content from './content';
 import { BoxStyle, BoxStyleValue } from './coreTypes';
+import Css from './css';
 import Filters from './filters';
 import Gradients from './gradients';
 import Palette from './palette';
@@ -2524,6 +2525,19 @@ export const cssStyles = {
       values: {} as Variables.CustomProperties,
       match: Variables.isCustomProperties,
       declarations: Variables.customProperties as NonNullable<BoxStyle['declarations']>,
+    },
+  ],
+  /**
+   * The escape hatch: a style object for the properties this library has no prop for, compiled into a class
+   * through the same pipeline as every other prop — shared, nestable, server-rendered — rather than an inline
+   * style. Declared last on purpose: its rule sorts after every typed prop's, so on one element it wins the
+   * property both name. A colour token resolves the way a `vars` value does; a number is written as it stands.
+   */
+  css: [
+    {
+      values: {} as Css.Declarations,
+      match: Css.isDeclarations,
+      declarations: Css.declarations as NonNullable<BoxStyle['declarations']>,
     },
   ],
 } satisfies Record<string, BoxStyle[]>;
