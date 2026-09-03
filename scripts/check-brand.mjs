@@ -81,8 +81,12 @@ function walk(dir) {
 }
 
 const tracked = execSync('git ls-files', { cwd: root, encoding: 'utf8' }).trim().split('\n');
-// The bridge keeps the old specifier resolving by design — it is published, not purged.
-const sources = tracked.filter((path) => !BINARY.test(path) && !path.startsWith('bridge/'));
+// Two exemptions that are structural rather than editorial. The bridge keeps the old specifier
+// resolving by design — it is published, not purged. And this file cannot be judged by its own rule:
+// naming the forbidden strings is what it is for, in the patterns, in the allowlist and in the message
+// it prints. An allowlist entry would have to quote every one of them and grow with each new one.
+const SELF = 'scripts/check-brand.mjs';
+const sources = tracked.filter((path) => !BINARY.test(path) && !path.startsWith('bridge/') && path !== SELF);
 const shipped = existsSync(join(root, 'dist')) ? walk('dist').filter((path) => !BINARY.test(path)) : [];
 
 const violations = [];
