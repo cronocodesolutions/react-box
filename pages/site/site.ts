@@ -107,7 +107,7 @@ export const siteRoutes = [
     path: '/escape-hatch',
     name: 'Escape Hatch',
     description:
-      'The css prop: a style object for the properties this library has no prop for, compiled into a shared class like every other prop — nestable, themed, server-rendered, never an inline style.',
+      'The css prop: a style object for the properties this library has no prop for, compiled into a shared class like every other prop — never an inline style.',
   },
   {
     path: '/animation',
