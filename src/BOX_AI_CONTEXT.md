@@ -1,6 +1,6 @@
 # @cronocode/react-box - AI Assistant Context
 
-Runtime CSS-in-JS library. `Box` component accepts 211 CSS props and generates CSS classes at runtime. Same prop values share a single class.
+Runtime CSS-in-JS library. `Box` component accepts 212 CSS props and generates CSS classes at runtime. Same prop values share a single class.
 
 ---
 
@@ -8,7 +8,9 @@ Runtime CSS-in-JS library. `Box` component accepts 211 CSS props and generates C
 
 ### Rule #1: NEVER Use Inline Styles
 
-Always use Box props. If a prop doesn't exist, create it with `Box.extend()` (see Extension System).
+Always use Box props. If a prop doesn't exist, create it with `Box.extend()` (see Extension System) — or,
+for a one-off property, write it in `css={{ … }}`: the typed escape hatch, which is still a class and
+never a `style` attribute (see "The escape hatch").
 
 | Inline Style (WRONG)                          | Box Prop (CORRECT)                             |
 | --------------------------------------------- | ---------------------------------------------- |
@@ -29,7 +31,7 @@ Always use Box props. If a prop doesn't exist, create it with `Box.extend()` (se
 | `style={{ opacity: 0.5 }}`                    | `opacity={0.5}`                                |
 | `sm={{ style: { maxWidth: 600 } }}`           | `sm={{ maxWidth: 150 }}` (150/4=37.5rem=600px) |
 
-**`style` is top-level only** — it is NOT supported inside breakpoints, pseudo-classes, or theme objects. Always use Box props for responsive/conditional styles.
+**`style` is top-level only** — it is NOT supported inside breakpoints, pseudo-classes, or theme objects. Always use Box props for responsive/conditional styles; `css` nests anywhere a prop does (`md={{ css: { objectPosition: 'center' } }}` compiles to a rule).
 
 ### Rule #2: ALWAYS Use Component Shortcuts
 
@@ -324,6 +326,35 @@ rendered — a chart library, a third-party widget, a subtree with its own token
   only, not the whole record, so one bad name cannot take a palette down with it.
 - Not the same thing as `Box.extend({ variables })`, which declares tokens globally on `:root` before
   the first render. `vars` is per element, per theme, per breakpoint.
+
+### The escape hatch (`css`)
+
+The 5% the typed set does not cover, without an inline style: a style object compiled through the
+same pipeline as every other prop — one class per object, shared between elements writing the same
+one, nested wherever a prop nests, rendered on a server.
+
+```tsx
+<Box css={{ mixBlendMode: 'multiply', scrollSnapType: 'x mandatory' }} hover={{ css: { isolation: 'isolate' } }} />
+<Img css={{ objectPosition: 'top' }} md={{ css: { objectPosition: 'center' } }} />
+```
+
+- **Property names are camelCase**, as React spells them (`WebkitLineClamp` → `-webkit-line-clamp`,
+  `msOverflowStyle` → `-ms-overflow-style`); a hyphenated name or a `--custom` one is written as it
+  stands. Names and keyword values are typed by `csstype`, so a misspelt property is a compile error.
+- **Values are CSS, written out as they stand** — a number too, so a length wants its unit
+  (`width: '100px'`; the type refuses `width: 100`) while `zIndex`, `opacity`, `flexGrow` and
+  `lineHeight` take theirs. A colour token resolves the way a `vars` value does
+  (`outlineColor: 'sky-500'` → `var(--sky-500)`, `'rose-400/60'` → the mix), so the hatch stays themed.
+- **It is sorted last**: on one element a `css` declaration wins over the typed prop naming the same
+  property. It is the override, and the cascade says so.
+- **It nests like any prop** — `hover`, `md`, `theme`, `dataAttr`, `before`, `startingStyle`, a
+  `Box.keyframes()` step. What it does _not_ take is a selector or a nested rule: those are the
+  nesting keys' job, around it.
+- A value carrying `;` or a brace, or a name that is not a property name, is dropped — that entry
+  only. A data URI's `;` is written `%3B`.
+- **Governance**: reach for a typed prop first; for a property used more than once, `Box.extend()`
+  (five lines, indistinguishable from a built-in afterwards); `css` is for the one-off. An ESLint rule
+  that flags or forbids it per team policy is planned; until it ships, `grep -rn "css={{"` is the audit.
 
 ### SVG
 
@@ -1351,7 +1382,7 @@ function TrendCell({ cell }: { cell: CellModel<Row> }) {
 
 ## Key Reminders for AI Assistants
 
-1. **NEVER `style={{ }}`** — use Box props. Missing prop? Use `Box.extend()`
+1. **NEVER `style={{ }}`** — use Box props. Missing prop? Use `Box.extend()`, or `css={{ … }}` for a one-off — the typed escape hatch compiles to a class, never a `style` attribute
 2. **NEVER `<Box tag="...">` for common elements** — use `<Button>`, `<Link>`, `<H1>`, `<P>`, `<Nav>`, `<Svg>`, `<Path>`, `<Circle>`, etc.
 3. **NEVER `<Box display="flex/grid">`** — use `<Flex>` / `<Grid>`
 4. **fontSize divider is 16** (not 4). `fontSize={14}` → 14px
@@ -1363,7 +1394,7 @@ function TrendCell({ cell }: { cell: CellModel<Row> }) {
 10. **HTML attributes go in `props` prop**: `<Link props={{ href: '/about' }}>` not `<Link href>`. `data-*` and `aria-*` go there too — a `data-state` written at the top level typechecks and is then dropped
 11. **Size shortcuts**: `width="fit"` = 100%, `width="fit-screen"` = 100vw, `width="1/2"` = 50%
 12. **Box is memoized** with `React.memo`
-13. **`style` is top-level only** — never inside breakpoints (`sm={{ style: ... }}`), pseudo-classes, or theme objects
+13. **`style` is top-level only** — never inside breakpoints (`sm={{ style: ... }}`), pseudo-classes, or theme objects. `css` is the one that nests: `sm={{ css: { objectPosition: 'top' } }}` is a rule
 14. **A CSS variable is a prop**: `vars={{ 'color-x': 'sky-500' }}` declares `--color-x` for everything inside — and a third-party chart goes in `<ChartContainer series={['revenue']}>` so it names no colour at all
 15. **All sizing props use divider 4** — `width`, `height`, `minWidth`, `maxWidth`, `minHeight`, `maxHeight` are NOT direct pixels. `height={10}` = 2.5rem = 40px
 16. **A state your own code sets is a nested prop too**: `dataAttr={{ 'state=open': { … } }}` → `[data-state="open"]`, `ariaAttr={{ selected: { … } }}` → `[aria-selected="true"]`, `has={{ ':checked': { … } }}`, `not={{ hover: { … } }}`, `nth={{ odd: { … } }}`. The attribute itself still goes in `props`

@@ -42,7 +42,9 @@ export default function TailwindParityPage() {
             Five lines. <Mono>Box.extend()</Mono> registers a prop that is indistinguishable from a built-in one afterwards: it nests in
             themes, breakpoints, container queries and every state on this site's <Mono>/variants</Mono> page, shares a class with every
             other element that used the same value, and reaches <Mono>getStyles()</Mono> on a server. So the rows below are not a list of
-            things you cannot do — they are the list of props not worth typing for <em>everybody</em>, yet.
+            things you cannot do — they are the list of props not worth typing for <em>everybody</em>, yet. And for the one-off nobody will
+            type twice, <Mono>css=&#123;&#123; mixBlendMode: 'multiply' &#125;&#125;</Mono> is the same style object compiled to a class
+            rather than an inline style — the <Mono>/escape-hatch</Mono> page is what governs it.
           </Section>
 
           <Code

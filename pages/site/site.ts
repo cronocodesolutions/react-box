@@ -53,7 +53,7 @@ export const siteRoutes = [
   {
     path: '/box',
     name: 'Box',
-    description: 'The foundational component: 211 CSS properties as type-safe props, with the numeric formatters explained.',
+    description: 'The foundational component: 212 CSS properties as type-safe props, with the numeric formatters explained.',
   },
   {
     path: '/svg',
@@ -102,6 +102,12 @@ export const siteRoutes = [
     name: 'Tailwind Parity',
     description:
       'Every Tailwind v4.3 utility family against the props this library ships — what is covered, what is partial, and the one-line answer for the rest.',
+  },
+  {
+    path: '/escape-hatch',
+    name: 'Escape Hatch',
+    description:
+      'The css prop: a style object for the properties this library has no prop for, compiled into a shared class like every other prop — never an inline style.',
   },
   {
     path: '/animation',

@@ -172,16 +172,19 @@ namespace Variables {
   const customPropertyName = /^(--)?[A-Za-z_][\w-]*$/;
 
   /**
-   * Whether one entry of a `vars` record can be written into a rule — the only thing standing between a
-   * prop value and the text of a rule: a name that is not a CSS identifier, or a value carrying `;` or a
-   * brace, would end the declaration early and let the rest be read as CSS.
+   * Whether a value can be written into a rule as it stands — the only thing between a prop value and the
+   * text of a rule: a `;` or a brace would end the declaration early and let the rest be read as CSS. Shared
+   * with `css`, the other prop whose values reach a rule unformatted.
    */
-  function isUsableEntry([name, entry]: [string, unknown]): boolean {
-    if (!customPropertyName.test(name)) return false;
-
+  export function isUsableValue(entry: unknown): entry is string | number {
     return typeof entry === 'number'
       ? Number.isFinite(entry)
       : typeof entry === 'string' && entry.trim().length > 0 && !/[;{}]/.test(entry);
+  }
+
+  /** Whether one entry of a `vars` record can be written: a name that is a CSS identifier, and a usable value. */
+  function isUsableEntry([name, entry]: [string, unknown]): boolean {
+    return customPropertyName.test(name) && isUsableValue(entry);
   }
 
   /**
