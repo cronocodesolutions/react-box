@@ -45,9 +45,11 @@ jobs:
             exit 1
           fi
 
-          # The H1 repeats the release title, so the body starts at the line under it.
+          # The H1 repeats the release title, so the body starts at the line under it — after one line
+          # pointing at the same notes on the site, which is the one thing the file cannot say about itself.
           body=$(mktemp)
-          sed '1{/^# /d}' "$notes" | sed '1{/^$/d}' > "$body"
+          printf '_Read these notes on [box-kite.dev](https://www.box-kite.dev/releases/%s/)._\n\n' "$version" > "$body"
+          sed '1{/^# /d}' "$notes" | sed '1{/^$/d}' >> "$body"
 
           if git ls-remote --exit-code --tags origin "refs/tags/$tag" > /dev/null; then
             echo "$tag is already tagged"
