@@ -5,6 +5,7 @@ import Box from '../src/box';
 import AfterHydration from './app/afterHydration';
 import Root from './app/root';
 import { preloadPage } from './app/routePages';
+import { routes } from './site/routes';
 import { routeFor } from './site/siteMeta';
 import './extends';
 // The syntax-highlighting theme belongs to the whole site, and it has to be in the entry's CSS: the
@@ -33,7 +34,7 @@ const tree = (
 if (container.hasChildNodes()) {
   // A prerendered page: `React.lazy` would suspend on the route being hydrated, and a hydration that
   // suspends throws away the HTML it was supposed to adopt — so that one chunk is fetched first.
-  const route = routeFor(window.location.pathname);
+  const route = routeFor(window.location.pathname, routes);
 
   (route ? preloadPage(route.path) : Promise.resolve()).then(() => hydrateRoot(container, tree));
 } else {

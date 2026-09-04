@@ -1,12 +1,12 @@
 import { Suspense } from 'react';
 import { Route, Routes } from 'react-router-dom';
 import NotFoundPage from '../pages/notFoundPage';
-import { SiteRoutePath, siteRoutes } from '../site/site';
+import { routes } from '../site/routes';
 import Layout from './layout';
 import pageFor from './routePages';
 
 /** One route's page: the module itself once loaded, a suspending stand-in while its chunk arrives. */
-function RoutePage({ path }: { path: SiteRoutePath }) {
+function RoutePage({ path }: { path: string }) {
   // Both halves of `pageFor` are memoized per path, so the identity this returns is stable and the
   // remount the rule guards against cannot happen — but which half answers is only knowable here,
   // after `preloadPage` has run.
@@ -24,7 +24,7 @@ export default function App() {
           synchronous update landing mid-flight. The wait itself is what prefetchPage is for. */}
       <Suspense fallback={null}>
         <Routes>
-          {siteRoutes.map(({ path }) => (
+          {routes.map(({ path }) => (
             <Route key={path} path={path} element={<RoutePage path={path} />} />
           ))}
           <Route path="*" element={<NotFoundPage />} />

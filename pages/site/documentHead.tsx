@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
+import { routes } from './routes';
 import { notFoundMeta, pageMeta, routeFor } from './siteMeta';
 
 /**
@@ -11,7 +12,7 @@ export default function DocumentHead() {
   const { pathname } = useLocation();
 
   useEffect(() => {
-    const route = routeFor(pathname);
+    const route = routeFor(pathname, routes);
     // An address the router does not serve still renders the app shell, because that is what the
     // 404 page is a copy of. Say so, and keep it out of the index.
     const meta = route ? pageMeta(route) : notFoundMeta;

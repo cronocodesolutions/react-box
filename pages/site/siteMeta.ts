@@ -44,24 +44,27 @@ export const notFoundMeta: PageMeta = {
   indexable: false,
 };
 
-/** The route serving a pathname, or `undefined` for anything the router does not know. */
-export function routeFor(pathname: string): SiteRoute | undefined {
+/**
+ * The route serving a pathname, or `undefined` for anything the router does not know. The table is the
+ * default; the app passes its full list, which adds one route per file in `releases/`.
+ */
+export function routeFor(pathname: string, within: readonly SiteRoute[] = routes): SiteRoute | undefined {
   const path = pathname.length > 1 ? pathname.replace(/\/+$/, '') : pathname;
 
-  return routes.find((route) => route.path === path);
+  return within.find((route) => route.path === path);
 }
 
 /** The routes search engines are meant to list — everything but the unlisted demos. */
-export function indexableRoutes(): readonly SiteRoute[] {
-  return routes.filter((route) => route.indexable !== false);
+export function indexableRoutes(within: readonly SiteRoute[] = routes): readonly SiteRoute[] {
+  return within.filter((route) => route.indexable !== false);
 }
 
 /**
  * `sitemap.xml` for the whole site. No `<lastmod>`: the only date the build knows is its own, and a
  * sitemap that claims every page changed on every deploy is worse than one that says nothing.
  */
-export function buildSitemap(siteUrl: string = SITE_URL): string {
-  const urls = indexableRoutes()
+export function buildSitemap(siteUrl: string = SITE_URL, within: readonly SiteRoute[] = routes): string {
+  const urls = indexableRoutes(within)
     .map((route) => `  <url>\n    <loc>${canonicalUrl(route.path, siteUrl)}</loc>\n  </url>`)
     .join('\n');
 

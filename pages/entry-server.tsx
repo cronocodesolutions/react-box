@@ -6,7 +6,7 @@ import { getStyles, resetStyles } from '../src/ssg';
 import Root from './app/root';
 import { preloadPage } from './app/routePages';
 import { PRERENDERED_STYLE_ID } from './site/prerender';
-import { siteRoutes } from './site/site';
+import { routes } from './site/routes';
 import './extends';
 
 /**
@@ -22,7 +22,7 @@ Box.configure({ classNames: 'stable' });
 /** A location no route matches, so the router falls through to the 404 page. */
 export const NOT_FOUND_PATH = '/404';
 
-export const prerenderPaths = siteRoutes.map((route) => route.path);
+export const prerenderPaths = routes.map((route) => route.path);
 
 export { PRERENDERED_STYLE_ID };
 

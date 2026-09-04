@@ -22,6 +22,7 @@ import {
   Paintbrush,
   Palette,
   Proportions,
+  Rocket,
   Rows3,
   Server,
   Shapes,
@@ -109,6 +110,9 @@ export default function Sidebar({ toggleTheme, onClose }: SidebarProps) {
           </MenuItem>
           <MenuItem to="/migrating" icon={<PackageIcon />}>
             Migrating
+          </MenuItem>
+          <MenuItem to="/releases" icon={<Rocket />}>
+            Releases
           </MenuItem>
           <MenuItem to="/theme-setup" icon={<Paintbrush />}>
             Theme Setup

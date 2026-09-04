@@ -1,4 +1,5 @@
 import { ComponentType, lazy } from 'react';
+import { RELEASES_PATH } from '../site/releases';
 import { SiteRoutePath } from '../site/site';
 
 /**
@@ -11,6 +12,7 @@ const loaders: Record<SiteRoutePath, () => Promise<{ default: ComponentType }>> 
   '/': () => import('../pages/homePage'),
   '/installation': () => import('../pages/installationPage'),
   '/migrating': () => import('../pages/migrationPage'),
+  '/releases': () => import('../pages/releasesPage'),
   '/theme-setup': () => import('../pages/themeSetupPage'),
   '/server-components': () => import('../pages/serverComponentsPage'),
   '/box': () => import('../pages/boxPage'),
@@ -42,6 +44,13 @@ const loaders: Record<SiteRoutePath, () => Promise<{ default: ComponentType }>> 
   '/ai-context': () => import('../pages/aiContextPage'),
 };
 
+// Every release has a route of its own, but one page module: the version is in the pathname.
+const releasePage = () => import('../pages/releasePage');
+
+function loaderFor(path: string) {
+  return loaders[path as SiteRoutePath] ?? (path.startsWith(`${RELEASES_PATH}/`) ? releasePage : undefined);
+}
+
 // Modules resolved before rendering starts. `React.lazy` always suspends on its first render, and a
 // hydration that suspends throws away the prerendered HTML it was supposed to adopt — so the route
 // being hydrated (and every route the prerender pass renders) is loaded up front and rendered eagerly.
@@ -50,7 +59,7 @@ const suspending = new Map<string, ComponentType>();
 
 /** Load one route's page module. Unknown paths are the 404 route's, which is bundled with the app. */
 export async function preloadPage(path: string): Promise<void> {
-  const loader = loaders[path as SiteRoutePath];
+  const loader = loaderFor(path);
   if (!loader) return;
 
   resolved.set(path, (await loader()).default);
@@ -66,14 +75,16 @@ export function prefetchPage(path: string): void {
 }
 
 /** The page component for a path: rendered directly when preloaded, through Suspense otherwise. */
-export default function pageFor(path: SiteRoutePath): ComponentType {
+export default function pageFor(path: string): ComponentType {
   const preloaded = resolved.get(path);
   if (preloaded) return preloaded;
 
   let page = suspending.get(path);
 
   if (!page) {
-    page = lazy(loaders[path]);
+    const loader = loaderFor(path);
+    if (!loader) throw new Error(`${path} is not a route this site serves`);
+    page = lazy(loader);
     suspending.set(path, page);
   }
 
