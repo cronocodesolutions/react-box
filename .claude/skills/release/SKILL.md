@@ -1,92 +1,68 @@
 ---
 name: release
-description: Create a new package release with version bump, GitHub release, and npm publish trigger
+description: Cut a Box Kite release — turn releases/next.md into the versioned notes, bump the manifest and open the release PR; merging it tags, publishes to npm and deploys the site
 disable-model-invocation: true
-argument-hint: [patch|minor|major]
+argument-hint: [patch|minor|major|x.y.z] [--dry-run]
 ---
 
-Create a new package release for @box-kite/react.
+Cut a release of `@box-kite/react` and `@box-kite/core`. One version, both packages, one PR.
+
+## How a release works
+
+- **The notes are written as the work lands.** Every PR that changes what a consumer sees adds a
+  section to `releases/next.md`; CI (`release-notes.yml`) fails a source change with no note unless
+  the PR carries the `no release note` label. By release day the notes exist.
+- **`npm run release -- <bump>` opens the release PR.** It turns `releases/next.md` into
+  `releases/<version>.md` (stamped with the version, the date and the compare link), resets the
+  draft, adds the CHANGELOG row, bumps `package.json` and `package-lock.json`, and opens
+  `release/<version>` against main. The manifest leads and the tag follows; `npm version` is never
+  run and no tag is made by hand.
+- **Merging the PR is the release.** When Tests go green on main, `release.yml` tags `v<version>`,
+  creates the GitHub Release with the notes file as its body, and dispatches `publish.yml`, which
+  publishes core then react with provenance. `pages.yml` deploys the site on the same push.
 
 ## Steps
 
-1. **Pre-flight checks**
-   - Run `npm run compile` to verify type check passes
-   - Run `npm test` to verify all tests pass
-   - Confirm you are on the `main` branch and it is clean and up to date with origin
+1. **Pre-flight.** On `main`, clean, at `origin/main`. Read `releases/next.md` as a reader would:
+   is the story there? Decide the bump against SUPPORT.md — a patch for fixes, a minor for new props
+   or components, a major for anything under "Breaking changes". The script refuses a non-major bump
+   while that section says more than `None.`
+2. **Dry run first**: `npm run release -- $ARGUMENTS --dry-run` prints the version, the CHANGELOG
+   line and the head of the notes, and writes nothing.
+3. **Run it**: `npm run release -- $ARGUMENTS`. It prints the PR URL.
+4. **Review the release PR as the release.** Read `releases/<version>.md` whole. Write the intro and
+   the Highlights if the draft had none; order the sections biggest first; make sure every breaking
+   change has a migration note beside it; check the CHANGELOG line. Fix in place on the release
+   branch — the file is the source of truth, and the GitHub Release body follows it.
+5. **Merge** (squash), then watch the chain: `gh run list --limit 6` shows Tests → Release →
+   Publish to NPM, and Deploy static content to Pages beside them.
+6. **Confirm**: `npm view @box-kite/react version` and `npm view @box-kite/core version` say the new
+   version; the release page reads right; the site is up.
 
-2. **Version bump**
-   - Run `npm version $ARGUMENTS` (defaults to `patch` if no argument provided)
-   - This creates a version commit and a git tag automatically
+## When something fails
 
-3. **Push**
-   - Push the commit and tag: `git push origin main --follow-tags`
+- **Tests red on main after the merge**: fix forward on main. Release runs again after the next
+  green Tests, and a version with no tag is released then.
+- **Release failed after tagging**: run it again from the Actions tab (`workflow_dispatch`). Every
+  step checks what already exists before doing it.
+- **Publish failed**: `gh workflow run publish.yml -f ref=v<version>`. A package already on the
+  registry is skipped, so the one that failed is the only one retried. An OIDC `403` means npm's
+  trusted-publisher record does not match — see below.
+- **A wrong word in published notes**: edit `releases/<version>.md` in an ordinary PR. The release
+  body re-syncs on the next green main.
 
-4. **Gather changelog context**
-   - Find the previous release tag: `gh release list --limit 1`
-   - Get all commits since the last release: `git log <previous-tag>..HEAD --oneline`
-   - Get all merged PRs since the last release: `gh pr list --state merged --search "merged:>YYYY-MM-DD"`
-   - Read the commit messages and PR titles to understand all changes
+## Writing a note, for any PR
 
-5. **Create GitHub release** using the format below
-   - The release title is the plain version number (e.g. `3.2.0`), no "v" prefix
-   - The tag is `v<version>` (e.g. `v3.2.0`)
+- One `## ` section per change, above "Breaking changes": a sentence for the heading (the way the
+  commit subjects read), a paragraph on what changed and why the reader would care, an example if it
+  helps. Lead with the thing to know.
+- A breaking change is a bullet under `## Breaking changes` (replace `None.`), with what to change
+  beside it. A fix is a bullet under `## Fixes`: **what was wrong**, then what it does now.
+- Links are absolute (`https://www.box-kite.dev/…`), because the same text is the GitHub Release
+  body. `releases/1.0.0.md` is the reference for the shape.
 
-6. **Confirm** the release was created and share the URL
+## Owner setup, once per package
 
-## The 1.0.0 rename release, once only
-
-These steps belong to the first release under the new name and to no other. Delete this section after it.
-
-- **Trusted publishing is per package.** `publish.yml` publishes whatever name is in `dist/package.json`,
-  but npm's OIDC config binds to a _package_. `@box-kite/react` needs its own trusted-publisher entry
-  (repo `box-kite/box-kite`, workflow `publish.yml`) before the release, or the publish 403s.
-- **The compatibility bridge is published by hand**, because it is a different package: after the
-  release, `npm run build` then `npm run build:bridge`, then `npm publish ./dist-bridge --access public`.
-- **Then deprecate the old name** — the bridge is what stops a build breaking; this is what moves people:
-  `npm deprecate @cronocode/react-box "renamed: npm i @box-kite/react"`.
-- **Link the migration page** (<https://box-kite.dev/migrating/>) from the release notes, and list the
-  two DOM id changes and the type-augmentation string as the breaking surface.
-
-## Release Notes Format
-
-````markdown
-## Highlights
-
-One or two sentence summary of the most notable changes in this release.
-
-### 🚀 Features
-
-- **ComponentOrPropName**: Description of what was added ([#PR](url))
-  ```tsx
-  // Optional: short code example if it helps illustrate usage
-  ```
-````
-
-### 🐛 Bug Fixes
-
-- **ComponentOrPropName**: Description of what was fixed ([#PR](url))
-
-### ⚡ Performance
-
-- Description of performance improvement ([#PR](url))
-
-### 📦 Other Changes
-
-- Dependency updates, refactoring, docs ([#PR](url))
-
----
-
-**Full Changelog**: https://github.com/box-kite/box-kite/compare/<previous-tag>...<new-tag>
-
-```
-
-## Format Rules
-
-- Only include sections that have entries (skip empty sections)
-- **Bold the component or prop name** at the start of each bullet
-- Link every item to its PR
-- Include short code examples for new features when they help illustrate usage
-- Keep descriptions concise — one line per item
-- The "Highlights" section is always present
-- End with a Full Changelog compare link
-```
+npm trusted publishing is configured per package, and 1.0.0 was published by hand because it was
+missing: `@box-kite/react` **and** `@box-kite/core` each need a trusted publisher of owner
+`box-kite`, repository `box-kite`, workflow `publish.yml`, environment left blank.

@@ -1,0 +1,43 @@
+# The release notes are written by whoever made the change, when they made it: a PR that changes
+# what a consumer sees adds its section to releases/next.md. This is what keeps that from rotting —
+# a change under src/ with no note fails, unless the PR says why with the `no release note` label.
+name: Release note
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, labeled, unlabeled]
+
+permissions:
+  contents: read
+  pull-requests: read
+
+jobs:
+  note:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: A source change carries a note, or says why not
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          PR: ${{ github.event.pull_request.number }}
+        run: |
+          set -euo pipefail
+          if gh pr view "$PR" --json labels -q '.labels[].name' | grep -qx 'no release note'; then
+            echo "labelled 'no release note' — nothing to check"
+            exit 0
+          fi
+          files=$(gh pr diff "$PR" --name-only)
+          # Tests and the AI context file are not what a consumer sees.
+          source=$(grep -E '^src/' <<< "$files" | grep -vE '(\.test\.[cm]?[jt]sx?|\.md)$' || true)
+          if [ -z "$source" ]; then
+            echo "no source change — nothing to check"
+            exit 0
+          fi
+          if grep -qx 'releases/next.md' <<< "$files"; then
+            echo "releases/next.md changed — the note is there"
+            exit 0
+          fi
+          count=$(wc -l <<< "$source")
+          echo "::error::This PR changes $count source file(s) and releases/next.md is untouched. Add a section for the reader, or label the PR 'no release note' if nothing a consumer sees changed."
+          exit 1

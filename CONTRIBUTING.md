@@ -1289,19 +1289,34 @@ export default defineConfig({
 });
 ```
 
+### Release notes
+
+The notes are written when the change lands, not on release day. A PR that changes what a consumer
+sees adds a section to `releases/next.md`: a sentence for the heading (the way the commit subjects
+read), a paragraph on what changed and why the reader would care, an example if it helps. A breaking
+change is a bullet under "Breaking changes" (replacing `None.`) with the migration beside it; a fix
+is a bullet under "Fixes". Links are absolute, because the same text becomes the GitHub Release body.
+`release-notes.yml` fails a PR that changes `src/` and leaves the draft alone, unless the PR carries the
+`no release note` label. `releases/1.0.0.md` is the reference for the shape.
+
 ### Publishing Workflow
 
+A release is a pull request, and merging it is the release:
+
 ```bash
-# 1. Update version in package.json
-npm version patch|minor|major
-
-# 2. Build
-npm run build
-
-# 3. Publish from dist/
-cd dist
-npm publish --access public
+npm run release -- minor --dry-run   # what would happen: the version, the CHANGELOG line, the notes
+npm run release -- minor             # patch | minor | major | x.y.z
 ```
+
+The script turns `releases/next.md` into `releases/<version>.md` (version, date, compare link), resets
+the draft, adds the CHANGELOG row, bumps `package.json` and `package-lock.json`, and opens
+`release/<version>` against main. It refuses a non-major bump while the draft lists breaking changes.
+Review the notes there as a reader would, fix them in place, and merge. When Tests go green on main,
+`release.yml` tags `v<version>`, creates the GitHub Release with the notes file as its body and
+dispatches `publish.yml`, which publishes `@box-kite/core` then `@box-kite/react` with provenance;
+`pages.yml` deploys the site on the same push. The manifest leads and the tag follows — `npm version`
+is never run, and no tag is made by hand. Every step is idempotent, so a run that stopped halfway is
+run again from the Actions tab. The full runbook is `.claude/skills/release/SKILL.md`.
 
 ---
 

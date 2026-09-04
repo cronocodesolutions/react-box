@@ -1,0 +1,74 @@
+# The release is a merged pull request. `npm run release -- minor` bumps package.json, turns
+# releases/next.md into releases/<version>.md and opens the PR; when Tests go green on main and the
+# version the manifest names has no tag yet, this tags it, opens the GitHub Release from the notes
+# file, and hands the tag to publish.yml. A version already released only gets its release body
+# re-synced from the file, so a typo fixed in releases/<version>.md reaches the release page on the
+# next green main. Every step is idempotent, so a run that stopped halfway is simply run again.
+name: Release
+
+on:
+  workflow_run:
+    workflows: [Tests]
+    types: [completed]
+    branches: [main]
+  # The retry: the checks already ran on main, so this only redoes whatever the last run did not.
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  actions: write
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+jobs:
+  release:
+    if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
+
+      - name: Tag, release and publish the version the manifest names
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          version=$(node -p "require('./package.json').version")
+          tag="v$version"
+          notes="releases/$version.md"
+          if [ ! -f "$notes" ]; then
+            echo "::error::$notes does not exist — npm run release writes it, and the release PR carries it"
+            exit 1
+          fi
+
+          # The H1 repeats the release title, so the body starts at the line under it — after one line
+          # pointing at the same notes on the site, which is the one thing the file cannot say about itself.
+          body=$(mktemp)
+          printf '_Read these notes on [box-kite.dev](https://www.box-kite.dev/releases/%s/)._\n\n' "$version" > "$body"
+          sed '1{/^# /d}' "$notes" | sed '1{/^$/d}' >> "$body"
+
+          if git ls-remote --exit-code --tags origin "refs/tags/$tag" > /dev/null; then
+            echo "$tag is already tagged"
+          else
+            git config user.name 'github-actions[bot]'
+            git config user.email 'github-actions[bot]@users.noreply.github.com'
+            git tag -a "$tag" -m "Box Kite $version"
+            git push origin "$tag"
+            echo "tagged $tag"
+          fi
+
+          if gh release view "$tag" > /dev/null 2>&1; then
+            gh release edit "$tag" --notes-file "$body"
+            echo "$tag is already released — its body now matches $notes"
+            exit 0
+          fi
+
+          gh release create "$tag" --title "$version" --notes-file "$body" --latest
+          # A release created with the workflow token fires no `release: published` run — GitHub's rule
+          # against recursive workflows — so the publish is dispatched by name instead.
+          gh workflow run publish.yml --ref main -f "ref=$tag"
+          echo "released $tag and dispatched publish.yml for it"

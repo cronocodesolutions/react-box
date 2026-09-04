@@ -9,4 +9,5 @@
 - [ ] `npm test` passes (new behavior has tests)
 - [ ] `npm run build` passes
 - [ ] No inline `style={{ }}` — Box props only (see `.claude/rules/box-kite-rules.md`)
-- [ ] Breaking change? Called out in the description with a migration note.
+- [ ] `releases/next.md` has a section for this change, or the PR is labelled `no release note`
+- [ ] Breaking change? Called out in the description with a migration note. And listed under Breaking changes in `releases/next.md`.

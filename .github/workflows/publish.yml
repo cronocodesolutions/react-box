@@ -3,6 +3,13 @@ name: Publish to NPM
 on:
   release:
     types: [published]
+  # A publish that failed halfway is retried from here rather than by deleting and recreating the
+  # release: `ref` takes the tag to publish, and a version already on the registry is skipped.
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: 'Tag to publish (e.g. v1.0.1). Defaults to the ref this is run from.'
+        required: false
 
 permissions:
   id-token: write
@@ -14,6 +21,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.ref || github.ref }}
 
       - uses: actions/setup-node@v4
         with:
@@ -24,5 +33,24 @@ jobs:
       - run: npm run build
 
       # Core first: @box-kite/react depends on an exact version of it.
-      - run: npm publish ./dist-core --access public --provenance
-      - run: npm publish ./dist --access public --provenance
+      #
+      # Each publish is skipped when that exact version is already on the registry. npm refuses to
+      # republish a version, so without this a retry after a half-finished release fails on the package
+      # that *succeeded* — which is the one case where a retry is what you need.
+      - name: Publish @box-kite/core
+        run: |
+          version=$(node -p "require('./dist-core/package.json').version")
+          if npm view "@box-kite/core@$version" version > /dev/null 2>&1; then
+            echo "@box-kite/core@$version is already on the registry — skipping"
+          else
+            npm publish ./dist-core --access public --provenance
+          fi
+
+      - name: Publish @box-kite/react
+        run: |
+          version=$(node -p "require('./dist/package.json').version")
+          if npm view "@box-kite/react@$version" version > /dev/null 2>&1; then
+            echo "@box-kite/react@$version is already on the registry — skipping"
+          else
+            npm publish ./dist --access public --provenance
+          fi

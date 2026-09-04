@@ -69,7 +69,8 @@
     "check:props": "node scripts/check-props-api.mjs",
     "docs:props": "node scripts/check-props-api.mjs --fix",
     "check:package": "publint dist && attw --pack dist --ignore-rules false-esm cjs-resolves-to-esm internal-resolution-error && publint dist-core && attw --pack dist-core --ignore-rules false-esm cjs-resolves-to-esm internal-resolution-error",
-    "size": "size-limit"
+    "size": "size-limit",
+    "release": "node scripts/release.mjs"
   },
   "size-limit": [
     {
