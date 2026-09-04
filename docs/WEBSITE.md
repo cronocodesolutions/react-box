@@ -51,27 +51,33 @@ down. Everything address-bound is built from it by the `site-metadata` plugin in
 - **`sitemap.xml`** (every route but the unlisted demos) and **`robots.txt`** (which allows the AI
   crawlers by name, and disallows nothing — a page a crawler may not fetch never gets to show it its
   `noindex`).
-- **`CNAME`**, so a lost or overwritten GitHub Pages custom-domain setting shows up as a diff here.
+- **`CNAME`**, which records the host the build believes in. It does **not** set it: publishing from
+  a workflow rather than a branch, GitHub ignores the file and reads the repository setting instead
+  (see "Moving the site to another domain").
 
 [pages/site/documentHead.tsx](pages/site/documentHead.tsx) keeps the same tags correct after the app
 takes over navigation. The shells carry the metadata; the prerender pass below puts the page in them.
 
 ### Moving the site to another domain
 
-1. Point DNS at GitHub Pages, and wait for the certificate before announcing anything. Do **not** set
-   the custom domain by hand: the build emits a `CNAME` asset, and a Pages deploy carrying one sets
-   the domain — a setting made ahead of the deploy is overwritten by it. **Both halves of the pair
-   need records even though only one is canonical**: `www` a `CNAME` to `box-kite.github.io`, the apex
-   the four `A` records. GitHub redirects one to the other by itself, but only when it can answer both
-   — with the apex undelegated, `box-kite.dev` reaches nothing at all.
-2. Change `SITE_URL` **and `SITE_NAME` in the same commit**: canonicals, `sitemap.xml`, `robots.txt`
+1. Point DNS at GitHub Pages, and wait for the certificate before announcing anything. **Both halves
+   of the pair need records even though only one is canonical**: `www` a `CNAME` to
+   `box-kite.github.io`, the apex the four `A` records. GitHub redirects one to the other by itself,
+   but only when it can answer both — with the apex undelegated, `box-kite.dev` reaches nothing at all.
+2. **Set the custom domain in Settings → Pages** (or `PUT /repos/{owner}/{repo}/pages`). The build
+   emits a `CNAME` asset, but this site publishes from a workflow rather than from a branch, and
+   GitHub is explicit that "any existing `CNAME` file is ignored" in that mode. The asset is kept
+   because it would become the source of truth again if the publishing source ever moved to a branch;
+   until then the repository setting is the only thing that decides the host, and a deploy will not
+   change it in either direction.
+3. Change `SITE_URL` **and `SITE_NAME` in the same commit**: canonicals, `sitemap.xml`, `robots.txt`
    and `CNAME` all follow the address, and `npm test` checks they moved together. The name goes with
    it because it is the suffix of every `<title>` — flipping it later re-indexes every route twice.
-3. Repoint the links we own that are written by hand: `homepage` in `package.json`, the docs link in
+4. Repoint the links we own that are written by hand: `homepage` in `package.json`, the docs link in
    `README.md`, and `ARTICLE.md`.
-4. Redirect the old host path-preservingly (301) — it cannot live in this repo, because GitHub Pages
+5. Redirect the old host path-preservingly (301) — it cannot live in this repo, because GitHub Pages
    serves one custom domain per repository.
-5. Add the new address to Search Console and file a change of address for the old one.
+6. Add the new address to Search Console and file a change of address for the old one.
 
 ## Prerendering
 
