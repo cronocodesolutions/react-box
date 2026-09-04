@@ -40,6 +40,21 @@ const ALLOWED = [
     ],
   },
   {
+    file: '.claude/skills/release/SKILL.md',
+    reason: 'the one-time rename release runbook: the bridge publish and the deprecation both name the old package',
+    strings: ['@cronocode/react-box'],
+  },
+  {
+    file: 'releases/1.0.0.md',
+    reason: 'the rename release notes: the old package is what the reader is renaming from, and the bridge carries its name',
+    strings: ['@cronocode/react-box', 'crono-styles', 'crono-box', '[react-box]'],
+  },
+  {
+    file: 'CHANGELOG.md',
+    reason: 'the index says which name the releases before 1.0.0 were published under',
+    strings: ['@cronocode/react-box'],
+  },
+  {
     file: 'README.md',
     reason: 'the rename note, so a reader arriving with the old name in their package.json finds it here',
     strings: ['@cronocode/react-box'],
