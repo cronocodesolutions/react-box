@@ -95,7 +95,7 @@ describe('buildSitemap', () => {
   });
 
   it('follows the site address, so the domain cutover is one constant', () => {
-    expect(buildSitemap('https://box-kite.dev')).toContain('<loc>https://box-kite.dev/dropdown/</loc>');
+    expect(buildSitemap('https://www.box-kite.dev')).toContain('<loc>https://www.box-kite.dev/dropdown/</loc>');
   });
 });
 
