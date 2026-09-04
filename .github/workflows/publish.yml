@@ -23,4 +23,6 @@ jobs:
       - run: npm ci
       - run: npm run build
 
+      # Core first: @box-kite/react depends on an exact version of it.
+      - run: npm publish ./dist-core --access public --provenance
       - run: npm publish ./dist --access public --provenance

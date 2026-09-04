@@ -1,6 +1,6 @@
 import { createContext, useContext } from 'react';
 import { BoxProps } from '../../box';
-import { ClassNameType } from '../../core/classNames';
+import { ClassNameType } from '../../core';
 
 export interface DropdownItemProps<TVal = unknown> extends BoxProps {
   value: TVal;

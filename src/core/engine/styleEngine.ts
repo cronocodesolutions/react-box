@@ -32,6 +32,7 @@ import Filters from '../filters';
 import Groups from '../groups';
 import { stableHash } from '../hash';
 import IdentityFactory from '../identity';
+import { mergeDeep } from '../mergeDeep';
 import Palette from '../palette';
 import Shadows from '../shadows';
 import Variables from '../variables';
@@ -233,7 +234,7 @@ function resolveExtends(components: Components): Components {
     if (!baseComponent) continue;
 
     const { extends: _, ...override } = component;
-    resolved[name] = ObjectUtils.mergeDeep<BoxComponent>({}, baseComponent, override);
+    resolved[name] = mergeDeep<BoxComponent>({}, baseComponent, override);
   }
 
   return resolved;
@@ -919,7 +920,7 @@ export function createStyleEngine(options: StyleEngineOptions = {}): StyleEngine
 
     if (!resolved) {
       const componentStyles = resolveComponentStyles(props, componentsStyles) as BoxStyleProps;
-      const propsToUse = componentStyles ? ObjectUtils.mergeDeep(componentStyles, props) : props;
+      const propsToUse = componentStyles ? mergeDeep(componentStyles, props) : props;
 
       const classNames = [isSvg ? svgClassName : boxClassName];
       resolved = { classNames, elements: collect(() => addClassNames(propsToUse, classNames, rootContext())) };
@@ -1012,7 +1013,7 @@ export function createStyleEngine(options: StyleEngineOptions = {}): StyleEngine
 
     components(components) {
       // Merge into what this engine holds, not the defaults: sequential calls used to drop earlier ones.
-      componentsStyles = resolveExtends(ObjectUtils.mergeDeep<Components>(componentsStyles, components));
+      componentsStyles = resolveExtends(mergeDeep<Components>(componentsStyles, components));
       // Cached class lists were resolved against the previous component defaults.
       styleCache.clear();
 

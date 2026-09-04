@@ -1,6 +1,6 @@
 # The core engine, without React
 
-A plain HTML page styled entirely by `@box-kite/react/core`. No framework is loaded — the
+A plain HTML page styled entirely by `@box-kite/core`. No framework is loaded — the
 page is `document.createElement` plus `engine.classNames(props)`, and the CSS is generated at
 runtime into a `<style>` element the engine owns.
 

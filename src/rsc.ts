@@ -1,8 +1,5 @@
 import React from 'react';
-import getDefaultEngine from './core/engine/defaultEngine';
-import { StylesConfiguration } from './core/engine/styleEngine';
-import BoxExtends from './core/extends/boxExtends';
-import Springs from './core/springs';
+import { BoxExtends, getDefaultEngine, Springs, StylesConfiguration } from './core';
 import boxClassNames, { BoxClassNames } from './react/boxClassNames';
 import { BoxClassNameProps, BoxCoreProps } from './react/boxProps';
 import buildTagProps from './react/boxTagProps';

@@ -17,7 +17,16 @@ Then one find-and-replace across your source:
 @cronocode/react-box   →   @box-kite/react
 ```
 
-Every subpath keeps its name, so `@cronocode/react-box/components/flex` becomes `@box-kite/react/components/flex`, and `/rsc`, `/a11y`, `/core`, `/ssg` and `/types` are unchanged apart from the prefix.
+Most subpaths keep their name, so `@cronocode/react-box/components/flex` becomes `@box-kite/react/components/flex`, and `/rsc`, `/a11y` and `/ssg` are unchanged apart from the prefix.
+
+Two moved to a package of their own, because the engine is now published separately for apps with no React in them:
+
+| was                          | is                     |
+| ---------------------------- | ---------------------- |
+| `@cronocode/react-box/core`  | `@box-kite/core`       |
+| `@cronocode/react-box/types` | `@box-kite/core/types` |
+
+`@box-kite/react` depends on `@box-kite/core`, so installing the React package still gets you both.
 
 ## Three things the bridge does not forward
 
@@ -27,8 +36,11 @@ Every subpath keeps its name, so `@cronocode/react-box/components/flex` becomes 
 // before
 declare module '@cronocode/react-box/types' { ... }
 // after
-declare module '@box-kite/react/types' { ... }
+declare module '@box-kite/core/types' { ... }
 ```
+
+The target is the **core** package: the types are derived from the prop registry, so they live with it
+rather than with a framework binding.
 
 **Two DOM ids changed**, and both are documented debugging landmarks, so anything selecting them in a test or a global stylesheet needs updating:
 

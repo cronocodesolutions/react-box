@@ -101,7 +101,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             language="jsx"
             code={`// app/themeToggle.tsx — the island that changes it.
 'use client';
-import { createThemeController } from '@box-kite/react/core';
+import { createThemeController } from '@box-kite/core';
 
 const controller = createThemeController({ storageKey: 'theme', theme: 'dark' });
 

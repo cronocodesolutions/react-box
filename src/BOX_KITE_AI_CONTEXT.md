@@ -917,11 +917,11 @@ Box.extend(
 
 ```typescript
 // types.d.ts — Generic approach (recommended)
-import { ExtractComponentsAndVariants, ExtractBoxStyles } from '@box-kite/react/types';
+import { ExtractComponentsAndVariants, ExtractBoxStyles } from '@box-kite/core/types';
 import { components } from './boxComponents';
 import { extendedPropTypes, extendedProps } from './boxExtends';
 
-declare module '@box-kite/react/types' {
+declare module '@box-kite/core/types' {
   namespace Augmented {
     interface BoxProps extends ExtractBoxStyles<typeof extendedProps> {}
     interface BoxPropTypes extends ExtractBoxStyles<typeof extendedPropTypes> {}
@@ -930,7 +930,7 @@ declare module '@box-kite/react/types' {
 }
 
 // Manual approach (simple cases):
-declare module '@box-kite/react/types' {
+declare module '@box-kite/core/types' {
   namespace Augmented {
     interface BoxPropTypes {
       bgColor: 'brand-primary' | 'brand-secondary';

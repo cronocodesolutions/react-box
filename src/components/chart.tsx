@@ -1,9 +1,9 @@
 import { forwardRef, Ref, RefAttributes } from 'react';
 import Box, { BoxProps } from '../box';
+import { mergeDeep } from '../core';
 import { ExtractElementFromTag } from '../react/reactTypes';
 import { BoxStyleProps, ComponentsAndVariants } from '../types';
 import ChartUtils from '../utils/chart/chartUtils';
-import ObjectUtils from '../utils/object/objectUtils';
 import { Circle, Path, Svg, SvgProps } from './svg';
 
 /**
@@ -239,7 +239,7 @@ function ChartContainerImpl<TTag extends keyof React.JSX.IntrinsicElements = 'di
 
   // The dark palette arrives through the same theme selector every other prop uses, which is the whole
   // trick. Merged rather than replaced, so a caller's own `theme` survives.
-  const themes = ObjectUtils.mergeDeep<NonNullable<ChartContainerProps<TTag>['theme']>>(
+  const themes = mergeDeep<NonNullable<ChartContainerProps<TTag>['theme']>>(
     { dark: { vars: ChartUtils.paletteVariables(ChartUtils.DARK_PALETTE) } },
     theme ?? {},
   );

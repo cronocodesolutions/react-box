@@ -51,7 +51,7 @@ box-kite/
 ├── src/                          # Library source (published to npm)
 │   ├── box.ts                    # Main Box component (entry point)
 │   ├── a11y.ts                   # Behaviour primitives (`@box-kite/react/a11y`)
-│   ├── core.ts                   # The engine with no React (`@box-kite/react/core`)
+│   ├── core.ts                   # The engine with no React (`@box-kite/core`)
 │   ├── rsc.ts                    # Box for Server Components (the `react-server` entry, hook-free)
 │   ├── types.ts                  # TypeScript type exports
 │   ├── ssg.ts                    # Server-side rendering support (entry point)
@@ -165,13 +165,13 @@ box-kite/
 The split is not cosmetic. The engine — prop definitions, formatters, class-name generation, the
 rule registry, the sinks, the flush scheduler, the variables, the theme runtime — has no idea a
 component tree exists. It is the future `@box-kite/core` package, it already ships as the
-`@box-kite/react/core` entry (`src/core.ts`), and it is what makes the library embeddable in
+`@box-kite/core` entry (`src/core.ts`), and it is what makes the library embeddable in
 places React is not: a vanilla-DOM page, an iframe widget, another framework's adapter, a
 build-time compiler. `examples/vanilla` is that claim as a running page.
 
 | Layer               | Path                                                     | May import React?                         |
 | ------------------- | -------------------------------------------------------- | ----------------------------------------- |
-| Core engine         | `src/core/**`, `src/core.ts`                             | **No** — enforced                         |
+| Core engine         | `src/core/**`, `src/core.ts`, `src/types.ts`             | **No** — enforced, and its own package    |
 | React binding       | `src/react/**`, `src/box.ts`, `src/rsc.ts`, `src/ssg.ts` | Yes (`src/rsc.ts`: no hooks — see below)  |
 | Components, icons   | `src/components/**`, `src/icons/**`                      | Yes                                       |
 | Shared utils, types | `src/utils/**`, `src/types.ts`                           | No — the engine reaches them, so enforced |
@@ -226,7 +226,7 @@ cannot be classified one way by the checks and another by the bundler:
 
 | Chunk          | What is in it                                                                                          | Who imports it                                    |
 | -------------- | ------------------------------------------------------------------------------------------------------ | ------------------------------------------------- |
-| `engine`       | everything `src/core.ts` reaches — framework-free                                                      | every entry                                       |
+| `engine`       | **a tripwire, and empty when the split is intact**: anything `src/core.ts` reaches that leaked in      | nothing — `postbuild.mjs` fails if it exists      |
 | `react-shared` | hook-free React modules, plus what only a server-safe component uses                                   | `box`, `rsc`, components                          |
 | `behavior`     | `src/react/a11y/**` — the primitives, React and nothing else                                           | `a11y`, and the components A3+ build on them      |
 | `platform`     | `src/utils/environment/**`, `src/utils/dom/**` — is there a DOM, and did this event happen inside that | every group, engine included                      |
@@ -1109,9 +1109,9 @@ Users extend via declaration merging:
 
 ```typescript
 // user's types.d.ts
-import '@box-kite/react/types';
+import '@box-kite/core/types';
 
-declare module '@box-kite/react/types' {
+declare module '@box-kite/core/types' {
   namespace Augmented {
     interface BoxPropTypes {
       bgColor: 'brand-primary' | 'brand-secondary';

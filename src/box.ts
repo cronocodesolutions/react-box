@@ -1,7 +1,5 @@
 import React, { forwardRef, memo, Ref, RefAttributes, useMemo, useState } from 'react';
-import getDefaultEngine from './core/engine/defaultEngine';
-import BoxExtends from './core/extends/boxExtends';
-import Springs from './core/springs';
+import { BoxExtends, getDefaultEngine, Springs } from './core';
 import boxClassNames, { BoxClassNames } from './react/boxClassNames';
 import { BoxClassNameProps, BoxCoreProps } from './react/boxProps';
 import buildTagProps from './react/boxTagProps';

@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleElementDescriptor } from '../core/engine/styleSink';
+import { StyleElementDescriptor } from '../core';
 
 /**
  * The engine's style-element descriptors as React elements. `<style href precedence>` is React 19's

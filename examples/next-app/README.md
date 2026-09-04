@@ -26,7 +26,7 @@ symlinked and resolve its own copy of React from the repository root.
 | `app/streamedSection.tsx` | An `async` Server Component behind `<Suspense>` — its markup and its CSS arrive in a later chunk |
 | `app/elementMode.ts`      | The one line a client bundle needs: `Box.configure({ sink: 'element' })`                         |
 | `app/counter.tsx`         | A client island using `Flex`/`Button`, server-rendered with its CSS in the HTML                  |
-| `app/themeToggle.tsx`     | `createThemeController()` from `@box-kite/react/core` — theme switching with no provider         |
+| `app/themeToggle.tsx`     | `createThemeController()` from `@box-kite/core` — theme switching with no provider         |
 | `app/components/page.tsx` | Server Component. The pre-built components imported straight into it, hook-free and stateful     |
 | `smoke.mjs`               | The CI check: 13 assertions against the served HTML                                              |
 

@@ -3,7 +3,7 @@
 // Nothing here is React-adjacent: `engine.classNames(props)` returns a `class` attribute value and
 // the CSS behind it is written to a `<style>` element the engine owns. The props are the same ones
 // `<Box>` takes — the React binding is a wrapper around this call, not a different feature set.
-import { createStyleEngine, createThemeController } from '@box-kite/react/core';
+import { createStyleEngine, createThemeController } from '@box-kite/core';
 
 const engine = createStyleEngine();
 

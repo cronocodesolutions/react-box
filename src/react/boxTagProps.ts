@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { classNames, ClassNameType } from '../core/classNames';
+import { classNames, ClassNameType } from '../core';
 import { BoxStyleProps } from '../types';
 import BoxUtils from '../utils/box/boxUtils';
 

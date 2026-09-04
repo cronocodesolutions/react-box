@@ -29,6 +29,16 @@ npm install @box-kite/react
 React 16.14 or newer, including 18 and 19 (both are covered by CI). TypeScript is optional but the
 props are typed for it.
 
+Two packages ship, and a React project installs one of them:
+
+| Package                                           | What it is                                                        |
+| ------------------------------------------------- | ----------------------------------------------------------------- |
+| **`@box-kite/react`**                             | `Box`, every component, the hooks. Depends on the one below.      |
+| [`@box-kite/core`](#using-the-core-without-react) | The engine and the types, no framework. For an app with no React. |
+
+`@box-kite/core/types` is where a project declares its own props and components — the augmentation
+target lives with the prop registry it extends, not with a binding.
+
 2. Use it
 
 Spacing counts in quarters of a rem: `p={3}` is `0.75rem`, `m={2}` is `0.5rem`. The example below is
@@ -418,10 +428,10 @@ export const { extendedProps, extendedPropTypes } = Box.extend(
 
 ```JS
 import '@box-kite/react';
-import { ExtractBoxStyles, ExtractComponentsAndVariants } from '@box-kite/react/types';
+import { ExtractBoxStyles, ExtractComponentsAndVariants } from '@box-kite/core/types';
 import { extendedProps, extendedPropTypes, components } from './path-to-your-b0x-extends-declaration';
 
-declare module '@box-kite/react/types' {
+declare module '@box-kite/core/types' {
   namespace Augmented {
     interface BoxProps extends ExtractBoxStyles<typeof extendedProps> {}
     interface BoxPropTypes extends ExtractBoxStyles<typeof extendedPropTypes> {}
@@ -609,7 +619,7 @@ Full reference: [docs/a11y-primitives.md](docs/a11y-primitives.md).
 The engine that turns props into CSS has no framework in it, and it is published on its own:
 
 ```js
-import { createStyleEngine } from '@box-kite/react/core';
+import { createStyleEngine } from '@box-kite/core';
 
 const engine = createStyleEngine();
 
@@ -647,7 +657,7 @@ engine.getStyles(); // the stylesheet as text, for static output
 Theming is the same state machine `<Box.Theme>` runs, as a plain object:
 
 ```js
-import { createThemeController } from '@box-kite/react/core';
+import { createThemeController } from '@box-kite/core';
 
 // Reads prefers-color-scheme, restores a stored choice, writes the theme onto <html>, and follows
 // the system preference until something overrides it. Theme rules are ancestor-scoped (`.dark .p-4`),
@@ -679,7 +689,7 @@ the value formatters, class-name generation, rule ordering, the style sinks (CSS
 string for SSR, style elements for React 19), the flush scheduler, CSS variables and the theme
 runtime — lives in `src/core/` and imports no React at all. CI fails the build if it ever does
 (`npm run check:boundaries`), and it ships on its own as
-[`@box-kite/react/core`](#using-the-core-without-react).
+[`@box-kite/core`](#using-the-core-without-react).
 
 React is a thin adapter on top of it:
 

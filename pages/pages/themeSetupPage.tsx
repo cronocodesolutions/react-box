@@ -61,10 +61,10 @@ export const components = Box.components({
             check={false}
             code={`// box.d.ts — without this, variant="primary" is a type error: the names exist at runtime only.
 import '@box-kite/react';
-import { ExtractComponentsAndVariants } from '@box-kite/react/types';
+import { ExtractComponentsAndVariants } from '@box-kite/core/types';
 import { components } from './boxExtends';
 
-declare module '@box-kite/react/types' {
+declare module '@box-kite/core/types' {
   namespace Augmented {
     interface ComponentsTypes extends ExtractComponentsAndVariants<typeof components> {}
   }
