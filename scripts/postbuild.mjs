@@ -3,7 +3,7 @@
 // reach a client hook through any chunk it imports.
 // Uses Node's fs (not shell cp/mkdir) so it runs identically on macOS, Linux, and Windows.
 import { spawnSync } from 'node:child_process';
-import { cpSync, existsSync, mkdirSync, readFileSync } from 'node:fs';
+import { cpSync, existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { CLIENT_ONLY_COMPONENTS, CLIENT_ONLY_ENTRIES, CORE_PACKAGE, PACKAGE_NAME, SERVER_SAFE_COMPONENTS } from './moduleGraph.mjs';
 
@@ -12,7 +12,6 @@ mkdirSync('dist/.claude/skills/box-kite', { recursive: true });
 mkdirSync('dist/.claude/rules', { recursive: true });
 
 const copies = [
-  ['package.json', 'dist/package.json'],
   ['LICENSE', 'dist/LICENSE'],
   ['README.md', 'dist/README.md'],
   ['src/BOX_KITE_AI_CONTEXT.md', 'dist/BOX_KITE_AI_CONTEXT.md'],
@@ -26,6 +25,17 @@ const copies = [
 for (const [from, to] of copies) {
   cpSync(from, to);
 }
+
+// The published manifest is the root one plus the core dependency, which is deliberately *not* a root
+// dependency: this repo resolves core through relative imports (the build rewrites them to the package),
+// and a version nobody can fetch until this same release publishes it would fail `npm install` here and
+// in CI. Pinned exactly, and to this package's own version, because the two are one release — a range
+// would let a consumer pair a Box with an engine whose class-name identity it does not share.
+const manifest = JSON.parse(readFileSync('package.json', 'utf8'));
+manifest.dependencies = Object.fromEntries(
+  Object.entries({ ...manifest.dependencies, [CORE_PACKAGE]: manifest.version }).sort(([a], [b]) => a.localeCompare(b)),
+);
+writeFileSync('dist/package.json', `${JSON.stringify(manifest, null, 2)}\n`);
 
 // Load the built package the way a Server Component's bundler resolves it: `check:boundaries` proves the
 // *sources* call no client hook, and this proves the bundler did not undo that. Node applies
