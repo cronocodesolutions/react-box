@@ -1,0 +1,68 @@
+# Cut a release from the Actions tab: verify, tag, and open a GitHub Release.
+# Publishing to npm is `publish.yml`, which fires when that release is published — so this workflow
+# creates a *draft* by default and the irreversible half stays a deliberate second click.
+name: Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to release — must already equal the version in package.json (e.g. 1.0.1)'
+        required: true
+      draft:
+        description: 'Create the release as a draft to review before it publishes to npm'
+        type: boolean
+        default: true
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: '.nvmrc'
+
+      # The manifest leads and the tag follows. `npm version` is deliberately not used anywhere in this
+      # repo, so a release that disagrees with package.json is a mistake rather than a thing to reconcile.
+      - name: The version matches the manifest, and is not already released
+        run: |
+          manifest=$(node -p "require('./package.json').version")
+          if [ "$manifest" != "${{ inputs.version }}" ]; then
+            echo "::error::package.json says $manifest but this run asked for ${{ inputs.version }} — bump the manifest in a PR first"
+            exit 1
+          fi
+          if git rev-parse "v$manifest" >/dev/null 2>&1; then
+            echo "::error::v$manifest already exists — a published version is never reused"
+            exit 1
+          fi
+
+      - run: npm ci
+      - run: npm run compile
+      - run: npm run lint
+      - run: npm run check:boundaries
+      - run: npm run check:brand
+      - run: npm run check:props
+      - run: npm test
+      - run: npm run build
+      - run: npm run check:package
+
+      - name: Tag and open the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email 'github-actions[bot]@users.noreply.github.com'
+          git tag -a "v${{ inputs.version }}" -m "Box Kite ${{ inputs.version }}"
+          git push origin "v${{ inputs.version }}"
+          gh release create "v${{ inputs.version }}" \
+            --title "${{ inputs.version }}" \
+            --generate-notes \
+            ${{ inputs.draft && '--draft' || '' }}
