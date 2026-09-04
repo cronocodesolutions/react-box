@@ -1,9 +1,11 @@
+import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
 import reactPlugin from '@vitejs/plugin-react';
 import iconsPlugin from 'unplugin-icons/vite';
 import { defineConfig, Plugin } from 'vite';
-import { SITE_URL, siteRoutes } from './pages/site/site';
+import { parseReleases, releaseRoutes } from './pages/site/releases';
+import { SITE_URL, SiteRoute, siteRoutes } from './pages/site/site';
 import { buildRobotsTxt, buildSitemap, notFoundMeta, pageMeta, withHeadHtml } from './pages/site/siteMeta';
 
 /**
@@ -13,8 +15,26 @@ import { buildRobotsTxt, buildSitemap, notFoundMeta, pageMeta, withHeadHtml } fr
  * The shells are why the sitemap is worth having: GitHub Pages answers an address it has no file for with
  * an HTTP 404, so every route the sitemap listed would report itself missing.
  */
+/**
+ * The routes the app serves, the release pages included. The app derives those from an `import.meta.glob`
+ * over `releases/`; this runs in Node, where the same files are read with `fs`.
+ */
+function allRoutes(): readonly SiteRoute[] {
+  const dir = join(import.meta.dirname, 'releases');
+  const files = existsSync(dir)
+    ? Object.fromEntries(
+        readdirSync(dir)
+          .filter((file) => file.endsWith('.md'))
+          .map((file) => [file, readFileSync(join(dir, file), 'utf8')]),
+      )
+    : {};
+
+  return [...siteRoutes, ...releaseRoutes(parseReleases(files))];
+}
+
 function siteMetadata(): Plugin {
   const home = siteRoutes[0];
+  const routes = allRoutes();
 
   return {
     name: 'site-metadata',
@@ -23,7 +43,7 @@ function siteMetadata(): Plugin {
       handler: (html) => withHeadHtml(html, pageMeta(home)),
     },
     generateBundle() {
-      this.emitFile({ type: 'asset', fileName: 'sitemap.xml', source: buildSitemap() });
+      this.emitFile({ type: 'asset', fileName: 'sitemap.xml', source: buildSitemap(SITE_URL, routes) });
       this.emitFile({ type: 'asset', fileName: 'robots.txt', source: buildRobotsTxt() });
       // GitHub Pages keeps the custom domain in a repository setting that nothing in this repo can
       // see. Shipping the same host in the artifact means a setting that gets lost or overwritten
@@ -36,7 +56,7 @@ function siteMetadata(): Plugin {
 
       const shell = await readFile(join(outDir, 'index.html'), 'utf8');
 
-      const pages = siteRoutes
+      const pages = routes
         .filter((route) => route.path !== home.path)
         .map((route) => [join(outDir, route.path.slice(1), 'index.html'), pageMeta(route)] as const)
         .concat([[join(outDir, '404.html'), notFoundMeta] as const]);

@@ -47,6 +47,12 @@ export const siteRoutes = [
       'The library was @cronocode/react-box until 1.0.0. One find-and-replace, a compatibility bridge if you are not ready, and the three things it cannot forward.',
   },
   {
+    path: '/releases',
+    name: 'Releases',
+    description:
+      'What changed in each version of Box Kite, written as it landed: new props and components, breaking changes with their migration notes, and fixes.',
+  },
+  {
     path: '/theme-setup',
     name: 'Theme Setup',
     description: 'Declare light and dark variants next to the styles they override, and switch them at runtime with Box.Theme.',

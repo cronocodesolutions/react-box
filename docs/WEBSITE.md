@@ -32,6 +32,12 @@ Purpose: help AI contributors extend the docs/demo site under `pages/**`.
   description search engines and link previews show. [pages/app/app.tsx](pages/app/app.tsx) keys its
   page components by those paths through an exhaustive record, so a page without metadata — or
   metadata without a page — is a type error, and the sitemap can never fall behind the router.
+- The release notes are the one exception to the hand-written table: `releases/<version>.md` in the repo
+  root becomes `/releases/<version>` through an `import.meta.glob` in [pages/site/routes.ts](pages/site/routes.ts)
+  (the app, the prerender) and an `fs` read in [pages.vite.config.ts](pages.vite.config.ts) (the shells, the
+  sitemap) — both through `parseReleases`/`releaseRoutes` in [pages/site/releases.ts](pages/site/releases.ts).
+  `/releases` itself is an ordinary table entry. The markdown is rendered by
+  [pages/components/markdown.tsx](pages/components/markdown.tsx) with Box components, code blocks through `Code`.
 - Pages live in [pages/pages/](pages/pages/); sidebar nav and grouping are hand-written in
   [pages/app/sidebar.tsx](pages/app/sidebar.tsx).
 - Common page components: [pages/components/pageHeader.tsx](pages/components/pageHeader.tsx), [pages/components/code.tsx](pages/components/code.tsx).
