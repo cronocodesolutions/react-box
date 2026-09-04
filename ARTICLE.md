@@ -200,7 +200,7 @@ Sometimes you were. Sometimes you ship version 170 to fix what version 169 got w
 
 If you're curious, take a look:
 
-- Website: [box-kite.dev](https://box-kite.dev/)
+- Website: [box-kite.dev](https://www.box-kite.dev/)
 - GitHub: [github.com/box-kite/box-kite](https://github.com/box-kite/box-kite)
 - npm: [@cronocode/react-box](https://www.npmjs.com/package/@cronocode/react-box)
 
