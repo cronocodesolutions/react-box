@@ -3,7 +3,7 @@
  * `sitemap.xml`, `robots.txt`, the `CNAME` — so a move is this constant plus the DNS records
  * (checklist in `docs/WEBSITE.md`). Nothing else in `pages/` may hard-code a host.
  */
-export const SITE_URL = 'https://box-kite.dev';
+export const SITE_URL = 'https://www.box-kite.dev';
 
 /** Second half of every document title, and the Open Graph site name. */
 export const SITE_NAME = 'Box Kite';

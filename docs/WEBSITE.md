@@ -58,9 +58,12 @@ takes over navigation. The shells carry the metadata; the prerender pass below p
 
 ### Moving the site to another domain
 
-1. Point DNS at GitHub Pages (apex + `www`), and wait for the certificate before announcing
-   anything. Do **not** set the custom domain by hand: the build emits a `CNAME` asset, and a Pages
-   deploy carrying one sets the domain — a setting made ahead of the deploy is overwritten by it.
+1. Point DNS at GitHub Pages, and wait for the certificate before announcing anything. Do **not** set
+   the custom domain by hand: the build emits a `CNAME` asset, and a Pages deploy carrying one sets
+   the domain — a setting made ahead of the deploy is overwritten by it. **Both halves of the pair
+   need records even though only one is canonical**: `www` a `CNAME` to `box-kite.github.io`, the apex
+   the four `A` records. GitHub redirects one to the other by itself, but only when it can answer both
+   — with the apex undelegated, `box-kite.dev` reaches nothing at all.
 2. Change `SITE_URL` **and `SITE_NAME` in the same commit**: canonicals, `sitemap.xml`, `robots.txt`
    and `CNAME` all follow the address, and `npm test` checks they moved together. The name goes with
    it because it is the suffix of every `<title>` — flipping it later re-indexes every route twice.
