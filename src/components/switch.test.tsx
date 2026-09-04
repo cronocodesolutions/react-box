@@ -108,7 +108,7 @@ describe('Switch', () => {
   it('moves its thumb on :checked — the rule reaches the stylesheet, with ::before last', () => {
     render(<Switch name="notify" label="Email notifications" />);
 
-    const css = (document.getElementById('crono-styles') as HTMLStyleElement | null)?.textContent ?? '';
+    const css = (document.getElementById('box-kite-styles') as HTMLStyleElement | null)?.textContent ?? '';
 
     expect(css).toContain(':checked::before{--boxTranslateX:1rem;translate:var(--boxTranslateX, 0) var(--boxTranslateY, 0)}');
     expect(css).not.toContain('::before:checked');
@@ -119,7 +119,7 @@ describe('Switch', () => {
   it('gets the content its thumb needs without the component asking for it', () => {
     render(<Switch name="notify" label="Email notifications" />);
 
-    const css = (document.getElementById('crono-styles') as HTMLStyleElement | null)?.textContent ?? '';
+    const css = (document.getElementById('box-kite-styles') as HTMLStyleElement | null)?.textContent ?? '';
 
     expect(css).toContain("::before{content:''}");
   });
@@ -127,7 +127,7 @@ describe('Switch', () => {
   it('stops the thumb travelling when the user asked for less motion', () => {
     render(<Switch name="notify" label="Email notifications" />);
 
-    const css = (document.getElementById('crono-styles') as HTMLStyleElement | null)?.textContent ?? '';
+    const css = (document.getElementById('box-kite-styles') as HTMLStyleElement | null)?.textContent ?? '';
 
     // The library-wide default (`--transitionTime: 0s`) cannot reach a component that named its
     // own 150ms, so the switch opts out by name — for the track and for the thumb.
@@ -139,7 +139,7 @@ describe('Switch', () => {
   it('says on and off in system colours, where the palette is gone', () => {
     render(<Switch name="notify" label="Email notifications" />);
 
-    const css = (document.getElementById('crono-styles') as HTMLStyleElement | null)?.textContent ?? '';
+    const css = (document.getElementById('box-kite-styles') as HTMLStyleElement | null)?.textContent ?? '';
 
     // Forced colours flatten indigo and gray to the same fill, so the two states read identically and
     // the white thumb can vanish into the track. `ButtonText` on `ButtonFace`, inverted when checked.

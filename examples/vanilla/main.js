@@ -3,7 +3,7 @@
 // Nothing here is React-adjacent: `engine.classNames(props)` returns a `class` attribute value and
 // the CSS behind it is written to a `<style>` element the engine owns. The props are the same ones
 // `<Box>` takes — the React binding is a wrapper around this call, not a different feature set.
-import { createStyleEngine, createThemeController } from '@cronocode/react-box/core';
+import { createStyleEngine, createThemeController } from '@box-kite/react/core';
 
 const engine = createStyleEngine();
 
@@ -78,7 +78,7 @@ function el(tag, props, children = []) {
 // Reads the system preference, restores a stored choice, writes the theme name onto `<html>` and
 // follows `prefers-color-scheme` until something overrides it. Generated theme rules are
 // ancestor-scoped (`.dark .p-4`), so that one class name is what restyles the whole page.
-const theme = createThemeController({ storageKey: 'react-box-vanilla-theme' });
+const theme = createThemeController({ storageKey: 'box-kite-vanilla-theme' });
 
 function themeToggle() {
   const button = el('button', {
@@ -108,7 +108,7 @@ const page = el('div', {
 });
 
 const title = el('h1', { fontSize: 32, fontWeight: 700 });
-title.textContent = 'react-box, without React';
+title.textContent = 'Box Kite, without React';
 
 const subtitle = el('p', { mt: 2, color: 'gray-500', theme: { dark: { color: 'gray-400' } } });
 subtitle.textContent = 'Every class on this page came from engine.classNames(). No framework is loaded.';

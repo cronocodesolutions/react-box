@@ -70,7 +70,7 @@ describe('SSG', () => {
     expect(result.styles).includes('.parent:hover .hover-parent-display-block{display:block}');
 
     // Check HTML structure
-    expect(result.html).includes('<style id="crono-styles">');
+    expect(result.html).includes('<style id="box-kite-styles">');
     expect(result.html).includes('<title>my website</title>');
     expect(result.html).includes('class="_b display-flex ai-center position-relative cursor-pointer pb-2 pl-2 parent"');
     expect(result.html).includes(

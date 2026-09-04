@@ -15,7 +15,7 @@ export default function FlexPage() {
 
       <Reveal delay={0.1}>
         <Flex d="column" gap={8}>
-          <Code label="Import" language="jsx" code="import Flex from '@cronocode/react-box/components/flex';" />
+          <Code label="Import" language="jsx" code="import Flex from '@box-kite/react/components/flex';" />
 
           <Code
             id="basic"

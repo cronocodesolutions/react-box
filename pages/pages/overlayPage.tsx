@@ -23,7 +23,7 @@ export default function OverlayPage() {
 
       <Reveal delay={0.1}>
         <Flex d="column" gap={8}>
-          <Code label="Import" language="jsx" code="import Overlay from '@cronocode/react-box/components/overlay';" />
+          <Code label="Import" language="jsx" code="import Overlay from '@box-kite/react/components/overlay';" />
 
           <Section title="A layer, not a pattern">
             <Box>

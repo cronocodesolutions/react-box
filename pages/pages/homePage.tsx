@@ -150,17 +150,17 @@ export default function HomePage() {
           </Box>
 
           <Flex d="column" gap={6} maxWidth={170} mx="auto">
-            <Code label="1. Install the package" language="shell" code="npm install @cronocode/react-box" />
+            <Code label="1. Install the package" language="shell" code="npm install @box-kite/react" />
 
             <Code
               label="2. Import and use"
               language="jsx"
-              code={`import Box from '@cronocode/react-box';
+              code={`import Box from '@box-kite/react';
 
 function App() {
   return (
     <Box p={4} bgColor="indigo-500" color="white" borderRadius={2}>
-      Hello, React Box!
+      Hello, Box Kite!
     </Box>
   );
 }`}
@@ -169,7 +169,7 @@ function App() {
             <Code
               label="3. Add responsive styles"
               language="jsx"
-              code={`import Flex from '@cronocode/react-box/components/flex';
+              code={`import Flex from '@box-kite/react/components/flex';
 
 <Flex
   p={4}
@@ -209,7 +209,7 @@ function App() {
             Ready to build something amazing?
           </Box>
           <Box fontSize={16} theme={{ dark: { color: 'slate-400' }, light: { color: 'slate-600' } }} mb={8} maxWidth={130}>
-            Join developers who are building faster with React Box.
+            Join developers who are building faster with Box Kite.
           </Box>
           <NavLink to="/installation">
             <Button px={8} py={4} fontSize={15}>

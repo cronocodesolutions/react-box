@@ -1,6 +1,6 @@
 'use client';
 
-import Icon from '@cronocode/react-box/components/icon';
+import Icon from '@box-kite/react/components/icon';
 import { Icon as IconifyIcon } from '@iconify/react';
 
 /**

@@ -626,7 +626,7 @@ describe('Theme', () => {
   });
 
   describe('globalStyles', () => {
-    const getStyleSheet = () => document.getElementById('crono-styles') as unknown as HTMLStyleElement;
+    const getStyleSheet = () => document.getElementById('box-kite-styles') as unknown as HTMLStyleElement;
 
     it('emits a rule targeting `html` when use="global"', () => {
       render(

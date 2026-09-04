@@ -24,6 +24,10 @@ jobs:
         run: npm run lint
       - name: Check core stays framework-free 🔧
         run: npm run check:boundaries
+      # Both purges, one check: the old company and the old project name, over the tracked files
+      # and over dist/ once it is built — four of those strings reach a consumer's console or files.
+      - name: Check the old names stay gone 🔧
+        run: npm run check:brand
       # The docs site's code blocks are strings, so nothing else compiles them. This does, against
       # the published entry points — the way the reader copying one would.
       - name: Check the docs snippets compile 🔧

@@ -1152,7 +1152,7 @@ export default function BoxPage() {
 
       <Reveal delay={0.1}>
         <Flex d="column" gap={8}>
-          <Code label="Import" language="jsx" code="import Box from '@cronocode/react-box';" />
+          <Code label="Import" language="jsx" code="import Box from '@box-kite/react';" />
 
           {/* Category Navigation */}
           <Box>

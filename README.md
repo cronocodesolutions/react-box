@@ -1,9 +1,9 @@
-# React box
+# Box Kite
 
-[![npm](https://img.shields.io/npm/v/@cronocode/react-box)](https://www.npmjs.com/package/@cronocode/react-box)
-[![bundle size](https://img.shields.io/bundlephobia/minzip/@cronocode/react-box)](https://bundlephobia.com/package/@cronocode/react-box)
+[![npm](https://img.shields.io/npm/v/@box-kite/react)](https://www.npmjs.com/package/@box-kite/react)
+[![bundle size](https://img.shields.io/bundlephobia/minzip/@box-kite/react)](https://bundlephobia.com/package/@box-kite/react)
 [![Tests](https://github.com/box-kite/box-kite/actions/workflows/test.yml/badge.svg)](https://github.com/box-kite/box-kite/actions/workflows/test.yml)
-[![license](https://img.shields.io/npm/l/@cronocode/react-box)](LICENSE)
+[![license](https://img.shields.io/npm/l/@box-kite/react)](LICENSE)
 
 `Box` is a single React component with 212 typed CSS props. It generates the CSS for the values you
 pass at runtime and caches every rule by its content, so the same value anywhere in the app reuses
@@ -14,12 +14,16 @@ convention to remember.
 [Support](SUPPORT.md) · [Security](SECURITY.md) ·
 [Releases](https://github.com/box-kite/box-kite/releases)
 
+> **Renamed at 1.0.0.** This was `@cronocode/react-box`. The API is unchanged — the move is one
+> find-and-replace, and `@cronocode/react-box@3.4.0` re-exports this package if you are not ready
+> yet. [What to change](https://box-kite.dev/migrating/).
+
 ## Getting Started
 
 1. Installation
 
 ```bash
-npm install @cronocode/react-box
+npm install @box-kite/react
 ```
 
 React 16.14 or newer, including 18 and 19 (both are covered by CI). TypeScript is optional but the
@@ -31,7 +35,7 @@ Spacing counts in quarters of a rem: `p={3}` is `0.75rem`, `m={2}` is `0.5rem`. 
 a box with `margin: 0.5rem` and `padding: 1.75rem`.
 
 ```JS
-import Box from "@cronocode/react-box";
+import Box from "@box-kite/react";
 
 export default function Component(props: Props) {
   return (
@@ -131,10 +135,10 @@ Every component here is a `Box` underneath — the same style props, the same th
 `component`/`variant` defaults — with the right HTML tag, the ARIA its pattern owes and, where the
 pattern has one, its keyboard. Each is a separate entry point, so a `Textbox` does not pull the
 `DataGrid` into your bundle. Module paths below are relative to the package name, i.e.
-`@cronocode/react-box/components/flex`.
+`@box-kite/react/components/flex`.
 
 ```JS
-import Box from "@cronocode/react-box";
+import Box from "@box-kite/react";
 ```
 
 ### Layout and content
@@ -179,16 +183,16 @@ Two whose shape is not obvious from a table:
 ```tsx
 // The tooltip's trigger is a render prop, so `aria-describedby` lands on the control itself
 // rather than on a wrapper around it.
-import Tooltip from '@cronocode/react-box/components/tooltip';
+import Tooltip from '@box-kite/react/components/tooltip';
 
 <Tooltip content="Deletes the row for good">{(trigger) => <Button {...trigger}>Delete</Button>}</Tooltip>;
 ```
 
 ```tsx
 // `Form` reads the named fields under it when it submits, and hands them over as one object.
-import Button from '@cronocode/react-box/components/button';
-import Form from '@cronocode/react-box/components/form';
-import Textbox from '@cronocode/react-box/components/textbox';
+import Button from '@box-kite/react/components/button';
+import Form from '@box-kite/react/components/form';
+import Textbox from '@box-kite/react/components/textbox';
 
 interface Credentials {
   email: string;
@@ -215,7 +219,7 @@ same way a `<div>` is — and there is a component for every SVG element, so a d
 `tag` either.
 
 ```JSX
-import { Path, Svg } from '@cronocode/react-box/components/svg';
+import { Path, Svg } from '@box-kite/react/components/svg';
 
 <Svg
   viewBox="0 0 200 48"
@@ -275,7 +279,7 @@ it. `Icon` styles it through the one channel it does offer — the `className` i
 `<svg>`:
 
 ```JSX
-import Icon from '@cronocode/react-box/components/icon';
+import Icon from '@box-kite/react/components/icon';
 import { Sun } from 'lucide-react';
 
 <Icon size={5} color="amber-500" hover={{ color: 'amber-300' }} label="Sunny">
@@ -293,7 +297,7 @@ Behind it is `useClassNames`, which is public for the same reason: a `motion.div
 `NavLink` or a third-party chart takes a `className` and nothing else.
 
 ```JSX
-import { useClassNames } from '@cronocode/react-box';
+import { useClassNames } from '@box-kite/react';
 
 const { className, styles } = useClassNames({ color: 'sky-500', hover: { color: 'sky-300' } });
 
@@ -312,7 +316,7 @@ Four micro-primitives, built from the SVG components — the small drawings a da
 than a chart library:
 
 ```JSX
-import { Gauge, MiniDonut, ProgressRing, Sparkline } from '@cronocode/react-box/components/chart';
+import { Gauge, MiniDonut, ProgressRing, Sparkline } from '@box-kite/react/components/chart';
 
 <Sparkline data={[4, 9, 6, 12, 10, 15]} variant="area" color="sky-500" width="7rem" />;
 <ProgressRing value={0.62} color="emerald-500" label="62% complete" />;
@@ -337,7 +341,7 @@ The other half of charts is the chart library you already use. A `<ChartContaine
 variables a chart reads, so the chart itself names no colour at all:
 
 ```JSX
-import { ChartContainer } from '@cronocode/react-box/components/chart';
+import { ChartContainer } from '@box-kite/react/components/chart';
 import { Area, AreaChart, ResponsiveContainer, XAxis } from 'recharts';
 
 <ChartContainer series={['revenue', 'cost']} height={60}>
@@ -376,7 +380,7 @@ You need to do a few steps.
 1. In a project root file you need to define your extends
 
 ```JS
-import Box from "@cronocode/react-box";
+import Box from "@box-kite/react";
 
 export const { extendedProps, extendedPropTypes } = Box.extend(
   // css variables
@@ -413,11 +417,11 @@ export const { extendedProps, extendedPropTypes } = Box.extend(
    You need to create a `box.d.ts`
 
 ```JS
-import '@cronocode/react-box';
-import { ExtractBoxStyles, ExtractComponentsAndVariants } from '@cronocode/react-box/types';
+import '@box-kite/react';
+import { ExtractBoxStyles, ExtractComponentsAndVariants } from '@box-kite/react/types';
 import { extendedProps, extendedPropTypes, components } from './path-to-your-b0x-extends-declaration';
 
-declare module '@cronocode/react-box/types' {
+declare module '@box-kite/react/types' {
   namespace Augmented {
     interface BoxProps extends ExtractBoxStyles<typeof extendedProps> {}
     interface BoxPropTypes extends ExtractBoxStyles<typeof extendedPropTypes> {}
@@ -445,7 +449,7 @@ property. Prefer a prop, then `Box.extend()` for anything used twice.
 In the project root file (main.tsx) use `Theme.setup`
 
 ```JS
-import Box from '@cronocode/react-box';
+import Box from '@box-kite/react';
 
 Box.components({
   button: {
@@ -465,7 +469,7 @@ Box.components({
 All styles will be applied to Button component
 
 ```JS
-import Button from '@cronocode/react-box/components/button';
+import Button from '@box-kite/react/components/button';
 
 function MyComponent() {
   return <Button>Click me</Button>
@@ -475,7 +479,7 @@ function MyComponent() {
 or is possible to use Button with specific variant
 
 ```JS
-import Button from '@cronocode/react-box/components/button';
+import Button from '@box-kite/react/components/button';
 
 function MyComponent() {
   return <Button variant="mytheme">Click me</Button>
@@ -501,8 +505,8 @@ instead of being injected by an effect. A server component just imports the pack
 
 ```tsx
 // app/page.tsx — a Server Component. No 'use client', no provider, no CSS import.
-import Flex from '@cronocode/react-box/components/flex';
-import { H1, P } from '@cronocode/react-box/components/semantics';
+import Flex from '@box-kite/react/components/flex';
+import { H1, P } from '@box-kite/react/components/semantics';
 
 export default function Page() {
   return (
@@ -526,7 +530,7 @@ RSC app, so their CSS is in the HTML too. One line, in a module the root layout 
 
 ```tsx
 'use client';
-import Box from '@cronocode/react-box';
+import Box from '@box-kite/react';
 
 Box.configure({ sink: 'element' }); // React 19 only — see below
 ```
@@ -578,8 +582,8 @@ element to another. They are what this library's components are built from, and 
 own for the patterns it does not cover:
 
 ```tsx
-import { useControllableState, useDismiss, useFocusReturn, useIdentifier, useRovingFocus } from '@cronocode/react-box/a11y';
-import VisuallyHidden from '@cronocode/react-box/components/visuallyHidden';
+import { useControllableState, useDismiss, useFocusReturn, useIdentifier, useRovingFocus } from '@box-kite/react/a11y';
+import VisuallyHidden from '@box-kite/react/components/visuallyHidden';
 
 function Menu({ open, onOpenChange, items }) {
   const trigger = useRef(null);
@@ -605,7 +609,7 @@ Full reference: [docs/a11y-primitives.md](docs/a11y-primitives.md).
 The engine that turns props into CSS has no framework in it, and it is published on its own:
 
 ```js
-import { createStyleEngine } from '@cronocode/react-box/core';
+import { createStyleEngine } from '@box-kite/react/core';
 
 const engine = createStyleEngine();
 
@@ -643,7 +647,7 @@ engine.getStyles(); // the stylesheet as text, for static output
 Theming is the same state machine `<Box.Theme>` runs, as a plain object:
 
 ```js
-import { createThemeController } from '@cronocode/react-box/core';
+import { createThemeController } from '@box-kite/react/core';
 
 // Reads prefers-color-scheme, restores a stored choice, writes the theme onto <html>, and follows
 // the system preference until something overrides it. Theme rules are ancestor-scoped (`.dark .p-4`),
@@ -675,7 +679,7 @@ the value formatters, class-name generation, rule ordering, the style sinks (CSS
 string for SSR, style elements for React 19), the flush scheduler, CSS variables and the theme
 runtime — lives in `src/core/` and imports no React at all. CI fails the build if it ever does
 (`npm run check:boundaries`), and it ships on its own as
-[`@cronocode/react-box/core`](#using-the-core-without-react).
+[`@box-kite/react/core`](#using-the-core-without-react).
 
 React is a thin adapter on top of it:
 
@@ -688,7 +692,7 @@ The binding is the whole React-specific surface: resolve class names during rend
 pending rules from `useInsertionEffect`, render the style elements of the Server-Component path,
 and hold the theme state. React feature code the components share sits alongside it and is counted
 separately — three helper hooks (`useVisibility`, `usePortalContainer`, `useVirtualization`), the
-modules behind [`@cronocode/react-box/a11y`](#behaviour-primitives-for-your-own-components), the
+modules behind [`@box-kite/react/a11y`](#behaviour-primitives-for-your-own-components), the
 markup the form controls share, and the ARIA the SVG and chart components share, 911 lines together. A Vue adapter would need its own arrow-key navigation for the same reason it
 would need its own components, which says nothing about how much of the styling engine is
 React-specific.

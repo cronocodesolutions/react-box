@@ -1,9 +1,9 @@
 ---
-description: Critical rules for @cronocode/react-box — prevents the most common AI mistakes
+description: Critical rules for @box-kite/react — prevents the most common AI mistakes
 globs: '**/*.{ts,tsx,jsx}'
 ---
 
-# @cronocode/react-box Rules
+# @box-kite/react Rules
 
 1. **NEVER use `style={{ }}`** — always use Box props. Missing prop? Create with `Box.extend()`
 2. **NEVER `<Box tag="...">`** for common elements — use `<Button>`, `<Link>`, `<H1>`, `<P>`, `<Ul>`/`<Li>`, `<Nav>`, `<Flex>`, `<Grid>`, and for SVG `<Svg>`, `<Path>`, `<Circle>`, `<Rect>`, `<SvgText>`… from `components/svg`
@@ -40,4 +40,4 @@ globs: '**/*.{ts,tsx,jsx}'
 
 26. **The 5% is `css`, and it is still a class.** `css={{ mixBlendMode: 'multiply', WebkitLineClamp: 2 }}` takes a style object for the properties this library has no prop for and compiles it through the same pipeline as every other prop — one shared class, nested anywhere a prop nests (`hover={{ css: … }}`, `md`, `theme`, `dataAttr`, `before`, `startingStyle`, a keyframes step), rendered on a server — so it is never `style={{ }}`. Names are camelCase and typed by csstype (a misspelt property is a compile error, `WebkitLineClamp` → `-webkit-line-clamp`); values are CSS written as they stand, a number included, so a length wants its unit (`width: '100px'`, the type refuses `100`) and a colour token resolves the way a `vars` value does (`outlineColor: 'sky-500'`). It is sorted **last**, so on one element it wins the property a typed prop also names. A value carrying `;` or a brace is dropped, that entry only. Reach for a typed prop first, `Box.extend()` for anything used twice, `css` for the one-off.
 
-Full reference: `src/BOX_AI_CONTEXT.md` or invoke `/react-box` skill.
+Full reference: `src/BOX_KITE_AI_CONTEXT.md` or invoke `/box-kite` skill.

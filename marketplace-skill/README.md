@@ -1,6 +1,6 @@
-# @cronocode/react-box — Claude Code Plugin
+# @box-kite/react — Claude Code Plugin
 
-AI skill for the [@cronocode/react-box](https://github.com/box-kite/box-kite) runtime CSS-in-JS library. Helps AI assistants correctly use Box props, component shortcuts, numeric formatters, themes, Dropdown, Select, DataGrid, and the full extension system.
+AI skill for the [@box-kite/react](https://github.com/box-kite/box-kite) runtime CSS-in-JS library. Helps AI assistants correctly use Box props, component shortcuts, numeric formatters, themes, Dropdown, Select, DataGrid, and the full extension system.
 
 ## Install
 
@@ -13,21 +13,26 @@ AI skill for the [@cronocode/react-box](https://github.com/box-kite/box-kite) ru
 Then install:
 
 ```bash
-/plugin install cronocode-react-box@cronocodesolutions-react-box-skill
+/plugin install box-kite@cronocodesolutions-react-box-skill
 ```
+
+> **The plugin id is `box-kite` from 1.0.0** (it was `cronocode-react-box`). An installed plugin keeps
+> resolving to the marketplace entry it came from, so changing the id migrates nobody — anyone on the old
+> id should reinstall with the line above. The marketplace repo itself has not moved yet; when it does,
+> the old entry stays live for one release cycle pointing at the same skill content.
 
 ### Manual install (global — works across all projects)
 
 ```bash
 git clone https://github.com/cronocodesolutions/react-box-skill.git
-cp -r react-box-skill/skills/cronocode-react-box ~/.claude/skills/
+cp -r react-box-skill/skills/box-kite ~/.claude/skills/
 ```
 
 ### Manual install (project-level)
 
 ```bash
 mkdir -p .claude/skills
-cp -r node_modules/@cronocode/react-box/.claude/skills/react-box .claude/skills/
+cp -r node_modules/@box-kite/react/.claude/skills/box-kite .claude/skills/
 ```
 
 ## What it does

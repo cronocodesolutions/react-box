@@ -19,7 +19,7 @@ Once a fix is available we will publish a patched release and credit the reporte
 
 ## Scope notes
 
-react-box is a styling library that injects CSS at runtime. Reports we consider in scope include (but are not limited to):
+Box Kite is a styling library that injects CSS at runtime. Reports we consider in scope include (but are not limited to):
 
 - CSS injection through prop values (e.g. a crafted prop value escaping a generated rule)
 - Prototype pollution or global-scope mutation reachable from the published entries

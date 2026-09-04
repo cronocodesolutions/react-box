@@ -1,4 +1,4 @@
-# React Box Docs/Webapp Guide
+# Box Kite Docs/Webapp Guide
 
 Purpose: help AI contributors extend the docs/demo site under `pages/**`.
 
@@ -141,7 +141,7 @@ A `<Code>` block shows its example one of two ways, and the difference decides w
 - **A `code` string** — hand-written, for what the page cannot render: imports, a `.d.ts`, a
   controlled-state example. `npm run check:docs` compiles every one of these
   ([scripts/check-docs-snippets.mjs](scripts/check-docs-snippets.mjs)) against the _published_
-  specifiers (`@cronocode/react-box/components/flex`) and without the site's own `Box.extend()`
+  specifiers (`@box-kite/react/components/flex`) and without the site's own `Box.extend()`
   augmentation — so a snippet that only works because `pages/extends.ts` widened a prop fails, which
   is the point: the reader does not have that file. Two escape hatches, both visible in the page
   source:

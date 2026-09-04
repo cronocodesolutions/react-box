@@ -34,7 +34,7 @@ export default function DropdownPage() {
 
       <Reveal delay={0.1}>
         <Flex d="column" gap={8}>
-          <Code label="Import" language="jsx" code="import Dropdown from '@cronocode/react-box/components/dropdown';" />
+          <Code label="Import" language="jsx" code="import Dropdown from '@box-kite/react/components/dropdown';" />
 
           <Code
             id="basic"
@@ -170,10 +170,10 @@ export const components = Box.components({
 });
 
 // box.d.ts — teach TypeScript the name, or variant="outlined" stays a type error.
-import { ExtractComponentsAndVariants } from '@cronocode/react-box/types';
+import { ExtractComponentsAndVariants } from '@box-kite/react/types';
 import { components } from './boxExtends';
 
-declare module '@cronocode/react-box/types' {
+declare module '@box-kite/react/types' {
   namespace Augmented {
     interface ComponentsTypes extends ExtractComponentsAndVariants<typeof components> {}
   }
@@ -261,7 +261,7 @@ declare module '@cronocode/react-box/types' {
             </Box>
 
             <Flex d="column" gap={8}>
-              <Code label="Import" language="jsx" code="import Select from '@cronocode/react-box/components/select';" />
+              <Code label="Import" language="jsx" code="import Select from '@box-kite/react/components/select';" />
 
               <Code
                 id="select-basic"

@@ -19,7 +19,7 @@ export default function styleElementsOf(descriptors: readonly StyleElementDescri
   if (!canHoist && !warned) {
     warned = true;
     console.warn(
-      `[react-box] Box.configure({ sink: 'element' }) needs React 19 to hoist and dedupe its <style> elements; React ${React.version} will render them inline. Use the default sink instead.`,
+      `[box-kite] Box.configure({ sink: 'element' }) needs React 19 to hoist and dedupe its <style> elements; React ${React.version} will render them inline. Use the default sink instead.`,
     );
   }
 

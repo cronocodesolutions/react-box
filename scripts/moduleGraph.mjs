@@ -15,7 +15,7 @@ export const CORE_ENTRY = 'src/core.ts';
 export const BOX_ENTRY = 'src/box.ts';
 
 /** The package's own name — what the `../box` edge becomes in the built server-safe components. */
-export const PACKAGE_NAME = '@cronocode/react-box';
+export const PACKAGE_NAME = '@box-kite/react';
 
 /**
  * The pre-built components a Server Component can render *on the server*: no hook, no effect, just props

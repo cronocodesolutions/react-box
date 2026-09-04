@@ -1,6 +1,6 @@
-import Flex from '@cronocode/react-box/components/flex';
-import Icon from '@cronocode/react-box/components/icon';
-import { H2, Link, P, Span } from '@cronocode/react-box/components/semantics';
+import Flex from '@box-kite/react/components/flex';
+import Icon from '@box-kite/react/components/icon';
+import { H2, Link, P, Span } from '@box-kite/react/components/semantics';
 import RuntimeIcon from './runtimeIcon';
 
 /**

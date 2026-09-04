@@ -1,10 +1,10 @@
-import Box from '@cronocode/react-box';
-import Button from '@cronocode/react-box/components/button';
-import Checkbox from '@cronocode/react-box/components/checkbox';
-import Flex from '@cronocode/react-box/components/flex';
-import Grid from '@cronocode/react-box/components/grid';
-import { H2, Label, Link, P, Span } from '@cronocode/react-box/components/semantics';
-import Textbox from '@cronocode/react-box/components/textbox';
+import Box from '@box-kite/react';
+import Button from '@box-kite/react/components/button';
+import Checkbox from '@box-kite/react/components/checkbox';
+import Flex from '@box-kite/react/components/flex';
+import Grid from '@box-kite/react/components/grid';
+import { H2, Label, Link, P, Span } from '@box-kite/react/components/semantics';
+import Textbox from '@box-kite/react/components/textbox';
 
 /**
  * The pre-built components, imported straight into a Server Component — no `'use client'` here. The
@@ -20,8 +20,8 @@ export default function ComponentsPage() {
           Server-rendered components
         </H2>
         <P mt={3} color="slate-600" theme={{ dark: { color: 'slate-400' } }}>
-          Every element below came from <Span fontWeight={600}>@cronocode/react-box/components/*</Span>, imported by a Server Component.
-          None of them is a client boundary.
+          Every element below came from <Span fontWeight={600}>@box-kite/react/components/*</Span>, imported by a Server Component. None of
+          them is a client boundary.
         </P>
 
         <Grid gridTemplateColumns={1} gap={4} mt={5} md={{ gridTemplateColumns: 2 }}>

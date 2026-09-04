@@ -13,7 +13,7 @@ export default function GridPage() {
 
       <Reveal delay={0.1}>
         <Flex d="column" gap={8}>
-          <Code label="Import" language="jsx" code="import Grid from '@cronocode/react-box/components/grid';" />
+          <Code label="Import" language="jsx" code="import Grid from '@box-kite/react/components/grid';" />
 
           <Code
             label="Grid Layout"

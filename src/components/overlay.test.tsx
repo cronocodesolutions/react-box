@@ -15,7 +15,7 @@ describe('Overlay', () => {
     cleanup();
   });
 
-  const portal = () => document.getElementById('crono-box');
+  const portal = () => document.getElementById('box-kite-portal');
 
   it('renders its children into the portal container, not where it was declared', () => {
     const { container } = render(<Overlay>anywhere</Overlay>);

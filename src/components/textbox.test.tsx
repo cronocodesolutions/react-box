@@ -13,7 +13,7 @@ describe('the placeholder prop', () => {
     cleanup();
   });
 
-  const css = () => (document.getElementById('crono-styles') as HTMLStyleElement | null)?.textContent ?? '';
+  const css = () => (document.getElementById('box-kite-styles') as HTMLStyleElement | null)?.textContent ?? '';
 
   it('is the attribute when it is a string', () => {
     render(<Textbox placeholder="Search projects" />);

@@ -13,7 +13,7 @@ describe('assertClientRuntime', () => {
   });
 
   it('points at the package name and the client directive', () => {
-    expect(CLIENT_RUNTIME_MESSAGE).toContain('@cronocode/react-box');
+    expect(CLIENT_RUNTIME_MESSAGE).toContain('@box-kite/react');
     expect(CLIENT_RUNTIME_MESSAGE).toContain("'use client'");
   });
 });

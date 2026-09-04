@@ -20,7 +20,7 @@ export default function TextboxPage() {
 
       <Reveal delay={0.1}>
         <Flex d="column" gap={8}>
-          <Code label="Import" language="jsx" code="import Textbox from '@cronocode/react-box/components/textbox';" />
+          <Code label="Import" language="jsx" code="import Textbox from '@box-kite/react/components/textbox';" />
 
           <Code id="basic" label="Basic Textbox" language="jsx" code='<Textbox placeholder="Enter your name..." />'>
             <Textbox placeholder="Enter your name..." theme={{ dark: { bgColor: 'slate-800', color: 'white' } }} />

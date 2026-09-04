@@ -25,7 +25,7 @@ export default function ThemeSetupPage() {
             label="Define Your Own Styles"
             language="jsx"
             code={`// boxExtends.ts — register the styles, and export what you registered.
-import Box from '@cronocode/react-box';
+import Box from '@box-kite/react';
 
 export const components = Box.components({
   button: {
@@ -60,11 +60,11 @@ export const components = Box.components({
             language="jsx"
             check={false}
             code={`// box.d.ts — without this, variant="primary" is a type error: the names exist at runtime only.
-import '@cronocode/react-box';
-import { ExtractComponentsAndVariants } from '@cronocode/react-box/types';
+import '@box-kite/react';
+import { ExtractComponentsAndVariants } from '@box-kite/react/types';
 import { components } from './boxExtends';
 
-declare module '@cronocode/react-box/types' {
+declare module '@box-kite/react/types' {
   namespace Augmented {
     interface ComponentsTypes extends ExtractComponentsAndVariants<typeof components> {}
   }
@@ -76,8 +76,8 @@ declare module '@cronocode/react-box/types' {
             label="Use them"
             language="jsx"
             check={false}
-            code={`import Flex from '@cronocode/react-box/components/flex';
-import Button from '@cronocode/react-box/components/button';
+            code={`import Flex from '@box-kite/react/components/flex';
+import Button from '@box-kite/react/components/button';
 
 function App() {
   return (
@@ -104,7 +104,7 @@ function App() {
             id="global-styles"
             label="App-wide Styles (globalStyles)"
             language="jsx"
-            code={`import Box from '@cronocode/react-box';
+            code={`import Box from '@box-kite/react';
 
 // Apply Box props to <html> for app-wide, inheritable CSS like scrollbar-color, fontFamily, color.
 // Only takes effect with use="global". Supports theme-keyed values.
@@ -136,9 +136,9 @@ function Providers({ children }: { children: React.ReactNode }) {
             id="theme-switching"
             label="Theme Switching"
             language="jsx"
-            code={`import Box from '@cronocode/react-box';
-import Button from '@cronocode/react-box/components/button';
-import Flex from '@cronocode/react-box/components/flex';
+            code={`import Box from '@box-kite/react';
+import Button from '@box-kite/react/components/button';
+import Flex from '@box-kite/react/components/flex';
 
 function App() {
   return (

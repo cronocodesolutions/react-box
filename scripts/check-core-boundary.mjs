@@ -76,7 +76,7 @@ function measure(paths) {
   return { files: files.length, lines };
 }
 
-// The published entry (`@cronocode/react-box/core`) and everything it reaches, which is the real
+// The published entry (`@box-kite/react/core`) and everything it reaches, which is the real
 // framework-free boundary: the engine also uses `src/utils/**` and `src/types.ts`, and a React
 // import there would ship to a consumer who installed the library precisely to avoid one. The
 // directory walk stays alongside it, because a core module no entry imports yet is still core.

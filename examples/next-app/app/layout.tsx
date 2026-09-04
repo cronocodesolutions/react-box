@@ -1,11 +1,11 @@
-import Box from '@cronocode/react-box';
+import Box from '@box-kite/react';
 import type { Metadata } from 'next';
 import type { ReactNode } from 'react';
 import ThemeToggle from './themeToggle';
 
 export const metadata: Metadata = {
   title: 'Box in a Server Component',
-  description: 'The react-box element-rendering mode inside the Next.js App Router — no client runtime, no "use client".',
+  description: 'The Box Kite element-rendering mode inside the Next.js App Router — no client runtime, no "use client".',
 };
 
 /**

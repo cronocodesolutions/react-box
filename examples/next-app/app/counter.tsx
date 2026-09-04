@@ -1,7 +1,7 @@
 'use client';
-import Box from '@cronocode/react-box';
-import Button from '@cronocode/react-box/components/button';
-import Flex from '@cronocode/react-box/components/flex';
+import Box from '@box-kite/react';
+import Button from '@box-kite/react/components/button';
+import Flex from '@box-kite/react/components/flex';
 import { useState } from 'react';
 import './elementMode';
 

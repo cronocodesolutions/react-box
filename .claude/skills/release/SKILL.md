@@ -5,7 +5,7 @@ disable-model-invocation: true
 argument-hint: [patch|minor|major]
 ---
 
-Create a new package release for @cronocode/react-box.
+Create a new package release for @box-kite/react.
 
 ## Steps
 
@@ -33,9 +33,23 @@ Create a new package release for @cronocode/react-box.
 
 6. **Confirm** the release was created and share the URL
 
+## The 1.0.0 rename release, once only
+
+These steps belong to the first release under the new name and to no other. Delete this section after it.
+
+- **Trusted publishing is per package.** `publish.yml` publishes whatever name is in `dist/package.json`,
+  but npm's OIDC config binds to a _package_. `@box-kite/react` needs its own trusted-publisher entry
+  (repo `box-kite/box-kite`, workflow `publish.yml`) before the release, or the publish 403s.
+- **The compatibility bridge is published by hand**, because it is a different package: after the
+  release, `npm run build` then `npm run build:bridge`, then `npm publish ./dist-bridge --access public`.
+- **Then deprecate the old name** — the bridge is what stops a build breaking; this is what moves people:
+  `npm deprecate @cronocode/react-box "renamed: npm i @box-kite/react"`.
+- **Link the migration page** (<https://box-kite.dev/migrating/>) from the release notes, and list the
+  two DOM id changes and the type-augmentation string as the breaking surface.
+
 ## Release Notes Format
 
-```markdown
+````markdown
 ## Highlights
 
 One or two sentence summary of the most notable changes in this release.
@@ -46,6 +60,7 @@ One or two sentence summary of the most notable changes in this release.
   ```tsx
   // Optional: short code example if it helps illustrate usage
   ```
+````
 
 ### 🐛 Bug Fixes
 
@@ -62,6 +77,7 @@ One or two sentence summary of the most notable changes in this release.
 ---
 
 **Full Changelog**: https://github.com/box-kite/box-kite/compare/<previous-tag>...<new-tag>
+
 ```
 
 ## Format Rules
@@ -73,3 +89,4 @@ One or two sentence summary of the most notable changes in this release.
 - Keep descriptions concise — one line per item
 - The "Highlights" section is always present
 - End with a Full Changelog compare link
+```
