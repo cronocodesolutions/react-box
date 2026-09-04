@@ -8,22 +8,23 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Commands
 
-| Command                                    | Purpose                                                                                                      |
-| ------------------------------------------ | ------------------------------------------------------------------------------------------------------------ |
-| `npm run dev`                              | Start Vite dev server for the demo pages                                                                     |
-| `npm run dev:vanilla`                      | Start the framework-free example (`examples/vanilla`) — the core engine with no React                        |
-| `npm run build`                            | Build library (ESM + CJS output to dist/)                                                                    |
-| `npm run build:dev`                        | Build library without minification                                                                           |
-| `npm run compile`                          | TypeScript type check (no emit)                                                                              |
-| `npm test`                                 | Run all tests (Vitest)                                                                                       |
-| `npm run test:coverage`                    | Run all tests and enforce the coverage budget on `src/core/`                                                 |
-| `npm run test:watch`                       | Run tests in watch mode                                                                                      |
-| `npm run test:a11y`                        | Run the axe sweep and the APG keyboard tests only                                                            |
-| `npx vitest run src/path/to/file.test.tsx` | Run a single test file                                                                                       |
-| `npm run lint`                             | ESLint check                                                                                                 |
-| `npm run check:boundaries`                 | Fail if the core engine imports React or the RSC entry reaches a client hook (also prints the adapter ratio) |
-| `npm run docs:props`                       | Write every prop's `@example` (measured from the engine) and `api/props.json`                                |
-| `npm run check:props`                      | Fail if a prop has no JSDoc, an example no longer matches the CSS, or the reference is stale                 |
+| Command                                    | Purpose                                                                                                           |
+| ------------------------------------------ | ----------------------------------------------------------------------------------------------------------------- |
+| `npm run dev`                              | Start Vite dev server for the demo pages                                                                          |
+| `npm run dev:vanilla`                      | Start the framework-free example (`examples/vanilla`) — the core engine with no React                             |
+| `npm run build`                            | Build library (ESM + CJS output to dist/)                                                                         |
+| `npm run build:dev`                        | Build library without minification                                                                                |
+| `npm run compile`                          | TypeScript type check (no emit)                                                                                   |
+| `npm test`                                 | Run all tests (Vitest)                                                                                            |
+| `npm run test:coverage`                    | Run all tests and enforce the coverage budget on `src/core/`                                                      |
+| `npm run test:watch`                       | Run tests in watch mode                                                                                           |
+| `npm run test:a11y`                        | Run the axe sweep and the APG keyboard tests only                                                                 |
+| `npx vitest run src/path/to/file.test.tsx` | Run a single test file                                                                                            |
+| `npm run lint`                             | ESLint check                                                                                                      |
+| `npm run check:boundaries`                 | Fail if the core engine imports React or the RSC entry reaches a client hook (also prints the adapter ratio)      |
+| `npm run docs:props`                       | Write every prop's `@example` (measured from the engine) and `api/props.json`                                     |
+| `npm run check:props`                      | Fail if a prop has no JSDoc, an example no longer matches the CSS, or the reference is stale                      |
+| `npm run release -- minor`                 | Turn `releases/next.md` into the versioned notes, bump the manifest and open the release PR — merging it releases |
 
 Node version: v24 (pinned in .nvmrc).
 
@@ -145,6 +146,7 @@ Pre-built components wrap Box with the correct HTML tag. Each is a separate entr
 - Accessibility tests: `src/components/a11y.test.tsx` sweeps every component with axe against the fixtures in `dev/a11y/fixtures.tsx`, whose `knownViolations` ledger fails both on a new violation and on a listed one that stopped firing; `*.a11y.test.tsx` files hold the APG keyboard map, driven by `dev/a11y/keyboard.ts`. See `docs/a11y-testing.md`
 - **Accessible behavior belongs in `src/react/a11y/`, not in a component** — focus return, list navigation, dismissal and controlled state are shared primitives (`docs/a11y-primitives.md`). A component supplies the roles and the ARIA; the hooks supply the mechanics
 - Engine-level tests build their own isolated engine via `dev/engineHarness.ts` (readable class names + `textContent` sink) instead of the default instance, so they can assert exact rule text without interfering with each other
+- **A PR that changes what a consumer sees adds a section to `releases/next.md`** — a sentence for the heading, a paragraph, an example; a breaking change is a bullet under its heading with the migration beside it. CI fails a source change with no note unless the PR is labelled `no release note`. The release script turns the draft into `releases/<version>.md`, and that file is the GitHub Release body (runbook: `.claude/skills/release/SKILL.md`)
 - One component per file, PascalCase component names, camelCase prop names
 - **Comments are one or two lines** (the `terse-comments` skill has the sweep tooling) — say the thing the code cannot (the trap, the reason, the bug it came from) and stop. Four or five is for a module-level doc that genuinely needs it: a code example, two conventions meeting. Never restate what the next line does; a long explanation belongs in CONTRIBUTING.md, the docs site or the roadmap, where it is read on purpose
 - Prettier: 140 char width, single quotes, trailing commas
@@ -178,7 +180,7 @@ CI runs the test suite against React 18 and React 19 — both are in the support
 - Vite library mode, dual ESM (.mjs) + CJS (.cjs) output
 - Components get individual chunks for tree-shaking
 - `react`, `react-dom` are external (peer dependencies)
-- Published from `dist/` directory on GitHub Release (CI handles it)
+- Published from `dist/` and `dist-core/` by `publish.yml`, dispatched by `release.yml` when a merged release PR (`npm run release`) lands on a green main; the release body is `releases/<version>.md`
 - `vite-plugin-dts` generates `.d.ts` files
 
 ## Reference Documents

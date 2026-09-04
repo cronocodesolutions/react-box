@@ -40,11 +40,6 @@ const ALLOWED = [
     ],
   },
   {
-    file: '.claude/skills/release/SKILL.md',
-    reason: 'the one-time rename release runbook: the bridge publish and the deprecation both name the old package',
-    strings: ['@cronocode/react-box'],
-  },
-  {
     file: 'README.md',
     reason: 'the rename note, so a reader arriving with the old name in their package.json finds it here',
     strings: ['@cronocode/react-box'],
